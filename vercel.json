@@ -1,0 +1,7 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/share/card", "destination": "/api/share" },
+    { "source": "/og/card.png", "destination": "/api/og" }
+  ]
+}
