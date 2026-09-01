@@ -728,40 +728,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {/* HERO CARD: LINE 吉時間 (Full Width Spacious Layout) */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(6, 199, 85, 0.16) 0%, rgba(0, 0, 0, 0.5) 100%)',
-          padding: '0.85rem 1rem',
+          padding: '0.9rem 1rem',
           borderRadius: '14px',
           border: '1.5px solid rgba(6, 199, 85, 0.45)',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.75rem',
+          flexDirection: 'column',
+          gap: '0.4rem',
           boxShadow: '0 4px 20px rgba(6, 199, 85, 0.15)'
         }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: '#4ade80', fontWeight: 'bold' }}>
-              <LineLogoIcon size={16} />
-              <span>推奨送信タイミング</span>
-            </div>
-            <div style={{ fontSize: '1.15rem', color: '#ffffff', fontWeight: '900', letterSpacing: '0.03em', textShadow: '0 0 12px rgba(6, 199, 85, 0.6)' }}>
-              {activeResult.bestContactHour || '7:30 〜 8:30'}
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#4ade80', fontWeight: 'bold' }}>
+            <LineLogoIcon size={18} />
+            <span>推奨送信タイミング</span>
           </div>
-          {(activeResult.bestContactHour || '').includes('(') && (
-            <span style={{
-              fontSize: '0.68rem',
-              color: '#86efac',
-              background: 'rgba(6, 199, 85, 0.18)',
-              border: '1px solid rgba(6, 199, 85, 0.35)',
-              padding: '0.35rem 0.65rem',
-              borderRadius: '8px',
-              fontWeight: '600',
-              textAlign: 'center',
-              lineHeight: '1.3',
-              maxWidth: '135px'
-            }}>
-              {(activeResult.bestContactHour || '').substring((activeResult.bestContactHour || '').indexOf('(')).replace(/\(|\)/g, '')}
-            </span>
-          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.1rem' }}>
+            {/* Line 1: 7:30 〜 8:30 */}
+            <div style={{ fontSize: '1.25rem', color: '#ffffff', fontWeight: '900', letterSpacing: '0.04em', textShadow: '0 0 12px rgba(6, 199, 85, 0.6)' }}>
+              {(activeResult.bestContactHour || '7:30 〜 8:30').split('(')[0].trim()}
+            </div>
+
+            {/* Line 2: 朝の短文一言メッセージ */}
+            {(activeResult.bestContactHour || '').includes('(') && (
+              <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
+                {(activeResult.bestContactHour || '').split('(')[1]?.replace(/\)/g, '').trim()}
+              </div>
+            )}
+          </div>
         </div>
 
 
