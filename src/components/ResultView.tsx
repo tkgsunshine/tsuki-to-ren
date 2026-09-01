@@ -2490,12 +2490,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* Floating Sticky Bottom Share CTA Bar */}
       <div style={{
         position: 'fixed',
-        bottom: 'calc(1rem + var(--safe-bottom, 0px))',
+        bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
         left: '50%',
         transform: 'translateX(-50%)',
         width: 'calc(100% - 2rem)',
         maxWidth: '440px',
-        zIndex: 9999,
+        zIndex: 99990,
         boxSizing: 'border-box'
       }}>
         <button
