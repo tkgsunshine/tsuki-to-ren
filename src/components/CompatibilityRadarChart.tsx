@@ -325,17 +325,36 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.72rem', color: isLocked ? '#9ca3af' : '#f3f4f6', fontWeight: '600' }}>
+                <span style={{ fontSize: '0.72rem', color: '#f3f4f6', fontWeight: '700' }}>
                   {axis.label}
                 </span>
-                <span className="font-serif" style={{
+                <div className="font-serif" style={{
                   fontSize: '0.95rem',
                   fontWeight: '800',
-                  color: isLocked ? '#6b7280' : themeColor,
-                  filter: isLocked ? 'blur(3px)' : 'none'
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: '1px'
                 }}>
-                  {isLocked ? '??' : `${axis.val}点`}
-                </span>
+                  {isLocked ? (
+                    <>
+                      <span style={{
+                        color: themeColor,
+                        filter: 'blur(5px)',
+                        userSelect: 'none',
+                        display: 'inline-block',
+                        opacity: 0.85
+                      }}>
+                        {axis.val}
+                      </span>
+                      <span style={{ color: themeColor, fontSize: '0.75rem', fontWeight: 'bold' }}>点</span>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ color: themeColor }}>{axis.val}</span>
+                      <span style={{ color: themeColor, fontSize: '0.75rem', fontWeight: 'bold' }}>点</span>
+                    </>
+                  )}
+                </div>
               </div>
               <p style={{
                 fontSize: '0.62rem',
