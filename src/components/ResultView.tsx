@@ -14,6 +14,12 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const LineLogoIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <path fillRule="evenodd" clipRule="evenodd" d="M19.365 9.863c.349 0 .63.285.63.631 0 .348-.281.63-.63.63h-2.193v.975h2.193c.349 0 .63.285.63.63 0 .348-.281.63-.63.63h-2.824a.63.63 0 0 1-.63-.63V7.27c0-.348.281-.63.63-.63h2.824c.349 0 .63.285.63.63 0 .348-.281.63-.63.63h-2.193v.963h2.193zm-4.708 2.866c0 .248-.146.471-.371.567a.63.63 0 0 1-.663-.087l-2.73-2.784v2.238c0 .348-.282.63-.63.63a.63.63 0 0 1-.63-.63V7.27c0-.248.146-.471.371-.567a.63.63 0 0 1 .663.087l2.73 2.784V7.27c0-.348.282-.63.63-.63.63 0 .63.282.63.63v5.459zM8.76 7.27v5.459c0 .348-.282.63-.63.63a.63.63 0 0 1-.63-.63V7.27c0-.348.282-.63.63-.63.63 0 .63.282.63.63zM24 10.614c0-4.943-5.373-8.964-12-8.964-6.627 0-12 4.021-12 8.964 0 4.429 4.262 8.152 10.02 8.847.39.084.922.257 1.058.59.122.298.079.765.039 1.066-.088.665-.572 2.6-.628 3.15-.07.689.317.681.666.452 2.748-1.802 7.426-5.185 10.134-8.877C23.018 14.184 24 12.518 24 10.614z" fill="#06C755"/>
+  </svg>
+);
+
 const XIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -687,51 +693,108 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </p>
       </div>
 
-      {/* Feature 2: Daily Luck & Notification Card */}
+      {/* Feature 2: Daily Luck & Notification Card (Redesigned with Official LINE Logo) */}
       <div className="glass-panel" style={{
-        padding: '1.25rem',
+        padding: '1.15rem',
         display: 'flex',
         flexDirection: 'column',
         gap: '0.85rem',
-        border: '1px solid rgba(226, 192, 116, 0.25)',
-        background: 'linear-gradient(135deg, rgba(20, 15, 35, 0.7) 0%, rgba(10, 10, 25, 0.7) 100%)'
+        border: '1.5px solid rgba(6, 199, 85, 0.35)',
+        background: 'linear-gradient(135deg, rgba(12, 28, 18, 0.75) 0%, rgba(10, 15, 25, 0.85) 100%)',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 199, 85, 0.1)'
       }}>
+        {/* Header with Official LINE Logo */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Calendar size={16} style={{ color: 'var(--color-gold)' }} />
-            <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
-              {hasOpponent ? '本日の日盤運気・LINE吉時間' : '本日の日盤運気・開運黄金時間'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <LineLogoIcon size={22} />
+            <span style={{ fontSize: '0.92rem', fontWeight: '800', color: '#ffffff', letterSpacing: '0.02em' }}>
+              {hasOpponent ? '本日のLINE吉時間 ＆ 運勢' : '本日の開運黄金時間 ＆ 運勢'}
             </span>
           </div>
-          <span style={{ fontSize: '0.7rem', color: '#9ca3af', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '10px' }}>
+          <span style={{ fontSize: '0.65rem', color: '#86efac', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
             毎日0時更新
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <div>
-            <div style={{ fontSize: '0.75rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>
+        {/* 2-Column Split Dashboard Card */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1.35fr',
+          gap: '0.65rem',
+          alignItems: 'stretch'
+        }}>
+          {/* Left Box: Score & Luck Title */}
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.35)',
+            padding: '0.75rem',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}>
+            <span style={{ fontSize: '0.65rem', color: '#9ca3af', fontWeight: '600' }}>
               {hasOpponent ? '本日の相性スコア' : '本日の運気スコア'}
-            </div>
-            <div className="font-serif gold-text" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+            </span>
+            <div className="font-serif gold-text" style={{ fontSize: '1.7rem', fontWeight: 'bold', lineHeight: '1.1', margin: '0.2rem 0' }}>
               {activeResult.dailyScore}<span style={{ fontSize: '0.8rem' }}>点</span>
             </div>
+            <span style={{
+              fontSize: '0.65rem',
+              fontWeight: 'bold',
+              color: '#fef08a',
+              background: 'rgba(234, 179, 8, 0.15)',
+              border: '1px solid rgba(234, 179, 8, 0.3)',
+              padding: '2px 6px',
+              borderRadius: '6px',
+              whiteSpace: 'nowrap'
+            }}>
+              {(activeResult.dailyLuckTitle || '').replace(/【|】/g, '')}
+            </span>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.75rem', color: '#fef08a', fontWeight: 'bold', whiteSpace: 'pre-line', lineHeight: '1.3' }}>
-              {activeResult.dailyLuckTitle}
+
+          {/* Right Box: LINE Golden Hours Card */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(6, 199, 85, 0.12) 0%, rgba(0, 0, 0, 0.4) 100%)',
+            padding: '0.75rem 0.85rem',
+            borderRadius: '12px',
+            border: '1px solid rgba(6, 199, 85, 0.4)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            gap: '0.25rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.68rem', color: '#4ade80', fontWeight: 'bold' }}>
+              <LineLogoIcon size={14} />
+              <span>推奨送信タイミング</span>
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '0.25rem', lineHeight: '1.35' }}>
-              送るべき推奨時間:<br />
-              <span style={{ color: '#60a5fa', fontWeight: 'bold' }}>{activeResult.bestContactHour}</span>
+            <div style={{ fontSize: '0.98rem', color: '#ffffff', fontWeight: '900', letterSpacing: '0.03em', textShadow: '0 0 10px rgba(6, 199, 85, 0.5)' }}>
+              {activeResult.bestContactHour}
             </div>
           </div>
         </div>
 
-        <p style={{ fontSize: '0.8rem', color: '#d1d5db', lineHeight: '1.6', margin: 0 }}>
-          💡 <strong>本日のワンポイント助言:</strong><br />
-          {activeResult.dailyActionAdvice}
-        </p>
+        {/* Action Advice Speech Bubble */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '10px',
+          padding: '0.65rem 0.85rem',
+          fontSize: '0.76rem',
+          color: '#e5e7eb',
+          lineHeight: '1.55',
+          display: 'flex',
+          gap: '0.4rem',
+          alignItems: 'flex-start'
+        }}>
+          <span style={{ fontSize: '0.9rem', flexShrink: 0, marginTop: '1px' }}>💡</span>
+          <div>
+            <strong style={{ color: '#fef08a' }}>本日のアプローチ助言: </strong>
+            {activeResult.dailyActionAdvice}
+          </div>
+        </div>
 
         {/* Daily Notification Prompt */}
         <div style={{
