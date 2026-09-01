@@ -1447,7 +1447,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
                       <button className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); handleScrollToRegister(); }}>
-                        <Lock size={11} /> 続きを無料登録で開封
+                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                       </button>
                     </div>
                   </div>
@@ -1648,7 +1648,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => {
+                  className="premium-lock-tag"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!isRegistered) {
                       handleScrollToRegister();
                     } else if (onOpenPremiumLP) {
@@ -1657,27 +1659,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       handleScrollToSub();
                     }
                   }}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.88)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 1.15rem',
-                    color: '#fef08a',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    whiteSpace: 'nowrap'
-                  }}
                 >
-                  <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
               </div>
             )}
@@ -1722,7 +1705,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => {
+                  className="premium-lock-tag"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!isRegistered) {
                       handleScrollToRegister();
                     } else if (onOpenPremiumLP) {
@@ -1731,27 +1716,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       handleScrollToSub();
                     }
                   }}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.88)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 1.15rem',
-                    color: '#fef08a',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    whiteSpace: 'nowrap'
-                  }}
                 >
-                  <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
               </div>
             )}
@@ -1790,7 +1756,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => {
+                  className="premium-lock-tag"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!isRegistered) {
                       handleScrollToRegister();
                     } else if (onOpenPremiumLP) {
@@ -1799,27 +1767,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       handleScrollToSub();
                     }
                   }}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.88)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 1.15rem',
-                    color: '#fef08a',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    whiteSpace: 'nowrap'
-                  }}
                 >
-                  <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
               </div>
             )}
@@ -1859,7 +1808,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => {
+                  className="premium-lock-tag"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!isRegistered) {
                       handleScrollToRegister();
                     } else if (onOpenPremiumLP) {
@@ -1868,27 +1819,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       handleScrollToSub();
                     }
                   }}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.88)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 1.15rem',
-                    color: '#fef08a',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    whiteSpace: 'nowrap'
-                  }}
                 >
-                  <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
               </div>
             )}
@@ -1927,7 +1859,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => {
+                  className="premium-lock-tag"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!isRegistered) {
                       handleScrollToRegister();
                     } else if (onOpenPremiumLP) {
@@ -1936,27 +1870,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       handleScrollToSub();
                     }
                   }}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.88)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 1.15rem',
-                    color: '#fef08a',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    whiteSpace: 'nowrap'
-                  }}
                 >
-                  <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
               </div>
             )}
@@ -2001,7 +1916,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => {
+                  className="premium-lock-tag"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!isRegistered) {
                       handleScrollToRegister();
                     } else if (onOpenPremiumLP) {
@@ -2010,27 +1927,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       handleScrollToSub();
                     }
                   }}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.88)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 1.15rem',
-                    color: '#fef08a',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    whiteSpace: 'nowrap'
-                  }}
                 >
-                  <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
               </div>
             )}
@@ -2066,7 +1964,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => {
+                  className="premium-lock-tag"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!isRegistered) {
                       handleScrollToRegister();
                     } else if (onOpenPremiumLP) {
@@ -2075,27 +1975,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       handleScrollToSub();
                     }
                   }}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.88)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 1.15rem',
-                    color: '#fef08a',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    whiteSpace: 'nowrap'
-                  }}
                 >
-                  <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
               </div>
             )}
@@ -2131,7 +2012,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => {
+                  className="premium-lock-tag"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!isRegistered) {
                       handleScrollToRegister();
                     } else if (onOpenPremiumLP) {
@@ -2140,27 +2023,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       handleScrollToSub();
                     }
                   }}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.88)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 1.15rem',
-                    color: '#fef08a',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.35rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    whiteSpace: 'nowrap'
-                  }}
                 >
-                  <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
               </div>
             )}
