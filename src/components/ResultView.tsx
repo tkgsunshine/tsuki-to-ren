@@ -2437,7 +2437,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                               }
                             }}
                           >
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録で開封' : 'プレミアム登録で開封'}
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で開封'}
                           </button>
                         </div>
                       )}
