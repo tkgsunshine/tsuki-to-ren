@@ -1617,12 +1617,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <span>💘 刺さる言葉 TOP5（キュンとさせる褒め方）</span>
             </div>
             <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#f3f4f6', lineHeight: '1.75' }}>
-              {activeResult.opponentTorisetsu.killingWords.slice(0, 2).map((word, idx) => (
+              {activeResult.opponentTorisetsu.killingWords.slice(0, 1).map((word, idx) => (
                 <li key={idx} style={{ marginBottom: '0.2rem' }}>{word.replace(/〇〇/g, oppNickname || 'お相手')}</li>
               ))}
-              {activeResult.opponentTorisetsu.killingWords.slice(2).map((word, idx) => (
+              {activeResult.opponentTorisetsu.killingWords.slice(1).map((word, idx) => (
                 <li
-                  key={idx + 2}
+                  key={idx + 1}
                   style={{
                     marginBottom: '0.2rem',
                     filter: !isSubscribed ? 'blur(4.5px)' : 'none',
@@ -1734,13 +1734,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 fontSize: '0.8rem',
                 color: '#dbeafe',
                 margin: 0,
-                lineHeight: '1.6',
-                filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                userSelect: !isSubscribed ? 'none' : 'auto',
-                opacity: !isSubscribed ? 0.65 : 1
+                lineHeight: '1.6'
               }}>
                 <p style={{ margin: '0 0 0.35rem 0' }}><strong>【本音の裏心理】</strong> {activeResult.opponentTorisetsu.slowReplyPsychology?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
-                <p style={{ margin: 0, color: '#60a5fa' }}><strong>【送るべき神返信】</strong> {activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
+                <p style={{
+                  margin: 0,
+                  color: '#60a5fa',
+                  filter: !isSubscribed ? 'blur(4.5px)' : 'none',
+                  userSelect: !isSubscribed ? 'none' : 'auto',
+                  opacity: !isSubscribed ? 0.65 : 1
+                }}><strong>【送るべき神返信】</strong> {activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
               </div>
             {!isSubscribed && (
               <div style={{
@@ -1783,16 +1786,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 fontSize: '0.78rem',
                 color: '#dcfce7',
                 lineHeight: '1.6',
-                filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                userSelect: !isSubscribed ? 'none' : 'auto',
-                opacity: !isSubscribed ? 0.65 : 1,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.3rem'
               }}>
                 <div><strong>Lv.1 (初期):</strong> {activeResult.opponentTorisetsu.greenFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
-                <div><strong>Lv.2 (本気):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手')}</div>
-                <div><strong>Lv.3 (ゾッコン):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手')}</div>
+                <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手')}</div>
+                <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.3 (ゾッコン):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手')}</div>
               </div>
             {!isSubscribed && (
               <div style={{
@@ -1835,15 +1835,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 fontSize: '0.78rem',
                 color: '#ffe4e6',
                 lineHeight: '1.6',
-                filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                userSelect: !isSubscribed ? 'none' : 'auto',
-                opacity: !isSubscribed ? 0.65 : 1,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.3rem'
               }}>
                 <div><strong>【危険サイン】</strong> {activeResult.opponentTorisetsu.redFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
-                <div><strong>【逆転挽回策】</strong> {(activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手')}</div>
+                <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>【逆転挽回策】</strong> {(activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手')}</div>
               </div>
             {!isSubscribed && (
               <div style={{
@@ -1886,9 +1883,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 fontSize: '0.78rem',
                 color: '#f3e8ff',
                 lineHeight: '1.6',
-                filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                userSelect: !isSubscribed ? 'none' : 'auto',
-                opacity: !isSubscribed ? 0.65 : 1,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.35rem'
@@ -1897,9 +1891,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
                   {(activeResult.opponentTorisetsu.lineTemplateInvite || '「〇〇さんが前言ってたあのお店、サクッと行かない？」').replace(/〇〇/g, oppNickname || 'お相手')}
                 </div>
-                <div style={{ marginTop: '0.2rem' }}><strong>【距離を縮める質問テンプレ】</strong></div>
-                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                  {(activeResult.opponentTorisetsu.lineTemplateTopic || '「〇〇さんって休みの日は何に没頭してる時が一番癒される？」').replace(/〇〇/g, oppNickname || 'お相手')}
+                <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}>
+                  <div style={{ marginTop: '0.2rem' }}><strong>【距離を縮める質問テンプレ】</strong></div>
+                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
+                    {(activeResult.opponentTorisetsu.lineTemplateTopic || '「〇〇さんって休みの日は何に没頭してる時が一番癒される？」').replace(/〇〇/g, oppNickname || 'お相手')}
+                  </div>
                 </div>
               </div>
             {!isSubscribed && (
