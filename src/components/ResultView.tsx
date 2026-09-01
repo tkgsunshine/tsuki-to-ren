@@ -759,7 +759,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   handleScrollToRegister();
                 }
               } else if (!isSubscribed) {
-                if (confirm('毎朝8時の運勢通知機能は、月額300円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？')) {
+                if (confirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？')) {
                   handleScrollToSub();
                 }
               } else {
@@ -1648,6 +1648,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <p style={{ margin: '0 0 0.35rem 0' }}><strong>【本音の裏心理】</strong> {activeResult.opponentTorisetsu.slowReplyPsychology?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
                 <p style={{ margin: 0, color: '#60a5fa' }}><strong>【送るべき神返信】</strong> {activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
               </div>
+            {!isSubscribed && (
+              <button
+                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                style={{
+                  marginTop: '0.65rem',
+                  width: '100%',
+                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.65rem 1.2rem',
+                  color: '#000000',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span style={{ fontSize: '0.95rem' }}>🔓</span>
+                <span>プレミアム登録して全解禁（月額500円）</span>
+              </button>
+            )}
             </div>
 
             {/* 4. 脈ありサイン 3段階レベル */}
@@ -1670,6 +1696,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div><strong>Lv.2 (本気):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div><strong>Lv.3 (ゾッコン):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手')}</div>
               </div>
+            {!isSubscribed && (
+              <button
+                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                style={{
+                  marginTop: '0.65rem',
+                  width: '100%',
+                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.65rem 1.2rem',
+                  color: '#000000',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span style={{ fontSize: '0.95rem' }}>🔓</span>
+                <span>プレミアム登録して全解禁（月額500円）</span>
+              </button>
+            )}
             </div>
 
             {/* 5. 脈なしサイン ＆ 挽回テクニック */}
@@ -1691,6 +1743,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div><strong>【危険サイン】</strong> {activeResult.opponentTorisetsu.redFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div><strong>【逆転挽回策】</strong> {(activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手')}</div>
               </div>
+            {!isSubscribed && (
+              <button
+                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                style={{
+                  marginTop: '0.65rem',
+                  width: '100%',
+                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.65rem 1.2rem',
+                  color: '#000000',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span style={{ fontSize: '0.95rem' }}>🔓</span>
+                <span>プレミアム登録して全解禁（月額500円）</span>
+              </button>
+            )}
             </div>
 
             {/* 6. そのまま使えるLINEキラーテンプレート */}
@@ -1718,6 +1796,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {(activeResult.opponentTorisetsu.lineTemplateTopic || '「〇〇さんって休みの日は何に没頭してる時が一番癒される？」').replace(/〇〇/g, oppNickname || 'お相手')}
                 </div>
               </div>
+            {!isSubscribed && (
+              <button
+                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                style={{
+                  marginTop: '0.65rem',
+                  width: '100%',
+                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.65rem 1.2rem',
+                  color: '#000000',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span style={{ fontSize: '0.95rem' }}>🔓</span>
+                <span>プレミアム登録して全解禁（月額500円）</span>
+              </button>
+            )}
             </div>
 
             {/* 7. 喜ばれるデート＆プレゼント傾向 */}
@@ -1736,6 +1840,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 {(activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手')}
               </p>
+            {!isSubscribed && (
+              <button
+                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                style={{
+                  marginTop: '0.65rem',
+                  width: '100%',
+                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.65rem 1.2rem',
+                  color: '#000000',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span style={{ fontSize: '0.95rem' }}>🔓</span>
+                <span>プレミアム登録して全解禁（月額500円）</span>
+              </button>
+            )}
             </div>
 
             {/* 8. 蓮と月からの最終攻略アドバイス */}
@@ -1754,6 +1884,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 {activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手')}
               </p>
+            {!isSubscribed && (
+              <button
+                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                style={{
+                  marginTop: '0.65rem',
+                  width: '100%',
+                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.65rem 1.2rem',
+                  color: '#000000',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span style={{ fontSize: '0.95rem' }}>🔓</span>
+                <span>プレミアム登録して全解禁（月額500円）</span>
+              </button>
+            )}
             </div>
 
             {/* Lock CTA Card placed BELOW the content boxes for Non-Premium Users */}
@@ -2082,7 +2238,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   二人の未来予測スケジュールをすべて解禁
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d1d5db', lineHeight: '1.4', margin: 0 }}>
-                  月額300円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
+                  月額500円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
                 </p>
               </div>
 
