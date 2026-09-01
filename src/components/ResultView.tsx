@@ -744,14 +744,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.1rem' }}>
             {/* Line 1: 7:30 〜 8:30 */}
             <div style={{ fontSize: '1.25rem', color: '#ffffff', fontWeight: '900', letterSpacing: '0.04em', textShadow: '0 0 12px rgba(6, 199, 85, 0.6)' }}>
-              {(activeResult.bestContactHour || '7:30 〜 8:30').split('(')[0].trim()}
+              {(activeResult.bestContactHour || '7:30 〜 8:30').split(/[（\(]/)[0].trim()}
             </div>
 
             {/* Line 2: 朝の短文一言メッセージ */}
-            {(activeResult.bestContactHour || '').includes('(') && (
+            {(activeResult.bestContactHour || '').match(/[（\(](.*?)[）\)]/) ? (
               <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
-                {(activeResult.bestContactHour || '').split('(')[1]?.replace(/\)/g, '').trim()}
+                {(activeResult.bestContactHour || '').match(/[（\(](.*?)[）\)]/)?.[1]}
               </div>
+            ) : (
+              (activeResult.bestContactHour || '').includes('（') || (activeResult.bestContactHour || '').includes('(') ? (
+                <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
+                  {(activeResult.bestContactHour || '').replace(/.*?[（\(]/, '').replace(/[）\)].*/, '').trim()}
+                </div>
+              ) : null
             )}
           </div>
         </div>
