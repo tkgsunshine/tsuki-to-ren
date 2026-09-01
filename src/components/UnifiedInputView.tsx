@@ -4,22 +4,22 @@ import type { SavedPartner } from '../App';
 import { CustomDatePicker } from './CustomDatePicker';
 export const mbtiOptions = [
   { value: 'UNKNOWN', label: 'わからない / 未設定' },
-  { value: 'INFJ', label: 'INFJ (提唱者タイプ：思慮深く信念が強い)' },
-  { value: 'INFP', label: 'INFP (仲介者タイプ：共感力が高くロマンチスト)' },
-  { value: 'ENFJ', label: 'ENFJ (主人公タイプ：人を導くカリスマ的リーダー)' },
-  { value: 'ENFP', label: 'ENFP (運動家タイプ：情熱的で社交的な自由人)' },
-  { value: 'INTJ', label: 'INTJ (建築家タイプ：論理的で完璧主義な戦略家)' },
-  { value: 'INTP', label: 'INTP (論理学者タイプ：知的好奇心が強い探求者)' },
-  { value: 'ENTJ', label: 'ENTJ (指揮官タイプ：大胆で決断力のある指導者)' },
-  { value: 'ENTP', label: 'ENTP (討論者タイプ：頭脳明晰でアイデア豊富な挑戦者)' },
-  { value: 'ISFJ', label: 'ISFJ (擁護者タイプ：献身的で責任感が強いサポーター)' },
-  { value: 'ISFP', label: 'ISFP (冒険家タイプ：芸術的でマイペースな表現者)' },
-  { value: 'ESFJ', label: 'ESFJ (領事官タイプ：面倒見が良く調和を重んじる人)' },
-  { value: 'ESFP', label: 'ESFP (エンターテイナータイプ：陽気で周りを笑顔にする人)' },
-  { value: 'ISTJ', label: 'ISTJ (管理者タイプ：誠実でルールを重んじる堅実派)' },
-  { value: 'ISTP', label: 'ISTP (巨匠タイプ：冷静沈着で器用な職人肌)' },
-  { value: 'ESTJ', label: 'ESTJ (幹部タイプ：頼れる実務家リーダー)' },
-  { value: 'ESTP', label: 'ESTP (起業家タイプ：自由で行動力抜群な冒険家)' }
+  { value: 'INFJ', label: 'INFJ' },
+  { value: 'INFP', label: 'INFP' },
+  { value: 'ENFJ', label: 'ENFJ' },
+  { value: 'ENFP', label: 'ENFP' },
+  { value: 'INTJ', label: 'INTJ' },
+  { value: 'INTP', label: 'INTP' },
+  { value: 'ENTJ', label: 'ENTJ' },
+  { value: 'ENTP', label: 'ENTP' },
+  { value: 'ISFJ', label: 'ISFJ' },
+  { value: 'ISFP', label: 'ISFP' },
+  { value: 'ESFJ', label: 'ESFJ' },
+  { value: 'ESFP', label: 'ESFP' },
+  { value: 'ISTJ', label: 'ISTJ' },
+  { value: 'ISTP', label: 'ISTP' },
+  { value: 'ESTJ', label: 'ESTJ' },
+  { value: 'ESTP', label: 'ESTP' }
 ];
 
 interface UnifiedInputViewProps {
