@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Sparkles, Lock, Calendar, Download, X, Heart, Bell } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
+import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { getPillarWithReading } from '../utils/fortuneEngine';
 
 const GoogleIcon = () => (
@@ -657,6 +658,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </button>
         )}
       </div>
+
+
+      {/* 6-Axis Compatibility Radar Chart with Monetization Lock */}
+      <CompatibilityRadarChart
+        scores={activeResult.radarScores || {
+          romance: activeResult.baseScore || 85,
+          conversation: Math.min(99, Math.floor((activeResult.baseScore || 80) * 0.9)),
+          sensual: Math.min(99, Math.floor((activeResult.baseScore || 85) * 1.05)),
+          marriage: Math.min(99, Math.floor((activeResult.baseScore || 75) * 0.95)),
+          obsession: Math.min(99, Math.floor((activeResult.baseScore || 88) * 1.02)),
+          trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
+        }}
+        isUnlocked={isRegistered || isSubscribed}
+        onOpenAuth={onOpenPremiumLP}
+        onOpenPremiumLP={onOpenPremiumLP}
+        character={selectedChar}
+      />
 
       {/* Free Summary Section (Fully Visible) */}
       <div className="glass-panel" style={{ padding: '1.25rem' }}>

@@ -183,7 +183,17 @@ export interface DiagnosisInput {
   relationship: 'single' | 'partner' | string;
 }
 
+export interface CompatibilityRadarScores {
+  romance: number;
+  conversation: number;
+  sensual: number;
+  marriage: number;
+  obsession: number;
+  trust: number;
+}
+
 export interface FortuneResult {
+  radarScores?: CompatibilityRadarScores;
   baseScore: number;
   dailyScore: number;
   myPillar: string;
@@ -1140,6 +1150,14 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         ? '少し疲れが出やすい日です。無理に誰かと関わろうとせず、暖かいお茶を飲んで早めに休み、エネルギーを再充填しましょう。'
         : '今日は徹底的に自分を癒すスペシャルの日です。自分を思いっきり甘やかし褒めてあげることで、明日以降の開運ウェーブを引き寄せます。'
     ),
+    radarScores: {
+      romance: Math.min(99, Math.max(50, Math.floor(baseScore + (myPillarObj.stem === oppPillarObj?.stem ? 5 : 0)))),
+      conversation: Math.min(99, Math.max(45, Math.floor(baseScore * 0.7 + (mbtiNames[input.myMbti] ? 15 : 5) + Math.abs(Math.sin(todaySeed + 13)) * 12))),
+      sensual: Math.min(99, Math.max(55, Math.floor(baseScore * 0.65 + (hasOpponent ? 22 : 12) + Math.abs(Math.cos(todaySeed + 41)) * 14))),
+      marriage: Math.min(99, Math.max(40, Math.floor(baseScore * 0.8 + (hasOpponent ? 15 : 5) + Math.abs(Math.sin(todaySeed + 77)) * 10))),
+      obsession: Math.min(99, Math.max(50, Math.floor(baseScore * 0.6 + (hasOpponent ? 25 : 10) + Math.abs(Math.sin(todaySeed + 99)) * 15))),
+      trust: Math.min(99, Math.max(45, Math.floor(baseScore * 0.75 + (hasOpponent ? 18 : 8) + Math.abs(Math.cos(todaySeed + 123)) * 10)))
+    },
     myTorisetsu: generateTorisetsu(
       myPillarObj.stem,
       myPillarObj.branch,
