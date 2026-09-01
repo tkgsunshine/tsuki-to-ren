@@ -20,33 +20,42 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
   const [demoUnlocked, setDemoUnlocked] = useState(false);
   const activeUnlocked = isUnlocked || demoUnlocked;
 
+  // Safe Score Extractor
+  const getVal = (val: any, defaultVal: number): number => {
+    const num = Number(val);
+    return (!isNaN(num) && num > 0) ? Math.min(100, Math.max(10, num)) : defaultVal;
+  };
+
   // 6軸の定義
   const axes = [
-    { key: 'romance', label: '💖 恋愛相性', val: scores?.romance || 85, desc: '情熱的なロマンスと心身の惹かれ合い度' },
-    { key: 'conversation', label: '💬 会話相性', val: scores?.conversation || 78, desc: '言葉のテンポと本音が伝わる心地よさ', isSecret: true },
-    { key: 'sensual', label: '🔥 夜の相性', val: scores?.sensual || 92, desc: '本能的な官能感と夜のシンクロ率', isSecret: true },
-    { key: 'marriage', label: '💍 結婚・将来性', val: scores?.marriage || 74, desc: '長期的生活と価値観の安定性' },
-    { key: 'obsession', label: '⚡️ 沼り度', val: scores?.obsession || 89, desc: '一度味わうと離れられない依存・熱中度', isSecret: true },
-    { key: 'trust', label: '🛡️ 信頼・安心感', val: scores?.trust || 81, desc: '嘘偽りのない深い包容力と安心感', isSecret: true },
+    { key: 'romance', label: '💖 恋愛相性', val: getVal(scores?.romance, 85), desc: '情熱的なロマンスと心身の惹かれ合い度' },
+    { key: 'conversation', label: '💬 会話相性', val: getVal(scores?.conversation, 78), desc: '言葉のテンポと本音が伝わる心地よさ', isSecret: true },
+    { key: 'sensual', label: '🔥 夜の相性', val: getVal(scores?.sensual, 92), desc: '本能的な官能感と夜のシンクロ率', isSecret: true },
+    { key: 'marriage', label: '💍 結婚・将来性', val: getVal(scores?.marriage, 74), desc: '長期的生活と価値観の安定性' },
+    { key: 'obsession', label: '⚡️ 沼り度', val: getVal(scores?.obsession, 89), desc: '一度味わうと離れられない依存・熱中度', isSecret: true },
+    { key: 'trust', label: '🛡️ 信頼・安心感', val: getVal(scores?.trust, 81), desc: '嘘偽りのない深い包容力と安心感', isSecret: true },
   ];
 
-  // SVG レーダーチャート計算 (円の中心 = (140, 140), 半径 = 90)
+  // SVG レーダーチャート計算 (円の中心 = (140, 140), 半径 = 85)
   const size = 280;
   const center = size / 2;
   const radius = 85;
   const totalAxes = axes.length;
 
-  const getCoordinates = (index: number, value: number, maxVal = 100) => {
+  const getCoordinates = (index: number, rawValue: number, maxVal = 100) => {
+    const value = Math.max(10, Math.min(100, isNaN(rawValue) ? 75 : rawValue));
     const angle = (Math.PI * 2 / totalAxes) * index - Math.PI / 2;
     const r = (value / maxVal) * radius;
     const x = center + r * Math.cos(angle);
     const y = center + r * Math.sin(angle);
-    return { x, y };
+    return {
+      x: isNaN(x) ? center : x,
+      y: isNaN(y) ? center : y
+    };
   };
 
   // ポリゴンパスの生成
   const points = axes.map((axis, i) => {
-    // 未解放かつシークレット項目はブラー/ダミー表示（非表示風）
     const displayVal = (!activeUnlocked && axis.isSecret) ? 35 : axis.val;
     const { x, y } = getCoordinates(i, displayVal);
     return `${x},${y}`;
@@ -61,14 +70,14 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(20, 20, 35, 0.85) 0%, rgba(10, 10, 20, 0.95) 100%)',
-      border: '1px solid rgba(226, 192, 116, 0.3)',
+      background: 'linear-gradient(135deg, rgba(20, 20, 35, 0.95) 0%, rgba(10, 10, 20, 0.98) 100%)',
+      border: '1px solid rgba(226, 192, 116, 0.35)',
       borderRadius: '20px',
       padding: '1.25rem 1rem',
       position: 'relative',
-      overflow: 'hidden',
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(226, 192, 116, 0.05)',
-      marginTop: '1.25rem'
+      marginTop: '1.25rem',
+      boxSizing: 'border-box'
     }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
@@ -90,15 +99,14 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
           多角相性 6軸アナリシス
         </div>
         <h3 className="font-serif" style={{
-          fontSize: '1.25rem',
+          fontSize: '1.2rem',
           color: '#f9fafb',
           fontWeight: '700',
-          marginTop: '0.4rem',
           margin: '0.4rem 0 0.1rem 0'
         }}>
           二人の詳細相性レーダー
         </h3>
-        <p style={{ fontSize: '0.72rem', color: '#9ca3af' }}>
+        <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: 0 }}>
           四柱推命・16タイプ・九星気学を統合した精密判定
         </p>
       </div>
@@ -109,6 +117,8 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        width: '100%',
+        minHeight: '300px',
         margin: '0.5rem 0'
       }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: 'visible' }}>
@@ -179,7 +189,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
 
           {/* Axis Labels positioned around the chart */}
           {axes.map((axis, i) => {
-            const labelPos = getCoordinates(i, 122);
+            const labelPos = getCoordinates(i, 120);
             const isSecretLocked = !activeUnlocked && axis.isSecret;
             return (
               <text
@@ -208,9 +218,9 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'backdrop-filter',
-            backdropFilter: 'blur(5px)',
-            backgroundColor: 'rgba(15, 15, 25, 0.55)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(12, 10, 25, 0.82)',
             borderRadius: '16px',
             display: 'flex',
             flexDirection: 'column',
@@ -219,7 +229,8 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
             padding: '1rem',
             textAlign: 'center',
             zIndex: 10,
-            border: '1px solid rgba(226, 192, 116, 0.25)'
+            border: '1.5px solid rgba(226, 192, 116, 0.35)',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.7)'
           }}>
             <div style={{
               width: '44px',
@@ -243,13 +254,13 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               「夜の相性」「沼り度」「会話相性」全解明
             </h4>
             <p style={{ fontSize: '0.7rem', color: '#d1d5db', lineHeight: '1.4', maxWidth: '240px', marginBottom: '0.75rem' }}>
-              無料会員登録 / ログインで、6軸すべてのスコアと限定アドバイスが今すぐ解放されます。
+              有料プレミアムプラン（月額500円）で、6軸すべてのスコアと限定アドバイスが今すぐ解放されます。
             </p>
 
             <button
               onClick={() => {
-                if (onOpenAuth) onOpenAuth();
-                else if (onOpenPremiumLP) onOpenPremiumLP();
+                if (onOpenPremiumLP) onOpenPremiumLP();
+                else if (onOpenAuth) onOpenAuth();
                 else setDemoUnlocked(true);
               }}
               style={{
@@ -334,7 +345,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                 lineHeight: '1.3',
                 filter: isLocked ? 'blur(3px)' : 'none'
               }}>
-                {isLocked ? 'ログイン後に開放されるシークレット解説' : axis.desc}
+                {isLocked ? 'プレミアム登録後に開放される限定解説' : axis.desc}
               </p>
             </div>
           );
