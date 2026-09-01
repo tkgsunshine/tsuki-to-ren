@@ -883,6 +883,44 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <div className="avatar-halo-spotlight" />
                   </>
                 )}
+                {/* Subtle Glass Save Badge */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '8px',
+                  right: '8px',
+                  background: 'rgba(0, 0, 0, 0.65)',
+                  border: '1px solid rgba(226, 192, 116, 0.4)',
+                  borderRadius: '12px',
+                  padding: '3px 8px',
+                  color: '#fef08a',
+                  fontSize: '0.62rem',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  backdropFilter: 'blur(4px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  pointerEvents: 'none'
+                }}>
+                  <Download size={10} />
+                  <span>保存</span>
+                </div>
+              </div>
+
+              {/* Sub-text explaining tap to save */}
+              <div style={{
+                fontSize: '0.68rem',
+                color: '#9ca3af',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.3rem',
+                marginTop: '-0.35rem',
+                marginBottom: '0.65rem',
+                opacity: 0.85
+              }}>
+                <Download size={11} style={{ color: 'var(--color-gold)' }} />
+                <span>※タップで守護化身画像を保存できます</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.25rem' }}>
@@ -1130,6 +1168,44 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <div className="avatar-halo-spotlight" />
                   </>
                 )}
+                {/* Subtle Glass Save Badge */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '8px',
+                  right: '8px',
+                  background: 'rgba(0, 0, 0, 0.65)',
+                  border: '1px solid rgba(226, 192, 116, 0.4)',
+                  borderRadius: '12px',
+                  padding: '3px 8px',
+                  color: '#fef08a',
+                  fontSize: '0.62rem',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  backdropFilter: 'blur(4px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  pointerEvents: 'none'
+                }}>
+                  <Download size={10} />
+                  <span>保存</span>
+                </div>
+              </div>
+
+              {/* Sub-text explaining tap to save */}
+              <div style={{
+                fontSize: '0.68rem',
+                color: '#9ca3af',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.3rem',
+                marginTop: '-0.35rem',
+                marginBottom: '0.65rem',
+                opacity: 0.85
+              }}>
+                <Download size={11} style={{ color: 'var(--color-gold)' }} />
+                <span>※タップで守護化身画像を保存できます</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.25rem' }}>
