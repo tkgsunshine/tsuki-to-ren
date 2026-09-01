@@ -756,40 +756,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           )}
         </div>
 
-        {/* Sub-row: Score & Daily Luck Title */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: 'rgba(0, 0, 0, 0.35)',
-          padding: '0.6rem 0.85rem',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.08)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: '600' }}>
-              {hasOpponent ? '本日の相性スコア:' : '本日の運気スコア:'}
-            </span>
-            <span className="font-serif gold-text" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-              {activeResult.dailyScore}<span style={{ fontSize: '0.75rem' }}>点</span>
-            </span>
-          </div>
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: 'bold',
-            color: '#fef08a',
-            background: 'rgba(234, 179, 8, 0.12)',
-            border: '1px solid rgba(234, 179, 8, 0.3)',
-            padding: '3px 8px',
-            borderRadius: '6px',
-            maxWidth: '180px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}>
-            {(activeResult.dailyLuckTitle || '').replace(/【|】/g, '')}
-          </span>
-        </div>
+
 
         {/* Action Advice Speech Bubble */}
         <div style={{
