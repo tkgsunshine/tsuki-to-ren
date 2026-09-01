@@ -9,57 +9,78 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
   return (
-    <header className="app-header" style={{ padding: 'calc(1.2rem + var(--safe-top, 0px)) 1rem 1.2rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
-      {/* Top Right Account / Login Button */}
-      {onOpenAuth && (
-        <button
-          onClick={onOpenAuth}
-          style={{
-            position: 'absolute',
-            top: 'calc(0.85rem + var(--safe-top, 0px))',
-            right: '0.85rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.35rem 0.75rem',
-            background: currentUser
-              ? 'rgba(74, 222, 128, 0.12)'
-              : 'rgba(255, 255, 255, 0.08)',
-            border: currentUser
-              ? '1px solid rgba(74, 222, 128, 0.35)'
-              : '1px solid rgba(226, 192, 116, 0.35)',
-            borderRadius: '20px',
-            color: currentUser ? '#4ade80' : '#fef08a',
-            fontSize: '0.75rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            zIndex: 10
-          }}
-        >
-          {currentUser ? (
-            <>
-              {currentUser.photoURL ? (
-                <img src={currentUser.photoURL} alt="Avatar" style={{ width: '18px', height: '18px', borderRadius: '50%' }} />
-              ) : (
-                <User size={14} />
-              )}
-              <span>{currentUser.displayName || 'マイページ'}</span>
-            </>
-          ) : (
-            <>
-              <LogIn size={14} />
-              <span>ログイン / 登録</span>
-            </>
-          )}
-        </button>
-      )}
+    <header className="app-header" style={{ padding: 'calc(0.85rem + var(--safe-top, 0px)) 1rem 1.2rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
+      {/* Top Flex Bar with Center Title & Right Auth Button */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        maxWidth: '440px',
+        margin: '0 auto',
+        position: 'relative',
+        minHeight: '44px'
+      }}>
+        {/* Left Spacer for symmetry */}
+        <div style={{ width: '90px', flexShrink: 0 }} />
 
-      {/* Main Brand Title */}
-      <h1 className="header-title font-serif gold-text" style={{ fontSize: '2.5rem', margin: 0, letterSpacing: '0.18em', fontWeight: 'bold', filter: 'drop-shadow(0 0 12px rgba(226, 192, 116, 0.4))' }}>
-        月と蓮
-      </h1>
+        {/* Main Brand Title */}
+        <h1 className="header-title font-serif gold-text" style={{
+          fontSize: '2.1rem',
+          margin: 0,
+          letterSpacing: '0.15em',
+          fontWeight: 'bold',
+          filter: 'drop-shadow(0 0 12px rgba(226, 192, 116, 0.4))',
+          whiteSpace: 'nowrap'
+        }}>
+          月と蓮
+        </h1>
+
+        {/* Right Account / Login Button */}
+        <div style={{ width: '90px', display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
+          {onOpenAuth && (
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                padding: '0.35rem 0.65rem',
+                background: currentUser
+                  ? 'rgba(74, 222, 128, 0.12)'
+                  : 'rgba(255, 255, 255, 0.08)',
+                border: currentUser
+                  ? '1px solid rgba(74, 222, 128, 0.35)'
+                  : '1px solid rgba(226, 192, 116, 0.35)',
+                borderRadius: '20px',
+                color: currentUser ? '#4ade80' : '#fef08a',
+                fontSize: '0.72rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {currentUser ? (
+                <>
+                  {currentUser.photoURL ? (
+                    <img src={currentUser.photoURL} alt="Avatar" style={{ width: '16px', height: '16px', borderRadius: '50%' }} />
+                  ) : (
+                    <User size={13} />
+                  )}
+                  <span>{currentUser.displayName || 'マイページ'}</span>
+                </>
+              ) : (
+                <>
+                  <LogIn size={13} />
+                  <span>ログイン / 登録</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Subtitle Badge - High Impact */}
       <div style={{
