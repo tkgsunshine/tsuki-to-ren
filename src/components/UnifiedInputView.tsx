@@ -509,7 +509,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の生年月日 (任意)</label>
+              <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の生年月日 (必須)</label>
               <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                 <input
                   type="text"
