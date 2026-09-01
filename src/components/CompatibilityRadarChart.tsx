@@ -133,7 +133,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                 key={idx}
                 points={gridPts}
                 fill="none"
-                stroke="rgba(255, 255, 255, 0.25)"
+                stroke="rgba(255, 255, 255, 0.45)"
                 strokeWidth="1"
                 strokeDasharray={idx === 4 ? 'none' : '2,2'}
               />
@@ -161,9 +161,9 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
             points={points}
             fill={fillColor}
             stroke={strokeColor}
-            strokeWidth="2.5"
+            strokeWidth="3.5"
             style={{
-              filter: 'drop-shadow(0 0 10px rgba(234, 179, 8, 0.4))',
+              filter: 'drop-shadow(0 0 16px rgba(254, 224, 71, 0.95))',
               transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}
           />
@@ -218,44 +218,38 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
           <div style={{
             position: 'absolute',
             inset: 0,
-            backdropFilter: 'blur(3.5px)',
-            WebkitBackdropFilter: 'blur(3.5px)',
-            backgroundColor: 'rgba(10, 8, 22, 0.35)',
+            backdropFilter: 'blur(2px)',
+            WebkitBackdropFilter: 'blur(2px)',
+            backgroundColor: 'rgba(8, 6, 18, 0.22)',
             borderRadius: '16px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '0.75rem',
             textAlign: 'center',
             zIndex: 10,
-            border: '1.5px solid rgba(226, 192, 116, 0.35)',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.7)'
+            border: '1.5px solid rgba(226, 192, 116, 0.45)',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5)'
           }}>
             <div style={{
-              width: '44px',
-              height: '44px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#000',
-              marginBottom: '0.5rem',
-              boxShadow: '0 0 20px rgba(234, 179, 8, 0.5)'
+              marginBottom: '0.35rem',
+              boxShadow: '0 0 20px rgba(234, 179, 8, 0.6)'
             }}>
               <Lock className="w-5 h-5" />
             </div>
             
-            <span style={{ fontSize: '0.72rem', color: '#fef08a', fontWeight: '700', letterSpacing: '0.05em' }}>
-              🔒 プレミアム限定開放
+            <span style={{ fontSize: '0.78rem', color: '#ffffff', fontWeight: '800', letterSpacing: '0.05em', marginBottom: '0.65rem', textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
+              🔒 6軸詳細相性を全解禁
             </span>
-            <h4 style={{ fontSize: '0.95rem', color: '#ffffff', fontWeight: '800', margin: '0.2rem 0 0.4rem 0' }}>
-              「夜の相性」「沼り度」「会話相性」全解明
-            </h4>
-            <p style={{ fontSize: '0.7rem', color: '#d1d5db', lineHeight: '1.4', maxWidth: '240px', marginBottom: '0.75rem' }}>
-              有料プレミアムプラン（月額500円）で、6軸すべてのスコアと限定アドバイスが今すぐ解放されます。
-            </p>
 
             <button
               onClick={() => {
