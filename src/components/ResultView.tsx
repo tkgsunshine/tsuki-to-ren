@@ -1528,13 +1528,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
               ))}
             </ul>
             {!isSubscribed && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '90%',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto'
+              }}>
                 <button
                   type="button"
                   onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
                     borderRadius: '20px',
                     padding: '0.45rem 1.15rem',
                     color: '#fef08a',
@@ -1543,10 +1553,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.35rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
@@ -1582,13 +1594,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
               ))}
             </ul>
             {!isSubscribed && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '90%',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto'
+              }}>
                 <button
                   type="button"
                   onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
                     borderRadius: '20px',
                     padding: '0.45rem 1.15rem',
                     color: '#fef08a',
@@ -1597,10 +1619,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.35rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
@@ -1630,13 +1654,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <p style={{ margin: 0, color: '#60a5fa' }}><strong>【送るべき神返信】</strong> {activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
               </div>
             {!isSubscribed && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '90%',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto'
+              }}>
                 <button
                   type="button"
                   onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
                     borderRadius: '20px',
                     padding: '0.45rem 1.15rem',
                     color: '#fef08a',
@@ -1645,10 +1679,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.35rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
@@ -1679,13 +1715,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div><strong>Lv.3 (ゾッコン):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手')}</div>
               </div>
             {!isSubscribed && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '90%',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto'
+              }}>
                 <button
                   type="button"
                   onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
                     borderRadius: '20px',
                     padding: '0.45rem 1.15rem',
                     color: '#fef08a',
@@ -1694,10 +1740,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.35rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
@@ -1727,13 +1775,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div><strong>【逆転挽回策】</strong> {(activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手')}</div>
               </div>
             {!isSubscribed && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '90%',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto'
+              }}>
                 <button
                   type="button"
                   onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
                     borderRadius: '20px',
                     padding: '0.45rem 1.15rem',
                     color: '#fef08a',
@@ -1742,10 +1800,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.35rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
@@ -1781,13 +1841,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
             {!isSubscribed && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '90%',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto'
+              }}>
                 <button
                   type="button"
                   onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
                     borderRadius: '20px',
                     padding: '0.45rem 1.15rem',
                     color: '#fef08a',
@@ -1796,10 +1866,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.35rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
@@ -1826,13 +1898,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {(activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手')}
               </p>
             {!isSubscribed && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '90%',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto'
+              }}>
                 <button
                   type="button"
                   onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
                     borderRadius: '20px',
                     padding: '0.45rem 1.15rem',
                     color: '#fef08a',
@@ -1841,10 +1923,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.35rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
@@ -1871,13 +1955,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手')}
               </p>
             {!isSubscribed && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 10,
+                width: '90%',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto'
+              }}>
                 <button
                   type="button"
                   onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    background: 'rgba(0, 0, 0, 0.88)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.65)',
                     borderRadius: '20px',
                     padding: '0.45rem 1.15rem',
                     color: '#fef08a',
@@ -1886,10 +1980,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.35rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(4px)',
-                    WebkitBackdropFilter: 'blur(4px)'
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.85), 0 0 15px rgba(226, 192, 116, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
