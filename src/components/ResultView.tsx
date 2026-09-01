@@ -670,7 +670,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           obsession: Math.min(99, Math.floor((activeResult.baseScore || 88) * 1.02)),
           trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
         }}
-        isUnlocked={isRegistered || isSubscribed}
+        isUnlocked={isSubscribed}
         onOpenAuth={onOpenPremiumLP}
         onOpenPremiumLP={onOpenPremiumLP}
         character={selectedChar}
