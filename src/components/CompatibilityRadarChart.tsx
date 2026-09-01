@@ -56,7 +56,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
 
   // ポリゴンパスの生成
   const points = axes.map((axis, i) => {
-    const displayVal = (!activeUnlocked && axis.isSecret) ? 35 : axis.val;
+    const displayVal = !activeUnlocked ? 35 : axis.val;
     const { x, y } = getCoordinates(i, displayVal);
     return `${x},${y}`;
   }).join(' ');
@@ -324,7 +324,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
         marginTop: '0.75rem'
       }}>
         {axes.map((axis, i) => {
-          const isLocked = !activeUnlocked && axis.isSecret;
+          const isLocked = !activeUnlocked;
           return (
             <div
               key={i}
