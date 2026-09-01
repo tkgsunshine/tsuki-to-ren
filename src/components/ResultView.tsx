@@ -681,6 +681,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </p>
       </div>
 
+      {/* Character Advice Cards (100% visible, no lock) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {activeResult.topics.map((topic) => (
+            <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
+              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#93c5fd' : '#d8b4fe', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold' }}>
+                {topic.title}
+              </h3>
+              <p className="font-serif" style={{ fontSize: '0.85rem', lineHeight: '1.6', color: '#d1d5db', margin: 0 }}>
+                {topic.text}
+              </p>
+            </div>
+          ))}
+        </div>
+
       {/* Astrology Guardian & Destiny Details Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* User Card */}
@@ -1258,20 +1272,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
       {/* Main Content Area */}
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-
-        {/* Character Advice Cards (100% visible, no lock) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {activeResult.topics.map((topic) => (
-            <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
-              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#93c5fd' : '#d8b4fe', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold' }}>
-                {topic.title}
-              </h3>
-              <p className="font-serif" style={{ fontSize: '0.85rem', lineHeight: '1.6', color: '#d1d5db', margin: 0 }}>
-                {topic.text}
-              </p>
-            </div>
-          ))}
-        </div>
 
         {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
       <div className="glass-panel" style={{
