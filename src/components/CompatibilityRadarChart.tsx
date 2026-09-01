@@ -133,7 +133,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                 key={idx}
                 points={gridPts}
                 fill="none"
-                stroke="rgba(255, 255, 255, 0.08)"
+                stroke="rgba(255, 255, 255, 0.25)"
                 strokeWidth="1"
                 strokeDasharray={idx === 4 ? 'none' : '2,2'}
               />
@@ -150,7 +150,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                 y1={center}
                 x2={x}
                 y2={y}
-                stroke="rgba(255, 255, 255, 0.12)"
+                stroke="rgba(255, 255, 255, 0.3)"
                 strokeWidth="1"
               />
             );
@@ -218,9 +218,9 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
           <div style={{
             position: 'absolute',
             inset: 0,
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            backgroundColor: 'rgba(12, 10, 25, 0.82)',
+            backdropFilter: 'blur(3.5px)',
+            WebkitBackdropFilter: 'blur(3.5px)',
+            backgroundColor: 'rgba(10, 8, 22, 0.35)',
             borderRadius: '16px',
             display: 'flex',
             flexDirection: 'column',
