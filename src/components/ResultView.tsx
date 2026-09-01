@@ -1648,7 +1648,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  onClick={() => {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
+                      onOpenPremiumLP();
+                    } else {
+                      handleScrollToSub();
+                    }
+                  }}
                   style={{
                     background: 'rgba(0, 0, 0, 0.88)',
                     border: '1.5px solid rgba(226, 192, 116, 0.65)',
@@ -1669,7 +1677,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
                 </button>
               </div>
             )}
@@ -1714,7 +1722,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  onClick={() => {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
+                      onOpenPremiumLP();
+                    } else {
+                      handleScrollToSub();
+                    }
+                  }}
                   style={{
                     background: 'rgba(0, 0, 0, 0.88)',
                     border: '1.5px solid rgba(226, 192, 116, 0.65)',
@@ -1735,7 +1751,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
                 </button>
               </div>
             )}
@@ -1774,7 +1790,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  onClick={() => {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
+                      onOpenPremiumLP();
+                    } else {
+                      handleScrollToSub();
+                    }
+                  }}
                   style={{
                     background: 'rgba(0, 0, 0, 0.88)',
                     border: '1.5px solid rgba(226, 192, 116, 0.65)',
@@ -1795,7 +1819,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
                 </button>
               </div>
             )}
@@ -1835,7 +1859,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  onClick={() => {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
+                      onOpenPremiumLP();
+                    } else {
+                      handleScrollToSub();
+                    }
+                  }}
                   style={{
                     background: 'rgba(0, 0, 0, 0.88)',
                     border: '1.5px solid rgba(226, 192, 116, 0.65)',
@@ -1856,7 +1888,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
                 </button>
               </div>
             )}
@@ -1895,7 +1927,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  onClick={() => {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
+                      onOpenPremiumLP();
+                    } else {
+                      handleScrollToSub();
+                    }
+                  }}
                   style={{
                     background: 'rgba(0, 0, 0, 0.88)',
                     border: '1.5px solid rgba(226, 192, 116, 0.65)',
@@ -1916,7 +1956,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
                 </button>
               </div>
             )}
@@ -1961,7 +2001,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  onClick={() => {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
+                      onOpenPremiumLP();
+                    } else {
+                      handleScrollToSub();
+                    }
+                  }}
                   style={{
                     background: 'rgba(0, 0, 0, 0.88)',
                     border: '1.5px solid rgba(226, 192, 116, 0.65)',
@@ -1982,7 +2030,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
                 </button>
               </div>
             )}
@@ -2018,7 +2066,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  onClick={() => {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
+                      onOpenPremiumLP();
+                    } else {
+                      handleScrollToSub();
+                    }
+                  }}
                   style={{
                     background: 'rgba(0, 0, 0, 0.88)',
                     border: '1.5px solid rgba(226, 192, 116, 0.65)',
@@ -2039,7 +2095,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
                 </button>
               </div>
             )}
@@ -2075,7 +2131,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  onClick={() => {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
+                      onOpenPremiumLP();
+                    } else {
+                      handleScrollToSub();
+                    }
+                  }}
                   style={{
                     background: 'rgba(0, 0, 0, 0.88)',
                     border: '1.5px solid rgba(226, 192, 116, 0.65)',
@@ -2096,7 +2160,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}
                 >
                   <Lock size={12} style={{ color: '#fef08a' }} />
-                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                  <span>{!isRegistered ? '🔒 無料会員登録' : '🔒 プレミアム登録して全解禁'}</span>
                 </button>
               </div>
             )}
