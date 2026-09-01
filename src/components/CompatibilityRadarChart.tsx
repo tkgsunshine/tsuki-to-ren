@@ -32,7 +32,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
     { key: 'conversation', label: '💬 会話相性', val: getVal(scores?.conversation, 78), desc: '言葉のテンポと本音が伝わる心地よさ', isSecret: true },
     { key: 'sensual', label: '🔥 夜の相性', val: getVal(scores?.sensual, 92), desc: '本能的な官能感と夜のシンクロ率', isSecret: true },
     { key: 'marriage', label: '💍 結婚・将来性', val: getVal(scores?.marriage, 74), desc: '長期的生活と価値観の安定性' },
-    { key: 'obsession', label: '🔮 運命・ソウルメイト度', val: getVal(scores?.obsession, 89), desc: '前世からの深い縁と運命的な引き寄せ力', isSecret: true },
+    { key: 'obsession', label: '🔮 運命の引き寄せ', val: getVal(scores?.obsession, 89), desc: '前世からの深い縁と運命的な引き寄せ力', isSecret: true },
     { key: 'trust', label: '🛡️ 信頼・安心感', val: getVal(scores?.trust, 81), desc: '嘘偽りのない深い包容力と安心感', isSecret: true },
   ];
 
@@ -340,7 +340,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.72rem', color: '#f3f4f6', fontWeight: '700' }}>
+                <span style={{ fontSize: '0.72rem', color: '#f3f4f6', fontWeight: '700', whiteSpace: 'nowrap' }}>
                   {axis.label}
                 </span>
                 <div className="font-serif" style={{
