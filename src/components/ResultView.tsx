@@ -670,23 +670,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
         )}
       </div>
 
-
-      {/* 6-Axis Compatibility Radar Chart with Monetization Lock */}
-      <CompatibilityRadarChart
-        scores={activeResult.radarScores || {
-          romance: activeResult.baseScore || 85,
-          conversation: Math.min(99, Math.floor((activeResult.baseScore || 80) * 0.9)),
-          sensual: Math.min(99, Math.floor((activeResult.baseScore || 85) * 1.05)),
-          marriage: Math.min(99, Math.floor((activeResult.baseScore || 75) * 0.95)),
-          obsession: Math.min(99, Math.floor((activeResult.baseScore || 88) * 1.02)),
-          trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
-        }}
-        isUnlocked={isSubscribed}
-        onOpenAuth={onOpenPremiumLP}
-        onOpenPremiumLP={onOpenPremiumLP}
-        character={selectedChar}
-      />
-
       {/* Free Summary Section (Fully Visible) */}
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
         <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
@@ -697,149 +680,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {activeResult.summary}
         </p>
       </div>
-
-      {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
-      <div className="glass-panel" style={{
-        padding: '1.15rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem',
-        border: '1.5px solid rgba(6, 199, 85, 0.35)',
-        background: 'linear-gradient(135deg, rgba(12, 28, 18, 0.75) 0%, rgba(10, 15, 25, 0.85) 100%)',
-        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 199, 85, 0.1)'
-      }}>
-        {/* Header with Official LINE Logo */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-            <LineLogoIcon size={22} />
-            <span style={{ fontSize: '0.92rem', fontWeight: '800', color: '#ffffff', letterSpacing: '0.02em' }}>
-              {hasOpponent ? '本日のLINE吉時間 ＆ 運勢' : '本日の開運黄金時間 ＆ 運勢'}
-            </span>
-          </div>
-          <span style={{ fontSize: '0.65rem', color: '#86efac', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
-            毎日0時更新
-          </span>
-        </div>
-
-        {/* HERO CARD: LINE 吉時間 (Full Width Spacious Layout) */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(6, 199, 85, 0.16) 0%, rgba(0, 0, 0, 0.5) 100%)',
-          padding: '0.9rem 1rem',
-          borderRadius: '14px',
-          border: '1.5px solid rgba(6, 199, 85, 0.45)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.4rem',
-          boxShadow: '0 4px 20px rgba(6, 199, 85, 0.15)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#4ade80', fontWeight: 'bold' }}>
-            <LineLogoIcon size={18} />
-            <span>推奨送信タイミング</span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.1rem' }}>
-            {/* Line 1: 7:30 〜 8:30 */}
-            <div style={{ fontSize: '1.25rem', color: '#ffffff', fontWeight: '900', letterSpacing: '0.04em', textShadow: '0 0 12px rgba(6, 199, 85, 0.6)' }}>
-              {(activeResult.bestContactHour || '7:30 〜 8:30').split(/[（\(]/)[0].trim()}
-            </div>
-
-            {/* Line 2: 朝の短文一言メッセージ */}
-            {(activeResult.bestContactHour || '').match(/[（\(](.*?)[）\)]/) ? (
-              <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
-                {(activeResult.bestContactHour || '').match(/[（\(](.*?)[）\)]/)?.[1]}
-              </div>
-            ) : (
-              (activeResult.bestContactHour || '').includes('（') || (activeResult.bestContactHour || '').includes('(') ? (
-                <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
-                  {(activeResult.bestContactHour || '').replace(/.*?[（\(]/, '').replace(/[）\)].*/, '').trim()}
-                </div>
-              ) : null
-            )}
-          </div>
-        </div>
-
-
-
-        {/* Action Advice Speech Bubble */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.03)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '10px',
-          padding: '0.65rem 0.85rem',
-          fontSize: '0.76rem',
-          color: '#e5e7eb',
-          lineHeight: '1.55',
-          display: 'flex',
-          gap: '0.4rem',
-          alignItems: 'flex-start'
-        }}>
-          <span style={{ fontSize: '0.9rem', flexShrink: 0, marginTop: '1px' }}>💡</span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <div style={{ color: '#fef08a', fontWeight: 'bold' }}>本日のアプローチ助言</div>
-            <div style={{ color: '#e5e7eb', lineHeight: '1.55' }}>
-              {activeResult.dailyActionAdvice}
-            </div>
-          </div>
-        </div>
-
-        {/* Daily Notification Prompt */}
-        <div style={{
-          marginTop: '0.25rem',
-          padding: '0.85rem',
-          background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%)',
-          border: '1px dashed rgba(226, 192, 116, 0.3)',
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.5rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
-            <Bell size={16} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
-            <div style={{ fontSize: '0.7rem', color: '#e5e7eb', lineHeight: '1.45', minWidth: 0 }}>
-              <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                毎朝8時に運勢＆LINE吉時間をお届け
-              </div>
-              <div style={{ color: '#9ca3af', fontSize: '0.66rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                相性と運気は毎日変化します
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              if (!isRegistered) {
-                if (confirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？')) {
-                  handleScrollToRegister();
-                }
-              } else if (!isSubscribed) {
-                if (confirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？')) {
-                  handleScrollToSub();
-                }
-              } else {
-                setIsNotified(!isNotified);
-                alert(!isNotified ? '🔔 毎朝8時の運勢通知をONに設定しました。' : '🔕 デイリー通知をOFFに設定しました。');
-              }
-            }}
-            style={{
-              background: isNotified ? 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)' : 'linear-gradient(135deg, #fef08a 0%, #e2c074 50%, #d97706 100%)',
-              border: 'none',
-              borderRadius: '20px',
-              color: isNotified ? '#ffffff' : '#0f0728',
-              padding: '0.5rem 0.95rem',
-              fontSize: '0.75rem',
-              fontWeight: '900',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(226,192,116,0.5)',
-              letterSpacing: '0.02em'
-            }}
-          >
-            {isNotified ? '通知ON' : '通知を設定'}
-          </button>
-        </div>
-      </div>
-
 
       {/* Astrology Guardian & Destiny Details Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -1414,7 +1254,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
           );
         })()}
-      </div>      {/* Main Content Area */}
+      </div>
+
+      {/* Main Content Area */}
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
         {/* Character Advice Cards (100% visible, no lock) */}
@@ -1431,11 +1273,165 @@ export const ResultView: React.FC<ResultViewProps> = ({
           ))}
         </div>
 
-      
+      {/* 6-Axis Compatibility Radar Chart with Monetization Lock */}
+      <CompatibilityRadarChart
+        scores={activeResult.radarScores || {
+          romance: activeResult.baseScore || 85,
+          conversation: Math.min(99, Math.floor((activeResult.baseScore || 80) * 0.9)),
+          sensual: Math.min(99, Math.floor((activeResult.baseScore || 85) * 1.05)),
+          marriage: Math.min(99, Math.floor((activeResult.baseScore || 75) * 0.95)),
+          obsession: Math.min(99, Math.floor((activeResult.baseScore || 88) * 1.02)),
+          trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
+        }}
+        isUnlocked={isSubscribed}
+        onOpenAuth={onOpenPremiumLP}
+        onOpenPremiumLP={onOpenPremiumLP}
+        character={selectedChar}
+      />
+
+      {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
+      <div className="glass-panel" style={{
+        padding: '1.15rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        border: '1.5px solid rgba(6, 199, 85, 0.35)',
+        background: 'linear-gradient(135deg, rgba(12, 28, 18, 0.75) 0%, rgba(10, 15, 25, 0.85) 100%)',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 199, 85, 0.1)'
+      }}>
+        {/* Header with Official LINE Logo */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <LineLogoIcon size={22} />
+            <span style={{ fontSize: '0.92rem', fontWeight: '800', color: '#ffffff', letterSpacing: '0.02em' }}>
+              {hasOpponent ? '本日のLINE吉時間 ＆ 運勢' : '本日の開運黄金時間 ＆ 運勢'}
+            </span>
+          </div>
+          <span style={{ fontSize: '0.65rem', color: '#86efac', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
+            毎日0時更新
+          </span>
+        </div>
+
+        {/* HERO CARD: LINE 吉時間 (Full Width Spacious Layout) */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(6, 199, 85, 0.16) 0%, rgba(0, 0, 0, 0.5) 100%)',
+          padding: '0.9rem 1rem',
+          borderRadius: '14px',
+          border: '1.5px solid rgba(6, 199, 85, 0.45)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.4rem',
+          boxShadow: '0 4px 20px rgba(6, 199, 85, 0.15)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#4ade80', fontWeight: 'bold' }}>
+            <LineLogoIcon size={18} />
+            <span>推奨送信タイミング</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', marginTop: '0.1rem' }}>
+            {/* Line 1: 7:30 〜 8:30 */}
+            <div style={{ fontSize: '1.25rem', color: '#ffffff', fontWeight: '900', letterSpacing: '0.04em', textShadow: '0 0 12px rgba(6, 199, 85, 0.6)' }}>
+              {(activeResult.bestContactHour || '7:30 〜 8:30').split(/[（\(]/)[0].trim()}
+            </div>
+
+            {/* Line 2: 朝の短文一言メッセージ */}
+            {(activeResult.bestContactHour || '').match(/[（\(](.*?)[）\)]/) ? (
+              <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
+                {(activeResult.bestContactHour || '').match(/[（\(](.*?)[）\)]/)?.[1]}
+              </div>
+            ) : (
+              (activeResult.bestContactHour || '').includes('（') || (activeResult.bestContactHour || '').includes('(') ? (
+                <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
+                  {(activeResult.bestContactHour || '').replace(/.*?[（\(]/, '').replace(/[）\)].*/, '').trim()}
+                </div>
+              ) : null
+            )}
+          </div>
+        </div>
 
 
 
-        {/* 5 Detailed Appraisal Topics */}
+        {/* Action Advice Speech Bubble */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '10px',
+          padding: '0.65rem 0.85rem',
+          fontSize: '0.76rem',
+          color: '#e5e7eb',
+          lineHeight: '1.55',
+          display: 'flex',
+          gap: '0.4rem',
+          alignItems: 'flex-start'
+        }}>
+          <span style={{ fontSize: '0.9rem', flexShrink: 0, marginTop: '1px' }}>💡</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <div style={{ color: '#fef08a', fontWeight: 'bold' }}>本日のアプローチ助言</div>
+            <div style={{ color: '#e5e7eb', lineHeight: '1.55' }}>
+              {activeResult.dailyActionAdvice}
+            </div>
+          </div>
+        </div>
+
+        {/* Daily Notification Prompt */}
+        <div style={{
+          marginTop: '0.25rem',
+          padding: '0.85rem',
+          background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%)',
+          border: '1px dashed rgba(226, 192, 116, 0.3)',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.5rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
+            <Bell size={16} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
+            <div style={{ fontSize: '0.7rem', color: '#e5e7eb', lineHeight: '1.45', minWidth: 0 }}>
+              <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                毎朝8時に運勢＆LINE吉時間をお届け
+              </div>
+              <div style={{ color: '#9ca3af', fontSize: '0.66rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                相性と運気は毎日変化します
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              if (!isRegistered) {
+                if (confirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？')) {
+                  handleScrollToRegister();
+                }
+              } else if (!isSubscribed) {
+                if (confirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？')) {
+                  handleScrollToSub();
+                }
+              } else {
+                setIsNotified(!isNotified);
+                alert(!isNotified ? '🔔 毎朝8時の運勢通知をONに設定しました。' : '🔕 デイリー通知をOFFに設定しました。');
+              }
+            }}
+            style={{
+              background: isNotified ? 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)' : 'linear-gradient(135deg, #fef08a 0%, #e2c074 50%, #d97706 100%)',
+              border: 'none',
+              borderRadius: '20px',
+              color: isNotified ? '#ffffff' : '#0f0728',
+              padding: '0.5rem 0.95rem',
+              fontSize: '0.75rem',
+              fontWeight: '900',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              boxShadow: '0 4px 12px rgba(226,192,116,0.5)',
+              letterSpacing: '0.02em'
+            }}
+          >
+            {isNotified ? '通知ON' : '通知を設定'}
+          </button>
+        </div>
+      </div>
+
+      {/* 5 Detailed Appraisal Topics */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <Sparkles size={18} />
           深層鑑定結果
