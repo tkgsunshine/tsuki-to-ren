@@ -131,7 +131,9 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const [showOpponentDatePicker, setShowOpponentDatePicker] = useState(false);
 
   const formatBirthDate = (value: string) => {
-    const clean = value.replace(/\D/g, '');
+    // Convert full-width Japanese digits (０-９) to half-width digits (0-9)
+    const normalized = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
+    const clean = normalized.replace(/\D/g, '');
     if (clean.length <= 4) {
       return clean;
     } else if (clean.length <= 6) {
