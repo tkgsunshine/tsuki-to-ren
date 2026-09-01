@@ -15,14 +15,18 @@ const GoogleIcon = () => (
 );
 
 const LineLogoIcon = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, borderRadius: '22%' }}>
-    <rect width="500" height="500" rx="110" fill="#06C755"/>
-    <path fillRule="evenodd" clipRule="evenodd" d="M250 90C145.066 90 60 162.775 60 252.544C60 318.599 105.155 374.839 169.831 399.761C174.912 401.077 181.859 403.784 183.985 408.98C185.894 413.64 185.226 420.932 184.606 425.625C183.238 435.999 175.698 466.166 174.821 474.757C173.729 485.496 178.783 485.378 184.225 481.815C227.108 453.766 300.081 401.082 342.341 343.518C385.545 289.444 440 252.544 440 252.544C440 162.775 354.934 90 250 90Z" fill="#FFFFFF"/>
-    <path d="M138.1 190.2V270.8H189.9V252.3H156.6V190.2H138.1Z" fill="#06C755"/>
-    <path d="M200.7 190.2V270.8H219.2V190.2H200.7Z" fill="#06C755"/>
-    <path d="M230.1 190.2V270.8H247.7L280.9 217.2V270.8H299.4V190.2H281.8L248.6 243.8V190.2H230.1Z" fill="#06C755"/>
-    <path d="M310.3 190.2V270.8H364.7V252.3H328.8V237.9H360.7V220.1H328.8V208.7H364.7V190.2H310.3Z" fill="#06C755"/>
-  </svg>
+  <img 
+    src="/line-logo.png" 
+    alt="LINE" 
+    style={{ 
+      width: `${size}px`, 
+      height: `${size}px`, 
+      objectFit: 'contain', 
+      borderRadius: '22%', 
+      flexShrink: 0, 
+      display: 'inline-block' 
+    }} 
+  />
 );
 
 const XIcon = () => (
