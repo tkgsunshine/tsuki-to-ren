@@ -1302,28 +1302,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           ))}
         </div>
 
-      {/* Share / Save Action Panel (Upper position above Torisetsu) */}
-      <div className="glass-panel" style={{
-        padding: '1.25rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem',
-        border: '1px solid rgba(226, 192, 116, 0.2)',
-        background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%)'
-      }}>
-        <h3 className="font-serif gold-text" style={{ fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-          <Sparkles size={16} /> 鑑定結果をシェア・保存する
-        </h3>
-        <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: 0, lineHeight: '1.4' }}>
-          相性スコアや二つ名が入った綺麗なデザインカード画像をSNSで共有したり、リンクをコピーして保存できます。
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.25rem' }}>
-          <button className="consult-btn" onClick={onOpenShareCard} style={{ width: '100%', fontSize: '0.85rem', padding: '0.8rem' }}>
-            シェアカード画像を作成する
-          </button>
-        </div>
-      </div>
+      
 
 
 
@@ -1549,30 +1528,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
               ))}
             </ul>
             {!isSubscribed && (
-              <button
-                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
-                style={{
-                  marginTop: '0.65rem',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.65rem 1.2rem',
-                  color: '#000000',
-                  fontSize: '0.82rem',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span style={{ fontSize: '0.95rem' }}>🔓</span>
-                <span>プレミアム登録して全解禁（月額500円）</span>
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    borderRadius: '20px',
+                    padding: '0.45rem 1.15rem',
+                    color: '#fef08a',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Lock size={12} style={{ color: '#fef08a' }} />
+                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -1602,30 +1582,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
               ))}
             </ul>
             {!isSubscribed && (
-              <button
-                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
-                style={{
-                  marginTop: '0.65rem',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.65rem 1.2rem',
-                  color: '#000000',
-                  fontSize: '0.82rem',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span style={{ fontSize: '0.95rem' }}>🔓</span>
-                <span>プレミアム登録して全解禁（月額500円）</span>
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    borderRadius: '20px',
+                    padding: '0.45rem 1.15rem',
+                    color: '#fef08a',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Lock size={12} style={{ color: '#fef08a' }} />
+                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -1649,30 +1630,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <p style={{ margin: 0, color: '#60a5fa' }}><strong>【送るべき神返信】</strong> {activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
               </div>
             {!isSubscribed && (
-              <button
-                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
-                style={{
-                  marginTop: '0.65rem',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.65rem 1.2rem',
-                  color: '#000000',
-                  fontSize: '0.82rem',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span style={{ fontSize: '0.95rem' }}>🔓</span>
-                <span>プレミアム登録して全解禁（月額500円）</span>
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    borderRadius: '20px',
+                    padding: '0.45rem 1.15rem',
+                    color: '#fef08a',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Lock size={12} style={{ color: '#fef08a' }} />
+                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                </button>
+              </div>
             )}
             </div>
 
@@ -1697,30 +1679,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div><strong>Lv.3 (ゾッコン):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手')}</div>
               </div>
             {!isSubscribed && (
-              <button
-                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
-                style={{
-                  marginTop: '0.65rem',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.65rem 1.2rem',
-                  color: '#000000',
-                  fontSize: '0.82rem',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span style={{ fontSize: '0.95rem' }}>🔓</span>
-                <span>プレミアム登録して全解禁（月額500円）</span>
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    borderRadius: '20px',
+                    padding: '0.45rem 1.15rem',
+                    color: '#fef08a',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Lock size={12} style={{ color: '#fef08a' }} />
+                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                </button>
+              </div>
             )}
             </div>
 
@@ -1744,30 +1727,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div><strong>【逆転挽回策】</strong> {(activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手')}</div>
               </div>
             {!isSubscribed && (
-              <button
-                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
-                style={{
-                  marginTop: '0.65rem',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.65rem 1.2rem',
-                  color: '#000000',
-                  fontSize: '0.82rem',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span style={{ fontSize: '0.95rem' }}>🔓</span>
-                <span>プレミアム登録して全解禁（月額500円）</span>
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    borderRadius: '20px',
+                    padding: '0.45rem 1.15rem',
+                    color: '#fef08a',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Lock size={12} style={{ color: '#fef08a' }} />
+                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                </button>
+              </div>
             )}
             </div>
 
@@ -1797,30 +1781,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
             {!isSubscribed && (
-              <button
-                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
-                style={{
-                  marginTop: '0.65rem',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.65rem 1.2rem',
-                  color: '#000000',
-                  fontSize: '0.82rem',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span style={{ fontSize: '0.95rem' }}>🔓</span>
-                <span>プレミアム登録して全解禁（月額500円）</span>
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    borderRadius: '20px',
+                    padding: '0.45rem 1.15rem',
+                    color: '#fef08a',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Lock size={12} style={{ color: '#fef08a' }} />
+                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                </button>
+              </div>
             )}
             </div>
 
@@ -1841,30 +1826,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {(activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手')}
               </p>
             {!isSubscribed && (
-              <button
-                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
-                style={{
-                  marginTop: '0.65rem',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.65rem 1.2rem',
-                  color: '#000000',
-                  fontSize: '0.82rem',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span style={{ fontSize: '0.95rem' }}>🔓</span>
-                <span>プレミアム登録して全解禁（月額500円）</span>
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    borderRadius: '20px',
+                    padding: '0.45rem 1.15rem',
+                    color: '#fef08a',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Lock size={12} style={{ color: '#fef08a' }} />
+                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                </button>
+              </div>
             )}
             </div>
 
@@ -1885,30 +1871,31 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手')}
               </p>
             {!isSubscribed && (
-              <button
-                onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
-                style={{
-                  marginTop: '0.65rem',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.65rem 1.2rem',
-                  color: '#000000',
-                  fontSize: '0.82rem',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span style={{ fontSize: '0.95rem' }}>🔓</span>
-                <span>プレミアム登録して全解禁（月額500円）</span>
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.65rem', width: '100%' }}>
+                <button
+                  type="button"
+                  onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    border: '1px solid rgba(226, 192, 116, 0.55)',
+                    borderRadius: '20px',
+                    padding: '0.45rem 1.15rem',
+                    color: '#fef08a',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Lock size={12} style={{ color: '#fef08a' }} />
+                  <span>🔒 プレミアム登録して全解禁（月額500円）</span>
+                </button>
+              </div>
             )}
             </div>
 
@@ -2301,29 +2288,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           )}
         </div>
 
-        {/* Sharing buttons panel (visible to all users, registered or unregistered!) */}
-        <div className="glass-panel" style={{
-          padding: '1.25rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          marginTop: '0.5rem',
-          border: '1px solid rgba(226, 192, 116, 0.15)',
-          background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%)'
-        }}>
-          <h3 className="font-serif gold-text" style={{ fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-            <Sparkles size={16} /> 鑑定結果をシェア・保存する
-          </h3>
-          <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: 0, lineHeight: '1.4' }}>
-            相性スコアや星座グラフが入った綺麗なデザインカード画像をSNSで共有したり、リンクをコピーして保存できます。
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.25rem' }}>
-            <button className="consult-btn" onClick={onOpenShareCard} style={{ width: '100%', fontSize: '0.85rem', padding: '0.8rem' }}>
-              シェアカード画像を作成する
-            </button>
-          </div>
-        </div>
+        
 
         {/* Reset Button (Diagnose Again) */}
         {onReset && (
@@ -2521,6 +2486,44 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         )}
 
+      </div>
+      {/* Floating Sticky Bottom Share CTA Bar */}
+      <div style={{
+        position: 'fixed',
+        bottom: 'calc(1rem + var(--safe-bottom, 0px))',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'calc(100% - 2rem)',
+        maxWidth: '440px',
+        zIndex: 9999,
+        boxSizing: 'border-box'
+      }}>
+        <button
+          type="button"
+          className="consult-btn"
+          onClick={onOpenShareCard}
+          style={{
+            width: '100%',
+            padding: '0.9rem 1.25rem',
+            fontSize: '1rem',
+            fontWeight: '800',
+            letterSpacing: '0.04em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+            color: '#000000',
+            border: 'none',
+            borderRadius: '9999px',
+            boxShadow: '0 8px 30px rgba(234, 179, 8, 0.6), 0 4px 15px rgba(0,0,0,0.8)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Sparkles size={18} style={{ color: '#000000' }} />
+          <span>鑑定結果をシェアする</span>
+        </button>
       </div>
     </div>
   );

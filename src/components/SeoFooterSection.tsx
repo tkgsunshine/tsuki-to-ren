@@ -25,8 +25,8 @@ export const SeoFooterSection: React.FC = () => {
 
   return (
     <footer style={{
-      marginTop: '3.5rem',
-      padding: '2.5rem 1.25rem 4.5rem',
+      marginTop: '0.75rem',
+      padding: '1.25rem 1.25rem 3.5rem',
       background: 'linear-gradient(180deg, rgba(10, 7, 24, 0) 0%, rgba(13, 9, 32, 0.95) 20%, rgba(8, 5, 20, 0.99) 100%)',
       borderTop: '1px solid rgba(226, 192, 116, 0.15)',
       color: '#cbd5e1',
