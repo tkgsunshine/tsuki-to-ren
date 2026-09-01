@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Sparkles, ChevronRight } from 'lucide-react';
+import { Lock, Sparkles } from 'lucide-react';
 import type { CompatibilityRadarScores } from '../utils/fortuneEngine';
 
 interface CompatibilityRadarChartProps {
@@ -253,23 +253,23 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                 else setDemoUnlocked(true);
               }}
               style={{
-                background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
+                background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
                 color: '#000000',
                 border: 'none',
-                padding: '0.65rem 1.25rem',
-                borderRadius: '25px',
-                fontSize: '0.82rem',
+                padding: '0.7rem 1.25rem',
+                borderRadius: '9999px',
+                fontSize: '0.85rem',
                 fontWeight: '800',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.4rem',
-                boxShadow: '0 4px 15px rgba(234, 179, 8, 0.4)',
-                transition: 'all 0.2s'
+                boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                transition: 'all 0.2s ease'
               }}
             >
-              <span>6軸相性を無料でアンロック</span>
-              <ChevronRight className="w-4 h-4" />
+              <span style={{ fontSize: '1rem' }}>🔓</span>
+              <span>プレミアム登録して全解禁（月額500円）</span>
             </button>
 
             <button

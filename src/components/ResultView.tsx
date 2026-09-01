@@ -1552,24 +1552,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <button
                 onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                 style={{
-                  marginTop: '0.5rem',
+                  marginTop: '0.65rem',
                   width: '100%',
-                  background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%)',
-                  border: '1px solid rgba(226, 192, 116, 0.5)',
-                  borderRadius: '8px',
-                  padding: '0.45rem',
-                  color: '#fef08a',
-                  fontSize: '0.73rem',
-                  fontWeight: 'bold',
+                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.65rem 1.2rem',
+                  color: '#000000',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.35rem'
+                  gap: '0.4rem',
+                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <Lock size={12} />
-                <span>3〜5位を全解禁（月額500円）</span>
+                <span style={{ fontSize: '0.95rem' }}>🔓</span>
+                <span>プレミアム登録して全解禁（月額500円）</span>
               </button>
             )}
           </div>
@@ -1603,24 +1605,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <button
                 onClick={() => onOpenPremiumLP ? onOpenPremiumLP() : onSubscribe()}
                 style={{
-                  marginTop: '0.5rem',
+                  marginTop: '0.65rem',
                   width: '100%',
-                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(226, 192, 116, 0.2) 100%)',
-                  border: '1px solid rgba(239, 68, 68, 0.4)',
-                  borderRadius: '8px',
-                  padding: '0.45rem',
-                  color: '#fca5a5',
-                  fontSize: '0.73rem',
-                  fontWeight: 'bold',
+                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.65rem 1.2rem',
+                  color: '#000000',
+                  fontSize: '0.82rem',
+                  fontWeight: '800',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.35rem'
+                  gap: '0.4rem',
+                  boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <Lock size={12} />
-                <span>NG行動2〜5を全解禁（月額500円）</span>
+                <span style={{ fontSize: '0.95rem' }}>🔓</span>
+                <span>プレミアム登録して全解禁（月額500円）</span>
               </button>
             )}
           </div>
@@ -1792,20 +1796,25 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     }
                   }}
                   style={{
-                    background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 50%, #d97706 100%)',
-                    border: 'none',
-                    borderRadius: '24px',
-                    color: '#0f0728',
-                    fontWeight: '900',
-                    fontSize: '0.82rem',
-                    padding: '0.65rem 1.1rem',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(254,240,138,0.3)',
                     width: '100%',
-                    letterSpacing: '0.02em'
+                    background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                    border: 'none',
+                    borderRadius: '9999px',
+                    padding: '0.7rem 1.2rem',
+                    color: '#000000',
+                    fontSize: '0.85rem',
+                    fontWeight: '800',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                    boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  🔒 プレミアム登録して全解禁 (月額500円)
+                  <span style={{ fontSize: '1rem' }}>🔓</span>
+                  <span>プレミアム登録して全解禁（月額500円）</span>
                 </button>
               </div>
             )}
