@@ -37,9 +37,9 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
   ];
 
   // SVG レーダーチャート計算 (円の中心 = (140, 140), 半径 = 85)
-  const size = 280;
+  const size = 320;
   const center = size / 2;
-  const radius = 85;
+  const radius = 105;
   const totalAxes = axes.length;
 
   const getCoordinates = (index: number, rawValue: number, maxVal = 100) => {
@@ -118,10 +118,10 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
         justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
-        minHeight: '300px',
+        minHeight: '340px',
         margin: '0.5rem 0'
       }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: 'visible' }}>
+        <svg width="100%" height="340" viewBox="-35 -25 390 370" style={{ overflow: 'visible', maxWidth: '360px' }}>
           {/* Background Grid Hexagons */}
           {gridLevels.map((lvl, idx) => {
             const gridPts = axes.map((_, i) => {
@@ -187,27 +187,48 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
             );
           })}
 
-          {/* Axis Labels positioned around the chart */}
+          {/* Axis Labels positioned around the chart with smart directional offsets */}
           {axes.map((axis, i) => {
-            const labelPos = getCoordinates(i, 120);
-            const isSecretLocked = !activeUnlocked && axis.isSecret;
+            const labelPos = getCoordinates(i, 115);
+            let textAnchor: "middle" | "start" | "end" = "middle";
+            let dx = 0;
+            let dy = 0;
+
+            if (i === 0) {
+              // Top label
+              textAnchor = "middle";
+              dy = -16;
+            } else if (i === 3) {
+              // Bottom label
+              textAnchor = "middle";
+              dy = 16;
+            } else if (i === 1 || i === 2) {
+              // Right side labels (start anchor extends rightwards)
+              textAnchor = "start";
+              dx = 12;
+            } else if (i === 4 || i === 5) {
+              // Left side labels (end anchor extends leftwards)
+              textAnchor = "end";
+              dx = -12;
+            }
+
             return (
               <text
                 key={i}
-                x={labelPos.x}
-                y={labelPos.y}
-                textAnchor="middle"
+                x={labelPos.x + dx}
+                y={labelPos.y + dy}
+                textAnchor={textAnchor}
                 dominantBaseline="central"
-                fill={isSecretLocked ? '#9ca3af' : '#f3f4f6'}
+                fill="#ffffff"
                 style={{
-                  fontSize: '0.68rem',
-                  fontWeight: '600',
+                  fontSize: '0.75rem',
+                  fontWeight: '800',
                   fontFamily: 'sans-serif',
                   letterSpacing: '0.02em',
-                  filter: isSecretLocked ? 'blur(1px)' : 'none'
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.95))'
                 }}
               >
-                {axis.label.split(' ')[0]} {isSecretLocked ? '🔒' : axis.label.split(' ')[1]}
+                {axis.label}
               </text>
             );
           })}
