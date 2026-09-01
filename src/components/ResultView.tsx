@@ -772,9 +772,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
           alignItems: 'flex-start'
         }}>
           <span style={{ fontSize: '0.9rem', flexShrink: 0, marginTop: '1px' }}>💡</span>
-          <div>
-            <strong style={{ color: '#fef08a' }}>本日のアプローチ助言: </strong>
-            {activeResult.dailyActionAdvice}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <div style={{ color: '#fef08a', fontWeight: 'bold' }}>本日のアプローチ助言</div>
+            <div style={{ color: '#e5e7eb', lineHeight: '1.55' }}>
+              {activeResult.dailyActionAdvice}
+            </div>
           </div>
         </div>
 
