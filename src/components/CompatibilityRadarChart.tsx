@@ -28,7 +28,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
 
   // 6軸の定義
   const axes = [
-    { key: 'romance', label: '💖 恋愛相性', val: getVal(scores?.romance, 85), desc: '情熱的なロマンスと心身の惹かれ合い度' },
+    { key: 'romance', label: '💓 価値観・フィーリング', val: getVal(scores?.romance, 85), desc: '金銭感覚・喜怒哀楽・休日の感覚の一致度' },
     { key: 'conversation', label: '💬 会話相性', val: getVal(scores?.conversation, 78), desc: '言葉のテンポと本音が伝わる心地よさ', isSecret: true },
     { key: 'sensual', label: '🔥 夜の相性', val: getVal(scores?.sensual, 92), desc: '本能的な官能感と夜のシンクロ率', isSecret: true },
     { key: 'marriage', label: '💍 結婚・将来性', val: getVal(scores?.marriage, 74), desc: '長期的生活と価値観の安定性' },
