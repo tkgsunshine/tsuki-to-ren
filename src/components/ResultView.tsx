@@ -1273,23 +1273,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           ))}
         </div>
 
-      {/* 6-Axis Compatibility Radar Chart with Monetization Lock */}
-      <CompatibilityRadarChart
-        scores={activeResult.radarScores || {
-          romance: activeResult.baseScore || 85,
-          conversation: Math.min(99, Math.floor((activeResult.baseScore || 80) * 0.9)),
-          sensual: Math.min(99, Math.floor((activeResult.baseScore || 85) * 1.05)),
-          marriage: Math.min(99, Math.floor((activeResult.baseScore || 75) * 0.95)),
-          obsession: Math.min(99, Math.floor((activeResult.baseScore || 88) * 1.02)),
-          trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
-        }}
-        isUnlocked={isSubscribed}
-        onOpenAuth={onOpenPremiumLP}
-        onOpenPremiumLP={onOpenPremiumLP}
-        character={selectedChar}
-      />
-
-      {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
+        {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
       <div className="glass-panel" style={{
         padding: '1.15rem',
         display: 'flex',
@@ -1431,7 +1415,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </div>
       </div>
 
-      {/* 5 Detailed Appraisal Topics */}
+        {/* 5 Detailed Appraisal Topics */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <Sparkles size={18} />
           深層鑑定結果
@@ -1606,10 +1590,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
             )}
           </React.Fragment>
         ))}
-      
 
-      
-      {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
+        {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
       {activeResult.opponentTorisetsu && (
         <div className="glass-panel" style={{
           padding: '1.25rem',
@@ -2186,6 +2168,22 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </div>
       )}
 
+        {/* 6-Axis Compatibility Radar Chart with Monetization Lock */}
+      <CompatibilityRadarChart
+        scores={activeResult.radarScores || {
+          romance: activeResult.baseScore || 85,
+          conversation: Math.min(99, Math.floor((activeResult.baseScore || 80) * 0.9)),
+          sensual: Math.min(99, Math.floor((activeResult.baseScore || 85) * 1.05)),
+          marriage: Math.min(99, Math.floor((activeResult.baseScore || 75) * 0.95)),
+          obsession: Math.min(99, Math.floor((activeResult.baseScore || 88) * 1.02)),
+          trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
+        }}
+        isUnlocked={isSubscribed}
+        onOpenAuth={onOpenPremiumLP}
+        onOpenPremiumLP={onOpenPremiumLP}
+        character={selectedChar}
+      />
+
         {/* 10. Future Timeline Schedule Preview */}
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
@@ -2415,7 +2413,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
           </div>
 
-          {/* Subscription CTA Panel */}
+        {/* Subscription CTA Panel */}
           {isRegistered && !isSubscribed && (
             <div ref={subCardRef} className="glass-panel animate-pulse-subtle" style={{
               background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.04) 0%, rgba(15, 15, 27, 0.98) 100%)',
