@@ -127,7 +127,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           flex: 1,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          paddingBottom: 'calc(6.5rem + var(--safe-bottom, 0px))'
+          paddingBottom: '1.5rem'
         }}>
           {/* Hero Banner Section */}
           <div style={{
@@ -456,14 +456,16 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           </div>
         </div>
 
-        {/* ALWAYS FLOATING ONLY GOLDEN BUTTON (PURE FLOATING CTA) */}
+        {/* PINNED FIXED BOTTOM CTA FOOTER */}
         <div style={{
-          position: 'absolute',
-          bottom: 'calc(1rem + var(--safe-bottom, 0px))',
-          left: '1.25rem',
-          right: '1.25rem',
-          zIndex: 40,
-          pointerEvents: 'none'
+          padding: '0.85rem 1.25rem calc(0.85rem + var(--safe-bottom, 0px)) 1.25rem',
+          background: 'rgba(13, 9, 30, 0.96)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderTop: '1px solid rgba(226, 192, 116, 0.3)',
+          boxShadow: '0 -10px 30px rgba(0,0,0,0.6)',
+          zIndex: 50,
+          flexShrink: 0
         }}>
           {isSubscribed ? (
             <div style={{
@@ -476,7 +478,6 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               color: '#000',
               fontSize: '0.85rem',
               fontWeight: 'bold',
-              pointerEvents: 'auto',
               boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
             }}>
               ✓ あなたは現在プレミアム会員です
@@ -489,17 +490,21 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               onClick={handleSubscribeAction}
               style={{
                 width: '100%',
-                padding: '0.95rem',
-                fontSize: '1.02rem',
-                fontWeight: 'bold',
-                letterSpacing: '0.05em',
+                padding: '0.85rem 1.25rem',
+                fontSize: '0.98rem',
+                fontWeight: '800',
+                letterSpacing: '0.03em',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.45rem',
-                borderRadius: '18px',
-                boxShadow: '0 10px 35px rgba(226, 192, 116, 0.65), 0 4px 15px rgba(0,0,0,0.8)',
-                pointerEvents: 'auto'
+                background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                color: '#000000',
+                border: 'none',
+                borderRadius: '9999px',
+                boxShadow: '0 6px 20px rgba(234, 179, 8, 0.55)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
               }}
             >
               {isProcessing ? (
