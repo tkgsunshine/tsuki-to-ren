@@ -1097,8 +1097,6 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     isKaigo,
     opponentIsKaigo: hasOpponent ? opponentIsKaigo : undefined,
     compatibilityTitle: hasOpponent ? (
-      (isKaigo && opponentIsKaigo) ? '【魁罡×魁罡！世界をひっくり返す覇王カップル】' :
-      (isRare || opponentIsRare) ? '【極稀降臨！前世からの神格ソウルメイト】' :
       baseScore >= 95 ? '【100年に1度の奇跡相性】' :
       baseScore >= 88 ? '【電撃惹かれ合う運命のソウルメイト】' :
       baseScore >= 82 ? '【陰陽が完全調和する究極のツインレイ】' :
