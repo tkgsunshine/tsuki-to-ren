@@ -2682,20 +2682,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </span>
                   </div>
 
-                  {/* Top-Right: Nickname */}
+                  {/* Top-Right: Nickname (Displays full 8 chars) */}
                   {zoomedImg.nickname && (
                     <div style={{
-                      padding: '0.2rem 0.65rem',
-                      background: 'rgba(0, 0, 0, 0.55)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      padding: '0.2rem 0.55rem',
+                      background: 'rgba(0, 0, 0, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.25)',
                       borderRadius: '12px',
-                      maxWidth: '130px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      maxWidth: '150px',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
                     }}>
-                      <span className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold', textShadow: '0 2px 6px rgba(0,0,0,0.9)', letterSpacing: '0.04em' }}>
-                        {zoomedImg.nickname.length > 8 ? zoomedImg.nickname.substring(0, 8) + '...' : zoomedImg.nickname}
+                      <span className="font-serif gold-text" style={{ fontSize: '0.75rem', fontWeight: 'bold', textShadow: '0 2px 6px rgba(0,0,0,0.9)', letterSpacing: '0.02em' }}>
+                        {zoomedImg.nickname.slice(0, 8)}
                       </span>
                     </div>
                   )}
