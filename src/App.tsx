@@ -1759,7 +1759,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>運営責任者</span>
-                  <span style={{ color: 'white' }}>須藤 龍也</span>
+                  <span style={{ color: 'white' }}>山下 高志</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#9ca3af' }}>所在地</span>
