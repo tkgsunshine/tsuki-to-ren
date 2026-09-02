@@ -774,7 +774,61 @@ function App() {
             {/* Sub-View: MAIN MENU */}
             {settingsSubView === 'main' && (
               <div style={{ width: '100%', boxSizing: 'border-box' }}>
-                {/* Premium Plan Upgrade Banner Card (Compact Menu Item) */}
+                {/* Account Status / Login Banner (1st) */}
+                <div 
+                  onClick={() => setShowAuthModal(true)}
+                  className="glass-panel" 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '1.15rem 1.25rem',
+                    background: currentUser 
+                      ? 'linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(20, 16, 35, 0.8) 100%)' 
+                      : 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+                    border: currentUser 
+                      ? '1px solid rgba(74, 222, 128, 0.4)' 
+                      : '1.5px solid rgba(226, 192, 116, 0.5)',
+                    borderRadius: '18px',
+                    color: '#f3f4f6',
+                    cursor: 'pointer',
+                    marginBottom: '0.85rem',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
+                    {currentUser?.photoURL ? (
+                      <img src={currentUser.photoURL} alt="Avatar" style={{ width: '38px', height: '38px', borderRadius: '50%', border: '1.5px solid var(--color-gold)' }} />
+                    ) : (
+                      <div style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        border: '1.5px solid var(--color-gold)'
+                      }}>
+                        {currentUser ? (currentUser.displayName || 'U').charAt(0) : <User size={20} />}
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: currentUser ? '#ffffff' : '#fef08a' }}>
+                        {currentUser ? currentUser.displayName : 'Google / X で無料登録・ログイン'}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: currentUser ? '#4ade80' : '#cbd5e1', marginTop: '2px' }}>
+                        {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : 'Google 連携中'} (${currentUser.email || '登録済み'})` : '鑑定履歴・お相手データをクラウド保存'}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} style={{ color: currentUser ? '#4ade80' : 'var(--color-gold)' }} />
+                </div>
+
+                {/* Premium Plan Upgrade Banner Card / Member Rank (2nd) */}
                 <div 
                   onClick={() => setShowPremiumLP(true)}
                   className="glass-panel" 
@@ -818,60 +872,6 @@ function App() {
                     </div>
                   </div>
                   <ChevronRight size={16} style={{ color: '#fef08a', flexShrink: 0 }} />
-                </div>
-
-                {/* Account Status / Login Banner */}
-                <div 
-                  onClick={() => setShowAuthModal(true)}
-                  className="glass-panel" 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '1.15rem 1.25rem',
-                    background: currentUser 
-                      ? 'linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(20, 16, 35, 0.8) 100%)' 
-                      : 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
-                    border: currentUser 
-                      ? '1px solid rgba(74, 222, 128, 0.4)' 
-                      : '1.5px solid rgba(226, 192, 116, 0.5)',
-                    borderRadius: '18px',
-                    color: '#f3f4f6',
-                    cursor: 'pointer',
-                    marginBottom: '1.25rem',
-                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    {currentUser?.photoURL ? (
-                      <img src={currentUser.photoURL} alt="Avatar" style={{ width: '38px', height: '38px', borderRadius: '50%', border: '1.5px solid var(--color-gold)' }} />
-                    ) : (
-                      <div style={{
-                        width: '38px',
-                        height: '38px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        fontSize: '1rem',
-                        border: '1.5px solid var(--color-gold)'
-                      }}>
-                        {currentUser ? (currentUser.displayName || 'U').charAt(0) : <User size={20} />}
-                      </div>
-                    )}
-                    <div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: currentUser ? '#ffffff' : '#fef08a' }}>
-                        {currentUser ? currentUser.displayName : 'Google / X で無料登録・ログイン'}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: currentUser ? '#4ade80' : '#cbd5e1', marginTop: '2px' }}>
-                        {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : 'Google 連携中'} (${currentUser.email || '登録済み'})` : '鑑定履歴・お相手データをクラウド保存'}
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight size={18} style={{ color: currentUser ? '#4ade80' : 'var(--color-gold)' }} />
                 </div>
 
                 <div 
