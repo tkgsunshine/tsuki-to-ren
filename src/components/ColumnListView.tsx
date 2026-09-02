@@ -103,13 +103,13 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
         <Search size={18} style={{ position: 'absolute', left: '0.95rem', top: '50%', transform: 'translateY(-50%)', color: '#fef08a' }} />
       </div>
 
-      {/* Category Pill Filters */}
+      {/* Category Pill Filters (Multi-line 2-3 rows) */}
       <div style={{
         display: 'flex',
+        flexWrap: 'wrap',
         gap: '0.45rem',
-        overflowX: 'auto',
-        WebkitOverflowScrolling: 'touch',
-        paddingBottom: '0.35rem'
+        width: '100%',
+        boxSizing: 'border-box'
       }}>
         {categories.map((cat) => (
           <button
