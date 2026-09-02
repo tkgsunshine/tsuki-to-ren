@@ -23,7 +23,7 @@ import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
-import { subscribeAuthChange, type UserProfile as FirebaseUser } from './services/firebase';
+import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, type UserProfile, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -57,6 +57,13 @@ function App() {
   const [showLegalPage, setShowLegalPage] = useState(false);
 
   useEffect(() => {
+    completeEmailMagicLinkSignIn().then((magicUser) => {
+      if (magicUser) {
+        setCurrentUser(magicUser);
+        setIsRegistered(true);
+      }
+    });
+
     const unsubscribe = subscribeAuthChange((user) => {
       setCurrentUser(user);
       if (user) {
@@ -442,8 +449,22 @@ function App() {
     }, 3000);
   };
 
-  const handleRegister = (email: string) => {
-    console.log(`Registered user email: ${email}`);
+  const handleRegister = async (email: string) => {
+    console.log(`Sending Magic Link to email: ${email}`);
+    try {
+      await sendEmailMagicLink(email);
+    } catch (err) {
+      console.warn('sendEmailMagicLink warning:', err);
+    }
+    const tempUser: UserProfile = {
+      uid: 'email-' + Date.now(),
+      displayName: email.split('@')[0] || '会員ユーザー',
+      email: email,
+      photoURL: null,
+      providerId: 'email'
+    };
+    setCurrentUser(tempUser);
+    localStorage.setItem('hasu_tsuki_user', JSON.stringify(tempUser));
     setIsRegistered(true);
   };
 

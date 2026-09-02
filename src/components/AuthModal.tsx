@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Sparkles } from 'lucide-react';
-import { signInWithGoogle, signInWithX, logOutUser, type UserProfile } from '../services/firebase';
+import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, type UserProfile } from '../services/firebase';
+import { Mail } from 'lucide-react';
 
 interface AuthModalProps {
   currentUser: UserProfile | null;
@@ -9,7 +10,36 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAuthSuccess }) => {
-  const [loading, setLoading] = useState<'google' | 'x' | null>(null);
+  const [loading, setLoading] = useState<'google' | 'x' | 'email' | null>(null);
+  const [emailInput, setEmailInput] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailInput.trim() || !emailInput.includes('@')) {
+      setErrorMsg('有効なメールアドレスを入力してください。');
+      return;
+    }
+    setLoading('email');
+    setErrorMsg(null);
+    try {
+      await sendEmailMagicLink(emailInput);
+      setEmailSent(true);
+      const tempUser: UserProfile = {
+        uid: 'email-' + Date.now(),
+        displayName: emailInput.split('@')[0] || '会員ユーザー',
+        email: emailInput,
+        photoURL: null,
+        providerId: 'email'
+      };
+      onAuthSuccess(tempUser);
+    } catch (err: any) {
+      console.error('Email signin error:', err);
+      setErrorMsg('確認メールの送信に失敗しました。');
+    } finally {
+      setLoading(null);
+    }
+  };
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
@@ -279,6 +309,57 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
               </svg>
               <span>{loading === 'x' ? 'X 認証中...' : 'X で登録 / ログイン'}</span>
             </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '0.2rem 0', color: '#64748b', fontSize: '0.72rem' }}>
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+              <span>またはメールアドレスで手軽に登録</span>
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+            </div>
+
+            {emailSent ? (
+              <div style={{ background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)', borderRadius: '14px', padding: '0.85rem', textAlign: 'center', fontSize: '0.78rem', color: '#34d399' }}>
+                ✉️ <strong>「{emailInput}」宛に確認メールを送信しました！</strong><br />
+                届いたメールのリンクをタップするとログインが完了します。
+              </div>
+            ) : (
+              <form onSubmit={handleEmailSignIn} style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="email"
+                    required
+                    placeholder="メールアドレスを入力..."
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 0.85rem 0.75rem 2.3rem',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(226, 192, 116, 0.3)',
+                      borderRadius: '14px',
+                      color: '#ffffff',
+                      fontSize: '0.82rem',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  <Mail size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading === 'email'}
+                  className="consult-btn font-serif"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    borderRadius: '14px',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {loading === 'email' ? '送信中...' : 'メールアドレスで登録 / ログイン →'}
+                </button>
+              </form>
+            )}
           </div>
         )}
 

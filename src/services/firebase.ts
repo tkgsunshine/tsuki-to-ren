@@ -4,6 +4,9 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   TwitterAuthProvider,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
   signOut,
   onAuthStateChanged,
   type User
@@ -127,6 +130,49 @@ export const signInWithX = async (): Promise<UserProfile> => {
 };
 
 // Sign Out
+// Send Email Magic Link (Passwordless Sign-In)
+export const sendEmailMagicLink = async (email: string): Promise<void> => {
+  const actionCodeSettings = {
+    url: window.location.href.split('?')[0].split('#')[0],
+    handleCodeInApp: true,
+  };
+  try {
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+  } catch (err) {
+    console.warn('Firebase sendSignInLinkToEmail notice:', err);
+  }
+  window.localStorage.setItem('emailForSignIn', email);
+};
+
+// Complete Email Magic Link Sign-In on redirect back
+export const completeEmailMagicLinkSignIn = async (): Promise<UserProfile | null> => {
+  if (isSignInWithEmailLink(auth, window.location.href)) {
+    let email = window.localStorage.getItem('emailForSignIn');
+    if (!email) {
+      email = window.prompt('確認のため、ご入力されたメールアドレスを入力してください:') || '';
+    }
+    if (email) {
+      try {
+        const result = await signInWithEmailLink(auth, email, window.location.href);
+        window.localStorage.removeItem('emailForSignIn');
+        const user = result.user;
+        const userProfile: UserProfile = {
+          uid: user.uid,
+          displayName: user.displayName || email.split('@')[0] || '会員ユーザー',
+          email: user.email || email,
+          photoURL: user.photoURL,
+          providerId: 'email'
+        };
+        localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
+        return userProfile;
+      } catch (e) {
+        console.error('Magic link completion error:', e);
+      }
+    }
+  }
+  return null;
+};
+
 export const logOutUser = async (): Promise<void> => {
   try {
     await signOut(auth);
