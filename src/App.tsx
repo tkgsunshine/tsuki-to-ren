@@ -203,10 +203,15 @@ function App() {
   };
 
   const generateShareUrl = () => {
-    const baseUrl = window.location.origin + '/share/card';
+    const isLocal = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
+    const baseUrl = isLocal ? window.location.origin + '/share/card' : 'https://tsuki-to-ren.com/share/card';
     const params = new URLSearchParams();
-    // Add protection bypass for crawlers (must be first param right after ?)
-    params.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
+    
+    // Protection bypass only when testing on vercel.app preview domain
+    if (!isLocal && window.location.hostname.includes('vercel.app')) {
+      params.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
+    }
+
     params.set('mName', myName);
     params.set('mBirth', myBirth);
     params.set('mMbti', myMbti);
@@ -219,16 +224,10 @@ function App() {
       params.set('oGender', oppGender);
       params.set('rel', relationship);
     }
-    // Add dynamic OGP data
     if (activeResult) {
       params.set('baseScore', String(activeResult.baseScore));
       params.set('dailyScore', String(activeResult.dailyScore));
-      params.set('oneLiner', activeResult.oneLiner);
-      if (activeResult.compatibilityTitle) params.set('title', activeResult.compatibilityTitle);
-      if (activeResult.myPillar) params.set('myPillar', activeResult.myPillar);
-      if (activeResult.myStar) params.set('myStar', activeResult.myStar);
-      if (activeResult.opponentPillar) params.set('oppPillar', activeResult.opponentPillar);
-      if (activeResult.opponentStar) params.set('oppStar', activeResult.opponentStar);
+      if (activeResult.oneLiner) params.set('oneLiner', activeResult.oneLiner);
     }
     return `${baseUrl}?${params.toString()}`;
   };
@@ -887,9 +886,6 @@ function App() {
                           {isSubscribed ? '購読中' : '未登録'}
                         </span>
                       </div>
-                      <span style={{ fontSize: '0.7rem', color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {isSubscribed ? 'すべての限定機能が解放されています' : '毎朝8時吉時間通知・無制限チャット・10人保存'}
-                      </span>
                     </div>
                   </div>
                   <ChevronRight size={16} style={{ color: '#fef08a', flexShrink: 0 }} />
