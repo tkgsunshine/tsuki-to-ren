@@ -3,7 +3,6 @@ import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Sparkles, Lock, Calendar, Download, X, Heart, Bell } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
-import { getPillarWithReading } from '../utils/fortuneEngine';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -190,7 +189,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [subSuccess, setSubSuccess] = useState(false);
-  const [zoomedImg, setZoomedImg] = useState<{ src: string; alt: string } | null>(null);
+  interface ZoomedImgData {
+  src: string;
+  headerTitle: string;
+  astrologyName: string;
+  astrologyTheme: string;
+  isKaigo?: boolean;
+  isRare?: boolean;
+  myGender?: 'male' | 'female';
+  astrologyElement?: string;
+  branchPersonality?: string;
+  astrologyColor?: string;
+}
+  const [zoomedImg, setZoomedImg] = useState<ZoomedImgData | null>(null);
   const [explanation, setExplanation] = useState<{ title: string; reading: string; body: string } | null>(null);
 
   const getKanjiReading = (pillar: string): string => {
@@ -351,7 +362,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     try {
       const res = await fetch(zoomedImg.src);
       const blob = await res.blob();
-      const fileName = `月と蓮_${zoomedImg.alt || '守護化身'}.jpg`;
+      const fileName = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
       const file = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -368,7 +379,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
     const link = document.createElement('a');
     link.href = zoomedImg.src;
-    link.download = `月と蓮_${zoomedImg.alt || '守護化身'}.jpg`;
+    link.download = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -787,7 +798,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}
                 onClick={() => setZoomedImg({ 
                   src: activeResult.myAvatarUrl || '', 
-                  alt: `${activeResult.isKaigo ? '👑 魁罡' : (activeResult.isRare ? '👑 極星' : '👑 守護化身')} ${getPillarWithReading(activeResult.myPillar)}` 
+                  headerTitle: '✦ あなたの守護化身 ✦',
+                  astrologyName: activeResult.myAstrologyName || '守護化身',
+                  astrologyTheme: activeResult.myAstrologyTheme || '',
+                  isKaigo: activeResult.isKaigo,
+                  isRare: activeResult.isRare,
+                  myGender: activeResult.myGender,
+                  astrologyElement: activeResult.myAstrologyElement || '金・陽',
+                  branchPersonality: activeResult.myBranchPersonality || '策士',
+                  astrologyColor: activeResult.myAstrologyColor || '銀・白'
                 })}
                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -1072,7 +1091,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}
                 onClick={() => setZoomedImg({ 
                   src: activeResult.opponentAvatarUrl || '', 
-                  alt: `${activeResult.opponentIsKaigo ? '👑 魁罡' : (activeResult.opponentIsRare ? '👑 極星' : '👑 守護化身')} ${getPillarWithReading(activeResult.opponentPillar)}` 
+                  headerTitle: '✦ お相手の守護化身 ✦',
+                  astrologyName: activeResult.opponentAstrologyName || '守護化身',
+                  astrologyTheme: activeResult.opponentAstrologyTheme || '',
+                  isKaigo: activeResult.opponentIsKaigo,
+                  isRare: activeResult.opponentIsRare,
+                  myGender: activeResult.opponentGender,
+                  astrologyElement: activeResult.opponentAstrologyElement || '金・陽',
+                  branchPersonality: activeResult.opponentBranchPersonality || '策士',
+                  astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
                 })}
                 onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
                 onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -2610,47 +2637,111 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <X size={18} />
               </button>
 
-              {/* Expanded Image */}
+              {/* Header Pill Badge matching card visual */}
               <div style={{
-                width: '100%',
-                aspectRatio: '3 / 4',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.35rem 1.1rem',
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(168, 85, 247, 0.14) 100%)',
+                border: '1.5px solid rgba(226, 192, 116, 0.45)',
                 borderRadius: '20px',
-                overflow: 'hidden',
-                border: '2px solid rgba(226, 192, 116, 0.4)',
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)'
+                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
+                marginBottom: '0.2rem'
               }}>
-                <img 
-                  src={zoomedImg.src} 
-                  alt={zoomedImg.alt} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
+                <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fef08a', textShadow: '0 0 10px rgba(254, 240, 138, 0.6)' }}>
+                  {zoomedImg.headerTitle}
+                </span>
               </div>
 
-              {/* Title & Download Button */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold' }}>
-                  {zoomedImg.alt}
-                </span>
-                
+              {/* Expanded Image with Rich Border */}
+              <div 
+                className={zoomedImg.isKaigo ? 'kaigo-border' : (zoomedImg.isRare ? 'rare-rainbow-border' : '')}
+                style={{
+                  width: '100%',
+                  aspectRatio: '3 / 4',
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  border: (zoomedImg.isKaigo || zoomedImg.isRare) ? 'none' : '2px solid rgba(226, 192, 116, 0.4)',
+                  boxShadow: zoomedImg.isKaigo ? '0 0 30px rgba(220, 38, 38, 0.5)' : (zoomedImg.isRare ? '0 0 25px rgba(251, 191, 36, 0.45)' : '0 20px 50px rgba(0, 0, 0, 0.8)'),
+                  position: 'relative'
+                }}
+              >
+                <img 
+                  src={zoomedImg.src} 
+                  alt={zoomedImg.astrologyName} 
+                  className={zoomedImg.isKaigo ? 'kaigo-img-glow' : (zoomedImg.isRare ? 'rare-holographic-img' : '')}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+                {(zoomedImg.isKaigo || zoomedImg.isRare) && (
+                  <>
+                    <div className="avatar-shimmer-overlay" />
+                    <div className="avatar-halo-spotlight" />
+                  </>
+                )}
+              </div>
+
+              {/* Title, Badges & Download Button matching card visual */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+                  <span className="font-serif gold-text" style={{ fontSize: '1.05rem', fontWeight: 'bold' }}>
+                    {zoomedImg.astrologyName}
+                  </span>
+                  <span className={zoomedImg.isKaigo ? 'kaigo-badge' : (zoomedImg.isRare ? 'rare-badge' : '')} style={{
+                    fontSize: '0.62rem',
+                    padding: '2px 7px',
+                    borderRadius: '4px',
+                    background: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)'),
+                    color: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '#d8b4fe' : '#93c5fd'),
+                    border: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)')
+                  }}>
+                    {zoomedImg.isKaigo ? '👑 魁罡' : (zoomedImg.isRare ? '👑 選ばれし極星' : (zoomedImg.myGender === 'female' ? '女性' : '男性'))}
+                  </span>
+                </div>
+
+                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.4', fontWeight: '500', textAlign: 'center' }}>
+                  {zoomedImg.astrologyTheme}
+                </div>
+
+                {/* 3 Attribute Grid Boxes (五行・性格分類・守護カラー) */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: '8px',
+                  width: '100%',
+                  marginTop: '0.4rem',
+                  marginBottom: '0.2rem'
+                }}>
+                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '7px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.58rem', color: '#9ca3af' }}>五行 (陰陽)</span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--color-gold)' }}>{zoomedImg.astrologyElement || '金・陽'}</span>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '7px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.58rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>性格分類</span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--color-gold)' }}>{zoomedImg.branchPersonality || '策士'}</span>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '7px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.58rem', color: '#9ca3af' }}>守護カラー</span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--color-gold)' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
+                  </div>
+                </div>
+
                 <button
                   onClick={handleDownload}
+                  className="consult-btn font-serif"
                   style={{
-                    background: 'linear-gradient(135deg, #e2c074 0%, #b89850 100%)',
-                    border: 'none',
-                    borderRadius: '14px',
-                    padding: '0.75rem 1.75rem',
-                    color: '#0a0a14',
-                    fontSize: '0.85rem',
+                    width: '100%',
+                    marginTop: '0.5rem',
+                    padding: '0.85rem',
+                    borderRadius: '16px',
+                    fontSize: '0.92rem',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '0.5rem',
-                    boxShadow: 'var(--shadow-gold)',
-                    transition: 'all 0.15s ease'
+                    cursor: 'pointer'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                 >
                   <Download size={16} />
                   画像を保存する
