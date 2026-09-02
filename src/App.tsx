@@ -801,18 +801,27 @@ function App() {
             {selectedColumnSlug ? (
               <ColumnDetailView
                 slug={selectedColumnSlug}
-                onBackToList={() => setSelectedColumnSlug(null)}
+                onBackToList={() => {
+                  setSelectedColumnSlug(null);
+                  window.scrollTo(0, 0);
+                  const mainContentEl = document.querySelector('.main-content');
+                  if (mainContentEl) mainContentEl.scrollTop = 0;
+                }}
                 onNavigateHome={() => handleTabChange('home')}
                 onSelectArticle={(slug) => {
                   setSelectedColumnSlug(slug);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  window.scrollTo(0, 0);
+                  const mainContentEl = document.querySelector('.main-content');
+                  if (mainContentEl) mainContentEl.scrollTop = 0;
                 }}
               />
             ) : (
               <ColumnListView
                 onSelectArticle={(slug) => {
                   setSelectedColumnSlug(slug);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  window.scrollTo(0, 0);
+                  const mainContentEl = document.querySelector('.main-content');
+                  if (mainContentEl) mainContentEl.scrollTop = 0;
                 }}
                 onNavigateHome={() => handleTabChange('home')}
               />

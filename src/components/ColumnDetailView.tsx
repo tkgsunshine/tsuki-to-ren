@@ -18,7 +18,14 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
   const article = COLUMNS_DATA.find(a => a.slug === slug) || COLUMNS_DATA[0];
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Force reset scroll on both window and .main-content scroll container
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    const mainContentEl = document.querySelector('.main-content');
+    if (mainContentEl) {
+      mainContentEl.scrollTop = 0;
+    }
 
     // SEO Meta Injection for Article Page
     document.title = `${article.title} | 月と蓮`;
