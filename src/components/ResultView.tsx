@@ -1475,7 +1475,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     無料会員登録で鑑定結果の続きを開く
                   </h2>
                   <p style={{ fontSize: '0.75rem', color: '#d1d5db', lineHeight: '1.5', margin: 0 }}>
-                    メールアドレスの入力だけで、モザイクがかかった鑑定結果の続きをご覧いただけます。
+                    会員登録をいただくと深層鑑定結果の続きを全てご覧になれます。
                   </p>
                 </div>
 
