@@ -453,6 +453,18 @@ body {
   transform: scale(1.08);
 }
 
+.column-search-input::placeholder {
+  color: #d1d5db !important;
+  opacity: 1 !important;
+  font-weight: 500;
+}
+
+.column-search-input::-webkit-input-placeholder {
+  color: #d1d5db !important;
+  opacity: 1 !important;
+  font-weight: 500;
+}
+
 /* Article Column Typography & Headings Styling */
 .article-body-content {
   color: #e2e8f0;

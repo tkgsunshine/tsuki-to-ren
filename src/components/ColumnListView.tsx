@@ -82,22 +82,25 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
       <div style={{ position: 'relative', width: '100%' }}>
         <input
           type="text"
+          className="column-search-input"
           placeholder="キーワードでコラムを検索（例: 魁罡, INTJ, LINE吉時間）"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
             width: '100%',
-            padding: '0.75rem 1rem 0.75rem 2.6rem',
+            padding: '0.85rem 1rem 0.85rem 2.75rem',
             borderRadius: '14px',
-            background: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: 'white',
-            fontSize: '0.85rem',
+            background: 'rgba(15, 10, 30, 0.92)',
+            border: '1.5px solid rgba(226, 192, 116, 0.5)',
+            color: '#ffffff',
+            fontSize: '0.88rem',
+            fontWeight: 'bold',
             outline: 'none',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)'
           }}
         />
-        <Search size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+        <Search size={18} style={{ position: 'absolute', left: '0.95rem', top: '50%', transform: 'translateY(-50%)', color: '#fef08a' }} />
       </div>
 
       {/* Category Pill Filters */}
@@ -114,16 +117,17 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
             type="button"
             onClick={() => setSelectedCategory(cat)}
             style={{
-              padding: '0.4rem 0.85rem',
+              padding: '0.45rem 0.95rem',
               borderRadius: '20px',
-              fontSize: '0.75rem',
+              fontSize: '0.78rem',
               fontWeight: 'bold',
               whiteSpace: 'nowrap',
-              border: selectedCategory === cat ? '1px solid rgba(226, 192, 116, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
-              background: selectedCategory === cat ? 'linear-gradient(135deg, rgba(226, 192, 116, 0.25) 0%, rgba(217, 119, 6, 0.25) 100%)' : 'rgba(255, 255, 255, 0.03)',
-              color: selectedCategory === cat ? '#fef08a' : '#9ca3af',
+              border: selectedCategory === cat ? '1.5px solid #fef08a' : '1px solid rgba(255, 255, 255, 0.25)',
+              background: selectedCategory === cat ? 'linear-gradient(135deg, rgba(254, 240, 138, 0.3) 0%, rgba(217, 119, 6, 0.4) 100%)' : 'rgba(15, 10, 30, 0.85)',
+              color: selectedCategory === cat ? '#fef08a' : '#e2e8f0',
               cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              boxShadow: selectedCategory === cat ? '0 0 12px rgba(254, 240, 138, 0.3)' : 'none'
             }}
           >
             {cat === 'ALL' ? '全コラム' : cat}
@@ -134,7 +138,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
       {/* Article Grid List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {filteredArticles.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#9ca3af', fontSize: '0.85rem' }}>
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#e2e8f0', fontSize: '0.88rem', fontWeight: 'bold' }}>
             検索結果が見つかりませんでした。「魁罡」や「16タイプ」などキーワードを変えてお試しください。
           </div>
         ) : (
@@ -150,8 +154,9 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                 gap: '1rem',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(255, 255, 255, 0.02)'
+                border: '1.5px solid rgba(255, 255, 255, 0.15)',
+                background: 'rgba(15, 10, 30, 0.85)',
+                boxShadow: '0 4px 18px rgba(0,0,0,0.5)'
               }}
             >
               {/* Thumbnail Image */}
@@ -186,7 +191,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                     }}>
                       {article.category}
                     </span>
-                    <span style={{ fontSize: '0.68rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <Clock size={11} /> {article.readTimeMinutes}分で読める
                     </span>
                   </div>
@@ -194,8 +199,8 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                   <h2 className="font-serif" style={{
                     fontSize: '0.9rem',
                     fontWeight: 'bold',
-                    color: '#f8fafc',
-                    lineHeight: '1.4',
+                    color: '#ffffff',
+                    lineHeight: '1.45',
                     margin: '0 0 0.35rem 0',
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
@@ -207,7 +212,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.35rem' }}>
-                  <span style={{ fontSize: '0.68rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                  <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                     <Calendar size={11} /> {article.publishedAt.split('T')[0].replace(/-/g, '/')}
                   </span>
                   <span style={{ fontSize: '0.72rem', color: '#fef08a', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
