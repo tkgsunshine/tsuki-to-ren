@@ -249,35 +249,17 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                   <td style={{ fontWeight: '600', color: '#e2e8f0' }}>Ill株式会社</td>
                 </tr>
                 <tr>
-                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>代表者</td>
-                  <td>代表取締役　山下 高志</td>
+                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>お問合せ</td>
+                  <td style={{ color: '#e2e8f0' }}>support@tsuki-to-ren.com</td>
                 </tr>
                 <tr>
-                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>設立</td>
-                  <td>2022年6月1日</td>
-                </tr>
-                <tr>
-                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>サービス名</td>
-                  <td>月と蓮（つきとれん）</td>
+                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
+                  <td style={{ color: '#e2e8f0' }}>2026年9月1日</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </section>
-
-        {/* Footer */}
-        <div style={{
-          marginTop: '2.5rem',
-          paddingTop: '1.25rem',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          textAlign: 'center',
-          fontSize: '0.72rem',
-          color: '#64748b',
-          lineHeight: '1.5'
-        }}>
-          <p style={{ margin: 0 }}>最終更新日：2025年8月26日</p>
-          <p style={{ margin: '0.25rem 0 0' }}>Ill株式会社</p>
-        </div>
       </div>
     </div>
   );
