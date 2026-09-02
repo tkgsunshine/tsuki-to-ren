@@ -13,6 +13,8 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const ITEMS_PER_PAGE = 6;
 
   const categories = [
     'ALL',
@@ -31,6 +33,13 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
       art.keywords.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
+
+  const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE) || 1;
+
+  const paginatedArticles = filteredArticles.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div style={{
@@ -85,7 +94,10 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
           className="column-search-input"
           placeholder="キーワードでコラムを検索（例: 魁罡, INTJ, LINE吉時間）"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1);
+          }}
           style={{
             width: '100%',
             padding: '0.85rem 1rem 0.85rem 2.75rem',
@@ -115,7 +127,10 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
           <button
             key={cat}
             type="button"
-            onClick={() => setSelectedCategory(cat)}
+            onClick={() => {
+              setSelectedCategory(cat);
+              setCurrentPage(1);
+            }}
             style={{
               padding: '0.45rem 0.95rem',
               borderRadius: '20px',
@@ -137,12 +152,12 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
 
       {/* Article Grid List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {filteredArticles.length === 0 ? (
+        {paginatedArticles.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#e2e8f0', fontSize: '0.88rem', fontWeight: 'bold' }}>
             検索結果が見つかりませんでした。「魁罡」や「16タイプ」などキーワードを変えてお試しください。
           </div>
         ) : (
-          filteredArticles.map((article) => (
+          paginatedArticles.map((article) => (
             <article
               key={article.id}
               onClick={() => onSelectArticle(article.slug)}
@@ -224,6 +239,89 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
           ))
         )}
       </div>
+
+      {/* Pagination Bar Controls */}
+      {totalPages > 1 && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '0.4rem',
+          margin: '1.25rem 0 0.5rem'
+        }}>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => {
+              setCurrentPage(p => Math.max(1, p - 1));
+              const mainEl = document.querySelector('.main-content');
+              if (mainEl) mainEl.scrollTop = 0;
+            }}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '10px',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              background: currentPage === 1 ? 'rgba(255,255,255,0.03)' : 'rgba(15, 10, 30, 0.85)',
+              border: currentPage === 1 ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.2)',
+              color: currentPage === 1 ? '#6b7280' : '#e2e8f0',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            ＜ 前へ
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              onClick={() => {
+                setCurrentPage(page);
+                const mainEl = document.querySelector('.main-content');
+                if (mainEl) mainEl.scrollTop = 0;
+              }}
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '10px',
+                fontSize: '0.8rem',
+                fontWeight: 'bold',
+                background: currentPage === page
+                  ? 'linear-gradient(135deg, rgba(254, 240, 138, 0.35) 0%, rgba(217, 119, 6, 0.45) 100%)'
+                  : 'rgba(15, 10, 30, 0.85)',
+                border: currentPage === page ? '1.5px solid #fef08a' : '1px solid rgba(255,255,255,0.15)',
+                color: currentPage === page ? '#fef08a' : '#cbd5e1',
+                cursor: 'pointer',
+                boxShadow: currentPage === page ? '0 0 12px rgba(254, 240, 138, 0.3)' : 'none'
+              }}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => {
+              setCurrentPage(p => Math.min(totalPages, p + 1));
+              const mainEl = document.querySelector('.main-content');
+              if (mainEl) mainEl.scrollTop = 0;
+            }}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '10px',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              background: currentPage === totalPages ? 'rgba(255,255,255,0.03)' : 'rgba(15, 10, 30, 0.85)',
+              border: currentPage === totalPages ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.2)',
+              color: currentPage === totalPages ? '#6b7280' : '#e2e8f0',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+            }}
+          >
+            次へ ＞
+          </button>
+        </div>
+      )}
 
       {/* Footer CTA Box */}
       <div className="glass-panel" style={{
