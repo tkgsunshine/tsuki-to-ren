@@ -545,9 +545,6 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             placeholder={isRegistered ? "メッセージを入力..." : "無料メンバー登録後に送信できます"}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSend(inputText);
-            }}
           />
           <button className="chat-send-btn" onClick={() => handleSend(inputText)}>
             <Send size={18} />
