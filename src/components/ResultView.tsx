@@ -1949,22 +1949,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 7. 喜ばれるデート＆プレゼント傾向 */}
-            <div style={{ background: 'rgba(226, 192, 116, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 192, 116, 0.2)', position: 'relative' }}>
+            <div style={{ background: 'rgba(226, 192, 116, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 192, 116, 0.2)' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fef08a', marginBottom: '0.35rem' }}>
                 🎁 喜ばれるデートスポット ＆ プレゼント傾向
               </div>
-              <p className="font-serif" style={{
-                fontSize: '0.78rem',
-                color: '#fef9c3',
-                margin: 0,
-                lineHeight: '1.6',
-                filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                userSelect: !isSubscribed ? 'none' : 'auto',
-                opacity: !isSubscribed ? 0.65 : 1
-              }}>
-                {(activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手')}
-              </p>
-            {!isSubscribed && (
+              <div style={{ position: 'relative', marginTop: '0.2rem' }}>
+                <p className="font-serif" style={{
+                  fontSize: '0.78rem',
+                  color: '#fef9c3',
+                  margin: 0,
+                  lineHeight: '1.6',
+                  filter: !isSubscribed ? 'blur(4.5px)' : 'none',
+                  userSelect: !isSubscribed ? 'none' : 'auto',
+                  opacity: !isSubscribed ? 0.65 : 1
+                }}>
+                  {(activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手')}
+                </p>
+                {!isSubscribed && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -1994,25 +1995,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </button>
               </div>
             )}
+              </div>
             </div>
 
             {/* 8. 蓮と月からの最終攻略アドバイス */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--color-gold)', marginBottom: '0.35rem' }}>
                 💡 蓮と月からの最終攻略ロードマップ
               </div>
-              <p className="font-serif" style={{
-                fontSize: '0.78rem',
-                color: '#e2e8f0',
-                margin: 0,
-                lineHeight: '1.6',
-                filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                userSelect: !isSubscribed ? 'none' : 'auto',
-                opacity: !isSubscribed ? 0.65 : 1
-              }}>
-                {activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手')}
-              </p>
-            {!isSubscribed && (
+              <div style={{ position: 'relative', marginTop: '0.2rem' }}>
+                <p className="font-serif" style={{
+                  fontSize: '0.78rem',
+                  color: '#e2e8f0',
+                  margin: 0,
+                  lineHeight: '1.6',
+                  filter: !isSubscribed ? 'blur(4.5px)' : 'none',
+                  userSelect: !isSubscribed ? 'none' : 'auto',
+                  opacity: !isSubscribed ? 0.65 : 1
+                }}>
+                  {activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手')}
+                </p>
+                {!isSubscribed && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -2042,6 +2045,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </button>
               </div>
             )}
+              </div>
             </div>
 
             {/* Lock CTA Card placed BELOW the content boxes for Non-Premium Users */}
