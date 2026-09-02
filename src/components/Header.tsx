@@ -10,9 +10,14 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
   return (
     <header className="app-header" style={{ padding: 'calc(0.6rem + var(--safe-top, 0px)) 1rem 1rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
-      {/* Top Auth Bar (Aligned Top-Right, No Overlap with Title) */}
+      {/* Top Auth Bar (Pinned Absolute Top-Right) */}
       {onOpenAuth && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', maxWidth: '440px', margin: '0 auto 0.2rem auto' }}>
+        <div style={{
+          position: 'absolute',
+          top: 'calc(0.6rem + var(--safe-top, 0px))',
+          right: '1rem',
+          zIndex: 10
+        }}>
           <button
             type="button"
             onClick={onOpenAuth}
