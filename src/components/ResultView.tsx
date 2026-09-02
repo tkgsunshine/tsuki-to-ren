@@ -2862,7 +2862,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         transform: 'translateX(-50%)',
         width: 'calc(100% - 2rem)',
         maxWidth: '440px',
-        zIndex: 99990,
+        zIndex: 9990,
         boxSizing: 'border-box'
       }}>
         <button

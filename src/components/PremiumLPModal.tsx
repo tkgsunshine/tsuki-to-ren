@@ -52,7 +52,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     },
     {
       q: '登録後すぐにすべての機能が使えますか？',
-      a: 'はい、お支払いが完了した瞬間から、全解放された鑑定結果やAIチャット、毎朝の通知機能が即時にお使いいただけます。'
+      a: 'はい、お支払いが完了した瞬間から、全解放された鑑定結果やAIチャット、すべてのプレミアム機能が即時にお使いいただけます。'
     }
   ];
 
@@ -63,7 +63,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       background: 'rgba(5, 4, 12, 0.92)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
-      zIndex: 10000,
+      zIndex: 200000,
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -302,10 +302,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fef08a' }}>
-                  ③ 毎朝8時「LINE吉時間・運勢」メール配信
+                  ③ 本日の「LINE送信推奨時間 ＆ バイオリズム」完全解禁
                 </span>
                 <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  毎朝、本日の相性バイオリズムと「今日LINEを送るべき推奨時間（返信率MAX帯）」を自動通知。送るタイミングに二度と迷いません。
+                  当日の相性バイオリズムと「今日LINEを送るべき黄金時間帯（返信率MAX帯）」をリアルタイム表示。送るタイミングに二度と迷いません。
                 </p>
               </div>
             </div>
