@@ -453,6 +453,78 @@ body {
   transform: scale(1.08);
 }
 
+/* Article Column Typography & Headings Styling */
+.article-body-content {
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  line-height: 1.85;
+  word-break: break-word;
+}
+
+.article-body-content h2 {
+  font-family: var(--font-serif), serif;
+  font-size: 1.12rem;
+  font-weight: bold;
+  color: #fef08a;
+  background: linear-gradient(135deg, rgba(254, 240, 138, 0.12) 0%, rgba(226, 192, 116, 0.04) 100%);
+  border-left: 4px solid #e2c074;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0 10px 10px 0;
+  margin: 2.2rem 0 1.1rem 0;
+  line-height: 1.45;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.article-body-content h3 {
+  font-family: var(--font-serif), serif;
+  font-size: 0.96rem;
+  font-weight: bold;
+  color: #d8b4fe;
+  border-bottom: 1px dashed rgba(216, 180, 254, 0.35);
+  padding-bottom: 0.4rem;
+  margin: 1.6rem 0 0.85rem 0;
+  line-height: 1.5;
+}
+
+.article-body-content p {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  line-height: 1.85;
+  color: #cbd5e1;
+}
+
+.article-body-content strong {
+  color: #fef08a;
+  background: rgba(254, 240, 138, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.article-body-content ul, 
+.article-body-content ol {
+  margin: 1rem 0 1.35rem 0;
+  padding-left: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.article-body-content li {
+  line-height: 1.7;
+  color: #e2e8f0;
+}
+
+.article-body-content blockquote {
+  margin: 1.35rem 0;
+  padding: 1rem 1.15rem;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 12px;
+  color: #e9d5ff;
+  line-height: 1.7;
+}
+
 /* Chat Modal Styles */
 .chat-overlay {
   position: absolute;
