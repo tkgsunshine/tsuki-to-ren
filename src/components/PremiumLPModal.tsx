@@ -269,10 +269,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fbcfe8' }}>
-                  ② お相手の「取扱説明書（トリセツ）」全項目解放
+                  ② お相手の「取扱説明書（トリセツ）」＆「6軸レーダーチャート」全解放
                 </span>
                 <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  刺さる言葉・絶対NG行動・神返信例・脈あり度判定など、お相手の深層攻略データを無制限で閲覧・実践できます。
+                  刺さる言葉・絶対NG行動・神返信例・6軸詳細相性分析（恋愛・価値観・身体・結婚・執着・信頼）などを無制限で閲覧・実践できます。
                 </p>
               </div>
             </div>
@@ -371,7 +371,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   ⑤ AI守護キャラクター「月・蓮」と無制限相談
                 </span>
                 <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  24時間いつでも「返信文案の添削」や「相手の本音相談」が可能。共感の月（LUNA）と論理の蓮（REN）があなたの専属占い師になります。
+                  24時間いつでも「返信文案の添削」や「相手の本音相談」が可能。共感の月と論理の蓮があなたの専属占い師になります。
                 </p>
               </div>
             </div>
