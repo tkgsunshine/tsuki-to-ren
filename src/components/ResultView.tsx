@@ -1726,7 +1726,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* Section 3-8 Container */}
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             {/* 3. 返信が遅い時の心理とベストな返信例 */}
-            <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+            <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#93c5fd', marginBottom: '0.35rem' }}>
                 💬 返信が遅い時の裏心理 ＆ ベストな神返信例
               </div>
@@ -1778,7 +1778,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 4. 脈ありサイン 3段階レベル */}
-            <div style={{ background: 'rgba(34, 197, 94, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+            <div style={{ background: 'rgba(34, 197, 94, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(34, 197, 94, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#86efac', marginBottom: '0.35rem' }}>
                 🟢 脈ありサイン 3段階レベル診断
               </div>
@@ -1827,7 +1827,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 5. 脈なしサイン ＆ 挽回テクニック */}
-            <div style={{ background: 'rgba(244, 63, 94, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
+            <div style={{ background: 'rgba(244, 63, 94, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(244, 63, 94, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fda4af', marginBottom: '0.35rem' }}>
                 🔴 脈なしサイン ＆ 逆転挽回アプローチ
               </div>
@@ -1875,7 +1875,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 6. そのまま使えるLINEキラーテンプレート */}
-            <div style={{ background: 'rgba(168, 85, 247, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+            <div style={{ background: 'rgba(168, 85, 247, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#c084fc', marginBottom: '0.35rem' }}>
                 💌 そのまま使えるLINEキラーテンプレート
               </div>
@@ -1931,7 +1931,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 7. 喜ばれるデート＆プレゼント傾向 */}
-            <div style={{ background: 'rgba(226, 192, 116, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 192, 116, 0.2)' }}>
+            <div style={{ background: 'rgba(226, 192, 116, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 192, 116, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fef08a', marginBottom: '0.35rem' }}>
                 🎁 喜ばれるデートスポット ＆ プレゼント傾向
               </div>
@@ -1979,7 +1979,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 8. 蓮と月からの最終攻略アドバイス */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--color-gold)', marginBottom: '0.35rem' }}>
                 💡 蓮と月からの最終攻略ロードマップ
               </div>
