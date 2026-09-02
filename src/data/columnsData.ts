@@ -15,53 +15,13 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
-    id: 'col-1788365205269',
-    slug: 'shichutsuimei-koki-gohou-combination',
-    title: '【四柱推命】「甲己の合（こうきのごう）」が導く至高の引き寄せ！引き合いと絆の秘密',
-    metaDescription: '四柱推命の干合の中でも最も精神的な絆が深まる「甲己の合」。二人の命式が引き合わせる運命の理由と愛の深め方。',
-    keywords: ["甲己の合","四柱推命 干合","引き寄せ 占い","運命の相手 四柱推命"],
-    category: '四柱推命・特殊星',
-    publishedAt: '2026-09-02T16:06:45.268Z',
-    readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
-    toc: [
-      {
-            "id": "section-1",
-            "title": "1. 「甲己の合」とは？精神的な信頼の絆",
-            "level": 1
-      },
-      {
-            "id": "section-2",
-            "title": "2. 二人が引き惹かれ合うメカニズム",
-            "level": 1
-      },
-      {
-            "id": "section-3",
-            "title": "3. まとめ",
-            "level": 1
-      }
-],
-    faqs: [
-      {
-            "question": "干合があるとどのような影響がありますか？",
-            "answer": "お互いの存在が自然と生活の一部になり、言葉を超えた強い絆と安らぎが生まれます。"
-      }
-],
-    content: `<h2 id="section-1">1. 「甲己の合」とは？精神的な信頼の絆</h2>
-      <p>四柱推命における「干合（かんごう）」は、磁石のように惹かれ合う特別な引き寄せです。特に甲（大木）と己（大地）の組み合わせは「中正の合」と呼ばれ、最も誠実で安定した愛を育みます。</p>
-      <h2 id="section-2">2. 二人が引き惹かれ合うメカニズム</h2>
-      <p>大地が大木を支え、木が大地に美しい景観をもたらすように、互いを高め合える理想の関係です。</p>
-      <h2 id="section-3">3. まとめ</h2>
-      <p>「月と蓮」の無料相性鑑定で、二人の命式に干合があるか今すぐチェックしてみましょう。</p>`
-  },
-  {
     id: 'col-1',
     slug: 'kaigou-shichutsuimei-guide',
     title: '【四柱推命】魁罡（かいごう）とは？約3.3%の強運特殊星を持つ人の性格特徴と相性完全ガイド',
     metaDescription: '四柱推命において約3.3%の確率で生まれる最強のカリスマ星「魁罡（かいごう）」。庚辰・庚戌・壬辰・戊戌の4つの干支を持つ人の性格特徴、圧倒的な引き寄せ力、相性の良いお相手を徹底解説。',
     keywords: ['四柱推命 魁罡', '魁罡 性格', '魁罡 相性', '魁罡 庚辰 庚戌 壬辰 戊戌'],
     category: '四柱推命・特殊星',
-    publishedAt: '2026-09-01T10:00:00+09:00',
+    publishedAt: '2026-08-15T10:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -132,7 +92,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '16タイプ（MBTI）診断に基づく全256通りの恋愛相性ランキング！正反対だから惹かれ合う「最高の相性」から、コミュニケーションにコツが必要な組み合わせまで、恋愛成就のポイントを徹底網羅。',
     keywords: ['16タイプ 相性', 'MBTI 相性ランキング', '16タイプ 恋愛', 'MBTI カップル'],
     category: '16タイプ・MBTI相性',
-    publishedAt: '2026-09-01T18:00:00+09:00',
+    publishedAt: '2026-08-16T18:00:00+09:00',
     readTimeMinutes: 9,
     thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -184,7 +144,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '前世で一つの魂だったツインレイ（魂の片割れ）。四柱推命の五行調和や命式分析から、本物のツインレイやソウルメイトを見分ける5つのサインと、試練の乗り越え方を徹底解説。',
     keywords: ['ツインレイ 診断', 'ツインレイ 四柱推命', 'ソウルメイト 見分け方', '運命の相手 占い'],
     category: 'ツインレイ・運命の絆',
-    publishedAt: '2026-09-02T10:00:00+09:00',
+    publishedAt: '2026-08-18T10:00:00+09:00',
     readTimeMinutes: 8,
     thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -228,7 +188,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: 'LINEを送るタイミングで返信率は劇的に変わる！お相手の日干や毎日の運勢バイオリズムから「返信率MAXの吉時間」を計算し、片思い成就や既読スルーを防ぐLINE戦略を解説。',
     keywords: ['LINE 吉時間', 'LINE 返信率 高い時間', 'LINE 送るタイミング 占い', '恋愛 LINE タイミング'],
     category: 'LINE攻略・アプローチ',
-    publishedAt: '2026-09-02T18:00:00+09:00',
+    publishedAt: '2026-08-19T18:00:00+09:00',
     readTimeMinutes: 6,
     thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -272,7 +232,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '相手からのLINE返信が遅いのはなぜ？16タイプ（MBTI）ごとの返信心理、脈ありレベル3のサイン、返信率を爆発的に高める神返信テンプレートを完全網羅。',
     keywords: ['MBTI LINE 返信遅い', '16タイプ 返信速度', 'LINE 脈ありサイン', 'LINE 神返信'],
     category: 'LINE攻略・16タイプ',
-    publishedAt: '2026-09-03T10:00:00+09:00',
+    publishedAt: '2026-08-21T10:00:00+09:00',
     readTimeMinutes: 8,
     thumbnailUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -314,7 +274,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: 'クールな戦略家「INTJ」と情熱的な自由人「ENFP」はなぜ奇跡的に惹かれ合うのか？二人の惹かれ合うメカニズム、すれ違いの回避策、長続きする関係性の築き方を解説。',
     keywords: ['INTJ ENFP 相性', 'INTJ ENFP 恋愛', 'INTJ 好きなタイプ', 'ENFP 恋愛傾向'],
     category: '16タイプ・MBTI相性',
-    publishedAt: '2026-09-03T18:00:00+09:00',
+    publishedAt: '2026-08-22T18:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -356,7 +316,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '東洋占星術の根幹「陰陽五行説（木火土金水）」。お互いのエネルギーを高め合う相生関係と、成長を促す相剋関係を解明し、二人の本質相性を診断。',
     keywords: ['四柱推命 五行 相性', '五行相生 相剋', '十干 相性', '陰陽五行 恋愛'],
     category: '四柱推命入門',
-    publishedAt: '2026-09-04T10:00:00+09:00',
+    publishedAt: '2026-08-24T10:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -389,7 +349,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '心優しい理想家「INFP」と圧倒的リーダー「ENTJ」の深層相性！真逆の性質を持つ二人が最高の相棒・カップルになれる理由を徹底解説。',
     keywords: ['INFP ENTJ 相性', 'INFP 恋愛', 'ENTJ 恋愛', '16タイプ 運命'],
     category: '16タイプ・MBTI相性',
-    publishedAt: '2026-09-04T18:00:00+09:00',
+    publishedAt: '2026-08-25T18:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -417,7 +377,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '九星気学（一白水星〜九紫火星）から読み解く2026〜2027年の恋愛運バイオリズム！結婚・出会い・転換期の波を事前に掴んで大開運を引き寄せる秘訣。',
     keywords: ['九星気学 恋愛運', '本命星 2026 2027', '恋愛 バイオリズム', '九星気学 相性'],
     category: '九星気学・バイオリズム',
-    publishedAt: '2026-09-05T10:00:00+09:00',
+    publishedAt: '2026-08-26T10:00:00+09:00',
     readTimeMinutes: 8,
     thumbnailUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -445,7 +405,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '四柱推命の吉星の代表格「天乙貴人（てんおつきじん）」「太極貴人」。人生のピンチをチャンスに変える強運と、愛される人の秘訣を解明。',
     keywords: ['天乙貴人', '太極貴人', '四柱推命 特殊星', '選ばれし極星 占い'],
     category: '四柱推命・特殊星',
-    publishedAt: '2026-09-05T18:00:00+09:00',
+    publishedAt: '2026-08-27T18:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -473,7 +433,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '高い共感力を持つ「INFJ」と「ENFJ」の恋愛相性！お互いの思いやりが溢れる温かい関係を築くコツと注意点。',
     keywords: ['INFJ ENFJ 相性', 'INFJ 恋愛', 'ENFJ 恋愛', '共感型 カップル'],
     category: '16タイプ・MBTI相性',
-    publishedAt: '2026-09-06T10:00:00+09:00',
+    publishedAt: '2026-08-28T10:00:00+09:00',
     readTimeMinutes: 6,
     thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -498,7 +458,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '好きな相手のハートを掴むアプローチ法！相手の十干（甲〜癸）に応じた響く言葉、やってはいけないNG行動を伝授。',
     keywords: ['片思い 成就 占い', '四柱推命 アプローチ', '相手に刺さる言葉', '絶対NG行動'],
     category: '恋愛アプローチ・トリセツ',
-    publishedAt: '2026-09-06T18:00:00+09:00',
+    publishedAt: '2026-08-29T18:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -508,7 +468,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     ],
     faqs: [],
     content: `
-      <h2 id="section-1">1. 四柱推命で相手の「ツbo」を把握する</h2>
+      <h2 id="section-1">1. 四柱推命で相手の「ツボ」を把握する</h2>
       <p>相手の essence に合わせた言葉選びが恋愛成就の最短ルートです。</p>
       <h2 id="section-2">2. 十干別アプローチ法</h2>
       <p>甲から癸までの刺さるフレーズ集。</p>
@@ -523,7 +483,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: 'マイペースでクールなISTPと誠実で優しいISFJの恋愛相性！居心地の良い距離感の保ち方を徹底分析。',
     keywords: ['ISTP ISFJ 相性', 'ISTP 恋愛', 'ISFJ 恋愛', '16タイプ 心理'],
     category: '16タイプ・MBTI相性',
-    publishedAt: '2026-09-07T10:00:00+09:00',
+    publishedAt: '2026-08-30T10:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -548,7 +508,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '諦められない恋を成就させる復縁占い！四柱推命のバイオリズムから元カレ・元カノに連絡すべき絶好のタイミングを伝授。',
     keywords: ['復縁 占い', '元カレ 復縁 タイミング', '四柱推命 復縁', '復縁成功の兆候'],
     category: '復縁・引き寄せ',
-    publishedAt: '2026-09-07T18:00:00+09:00',
+    publishedAt: '2026-08-31T18:00:00+09:00',
     readTimeMinutes: 8,
     thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -573,7 +533,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '議論好きなENTPと深い思索のINFJが引き合う磁石相性！二人の会話が尽きない理由と絆を深めるアプローチ。',
     keywords: ['ENTP INFJ 相性', 'ENTP INFJ 恋愛', '16タイプ 磁石相性', 'ENTP 恋愛'],
     category: '16タイプ・MBTI相性',
-    publishedAt: '2026-09-08T10:00:00+09:00',
+    publishedAt: '2026-09-01T10:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -598,7 +558,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: 'ツインレイ最大の試練「サイレント期間」。覚醒の兆候と、四柱推命のバイオリズムで読み解く再会のベストタイミング。',
     keywords: ['ツインレイ サイレント期間', 'ツインレイ 覚醒', 'ツインレイ 再会', 'ツインレイ 四柱推命'],
     category: 'ツインレイ・運命の絆',
-    publishedAt: '2026-09-08T18:00:00+09:00',
+    publishedAt: '2026-09-01T18:00:00+09:00',
     readTimeMinutes: 8,
     thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -623,7 +583,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: 'エンターテイナーESFPと真面目なISTJの相性！違いを魅力に変えるコミュニケーションのコツ。',
     keywords: ['ESFP ISTJ 相性', 'ESFP 恋愛', 'ISTJ 恋愛', '正反対 カップル'],
     category: '16タイプ・MBTI相性',
-    publishedAt: '2026-09-09T10:00:00+09:00',
+    publishedAt: '2026-09-02T10:00:00+09:00',
     readTimeMinutes: 6,
     thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -648,7 +608,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '四柱推命の命式表を初心者向けにわかりやすく解説！天干・地支・通変星が表す恋愛運と自分のトリセツの読み解き方。',
     keywords: ['四柱推命 命式 読み方', '天干 地支 意味', '通変星 恋愛', '自分の命式'],
     category: '四柱推命入門',
-    publishedAt: '2026-09-09T18:00:00+09:00',
+    publishedAt: '2026-09-02T18:00:00+09:00',
     readTimeMinutes: 8,
     thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -673,7 +633,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '相手の16タイプ（MBTI）ごとに即実践できる神LINEメッセージテンプレート集！デートの誘い方・雑談・感謝LINEまで徹底網羅。',
     keywords: ['16タイプ LINE 例文', 'MBTI 誘い方', 'LINE 神メッセージ', 'デート 誘い文句'],
     category: 'LINE攻略・16タイプ',
-    publishedAt: '2026-09-10T10:00:00+09:00',
+    publishedAt: '2026-09-03T10:00:00+09:00',
     readTimeMinutes: 7,
     thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
     toc: [
@@ -698,7 +658,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     metaDescription: '二人の結婚や同棲、人生の大きな転換期はいつ？四柱推命と九星気学を組み合わせた未来予測スケジュールの読み解き方と活用術。',
     keywords: ['結婚 黄金期 占い', '同棲 タイミング 四柱推命', '未来予測 スケジュール', '結婚運 2026'],
     category: '未来予測・結婚運',
-    publishedAt: '2026-09-10T18:00:00+09:00',
+    publishedAt: '2026-09-03T18:00:00+09:00',
     readTimeMinutes: 8,
     thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
     toc: [
