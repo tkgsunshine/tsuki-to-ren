@@ -38,9 +38,15 @@ function App() {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setIsChatOpen(false);
+    setShowPremiumLP(false);
+    setShowAuthModal(false);
+    setShowLegalPage(false);
+    setShowShareCard(false);
+
     if (tab === 'home') {
       setFlowStep('input');
       setLoadedPartner(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tab === 'profile') {
       setSettingsSubView('main');
     }
