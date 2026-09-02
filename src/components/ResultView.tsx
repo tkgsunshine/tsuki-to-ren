@@ -2077,7 +2077,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}>
                     ✦ プレミアムプラン解放 ✦
                   </span>
-                  <h3 className="font-serif gold-text" style={{ fontSize: '1.02rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', whiteSpace: 'nowrap' }}>
+                  <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
                     二人の取扱説明書・6軸詳細相性・未来予測をすべて解禁
                   </h3>
                   <p style={{ fontSize: '0.72rem', color: '#d1d5db', lineHeight: '1.4', margin: 0 }}>
@@ -2418,7 +2418,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}>
                   ✦ プレミアムプラン解放 ✦
                 </span>
-                <h3 className="font-serif gold-text" style={{ fontSize: '1.02rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', whiteSpace: 'nowrap' }}>
+                <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
                   二人の未来予測スケジュールをすべて解禁
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d1d5db', lineHeight: '1.4', margin: 0 }}>
