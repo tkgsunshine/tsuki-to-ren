@@ -2058,7 +2058,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
                 <button
                   onClick={() => {
-                    if (onOpenPremiumLP) {
+                    if (!isRegistered) {
+                      handleScrollToRegister();
+                    } else if (onOpenPremiumLP) {
                       onOpenPremiumLP();
                     } else {
                       onSubscribe();
@@ -2103,8 +2105,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
         }}
         isUnlocked={isSubscribed}
-        onOpenAuth={onOpenPremiumLP}
-        onOpenPremiumLP={onOpenPremiumLP}
+        onOpenAuth={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
+        onOpenPremiumLP={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
         character={selectedChar}
       />
 
@@ -2317,10 +2319,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" 
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (onOpenPremiumLP) {
-                                onOpenPremiumLP();
-                              } else if (!isRegistered) {
+                              if (!isRegistered) {
                                 handleScrollToRegister();
+                              } else if (onOpenPremiumLP) {
+                                onOpenPremiumLP();
                               } else {
                                 handleScrollToSub();
                               }
@@ -2405,7 +2407,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      if (onOpenPremiumLP) {
+                      if (!isRegistered) {
+                        handleScrollToRegister();
+                      } else if (onOpenPremiumLP) {
                         onOpenPremiumLP();
                       } else {
                         onSubscribe();
