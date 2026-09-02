@@ -973,7 +973,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     return { month: monthName, label, text, score };
   });
 
-  // 年次プレビュー (1年後, 2年後, 3年後, 4年後, 5年後, 10年後)
+  // 年次プレビュー (西暦表記: 2027年, 2028年, 2029年...)
+  const currentYear = new Date().getFullYear();
   const yearlyPreviews = [1, 2, 3, 4, 5, 10].map((yearsLater) => {
     const ySeed = todaySeed + yearsLater * 317;
     const yOffset = Math.sin(ySeed) * 20;
@@ -987,8 +988,9 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     else if (score >= 55) label = '準備の年 (基盤構築)';
     else label = '静観の年 (内省慎重)';
 
+    const calendarYear = currentYear + yearsLater;
+    const displayYear = `${calendarYear}年`;
     let text = '';
-    const displayYear = `${yearsLater}年後`;
 
     if (hasOpponent) {
       if (character === 'tsuki') {
