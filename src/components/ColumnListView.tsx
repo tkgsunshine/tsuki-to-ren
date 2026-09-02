@@ -1,0 +1,261 @@
+import React, { useState } from 'react';
+import { BookOpen, Search, Clock, Calendar, ChevronRight, Sparkles } from 'lucide-react';
+import { COLUMNS_DATA } from '../data/columnsData';
+
+interface ColumnListViewProps {
+  onSelectArticle: (slug: string) => void;
+  onNavigateHome: () => void;
+}
+
+export const ColumnListView: React.FC<ColumnListViewProps> = ({
+  onSelectArticle,
+  onNavigateHome
+}) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const categories = [
+    'ALL',
+    '四柱推命・特殊星',
+    '16タイプ・MBTI相性',
+    'ツインレイ・運命の絆',
+    'LINE攻略・アプローチ',
+    '九星気学・バイオリズム'
+  ];
+
+  const filteredArticles = COLUMNS_DATA.filter((art) => {
+    const matchesCategory = selectedCategory === 'ALL' || art.category === selectedCategory;
+    const matchesSearch = searchQuery === '' || 
+      art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      art.metaDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      art.keywords.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
+
+  return (
+    <div style={{
+      width: '100%',
+      maxWidth: '680px',
+      margin: '0 auto',
+      padding: '1.25rem 1rem 6rem',
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1.25rem'
+    }}>
+      {/* Header Banner */}
+      <div className="glass-panel" style={{
+        padding: '1.5rem',
+        textAlign: 'center',
+        background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%)',
+        border: '1px solid rgba(226, 192, 116, 0.3)',
+        borderRadius: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.5rem'
+      }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          padding: '4px 12px',
+          borderRadius: '20px',
+          background: 'rgba(226, 192, 116, 0.15)',
+          border: '1px solid rgba(226, 192, 116, 0.4)',
+          color: '#fef08a',
+          fontSize: '0.72rem',
+          fontWeight: 'bold'
+        }}>
+          <BookOpen size={14} />
+          <span>月と蓮 開運コラム ＆ 恋愛解体新書</span>
+        </div>
+        <h1 className="font-serif gold-text" style={{ fontSize: '1.35rem', fontWeight: 'bold', margin: '0.2rem 0', lineHeight: '1.4' }}>
+          四柱推命 × 16タイプで紐解く<br />恋愛成就・相性攻略ガイド
+        </h1>
+        <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0 }}>
+          魁罡（かいごう）の強運本質、16タイプ相性分析、LINEの吉時間、復縁・ツインレイの深層知識を分かりやすく解説。
+        </p>
+      </div>
+
+      {/* Search Input Bar */}
+      <div style={{ position: 'relative', width: '100%' }}>
+        <input
+          type="text"
+          placeholder="キーワードでコラムを検索（例: 魁罡, INTJ, LINE吉時間）"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '0.75rem 1rem 0.75rem 2.6rem',
+            borderRadius: '14px',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: 'white',
+            fontSize: '0.85rem',
+            outline: 'none',
+            boxSizing: 'border-box'
+          }}
+        />
+        <Search size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+      </div>
+
+      {/* Category Pill Filters */}
+      <div style={{
+        display: 'flex',
+        gap: '0.45rem',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        paddingBottom: '0.35rem'
+      }}>
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setSelectedCategory(cat)}
+            style={{
+              padding: '0.4rem 0.85rem',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              whiteSpace: 'nowrap',
+              border: selectedCategory === cat ? '1px solid rgba(226, 192, 116, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
+              background: selectedCategory === cat ? 'linear-gradient(135deg, rgba(226, 192, 116, 0.25) 0%, rgba(217, 119, 6, 0.25) 100%)' : 'rgba(255, 255, 255, 0.03)',
+              color: selectedCategory === cat ? '#fef08a' : '#9ca3af',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {cat === 'ALL' ? '全コラム' : cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Article Grid List */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {filteredArticles.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#9ca3af', fontSize: '0.85rem' }}>
+            検索結果が見つかりませんでした。「魁罡」や「16タイプ」などキーワードを変えてお試しください。
+          </div>
+        ) : (
+          filteredArticles.map((article) => (
+            <article
+              key={article.id}
+              onClick={() => onSelectArticle(article.slug)}
+              className="glass-panel"
+              style={{
+                padding: '1rem',
+                borderRadius: '16px',
+                display: 'flex',
+                gap: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'rgba(255, 255, 255, 0.02)'
+              }}
+            >
+              {/* Thumbnail Image */}
+              <div style={{
+                width: '100px',
+                height: '100px',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                flexShrink: 0,
+                background: '#110c26',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <img
+                  src={article.thumbnailUrl}
+                  alt={article.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
+
+              {/* Info Column */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                    <span style={{
+                      fontSize: '0.65rem',
+                      padding: '2px 8px',
+                      borderRadius: '10px',
+                      background: 'rgba(168, 85, 247, 0.15)',
+                      border: '1px solid rgba(168, 85, 247, 0.3)',
+                      color: '#d8b4fe',
+                      fontWeight: 'bold'
+                    }}>
+                      {article.category}
+                    </span>
+                    <span style={{ fontSize: '0.68rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Clock size={11} /> {article.readTimeMinutes}分で読める
+                    </span>
+                  </div>
+
+                  <h2 className="font-serif" style={{
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold',
+                    color: '#f8fafc',
+                    lineHeight: '1.4',
+                    margin: '0 0 0.35rem 0',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}>
+                    {article.title}
+                  </h2>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.35rem' }}>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                    <Calendar size={11} /> {article.publishedAt.split('T')[0].replace(/-/g, '/')}
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: '#fef08a', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                    読む <ChevronRight size={14} />
+                  </span>
+                </div>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+
+      {/* Footer CTA Box */}
+      <div className="glass-panel" style={{
+        padding: '1.25rem',
+        borderRadius: '18px',
+        textAlign: 'center',
+        background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%, rgba(217, 119, 6, 0.15) 100%)',
+        border: '1px solid rgba(234, 179, 8, 0.4)',
+        marginTop: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.65rem'
+      }}>
+        <Sparkles size={20} style={{ color: '#fef08a' }} />
+        <h3 className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold', margin: 0 }}>
+          あなたとお相手の本格相性を今すぐ占ってみませんか？
+        </h3>
+        <p style={{ fontSize: '0.75rem', color: '#cbd5e1', margin: 0 }}>
+          四柱推命×16タイプ診断で、二人の運命スコア・トリセツ・LINE吉時間を完全鑑定できます。
+        </p>
+        <button
+          type="button"
+          onClick={onNavigateHome}
+          className="consult-btn font-serif"
+          style={{
+            padding: '0.75rem 1.5rem',
+            fontSize: '0.85rem',
+            fontWeight: 'bold',
+            borderRadius: '9999px',
+            cursor: 'pointer',
+            marginTop: '0.2rem'
+          }}
+        >
+          ✨ 無料相性鑑定をスタートする ➔
+        </button>
+      </div>
+    </div>
+  );
+};

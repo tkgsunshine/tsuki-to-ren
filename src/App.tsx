@@ -23,6 +23,8 @@ import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
+import { ColumnListView } from './components/ColumnListView';
+import { ColumnDetailView } from './components/ColumnDetailView';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
@@ -35,6 +37,8 @@ const formatBirthDate = (val: string): string => {
 function App() {
   // Navigation & Flow
   const [activeTab, setActiveTab] = useState('home');
+  const [selectedColumnSlug, setSelectedColumnSlug] = useState<string | null>(null);
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setIsChatOpen(false);
@@ -49,6 +53,9 @@ function App() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tab === 'profile') {
       setSettingsSubView('main');
+    } else if (tab === 'column') {
+      setSelectedColumnSlug(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
@@ -785,6 +792,31 @@ function App() {
                   : '※チャットでの対話相談機能は、無料会員登録が必要です。'}
               </span>
             </div>
+          </div>
+        )}
+
+        {/* Tab 3: COLUMNS */}
+        {activeTab === 'column' && (
+          <div style={{ animation: 'fadeIn 0.4s ease', width: '100%' }}>
+            {selectedColumnSlug ? (
+              <ColumnDetailView
+                slug={selectedColumnSlug}
+                onBackToList={() => setSelectedColumnSlug(null)}
+                onNavigateHome={() => handleTabChange('home')}
+                onSelectArticle={(slug) => {
+                  setSelectedColumnSlug(slug);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            ) : (
+              <ColumnListView
+                onSelectArticle={(slug) => {
+                  setSelectedColumnSlug(slug);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onNavigateHome={() => handleTabChange('home')}
+              />
+            )}
           </div>
         )}
 

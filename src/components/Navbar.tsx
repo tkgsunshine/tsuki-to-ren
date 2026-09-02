@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, MessageCircle, User } from 'lucide-react';
+import { Sparkles, MessageCircle, User, BookOpen } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
@@ -28,6 +28,14 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
       >
         <Sparkles />
         <span>恋愛運</span>
+      </button>
+
+      <button
+        className={`navbar-item ${activeTab === 'column' ? 'active' : ''}`}
+        onClick={() => setActiveTab('column')}
+      >
+        <BookOpen />
+        <span>コラム</span>
       </button>
 
       <button

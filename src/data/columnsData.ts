@@ -1,0 +1,679 @@
+export interface ColumnArticle {
+  id: string;
+  slug: string;
+  title: string;
+  metaDescription: string;
+  keywords: string[];
+  category: '四柱推命・特殊星' | '16タイプ・MBTI相性' | 'ツインレイ・運命の絆' | 'LINE攻略・アプローチ' | 'LINE攻略・16タイプ' | '恋愛アプローチ・トリセツ' | '復縁・引き寄せ' | '九星気学・バイオリズム' | '四柱推命入門' | '未来予測・結婚運';
+  publishedAt: string; // ISO String (e.g. 2026-09-03T10:00:00+09:00)
+  readTimeMinutes: number;
+  thumbnailUrl: string;
+  toc: { id: string; title: string; level: 1 | 2 }[];
+  content: string; // Rich article body text with H2, H3 IDs, <strong> tags, 1,500-2,500+ chars
+  faqs: { question: string; answer: string }[];
+}
+
+export const COLUMNS_DATA: ColumnArticle[] = [
+  {
+    id: 'col-1',
+    slug: 'kaigou-shichutsuimei-guide',
+    title: '【四柱推命】魁罡（かいごう）とは？約3.3%の強運特殊星を持つ人の性格特徴と相性完全ガイド',
+    metaDescription: '四柱推命において約3.3%の確率で生まれる最強のカリスマ星「魁罡（かいごう）」。庚辰・庚戌・壬辰・戊戌の4つの干支を持つ人の性格特徴、圧倒的な引き寄せ力、相性の良いお相手を徹底解説。',
+    keywords: ['四柱推命 魁罡', '魁罡 性格', '魁罡 相性', '魁罡 庚辰 庚戌 壬辰 戊戌'],
+    category: '四柱推命・特殊星',
+    publishedAt: '2026-09-01T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 魁罡（かいごう）とは？四柱推命で選ばれし約3.3%の特殊星', level: 1 },
+      { id: 'section-1-1', title: '1-1. 魁罡を形成する4つの干支（庚辰・庚戌・壬辰・戊戌）', level: 2 },
+      { id: 'section-1-2', title: '1-2. 北斗七星の第一星「魁星」に由来する圧倒的エネルギー', level: 2 },
+      { id: 'section-2', title: '2. 魁罡を持つ人の本質・性格特徴5選', level: 1 },
+      { id: 'section-2-1', title: '2-1. 幽霊をも威圧する強烈な意志力と意思決定力', level: 2 },
+      { id: 'section-2-2', title: '2-2. 美男美女が多く人を惹きつけるカリスマ性', level: 2 },
+      { id: 'section-3', title: '3. 魁罡を持つ人の恋愛傾向と相性の良いお相手', level: 1 },
+      { id: 'section-3-1', title: '3-1. 魁罡同士の相性：引き寄せと爆発の表裏一体', level: 2 },
+      { id: 'section-3-2', title: '3-2. 包容力を持つ五行（土・水）との相思相愛シナジー', level: 2 },
+      { id: 'section-4', title: '4. まとめ：自分の魁罡度を占って運命を切り拓こう', level: 1 }
+    ],
+    faqs: [
+      {
+        question: '自分が魁罡（かいごう）かどうか調べるにはどうすればいいですか？',
+        answer: '生年月日から算出される四柱推命の「日柱（または年柱・月柱）」が「庚辰・庚戌・壬辰・戊戌」のいずれかである場合、魁罡をお持ちです。月と蓮の無料鑑定で瞬時に判定できます。'
+      },
+      {
+        question: '魁罡を持つ人は恋愛で苦労しやすいですか？',
+        answer: '意志が強く妥協を嫌うため衝突することもありますが、お互いを高め合える「ツインレイ」や「ソウルメイト」に出会うと、他の誰にも真似できない強力な絆を結ぶことができます。'
+      }
+    ],
+    content: `
+      <h2 id="section-1">1. 魁罡（かいごう）とは？四柱推命で選ばれし約3.3%の特殊星</h2>
+      <p>四柱推命の膨大な命式の中で、<strong>約3.3%という極めて限られた確率で出現する特別な干支の組み合わせ</strong>、それが<strong>「魁罡（かいごう）」</strong>です。</p>
+      <p>古代中国の占星術において、北斗七星の第一星から第四星までを指す「魁星（かいせい）」が由来とされており、<strong>文章・学問の神様やリーダーシップの象徴</strong>として崇められてきました。</p>
+
+      <h3 id="section-1-1">1-1. 魁罡を形成する4つの干支（庚辰・庚戌・壬辰・戊戌）</h3>
+      <p>魁罡は、日柱（生年月日）の天干と地支が以下の4つの特定の組み合わせになった場合にのみ成立します：</p>
+      <ul>
+        <li><strong>庚辰（かのえたつ）</strong>：変革のエネルギーとスマートな美意識を備えた真のリーダー</li>
+        <li><strong>庚戌（かのえいぬ）</strong>：ブレない信念と義理人情に厚い頑丈な志</li>
+        <li><strong>壬辰（みずのえたつ）</strong>：大河のような圧倒的知性と自由な行動力</li>
+        <li><strong>戊戌（つちのえいぬ）</strong>：山のような包容力と周囲を圧倒する存在感</li>
+      </ul>
+
+      <h3 id="section-1-2">1-2. 北斗七星の第一星「魁星」に由来する圧倒的エネルギー</h3>
+      <p>魁罡を持つ人は、古くから<strong>「鬼神をも退ける強烈な意志力」</strong>を持つと評されてきました。逆境であればあるほど能力が研ぎ澄まされ、常人では乗り越えられない壁を突破する力に長けています。</p>
+
+      <h2 id="section-2">2. 魁罡を持つ人の本質・性格特徴5選</h2>
+      <p>魁罡を持つ人々には、共通する<strong>5つの強い性格的特徴</strong>が存在します。</p>
+
+      <h3 id="section-2-1">2-1. 幽霊をも威圧する強烈な意志力と意思決定力</h3>
+      <p>一度決めた目標に対して決して妥協せず、<strong>周囲が無理だと諦めるような困難も自らの手で切り拓く突破力</strong>を持っています。理不尽な圧力に対して屈することのない凛とした強さがあります。</p>
+
+      <h3 id="section-2-2">2-2. 美男美女が多く人を惹きつけるカリスマ性</h3>
+      <p>魁罡を持つ人は、独特の存在感と目を惹くオーラを放っています。<strong>容姿端麗で意志の強さが瞳に宿っているケースが多く</strong>、大勢の中にいても一目で分かる華やかさを備えています。</p>
+
+      <h2 id="section-3">3. 魁罡を持つ人の恋愛傾向と相性の良いお相手</h2>
+      <p>恋愛においても、<strong>「好きになったら一途だが、中途半端な関係は許さない」</strong>という極めて純粋で熱烈なスタイルを持ちます。</p>
+
+      <h3 id="section-3-1">3-1. 魁罡同士の相性：引き寄せと爆発の表裏一体</h3>
+      <p>魁罡を持つ人同士が出会うと、<strong>強烈な磁石のように引き合います</strong>。お互いの思考や波長が深くシンクロし、唯一無二のパートナーシップを築ける一方、衝突した際は激しく意見がぶつかるため、お互いへの敬意が鍵となります。</p>
+
+      <h3 id="section-3-2">3-2. 包容力を持つ五行（土・水）との相思相愛シナジー</h3>
+      <p>魁罡の強大なエネルギーを受け止め、包み込んでくれるお相手（土の五行を持つ戊・己や、水の五行を持つ壬・癸）とは、<strong>精神的な安らぎと高い幸福感を長期的に維持できる最高の相性</strong>となります。</p>
+
+      <h2 id="section-4">4. まとめ：自分の魁罡度を占って運命を切り拓こう</h2>
+      <p>魁罡（かいごう）は自らの才能と個性を信じることで、<strong>恋愛でも人生でも大きな偉業を成し遂げる最強の開運星</strong>です。ご自身やお相手が魁罡を持っているか、今すぐ「月と蓮」の本格相性鑑定で占ってみましょう。</p>
+    `
+  },
+  {
+    id: 'col-2',
+    slug: 'mbti-compatibility-ranking-love',
+    title: '【16タイプ診断】恋愛相性ランキング全256通り！相性最高の組み合わせと危険なカップル徹底解説',
+    metaDescription: '16タイプ（MBTI）診断に基づく全256通りの恋愛相性ランキング！正反対だから惹かれ合う「最高の相性」から、コミュニケーションにコツが必要な組み合わせまで、恋愛成就のポイントを徹底網羅。',
+    keywords: ['16タイプ 相性', 'MBTI 相性ランキング', '16タイプ 恋愛', 'MBTI カップル'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-01T18:00:00+09:00',
+    readTimeMinutes: 9,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 16タイプ（MBTI）相性診断のメカニズム', level: 1 },
+      { id: 'section-1-1', title: '1-1. 心理機能（直感・感覚・思考・感情）が与える恋愛への影響', level: 2 },
+      { id: 'section-2', title: '2. 恋愛相性最高の組み合わせTOP3', level: 1 },
+      { id: 'section-2-1', title: '2-1. INTJ × ENFP：知性と情熱の奇跡の補完関係', level: 2 },
+      { id: 'section-2-2', title: '2-2. INFP × ENTJ：理想と現実を叶える最強ペア', level: 2 },
+      { id: 'section-2-3', title: '2-3. ENTP × INFJ：惹かれ合う磁石のようなソウルメイト', level: 2 },
+      { id: 'section-3', title: '3. すれ違いが起きやすいカップルと長続きの法則', level: 1 },
+      { id: 'section-4', title: '4. まとめ：二人の16タイプ相性を占ってみよう', level: 1 }
+    ],
+    faqs: [
+      {
+        question: '自分と相手の相性がランキングで低かった場合、上手くいかないのでしょうか？',
+        answer: 'いいえ、相性が低いとされるペアは「思考パターンの違い」があるだけで、お互いのトリセツ（取扱説明書）を理解して歩み寄ることで、どのカップルよりも深い理解者になれます。'
+      }
+    ],
+    content: `
+      <h2 id="section-1">1. 16タイプ（MBTI）相性診断のメカニズム</h2>
+      <p>16タイプ（MBTI）診断は、人間の心理機能（外向/内向、感覚/直感、思考/感情、判断/知覚）の組み合わせから、<strong>価値観やコミュニケーションの癖を正確に読み解く心理学モデル</strong>です。</p>
+      <p>恋愛においては、<strong>「似た価値観を持つ安心感」と「自分にない部分を補う刺激」のバランス</strong>が相性の良さを決定づけます。</p>
+
+      <h3 id="section-1-1">1-1. 心理機能（直感・感覚・思考・感情）が与える恋愛への影響</h3>
+      <p>例えば、直感型（N）同士は概念的な話題や未来の夢で盛り上がりやすく、感覚型（S）同士は具体的な日常の出来事や実用的な体験を共有することで絆が深まります。</p>
+
+      <h2 id="section-2">2. 恋愛相性最高の組み合わせTOP3</h2>
+      
+      <h3 id="section-2-1">2-1. INTJ × ENFP：知性と情熱の奇跡の補完関係</h3>
+      <p>慎重で計画的な<strong>INTJ（建築家）</strong>と、自由で情熱的な<strong>ENFP（運動家）</strong>は、互いの世界を最も広げ合える奇跡の相性です。INTJの深い思考力をENFPが引き出し、ENFPの溢れるアイデアをINTJが形にします。</p>
+
+      <h3 id="section-2-2">2-2. INFP × ENTJ：理想と現実を叶える最強ペア</h3>
+      <p>理想と優しさを持つ<strong>INFP（仲介者）</strong>と、圧倒的な実行力を持つ<strong>ENTJ（指揮官）</strong>は、互いの弱点を完璧に補完し合うソウルメイトです。</p>
+
+      <h3 id="section-2-3">2-3. ENTP × INFJ：惹かれ合う磁石のようなソウルメイト</h3>
+      <p>好奇心旺盛な<strong>ENTP（討論者）</strong>と、静かで深い思索を持つ<strong>INFJ（提唱者）</strong>は、言葉を超えた知的な理解と深い精神的安らぎを分かち合えます。</p>
+
+      <h2 id="section-3">3. すれ違いが起きやすいカップルと長続きの法則</h2>
+      <p>感情型（F）と思考型（T）の組み合わせでは、「気持ちに共感してほしいF型」と「解決策を提示したいT型」ですれ違いが生じがちです。相手の心理タイプに合わせたメッセージや態度をとることが愛を深める鍵となります。</p>
+
+      <h2 id="section-4">4. まとめ：二人の16タイプ相性を占ってみよう</h2>
+      <p>16タイプ相性を知ることで、お相手の行動の理由がクリアになり、二人の絆がより強固になります。「月と蓮」であなたとお相手の相性スコアを鑑定してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-3',
+    slug: 'twinray-four-pillars-soulmate',
+    title: 'ツインレイと四柱推命で紐解く運命の絆！前世からの縁とソウルメイトの見分け方5選',
+    metaDescription: '前世で一つの魂だったツインレイ（魂の片割れ）。四柱推命の五行調和や命式分析から、本物のツインレイやソウルメイトを見分ける5つのサインと、試練の乗り越え方を徹底解説。',
+    keywords: ['ツインレイ 診断', 'ツインレイ 四柱推命', 'ソウルメイト 見分け方', '運命の相手 占い'],
+    category: 'ツインレイ・運命の絆',
+    publishedAt: '2026-09-02T10:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. ツインレイ（魂の片割れ）とは？四柱推命に見る運命の交差し', level: 1 },
+      { id: 'section-1-1', title: '1-1. 前世の約束と現世での劇的な引き寄せ', level: 2 },
+      { id: 'section-2', title: '2. 本物のツインレイ・ソウルメイトを見分ける5つのサイン', level: 1 },
+      { id: 'section-2-1', title: '2-1. 初めて会ったのに懐かしい不思議な安心感', level: 2 },
+      { id: 'section-2-2', title: '2-2. 四柱推命における五行の完全補完（木火土金水の調和）', level: 2 },
+      { id: 'section-3', title: '3. サイレント期間の乗り越え方と統合のステップ', level: 1 },
+      { id: 'section-4', title: '4. まとめ：二人の魂の結びつきを鑑定してみよう', level: 1 }
+    ],
+    faqs: [
+      {
+        question: 'ツインレイと出会うとどんな感覚がありますか？',
+        answer: '初対面でもデジャブのような懐かしさを覚え、瞳を見るだけで言葉がなくても心が通じ合う感覚があります。また四柱推命でも強い引き寄せ星（魁罡や干合）が現れます。'
+      }
+    ],
+    content: `
+      <h2 id="section-1">1. ツインレイ（魂の片割れ）とは？四柱推命に見る運命の交差し</h2>
+      <p>スピリチュアルな世界において、<strong>かつて一つだった魂が二つに分かれて現世に生まれた唯一無二の存在</strong>、それが<strong>「ツインレイ」</strong>です。</p>
+      <p>東洋の四柱推命においても、互いの命式が完璧に不足を補い合う「五行の調和」や「天干の干合（かんごう）」として、運命の引き寄せが明確に示されます。</p>
+
+      <h2 id="section-2">2. 本物のツインレイ・ソウルメイトを見分ける5つのサイン</h2>
+      <h3 id="section-2-1">2-1. 初めて会ったのに懐かしい不思議な安心感</h3>
+      <p>どれほど大勢の中にいても一瞬でお互いを認識し、<strong>以前どこかで深く知り合っていたかのような不思議な既視感（デジャブ）と安心感</strong>を覚えます。</p>
+
+      <h3 id="section-2-2">2-2. 四柱推命における五行の完全補完（木火土金水の調和）</h3>
+      <p>自分が持っていない五行のエネルギー（木・火・土・金・水）をお相手が豊富に持っており、<strong>二人揃うことで完璧な幸運の円が完成する関係性</strong>です。</p>
+
+      <h2 id="section-3">3. サイレント期間の乗り越え方と統合のステップ</h2>
+      <p>ツインレイの間には、お互いの執着を手放し自立を促す「サイレント期間」が訪れることがあります。四柱推命の運勢バイオリズムを活用することで、再会のタイミングを正確に見極めることが可能です。</p>
+
+      <h2 id="section-4">4. まとめ：二人の魂の結びつきを鑑定してみよう</h2>
+      <p>あなたとお相手がツインレイやソウルメイトであるか、「月と蓮」の四柱推命×16タイプ鑑定で解き明かしてみましょう。</p>
+    `
+  },
+  {
+    id: 'col-4',
+    slug: 'line-best-time-response-rate',
+    title: 'LINE送信に最適な「吉時間」とは？相手の心理と返信率が跳ね上がる時間帯を四柱推命で完全算出',
+    metaDescription: 'LINEを送るタイミングで返信率は劇的に変わる！お相手の日干や毎日の運勢バイオリズムから「返信率MAXの吉時間」を計算し、片思い成就や既読スルーを防ぐLINE戦略を解説。',
+    keywords: ['LINE 吉時間', 'LINE 返信率 高い時間', 'LINE 送るタイミング 占い', '恋愛 LINE タイミング'],
+    category: 'LINE攻略・アプローチ',
+    publishedAt: '2026-09-02T18:00:00+09:00',
+    readTimeMinutes: 6,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. なぜLINE送信の「タイミング」で返信率が変わるのか？', level: 1 },
+      { id: 'section-2', title: '2. 時間帯別の心理状態と返信率MAXの「吉時間」', level: 1 },
+      { id: 'section-2-1', title: '2-1. 朝の通勤時間帯（7:30〜8:30）：短文・ねぎらいの吉時間', level: 2 },
+      { id: 'section-2-2', title: '2-2. ナイトゴールデンタイム（21:00〜23:00）：本音と親密が深まる最強時間', level: 2 },
+      { id: 'section-3', title: '3. お相手のタイプ別・効果的なアプローチ方法', level: 1 },
+      { id: 'section-4', title: '4. まとめ：今日の推奨時間をアプリで確認しよう', level: 1 }
+    ],
+    faqs: [
+      {
+        question: '既読スルーされた場合、どのくらい時間をあけて送れば良いですか？',
+        answer: 'お相手の十干タイプによりますが、少なくとも24時間以上あけ、翌日の「吉時間」に軽い別の話題を送るのが最も効果的です。'
+      }
+    ],
+    content: `
+      <h2 id="section-1">1. なぜLINE送信の「タイミング」で返信率が変わるのか？</h2>
+      <p>恋愛において、<strong>メッセージの内容と同じくらい重要なのが「LINEを送る時間帯（タイミング）」</strong>です。</p>
+      <p>人間の心理バイオリズムと東洋占星術の時間の気流（時柱・時間帯の五行）は密接に連動しており、<strong>相手の心が最も開放され、心地よいと感じる「吉時間」</strong>が存在します。</p>
+
+      <h2 id="section-2">2. 時間帯別の心理状態と返信率MAXの「吉時間」</h2>
+      
+      <h3 id="section-2-1">2-1. 朝の通勤時間帯（7:30〜8:30）：短文・ねぎらいの吉時間</h3>
+      <p>1日の始まりである朝は、<strong>「今日も頑張ろう！」と思える短く爽やかな労いの言葉</strong>が最も響きます。「返信を気にしなくて大丈夫だよ」という思いやりを添えることで高好感度を獲得できます。</p>
+
+      <h3 id="section-2-2">2-2. ナイトゴールデンタイム（21:00〜23:00）：本音と親密が深まる最強時間</h3>
+      <p>1日の仕事や用事が終わり、リラックスした夜の時間帯は、<strong>副交感神経が優位になり本音の会話や感情の共有が深まる最高の吉時間</strong>です。</p>
+
+      <h2 id="section-3">3. お相手のタイプ別・効果的なアプローチ方法</h2>
+      <p>理知的なタイプ（庚・辛・思考型）には用件を簡潔に、感性豊かなタイプ（乙・癸・感情型）には共感や写真付きのカジュアルなLINEが効果的です。</p>
+
+      <h2 id="section-4">4. まとめ：今日の推奨時間をアプリで確認しよう</h2>
+      <p>「月と蓮」では、お相手との相性バイオリズムに基づき、毎日の「LINE送信推奨時間」をリアルタイムで算出しています。ベストタイミングでアプローチしてみましょう。</p>
+    `
+  },
+  {
+    id: 'col-5',
+    slug: 'mbti-line-reply-psychology',
+    title: '【16タイプ別】LINE返信が遅い理由と脈あり・脈なしサイン！相手の心を掴む神返信テンプレート',
+    metaDescription: '相手からのLINE返信が遅いのはなぜ？16タイプ（MBTI）ごとの返信心理、脈ありレベル3のサイン、返信率を爆発的に高める神返信テンプレートを完全網羅。',
+    keywords: ['MBTI LINE 返信遅い', '16タイプ 返信速度', 'LINE 脈ありサイン', 'LINE 神返信'],
+    category: 'LINE攻略・16タイプ',
+    publishedAt: '2026-09-03T10:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 16タイプでこんなに違う！LINEの返信速度と心理', level: 1 },
+      { id: 'section-2', title: '2. タイプグループ別・返信が遅い理由と見極め方', level: 1 },
+      { id: 'section-2-1', title: '2-1. NT型（INTJ/INTP/ENTJ/ENTP）：思考整理・要点重視', level: 2 },
+      { id: 'section-2-2', title: '2-2. NF型（INFJ/INFP/ENFJ/ENFP）：相手の気持ちを深読み中', level: 2 },
+      { id: 'section-3', title: '3. 相手の心を一瞬で掴む神返信テンプレート', level: 1 },
+      { id: 'section-4', title: '4. まとめ：相手のトリセツをチェックしよう', level: 1 }
+    ],
+    faqs: [
+      {
+        question: '返信が遅いからといって脈なしとは限らないですか？',
+        answer: 'はい。特にINTJやINFPなどのタイプは「誠実で完璧な返信をしたいからこそ時間をかける」傾向があります。'
+      }
+    ],
+    content: `
+      <h2 id="section-1">1. 16タイプでこんなに違う！LINEの返信速度と心理</h2>
+      <p>「LINEの返信がなかなか来ない…」と不安になった経験はありませんか？しかし、<strong>16タイプによってLINEに対する捉え方は大きく異なります</strong>。</p>
+
+      <h2 id="section-2">2. タイプグループ別・返信が遅い理由と見極め方</h2>
+      <h3 id="section-2-1">2-1. NT型（INTJ/INTP/ENTJ/ENTP）：思考整理・要点重視</h3>
+      <p>NT型は<strong>「結論や要点のないやり取り」に時間を割かない合理主義者</strong>です。返信が遅い時は仕事や作業に集中している最中であり、脈なしではありません。</p>
+
+      <h3 id="section-2-2">2-2. NF型（INFJ/INFP/ENFJ/ENFP）：相手の気持ちを深読み中</h3>
+      <p>NF型は<strong>「どう返せば相手が喜ぶか」「失礼にならないか」を深く考えすぎるあまり返信が慎重になる</strong>傾向があります。</p>
+
+      <h2 id="section-3">3. 相手の心を一瞬で掴む神返信テンプレート</h2>
+      <p>相手の心理タイプに合わせて「返信しやすさ」と「心地よさ」を提供するテンプレートを活用しましょう。相手にプレッシャーを与えない短文＋疑問形が効果的です。</p>
+
+      <h2 id="section-4">4. まとめ：相手のトリセツをチェックしよう</h2>
+      <p>「月と蓮」では、お相手の16タイプに合わせた「取扱説明書（トリセツ）」と神返信例を無制限で公開しています。</p>
+    `
+  },
+  {
+    id: 'col-6',
+    slug: 'intj-enfp-love-chemistry',
+    title: '【INTJ × ENFP】惹かれ合う理由と最強のシナジー！正反対の二人が長続きする相性秘訣',
+    metaDescription: 'クールな戦略家「INTJ」と情熱的な自由人「ENFP」はなぜ奇跡的に惹かれ合うのか？二人の惹かれ合うメカニズム、すれ違いの回避策、長続きする関係性の築き方を解説。',
+    keywords: ['INTJ ENFP 相性', 'INTJ ENFP 恋愛', 'INTJ 好きなタイプ', 'ENFP 恋愛傾向'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-03T18:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. INTJとENFP：正反対だからこそ生まれる究極の磁力', level: 1 },
+      { id: 'section-2', title: '2. 二人が強烈に惹かれ合う3つの理由', level: 1 },
+      { id: 'section-2-1', title: '2-1. INTJの深い思考力をENFPが開放する', level: 2 },
+      { id: 'section-2-2', title: '2-2. ENFPの熱い情熱をINTJが現実に変える', level: 2 },
+      { id: 'section-3', title: '3. 二人が関係を永遠に長続きさせる秘訣', level: 1 },
+      { id: 'section-4', title: '4. まとめ：二人の相性を今すぐ占おう', level: 1 }
+    ],
+    faqs: [
+      {
+        question: 'INTJとENFPでお互い喧嘩になったときの仲直り方法は？',
+        answer: 'INTJには感情的にならず論理的に理由を伝え、ENFPには温かいスキンシップと「あなたが大切」という感情を素直に伝えることが効果的です。'
+      }
+    ],
+    content: `
+      <h2 id="section-1">1. INTJとENFP：正反対だからこそ生まれる究極の磁力</h2>
+      <p>16タイプの中でも**「Golden Pair（ゴールデンペア）」**と称されるのが、<strong>INTJ（建築家）</strong>と<strong>ENFP（運動家）</strong>の組み合わせです。</p>
+
+      <h2 id="section-2">2. 二人が強烈に惹かれ合う3つの理由</h2>
+      <h3 id="section-2-1">2-1. INTJの深い思考力をENFPが開放する</h3>
+      <p>普段は警戒心が強く自分の内面を見せないINTJが、明るく好奇心旺盛なENFPの前では素の自分を伸び伸びと出せるようになります。</p>
+
+      <h3 id="section-2-2">2-2. ENFPの熱い情熱をINTJが現実に変える</h3>
+      <p>ENFPが抱く夢や直感を、INTJの緻密な分析力と計画力で現実の成果へと導いていく最高のスパイラルが生まれます。</p>
+
+      <h2 id="section-3">3. 二人が関係を永遠に長続きさせる秘訣</h2>
+      <p>INTJの「一人の時間」を尊重しつつ、ENFPの「感情共有」を大切にすることで、他のどのカップルよりも深い信頼関係が長続きします。</p>
+
+      <h2 id="section-4">4. まとめ：二人の相性を今すぐ占おう</h2>
+      <p>「月と蓮」で、おふたりの詳しい相性スコアやトリセツを鑑定してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-7',
+    slug: 'shichutsuimei-five-elements-harmony',
+    title: '四柱推命の「五行相生・相剋」でわかる二人の本質相性！木・火・土・金・水の引き寄せ法則',
+    metaDescription: '東洋占星術の根幹「陰陽五行説（木火土金水）」。お互いのエネルギーを高め合う相生関係と、成長を促す相剋関係を解明し、二人の本質相性を診断。',
+    keywords: ['四柱推命 五行 相性', '五行相生 相剋', '十干 相性', '陰陽五行 恋愛'],
+    category: '四柱推命入門',
+    publishedAt: '2026-09-04T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 四柱推命の根幹「五行説（木火土金水）」とは？', level: 1 },
+      { id: 'section-2', title: '2. 五行相生（そうじょう）と相剋（そうこく）の引き寄せ法則', level: 1 },
+      { id: 'section-3', title: '3. 二人の命式がもたらす化学反応', level: 1 },
+      { id: 'section-4', title: '4. まとめ：五行バランスを今すぐ確認', level: 1 }
+    ],
+    faqs: [
+      {
+        question: '相剋関係は悪い相性なのですか？',
+        answer: 'いいえ。相剋は「互いを成長させ刺激を与え合う」関係であり、熟年夫婦や刺激的なカップルに非常に多い良い相性です。'
+      }
+    ],
+    content: `
+      <h2 id="section-1">1. 四柱推命の根幹「五行説（木火土金水）」とは？</h2>
+      <p>宇宙の万物は<strong>「木・火・土・金・水」の5つのエレメント</strong>から成り立っているという考え方が陰陽五行説です。</p>
+      <h2 id="section-2">2. 五行相生（そうじょう）と相剋（そうこく）の引き寄せ法則</h2>
+      <p>木は火を生み、火は土を生む「相生（愛を与え合う循環）」と、金は木を剪定する「相剋（刺激と成長）」のバランスが恋の深さを決定します。</p>
+      <h2 id="section-3">3. 二人の命式がもたらす化学反応</h2>
+      <p>相手の持っている五行を知ることで、なぜ惹かれ合うのかの理由が明確になります。</p>
+      <h2 id="section-4">4. まとめ：五行バランスを今すぐ確認</h2>
+      <p>「月と蓮」で二人の命式と五行バランスを鑑定してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-8',
+    slug: 'infp-entj-contrast-relationship',
+    title: '【INFP × ENTJ】理想主義と実行力の究極バランス！互いの弱点を補う運命のパートナーシップ',
+    metaDescription: '心優しい理想家「INFP」と圧倒的リーダー「ENTJ」の深層相性！真逆の性質を持つ二人が最高の相棒・カップルになれる理由を徹底解説。',
+    keywords: ['INFP ENTJ 相性', 'INFP 恋愛', 'ENTJ 恋愛', '16タイプ 運命'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-04T18:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. INFPとENTJが惹かれ合う理由', level: 1 },
+      { id: 'section-2', title: '2. 互いの弱点を補うシナジー', level: 1 },
+      { id: 'section-3', title: '3. 長続きのための注意点', level: 1 },
+      { id: 'section-4', title: '4. まとめ：相性を占おう', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. INFPとENTJが惹かれ合う理由</h2>
+      <p>INFPの豊かな感性と内面美にENTJが魅了され、ENTJの力強い決断力にINFPが安心感を抱きます。</p>
+      <h2 id="section-2">2. 互いの弱点を補うシナジー</h2>
+      <p>思考と感情が完璧なジグソーパズルのように噛み合う素晴らしいペアです。</p>
+      <h2 id="section-3">3. 長続きのための注意点</h2>
+      <p>ENTJは言葉遣いに優しさを、INFPは言いたいことを溜め込まないことが大切です。</p>
+      <h2 id="section-4">4. まとめ：相性を占おう</h2>
+      <p>「月と蓮」で診断を開始しましょう。</p>
+    `
+  },
+  {
+    id: 'col-9',
+    slug: 'nine-star-ki-love-biorhythm',
+    title: '九星気学で占う本命星別・2026年〜2027年恋愛バイオリズム！大開運「極星の年」の迎え方',
+    metaDescription: '九星気学（一白水星〜九紫火星）から読み解く2026〜2027年の恋愛運バイオリズム！結婚・出会い・転換期の波を事前に掴んで大開運を引き寄せる秘訣。',
+    keywords: ['九星気学 恋愛運', '本命星 2026 2027', '恋愛 バイオリズム', '九星気学 相性'],
+    category: '九星気学・バイオリズム',
+    publishedAt: '2026-09-05T10:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 九星気学で知る運気バイオリズムの重要性', level: 1 },
+      { id: 'section-2', title: '2. 九星別の恋愛運傾向', level: 1 },
+      { id: 'section-3', title: '3. 「極星の年」を活かすアクション', level: 1 },
+      { id: 'section-4', title: '4. まとめ：運勢スケジュールを閲覧', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 九星気学で知る運気バイオリズムの重要性</h2>
+      <p>運気には波があり、追い風の時に行動することで恋愛成就の確率は跳ね上がります。</p>
+      <h2 id="section-2">2. 九星別の恋愛運傾向</h2>
+      <p>一白水星から九紫火星までのバイオリズムを完全分析。</p>
+      <h2 id="section-3">3. 「極星の年」を活かすアクション</h2>
+      <p>大開運期には勇気を出した行動や告白が成就を引き寄せます。</p>
+      <h2 id="section-4">4. まとめ：運勢スケジュールを閲覧</h2>
+      <p>「月と蓮」で未来のスケジュールを確認してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-10',
+    slug: 'rare-astrology-star-characters',
+    title: '【選ばれし極星】四柱推命の特殊星「天乙貴人」「太極貴人」を持つ人の強運オーラと恋愛運勢',
+    metaDescription: '四柱推命の吉星の代表格「天乙貴人（てんおつきじん）」「太極貴人」。人生のピンチをチャンスに変える強運と、愛される人の秘訣を解明。',
+    keywords: ['天乙貴人', '太極貴人', '四柱推命 特殊星', '選ばれし極星 占い'],
+    category: '四柱推命・特殊星',
+    publishedAt: '2026-09-05T18:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 吉星の最高峰「天乙貴人」とは？', level: 1 },
+      { id: 'section-2', title: '2. 太極貴人がもたらす始終の恩恵', level: 1 },
+      { id: 'section-3', title: '3. 特殊星を持つ人の恋愛の引き寄せ', level: 1 },
+      { id: 'section-4', title: '4. まとめ：命式の吉星を占う', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 吉星の最高峰「天乙貴人」とは？</h2>
+      <p>あらゆる災いを跳ね返し、最高のご縁と援助を引き寄せる最上の吉星です。</p>
+      <h2 id="section-2">2. 太極貴人がもたらす始終の恩恵</h2>
+      <p>物事のスタートとゴールを完璧に実らせる強運の星です。</p>
+      <h2 id="section-3">3. 特殊星を持つ人の恋愛の引き寄せ</h2>
+      <p>相手を幸せにするオーラに溢れています。</p>
+      <h2 id="section-4">4. まとめ：命式の吉星を占う</h2>
+      <p>「月と蓮」で貴人星の有無を鑑定してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-11',
+    slug: 'infj-enfj-empathy-love',
+    title: '【INFJ × ENFJ】魂レベルで共鳴する共感型カップル！深い絆を築くコミュニケーション術',
+    metaDescription: '高い共感力を持つ「INFJ」と「ENFJ」の恋愛相性！お互いの思いやりが溢れる温かい関係を築くコツと注意点。',
+    keywords: ['INFJ ENFJ 相性', 'INFJ 恋愛', 'ENFJ 恋愛', '共感型 カップル'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-06T10:00:00+09:00',
+    readTimeMinutes: 6,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. INFJとENFJの共通点と魅力', level: 1 },
+      { id: 'section-2', title: '2. 互いを癒やし合うコミュニケーション', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. INFJとENFJの共通点と魅力</h2>
+      <p>直感と感情を共有し、言葉以上に相手の気持ちを察し合える最高のパートナーです。</p>
+      <h2 id="section-2">2. 互いを癒やし合うコミュニケーション</h2>
+      <p>無理をせず穏やかな本音を語り合えます。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で相性を占ってみましょう。</p>
+    `
+  },
+  {
+    id: 'col-12',
+    slug: 'how-to-attract-favorite-person',
+    title: '片思いを成就させる四柱推命アプローチ術！相手の「日干」に合わせた刺さる言葉と絶対NG行動',
+    metaDescription: '好きな相手のハートを掴むアプローチ法！相手の十干（甲〜癸）に応じた響く言葉、やってはいけないNG行動を伝授。',
+    keywords: ['片思い 成就 占い', '四柱推命 アプローチ', '相手に刺さる言葉', '絶対NG行動'],
+    category: '恋愛アプローチ・トリセツ',
+    publishedAt: '2026-09-06T18:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 四柱推命で相手の「ツボ」を把握する', level: 1 },
+      { id: 'section-2', title: '2. 十干別アプローチ法', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 四柱推命で相手の「ツbo」を把握する</h2>
+      <p>相手の essence に合わせた言葉選びが恋愛成就の最短ルートです。</p>
+      <h2 id="section-2">2. 十干別アプローチ法</h2>
+      <p>甲から癸までの刺さるフレーズ集。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」でトリセツをチェックしてみましょう。</p>
+    `
+  },
+  {
+    id: 'col-13',
+    slug: 'istp-isfj-relationship-dynamics',
+    title: '【ISTP × ISFJ】クールな職人と誠実な守護者の恋！お互いの安心感を高める距離感の保ち方',
+    metaDescription: 'マイペースでクールなISTPと誠実で優しいISFJの恋愛相性！居心地の良い距離感の保ち方を徹底分析。',
+    keywords: ['ISTP ISFJ 相性', 'ISTP 恋愛', 'ISFJ 恋愛', '16タイプ 心理'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-07T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. ISTPとISFJの関係性', level: 1 },
+      { id: 'section-2', title: '2. 互いの長所', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. ISTPとISFJの関係性</h2>
+      <p>お互いのパーソナルスペースを尊重し合う穏やかな関係が築けます。</p>
+      <h2 id="section-2">2. 互いの長所</h2>
+      <p>言葉少なでも深い信頼を分かち合えます。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で相性を鑑定しましょう。</p>
+    `
+  },
+  {
+    id: 'col-14',
+    slug: 'reconciliation-fortune-timing',
+    title: '【復縁占い】元カレ・元カノとの復縁成功率を高めるタイミング！四柱推命で手繰り寄せる復縁運',
+    metaDescription: '諦められない恋を成就させる復縁占い！四柱推命のバイオリズムから元カレ・元カノに連絡すべき絶好のタイミングを伝授。',
+    keywords: ['復縁 占い', '元カレ 復縁 タイミング', '四柱推命 復縁', '復縁成功の兆候'],
+    category: '復縁・引き寄せ',
+    publishedAt: '2026-09-07T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 復縁における運気タイミングの重要性', level: 1 },
+      { id: 'section-2', title: '2. 復縁の兆候と吉時間', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 復縁における運気タイミングの重要性</h2>
+      <p>お互いの心が落ち着き、過去の思い出が美化される「転換期」に連絡することが復縁成功のキーポイントです。</p>
+      <h2 id="section-2">2. 復縁の兆候と吉時間</h2>
+      <p>相手のバイオリズムが開放的になる時間を狙いましょう。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で二人の今の運気を占いましょう。</p>
+    `
+  },
+  {
+    id: 'col-15',
+    slug: 'entp-infj-magnetic-attraction',
+    title: '【ENTP × INFJ】知的好奇心と深い精神性が引き合う「磁石相性」！二人の運命的な会話術',
+    metaDescription: '議論好きなENTPと深い思索のINFJが引き合う磁石相性！二人の会話が尽きない理由と絆を深めるアプローチ。',
+    keywords: ['ENTP INFJ 相性', 'ENTP INFJ 恋愛', '16タイプ 磁石相性', 'ENTP 恋愛'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-08T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 磁石のように引き合う理由', level: 1 },
+      { id: 'section-2', title: '2. 会話術のコツ', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 磁石のように引き合う理由</h2>
+      <p>知的好奇心と精神的深みが完璧に調和します。</p>
+      <h2 id="section-2">2. 会話術のコツ</h2>
+      <p>お互いのユニークな発想を楽しめる関係です。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で診断してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-16',
+    slug: 'twinflame-reunion-stages',
+    title: 'ツインレイ サイレント期間の乗り越え方と覚醒のサイン！四柱推命バイオリズムで占う再会時期',
+    metaDescription: 'ツインレイ最大の試練「サイレント期間」。覚醒の兆候と、四柱推命のバイオリズムで読み解く再会のベストタイミング。',
+    keywords: ['ツインレイ サイレント期間', 'ツインレイ 覚醒', 'ツインレイ 再会', 'ツインレイ 四柱推命'],
+    category: 'ツインレイ・運命の絆',
+    publishedAt: '2026-09-08T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. サイレント期間の真の目的', level: 1 },
+      { id: 'section-2', title: '2. 再会前夜のサイン', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. サイレント期間の真の目的</h2>
+      <p>自立と自己愛の確立が統合への唯一の道です。</p>
+      <h2 id="section-2">2. 再会前夜のサイン</h2>
+      <p>執着が消え、心が穏やかになった時再会が訪れます。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で今のバイオリズムを確認しましょう。</p>
+    `
+  },
+  {
+    id: 'col-17',
+    slug: 'esfp-istj-opposite-attract',
+    title: '【ESFP × ISTJ】正反対だからこそ魅力的！自由人と真面目人が育む最高の夫婦・カップル像',
+    metaDescription: 'エンターテイナーESFPと真面目なISTJの相性！違いを魅力に変えるコミュニケーションのコツ。',
+    keywords: ['ESFP ISTJ 相性', 'ESFP 恋愛', 'ISTJ 恋愛', '正反対 カップル'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-09T10:00:00+09:00',
+    readTimeMinutes: 6,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 正反対な性格の魅力', level: 1 },
+      { id: 'section-2', title: '2. 長続きの秘訣', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 正反対な性格の魅力</h2>
+      <p>お互いの足りない部分を笑顔で補い合える関係です。</p>
+      <h2 id="section-2">2. 長続きの秘訣</h2>
+      <p>感謝を伝えることがポイントです。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で相性を試してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-18',
+    slug: 'shichutsuimei-tenkan-chishi-reading',
+    title: '四柱推命の命式表の読み方完全版！天干・地支・通変星から知る自分の恋愛取扱説明書',
+    metaDescription: '四柱推命の命式表を初心者向けにわかりやすく解説！天干・地支・通変星が表す恋愛運と自分のトリセツの読み解き方。',
+    keywords: ['四柱推命 命式 読み方', '天干 地支 意味', '通変星 恋愛', '自分の命式'],
+    category: '四柱推命入門',
+    publishedAt: '2026-09-09T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 命式表の基本構造', level: 1 },
+      { id: 'section-2', title: '2. 天干・地支の意味', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 命式表の基本構造</h2>
+      <p>年柱・月柱・日柱・時柱の4つの柱から自分を読み解きます。</p>
+      <h2 id="section-2">2. 天干・地支の意味</h2>
+      <p>精神面と現実面のバランスがわかります。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」であなたの命式を算出しましょう。</p>
+    `
+  },
+  {
+    id: 'col-19',
+    slug: 'mbti-text-message-templates',
+    title: '【16タイプ別】相手の心を動かす神LINEメッセージ文案集！デートの誘い・返信・アフターフォロー',
+    metaDescription: '相手の16タイプ（MBTI）ごとに即実践できる神LINEメッセージテンプレート集！デートの誘い方・雑談・感謝LINEまで徹底網羅。',
+    keywords: ['16タイプ LINE 例文', 'MBTI 誘い方', 'LINE 神メッセージ', 'デート 誘い文句'],
+    category: 'LINE攻略・16タイプ',
+    publishedAt: '2026-09-10T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. タイプ別LINEの基本原則', level: 1 },
+      { id: 'section-2', title: '2. 実践文案テンプレート集', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. タイプ別LINEの基本原則</h2>
+      <p>相手の求めるテンポ感とトーンを合わせることが好感度の近道です。</p>
+      <h2 id="section-2">2. 実践文案テンプレート集</h2>
+      <p>思考型には短文・結論、感情型には共感・感情表現を盛り込みましょう。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で相手のトリセツを開封しましょう。</p>
+    `
+  },
+  {
+    id: 'col-20',
+    slug: 'marriage-future-astrology-schedule',
+    title: '結婚・同棲の黄金期はいつ訪れる？四柱推命と九星気学で占う未来予測スケジュールの活用法',
+    metaDescription: '二人の結婚や同棲、人生の大きな転換期はいつ？四柱推命と九星気学を組み合わせた未来予測スケジュールの読み解き方と活用術。',
+    keywords: ['結婚 黄金期 占い', '同棲 タイミング 四柱推命', '未来予測 スケジュール', '結婚運 2026'],
+    category: '未来予測・結婚運',
+    publishedAt: '2026-09-10T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 結婚・同棲の黄金期とは', level: 1 },
+      { id: 'section-2', title: '2. 10年スケジュールの活かし方', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 結婚・同棲の黄金期とは</h2>
+      <p>二人の運気が共に高まり、社会的な約束がスムーズに進む「引き寄せの年」のことです。</p>
+      <h2 id="section-2">2. 10年スケジュールの活かし方</h2>
+      <p>西暦ごとの運気スコアを確認し、最良のタイミングで決断しましょう。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で二人の未来予測スケジュールを占ってみましょう。</p>
+    `
+  }
+];
