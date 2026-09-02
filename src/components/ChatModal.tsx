@@ -165,6 +165,11 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     setIsTyping(true);
 
     try {
+      const history = messages.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'model',
+        text: m.text
+      }));
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -173,7 +178,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         body: JSON.stringify({
           message: text,
           character,
-          diagnosedData: getDiagnosedDataText()
+          diagnosedData: getDiagnosedDataText(),
+          history
         })
       });
       
