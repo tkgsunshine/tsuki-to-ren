@@ -2050,66 +2050,96 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
             {/* Lock CTA Card placed BELOW the content boxes for Non-Premium Users */}
             {!isSubscribed && (
-              <div style={{
-                marginTop: '0.25rem',
-                background: 'rgba(15, 10, 30, 0.92)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
+              <div className="glass-panel animate-pulse-subtle" style={{
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.04) 0%, rgba(15, 15, 27, 0.98) 100%)',
+                border: '1px solid rgba(226, 192, 116, 0.25)',
                 borderRadius: '16px',
-                padding: '0.85rem 1rem',
+                padding: '1.25rem',
+                marginTop: '0.75rem',
+                textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.55rem',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.6), 0 0 15px rgba(226,192,116,0.15)',
-                textAlign: 'center',
+                gap: '0.85rem',
                 width: '100%',
                 boxSizing: 'border-box'
               }}>
-                <div style={{ color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <Lock size={15} />
-                  <span style={{ fontSize: '0.82rem', fontWeight: 'bold' }}>🔒 プレミアム会員限定コンテンツ</span>
+                <div>
+                  <span style={{
+                    fontSize: '0.6rem',
+                    color: 'var(--color-gold)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    fontWeight: 'bold',
+                    background: 'rgba(226, 192, 116, 0.1)',
+                    padding: '2px 8px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(226, 192, 116, 0.2)'
+                  }}>
+                    ✦ プレミアムプラン解放 ✦
+                  </span>
+                  <h3 className="font-serif gold-text" style={{ fontSize: '1.02rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', whiteSpace: 'nowrap' }}>
+                    二人の取扱説明書・6軸詳細相性・未来予測をすべて解禁
+                  </h3>
+                  <p style={{ fontSize: '0.72rem', color: '#d1d5db', lineHeight: '1.4', margin: 0 }}>
+                    月額500円で、取扱説明書8大コンテンツや6軸詳細相性分析、今後の運勢バイオリズムをいつでも確認できます。
+                  </p>
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#cbd5e1', lineHeight: '1.5', margin: '0.35rem 0 0.45rem 0', textAlign: 'left' }}>
-                  <div style={{ fontWeight: 'bold', color: '#fef08a', marginBottom: '0.35rem', fontSize: '0.72rem' }}>
-                    プレミアム登録（月額500円）で、以下を含む「全11大攻略コンテンツ」がすべて解禁！
+
+                {/* Comprehensive Premium Benefits list */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                    <span><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></span>
                   </div>
-                  <ul style={{ margin: 0, paddingLeft: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <li><strong>お相手の取扱説明書（取説）</strong>：刺さる言葉・絶対NG行動・神返信例・脈あり診断・LINEテンプレートなど8大コンテンツ</li>
-                    <li><strong>未来予測スケジュール</strong>：今後7日間のバイオリズム・月次運勢・年次運勢の3大コンテンツ</li>
-                  </ul>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                    <span><strong>6軸詳細相性分析（レーダーチャート）の完全解説</strong></span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                    <span><strong>月次・年次運勢スケジュールの完全閲覧</strong></span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                    <span><strong>お相手の保存上限が10人に拡大</strong>（無料会員2人 → 10人）</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                    <span><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                    <span><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></span>
+                  </div>
                 </div>
-                <button
-                  onClick={() => {
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      onSubscribe();
-                      setSubSuccess(true);
-                    }
-                  }}
-                  style={{
-                    width: '100%',
-                    background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
-                    border: 'none',
-                    borderRadius: '9999px',
-                    padding: '0.7rem 1.2rem',
-                    color: '#000000',
-                    fontSize: '0.85rem',
-                    fontWeight: '800',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.4rem',
-                    boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <span style={{ fontSize: '1rem' }}>🔓</span>
-                  <span>プレミアム登録して全解禁（月額500円）</span>
-                </button>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isRegistered) {
+                        handleScrollToRegister();
+                      } else if (onOpenPremiumLP) {
+                        onOpenPremiumLP();
+                      } else {
+                        onSubscribe();
+                        setSubSuccess(true);
+                      }
+                    }}
+                    className="consult-btn font-serif"
+                    style={{
+                      fontSize: '0.85rem',
+                      padding: '0.75rem',
+                      fontWeight: 'bold',
+                      width: '100%',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(254,240,138,0.3)',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    🔒 プレミアム登録して全解禁 (月額500円)
+                  </button>
+                </div>
               </div>
             )}
           </div>
