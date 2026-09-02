@@ -1150,12 +1150,12 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         : '今日は徹底的に自分を癒すスペシャルの日です。自分を思いっきり甘やかし褒めてあげることで、明日以降の開運ウェーブを引き寄せます。'
     ),
     radarScores: {
-      romance: Math.min(99, Math.max(50, Math.floor(baseScore + (myPillarObj.stem === oppPillarObj?.stem ? 5 : 0)))),
-      conversation: Math.min(99, Math.max(45, Math.floor(baseScore * 0.7 + (mbtiNames[input.myMbti] ? 15 : 5) + Math.abs(Math.sin(todaySeed + 13)) * 12))),
-      sensual: Math.min(99, Math.max(55, Math.floor(baseScore * 0.65 + (hasOpponent ? 22 : 12) + Math.abs(Math.cos(todaySeed + 41)) * 14))),
-      marriage: Math.min(99, Math.max(40, Math.floor(baseScore * 0.8 + (hasOpponent ? 15 : 5) + Math.abs(Math.sin(todaySeed + 77)) * 10))),
-      obsession: Math.min(99, Math.max(50, Math.floor(baseScore * 0.6 + (hasOpponent ? 25 : 10) + Math.abs(Math.sin(todaySeed + 99)) * 15))),
-      trust: Math.min(99, Math.max(45, Math.floor(baseScore * 0.75 + (hasOpponent ? 18 : 8) + Math.abs(Math.cos(todaySeed + 123)) * 10)))
+      romance: Math.min(99, Math.max(42, Math.floor(baseScore + Math.sin(todaySeed * 1.3 + 7) * 16 + (myPillarObj.stem === oppPillarObj?.stem ? 12 : -5)))),
+      conversation: Math.min(99, Math.max(45, Math.floor(baseScore * 0.85 + Math.cos(todaySeed * 2.7 + 19) * 18 + (input.myMbti !== input.opponentMbti ? 10 : -8)))),
+      sensual: Math.min(99, Math.max(48, Math.floor(baseScore * 0.9 + Math.sin(todaySeed * 4.1 + 33) * 20 + ((isKaigo || opponentIsKaigo || isRare || opponentIsRare) ? 15 : -3)))),
+      marriage: Math.min(99, Math.max(40, Math.floor(baseScore * 0.78 + Math.cos(todaySeed * 5.9 + 51) * 17 + (myPillarObj.branch !== oppPillarObj?.branch ? 8 : -6)))),
+      obsession: Math.min(99, Math.max(50, Math.floor(baseScore * 0.95 + Math.sin(todaySeed * 7.3 + 77) * 19 + ((isKaigo || opponentIsKaigo) ? 18 : 4)))),
+      trust: Math.min(99, Math.max(43, Math.floor(baseScore * 0.82 + Math.cos(todaySeed * 8.8 + 101) * 15 + (hasOpponent ? 6 : -4))))
     },
     myTorisetsu: generateTorisetsu(
       myPillarObj.stem,
