@@ -2234,7 +2234,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
-            <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>● 今後7日間の相性バイオリズム {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 今後7日間の相性バイオリズム {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
               <div 
                 className={isSubscribed ? '' : 'timeline-blurred'} 
@@ -2294,7 +2294,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Monthly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
-            <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>● 月次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 月次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
@@ -2375,7 +2375,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Yearly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
-            <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
