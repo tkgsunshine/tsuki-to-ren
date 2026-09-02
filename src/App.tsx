@@ -23,7 +23,7 @@ import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
-import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, type UserProfile, type UserProfile as FirebaseUser } from './services/firebase';
+import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -455,16 +455,9 @@ function App() {
     } catch (err) {
       console.warn('sendEmailMagicLink warning:', err);
     }
-    const tempUser: UserProfile = {
-      uid: 'email-' + Date.now(),
-      displayName: email.split('@')[0] || '会員ユーザー',
-      email: email,
-      photoURL: null,
-      providerId: 'email'
-    };
-    setCurrentUser(tempUser);
-    localStorage.setItem('hasu_tsuki_user', JSON.stringify(tempUser));
-    setIsRegistered(true);
+    // Note: Do NOT set isRegistered to true here immediately!
+    // User becomes registered ONLY after clicking the magic link in their email inbox,
+    // which triggers completeEmailMagicLinkSignIn() on page load.
   };
 
   // Helper to get active result based on chosen character tab
