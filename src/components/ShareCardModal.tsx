@@ -76,8 +76,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       const canvas = await html2canvas(cardRef.current, {
         useCORS: true,
         allowTaint: true,
-        scale: 2.5, // High quality
-        backgroundColor: '#020205'
+        scale: 3, // Ultra crisp high resolution
+        backgroundColor: '#05040a',
+        logging: false
       });
       const dataUrl = canvas.toDataURL('image/png');
 
@@ -299,33 +300,38 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           }}>
             {showOpponent && result.opponentAvatarUrl ? (
               <>
-                <div style={{
-                  flex: 1,
-                  backgroundImage: `url(${result.myAvatarUrl})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
-                <div style={{
-                  flex: 1,
-                  backgroundImage: `url(${result.opponentAvatarUrl})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
+                <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+                  <img
+                    src={result.myAvatarUrl}
+                    alt={myName}
+                    crossOrigin="anonymous"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+                  />
+                </div>
+                <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+                  <img
+                    src={result.opponentAvatarUrl}
+                    alt={oppNickname}
+                    crossOrigin="anonymous"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+                  />
+                </div>
               </>
             ) : (
-              <div style={{
-                width: '100%',
-                height: '100%',
-                backgroundImage: `url(${result.myAvatarUrl})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }} />
+              <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+                <img
+                  src={result.myAvatarUrl}
+                  alt={myName}
+                  crossOrigin="anonymous"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+                />
+              </div>
             )}
             {/* Dark overlay gradient for readability */}
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.12) 0%, rgba(5, 5, 10, 0.22) 45%, rgba(2, 2, 5, 0.55) 100%)'
+              background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.2) 0%, rgba(5, 5, 10, 0.5) 45%, rgba(2, 2, 5, 0.88) 100%)'
             }} />
           </div>
           {/* Card Top */}
@@ -339,13 +345,12 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                     color: '#fef08a',
                     fontWeight: 'bold',
                     letterSpacing: '0.08em',
-                    background: 'rgba(15, 10, 25, 0.38)',
+                    background: 'rgba(15, 10, 25, 0.85)',
                     border: '1px solid rgba(226, 192, 116, 0.35)',
                     padding: '4px 10px',
                     borderRadius: '20px',
                     display: 'inline-block',
                     alignSelf: 'center',
-                    backdropFilter: 'blur(4px)',
                     boxShadow: '0 0 10px rgba(226, 192, 116, 0.2)'
                   }}>
                     {result.compatibilityTitle}
@@ -400,7 +405,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0.25rem 0' }}>
-                  <div style={{ display: 'flex', gap: '1.25rem', background: 'rgba(10, 10, 20, 0.28)', backdropFilter: 'blur(4px)', padding: '8px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.18)' }}>
+                  <div style={{ display: 'flex', gap: '1.25rem', background: 'rgba(15, 10, 25, 0.85)', padding: '8px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.18)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontSize: '0.65rem', color: '#cbd5e1' }}>基本相性</span>
                       <span className="font-serif gold-text" style={{ fontSize: '1.5rem', fontWeight: 'bold', lineHeight: '1.2' }}>
@@ -426,8 +431,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 {/* Top Left: Title Badge */}
                 <div style={{
-                  background: 'rgba(10, 10, 25, 0.75)',
-                  backdropFilter: 'blur(8px)',
+                  background: 'rgba(10, 10, 25, 0.88)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   padding: '8px 14px',
                   borderRadius: '16px',
@@ -450,8 +454,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
                 {/* Top Right: Score & Date Card */}
                 <div style={{
-                  background: 'rgba(10, 10, 25, 0.75)',
-                  backdropFilter: 'blur(8px)',
+                  background: 'rgba(10, 10, 25, 0.88)',
                   border: '1px solid rgba(147, 197, 253, 0.3)',
                   padding: '6px 12px',
                   borderRadius: '16px',
@@ -501,7 +504,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
             {/* My Tags */}
             <div style={{ fontSize: '0.6rem', color: myTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-              <span style={{ background: myTagBg, backdropFilter: 'blur(4px)', padding: '4px 10px', borderRadius: '8px', border: myTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
+              <span style={{ background: myTagBg, padding: '4px 10px', borderRadius: '8px', border: myTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
                 あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
                 {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
               </span>
@@ -510,7 +513,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             {/* Opponent Tags */}
             {showOpponent && result.opponentPillar && (
               <div style={{ fontSize: '0.6rem', color: oppTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                <span style={{ background: oppTagBg, backdropFilter: 'blur(4px)', padding: '4px 10px', borderRadius: '8px', border: oppTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
+                <span style={{ background: oppTagBg, padding: '4px 10px', borderRadius: '8px', border: oppTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
                   相手：{getPillarWithReading(result.opponentPillar)} / {result.opponentStar} / {result.opponentMbtiText?.split(' ')[0] || '不明'}
                   {result.opponentIsKaigo ? ' / 👑 魁罡' : (result.opponentIsRare ? ' / 👑 極星' : '')}
                 </span>
@@ -637,14 +640,13 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.92)',
+          background: 'rgba(10, 10, 25, 0.94)',
           zIndex: 50,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '1.5rem',
-          backdropFilter: 'blur(8px)',
           animation: 'fadeIn 0.2s ease'
         }}>
           <div style={{
