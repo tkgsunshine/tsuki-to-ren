@@ -1763,11 +1763,11 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#9ca3af' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都港区六本木6-10-1 六本木ヒルズ</span>
+                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>お問合せ</span>
-                  <span style={{ color: 'white' }}>support@hasu-to-tsuki.app</span>
+                  <span style={{ color: 'white' }}>support@tsuki-to-ren.com</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>販売価格</span>
