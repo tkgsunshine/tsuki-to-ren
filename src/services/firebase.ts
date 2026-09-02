@@ -132,14 +132,19 @@ export const signInWithX = async (): Promise<UserProfile> => {
 // Sign Out
 // Send Email Magic Link (Passwordless Sign-In)
 export const sendEmailMagicLink = async (email: string): Promise<void> => {
+  const isLocal = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
+  const redirectUrl = isLocal ? 'https://tsuki-to-ren-dba8c.firebaseapp.com' : (window.location.origin + '/');
+  
   const actionCodeSettings = {
-    url: window.location.href.split('?')[0].split('#')[0],
+    url: redirectUrl,
     handleCodeInApp: true,
   };
   try {
     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-  } catch (err) {
-    console.warn('Firebase sendSignInLinkToEmail notice:', err);
+    console.log('Firebase sendSignInLinkToEmail SUCCESS for:', email);
+  } catch (err: any) {
+    console.error('Firebase sendSignInLinkToEmail ERROR:', err?.code, err?.message, err);
+    throw err;
   }
   window.localStorage.setItem('emailForSignIn', email);
 };

@@ -384,8 +384,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
       alert('有効なメールアドレスを入力してください。');
       return;
     }
-    await onRegister(email);
-    setEmailSent(true);
+    try {
+      await onRegister(email);
+      setEmailSent(true);
+    } catch (err: any) {
+      console.error('Registration email send error:', err);
+      const code = err?.code || '';
+      if (code === 'auth/unauthorized-continue-uri' || code === 'auth/invalid-continue-uri') {
+        alert('Firebase Consoleの承認済みドメイン（Authorized domains）に現在のドメインが登録されていません。');
+      } else if (code === 'auth/operation-not-allowed') {
+        alert('Firebase Consoleでメールリンクログインが無効になっています。');
+      } else {
+        alert(`メール送信エラー (${code || '送信失敗'}): 迷惑メールフォルダをご確認いただくか、Firebase Consoleの設定をご確認ください。`);
+      }
+    }
   };
 
   return (
