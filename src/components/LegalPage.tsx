@@ -250,7 +250,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>代表者</td>
-                  <td>代表取締役　須藤 龍也</td>
+                  <td>代表取締役　山下 高志</td>
                 </tr>
                 <tr>
                   <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>設立</td>
