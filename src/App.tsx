@@ -50,12 +50,18 @@ function App() {
     if (tab === 'home') {
       setFlowStep('input');
       setLoadedPartner(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const mainEl = document.querySelector('.main-content');
+      if (mainEl) mainEl.scrollTop = 0;
     } else if (tab === 'profile') {
       setSettingsSubView('main');
     } else if (tab === 'column') {
       setSelectedColumnSlug(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo(0, 0);
+      const mainEl = document.querySelector('.main-content');
+      if (mainEl) mainEl.scrollTop = 0;
     }
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
