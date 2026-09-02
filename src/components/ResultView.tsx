@@ -2653,38 +2653,51 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   position: 'relative'
                 }}
               >
-                {/* Top In-Image Overlay (Header Badge + Nickname) */}
+                {/* Top In-Image Overlay (Top-Left Header Badge, Top-Right Nickname) */}
                 <div style={{
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   right: 0,
                   background: 'linear-gradient(to bottom, rgba(8, 6, 20, 0.92) 0%, rgba(12, 9, 28, 0.65) 65%, rgba(12, 9, 28, 0) 100%)',
-                  padding: '0.75rem 0.75rem 0.85rem',
+                  padding: '0.85rem 1rem',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '0.2rem',
+                  justifyContent: 'space-between',
+                  gap: '0.5rem',
                   zIndex: 5
                 }}>
+                  {/* Top-Left: Header Pill Badge */}
                   <div style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.35rem',
-                    padding: '0.25rem 0.85rem',
-                    background: 'rgba(0, 0, 0, 0.55)',
+                    padding: '0.25rem 0.75rem',
+                    background: 'rgba(0, 0, 0, 0.65)',
                     border: '1px solid rgba(226, 192, 116, 0.45)',
                     borderRadius: '16px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
                   }}>
-                    <span className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)' }}>
+                    <span className="font-serif" style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)' }}>
                       {zoomedImg.headerTitle}
                     </span>
                   </div>
+
+                  {/* Top-Right: Nickname */}
                   {zoomedImg.nickname && (
-                    <span className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold', textShadow: '0 2px 6px rgba(0,0,0,0.9)', letterSpacing: '0.04em' }}>
-                      {zoomedImg.nickname}
-                    </span>
+                    <div style={{
+                      padding: '0.2rem 0.65rem',
+                      background: 'rgba(0, 0, 0, 0.55)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '12px',
+                      maxWidth: '130px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      <span className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold', textShadow: '0 2px 6px rgba(0,0,0,0.9)', letterSpacing: '0.04em' }}>
+                        {zoomedImg.nickname.length > 8 ? zoomedImg.nickname.substring(0, 8) + '...' : zoomedImg.nickname}
+                      </span>
+                    </div>
                   )}
                 </div>
                 <img 
