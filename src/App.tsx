@@ -1113,9 +1113,10 @@ function App() {
                   <label style={{ fontSize: '0.75rem', color: '#9ca3af' }}>お名前</label>
                   <input
                     type="text"
+                    maxLength={8}
                     value={myName === 'あなた' ? '' : myName}
-                    placeholder="あなた"
-                    onChange={(e) => setMyName(e.target.value || 'あなた')}
+                    placeholder="あなた (最大8文字)"
+                    onChange={(e) => setMyName(e.target.value.slice(0, 8) || 'あなた')}
                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.7rem 0.9rem', color: 'white', outline: 'none' }}
                   />
                 </div>

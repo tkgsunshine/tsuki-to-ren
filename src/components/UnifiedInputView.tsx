@@ -281,9 +281,10 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>ニックネーム (任意)</label>
             <input
               type="text"
-              placeholder="あなた"
+              maxLength={8}
+              placeholder="あなた (最大8文字)"
               value={myName}
-              onChange={(e) => setMyName(e.target.value)}
+              onChange={(e) => setMyName(e.target.value.slice(0, 8))}
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
             />
           </div>
@@ -503,9 +504,10 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
               <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手のニックネーム (任意)</label>
               <input
                 type="text"
-                placeholder="お相手"
+                maxLength={8}
+                placeholder="お相手 (最大8文字)"
                 value={oppName}
-                onChange={(e) => setOppName(e.target.value)}
+                onChange={(e) => setOppName(e.target.value.slice(0, 8))}
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
               />
             </div>
