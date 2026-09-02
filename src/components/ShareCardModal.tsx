@@ -47,9 +47,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  // Limit nickname character length to 11
+  // Limit nickname character length to 8 max
   const formatName = (name: string) => {
-    return name.length > 11 ? `${name.substring(0, 10)}...` : name;
+    return name.slice(0, 8);
   };
 
   const getShareUrlForTab = () => {
@@ -357,21 +357,23 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   </div>
                 )}
                 <div className="font-serif" style={{
-                  fontSize: '1.15rem',
+                  fontSize: '0.95rem',
                   fontWeight: 'bold',
                   color: 'white',
-                  letterSpacing: '0.05em',
+                  letterSpacing: '0.02em',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.5rem',
+                  gap: '0.35rem',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
                   borderBottom: '1px solid rgba(255,255,255,0.15)',
                   paddingBottom: '0.5rem',
                   textShadow: '0 2px 8px rgba(0,0,0,0.95)'
                 }}>
-                  <span>{formatName(myName)}</span>
-                  <span style={{ fontSize: '0.85rem', color: '#fbbf24' }}>×</span>
-                  <span>{formatName(oppNickname)}</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatName(myName)}</span>
+                  <span style={{ fontSize: '0.8rem', color: '#fbbf24', flexShrink: 0 }}>×</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatName(oppNickname)}</span>
                 </div>
 
                 {/* Rare Badges for Match Mode */}
