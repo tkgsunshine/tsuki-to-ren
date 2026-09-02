@@ -2654,7 +2654,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </span>
               </div>
 
-              {/* Expanded Image with Rich Border */}
+              {/* Expanded Image Container with Overlay inside bottom */}
               <div 
                 className={zoomedImg.isKaigo ? 'kaigo-border' : (zoomedImg.isRare ? 'rare-rainbow-border' : '')}
                 style={{
@@ -2679,74 +2679,87 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <div className="avatar-halo-spotlight" />
                   </>
                 )}
-              </div>
 
-              {/* Title, Badges & Download Button matching card visual */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
-                  <span className="font-serif gold-text" style={{ fontSize: '1.05rem', fontWeight: 'bold' }}>
-                    {zoomedImg.astrologyName}
-                  </span>
-                  <span className={zoomedImg.isKaigo ? 'kaigo-badge' : (zoomedImg.isRare ? 'rare-badge' : '')} style={{
-                    fontSize: '0.62rem',
-                    padding: '2px 7px',
-                    borderRadius: '4px',
-                    background: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)'),
-                    color: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '#d8b4fe' : '#93c5fd'),
-                    border: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)')
-                  }}>
-                    {zoomedImg.isKaigo ? '👑 魁罡' : (zoomedImg.isRare ? '👑 選ばれし極星' : (zoomedImg.myGender === 'female' ? '女性' : '男性'))}
-                  </span>
-                </div>
-
-                <div style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.4', fontWeight: '500', textAlign: 'center' }}>
-                  {zoomedImg.astrologyTheme}
-                </div>
-
-                {/* 3 Attribute Grid Boxes (五行・性格分類・守護カラー) */}
+                {/* Glass Bottom Overlay inside Image */}
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
-                  gap: '8px',
-                  width: '100%',
-                  marginTop: '0.4rem',
-                  marginBottom: '0.2rem'
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(to top, rgba(8, 6, 20, 0.96) 0%, rgba(12, 9, 28, 0.88) 75%, rgba(12, 9, 28, 0) 100%)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  padding: '1.25rem 0.75rem 0.75rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  zIndex: 5
                 }}>
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '7px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.58rem', color: '#9ca3af' }}>五行 (陰陽)</span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--color-gold)' }}>{zoomedImg.astrologyElement || '金・陽'}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+                    <span className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+                      {zoomedImg.astrologyName}
+                    </span>
+                    <span className={zoomedImg.isKaigo ? 'kaigo-badge' : (zoomedImg.isRare ? 'rare-badge' : '')} style={{
+                      fontSize: '0.6rem',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      background: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(59, 130, 246, 0.25)'),
+                      color: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '#d8b4fe' : '#93c5fd'),
+                      border: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid rgba(59, 130, 246, 0.4)')
+                    }}>
+                      {zoomedImg.isKaigo ? '👑 魁罡' : (zoomedImg.isRare ? '👑 選ばれし極星' : (zoomedImg.myGender === 'female' ? '女性' : '男性'))}
+                    </span>
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '7px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.58rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>性格分類</span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--color-gold)' }}>{zoomedImg.branchPersonality || '策士'}</span>
+
+                  <div style={{ fontSize: '0.72rem', color: '#e2e8f0', lineHeight: '1.3', fontWeight: '500', textAlign: 'center', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                    {zoomedImg.astrologyTheme}
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '7px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.58rem', color: '#9ca3af' }}>守護カラー</span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--color-gold)' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
+
+                  {/* 3 Attribute Grid Boxes inside Image Bottom */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr',
+                    gap: '6px',
+                    width: '100%',
+                    marginTop: '0.2rem'
+                  }}>
+                    <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.54rem', color: '#cbd5e1' }}>五行 (陰陽)</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#fef08a' }}>{zoomedImg.astrologyElement || '金・陽'}</span>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.54rem', color: '#cbd5e1', whiteSpace: 'nowrap' }}>性格分類</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#fef08a' }}>{zoomedImg.branchPersonality || '策士'}</span>
+                    </div>
+                    <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.54rem', color: '#cbd5e1' }}>守護カラー</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#fef08a' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
+                    </div>
                   </div>
                 </div>
-
-                <button
-                  onClick={handleDownload}
-                  className="consult-btn font-serif"
-                  style={{
-                    width: '100%',
-                    marginTop: '0.5rem',
-                    padding: '0.85rem',
-                    borderRadius: '16px',
-                    fontSize: '0.92rem',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Download size={16} />
-                  画像を保存する
-                </button>
               </div>
+
+              {/* Action Button */}
+              <button
+                onClick={handleDownload}
+                className="consult-btn font-serif"
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  borderRadius: '16px',
+                  fontSize: '0.92rem',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer'
+                }}
+              >
+                <Download size={16} />
+                画像を保存する
+              </button>
             </div>
           </div>
         )}
