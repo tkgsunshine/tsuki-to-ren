@@ -192,6 +192,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   interface ZoomedImgData {
   src: string;
   headerTitle: string;
+  nickname: string;
   astrologyName: string;
   astrologyTheme: string;
   isKaigo?: boolean;
@@ -799,6 +800,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 onClick={() => setZoomedImg({ 
                   src: activeResult.myAvatarUrl || '', 
                   headerTitle: '✦ あなたの守護化身 ✦',
+                  nickname: myName || 'あなた',
                   astrologyName: activeResult.myAstrologyName || '守護化身',
                   astrologyTheme: activeResult.myAstrologyTheme || '',
                   isKaigo: activeResult.isKaigo,
@@ -1092,6 +1094,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 onClick={() => setZoomedImg({ 
                   src: activeResult.opponentAvatarUrl || '', 
                   headerTitle: '✦ お相手の守護化身 ✦',
+                  nickname: opponentName || 'お相手',
                   astrologyName: activeResult.opponentAstrologyName || '守護化身',
                   astrologyTheme: activeResult.opponentAstrologyTheme || '',
                   isKaigo: activeResult.opponentIsKaigo,
@@ -2637,24 +2640,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <X size={18} />
               </button>
 
-              {/* Header Pill Badge matching card visual */}
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(168, 85, 247, 0.14) 100%)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                marginBottom: '0.2rem'
-              }}>
-                <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fef08a', textShadow: '0 0 10px rgba(254, 240, 138, 0.6)' }}>
-                  {zoomedImg.headerTitle}
-                </span>
-              </div>
-
-              {/* Expanded Image Container with Overlay inside bottom */}
+              {/* Expanded Image Container with In-Image Top & Bottom Overlays */}
               <div 
                 className={zoomedImg.isKaigo ? 'kaigo-border' : (zoomedImg.isRare ? 'rare-rainbow-border' : '')}
                 style={{
@@ -2667,6 +2653,40 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   position: 'relative'
                 }}
               >
+                {/* Top In-Image Overlay (Header Badge + Nickname) */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(to bottom, rgba(8, 6, 20, 0.92) 0%, rgba(12, 9, 28, 0.65) 65%, rgba(12, 9, 28, 0) 100%)',
+                  padding: '0.75rem 0.75rem 0.85rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.2rem',
+                  zIndex: 5
+                }}>
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.25rem 0.85rem',
+                    background: 'rgba(0, 0, 0, 0.55)',
+                    border: '1px solid rgba(226, 192, 116, 0.45)',
+                    borderRadius: '16px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
+                  }}>
+                    <span className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)' }}>
+                      {zoomedImg.headerTitle}
+                    </span>
+                  </div>
+                  {zoomedImg.nickname && (
+                    <span className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold', textShadow: '0 2px 6px rgba(0,0,0,0.9)', letterSpacing: '0.04em' }}>
+                      {zoomedImg.nickname}
+                    </span>
+                  )}
+                </div>
                 <img 
                   src={zoomedImg.src} 
                   alt={zoomedImg.astrologyName} 
