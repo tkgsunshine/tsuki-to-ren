@@ -4,14 +4,16 @@ export default function handler(req, res) {
     const url = new URL(req.url, `https://${host}`);
     const searchParams = url.searchParams;
 
-    const mName = searchParams.get('mName') || 'あなた';
-    const mGender = searchParams.get('mGender') || 'male';
-    const oName = searchParams.get('oName') || '';
+    const get = (k1, k2) => searchParams.get(k1) || searchParams.get(k2);
 
-    const baseScore = searchParams.get('baseScore') || '??';
-    const dailyScore = searchParams.get('dailyScore') || '??';
-    const oneLiner = searchParams.get('oneLiner') || '二人の運命を占いましょう';
-    const rawTitle = searchParams.get('title') || '';
+    const mName = get('mn', 'mName') || 'あなた';
+    const mGender = get('mg', 'mGender') || 'male';
+    const oName = get('on', 'oName') || '';
+
+    const baseScore = get('bs', 'baseScore') || '??';
+    const dailyScore = get('ds', 'dailyScore') || '??';
+    const oneLiner = get('ol', 'oneLiner') || '二人の運命を占いましょう';
+    const rawTitle = get('t', 'title') || '';
     const cleanTitle = rawTitle.replace(/^[【\s]+|[】\s]+$/g, '').trim();
 
     const myPillar = searchParams.get('myPillar') || '';

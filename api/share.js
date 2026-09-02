@@ -11,12 +11,14 @@ export default function handler(req, res) {
   const url = new URL(req.url, `https://${req.headers.host}`);
   const params = url.searchParams;
 
-  const mName = params.get('mName') || 'あなた';
-  const oName = params.get('oName') || '';
-  const baseScore = params.get('baseScore') || '??';
-  const dailyScore = params.get('dailyScore') || '??';
-  const oneLiner = params.get('oneLiner') || '二人の運命を占いましょう';
-  const rawTitle = params.get('title') || '';
+  const get = (k1, k2) => params.get(k1) || params.get(k2);
+
+  const mName = get('mn', 'mName') || 'あなた';
+  const oName = get('on', 'oName') || '';
+  const baseScore = get('bs', 'baseScore') || '??';
+  const dailyScore = get('ds', 'dailyScore') || '??';
+  const oneLiner = get('ol', 'oneLiner') || '二人の運命を占いましょう';
+  const rawTitle = get('t', 'title') || '';
   const cleanTitle = rawTitle.replace(/^[【\s]+|[】\s]+$/g, '').trim();
 
   // Reconstruct the OGP image URL: place protection bypass FIRST so Vercel always recognizes it
@@ -33,16 +35,16 @@ export default function handler(req, res) {
 
   // Build the redirect URL for normal users
   const appParams = new URLSearchParams();
-  if (params.get('mName')) appParams.set('mName', params.get('mName'));
-  if (params.get('mBirth')) appParams.set('mBirth', params.get('mBirth'));
-  if (params.get('mMbti')) appParams.set('mMbti', params.get('mMbti'));
-  if (params.get('mGender')) appParams.set('mGender', params.get('mGender'));
-  if (params.get('mode')) appParams.set('mode', params.get('mode'));
-  if (params.get('oName')) appParams.set('oName', params.get('oName'));
-  if (params.get('oBirth')) appParams.set('oBirth', params.get('oBirth'));
-  if (params.get('oMbti')) appParams.set('oMbti', params.get('oMbti'));
-  if (params.get('oGender')) appParams.set('oGender', params.get('oGender'));
-  if (params.get('rel')) appParams.set('rel', params.get('rel'));
+  const mNameVal = get('mn', 'mName'); if (mNameVal) appParams.set('mName', mNameVal);
+  const mBirthVal = get('mb', 'mBirth'); if (mBirthVal) appParams.set('mBirth', mBirthVal);
+  const mMbtiVal = get('mm', 'mMbti'); if (mMbtiVal) appParams.set('mMbti', mMbtiVal);
+  const mGenderVal = get('mg', 'mGender'); if (mGenderVal) appParams.set('mGender', mGenderVal);
+  const modeVal = params.get('mode'); if (modeVal) appParams.set('mode', modeVal);
+  const oNameVal = get('on', 'oName'); if (oNameVal) appParams.set('oName', oNameVal);
+  const oBirthVal = get('ob', 'oBirth'); if (oBirthVal) appParams.set('oBirth', oBirthVal);
+  const oMbtiVal = get('om', 'oMbti'); if (oMbtiVal) appParams.set('oMbti', oMbtiVal);
+  const oGenderVal = get('og', 'oGender'); if (oGenderVal) appParams.set('oGender', oGenderVal);
+  const relVal = get('r', 'rel'); if (relVal) appParams.set('rel', relVal);
   const appUrl = `https://${req.headers.host}/?${appParams.toString()}`;
 
   // Detect crawlers

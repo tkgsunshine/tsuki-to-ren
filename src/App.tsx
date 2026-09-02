@@ -138,17 +138,17 @@ function App() {
 
     window.addEventListener('popstate', handlePopState);
 
-    // Parse URL params
+    // Parse URL params (supports both compact short keys: mn, mb, mm, mg, on, ob, om, og, r & legacy long keys)
     const params = new URLSearchParams(window.location.search);
-    const mName = params.get('mName');
-    const mBirth = params.get('mBirth');
-    const mMbti = params.get('mMbti');
-    const mGender = params.get('mGender') as 'male' | 'female' | null;
-    const oName = params.get('oName');
-    const oBirth = params.get('oBirth');
-    const oMbti = params.get('oMbti');
-    const oGender = params.get('oGender') as 'male' | 'female' | null;
-    const rel = params.get('rel') || '友達';
+    const mName = params.get('mn') || params.get('mName');
+    const mBirth = params.get('mb') || params.get('mBirth');
+    const mMbti = params.get('mm') || params.get('mMbti');
+    const mGender = (params.get('mg') || params.get('mGender')) as 'male' | 'female' | null;
+    const oName = params.get('on') || params.get('oName');
+    const oBirth = params.get('ob') || params.get('oBirth');
+    const oMbti = params.get('om') || params.get('oMbti');
+    const oGender = (params.get('og') || params.get('oGender')) as 'male' | 'female' | null;
+    const rel = params.get('r') || params.get('rel') || '友達';
     const runMode = params.get('mode') as 'single' | 'match' | null;
 
     // Dynamic SEO Metadata Injection for 256 MBTI combinations & search terms
@@ -207,27 +207,25 @@ function App() {
     const baseUrl = isLocal ? window.location.origin + '/share/card' : 'https://tsuki-to-ren.com/share/card';
     const params = new URLSearchParams();
     
-    // Protection bypass only when testing on vercel.app preview domain
     if (!isLocal && window.location.hostname.includes('vercel.app')) {
       params.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
     }
 
-    params.set('mName', myName);
-    params.set('mBirth', myBirth);
-    params.set('mMbti', myMbti);
-    params.set('mGender', myGender);
+    params.set('mn', myName);
+    params.set('mb', myBirth);
+    params.set('mm', myMbti);
+    params.set('mg', myGender);
     params.set('mode', mode);
     if (mode === 'match') {
-      params.set('oName', oppName);
-      params.set('oBirth', oppBirth);
-      params.set('oMbti', oppMbti);
-      params.set('oGender', oppGender);
-      params.set('rel', relationship);
+      params.set('on', oppName);
+      params.set('ob', oppBirth);
+      params.set('om', oppMbti);
+      params.set('og', oppGender);
+      params.set('r', relationship);
     }
     if (activeResult) {
-      params.set('baseScore', String(activeResult.baseScore));
-      params.set('dailyScore', String(activeResult.dailyScore));
-      if (activeResult.oneLiner) params.set('oneLiner', activeResult.oneLiner);
+      params.set('bs', String(activeResult.baseScore));
+      params.set('ds', String(activeResult.dailyScore));
     }
     return `${baseUrl}?${params.toString()}`;
   };
