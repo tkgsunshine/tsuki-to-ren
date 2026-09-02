@@ -2682,18 +2682,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </span>
                   </div>
 
-                  {/* Top-Right: Nickname (Displays full 8 chars) */}
+                  {/* Top-Right: Nickname (Displays full 8 chars with bright gold text) */}
                   {zoomedImg.nickname && (
                     <div style={{
-                      padding: '0.2rem 0.55rem',
-                      background: 'rgba(0, 0, 0, 0.6)',
-                      border: '1px solid rgba(255, 255, 255, 0.25)',
+                      padding: '0.25rem 0.65rem',
+                      background: 'rgba(0, 0, 0, 0.75)',
+                      border: '1px solid rgba(254, 240, 138, 0.5)',
                       borderRadius: '12px',
                       maxWidth: '150px',
                       whiteSpace: 'nowrap',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.7), 0 0 12px rgba(254, 240, 138, 0.2)'
                     }}>
-                      <span className="font-serif gold-text" style={{ fontSize: '0.75rem', fontWeight: 'bold', textShadow: '0 2px 6px rgba(0,0,0,0.9)', letterSpacing: '0.02em' }}>
+                      <span className="font-serif" style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.7), 0 2px 4px rgba(0,0,0,0.95)', letterSpacing: '0.04em' }}>
                         {zoomedImg.nickname.slice(0, 8)}
                       </span>
                     </div>
@@ -2727,7 +2728,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   zIndex: 5
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
-                    <span className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+                    <span className="font-serif" style={{ fontSize: '1.15rem', fontWeight: '800', color: '#fef08a', textShadow: '0 0 12px rgba(254, 240, 138, 0.8), 0 2px 6px rgba(0,0,0,0.95)', letterSpacing: '0.03em' }}>
                       {zoomedImg.astrologyName}
                     </span>
                     <span className={zoomedImg.isKaigo ? 'kaigo-badge' : (zoomedImg.isRare ? 'rare-badge' : '')} style={{
