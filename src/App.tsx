@@ -144,18 +144,44 @@ function App() {
 
     window.addEventListener('popstate', handlePopState);
 
+    // Helper to decode 1-char relationship codes & short params
+    const decodeRel = (val: string | null) => {
+      if (!val) return '片思い中';
+      if (val === 'k' || val === 'single' || val === '片思い中') return '片思い中';
+      if (val === 'r' || val === 'ryoomoi' || val === '交際中' || val === '両思い・交際中') return '両思い・交際中';
+      if (val === 'f' || val === 'fukuen' || val === '復縁したい') return '復縁したい';
+      if (val === 'm' || val === 'kekkon' || val === '結婚・夫婦') return '結婚・夫婦';
+      if (val === 'c' || val === 'complex' || val === '複雑愛・秘密の恋') return '複雑愛・秘密の恋';
+      return val;
+    };
+
+    const decodeBirth = (val: string | null) => {
+      if (!val) return '';
+      if (val.length === 8 && !val.includes('-')) {
+        return `${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6)}`;
+      }
+      return val;
+    };
+
+    const decodeGender = (val: string | null): 'male' | 'female' => {
+      if (val === 'm' || val === 'male') return 'male';
+      if (val === 'f' || val === 'female') return 'female';
+      return 'female';
+    };
+
     // Parse URL params (supports both compact short keys: mn, mb, mm, mg, on, ob, om, og, r & legacy long keys)
     const params = new URLSearchParams(window.location.search);
-    const mName = params.get('mn') || params.get('mName');
-    const mBirth = params.get('mb') || params.get('mBirth');
+    const mName = params.get('mn') || params.get('mName') || 'あなた';
+    const mBirth = decodeBirth(params.get('mb') || params.get('mBirth'));
     const mMbti = params.get('mm') || params.get('mMbti');
-    const mGender = (params.get('mg') || params.get('mGender')) as 'male' | 'female' | null;
-    const oName = params.get('on') || params.get('oName');
-    const oBirth = params.get('ob') || params.get('oBirth');
+    const mGender = decodeGender(params.get('mg') || params.get('mGender'));
+    const oName = params.get('on') || params.get('oName') || 'お相手';
+    const oBirth = decodeBirth(params.get('ob') || params.get('oBirth'));
     const oMbti = params.get('om') || params.get('oMbti');
-    const oGender = (params.get('og') || params.get('oGender')) as 'male' | 'female' | null;
-    const rel = params.get('r') || params.get('rel') || '友達';
-    const runMode = params.get('mode') as 'single' | 'match' | null;
+    const oGender = decodeGender(params.get('og') || params.get('oGender'));
+    const rel = decodeRel(params.get('r') || params.get('rel'));
+    const rawMode = params.get('mode');
+    const runMode = (rawMode === 's' || rawMode === 'single') ? 'single' : (rawMode === 'm' || rawMode === 'match' || (oBirth && oMbti)) ? 'match' : null;
 
     // Dynamic SEO Metadata Injection for 256 MBTI combinations & search terms
     if (mMbti && oMbti && mMbti !== 'UNKNOWN' && oMbti !== 'UNKNOWN') {
@@ -217,18 +243,30 @@ function App() {
       params.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
     }
 
-    params.set('mn', myName);
-    params.set('mb', myBirth);
-    params.set('mm', myMbti);
-    params.set('mg', myGender);
-    params.set('mode', mode);
+    if (myName && myName !== 'あなた') params.set('mn', myName.slice(0, 8));
+    if (myBirth) params.set('mb', myBirth.replace(/-/g, ''));
+    if (myMbti) params.set('mm', myMbti);
+    params.set('mg', myGender === 'male' ? 'm' : 'f');
+
     if (mode === 'match') {
-      params.set('on', oppName);
-      params.set('ob', oppBirth);
-      params.set('om', oppMbti);
-      params.set('og', oppGender);
-      params.set('r', relationship);
+      if (oppName && oppName !== 'お相手') params.set('on', oppName.slice(0, 8));
+      if (oppBirth) params.set('ob', oppBirth.replace(/-/g, ''));
+      if (oppMbti) params.set('om', oppMbti);
+      params.set('og', oppGender === 'male' ? 'm' : 'f');
+
+      const relMap: Record<string, string> = {
+        '片思い中': 'k',
+        '両思い・交際中': 'r',
+        '交際中': 'r',
+        '復縁したい': 'f',
+        '結婚・夫婦': 'm',
+        '複雑愛・秘密の恋': 'c'
+      };
+      params.set('r', relMap[relationship] || 'k');
+    } else {
+      params.set('mode', 's');
     }
+
     if (activeResult) {
       params.set('bs', String(activeResult.baseScore));
       params.set('ds', String(activeResult.dailyScore));

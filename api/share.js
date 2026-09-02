@@ -34,18 +34,7 @@ export default function handler(req, res) {
   const ogImageUrl = `https://${req.headers.host}/og/card.png?${ogImageParams.toString()}`;
 
   // Build the redirect URL for normal users
-  const appParams = new URLSearchParams();
-  const mNameVal = get('mn', 'mName'); if (mNameVal) appParams.set('mName', mNameVal);
-  const mBirthVal = get('mb', 'mBirth'); if (mBirthVal) appParams.set('mBirth', mBirthVal);
-  const mMbtiVal = get('mm', 'mMbti'); if (mMbtiVal) appParams.set('mMbti', mMbtiVal);
-  const mGenderVal = get('mg', 'mGender'); if (mGenderVal) appParams.set('mGender', mGenderVal);
-  const modeVal = params.get('mode'); if (modeVal) appParams.set('mode', modeVal);
-  const oNameVal = get('on', 'oName'); if (oNameVal) appParams.set('oName', oNameVal);
-  const oBirthVal = get('ob', 'oBirth'); if (oBirthVal) appParams.set('oBirth', oBirthVal);
-  const oMbtiVal = get('om', 'oMbti'); if (oMbtiVal) appParams.set('oMbti', oMbtiVal);
-  const oGenderVal = get('og', 'oGender'); if (oGenderVal) appParams.set('oGender', oGenderVal);
-  const relVal = get('r', 'rel'); if (relVal) appParams.set('rel', relVal);
-  const appUrl = `https://${req.headers.host}/?${appParams.toString()}`;
+  const appUrl = `https://${req.headers.host}/?${params.toString()}`;
 
   // Detect crawlers
   const ua = (req.headers['user-agent'] || '').toLowerCase();
