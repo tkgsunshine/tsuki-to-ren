@@ -7,19 +7,7 @@
   ],
   "rewrites": [
     {
-      "source": "/googleulXaZ3db1hweLHarbpsLwp0-Rh2MnIc39ZNB2-h6f54.html",
-      "destination": "/googleulXaZ3db1hweLHarbpsLwp0-Rh2MnIc39ZNB2-h6f54.html"
-    },
-    {
-      "source": "/sitemap.xml",
-      "destination": "/sitemap.xml"
-    },
-    {
-      "source": "/robots.txt",
-      "destination": "/robots.txt"
-    },
-    {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|.*\\..*).*)",
       "destination": "/index.html"
     }
   ]
