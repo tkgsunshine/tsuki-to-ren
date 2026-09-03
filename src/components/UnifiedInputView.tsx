@@ -225,6 +225,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             <img 
               src="/assets/tsuki.jpg" 
               alt="月" 
+              fetchPriority="high"
+              decoding="async"
               style={{ transform: 'scale(1.22)', transformOrigin: 'center 18%' }}
             />
             {selectedCharacter === 'tsuki' && (
@@ -251,6 +253,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             <img 
               src="/assets/ren.jpg" 
               alt="蓮" 
+              fetchPriority="high"
+              decoding="async"
             />
             {selectedCharacter === 'ren' && (
               <div className="active-badge-overlay font-serif">
