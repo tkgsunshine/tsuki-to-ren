@@ -22,7 +22,7 @@ declare global {
 // Firebase production configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC8KuxFTkHR_3nLX7h8b-L_G40n59ymyY8',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'tsuki-to-ren-dba8c.firebaseapp.com',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'www.tsuki-to-ren.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'tsuki-to-ren-dba8c',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'tsuki-to-ren-dba8c.firebasestorage.app',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '670709162172',
