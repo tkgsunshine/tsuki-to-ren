@@ -219,7 +219,13 @@ export const logOutUser = async (): Promise<void> => {
 export const subscribeAuthChange = (callback: (user: UserProfile | null) => void) => {
   const unsubscribeFirebase = onAuthStateChanged(auth, (user: User | null) => {
     if (user) {
-      const providerId = (user.providerData[0]?.providerId as any) || 'google.com';
+      const rawProvider = user.providerData[0]?.providerId || '';
+      let providerId = 'email';
+      if (rawProvider === 'google.com' || user.providerData.some(p => p.providerId === 'google.com')) {
+        providerId = 'google.com';
+      } else if (rawProvider === 'twitter.com' || user.providerData.some(p => p.providerId === 'twitter.com')) {
+        providerId = 'twitter.com';
+      }
       const email = user.email || user.providerData[0]?.email || null;
       callback({
         uid: user.uid,

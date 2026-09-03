@@ -216,7 +216,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 marginTop: '8px'
               }}>
                 <CheckCircle size={12} />
-                <span>{currentUser.providerId === 'twitter.com' ? 'X 連携中' : 'Google 連携中'}</span>
+                <span>
+                  {currentUser.providerId === 'twitter.com'
+                    ? 'X 連携中'
+                    : currentUser.providerId === 'email'
+                    ? 'メール認証完了'
+                    : 'Google 連携中'}
+                </span>
               </div>
             </div>
 
