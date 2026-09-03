@@ -270,8 +270,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               <button 
                 onClick={async () => {
                   try {
-                    const user = await signInWithGoogle();
-                    onRegister(user.email || user.displayName || 'Googleユーザー');
+                    await signInWithGoogle();
                     setShowRegisterOverlay(false);
                   } catch(e) {
                     console.error(e);
@@ -308,8 +307,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               <button 
                 onClick={async () => {
                   try {
-                    const user = await signInWithX();
-                    onRegister(user.email || user.displayName || 'Xユーザー');
+                    await signInWithX();
                     setShowRegisterOverlay(false);
                   } catch(e) {
                     console.error(e);

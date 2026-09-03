@@ -1570,8 +1570,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       type="button"
                       onClick={async () => {
                         try {
-                          const user = await signInWithGoogle();
-                          onRegister(user.email || user.displayName || 'Googleユーザー');
+                          await signInWithGoogle();
                         } catch (e) {
                           console.error(e);
                         }
@@ -1599,8 +1598,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       type="button"
                       onClick={async () => {
                         try {
-                          const user = await signInWithX();
-                          onRegister(user.email || user.displayName || 'Xユーザー');
+                          await signInWithX();
                         } catch (e) {
                           console.error(e);
                         }
