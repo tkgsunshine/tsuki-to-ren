@@ -404,7 +404,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setEmailSent(true);
     } catch (err: any) {
       console.error('Registration email error:', err);
-      alert('認証メールの送信に失敗しました。メールアドレスをご確認ください。');
+      const detail = err?.code ? ` (${err.code}: ${err.message})` : '';
+      alert(`認証メールの送信に失敗しました。${detail}`);
     } finally {
       setRegisteringEmail(false);
     }

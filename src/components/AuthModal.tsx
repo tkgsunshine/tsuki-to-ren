@@ -28,7 +28,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
       setEmailSent(true);
     } catch (err: any) {
       console.error('Email signin error:', err);
-      setErrorMsg('認証メールの送信に失敗しました。メールアドレスをご確認ください。');
+      const detail = err?.code ? ` (${err.code}: ${err.message})` : '';
+      setErrorMsg(`認証メールの送信に失敗しました。${detail}`);
     } finally {
       setLoading(null);
     }
