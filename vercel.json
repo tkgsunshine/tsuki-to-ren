@@ -1,7 +1,8 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/share/card", "destination": "/api/share" },
-    { "source": "/og/card.png", "destination": "/api/og" }
+  "crons": [
+    {
+      "path": "/api/cron/publish",
+      "schedule": "0 1,9 * * *"
+    }
   ]
 }

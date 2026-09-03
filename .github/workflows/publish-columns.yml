@@ -1,0 +1,44 @@
+name: Daily Column Auto-Publisher Engine
+
+on:
+  schedule:
+    # Run twice daily at 10:00 JST (01:00 UTC) and 18:00 JST (09:00 UTC)
+    - cron: '0 1,9 * * *'
+  workflow_dispatch:
+
+jobs:
+  publish-column:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Daily SEO Column
+        run: node scripts/generate-column.js
+
+      - name: Verify Build Success
+        run: npm run build
+
+      - name: Commit & Push Generated Column to Main Branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/columnsData.ts
+          if git diff --staged --quiet; then
+            echo "No new column generated today."
+          else
+            git commit -m "feat(cron): auto-publish daily SEO column [skip ci]"
+            git push origin main
+          fi
