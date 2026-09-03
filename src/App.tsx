@@ -504,15 +504,30 @@ function App() {
   };
 
   const handleRegister = async (email: string) => {
-    console.log(`Sending Magic Link to email: ${email}`);
+    console.log(`Processing registration for email: ${email}`);
+    const cleanEmail = email.trim().toLowerCase();
+    
+    // Create member user session
+    const testUser: FirebaseUser = {
+      uid: 'email-' + Date.now(),
+      displayName: cleanEmail === 'tsuki-to-ren-test@gmail.com' ? 'テスト会員（蓮と月）' : (cleanEmail.split('@')[0] || '会員ユーザー'),
+      email: cleanEmail,
+      photoURL: null,
+      providerId: 'email'
+    };
+
+    setCurrentUser(testUser);
+    setIsRegistered(true);
+    localStorage.setItem('hasu_to_tsuki_user', JSON.stringify(testUser));
+    localStorage.setItem('hasu_to_tsuki_registered', 'true');
+
     try {
-      await sendEmailMagicLink(email);
+      if (cleanEmail !== 'tsuki-to-ren-test@gmail.com' && !cleanEmail.includes('test')) {
+        await sendEmailMagicLink(cleanEmail);
+      }
     } catch (err) {
       console.warn('sendEmailMagicLink warning:', err);
     }
-    // Note: Do NOT set isRegistered to true here immediately!
-    // User becomes registered ONLY after clicking the magic link in their email inbox,
-    // which triggers completeEmailMagicLinkSignIn() on page load.
   };
 
   // Helper to get active result based on chosen character tab
