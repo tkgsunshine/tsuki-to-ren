@@ -211,7 +211,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               プレミアム会員 5大解放特典
             </h2>
 
-            {/* Benefit 1: 7-Day Turning Points & 10-Year Destiny Biorhythm Fully Unlocked */}
+            {/* Benefit 1: 7-Day Biorhythm & 10-Year Destiny Timeline Fully Unlocked */}
             <div className="glass-panel" style={{
               padding: '1rem',
               display: 'flex',
@@ -236,10 +236,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#93c5fd' }}>
-                  ① 今後7日間の二人の運気予測 ＆ 10年後までの運命テキスト全解放
+                  ① 今後7日間の相性バイオリズム ＆ 10年後までの運命年表全解放
                 </span>
                 <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  明日・明後日〜7日後の「二人の急接近運気・転機日」や、今後10年間に訪れる「極星の年（大開運）」「結婚・同棲の黄金期」の鍵付き詳細テキストをすべて解禁できます。
+                  明日〜7日後までの「相性バイオリズム詳細」や、今後10年間（月次・年次）の「結婚・同棲・大開運の黄金期」の鍵付き運勢テキストをすべて閲覧できます。
                 </p>
               </div>
             </div>
@@ -272,12 +272,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   ② お相手の「取扱説明書（トリセツ）」＆「6軸レーダーチャート」全解放
                 </span>
                 <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  刺さる言葉・絶対NG行動・神返信例・6軸詳細相性分析（恋愛・価値観・身体・結婚・執着・信頼）などを無制限で閲覧・実践できます。
+                  脈ありサイン（Lv.2/Lv.3）・逆転挽回策・刺さる言葉・絶対NG行動・6軸詳細相性分析（恋愛・価値観・身体・結婚・執着・信頼）などを無制限で閲覧できます。
                 </p>
               </div>
             </div>
 
-            {/* Benefit 3: Deep Compatibility & Lucky Action Advice */}
+            {/* Benefit 3: Daily Email Notification */}
             <div className="glass-panel" style={{
               padding: '1rem',
               display: 'flex',
@@ -302,10 +302,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fef08a' }}>
-                  ③ 恋の成就をたぐり寄せる「深層相性アドバイス ＆ 特別開運法」完全解禁
+                  ③ 毎朝届く「デイリー鑑定メール ＆ 本日の吉方位」通知
                 </span>
                 <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  当日の相性バイオリズムと「お相手の防衛本能を解きほぐすアプローチ法」を詳細表示。二人の関係を進展させるチャンスを逃しません。
+                  毎朝の運勢や二人の重要な転機日・運気の波をメールでお届け。幸運のチャンスや注意すべきタイミングを逃さず把握できます。
                 </p>
               </div>
             </div>
