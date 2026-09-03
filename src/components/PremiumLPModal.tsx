@@ -148,7 +148,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             }}>
               <Sparkles size={14} style={{ color: '#fef08a' }} />
               <span style={{ fontSize: '0.72rem', color: '#fef08a', fontWeight: 'bold', letterSpacing: '0.05em' }}>
-                VIP PREVIEWS & FULL ACCESS
+                プレミアム会員限定 全機能解放
               </span>
             </div>
 
