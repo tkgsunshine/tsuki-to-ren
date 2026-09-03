@@ -99,6 +99,12 @@ for (const topic of UPCOMING_TOPICS) {
 if (addedCount > 0) {
   fs.writeFileSync(columnsFilePath, fileContent, 'utf-8');
   console.log('✅ Successfully published 1 new article to columnsData.ts!');
+  try {
+    const { execSync } = await import('child_process');
+    execSync('node scripts/build-sitemap.js', { stdio: 'inherit' });
+  } catch (err) {
+    console.error('Failed to auto-rebuild sitemap:', err);
+  }
 } else {
   console.log('ℹ️ No new topics needed to be published today. All up-to-date.');
 }

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hasu-to-tsuki.vercel.app/sitemap.xml
+Sitemap: https://www.tsuki-to-ren.com/sitemap.xml
