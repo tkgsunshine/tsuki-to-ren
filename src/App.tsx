@@ -88,8 +88,7 @@ function App() {
     });
 
     const unsubscribe = subscribeAuthChange((user) => {
-      const isReg = localStorage.getItem('hasu_to_tsuki_registered') === 'true';
-      if (user && isReg) {
+      if (user) {
         setCurrentUser(user);
         setIsRegistered(true);
         if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {

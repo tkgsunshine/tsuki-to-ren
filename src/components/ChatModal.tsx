@@ -9,7 +9,7 @@ interface ChatModalProps {
   isSubscribed: boolean;
   chatCount: number;
   setChatCount: React.Dispatch<React.SetStateAction<number>>;
-  onRegister: (email: string) => void;
+  onRegister: (email: string) => Promise<void>;
   onSubscribe: () => void;
   onClose: () => void;
   result?: FortuneResult | null;
@@ -37,6 +37,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [showRegisterOverlay, setShowRegisterOverlay] = useState(false);
   const [showSubscribeOverlay, setShowSubscribeOverlay] = useState(false);
+  const [emailSentChat, setEmailSentChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const characterName = character === 'ren' ? '蓮' : '月';
@@ -233,32 +234,51 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             <p style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: '1.5', marginBottom: '1.25rem' }}>
               無料のメンバー登録を行うことで、気になることや恋愛のお悩みなど、どうぞお気軽にご相談ください。
             </p>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const emailInput = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value;
-              onRegister(emailInput);
-              setShowRegisterOverlay(false);
-            }} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="メールアドレスを入力..."
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: '12px',
-                  padding: '0.75rem',
-                  color: 'white',
-                  outline: 'none',
-                  textAlign: 'center',
-                  fontSize: '0.8rem'
-                }}
-              />
-              <button type="submit" className="consult-btn" style={{ fontSize: '0.85rem', padding: '0.75rem', background: 'linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%)', color: '#000', fontWeight: 'bold' }}>
-                無料で登録してチャットを開始
-              </button>
-            </form>
+            {emailSentChat ? (
+              <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✉️</div>
+                <p style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>認証メールを送信しました！</p>
+                <p style={{ fontSize: '0.75rem', color: '#9ca3af', lineHeight: '1.6' }}>
+                  メールに届いたリンクをクリックすると<br />
+                  登録が完了し、チャットが解放されます。
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const emailInput = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value.trim().toLowerCase();
+                if (!emailInput || !emailInput.includes('@')) {
+                  alert('有効なメールアドレスを入力してください。');
+                  return;
+                }
+                try {
+                  await onRegister(emailInput);
+                  setEmailSentChat(true);
+                } catch {
+                  alert('メール送信に失敗しました。もう一度お試しください。');
+                }
+              }} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="メールアドレスを入力..."
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '12px',
+                    padding: '0.75rem',
+                    color: 'white',
+                    outline: 'none',
+                    textAlign: 'center',
+                    fontSize: '0.8rem'
+                  }}
+                />
+                <button type="submit" className="consult-btn" style={{ fontSize: '0.85rem', padding: '0.75rem', background: 'linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%)', color: '#000', fontWeight: 'bold' }}>
+                  無料で登録してチャットを開始
+                </button>
+              </form>
+            )}
 
             <div style={{ display: 'flex', alignItems: 'center', width: '100%', margin: '1rem 0', gap: '0.75rem' }}>
               <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>

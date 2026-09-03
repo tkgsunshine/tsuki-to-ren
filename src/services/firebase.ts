@@ -42,6 +42,7 @@ export interface UserProfile {
 }
 
 // Google Sign-In via Firebase Auth
+// OAuth認証は本人確認済みのため、即座に registered=true をセットする
 export const signInWithGoogle = async (): Promise<UserProfile> => {
   const provider = new GoogleAuthProvider();
   const result = await signInWithPopup(auth, provider);
@@ -55,11 +56,12 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
     providerId: 'google.com'
   };
   localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
-  localStorage.setItem('hasu_to_tsuki_registered', 'true');
+  localStorage.setItem('hasu_to_tsuki_registered', 'oauth_complete');
   return userProfile;
 };
 
 // X (formerly Twitter) Sign-In via Firebase Auth
+// OAuth認証は本人確認済みのため、即座に registered=oauth_complete をセットする
 export const signInWithX = async (): Promise<UserProfile> => {
   const provider = new TwitterAuthProvider();
   const result = await signInWithPopup(auth, provider);
@@ -73,7 +75,7 @@ export const signInWithX = async (): Promise<UserProfile> => {
     providerId: 'twitter.com'
   };
   localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
-  localStorage.setItem('hasu_to_tsuki_registered', 'true');
+  localStorage.setItem('hasu_to_tsuki_registered', 'oauth_complete');
   return userProfile;
 };
 
@@ -133,7 +135,7 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
         providerId: 'email'
       };
       localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
-      localStorage.setItem('hasu_to_tsuki_registered', 'true');
+      localStorage.setItem('hasu_to_tsuki_registered', 'email_verified');
       if (window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -160,18 +162,29 @@ export const logOutUser = async (): Promise<void> => {
   }
 };
 
-// Auth State Listener (STRICT: NO GHOST LOCALSTORAGE FALLBACK)
+// Auth State Listener
+// - OAuth (google/twitter): firebase auth user が存在し registered=oauth_complete なら会員扱い
+// - Email: firebase auth user が存在し registered=email_verified なら会員扱い
+// - それ以外（メール送信中など）: 非会員扱い
 export const subscribeAuthChange = (callback: (user: UserProfile | null) => void) => {
   const unsubscribeFirebase = onAuthStateChanged(auth, (user: User | null) => {
-    const isRegistered = localStorage.getItem('hasu_to_tsuki_registered') === 'true';
-    if (user && isRegistered) {
-      const rawProvider = user.providerData[0]?.providerId || '';
-      let providerId = 'email';
-      if (rawProvider === 'google.com' || user.providerData.some(p => p.providerId === 'google.com')) {
-        providerId = 'google.com';
-      } else if (rawProvider === 'twitter.com' || user.providerData.some(p => p.providerId === 'twitter.com')) {
-        providerId = 'twitter.com';
-      }
+    if (!user) {
+      callback(null);
+      return;
+    }
+
+    const rawProvider = user.providerData[0]?.providerId || '';
+    let providerId = 'email';
+    if (rawProvider === 'google.com' || user.providerData.some(p => p.providerId === 'google.com')) {
+      providerId = 'google.com';
+    } else if (rawProvider === 'twitter.com' || user.providerData.some(p => p.providerId === 'twitter.com')) {
+      providerId = 'twitter.com';
+    }
+
+    const regFlag = localStorage.getItem('hasu_to_tsuki_registered');
+
+    // OAuthプロバイダー（Google/X）: oauth_complete フラグがあれば会員
+    if ((providerId === 'google.com' || providerId === 'twitter.com') && regFlag === 'oauth_complete') {
       const email = user.email || user.providerData[0]?.email || null;
       callback({
         uid: user.uid,
@@ -180,9 +193,24 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
         photoURL: user.photoURL,
         providerId
       });
-    } else {
-      callback(null);
+      return;
     }
+
+    // メール認証: email_verified フラグがあれば会員
+    if (providerId === 'email' && regFlag === 'email_verified') {
+      const email = user.email || null;
+      callback({
+        uid: user.uid,
+        displayName: user.displayName,
+        email: email,
+        photoURL: user.photoURL,
+        providerId: 'email'
+      });
+      return;
+    }
+
+    // それ以外（メール送信済みだが未クリック等）は非会員
+    callback(null);
   });
 
   return unsubscribeFirebase;
