@@ -205,6 +205,9 @@ export const logOutUser = async (): Promise<void> => {
     console.warn('Firebase signOut error:', e);
   }
   localStorage.removeItem('hasu_tsuki_user');
+  localStorage.removeItem('hasu_to_tsuki_user');
+  localStorage.removeItem('hasu_to_tsuki_registered');
+  sessionStorage.clear();
 };
 
 // Auth State Listener
