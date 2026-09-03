@@ -340,25 +340,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                   <Mail size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={() => setEmailInput('tsuki-to-ren-test@gmail.com')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#fef08a',
-                      fontSize: '0.7rem',
-                      fontWeight: 'bold',
-                      textDecoration: 'underline',
-                      cursor: 'pointer',
-                      padding: '2px 0'
-                    }}
-                  >
-                    ⚡ テスト用メールアドレスを入力
-                  </button>
-                </div>
-
                 <button
                   type="submit"
                   disabled={loading === 'email'}
