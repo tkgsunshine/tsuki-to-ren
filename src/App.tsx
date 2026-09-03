@@ -25,7 +25,7 @@ import { PremiumLPModal } from './components/PremiumLPModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
-import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, type UserProfile as FirebaseUser } from './services/firebase';
+import { subscribeAuthChange, completeEmailMagicLinkSignIn, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -504,30 +504,22 @@ function App() {
   };
 
   const handleRegister = async (email: string) => {
-    console.log(`Processing registration for email: ${email}`);
+    console.log(`Processing instant registration for email: ${email}`);
     const cleanEmail = email.trim().toLowerCase();
     
-    // Create member user session
-    const testUser: FirebaseUser = {
+    // Create member user session instantly without sending email
+    const memberUser: FirebaseUser = {
       uid: 'email-' + Date.now(),
-      displayName: cleanEmail === 'tsuki-to-ren-test@gmail.com' ? 'テスト会員（蓮と月）' : (cleanEmail.split('@')[0] || '会員ユーザー'),
+      displayName: cleanEmail.split('@')[0] || '会員ユーザー',
       email: cleanEmail,
       photoURL: null,
       providerId: 'email'
     };
 
-    setCurrentUser(testUser);
+    setCurrentUser(memberUser);
     setIsRegistered(true);
-    localStorage.setItem('hasu_to_tsuki_user', JSON.stringify(testUser));
+    localStorage.setItem('hasu_to_tsuki_user', JSON.stringify(memberUser));
     localStorage.setItem('hasu_to_tsuki_registered', 'true');
-
-    try {
-      if (cleanEmail !== 'tsuki-to-ren-test@gmail.com' && !cleanEmail.includes('test')) {
-        await sendEmailMagicLink(cleanEmail);
-      }
-    } catch (err) {
-      console.warn('sendEmailMagicLink warning:', err);
-    }
   };
 
   // Helper to get active result based on chosen character tab
