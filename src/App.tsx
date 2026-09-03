@@ -514,7 +514,6 @@ function App() {
   const handleRegister = async (email: string) => {
     console.log(`Sending registration email link to: ${email}`);
     const cleanEmail = email.trim().toLowerCase();
-    // Strictly send email verification link. Member status is ONLY granted after clicking email link.
     await sendEmailMagicLink(cleanEmail);
   };
 

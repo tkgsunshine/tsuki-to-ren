@@ -188,6 +188,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 }) => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
+  const [registeringEmail, setRegisteringEmail] = useState(false);
   const [subSuccess, setSubSuccess] = useState(false);
   interface ZoomedImgData {
   src: string;
@@ -397,12 +398,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
       alert('有効なメールアドレスを入力してください。');
       return;
     }
+    setRegisteringEmail(true);
     try {
       await onRegister(cleanEmail);
       setEmailSent(true);
     } catch (err: any) {
       console.error('Registration email error:', err);
       alert('認証メールの送信に失敗しました。メールアドレスをご確認ください。');
+    } finally {
+      setRegisteringEmail(false);
     }
   };
 
@@ -1553,8 +1557,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         fontSize: '0.85rem'
                       }}
                     />
-                    <button type="submit" className="consult-btn" style={{ fontSize: '0.9rem', padding: '0.85rem', width: '100%' }}>
-                      無料で続きを読む →
+                    <button type="submit" disabled={registeringEmail} className="consult-btn" style={{ fontSize: '0.9rem', padding: '0.85rem', width: '100%', cursor: registeringEmail ? 'wait' : 'pointer' }}>
+                      {registeringEmail ? '送信中...' : '無料で続きを読む →'}
                     </button>
                   </form>
                 )}

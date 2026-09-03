@@ -80,15 +80,6 @@ export const signInWithX = async (): Promise<UserProfile> => {
 // Sign Out
 // Send Email Magic Link (Passwordless Sign-In)
 export const sendEmailMagicLink = async (email: string): Promise<void> => {
-  // 1. Clear any prior active session & registration state so member features REMAIN 100% LOCKED until email link click
-  localStorage.removeItem('hasu_tsuki_user');
-  localStorage.removeItem('hasu_to_tsuki_registered');
-  try {
-    await signOut(auth);
-  } catch (e) {
-    // Ignore signout error if already signed out
-  }
-
   const redirectUrl = window.location.origin + '/';
   const actionCodeSettings = {
     url: redirectUrl,
@@ -156,18 +147,20 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
 };
 
 export const logOutUser = async (): Promise<void> => {
+  localStorage.removeItem('hasu_tsuki_user');
+  localStorage.removeItem('hasu_to_tsuki_user');
+  localStorage.removeItem('hasu_to_tsuki_registered');
+  localStorage.removeItem('emailForSignIn');
+  sessionStorage.clear();
+  document.cookie = "emailForSignIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   try {
     await signOut(auth);
   } catch (e) {
     console.warn('Firebase signOut error:', e);
   }
-  localStorage.removeItem('hasu_tsuki_user');
-  localStorage.removeItem('hasu_to_tsuki_user');
-  localStorage.removeItem('hasu_to_tsuki_registered');
-  sessionStorage.clear();
 };
 
-// Auth State Listener
+// Auth State Listener (STRICT: NO GHOST LOCALSTORAGE FALLBACK)
 export const subscribeAuthChange = (callback: (user: UserProfile | null) => void) => {
   const unsubscribeFirebase = onAuthStateChanged(auth, (user: User | null) => {
     const isRegistered = localStorage.getItem('hasu_to_tsuki_registered') === 'true';
@@ -187,17 +180,6 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
         photoURL: user.photoURL,
         providerId
       });
-    } else if (!user && isRegistered) {
-      const localUserStr = localStorage.getItem('hasu_tsuki_user');
-      if (localUserStr) {
-        try {
-          callback(JSON.parse(localUserStr));
-        } catch (e) {
-          callback(null);
-        }
-      } else {
-        callback(null);
-      }
     } else {
       callback(null);
     }
