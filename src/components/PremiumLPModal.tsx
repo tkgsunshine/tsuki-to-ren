@@ -169,7 +169,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               lineHeight: '1.6',
               margin: '0 0 1.25rem 0'
             }}>
-              気になるあの人の本心・LINEを送るべき黄金時間・10年後までの運命バイオリズムを完全解禁。二人の絆を確かなものにするプレミアムプラン。
+              気になるあの人の深層本心・絶対厳禁の地雷行動・10年後までの運命バイオリズムを完全解禁。二人の絆を確かなものにするプレミアムプラン。
             </p>
 
             {/* Pricing Highlight Card */}
@@ -211,7 +211,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               プレミアム会員 5大解放特典
             </h2>
 
-            {/* Benefit 1: 7-Day LINE Hours & 10-Year Destiny Biorhythm Fully Unlocked */}
+            {/* Benefit 1: 7-Day Turning Points & 10-Year Destiny Biorhythm Fully Unlocked */}
             <div className="glass-panel" style={{
               padding: '1rem',
               display: 'flex',
@@ -236,10 +236,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#93c5fd' }}>
-                  ① 今後7日間のLINE吉時間 ＆ 10年後までの運命テキスト全解放
+                  ① 今後7日間の二人の運気予測 ＆ 10年後までの運命テキスト全解放
                 </span>
                 <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  明日・明後日〜7日後の「LINE送信に最適な推奨時間（返信率MAX帯）」や、今後10年間に訪れる「極星の年（大開運）」「結婚・同棲の黄金期」の鍵付き詳細テキストをすべて解禁できます。
+                  明日・明後日〜7日後の「二人の急接近運気・転機日」や、今後10年間に訪れる「極星の年（大開運）」「結婚・同棲の黄金期」の鍵付き詳細テキストをすべて解禁できます。
                 </p>
               </div>
             </div>
@@ -277,7 +277,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
             </div>
 
-            {/* Benefit 3: Daily Email Notification */}
+            {/* Benefit 3: Deep Compatibility & Lucky Action Advice */}
             <div className="glass-panel" style={{
               padding: '1rem',
               display: 'flex',
@@ -302,10 +302,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                 <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fef08a' }}>
-                  ③ 本日の「LINE送信推奨時間 ＆ バイオリズム」完全解禁
+                  ③ 恋の成就をたぐり寄せる「深層相性アドバイス ＆ 特別開運法」完全解禁
                 </span>
                 <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  当日の相性バイオリズムと「今日LINEを送るべき黄金時間帯（返信率MAX帯）」をリアルタイム表示。送るタイミングに二度と迷いません。
+                  当日の相性バイオリズムと「お相手の防衛本能を解きほぐすアプローチ法」を詳細表示。二人の関係を進展させるチャンスを逃しません。
                 </p>
               </div>
             </div>
