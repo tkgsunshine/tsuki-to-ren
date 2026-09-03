@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
       {onOpenAuth && (
         <div style={{
           position: 'absolute',
-          top: 'calc(0.15rem + var(--safe-top, 0px))',
+          top: 'calc(-0.3rem + var(--safe-top, 0px))',
           right: '1rem',
           zIndex: 10
         }}>
