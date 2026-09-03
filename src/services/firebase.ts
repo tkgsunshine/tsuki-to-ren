@@ -41,67 +41,8 @@ export interface UserProfile {
   providerId: 'google.com' | 'apple.com' | 'twitter.com' | 'demo' | string;
 }
 
-// Google Sign-In with Native Popup & Firebase Auth
+// Google Sign-In via Firebase Auth
 export const signInWithGoogle = async (): Promise<UserProfile> => {
-  // 1. Try Firebase Auth Popup first
-  try {
-    const provider = new GoogleAuthProvider();
-    provider.addScope('profile');
-    provider.addScope('email');
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    const userProfile: UserProfile = {
-      uid: user.uid,
-      displayName: user.displayName || 'Google ユーザー',
-      email: user.email,
-      photoURL: user.photoURL,
-      providerId: 'google.com'
-    };
-    localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
-    return userProfile;
-  } catch (err: any) {
-    console.warn('Firebase signInWithPopup warning, fallback to Google GIS:', err);
-  }
-
-  // 2. Try Google Identity Services (GIS) Native OAuth2 Popup window
-  if (window.google?.accounts?.oauth2) {
-    return new Promise((resolve, reject) => {
-      try {
-        const client = window.google.accounts.oauth2.initTokenClient({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '31545247039-atiuov6m7i6m3mf73d8qr5klje7vfbn7.apps.googleusercontent.com',
-          scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-          callback: async (tokenResponse: any) => {
-            if (tokenResponse && tokenResponse.access_token) {
-              try {
-                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                });
-                const info = await res.json();
-                const user: UserProfile = {
-                  uid: 'google-' + (info.sub || Date.now()),
-                  displayName: info.name || info.given_name || 'Google ユーザー',
-                  email: info.email || null,
-                  photoURL: info.picture || null,
-                  providerId: 'google.com'
-                };
-                localStorage.setItem('hasu_tsuki_user', JSON.stringify(user));
-                resolve(user);
-              } catch (e) {
-                reject(e);
-              }
-            } else {
-              reject(new Error('No access token returned from Google'));
-            }
-          }
-        });
-        client.requestAccessToken();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
-
-  // Fallback demo user
   const provider = new GoogleAuthProvider();
   const result = await signInWithPopup(auth, provider);
   const user = result.user;
@@ -114,6 +55,7 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
     providerId: 'google.com'
   };
   localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
+  localStorage.setItem('hasu_to_tsuki_registered', 'true');
   return userProfile;
 };
 
@@ -131,12 +73,22 @@ export const signInWithX = async (): Promise<UserProfile> => {
     providerId: 'twitter.com'
   };
   localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
+  localStorage.setItem('hasu_to_tsuki_registered', 'true');
   return userProfile;
 };
 
 // Sign Out
 // Send Email Magic Link (Passwordless Sign-In)
 export const sendEmailMagicLink = async (email: string): Promise<void> => {
+  // 1. Clear any prior active session & registration state so member features REMAIN 100% LOCKED until email link click
+  localStorage.removeItem('hasu_tsuki_user');
+  localStorage.removeItem('hasu_to_tsuki_registered');
+  try {
+    await signOut(auth);
+  } catch (e) {
+    // Ignore signout error if already signed out
+  }
+
   const redirectUrl = window.location.origin + '/';
   const actionCodeSettings = {
     url: redirectUrl,
@@ -218,7 +170,8 @@ export const logOutUser = async (): Promise<void> => {
 // Auth State Listener
 export const subscribeAuthChange = (callback: (user: UserProfile | null) => void) => {
   const unsubscribeFirebase = onAuthStateChanged(auth, (user: User | null) => {
-    if (user) {
+    const isRegistered = localStorage.getItem('hasu_to_tsuki_registered') === 'true';
+    if (user && isRegistered) {
       const rawProvider = user.providerData[0]?.providerId || '';
       let providerId = 'email';
       if (rawProvider === 'google.com' || user.providerData.some(p => p.providerId === 'google.com')) {
@@ -234,7 +187,7 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
         photoURL: user.photoURL,
         providerId
       });
-    } else {
+    } else if (!user && isRegistered) {
       const localUserStr = localStorage.getItem('hasu_tsuki_user');
       if (localUserStr) {
         try {
@@ -245,6 +198,8 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
       } else {
         callback(null);
       }
+    } else {
+      callback(null);
     }
   });
 

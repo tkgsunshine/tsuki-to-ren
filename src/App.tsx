@@ -88,12 +88,16 @@ function App() {
     });
 
     const unsubscribe = subscribeAuthChange((user) => {
-      setCurrentUser(user);
-      if (user) {
+      const isReg = localStorage.getItem('hasu_to_tsuki_registered') === 'true';
+      if (user && isReg) {
+        setCurrentUser(user);
         setIsRegistered(true);
         if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
           setMyName(user.displayName);
         }
+      } else {
+        setCurrentUser(null);
+        setIsRegistered(false);
       }
     });
     return () => unsubscribe();
