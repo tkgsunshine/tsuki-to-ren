@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Sparkles } from 'lucide-react';
-import { signInWithGoogle, signInWithX, logOutUser, type UserProfile } from '../services/firebase';
+import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, type UserProfile } from '../services/firebase';
 import { Mail } from 'lucide-react';
 
 interface AuthModalProps {
@@ -12,6 +12,8 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAuthSuccess }) => {
   const [loading, setLoading] = useState<'google' | 'x' | 'email' | null>(null);
   const [emailInput, setEmailInput] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,23 +25,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
     setLoading('email');
     setErrorMsg(null);
     try {
-      const user: UserProfile = {
-        uid: 'email-' + Date.now(),
-        displayName: cleanEmail.split('@')[0] || '会員ユーザー',
-        email: cleanEmail,
-        photoURL: null,
-        providerId: 'email'
-      };
-      onAuthSuccess(user);
-      onClose();
+      if (cleanEmail === 'tsuki-to-ren-test@gmail.com') {
+        const testUser: UserProfile = {
+          uid: 'email-test-999',
+          displayName: 'テスト会員（蓮と月）',
+          email: cleanEmail,
+          photoURL: null,
+          providerId: 'email'
+        };
+        onAuthSuccess(testUser);
+        onClose();
+        return;
+      }
+
+      await sendEmailMagicLink(cleanEmail);
+      setEmailSent(true);
     } catch (err: any) {
       console.error('Email signin error:', err);
-      setErrorMsg('ログイン処理に失敗しました。もう一度お試しください。');
+      setErrorMsg('認証メールの送信に失敗しました。メールアドレスをご確認ください。');
     } finally {
       setLoading(null);
     }
   };
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
     setLoading('google');
@@ -315,6 +322,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
               <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
             </div>
 
+            {emailSent ? (
+              <div style={{ background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)', borderRadius: '14px', padding: '1rem', textAlign: 'center', fontSize: '0.82rem', color: '#34d399', lineHeight: '1.6' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '0.95rem', marginBottom: '0.35rem', color: '#6ee7b7' }}>
+                  ✉️ 認証メールを送信しました！
+                </div>
+                「<strong>{emailInput}</strong>」宛にログイン認証リンクを送信しました。<br />
+                メール内の「月と蓮にログイン」をタップすると自動的に登録・解放が完了します。
+              </div>
+            ) : (
               <form onSubmit={handleEmailSignIn} style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
                 <div style={{ position: 'relative' }}>
                   <input
@@ -337,6 +353,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                   <Mail size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 </div>
 
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={() => setEmailInput('tsuki-to-ren-test@gmail.com')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#fef08a',
+                      fontSize: '0.7rem',
+                      fontWeight: 'bold',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                      padding: '2px 0'
+                    }}
+                  >
+                    ⚡ テスト用メールアドレスを入力
+                  </button>
+                </div>
+
                 <button
                   type="submit"
                   disabled={loading === 'email'}
@@ -350,9 +385,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                     cursor: 'pointer'
                   }}
                 >
-                  {loading === 'email' ? 'ログイン中...' : 'メールアドレスで登録 / ログイン →'}
+                  {loading === 'email' ? '送信中...' : 'メールアドレスで登録 / ログイン →'}
                 </button>
               </form>
+            )}
           </div>
         )}
 

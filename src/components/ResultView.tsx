@@ -187,6 +187,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onShowLegal
 }) => {
   const [email, setEmail] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
   const [subSuccess, setSubSuccess] = useState(false);
   interface ZoomedImgData {
   src: string;
@@ -397,10 +398,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
       return;
     }
     try {
+      if (cleanEmail === 'tsuki-to-ren-test@gmail.com') {
+        await onRegister(cleanEmail);
+        return;
+      }
       await onRegister(cleanEmail);
+      setEmailSent(true);
     } catch (err: any) {
       console.error('Registration email error:', err);
-      await onRegister(cleanEmail);
+      alert('認証メールの送信に失敗しました。メールアドレスをご確認ください。');
     }
   };
 
@@ -1515,28 +1521,47 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </p>
                 </div>
 
-                <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <input
-                    type="email"
-                    required
-                    placeholder="メールアドレスを入力..."
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      padding: '0.8rem',
-                      color: 'white',
-                      outline: 'none',
-                      textAlign: 'center',
-                      fontSize: '0.85rem'
-                    }}
-                  />
-                  <button type="submit" className="consult-btn" style={{ fontSize: '0.9rem', padding: '0.85rem', width: '100%' }}>
-                    無料で続きを読む →
-                  </button>
-                </form>
+                {emailSent ? (
+                  <div style={{
+                    background: 'rgba(52, 211, 153, 0.12)',
+                    border: '1px solid rgba(52, 211, 153, 0.35)',
+                    borderRadius: '14px',
+                    padding: '1.1rem 1rem',
+                    textAlign: 'center',
+                    fontSize: '0.82rem',
+                    color: '#34d399',
+                    lineHeight: '1.6'
+                  }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '0.92rem', marginBottom: '0.4rem', color: '#6ee7b7' }}>
+                      ✉️ 認証メールを送信しました！
+                    </div>
+                    「<strong>{email}</strong>」宛にログイン認証リンクを送信しました。<br />
+                    届いたメール内の「月と蓮にログイン」リンクをタップして会員登録を完了させてください。
+                  </div>
+                ) : (
+                  <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <input
+                      type="email"
+                      required
+                      placeholder="メールアドレスを入力..."
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        padding: '0.8rem',
+                        color: 'white',
+                        outline: 'none',
+                        textAlign: 'center',
+                        fontSize: '0.85rem'
+                      }}
+                    />
+                    <button type="submit" className="consult-btn" style={{ fontSize: '0.9rem', padding: '0.85rem', width: '100%' }}>
+                      無料で続きを読む →
+                    </button>
+                  </form>
+                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1rem' }}>
                   <span style={{ fontSize: '0.6rem', color: '#9ca3af' }}>── または ──</span>

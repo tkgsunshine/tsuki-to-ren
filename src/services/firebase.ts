@@ -132,9 +132,7 @@ export const signInWithX = async (): Promise<UserProfile> => {
 // Sign Out
 // Send Email Magic Link (Passwordless Sign-In)
 export const sendEmailMagicLink = async (email: string): Promise<void> => {
-  const isLocal = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
-  const redirectUrl = isLocal ? 'https://tsuki-to-ren-dba8c.firebaseapp.com' : (window.location.origin + '/');
-  
+  const redirectUrl = window.location.origin + '/';
   const actionCodeSettings = {
     url: redirectUrl,
     handleCodeInApp: true,
@@ -169,6 +167,10 @@ export const completeEmailMagicLinkSignIn = async (): Promise<UserProfile | null
           providerId: 'email'
         };
         localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
+        localStorage.setItem('hasu_to_tsuki_registered', 'true');
+        if (window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
         return userProfile;
       } catch (e) {
         console.error('Magic link completion error:', e);
