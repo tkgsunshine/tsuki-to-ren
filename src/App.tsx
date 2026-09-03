@@ -508,26 +508,9 @@ function App() {
   };
 
   const handleRegister = async (email: string) => {
-    console.log(`Processing registration for email: ${email}`);
+    console.log(`Sending registration email link to: ${email}`);
     const cleanEmail = email.trim().toLowerCase();
-    
-    // Test email instant unlock shortcut
-    if (cleanEmail === 'tsuki-to-ren-test@gmail.com') {
-      const testUser: FirebaseUser = {
-        uid: 'email-test-999',
-        displayName: 'テスト会員（蓮と月）',
-        email: cleanEmail,
-        photoURL: null,
-        providerId: 'email'
-      };
-      setCurrentUser(testUser);
-      setIsRegistered(true);
-      localStorage.setItem('hasu_to_tsuki_user', JSON.stringify(testUser));
-      localStorage.setItem('hasu_to_tsuki_registered', 'true');
-      return;
-    }
-
-    // Real email: send email authentication magic link
+    // Strictly send email verification link. Member status is ONLY granted after clicking email link.
     await sendEmailMagicLink(cleanEmail);
   };
 

@@ -25,19 +25,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
     setLoading('email');
     setErrorMsg(null);
     try {
-      if (cleanEmail === 'tsuki-to-ren-test@gmail.com') {
-        const testUser: UserProfile = {
-          uid: 'email-test-999',
-          displayName: 'テスト会員（蓮と月）',
-          email: cleanEmail,
-          photoURL: null,
-          providerId: 'email'
-        };
-        onAuthSuccess(testUser);
-        onClose();
-        return;
-      }
-
       await sendEmailMagicLink(cleanEmail);
       setEmailSent(true);
     } catch (err: any) {

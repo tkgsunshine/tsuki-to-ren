@@ -398,10 +398,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
       return;
     }
     try {
-      if (cleanEmail === 'tsuki-to-ren-test@gmail.com') {
-        await onRegister(cleanEmail);
-        return;
-      }
       await onRegister(cleanEmail);
       setEmailSent(true);
     } catch (err: any) {
