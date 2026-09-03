@@ -102,15 +102,19 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
   }
 
   // Fallback demo user
-  const demoUser: UserProfile = {
-    uid: 'google-demo-' + Date.now(),
-    displayName: 'Google ユーザー',
-    email: 'user@gmail.com',
-    photoURL: 'https://lh3.googleusercontent.com/a/default-user',
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  const user = result.user;
+  const email = user.email || user.providerData[0]?.email || null;
+  const userProfile: UserProfile = {
+    uid: user.uid,
+    displayName: user.displayName || 'Google ユーザー',
+    email: email,
+    photoURL: user.photoURL,
     providerId: 'google.com'
   };
-  localStorage.setItem('hasu_tsuki_user', JSON.stringify(demoUser));
-  return demoUser;
+  localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
+  return userProfile;
 };
 
 // X (formerly Twitter) Sign-In via Firebase Auth
@@ -118,10 +122,11 @@ export const signInWithX = async (): Promise<UserProfile> => {
   const provider = new TwitterAuthProvider();
   const result = await signInWithPopup(auth, provider);
   const user = result.user;
+  const email = user.email || user.providerData[0]?.email || null;
   const userProfile: UserProfile = {
     uid: user.uid,
-    displayName: user.displayName || user.email?.split('@')[0] || 'X ユーザー',
-    email: user.email,
+    displayName: user.displayName || 'X ユーザー',
+    email: email,
     photoURL: user.photoURL,
     providerId: 'twitter.com'
   };
@@ -215,10 +220,11 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
   const unsubscribeFirebase = onAuthStateChanged(auth, (user: User | null) => {
     if (user) {
       const providerId = (user.providerData[0]?.providerId as any) || 'google.com';
+      const email = user.email || user.providerData[0]?.email || null;
       callback({
         uid: user.uid,
         displayName: user.displayName,
-        email: user.email,
+        email: email,
         photoURL: user.photoURL,
         providerId
       });
