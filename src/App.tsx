@@ -74,12 +74,16 @@ function App() {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showLegalPage, setShowLegalPage] = useState(false);
+  const [showEmailPromptModal, setShowEmailPromptModal] = useState(false);
+  const [promptEmailInput, setPromptEmailInput] = useState('');
 
   useEffect(() => {
-    completeEmailMagicLinkSignIn().then((magicUser) => {
-      if (magicUser) {
-        setCurrentUser(magicUser);
+    completeEmailMagicLinkSignIn().then((res) => {
+      if (res.success && res.user) {
+        setCurrentUser(res.user);
         setIsRegistered(true);
+      } else if (res.needsEmailPrompt) {
+        setShowEmailPromptModal(true);
       }
     });
 
@@ -2144,6 +2148,49 @@ function App() {
         isRegistered={isRegistered}
         onRegisterFirst={() => setShowAuthModal(true)}
       />
+
+      {/* Email Verification Prompt Modal (for cross-browser/device link clicks) */}
+      {showEmailPromptModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
+          <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '1.75rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.1rem', border: '1px solid rgba(226, 192, 116, 0.4)', borderRadius: '20px' }}>
+            <h3 className="font-serif gold-text" style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>
+              ✉️ メール認証の最終確認
+            </h3>
+            <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
+              メールリンクからのアクセスを確認いたしました。<br />
+              完了するため、ご入力されたメールアドレスを入力してください。
+            </p>
+            <input
+              type="email"
+              placeholder="例: user@example.com"
+              value={promptEmailInput}
+              onChange={(e) => setPromptEmailInput(e.target.value)}
+              style={{ padding: '0.85rem', borderRadius: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', textAlign: 'center', fontSize: '0.88rem', outline: 'none' }}
+            />
+            <button
+              onClick={async () => {
+                const clean = promptEmailInput.trim().toLowerCase();
+                if (!clean || !clean.includes('@')) {
+                  alert('有効なメールアドレスを入力してください。');
+                  return;
+                }
+                const res = await completeEmailMagicLinkSignIn(clean);
+                if (res.success && res.user) {
+                  setCurrentUser(res.user);
+                  setIsRegistered(true);
+                  setShowEmailPromptModal(false);
+                } else {
+                  alert('認証に失敗しました。メールアドレスが正しいかご確認ください。');
+                }
+              }}
+              className="consult-btn font-serif"
+              style={{ padding: '0.85rem', width: '100%', fontSize: '0.9rem', fontWeight: 'bold', borderRadius: '12px', cursor: 'pointer' }}
+            >
+              認証を完了して解放する →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Global Bottom Navbar (Always visible on top of all pages) */}
       <Navbar activeTab={activeTab} setActiveTab={handleTabChange} />

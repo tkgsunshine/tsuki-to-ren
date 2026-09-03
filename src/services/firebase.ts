@@ -144,40 +144,58 @@ export const sendEmailMagicLink = async (email: string): Promise<void> => {
     console.error('Firebase sendSignInLinkToEmail ERROR:', err?.code, err?.message, err);
     throw err;
   }
+  // Store email across localStorage, sessionStorage, and cookie for max resilience
   window.localStorage.setItem('emailForSignIn', email);
+  window.sessionStorage.setItem('emailForSignIn', email);
+  document.cookie = `emailForSignIn=${encodeURIComponent(email)}; path=/; max-age=86400`;
 };
 
+export interface MagicLinkResult {
+  success: boolean;
+  user?: UserProfile;
+  needsEmailPrompt?: boolean;
+}
+
 // Complete Email Magic Link Sign-In on redirect back
-export const completeEmailMagicLinkSignIn = async (): Promise<UserProfile | null> => {
+export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Promise<MagicLinkResult> => {
   if (isSignInWithEmailLink(auth, window.location.href)) {
-    let email = window.localStorage.getItem('emailForSignIn');
+    let email = providedEmail || window.localStorage.getItem('emailForSignIn') || window.sessionStorage.getItem('emailForSignIn');
+    
     if (!email) {
-      email = window.prompt('確認のため、ご入力されたメールアドレスを入力してください:') || '';
+      const match = document.cookie.match(/(?:^|; )emailForSignIn=([^;]*)/);
+      if (match) email = decodeURIComponent(match[1]);
     }
-    if (email) {
-      try {
-        const result = await signInWithEmailLink(auth, email, window.location.href);
-        window.localStorage.removeItem('emailForSignIn');
-        const user = result.user;
-        const userProfile: UserProfile = {
-          uid: user.uid,
-          displayName: user.displayName || email.split('@')[0] || '会員ユーザー',
-          email: user.email || email,
-          photoURL: user.photoURL,
-          providerId: 'email'
-        };
-        localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
-        localStorage.setItem('hasu_to_tsuki_registered', 'true');
-        if (window.history.replaceState) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        return userProfile;
-      } catch (e) {
-        console.error('Magic link completion error:', e);
+
+    if (!email) {
+      return { success: false, needsEmailPrompt: true };
+    }
+
+    try {
+      const result = await signInWithEmailLink(auth, email, window.location.href);
+      window.localStorage.removeItem('emailForSignIn');
+      window.sessionStorage.removeItem('emailForSignIn');
+      document.cookie = "emailForSignIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+      const user = result.user;
+      const userProfile: UserProfile = {
+        uid: user.uid,
+        displayName: user.displayName || email.split('@')[0] || '会員ユーザー',
+        email: user.email || email,
+        photoURL: user.photoURL,
+        providerId: 'email'
+      };
+      localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
+      localStorage.setItem('hasu_to_tsuki_registered', 'true');
+      if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
+      return { success: true, user: userProfile };
+    } catch (e) {
+      console.error('Magic link completion error:', e);
+      return { success: false };
     }
   }
-  return null;
+  return { success: false };
 };
 
 export const logOutUser = async (): Promise<void> => {
