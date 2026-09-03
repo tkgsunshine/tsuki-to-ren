@@ -458,7 +458,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
         {/* PINNED FIXED BOTTOM CTA FOOTER */}
         <div style={{
-          padding: '0.85rem 1.25rem calc(0.85rem + var(--safe-bottom, 0px)) 1.25rem',
+          padding: '0.85rem 1.25rem max(1.75rem, calc(0.85rem + env(safe-area-inset-bottom, 24px))) 1.25rem',
           background: 'rgba(13, 9, 30, 0.96)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
