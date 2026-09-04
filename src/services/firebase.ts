@@ -201,8 +201,10 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
     }
 
     // メール認証: email_verified フラグがあれば会員
-    if (providerId === 'email' && regFlag === 'email_verified') {
-      const email = user.email || null;
+    // ※Firebaseはメールリンク認証を既存Googleアカウントと自動リンクするため、
+    //   providerIdがgoogle.comになっていてもemail_verifiedフラグがあれば会員扱いとする
+    if (regFlag === 'email_verified') {
+      const email = user.email || user.providerData[0]?.email || null;
       callback({
         uid: user.uid,
         displayName: user.displayName,
