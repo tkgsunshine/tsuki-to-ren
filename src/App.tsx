@@ -924,7 +924,7 @@ function App() {
                         {currentUser ? currentUser.displayName : 'Google / X で無料登録・ログイン'}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: currentUser ? '#4ade80' : '#cbd5e1', marginTop: '2px' }}>
-                        {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : 'Google 連携中'} (${currentUser.email || '登録済み'})` : '鑑定履歴・お相手データをクラウド保存'}
+                        {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : (currentUser.providerId === 'email' || localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified') ? 'メール認証完了' : 'Google 連携中'} (${currentUser.email || '登録済み'})` : '鑑定履歴・お相手データをクラウド保存'}
                       </div>
                     </div>
                   </div>
