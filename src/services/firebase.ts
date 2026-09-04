@@ -82,11 +82,10 @@ export const signInWithX = async (): Promise<UserProfile> => {
 // Sign Out
 // Send Email Magic Link (Passwordless Sign-In)
 export const sendEmailMagicLink = async (email: string): Promise<void> => {
-  let redirectUrl = 'https://www.tsuki-to-ren.com/';
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    // Keep production URL for Firebase Auth email link domain matching
-    redirectUrl = 'https://www.tsuki-to-ren.com/';
-  }
+  // ローカル開発中はlocalhostにリダイレクト、本番は本番URLへ
+  const redirectUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? window.location.origin + '/'
+    : 'https://www.tsuki-to-ren.com/';
   let actionCodeSettings = {
     url: redirectUrl,
     handleCodeInApp: true,
