@@ -82,7 +82,11 @@ export const signInWithX = async (): Promise<UserProfile> => {
 // Sign Out
 // Send Email Magic Link (Passwordless Sign-In)
 export const sendEmailMagicLink = async (email: string): Promise<void> => {
-  let redirectUrl = window.location.origin + '/';
+  let redirectUrl = 'https://www.tsuki-to-ren.com/';
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    // Keep production URL for Firebase Auth email link domain matching
+    redirectUrl = 'https://www.tsuki-to-ren.com/';
+  }
   let actionCodeSettings = {
     url: redirectUrl,
     handleCodeInApp: true,
@@ -92,20 +96,7 @@ export const sendEmailMagicLink = async (email: string): Promise<void> => {
     console.log('Firebase sendSignInLinkToEmail SUCCESS for:', email);
   } catch (err: any) {
     console.error('Firebase sendSignInLinkToEmail ERROR (primary):', err?.code, err?.message, err);
-    // If running on localhost and domain is not authorized in Firebase Console, fallback to production URL
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      try {
-        console.log('Retrying with production redirect URL: https://www.tsuki-to-ren.com/');
-        actionCodeSettings.url = 'https://www.tsuki-to-ren.com/';
-        await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-        console.log('Firebase sendSignInLinkToEmail SUCCESS (fallback) for:', email);
-      } catch (fallbackErr: any) {
-        console.error('Firebase sendSignInLinkToEmail ERROR (fallback):', fallbackErr?.code, fallbackErr?.message, fallbackErr);
-        throw fallbackErr;
-      }
-    } else {
-      throw err;
-    }
+    throw err;
   }
   // Store email across localStorage, sessionStorage, and cookie for max resilience
   window.localStorage.setItem('emailForSignIn', email);
