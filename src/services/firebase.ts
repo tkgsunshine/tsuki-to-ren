@@ -86,7 +86,7 @@ export const sendEmailMagicLink = async (email: string): Promise<void> => {
   const redirectUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? window.location.origin + '/'
     : 'https://www.tsuki-to-ren.com/';
-  let actionCodeSettings = {
+  const actionCodeSettings = {
     url: redirectUrl,
     handleCodeInApp: true,
   };
@@ -94,10 +94,17 @@ export const sendEmailMagicLink = async (email: string): Promise<void> => {
     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     console.log('Firebase sendSignInLinkToEmail SUCCESS for:', email);
   } catch (err: any) {
-    console.error('Firebase sendSignInLinkToEmail ERROR (primary):', err?.code, err?.message, err);
+    console.error('Firebase sendSignInLinkToEmail ERROR:', err?.code, err?.message, err);
     throw err;
   }
-  // Store email across localStorage, sessionStorage, and cookie for max resilience
+  // メールリンク送信後：既存セッション（Google等）をサインアウトし、
+  // registered フラグを削除することで、リンクをクリックするまでログインされないようにする
+  try {
+    await signOut(auth);
+  } catch (_) {}
+  localStorage.removeItem('hasu_to_tsuki_registered');
+  localStorage.removeItem('hasu_tsuki_user');
+  // Store email for completion step
   window.localStorage.setItem('emailForSignIn', email);
   window.sessionStorage.setItem('emailForSignIn', email);
   document.cookie = `emailForSignIn=${encodeURIComponent(email)}; path=/; max-age=86400`;
