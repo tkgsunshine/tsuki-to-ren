@@ -105,7 +105,7 @@ body {
   background: linear-gradient(135deg, #fef08a 0%, #e2c074 50%, #ca8a04 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 8px rgba(226, 192, 116, 0.15);
+  filter: drop-shadow(0 0 6px rgba(226, 192, 116, 0.25));
 }
 
 /* Animations */
