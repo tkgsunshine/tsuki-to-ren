@@ -1,9 +1,9 @@
-name: Daily Auto Column Generator (Hasu-to-Tsuki)
+name: Twice Daily Auto Column Generator (Hasu-to-Tsuki)
 
 on:
   schedule:
-    # Runs every day at 23:00 UTC (8:00 AM JST)
-    - cron: '0 23 * * *'
+    # Runs twice daily at 8:00 AM JST (23:00 UTC) and 5:00 PM (17:00) JST (08:00 UTC)
+    - cron: '0 8,23 * * *'
   workflow_dispatch:
 
 jobs:
@@ -33,8 +33,8 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add src/data/columnsData.ts public/sitemap.xml
           if git diff --staged --quiet; then
-            echo "No new column updates today."
+            echo "No new column updates this run."
           else
-            git commit -m "Auto-generate daily column for Hasu-to-Tsuki [skip ci]"
+            git commit -m "Auto-generate scheduled column for Hasu-to-Tsuki [skip ci]"
             git push origin main
           fi
