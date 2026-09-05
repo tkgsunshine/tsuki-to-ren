@@ -1,0 +1,40 @@
+name: Daily Auto Column Generator (Hasu-to-Tsuki)
+
+on:
+  schedule:
+    # Runs every day at 23:00 UTC (8:00 AM JST)
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-column:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Run Column Generator
+        run: node scripts/generate-column.js
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/columnsData.ts public/sitemap.xml
+          if git diff --staged --quiet; then
+            echo "No new column updates today."
+          else
+            git commit -m "Auto-generate daily column for Hasu-to-Tsuki [skip ci]"
+            git push origin main
+          fi
