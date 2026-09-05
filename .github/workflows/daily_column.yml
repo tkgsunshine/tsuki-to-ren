@@ -2,8 +2,8 @@ name: Twice Daily Auto Column Generator (Hasu-to-Tsuki)
 
 on:
   schedule:
-    # Runs twice daily at 8:00 AM JST (23:00 UTC) and 5:00 PM (17:00) JST (08:00 UTC)
-    - cron: '0 8,23 * * *'
+    # Runs twice daily at 9:00 AM JST (00:00 UTC) and 6:00 PM (18:00) JST (09:00 UTC)
+    - cron: '0 0,9 * * *'
   workflow_dispatch:
 
 jobs:
