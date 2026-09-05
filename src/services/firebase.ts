@@ -33,6 +33,17 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const auth = getAuth(app);
 
+// Safe LocalStorage helpers for private browsing environments
+const safeSetItem = (key: string, value: string) => {
+  try { localStorage.setItem(key, value); } catch {}
+};
+const safeGetItem = (key: string): string | null => {
+  try { return localStorage.getItem(key); } catch { return null; }
+};
+const safeRemoveItem = (key: string) => {
+  try { localStorage.removeItem(key); } catch {}
+};
+
 export interface UserProfile {
   uid: string;
   displayName: string | null;
@@ -55,8 +66,8 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
     photoURL: user.photoURL,
     providerId: 'google.com'
   };
-  localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
-  localStorage.setItem('hasu_to_tsuki_registered', 'oauth_complete');
+  safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
+  safeSetItem('hasu_to_tsuki_registered', 'oauth_complete');
   return userProfile;
 };
 
@@ -74,8 +85,8 @@ export const signInWithX = async (): Promise<UserProfile> => {
     photoURL: user.photoURL,
     providerId: 'twitter.com'
   };
-  localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
-  localStorage.setItem('hasu_to_tsuki_registered', 'oauth_complete');
+  safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
+  safeSetItem('hasu_to_tsuki_registered', 'oauth_complete');
   return userProfile;
 };
 
@@ -102,11 +113,11 @@ export const sendEmailMagicLink = async (email: string): Promise<void> => {
   try {
     await signOut(auth);
   } catch (_) {}
-  localStorage.removeItem('hasu_to_tsuki_registered');
-  localStorage.removeItem('hasu_tsuki_user');
+  safeRemoveItem('hasu_to_tsuki_registered');
+  safeRemoveItem('hasu_tsuki_user');
   // Store email for completion step
-  window.localStorage.setItem('emailForSignIn', email);
-  window.sessionStorage.setItem('emailForSignIn', email);
+  safeSetItem('emailForSignIn', email);
+  try { window.sessionStorage.setItem('emailForSignIn', email); } catch {}
   document.cookie = `emailForSignIn=${encodeURIComponent(email)}; path=/; max-age=86400`;
 };
 
@@ -119,7 +130,7 @@ export interface MagicLinkResult {
 // Complete Email Magic Link Sign-In on redirect back
 export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Promise<MagicLinkResult> => {
   if (isSignInWithEmailLink(auth, window.location.href)) {
-    let email = providedEmail || window.localStorage.getItem('emailForSignIn') || window.sessionStorage.getItem('emailForSignIn');
+    let email = providedEmail || safeGetItem('emailForSignIn') || (() => { try { return window.sessionStorage.getItem('emailForSignIn'); } catch { return null; } })();
     
     if (!email) {
       const match = document.cookie.match(/(?:^|; )emailForSignIn=([^;]*)/);
@@ -132,8 +143,8 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
 
     try {
       const result = await signInWithEmailLink(auth, email, window.location.href);
-      window.localStorage.removeItem('emailForSignIn');
-      window.sessionStorage.removeItem('emailForSignIn');
+      safeRemoveItem('emailForSignIn');
+      try { window.sessionStorage.removeItem('emailForSignIn'); } catch {}
       document.cookie = "emailForSignIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
       const user = result.user;
@@ -144,8 +155,8 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
         photoURL: user.photoURL,
         providerId: 'email'
       };
-      localStorage.setItem('hasu_tsuki_user', JSON.stringify(userProfile));
-      localStorage.setItem('hasu_to_tsuki_registered', 'email_verified');
+      safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
+      safeSetItem('hasu_to_tsuki_registered', 'email_verified');
       if (window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -159,11 +170,11 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
 };
 
 export const logOutUser = async (): Promise<void> => {
-  localStorage.removeItem('hasu_tsuki_user');
-  localStorage.removeItem('hasu_to_tsuki_user');
-  localStorage.removeItem('hasu_to_tsuki_registered');
-  localStorage.removeItem('emailForSignIn');
-  sessionStorage.clear();
+  safeRemoveItem('hasu_tsuki_user');
+  safeRemoveItem('hasu_to_tsuki_user');
+  safeRemoveItem('hasu_to_tsuki_registered');
+  safeRemoveItem('emailForSignIn');
+  try { sessionStorage.clear(); } catch {}
   document.cookie = "emailForSignIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   try {
     await signOut(auth);
@@ -191,7 +202,7 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
       providerId = 'twitter.com';
     }
 
-    const regFlag = localStorage.getItem('hasu_to_tsuki_registered');
+    const regFlag = safeGetItem('hasu_to_tsuki_registered');
 
     // OAuthプロバイダー（Google/X）: oauth_complete フラグがあれば会員
     if ((providerId === 'google.com' || providerId === 'twitter.com') && regFlag === 'oauth_complete') {

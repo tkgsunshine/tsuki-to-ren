@@ -220,7 +220,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 <span>
                   {currentUser.providerId === 'twitter.com'
                     ? 'X 連携中'
-                    : (currentUser.providerId === 'email' || localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified')
+                    : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })())
                     ? 'メール認証完了'
                     : 'Google 連携中'}
                 </span>

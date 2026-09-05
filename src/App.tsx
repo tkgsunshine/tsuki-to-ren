@@ -145,7 +145,9 @@ function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem('hasu_saved_partners', JSON.stringify(savedPartners));
+    try {
+      localStorage.setItem('hasu_saved_partners', JSON.stringify(savedPartners));
+    } catch (e) {}
   }, [savedPartners]);
 
   // Handle browser back / forward navigation (popstate) & Parse share link query parameters
@@ -314,12 +316,16 @@ function App() {
   const [notifyEmailInput, setNotifyEmailInput] = useState('');
 
   useEffect(() => {
-    localStorage.setItem('hasu_notify_daily_luck', JSON.stringify(notifyDailyLuck));
+    try {
+      localStorage.setItem('hasu_notify_daily_luck', JSON.stringify(notifyDailyLuck));
+    } catch (e) {}
   }, [notifyDailyLuck]);
 
   useEffect(() => {
     if (notifyEmail) {
-      localStorage.setItem('hasu_notify_email', notifyEmail);
+      try {
+        localStorage.setItem('hasu_notify_email', notifyEmail);
+      } catch (e) {}
     }
   }, [notifyEmail]);
 
@@ -924,7 +930,7 @@ function App() {
                         {currentUser ? currentUser.displayName : 'Google / X で無料登録・ログイン'}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: currentUser ? '#4ade80' : '#cbd5e1', marginTop: '2px' }}>
-                        {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : (currentUser.providerId === 'email' || localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified') ? 'メール認証完了' : 'Google 連携中'} (${currentUser.email || '登録済み'})` : '鑑定履歴・お相手データをクラウド保存'}
+                        {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })()) ? 'メール認証完了' : 'Google 連携中'} (${currentUser.email || '登録済み'})` : '鑑定履歴・お相手データをクラウド保存'}
                       </div>
                     </div>
                   </div>
