@@ -44,7 +44,6 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
   return (
     <div style={{
       width: '100%',
-      maxWidth: '680px',
       margin: '0 auto',
       padding: '1.25rem 1rem 6rem',
       boxSizing: 'border-box',
