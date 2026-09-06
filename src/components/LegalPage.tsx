@@ -8,25 +8,23 @@ interface LegalPageProps {
 export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
   return (
     <div style={{
-      position: 'fixed',
+      position: 'absolute',
       inset: 0,
-      background: 'rgba(2, 2, 5, 0.92)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      zIndex: 200,
+      background: 'linear-gradient(180deg, rgba(15, 12, 28, 0.99) 0%, rgba(8, 8, 18, 1) 100%)',
+      zIndex: 900,
       display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
+      flexDirection: 'column',
       padding: '0',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      width: '100%',
+      height: '100%',
+      boxSizing: 'border-box'
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '640px',
-        background: 'linear-gradient(180deg, rgba(15, 12, 28, 0.98) 0%, rgba(8, 8, 18, 0.99) 100%)',
-        minHeight: '100vh',
-        padding: '1.5rem 1.25rem 3rem',
-        position: 'relative'
+        padding: '1.25rem 1.25rem calc(6.5rem + max(1rem, env(safe-area-inset-bottom, 16px)))',
+        position: 'relative',
+        boxSizing: 'border-box'
       }}>
         {/* Header */}
         <div style={{

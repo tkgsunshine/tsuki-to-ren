@@ -842,12 +842,12 @@ function App() {
           </div>
         )}
 
-        {/* Tab 4: SETTINGS */}
+        {/* Tab 4: SETTINGS (MYPAGE) */}
         {activeTab === 'profile' && (
-          <div style={{ animation: 'fadeIn 0.4s ease', padding: '1rem 0', display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box' }}>
+          <div style={{ animation: 'fadeIn 0.4s ease', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2rem' }}>
             {/* Header / Back Navigation */}
             {settingsSubView !== 'main' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <button
                   onClick={() => setSettingsSubView('main')}
                   style={{
@@ -875,14 +875,14 @@ function App() {
                 </span>
               </div>
             ) : (
-              <h2 className="font-serif gold-text" style={{ fontSize: '1.8rem', textAlign: 'center', margin: '0.5rem 0 1.5rem' }}>
+              <h2 className="font-serif gold-text" style={{ fontSize: '1.8rem', textAlign: 'center', margin: '0.5rem 0 1rem' }}>
                 アプリ設定・情報
               </h2>
             )}
 
             {/* Sub-View: MAIN MENU */}
             {settingsSubView === 'main' && (
-              <div style={{ width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {/* Account Status / Login Banner (1st) */}
                 <div 
                   onClick={() => setShowAuthModal(true)}
@@ -901,7 +901,6 @@ function App() {
                     borderRadius: '18px',
                     color: '#f3f4f6',
                     cursor: 'pointer',
-                    marginBottom: '0.85rem',
                     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
                   }}
                 >
@@ -953,8 +952,7 @@ function App() {
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
-                    boxSizing: 'border-box',
-                    marginBottom: '0.85rem'
+                    boxSizing: 'border-box'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem', minWidth: 0 }}>
@@ -987,23 +985,22 @@ function App() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '1.15rem 1.25rem',
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
                     color: '#f3f4f6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
-                    boxSizing: 'border-box',
-                    marginBottom: '0.85rem'
+                    boxSizing: 'border-box'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <User size={18} style={{ color: '#e2c074' }} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>プロフィール編集</span>
+                    <User size={20} style={{ color: '#e2c074' }} />
+                    <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>プロフィール編集</span>
                   </div>
-                  <ChevronRight size={16} style={{ color: '#6b7280' }} />
+                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
                 </div>
 
                 <div 
@@ -1013,23 +1010,22 @@ function App() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '1.15rem 1.25rem',
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
                     color: '#f3f4f6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
-                    boxSizing: 'border-box',
-                    marginBottom: '0.85rem'
+                    boxSizing: 'border-box'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <Users size={18} style={{ color: '#34d399' }} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>保存したお相手 ({savedPartners.length}人)</span>
+                    <Users size={20} style={{ color: '#34d399' }} />
+                    <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>保存したお相手 ({savedPartners.length}人)</span>
                   </div>
-                  <ChevronRight size={16} style={{ color: '#6b7280' }} />
+                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
                 </div>
 
                 {/* 毎朝8時 運勢・吉時間通知設定 (ON / OFF Toggle) */}
@@ -1039,21 +1035,20 @@ function App() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '1.15rem 1.25rem',
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
                     color: '#f3f4f6',
                     width: '100%',
-                    boxSizing: 'border-box',
-                    marginBottom: '0.85rem'
+                    boxSizing: 'border-box'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem', minWidth: 0 }}>
-                    <Bell size={18} style={{ color: '#fef08a', flexShrink: 0 }} />
+                    <Bell size={20} style={{ color: '#fef08a', flexShrink: 0 }} />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                      <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>毎朝8時の運勢・吉時間通知</span>
-                      <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
+                      <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>毎朝8時の運勢・吉時間通知</span>
+                      <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>
                         {notifyDailyLuck && notifyEmail ? `送信先: ${notifyEmail}` : '本日の運気とLINE推奨時間を毎朝お届け'}
                       </span>
                     </div>
@@ -1106,87 +1101,9 @@ function App() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '1.15rem 1.25rem',
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    borderRadius: '16px',
-                    color: '#f3f4f6',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    marginBottom: '0.85rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <BookOpen size={18} style={{ color: '#a855f7' }} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>月と蓮について (占い解説)</span>
-                  </div>
-                  <ChevronRight size={16} style={{ color: '#6b7280' }} />
-                </div>
-
-                <div 
-                  onClick={() => setSettingsSubView('tokushoho')}
-                  className="glass-panel" 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '1.15rem 1.25rem',
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    borderRadius: '16px',
-                    color: '#f3f4f6',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    marginBottom: '0.85rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <ShieldAlert size={18} style={{ color: '#3b82f6' }} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>特定商取引法に基づく表記</span>
-                  </div>
-                  <ChevronRight size={16} style={{ color: '#6b7280' }} />
-                </div>
-
-                <div 
-                  onClick={() => setShowLegalPage(true)}
-                  className="glass-panel" 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '1.15rem 1.25rem',
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    borderRadius: '16px',
-                    color: '#f3f4f6',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    marginBottom: '0.85rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <FileText size={18} style={{ color: '#10b981' }} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>利用規約・プライバシーポリシー</span>
-                  </div>
-                  <ChevronRight size={16} style={{ color: '#6b7280' }} />
-                </div>
-
-                <div 
-                  onClick={() => setSettingsSubView('company')}
-                  className="glass-panel" 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '1.15rem 1.25rem',
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
                     color: '#f3f4f6',
                     cursor: 'pointer',
@@ -1196,31 +1113,106 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <Building2 size={18} style={{ color: '#f59e0b' }} />
-                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>運営会社</span>
+                    <BookOpen size={20} style={{ color: '#a855f7' }} />
+                    <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>月と蓮について (占い解説)</span>
                   </div>
-                  <ChevronRight size={16} style={{ color: '#6b7280' }} />
+                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                </div>
+
+                <div 
+                  onClick={() => setSettingsSubView('tokushoho')}
+                  className="glass-panel" 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '16px',
+                    color: '#f3f4f6',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
+                    <ShieldAlert size={20} style={{ color: '#3b82f6' }} />
+                    <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>特定商取引法に基づく表記</span>
+                  </div>
+                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                </div>
+
+                <div 
+                  onClick={() => setShowLegalPage(true)}
+                  className="glass-panel" 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '16px',
+                    color: '#f3f4f6',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
+                    <FileText size={20} style={{ color: '#10b981' }} />
+                    <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>利用規約・プライバシーポリシー</span>
+                  </div>
+                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                </div>
+
+                <div 
+                  onClick={() => setSettingsSubView('company')}
+                  className="glass-panel" 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '16px',
+                    color: '#f3f4f6',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
+                    <Building2 size={20} style={{ color: '#f59e0b' }} />
+                    <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>運営会社</span>
+                  </div>
+                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
                 </div>
               </div>
             )}
 
             {/* Sub-View: PROFILE EDIT */}
             {settingsSubView === 'profile' && (
-              <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <label style={{ fontSize: '0.75rem', color: '#9ca3af' }}>お名前</label>
+              <div className="glass-panel" style={{ padding: '1.5rem 1.25rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '1.4rem', width: '100%', borderRadius: '20px', boxSizing: 'border-box' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>お名前</label>
                   <input
                     type="text"
                     maxLength={8}
                     value={myName === 'あなた' ? '' : myName}
                     placeholder="あなた (最大8文字)"
                     onChange={(e) => setMyName(e.target.value.slice(0, 8) || 'あなた')}
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.7rem 0.9rem', color: 'white', outline: 'none' }}
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '0.85rem 1rem', color: 'white', outline: 'none', fontSize: '0.95rem' }}
                   />
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <label style={{ fontSize: '0.75rem', color: '#9ca3af' }}>生年月日</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>生年月日</label>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                     <input
                       type="text"
@@ -1229,15 +1221,15 @@ function App() {
                       placeholder="例：19950401 (数字8桁)"
                       value={myBirth.replace(/-/g, '/')}
                       onChange={(e) => setMyBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
-                      style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.7rem 0.9rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                      style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '0.85rem 1rem', color: 'white', outline: 'none', fontSize: '0.95rem' }}
                     />
-                    <div style={{ position: 'relative', width: '42px', height: '42px' }}>
+                    <div style={{ position: 'relative', width: '46px', height: '46px' }}>
                       <button
                         type="button"
                         onClick={() => setShowProfileDatePicker(true)}
-                        style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#9ca3af', cursor: 'pointer' }}
+                        style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', color: 'var(--color-gold)', cursor: 'pointer' }}
                       >
-                        <Calendar size={18} />
+                        <Calendar size={20} />
                       </button>
                     </div>
                   </div>
@@ -1250,12 +1242,12 @@ function App() {
                   )}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <label style={{ fontSize: '0.75rem', color: '#9ca3af' }}>16タイプ診断 (性格タイプ)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>16タイプ診断 (性格タイプ)</label>
                   <select
                     value={myMbti}
                     onChange={(e) => setMyMbti(e.target.value)}
-                    style={{ background: '#0d0d18', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.7rem 0.9rem', color: 'white', outline: 'none' }}
+                    style={{ background: '#0d0d18', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '0.85rem 1rem', color: 'white', outline: 'none', fontSize: '0.95rem' }}
                   >
                     {mbtiOptions.map((opt: { value: string; label: string }) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1263,22 +1255,23 @@ function App() {
                   </select>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                  <label style={{ fontSize: '0.75rem', color: '#9ca3af' }}>性別 <span style={{ color: '#ef4444' }}>(必須)</span></label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>性別 <span style={{ color: '#ef4444' }}>(必須)</span></label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                     <button
                       type="button"
                       onClick={() => setMyGender('female')}
                       style={{
-                        background: myGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255,255,255,0.02)',
-                        border: myGender === 'female' ? '1px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: '10px',
-                        padding: '0.65rem',
+                        background: myGender === 'female' ? 'rgba(168, 85, 247, 0.22)' : 'rgba(255,255,255,0.03)',
+                        border: myGender === 'female' ? '1.5px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        padding: '0.85rem',
                         color: myGender === 'female' ? '#d8b4fe' : '#9ca3af',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
+                        fontSize: '0.95rem',
+                        fontWeight: 'bold',
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        boxShadow: myGender === 'female' ? '0 0 15px rgba(168, 85, 247, 0.3)' : 'none'
                       }}
                     >
                       女性
@@ -1287,15 +1280,16 @@ function App() {
                       type="button"
                       onClick={() => setMyGender('male')}
                       style={{
-                        background: myGender === 'male' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255,255,255,0.02)',
-                        border: myGender === 'male' ? '1px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: '10px',
-                        padding: '0.65rem',
+                        background: myGender === 'male' ? 'rgba(59, 130, 246, 0.22)' : 'rgba(255,255,255,0.03)',
+                        border: myGender === 'male' ? '1.5px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        padding: '0.85rem',
                         color: myGender === 'male' ? '#93c5fd' : '#9ca3af',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
+                        fontSize: '0.95rem',
+                        fontWeight: 'bold',
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        boxShadow: myGender === 'male' ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
                       }}
                     >
                       男性
