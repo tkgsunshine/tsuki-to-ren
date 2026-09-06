@@ -36,25 +36,31 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
 }
 
 body {
   font-family: var(--font-sans);
   color: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* App container */
+/* App container to mock phone viewport */
 .app-container {
   width: 100%;
+  max-width: 440px;
   height: 100dvh;
+  max-height: 900px;
   background-image: url('/assets/bg-stars.jpg');
   background-size: cover;
   background-position: center;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
+  border-radius: 40px;
 }
 
 @media (max-width: 440px) {
@@ -64,8 +70,13 @@ body {
     background-position: center;
     background-attachment: fixed;
   }
+  body {
+    align-items: stretch;
+  }
   .app-container {
     height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
   }
 }
 
