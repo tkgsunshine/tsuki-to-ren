@@ -48,7 +48,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     },
     {
       q: 'どのような支払い方法に対応していますか？',
-      a: 'クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Pay、PayPayに対応しています。'
+      a: 'クレジットカード（Visa / Mastercard / JCB / AMEX）、PayPayに対応しています。'
     },
     {
       q: '登録後すぐにすべての機能が使えますか？',
@@ -452,7 +452,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               <ShieldCheck size={12} style={{ color: '#4ade80' }} /> いつでも解約可能
             </span>
             <span>•</span>
-            <span>カード / PayPay / Apple Pay</span>
+            <span>クレジットカード / PayPay</span>
           </div>
         </div>
 
