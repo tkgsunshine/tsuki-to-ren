@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { getPillarWithReading } from '../utils/fortuneEngine';
@@ -47,6 +47,39 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+  const [myAvatarBase64, setMyAvatarBase64] = useState<string>(result.myAvatarUrl);
+  const [oppAvatarBase64, setOppAvatarBase64] = useState<string>(result.opponentAvatarUrl || '');
+
+  useEffect(() => {
+    let active = true;
+    const loadImages = async () => {
+      if (result.myAvatarUrl) {
+        try {
+          const res = await fetch(result.myAvatarUrl);
+          const blob = await res.blob();
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            if (active && reader.result) setMyAvatarBase64(reader.result as string);
+          };
+          reader.readAsDataURL(blob);
+        } catch (e) {}
+      }
+      if (result.opponentAvatarUrl) {
+        try {
+          const res = await fetch(result.opponentAvatarUrl);
+          const blob = await res.blob();
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            if (active && reader.result) setOppAvatarBase64(reader.result as string);
+          };
+          reader.readAsDataURL(blob);
+        } catch (e) {}
+      }
+    };
+    loadImages();
+    return () => { active = false; };
+  }, [result.myAvatarUrl, result.opponentAvatarUrl]);
+
   // Limit nickname character length to 8 max
   const formatName = (name: string) => {
     return name.slice(0, 8);
@@ -72,13 +105,39 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
     if (!cardRef.current || isSaving) return;
     setIsSaving(true);
     try {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
       const html2canvas = (await import('html2canvas')).default;
+      
+      // Standard fixed card dimensions for guaranteed 4:5 aspect ratio (360px x 450px)
+      const renderWidth = 360;
+      const renderHeight = 450;
+
       const canvas = await html2canvas(cardRef.current, {
         useCORS: true,
         allowTaint: true,
         scale: 3, // Ultra crisp high resolution
         backgroundColor: '#05040a',
-        logging: false
+        logging: false,
+        width: renderWidth,
+        height: renderHeight,
+        onclone: (_clonedDoc, clonedElement) => {
+          clonedElement.style.width = `${renderWidth}px`;
+          clonedElement.style.height = `${renderHeight}px`;
+          clonedElement.style.aspectRatio = 'none';
+          clonedElement.style.boxSizing = 'border-box';
+          clonedElement.style.overflow = 'hidden';
+          
+          // Ensure all text elements in cloned DOM have clear visible z-index & color
+          const allText = clonedElement.querySelectorAll('*');
+          allText.forEach((node: any) => {
+            if (node.style) {
+              node.style.webkitBackdropFilter = 'none';
+            }
+          });
+        }
       });
       const dataUrl = canvas.toDataURL('image/png');
 
@@ -302,17 +361,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               <>
                 <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
                   <img
-                    src={result.myAvatarUrl}
+                    src={myAvatarBase64}
                     alt={myName}
-                    crossOrigin="anonymous"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
                   />
                 </div>
                 <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
                   <img
-                    src={result.opponentAvatarUrl}
+                    src={oppAvatarBase64}
                     alt={oppNickname}
-                    crossOrigin="anonymous"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
                   />
                 </div>
@@ -320,9 +377,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             ) : (
               <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
                 <img
-                  src={result.myAvatarUrl}
+                  src={myAvatarBase64}
                   alt={myName}
-                  crossOrigin="anonymous"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
                 />
               </div>
