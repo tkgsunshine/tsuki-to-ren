@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Ill（B2B / 法人・IT）: 朝 8:00 ＆ 夕方 17:00",
+    "excerpt": "ビジネスマンが読む時間帯に最適な最新テクノロジートレンドと業務効率化のコラム。",
+    "thumbnail": "/assets/ill.jpg",
+    "author": "Tech Editor",
+    "readTime": "3 min",
+    "targetTimes": [8, 17]
+  },
+  {
+    "title": "月と蓮（占い・恋愛・16タイプ）: 朝 9:00 ＆ 夜 21:00",
+    "excerpt": "プライベートタイムにぴったりの恋愛診断と星座占いのコラム。",
+    "thumbnail": "/assets/tsuki.jpg",
+    "author": "Astro Writer",
+    "readTime": "4 min",
+    "targetTimes": [9, 21]
+  },
+  {
+    "title": "re,en（既婚者マッチング）: 朝 10:00 ＆ 夜 22:00",
+    "excerpt": "大人のひとり時間に合わせたライフハックと出会いに関するコラム。",
+    "thumbnail": "/assets/reen.jpg",
+    "author": "Lifestyle Editor",
+    "readTime": "5 min",
+    "targetTimes": [10, 22]
+  }
+]
