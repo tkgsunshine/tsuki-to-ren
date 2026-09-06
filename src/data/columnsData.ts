@@ -15,6 +15,56 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    id: 'col-20260906-morning',
+    slug: 'september-6-love-biorythm-16types',
+    title: '【9月6日朝刊】四柱推命×九星気学で解く本日の相性バイオリズム＆16タイプ恋愛吉時間',
+    metaDescription: '本日9月6日の運気を四柱推命と九星気学で解読。LINE送信の吉時間や16タイプ別の本日恋愛アプローチ法を徹底解説。',
+    keywords: ["9月6日 占い", "本日の運勢", "LINE吉時間", "16タイプ相性", "四柱推命"],
+    category: '九星気学・バイオリズム',
+    publishedAt: '2026-09-06T00:00:00.000Z',
+    readTimeMinutes: 6,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: "section-1", title: "1. 9月6日の運気と全体の恋愛バイオリズム", level: 1 },
+      { id: "section-2", title: "2. 16タイプ別・本日のLINE送るべき吉時間", level: 1 },
+      { id: "section-3", title: "3. まとめ＆本日の開運アクション", level: 1 }
+    ],
+    faqs: [
+      { question: "今日のLINE送信吉時間は？", answer: "本日の吉時間は朝の9:00と夜の21:00です。リラックスタイムに合わせて連絡すると返信率がアップします。" }
+    ],
+    content: `<h2 id="section-1">1. 9月6日の運気と全体の恋愛バイオリズム</h2>
+      <p>本日9月6日は、九星気学と四柱推命の星の巡りが「調和」と「引き寄せ」を高める特別な一日です。お互いの素直な気持ちが伝わりやすく、すれ違いが解消に向かう好機となります。</p>
+      <h2 id="section-2">2. 16タイプ別・本日のLINE送るべき吉時間</h2>
+      <p>思考型（N/T）のお相手には知識や共感を誘うメッセージ、感情型（F）のお相手には感謝や労いの言葉が響きます。朝9:00と夜21:00のプライベートタイムを狙うのがベストです。</p>
+      <h2 id="section-3">3. まとめ＆本日の開運アクション</h2>
+      <p>『月と蓮』の無料相性診断で二人の本日のバイオリズムを詳細チェックしましょう。</p>`
+  },
+  {
+    id: 'col-20260906-night',
+    slug: 'night-fortune-twinray-bond',
+    title: '【9月6日夜刊】夜のプライベートタイムに深めるツインレイの絆＆四柱推命で導く運命のソウルメイト',
+    metaDescription: '夜ベッドの中でじっくり読むツインレイの深層心理と四柱推命「極星」が暗示するソウルメイトとの運命的再会。',
+    keywords: ["ツインレイ 統合", "夜の占い", "極星 ソウルメイト", "四柱推命 恋愛", "復縁"],
+    category: 'ツインレイ・運命の絆',
+    publishedAt: '2026-09-06T12:00:00.000Z',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: "section-1", title: "1. 一人の夜に感じるツインレイとの強い引き寄せ", level: 1 },
+      { id: "section-2", title: "2. 四柱推命で解く「極星」属性と二人の宿命", level: 1 },
+      { id: "section-3", title: "3. まとめ", level: 1 }
+    ],
+    faqs: [
+      { question: "ツインレイと夢で会う意味は？", answer: "潜在意識での魂の統合が進んでいるサインです。不安を手放し受け入れることで現実の引き寄せが強まります。" }
+    ],
+    content: `<h2 id="section-1">1. 一人の夜に感じるツインレイとの強い引き寄せ</h2>
+      <p>静かな夜の時間帯は、魂の波動が最も共鳴しやすいタイミングです。突然思い浮かぶ相手は、あなたに念を送っているソウルメイトかもしれません。</p>
+      <h2 id="section-2">2. 四柱推命で解く「極星」属性と二人の宿命</h2>
+      <p>四柱推命における特殊属性「極星」はお互いを強く引き補い合う最高のソウルメイト関係を示します。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>『月と蓮』で二人の魂のつながりを今すぐ解読してみましょう。</p>`
+  },
+  {
     id: 'col-1788591195108',
     slug: 'infj-soulmate-opening-heart',
     title: '【INFJ】提唱者が心を開く特別な相手の特徴！本音を見せる理由と運命の出会い方',
