@@ -364,27 +364,24 @@ export const ResultView: React.FC<ResultViewProps> = ({
     try {
       const res = await fetch(zoomedImg.src);
       const blob = await res.blob();
-      const fileName = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
-      const file = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+      const blobUrl = URL.createObjectURL(blob);
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: '守護化身アバター画像',
-          text: '『月と蓮』守護化身アバター画像'
-        });
-        return;
-      }
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
     } catch (err) {
-      console.log('Mobile share skipped or cancelled:', err);
+      console.error('Download failed:', err);
+      const link = document.createElement('a');
+      link.href = zoomedImg.src;
+      link.download = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-
-    const link = document.createElement('a');
-    link.href = zoomedImg.src;
-    link.download = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const handleScrollToRegister = () => {
