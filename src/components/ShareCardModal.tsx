@@ -43,9 +43,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
     : 'linear-gradient(135deg, rgba(10, 10, 20, 0.28) 0%, rgba(168, 85, 247, 0.1) 100%)';
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const [myAvatarBase64, setMyAvatarBase64] = useState<string>(result.myAvatarUrl);
   const [oppAvatarBase64, setOppAvatarBase64] = useState<string>(result.opponentAvatarUrl || '');
@@ -102,85 +102,39 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   const targetShareUrl = getShareUrlForTab();
 
   const handleDownload = async () => {
-    if (!cardRef.current || isSaving) return;
+    const targetEl = captureRef.current || cardRef.current;
+    if (!targetEl || isSaving) return;
     setIsSaving(true);
     try {
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
       }
 
-      const html2canvas = (await import('html2canvas')).default;
-      
-      // Standard fixed card dimensions for guaranteed 4:5 aspect ratio (360px x 450px)
-      const renderWidth = 360;
-      const renderHeight = 450;
+      // Small delay to ensure Base64 images are rendered
+      await new Promise(r => setTimeout(r, 100));
 
-      const canvas = await html2canvas(cardRef.current, {
+      const html2canvas = (await import('html2canvas')).default;
+
+      const canvas = await html2canvas(targetEl, {
         useCORS: true,
         allowTaint: true,
-        scale: 3, // Ultra crisp high resolution
+        scale: 3, // 3x scale for 2400x3000 ultra crisp export
         backgroundColor: '#05040a',
         logging: false,
-        width: renderWidth,
-        height: renderHeight,
-        onclone: (_clonedDoc, clonedElement) => {
-          clonedElement.style.width = `${renderWidth}px`;
-          clonedElement.style.height = `${renderHeight}px`;
-          clonedElement.style.aspectRatio = 'none';
-          clonedElement.style.boxSizing = 'border-box';
-          clonedElement.style.overflow = 'hidden';
-          
-          // Ensure all text elements in cloned DOM have clear visible z-index & color
-          const allText = clonedElement.querySelectorAll('*');
-          allText.forEach((node: any) => {
-            if (node.style) {
-              node.style.webkitBackdropFilter = 'none';
-            }
-          });
-        }
+        width: 800,
+        height: 1000
       });
       const dataUrl = canvas.toDataURL('image/png');
 
-      // Check if mobile device or touch supported
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || ('ontouchstart' in window);
-
-      if (isMobile) {
-        let sharedSuccess = false;
-        try {
-          const blobRes = await fetch(dataUrl);
-          const blob = await blobRes.blob();
-          const fileName = showOpponent
-            ? `月と蓮_相性カード_${myName}_${oppNickname}.png`
-            : `月と蓮_運勢カード_${myName}.png`;
-          const file = new File([blob], fileName, { type: 'image/png' });
-          
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: showOpponent ? '相性鑑定シェアカード' : '恋愛運シェアカード',
-              text: '『月と蓮』鑑定結果カード'
-            });
-            sharedSuccess = true;
-          }
-        } catch (shareErr) {
-          console.warn('Native share cancelled or failed, triggering long-press preview:', shareErr);
-        }
-        
-        // If native share was not supported or not triggered, show long-press modal for 100% camera roll saving
-        if (!sharedSuccess) {
-          setPreviewImage(dataUrl);
-        }
-      } else {
-        // Desktop fallback: Standard file download
-        const link = document.createElement('a');
-        link.download = showOpponent
-          ? `月と蓮_相性カード_${myName}_${oppNickname}.png`
-          : `月と蓮_運勢カード_${myName}.png`;
-        link.href = dataUrl;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
+      // Direct file download on all devices
+      const link = document.createElement('a');
+      link.download = showOpponent
+        ? `月と蓮_相性カード_${myName}_${oppNickname}.png`
+        : `月と蓮_運勢カード_${myName}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error('Failed to save image:', err);
       alert('画像の保存に失敗しました。スマホ端末やブラウザによっては制限されている場合があります。');
@@ -241,8 +195,274 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       padding: '1rem 1rem calc(5.5rem + var(--safe-bottom, 0px))',
       overflowY: 'auto'
     }}>
-      
-      {/* Container */}
+      {/* Hidden 800x1000 Off-screen DOM Container for high-res lossless capture */}
+      <div
+        ref={captureRef}
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: 0,
+          width: '800px',
+          height: '1000px',
+          backgroundColor: '#05040a',
+          borderRadius: '36px',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '44px 40px',
+          boxSizing: 'border-box',
+          fontFamily: '"Cinzel", "Shippori Mincho", "Noto Serif JP", serif',
+          zIndex: -9999
+        }}
+      >
+        {/* Background Base64 Images (Aspect ratio locked crisp lossless direct img rendering) */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', zIndex: 1 }}>
+          {showOpponent && result.opponentAvatarUrl ? (
+            <>
+              <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={myAvatarBase64} alt="" style={{ height: '100%', width: 'auto', minWidth: '100%', display: 'block' }} />
+              </div>
+              <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={oppAvatarBase64} alt="" style={{ height: '100%', width: 'auto', minWidth: '100%', display: 'block' }} />
+              </div>
+            </>
+          ) : (
+            <div style={{ width: '100%', height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={myAvatarBase64} alt="" style={{ height: '100%', width: 'auto', minWidth: '100%', display: 'block' }} />
+            </div>
+          )}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.3) 0%, rgba(5, 5, 10, 0.55) 45%, rgba(2, 2, 5, 0.94) 100%)'
+          }} />
+        </div>
+
+        {/* Offscreen Card Top */}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+          {showOpponent ? (
+            <>
+              {result.compatibilityTitle && (
+                <div style={{
+                  fontSize: '22px',
+                  color: '#fef08a',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.08em',
+                  background: 'rgba(15, 10, 25, 0.92)',
+                  border: '2px solid rgba(226, 192, 116, 0.5)',
+                  padding: '8px 24px',
+                  borderRadius: '40px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.8)'
+                }}>
+                  {result.compatibilityTitle}
+                </div>
+              )}
+
+              <div style={{
+                fontSize: '32px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                letterSpacing: '0.04em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                borderBottom: '2px solid rgba(255, 255, 255, 0.2)',
+                paddingBottom: '16px',
+                width: '100%',
+                justifyContent: 'center',
+                textShadow: '0 2px 10px rgba(0,0,0,0.95)'
+              }}>
+                <span>{formatName(myName)}</span>
+                <span style={{ color: '#fbbf24', fontSize: '26px' }}>×</span>
+                <span>{formatName(oppNickname)}</span>
+              </div>
+
+              {(result.isKaigo || result.isRare || result.opponentIsKaigo || result.opponentIsRare) && (
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                  {(result.isKaigo || result.isRare) && (
+                    <span style={{
+                      fontSize: '17px',
+                      padding: '6px 16px',
+                      borderRadius: '12px',
+                      background: result.isKaigo ? 'linear-gradient(135deg, #7f1d1d, #b91c1c)' : 'linear-gradient(135deg, #b45309, #d97706)',
+                      color: '#fff',
+                      fontWeight: 'bold',
+                      border: '1px solid rgba(255,255,255,0.3)'
+                    }}>
+                      {formatName(myName)}: {result.isKaigo ? '👑 魁罡' : '👑 選ばれし極星'}
+                    </span>
+                  )}
+                  {(result.opponentIsKaigo || result.opponentIsRare) && (
+                    <span style={{
+                      fontSize: '17px',
+                      padding: '6px 16px',
+                      borderRadius: '12px',
+                      background: result.opponentIsKaigo ? 'linear-gradient(135deg, #7f1d1d, #b91c1c)' : 'linear-gradient(135deg, #b45309, #d97706)',
+                      color: '#fff',
+                      fontWeight: 'bold',
+                      border: '1px solid rgba(255,255,255,0.3)'
+                    }}>
+                      {formatName(oppNickname)}: {result.opponentIsKaigo ? '👑 魁罡' : '👑 選ばれし極星'}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div style={{
+                fontSize: '17px',
+                color: '#cbd5e1',
+                background: 'rgba(15, 10, 25, 0.7)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                padding: '6px 20px',
+                borderRadius: '30px'
+              }}>
+                鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '40px',
+                background: 'rgba(15, 10, 25, 0.92)',
+                padding: '18px 36px',
+                borderRadius: '24px',
+                border: '2px solid rgba(255, 255, 255, 0.25)'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '17px', color: '#cbd5e1' }}>基本相性</span>
+                  <span style={{ fontSize: '46px', fontWeight: 'bold', color: '#fbbf24', lineHeight: '1.1' }}>
+                    {result.baseScore}<span style={{ fontSize: '22px' }}>点</span>
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '17px', color: '#cbd5e1' }}>今日の相性</span>
+                  <span style={{ fontSize: '46px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1.1' }}>
+                    {result.dailyScore}<span style={{ fontSize: '22px' }}>点</span>
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{
+                background: 'rgba(10, 10, 25, 0.92)',
+                border: '2px solid rgba(255, 255, 255, 0.25)',
+                padding: '16px 28px',
+                borderRadius: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#ffffff' }}>
+                  {formatName(myName)} <span style={{ fontSize: '24px', color: '#fbbf24' }}>の運勢</span>
+                </div>
+                {(result.isKaigo || result.isRare) && (
+                  <span style={{
+                    fontSize: '18px',
+                    padding: '6px 14px',
+                    borderRadius: '10px',
+                    background: result.isKaigo ? 'linear-gradient(135deg, #7f1d1d, #b91c1c)' : 'linear-gradient(135deg, #b45309, #d97706)',
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    alignSelf: 'flex-start'
+                  }}>
+                    {result.isKaigo ? '👑 魁罡 (かいごう)' : '👑 選ばれし極星'}
+                  </span>
+                )}
+              </div>
+
+              <div style={{
+                background: 'rgba(10, 10, 25, 0.92)',
+                border: '2px solid rgba(147, 197, 253, 0.4)',
+                padding: '16px 28px',
+                borderRadius: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}>
+                <span style={{ fontSize: '18px', color: '#94a3b8' }}>今日の運勢</span>
+                <span style={{ fontSize: '48px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1.1' }}>
+                  {result.dailyScore}<span style={{ fontSize: '24px' }}>点</span>
+                </span>
+                <span style={{ fontSize: '16px', color: '#64748b', marginTop: '4px' }}>
+                  {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Offscreen Card Bottom */}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{
+            background: 'rgba(15, 10, 25, 0.92)',
+            borderRadius: '20px',
+            padding: '22px 28px',
+            border: '2px solid rgba(255, 255, 255, 0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '75px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
+          }}>
+            <span style={{
+              fontSize: '22px',
+              color: '#ffffff',
+              lineHeight: '1.5',
+              textAlign: 'center',
+              fontWeight: 'bold',
+              letterSpacing: '0.02em'
+            }}>
+              「{result.oneLiner}」
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{
+              background: 'rgba(59, 130, 246, 0.25)',
+              border: '1px solid rgba(59, 130, 246, 0.6)',
+              color: '#93c5fd',
+              padding: '10px 20px',
+              borderRadius: '14px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}>
+              あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
+              {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
+            </div>
+
+            {showOpponent && result.opponentPillar && (
+              <div style={{
+                background: 'rgba(168, 85, 247, 0.25)',
+                border: '1px solid rgba(168, 85, 247, 0.6)',
+                color: '#d8b4fe',
+                padding: '10px 20px',
+                borderRadius: '14px',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}>
+                相手：{getPillarWithReading(result.opponentPillar)} / {result.opponentStar} / {result.opponentMbtiText?.split(' ')[0] || '不明'}
+                {result.opponentIsKaigo ? ' / 👑 魁罡' : (result.opponentIsRare ? ' / 👑 極星' : '')}
+              </div>
+            )}
+          </div>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderTop: '2px solid rgba(255, 255, 255, 0.15)',
+            paddingTop: '16px',
+            marginTop: '8px'
+          }}>
+            <span style={{ fontSize: '18px', color: '#cbd5e1', letterSpacing: '0.08em', fontWeight: '500' }}>
+              恋愛鑑定アプリ - 蓮と月
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Visible Container */}
       <div style={{
         width: '100%',
         maxWidth: '360px',
@@ -331,7 +551,6 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         )}
 
         {/* 4:5 Share Card Preview */}
-        {/* 4:5 Share Card Preview */}
         <div ref={cardRef}
           className={(result.isKaigo || (showOpponent && result.opponentIsKaigo)) ? 'kaigo-border' : ((result.isRare || (showOpponent && result.opponentIsRare)) ? 'rare-rainbow-border' : '')}
           style={{
@@ -359,29 +578,32 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           }}>
             {showOpponent && result.opponentAvatarUrl ? (
               <>
-                <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
-                  <img
-                    src={myAvatarBase64}
-                    alt={myName}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
-                  />
-                </div>
-                <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
-                  <img
-                    src={oppAvatarBase64}
-                    alt={oppNickname}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
-                  />
-                </div>
+                <div style={{
+                  flex: 1,
+                  height: '100%',
+                  backgroundImage: `url(${myAvatarBase64})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center top',
+                  backgroundRepeat: 'no-repeat'
+                }} />
+                <div style={{
+                  flex: 1,
+                  height: '100%',
+                  backgroundImage: `url(${oppAvatarBase64})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center top',
+                  backgroundRepeat: 'no-repeat'
+                }} />
               </>
             ) : (
-              <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-                <img
-                  src={myAvatarBase64}
-                  alt={myName}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
-                />
-              </div>
+              <div style={{
+                width: '100%',
+                height: '100%',
+                backgroundImage: `url(${myAvatarBase64})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center top',
+                backgroundRepeat: 'no-repeat'
+              }} />
             )}
             {/* Dark overlay gradient for readability */}
             <div style={{
@@ -692,74 +914,6 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         </div>
 
       </div>
-
-      {/* Long Press Image Save Overlay for Mobile */}
-      {previewImage && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(10, 10, 25, 0.94)',
-          zIndex: 50,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1.5rem',
-          animation: 'fadeIn 0.2s ease'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '1.5rem',
-            right: '1.5rem',
-            zIndex: 51
-          }}>
-            <button
-              onClick={() => setPreviewImage(null)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.2)',
-                border: 'none',
-                color: 'white',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-              }}
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div style={{
-            color: '#fbbf24',
-            fontSize: '0.9rem',
-            fontWeight: 'bold',
-            marginBottom: '1rem',
-            textAlign: 'center',
-            background: 'rgba(251, 191, 36, 0.12)',
-            padding: '8px 16px',
-            borderRadius: '20px',
-            border: '1px solid rgba(251, 191, 36, 0.3)'
-          }}>
-            画像を長押しして「写真に保存」を選択してください
-          </div>
-
-          <img
-            src={previewImage}
-            alt="Fortune Share Card Preview"
-            style={{
-              maxWidth: '100%',
-              maxHeight: '70vh',
-              borderRadius: '16px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              objectFit: 'contain'
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 };
