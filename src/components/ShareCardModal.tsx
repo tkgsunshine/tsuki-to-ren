@@ -220,16 +220,16 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         <div style={{ position: 'absolute', inset: 0, display: 'flex', zIndex: 1 }}>
           {showOpponent && result.opponentAvatarUrl ? (
             <>
-              <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={myAvatarBase64} alt="" style={{ height: '100%', width: 'auto', minWidth: '100%', display: 'block' }} />
+              <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
+                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
               </div>
-              <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={oppAvatarBase64} alt="" style={{ height: '100%', width: 'auto', minWidth: '100%', display: 'block' }} />
+              <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
+                <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
               </div>
             </>
           ) : (
-            <div style={{ width: '100%', height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src={myAvatarBase64} alt="" style={{ height: '100%', width: 'auto', minWidth: '100%', display: 'block' }} />
+            <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
+              <img src={myAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
             </div>
           )}
           <div style={{
@@ -578,32 +578,17 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           }}>
             {showOpponent && result.opponentAvatarUrl ? (
               <>
-                <div style={{
-                  flex: 1,
-                  height: '100%',
-                  backgroundImage: `url(${myAvatarBase64})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center top',
-                  backgroundRepeat: 'no-repeat'
-                }} />
-                <div style={{
-                  flex: 1,
-                  height: '100%',
-                  backgroundImage: `url(${oppAvatarBase64})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center top',
-                  backgroundRepeat: 'no-repeat'
-                }} />
+                <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
+                  <img src={myAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+                </div>
+                <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
+                  <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+                </div>
               </>
             ) : (
-              <div style={{
-                width: '100%',
-                height: '100%',
-                backgroundImage: `url(${myAvatarBase64})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center top',
-                backgroundRepeat: 'no-repeat'
-              }} />
+              <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
+                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+              </div>
             )}
             {/* Dark overlay gradient for readability */}
             <div style={{

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Sparkles, Lock, Calendar, Download, X, Heart, Bell } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
@@ -357,30 +357,48 @@ export const ResultView: React.FC<ResultViewProps> = ({
     }
   ];
 
+  const zoomedCardRef = useRef<HTMLDivElement>(null);
+  const [isZoomedSaving, setIsZoomedSaving] = useState(false);
+
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!zoomedImg) return;
+    if (!zoomedCardRef.current || isZoomedSaving) return;
+    setIsZoomedSaving(true);
 
     try {
-      const res = await fetch(zoomedImg.src);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+      await new Promise(r => setTimeout(r, 100));
 
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(zoomedCardRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 3, // High-resolution export
+        backgroundColor: '#05040a',
+        logging: false
+      });
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
+      link.href = dataUrl;
+      link.download = `月と蓮_${zoomedImg?.astrologyName || '守護化身'}_カード.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
     } catch (err) {
       console.error('Download failed:', err);
-      const link = document.createElement('a');
-      link.href = zoomedImg.src;
-      link.download = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (zoomedImg) {
+        const link = document.createElement('a');
+        link.href = zoomedImg.src;
+        link.download = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } finally {
+      setIsZoomedSaving(false);
     }
   };
 
@@ -2636,6 +2654,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Expanded Image Container with In-Image Top & Bottom Overlays */}
               <div 
+                ref={zoomedCardRef}
                 className={zoomedImg.isKaigo ? 'kaigo-border' : (zoomedImg.isRare ? 'rare-rainbow-border' : '')}
                 style={{
                   width: '100%',
