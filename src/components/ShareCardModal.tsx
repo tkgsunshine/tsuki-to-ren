@@ -195,7 +195,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       padding: '1rem 1rem calc(5.5rem + var(--safe-bottom, 0px))',
       overflowY: 'auto'
     }}>
-      {/* Hidden 800x1000 Off-screen DOM Container for high-res lossless capture */}
+      {/* Hidden 800x1180 Off-screen DOM Container for high-res lossless capture */}
       <div
         ref={captureRef}
         style={{
@@ -203,7 +203,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           left: '-9999px',
           top: 0,
           width: '800px',
-          height: '1000px',
+          height: '1180px',
           backgroundColor: '#05040a',
           borderRadius: '36px',
           overflow: 'hidden',
@@ -216,14 +216,14 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           zIndex: -9999
         }}
       >
-        {/* Background Base64 Images (Natural aspect ratio preserved with clean dark base) */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', zIndex: 1, backgroundColor: '#05040a' }}>
+        {/* Background Base64 Images (Vertical stacked avatars with extended height) */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 1, backgroundColor: '#05040a' }}>
           {showOpponent && result.opponentAvatarUrl ? (
             <>
-              <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+              <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
               </div>
-              <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+              <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
               </div>
             </>
@@ -235,7 +235,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.1) 0%, rgba(5, 5, 10, 0.4) 40%, rgba(2, 2, 5, 0.94) 90%)'
+            background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.2) 0%, rgba(5, 5, 10, 0.45) 50%, rgba(2, 2, 5, 0.95) 92%)'
           }} />
         </div>
 
@@ -550,12 +550,12 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           </div>
         )}
 
-        {/* 4:5 Share Card Preview */}
+        {/* Extended Share Card Preview */}
         <div ref={cardRef}
           className={(result.isKaigo || (showOpponent && result.opponentIsKaigo)) ? 'kaigo-border' : ((result.isRare || (showOpponent && result.opponentIsRare)) ? 'rare-rainbow-border' : '')}
           style={{
             width: '100%',
-            aspectRatio: '4/5',
+            aspectRatio: '3/4.6',
             border: (result.isKaigo || result.isRare || (showOpponent && (result.opponentIsKaigo || result.opponentIsRare))) ? 'none' : '1.5px solid rgba(255, 255, 255, 0.12)',
             boxShadow: result.isKaigo ? '0 0 25px rgba(220, 38, 38, 0.45)' : (result.isRare ? '0 0 25px rgba(251, 191, 36, 0.45)' : (selectedChar === 'tsuki' 
               ? '0 20px 40px rgba(168, 85, 247, 0.25)' 
@@ -569,20 +569,21 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             overflow: 'hidden'
           }}
         >
-          {/* Background Images Layer (Natural aspect ratio preserved with clean dark base) */}
+          {/* Background Images Layer (Vertical 2-tier stacked avatars with clean dark base) */}
           <div style={{
             position: 'absolute',
             inset: 0,
             zIndex: 1,
             display: 'flex',
+            flexDirection: 'column',
             backgroundColor: '#05040a'
           }}>
             {showOpponent && result.opponentAvatarUrl ? (
               <>
-                <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
                 </div>
-                <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
                 </div>
               </>
@@ -595,7 +596,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.1) 0%, rgba(5, 5, 10, 0.4) 40%, rgba(2, 2, 5, 0.94) 90%)'
+              background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.2) 0%, rgba(5, 5, 10, 0.45) 50%, rgba(2, 2, 5, 0.95) 92%)'
             }} />
           </div>
           {/* Card Top */}
