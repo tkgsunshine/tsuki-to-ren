@@ -2658,12 +2658,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 className={zoomedImg.isKaigo ? 'kaigo-border' : (zoomedImg.isRare ? 'rare-rainbow-border' : '')}
                 style={{
                   width: '100%',
-                  aspectRatio: '3 / 4',
+                  backgroundColor: '#05040a',
                   borderRadius: '20px',
                   overflow: 'hidden',
                   border: (zoomedImg.isKaigo || zoomedImg.isRare) ? 'none' : '2px solid rgba(226, 192, 116, 0.4)',
                   boxShadow: zoomedImg.isKaigo ? '0 0 30px rgba(220, 38, 38, 0.5)' : (zoomedImg.isRare ? '0 0 25px rgba(251, 191, 36, 0.45)' : '0 20px 50px rgba(0, 0, 0, 0.8)'),
-                  position: 'relative'
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
                 {/* Top In-Image Overlay (Top-Left Header Badge, Top-Right Nickname) */}
@@ -2717,7 +2719,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   src={zoomedImg.src} 
                   alt={zoomedImg.astrologyName} 
                   className={zoomedImg.isKaigo ? 'kaigo-img-glow' : (zoomedImg.isRare ? 'rare-holographic-img' : '')}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} 
                 />
                 {(zoomedImg.isKaigo || zoomedImg.isRare) && (
                   <>
@@ -2728,17 +2730,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
                 {/* Glass Bottom Overlay inside Image */}
                 <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  background: 'linear-gradient(to top, rgba(8, 6, 20, 0.94) 0%, rgba(12, 9, 28, 0.78) 65%, rgba(12, 9, 28, 0) 100%)',
-                  padding: '1.25rem 0.75rem 0.75rem',
+                  background: 'linear-gradient(to bottom, rgba(5, 4, 10, 0.85) 0%, rgba(8, 6, 20, 0.98) 30%, rgba(5, 4, 10, 1) 100%)',
+                  padding: '0.85rem 0.75rem 0.75rem',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: '0.35rem',
-                  zIndex: 5
+                  zIndex: 5,
+                  marginTop: '-1.5rem',
+                  position: 'relative'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
                     <span className="font-serif" style={{ fontSize: '1.15rem', fontWeight: '800', color: '#fef08a', textShadow: '0 0 12px rgba(254, 240, 138, 0.8), 0 2px 6px rgba(0,0,0,0.95)', letterSpacing: '0.03em' }}>

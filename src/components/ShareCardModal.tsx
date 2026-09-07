@@ -216,26 +216,26 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           zIndex: -9999
         }}
       >
-        {/* Background Base64 Images (Aspect ratio locked crisp lossless direct img rendering) */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', zIndex: 1 }}>
+        {/* Background Base64 Images (Natural aspect ratio preserved with clean dark base) */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', zIndex: 1, backgroundColor: '#05040a' }}>
           {showOpponent && result.opponentAvatarUrl ? (
             <>
-              <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
-                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+              <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
               </div>
-              <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
-                <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+              <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
               </div>
             </>
           ) : (
-            <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
-              <img src={myAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+            <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+              <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
             </div>
           )}
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.3) 0%, rgba(5, 5, 10, 0.55) 45%, rgba(2, 2, 5, 0.94) 100%)'
+            background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.1) 0%, rgba(5, 5, 10, 0.4) 40%, rgba(2, 2, 5, 0.94) 90%)'
           }} />
         </div>
 
@@ -569,32 +569,33 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             overflow: 'hidden'
           }}
         >
-          {/* Background Images Layer */}
+          {/* Background Images Layer (Natural aspect ratio preserved with clean dark base) */}
           <div style={{
             position: 'absolute',
             inset: 0,
             zIndex: 1,
-            display: 'flex'
+            display: 'flex',
+            backgroundColor: '#05040a'
           }}>
             {showOpponent && result.opponentAvatarUrl ? (
               <>
-                <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
-                  <img src={myAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+                <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                  <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
                 </div>
-                <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
-                  <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+                <div style={{ flex: 1, height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                  <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
                 </div>
               </>
             ) : (
-              <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
-                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+              <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
               </div>
             )}
             {/* Dark overlay gradient for readability */}
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.2) 0%, rgba(5, 5, 10, 0.5) 45%, rgba(2, 2, 5, 0.88) 100%)'
+              background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.1) 0%, rgba(5, 5, 10, 0.4) 40%, rgba(2, 2, 5, 0.94) 90%)'
             }} />
           </div>
           {/* Card Top */}
