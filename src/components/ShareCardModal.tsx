@@ -230,8 +230,77 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         </div>
 
         {/* Offscreen Card Top */}
-        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
-          {!showOpponent && (
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', width: '100%' }}>
+          {showOpponent ? (
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              {/* Top Banner: Compatibility Title */}
+              {result.compatibilityTitle && (
+                <div style={{
+                  fontSize: '18px',
+                  color: '#fef08a',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.08em',
+                  background: 'rgba(5, 5, 15, 0.75)',
+                  border: '1.5px solid rgba(226, 192, 116, 0.5)',
+                  padding: '6px 24px',
+                  borderRadius: '30px',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+                }}>
+                  {result.compatibilityTitle}
+                </div>
+              )}
+
+              {/* Top Left & Right Name Badges */}
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{
+                  background: 'rgba(5, 5, 15, 0.75)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                  padding: '8px 20px',
+                  borderRadius: '20px',
+                  color: '#ffffff',
+                  fontWeight: 'bold',
+                  fontSize: '20px',
+                  backdropFilter: 'blur(8px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+                }}>
+                  <span>{formatName(myName)}</span>
+                  {(result.isKaigo || result.isRare) && (
+                    <span style={{ fontSize: '13px', color: '#fbbf24', fontWeight: 'bold' }}>
+                      {result.isKaigo ? '👑 魁罡' : '👑 極星'}
+                    </span>
+                  )}
+                </div>
+
+                <span style={{ color: '#fbbf24', fontSize: '24px', fontWeight: 'bold' }}>×</span>
+
+                <div style={{
+                  background: 'rgba(5, 5, 15, 0.75)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                  padding: '8px 20px',
+                  borderRadius: '20px',
+                  color: '#ffffff',
+                  fontWeight: 'bold',
+                  fontSize: '20px',
+                  backdropFilter: 'blur(8px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+                }}>
+                  <span>{formatName(oppNickname)}</span>
+                  {(result.opponentIsKaigo || result.opponentIsRare) && (
+                    <span style={{ fontSize: '13px', color: '#fbbf24', fontWeight: 'bold' }}>
+                      {result.opponentIsKaigo ? '👑 魁罡' : '👑 極星'}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{
                 background: 'rgba(10, 10, 25, 0.75)',
@@ -281,150 +350,59 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           )}
         </div>
 
-        {/* Offscreen Card Bottom */}
-        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {showOpponent && (
+        {/* Offscreen Card Middle (Left & Right Floating Badges) */}
+        {showOpponent && (
+          <div style={{
+            position: 'relative',
+            zIndex: 2,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            margin: '20px 0'
+          }}>
+            {/* Left Floating Badge: 基本相性 */}
             <div style={{
+              background: 'rgba(5, 5, 15, 0.75)',
+              border: '1.5px solid rgba(251, 191, 36, 0.5)',
+              backdropFilter: 'blur(8px)',
+              borderRadius: '20px',
+              padding: '10px 24px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '12px',
-              width: '100%'
+              alignItems: 'center',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.6)'
             }}>
-              {/* Top Row: Compatibility Title & Names Badge */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '12px',
-                width: '100%',
-                flexWrap: 'wrap'
-              }}>
-                {result.compatibilityTitle && (
-                  <div style={{
-                    fontSize: '18px',
-                    color: '#fef08a',
-                    fontWeight: 'bold',
-                    letterSpacing: '0.08em',
-                    background: 'rgba(5, 5, 15, 0.75)',
-                    border: '1.5px solid rgba(226, 192, 116, 0.5)',
-                    padding: '6px 20px',
-                    borderRadius: '30px',
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
-                  }}>
-                    {result.compatibilityTitle}
-                  </div>
-                )}
-
-                <div style={{
-                  fontSize: '24px',
-                  fontWeight: 'bold',
-                  color: '#ffffff',
-                  letterSpacing: '0.04em',
-                  background: 'rgba(5, 5, 15, 0.75)',
-                  border: '1.5px solid rgba(255, 255, 255, 0.25)',
-                  padding: '6px 20px',
-                  borderRadius: '30px',
-                  backdropFilter: 'blur(8px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
-                }}>
-                  <span>{formatName(myName)}</span>
-                  <span style={{ color: '#fbbf24', fontSize: '20px' }}>×</span>
-                  <span>{formatName(oppNickname)}</span>
-                </div>
-              </div>
-
-              {(result.isKaigo || result.isRare || result.opponentIsKaigo || result.opponentIsRare) && (
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                  {(result.isKaigo || result.isRare) && (
-                    <span style={{
-                      fontSize: '15px',
-                      padding: '4px 14px',
-                      borderRadius: '10px',
-                      background: result.isKaigo ? 'linear-gradient(135deg, #7f1d1d, #b91c1c)' : 'linear-gradient(135deg, #b45309, #d97706)',
-                      color: '#fff',
-                      fontWeight: 'bold',
-                      border: '1px solid rgba(255,255,255,0.3)'
-                    }}>
-                      {formatName(myName)}: {result.isKaigo ? '👑 魁罡' : '👑 選ばれし極星'}
-                    </span>
-                  )}
-                  {(result.opponentIsKaigo || result.opponentIsRare) && (
-                    <span style={{
-                      fontSize: '15px',
-                      padding: '4px 14px',
-                      borderRadius: '10px',
-                      background: result.opponentIsKaigo ? 'linear-gradient(135deg, #7f1d1d, #b91c1c)' : 'linear-gradient(135deg, #b45309, #d97706)',
-                      color: '#fff',
-                      fontWeight: 'bold',
-                      border: '1px solid rgba(255,255,255,0.3)'
-                    }}>
-                      {formatName(oppNickname)}: {result.opponentIsKaigo ? '👑 魁罡' : '👑 選ばれし極星'}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Middle Row: Left and Right Split Floating Badges (Center is 100% open for character) */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                width: '100%',
-                padding: '4px 0'
-              }}>
-                {/* Left Floating Badge: 基本相性 */}
-                <div style={{
-                  background: 'rgba(5, 5, 15, 0.72)',
-                  border: '1.5px solid rgba(251, 191, 36, 0.45)',
-                  backdropFilter: 'blur(8px)',
-                  borderRadius: '20px',
-                  padding: '10px 20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  boxShadow: '0 6px 20px rgba(0,0,0,0.6)'
-                }}>
-                  <span style={{ fontSize: '14px', color: '#cbd5e1' }}>基本相性</span>
-                  <span style={{ fontSize: '38px', fontWeight: 'bold', color: '#fbbf24', lineHeight: '1.1' }}>
-                    {result.baseScore}<span style={{ fontSize: '18px' }}>点</span>
-                  </span>
-                </div>
-
-                {/* Center space: EMPTY so character in center is 100% visible */}
-
-                {/* Right Floating Badge: 今日の相性 */}
-                <div style={{
-                  background: 'rgba(5, 5, 15, 0.72)',
-                  border: '1.5px solid rgba(147, 197, 253, 0.45)',
-                  backdropFilter: 'blur(8px)',
-                  borderRadius: '20px',
-                  padding: '10px 20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  boxShadow: '0 6px 20px rgba(0,0,0,0.6)'
-                }}>
-                  <span style={{ fontSize: '14px', color: '#cbd5e1' }}>今日の相性</span>
-                  <span style={{ fontSize: '38px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1.1' }}>
-                    {result.dailyScore}<span style={{ fontSize: '18px' }}>点</span>
-                  </span>
-                </div>
-              </div>
-
-              <div style={{
-                fontSize: '14px',
-                color: '#cbd5e1',
-                textAlign: 'center',
-                textShadow: '0 1px 3px rgba(0,0,0,0.9)'
-              }}>
-                鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
-              </div>
+              <span style={{ fontSize: '15px', color: '#cbd5e1' }}>基本相性</span>
+              <span style={{ fontSize: '38px', fontWeight: 'bold', color: '#fbbf24', lineHeight: '1.1' }}>
+                {result.baseScore}<span style={{ fontSize: '18px' }}>点</span>
+              </span>
             </div>
-          )}
+
+            {/* Center space: EMPTY so characters in center are 100% visible */}
+
+            {/* Right Floating Badge: 今日の相性 */}
+            <div style={{
+              background: 'rgba(5, 5, 15, 0.75)',
+              border: '1.5px solid rgba(147, 197, 253, 0.5)',
+              backdropFilter: 'blur(8px)',
+              borderRadius: '20px',
+              padding: '10px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.6)'
+            }}>
+              <span style={{ fontSize: '15px', color: '#cbd5e1' }}>今日の相性</span>
+              <span style={{ fontSize: '38px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1.1' }}>
+                {result.dailyScore}<span style={{ fontSize: '18px' }}>点</span>
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Offscreen Card Bottom */}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -466,9 +444,13 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            paddingTop: '8px',
-            marginTop: '2px'
+            gap: '12px',
+            paddingTop: '6px'
           }}>
+            <span style={{ fontSize: '14px', color: '#cbd5e1', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+              鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
             <span style={{ fontSize: '16px', color: '#cbd5e1', letterSpacing: '0.08em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
               恋愛鑑定アプリ - 蓮と月
             </span>
@@ -614,8 +596,88 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             }} />
           </div>
           {/* Card Top */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', zIndex: 2 }}>
-            {!showOpponent && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 2, width: '100%' }}>
+            {showOpponent ? (
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                {/* Top Banner: Compatibility Title */}
+                {result.compatibilityTitle && (
+                  <div style={{
+                    fontSize: '0.62rem',
+                    color: '#fef08a',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.06em',
+                    background: 'rgba(5, 5, 15, 0.72)',
+                    border: '1px solid rgba(226, 192, 116, 0.4)',
+                    padding: '2px 10px',
+                    borderRadius: '20px',
+                    backdropFilter: 'blur(6px)',
+                    WebkitBackdropFilter: 'blur(6px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                  }}>
+                    {result.compatibilityTitle}
+                  </div>
+                )}
+
+                {/* Top Left: My Name & Badge / Top Right: Opponent Name & Badge */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%',
+                  padding: '0 0.1rem'
+                }}>
+                  {/* Left Name Badge */}
+                  <div style={{
+                    background: 'rgba(5, 5, 15, 0.72)',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    padding: '3px 8px',
+                    borderRadius: '12px',
+                    color: '#ffffff',
+                    fontWeight: 'bold',
+                    fontSize: '0.75rem',
+                    backdropFilter: 'blur(6px)',
+                    WebkitBackdropFilter: 'blur(6px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                  }}>
+                    <span>{formatName(myName)}</span>
+                    {(result.isKaigo || result.isRare) && (
+                      <span className={result.isKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.48rem', padding: '1px 4px', borderRadius: '4px' }}>
+                        {result.isKaigo ? '👑 魁罡' : '👑 極星'}
+                      </span>
+                    )}
+                  </div>
+
+                  <span style={{ color: '#fbbf24', fontSize: '0.82rem', fontWeight: 'bold' }}>×</span>
+
+                  {/* Right Name Badge */}
+                  <div style={{
+                    background: 'rgba(5, 5, 15, 0.72)',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    padding: '3px 8px',
+                    borderRadius: '12px',
+                    color: '#ffffff',
+                    fontWeight: 'bold',
+                    fontSize: '0.75rem',
+                    backdropFilter: 'blur(6px)',
+                    WebkitBackdropFilter: 'blur(6px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                  }}>
+                    <span>{formatName(oppNickname)}</span>
+                    {(result.opponentIsKaigo || result.opponentIsRare) && (
+                      <span className={result.opponentIsKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.48rem', padding: '1px 4px', borderRadius: '4px' }}>
+                        {result.opponentIsKaigo ? '👑 魁罡' : '👑 極星'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
               /* Single Mode Top Corner Layout (Unobstructed Character) */
               <div style={{
                 display: 'flex',
@@ -669,133 +731,61 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             )}
           </div>
 
-          {/* Card Bottom */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', zIndex: 2 }}>
-            {showOpponent && (
+          {/* Card Middle (Left & Right Split Floating Score Badges) */}
+          {showOpponent && (
+            <div style={{
+              position: 'relative',
+              zIndex: 2,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              margin: '0.4rem 0'
+            }}>
+              {/* Left Floating Badge: 基本相性 */}
               <div style={{
+                background: 'rgba(5, 5, 15, 0.72)',
+                border: '1.2px solid rgba(251, 191, 36, 0.45)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                borderRadius: '14px',
+                padding: '4px 10px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.35rem',
-                width: '100%'
+                alignItems: 'center',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.5)'
               }}>
-                {/* Top Row: Compatibility Title & Names Badge */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  width: '100%',
-                  flexWrap: 'wrap'
-                }}>
-                  {result.compatibilityTitle && (
-                    <div style={{
-                      fontSize: '0.62rem',
-                      color: '#fef08a',
-                      fontWeight: 'bold',
-                      letterSpacing: '0.06em',
-                      background: 'rgba(5, 5, 15, 0.72)',
-                      border: '1px solid rgba(226, 192, 116, 0.4)',
-                      padding: '2px 8px',
-                      borderRadius: '20px',
-                      backdropFilter: 'blur(6px)',
-                      WebkitBackdropFilter: 'blur(6px)',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
-                    }}>
-                      {result.compatibilityTitle}
-                    </div>
-                  )}
-
-                  <div className="font-serif" style={{
-                    fontSize: '0.82rem',
-                    fontWeight: 'bold',
-                    color: '#ffffff',
-                    letterSpacing: '0.02em',
-                    background: 'rgba(5, 5, 15, 0.72)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    padding: '2px 10px',
-                    borderRadius: '20px',
-                    backdropFilter: 'blur(6px)',
-                    WebkitBackdropFilter: 'blur(6px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
-                  }}>
-                    <span>{formatName(myName)}</span>
-                    <span style={{ color: '#fbbf24', fontSize: '0.72rem' }}>×</span>
-                    <span>{formatName(oppNickname)}</span>
-                  </div>
-                </div>
-
-                {(result.isKaigo || result.isRare || result.opponentIsKaigo || result.opponentIsRare) && (
-                  <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    {(result.isKaigo || result.isRare) && (
-                      <span className={result.isKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.5rem', padding: '1px 5px', borderRadius: '5px' }}>
-                        {formatName(myName)}: {result.isKaigo ? '👑 魁罡' : '👑 選ばれし極星'}
-                      </span>
-                    )}
-                    {(result.opponentIsKaigo || result.opponentIsRare) && (
-                      <span className={result.opponentIsKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.5rem', padding: '1px 5px', borderRadius: '5px' }}>
-                        {formatName(oppNickname)}: {result.opponentIsKaigo ? '👑 魁罡' : '👑 選ばれし極星'}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Middle Row: Left & Right Split Floating Badges (Center is 100% open for character) */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  width: '100%',
-                  padding: '2px 0'
-                }}>
-                  {/* Left Floating Badge: 基本相性 */}
-                  <div style={{
-                    background: 'rgba(5, 5, 15, 0.72)',
-                    border: '1.2px solid rgba(251, 191, 36, 0.45)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    borderRadius: '14px',
-                    padding: '4px 10px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.5)'
-                  }}>
-                    <span style={{ fontSize: '0.52rem', color: '#cbd5e1' }}>基本相性</span>
-                    <span className="font-serif gold-text" style={{ fontSize: '1.15rem', fontWeight: 'bold', lineHeight: '1.1' }}>
-                      {result.baseScore}<span style={{ fontSize: '0.65rem' }}>点</span>
-                    </span>
-                  </div>
-
-                  {/* Center space: EMPTY so character in center is 100% visible */}
-
-                  {/* Right Floating Badge: 今日の相性 */}
-                  <div style={{
-                    background: 'rgba(5, 5, 15, 0.72)',
-                    border: '1.2px solid rgba(147, 197, 253, 0.45)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    borderRadius: '14px',
-                    padding: '4px 10px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.5)'
-                  }}>
-                    <span style={{ fontSize: '0.52rem', color: '#cbd5e1' }}>今日の相性</span>
-                    <span className="font-serif" style={{ fontSize: '1.15rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1.1' }}>
-                      {result.dailyScore}<span style={{ fontSize: '0.65rem' }}>点</span>
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ fontSize: '0.5rem', color: '#cbd5e1', textAlign: 'center', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
-                  鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
-                </div>
+                <span style={{ fontSize: '0.52rem', color: '#cbd5e1' }}>基本相性</span>
+                <span className="font-serif gold-text" style={{ fontSize: '1.15rem', fontWeight: 'bold', lineHeight: '1.1' }}>
+                  {result.baseScore}<span style={{ fontSize: '0.65rem' }}>点</span>
+                </span>
               </div>
-            )}
+
+              {/* Center space: EMPTY so character in center is 100% visible */}
+
+              {/* Right Floating Badge: 今日の相性 */}
+              <div style={{
+                background: 'rgba(5, 5, 15, 0.72)',
+                border: '1.2px solid rgba(147, 197, 253, 0.45)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                borderRadius: '14px',
+                padding: '4px 10px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.5)'
+              }}>
+                <span style={{ fontSize: '0.52rem', color: '#cbd5e1' }}>今日の相性</span>
+                <span className="font-serif" style={{ fontSize: '1.15rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1.1' }}>
+                  {result.dailyScore}<span style={{ fontSize: '0.65rem' }}>点</span>
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Card Bottom */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', zIndex: 2 }}>
             {/* One Liner Message */}
             <div style={{
               display: 'flex',
@@ -831,10 +821,17 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
+              gap: '8px',
               paddingTop: '0.2rem',
               marginTop: '0.1rem'
             }}>
-              <span style={{ fontSize: '0.58rem', color: '#cbd5e1', letterSpacing: '0.05em', textShadow: '0 1px 4px rgba(0,0,0,0.95)', fontWeight: '500' }}>恋愛鑑定アプリ - 蓮と月</span>
+              <span style={{ fontSize: '0.52rem', color: '#cbd5e1', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+                鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.52rem' }}>|</span>
+              <span style={{ fontSize: '0.58rem', color: '#cbd5e1', letterSpacing: '0.05em', textShadow: '0 1px 4px rgba(0,0,0,0.95)', fontWeight: '500' }}>
+                恋愛鑑定アプリ - 蓮と月
+              </span>
             </div>
           </div>
         </div>
