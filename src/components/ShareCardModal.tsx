@@ -32,9 +32,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   const myTagBg = isRen ? 'rgba(59, 130, 246, 0.12)' : 'rgba(168, 85, 247, 0.12)';
   const myTagBorder = isRen ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(168, 85, 247, 0.3)';
 
-  const oppTagColor = isRen ? '#d8b4fe' : '#93c5fd';
-  const oppTagBg = isRen ? 'rgba(168, 85, 247, 0.12)' : 'rgba(59, 130, 246, 0.12)';
-  const oppTagBorder = isRen ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)';
+
 
   const accentColor = isRen ? 'rgba(59, 130, 246, 0.35)' : 'rgba(168, 85, 247, 0.35)';
   const accentGlow = isRen ? '0 0 15px rgba(59, 130, 246, 0.15)' : '0 0 15px rgba(168, 85, 247, 0.15)';
@@ -418,35 +416,22 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{
-              background: 'rgba(59, 130, 246, 0.25)',
-              border: '1px solid rgba(59, 130, 246, 0.6)',
-              color: '#93c5fd',
-              padding: '10px 20px',
-              borderRadius: '14px',
-              fontSize: '18px',
-              fontWeight: 'bold'
-            }}>
-              あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
-              {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
-            </div>
-
-            {showOpponent && result.opponentPillar && (
+          {!showOpponent && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{
-                background: 'rgba(168, 85, 247, 0.25)',
-                border: '1px solid rgba(168, 85, 247, 0.6)',
-                color: '#d8b4fe',
+                background: 'rgba(59, 130, 246, 0.25)',
+                border: '1px solid rgba(59, 130, 246, 0.6)',
+                color: '#93c5fd',
                 padding: '10px 20px',
                 borderRadius: '14px',
                 fontSize: '18px',
                 fontWeight: 'bold'
               }}>
-                相手：{getPillarWithReading(result.opponentPillar)} / {result.opponentStar} / {result.opponentMbtiText?.split(' ')[0] || '不明'}
-                {result.opponentIsKaigo ? ' / 👑 魁罡' : (result.opponentIsRare ? ' / 👑 極星' : '')}
+                あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
+                {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <div style={{
             display: 'flex',
@@ -764,20 +749,12 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               </span>
             </div>
 
-            {/* My Tags */}
-            <div style={{ fontSize: '0.6rem', color: myTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-              <span style={{ background: myTagBg, padding: '4px 10px', borderRadius: '8px', border: myTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
-                あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
-                {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
-              </span>
-            </div>
-            
-            {/* Opponent Tags */}
-            {showOpponent && result.opponentPillar && (
-              <div style={{ fontSize: '0.6rem', color: oppTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                <span style={{ background: oppTagBg, padding: '4px 10px', borderRadius: '8px', border: oppTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
-                  相手：{getPillarWithReading(result.opponentPillar)} / {result.opponentStar} / {result.opponentMbtiText?.split(' ')[0] || '不明'}
-                  {result.opponentIsKaigo ? ' / 👑 魁罡' : (result.opponentIsRare ? ' / 👑 極星' : '')}
+            {/* My Tags (Only in single mode) */}
+            {!showOpponent && (
+              <div style={{ fontSize: '0.6rem', color: myTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                <span style={{ background: myTagBg, padding: '4px 10px', borderRadius: '8px', border: myTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
+                  あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
+                  {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
                 </span>
               </div>
             )}
