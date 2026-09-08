@@ -25,13 +25,15 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
     '九星気学・バイオリズム'
   ];
 
+  const now = new Date();
   const filteredArticles = COLUMNS_DATA.filter((art) => {
+    const isPublished = new Date(art.publishedAt) <= now;
     const matchesCategory = selectedCategory === 'ALL' || art.category === selectedCategory;
     const matchesSearch = searchQuery === '' || 
       art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       art.metaDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
       art.keywords.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
+    return isPublished && matchesCategory && matchesSearch;
   });
 
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE) || 1;

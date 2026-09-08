@@ -121,7 +121,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
   }, [slug, article]);
 
   // Related Articles
-  const relatedArticles = COLUMNS_DATA.filter(a => a.slug !== slug).slice(0, 3);
+  const relatedArticles = COLUMNS_DATA.filter(a => a.slug !== slug && new Date(a.publishedAt) <= new Date()).slice(0, 3);
 
   const handleShare = () => {
     if (navigator.share) {
