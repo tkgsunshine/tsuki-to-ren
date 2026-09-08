@@ -426,16 +426,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             </div>
           )}
           <div style={{
-            background: 'rgba(5, 5, 15, 0.55)',
-            borderRadius: '18px',
-            padding: '14px 24px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '60px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+            padding: '8px 16px',
+            textAlign: 'center'
           }}>
             <span style={{
               fontSize: '20px',
@@ -444,7 +439,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               textAlign: 'center',
               fontWeight: 'bold',
               letterSpacing: '0.02em',
-              textShadow: '0 2px 8px rgba(0,0,0,0.95)'
+              textShadow: '0 2px 12px rgba(0,0,0,0.98), 0 0 20px rgba(0,0,0,0.95)'
             }}>
               「{result.oneLiner}」
             </span>
@@ -803,26 +798,20 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             )}
             {/* One Liner Message */}
             <div style={{
-              background: 'rgba(5, 5, 15, 0.5)',
-              borderRadius: '12px',
-              padding: '0.45rem 0.75rem',
-              border: '1px solid rgba(255, 255, 255, 0.18)',
-              backdropFilter: 'blur(6px)',
-              WebkitBackdropFilter: 'blur(6px)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '2.2rem'
+              padding: '0.2rem 0.5rem',
+              textAlign: 'center'
             }}>
               <span className="font-serif" style={{
-                fontSize: '0.7rem',
-                color: '#fff',
+                fontSize: '0.72rem',
+                color: '#ffffff',
                 lineHeight: '1.4',
                 textAlign: 'center',
                 fontWeight: 'bold',
                 letterSpacing: '0.02em',
-                textShadow: '0 2px 6px rgba(0,0,0,0.95)'
+                textShadow: '0 2px 10px rgba(0,0,0,0.98), 0 0 15px rgba(0,0,0,0.95)'
               }}>
                 「{result.oneLiner}」
               </span>
