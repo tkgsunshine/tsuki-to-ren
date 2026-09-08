@@ -855,5 +855,255 @@ export const COLUMNS_DATA: ColumnArticle[] = [
       <h2 id="section-3">3. まとめ</h2>
       <p>「月と蓮」で二人の未来予測スケジュールを占ってみましょう。</p>
     `
+  },
+  {
+    id: 'col-21',
+    slug: 'enfp-intj-soulmate-chemistry',
+    title: '【ENFP × INTJ】自由なひらめき屋と冷徹な戦略家の「運命的ソウルメイト」！引き寄せ相性と長続きの秘訣',
+    metaDescription: 'アイデア豊かなENFPとクールな戦略家INTJのソウルメイト相性！互いの違いに魅了され固い絆で結ばれる秘密を解説。',
+    keywords: ['ENFP INTJ 相性', 'ENFP INTJ 恋愛', 'MBTI ソウルメイト', '16タイプ 相性'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-04T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. ENFPとINTJが惹かれ合う理由', level: 1 },
+      { id: 'section-2', title: '2. 長続きのための注意点', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. ENFPとINTJが惹かれ合う理由</h2>
+      <p>ENFPの直感力とINTJの深い洞察力が噛み合い、互いに代えがたい存在となります。</p>
+      <h2 id="section-2">2. 長続きのための注意点</h2>
+      <p>一人の時間を大切にするINTJのスタンスを理解することが愛を深める鍵です。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で二人の相性を詳しく診断してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-22',
+    slug: 'unrequited-love-fortune-timing',
+    title: '【片思い占い】あの人の本音と脈ありサインを見抜く！四柱推命で占うアプローチ成功の黄金日',
+    metaDescription: '片思いの悩みを解消！相手の命式から本音と脈ありサインを読み解き、アプローチが最高に響く日時を伝授。',
+    keywords: ['片思い 占い', '脈ありサイン', '四柱推命 片思い', 'アプローチ タイミング'],
+    category: '恋愛アプローチ・トリセツ',
+    publishedAt: '2026-09-04T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 命式から知るあの人の本音', level: 1 },
+      { id: 'section-2', title: '2. 脈ありサインとアプローチ日', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 命式から知るあの人の本音</h2>
+      <p>相手の通変星によって、好意の示し方やアプローチの響きやすさが全く異なります。</p>
+      <h2 id="section-2">2. 脈ありサインとアプローチ日</h2>
+      <p>相手の運気が開放的になる吉日を選んで連絡してみましょう。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で二人の本日の運勢と相性スコアをチェック！</p>
+    `
+  },
+  {
+    id: 'col-23',
+    slug: 'isfp-estj-attraction-balance',
+    title: '【ISFP × ESTJ】感性豊かなアーティストと実行力抜群のリーダー！正反対な二人が愛を育む方法',
+    metaDescription: '穏やかなISFPとしっかり者のESTJの恋愛相性！お互いの強みを活かしてすれ違いを防ぐポイントを分析。',
+    keywords: ['ISFP ESTJ 相性', 'ISFP 恋愛', 'ESTJ 恋愛', '16タイプ 恋愛'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-05T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 正反対なふたりの魅力', level: 1 },
+      { id: 'section-2', title: '2. 歩み寄りのコツ', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 正反対なふたりの魅力</h2>
+      <p>ISFPの優しさとESTJの頼もしさが合わさり、安心感のあるカップルになれます。</p>
+      <h2 id="section-2">2. 歩み寄りのコツ</h2>
+      <p>感情の伝え方を工夫することで互いの価値観を尊重できます。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で性格タイプと四柱推命の相性を合わせて鑑定しましょう。</p>
+    `
+  },
+  {
+    id: 'col-24',
+    slug: 'shichutsuimei-kaigo-column',
+    title: '四柱推命の特殊星「魁罡（かいごう）」を持つ人の圧倒的オーラと恋愛運！運命のパートナーの引き寄せ方',
+    metaDescription: '強いカリスマ性と強運を持つ特殊星「魁罡」。魁罡を持つ人の恋愛傾向と、最高の相性を誇るパートナーの選び方を徹底解説。',
+    keywords: ['四柱推命 魁罡', '魁罡 恋愛運', '魁罡 相性', '特殊星 四柱推命'],
+    category: '四柱推命入門',
+    publishedAt: '2026-09-05T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 魁罡（かいごう）とは', level: 1 },
+      { id: 'section-2', title: '2. 魁罡の人の恋愛傾向と運命の相性', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 魁罡（かいごう）とは</h2>
+      <p>庚辰・庚戌・壬辰・戊戌の日柱を持つ、強烈な意志と輝くオーラを秘めた特別な存在です。</p>
+      <h2 id="section-2">2. 魁罡の人の恋愛傾向と運命の相性</h2>
+      <p>包容力のあるお相手や、互いの個性を受け入れ合えるパートナーと最高の愛を育めます。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で自分や相手の命式に魁罡があるか鑑定してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-25',
+    slug: 'entj-infp-dynamic-attraction',
+    title: '【ENTJ × INFP】野心家リーダーと心優しき理想家！互いを高め合う「補完相性」の恋愛ダイナミクス',
+    metaDescription: '決断力あるENTJと理想主義のINFPが引き合う関係性！お互いを補い合い深い絆を築くステップ。',
+    keywords: ['ENTJ INFP 相性', 'ENTJ 恋愛', 'INFP 恋愛', '16タイプ 補完相性'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-06T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 補完し合うふたりの強み', level: 1 },
+      { id: 'section-2', title: '2. コミュニケーションのポイント', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 補完し合うふたりの強み</h2>
+      <p>ENTJのリードとINFPの深い共感力が最高のバランスを生み出します。</p>
+      <h2 id="section-2">2. コミュニケーションのポイント</h2>
+      <p>言葉のトーンを優しく保つことで信頼関係が盤石になります。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で診断結果をチェック！</p>
+    `
+  },
+  {
+    id: 'col-26',
+    slug: 'kyuseikigaku-love-luck-boost',
+    title: '【九星気学】本命星・月命星から紐解くあなたの恋愛体質と相性！2026年後半の運気アップ風水',
+    metaDescription: '九星気学で自分の本命星をチェック！九星別の恋愛パターンと2026年後半に恋愛運を急上昇させる開運習慣。',
+    keywords: ['九星気学 恋愛運', '本命星 相性', '九星気学 風水', '恋愛運アップ 2026'],
+    category: '九星気学・バイオリズム',
+    publishedAt: '2026-09-06T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 本命星が教える恋愛体質', level: 1 },
+      { id: 'section-2', title: '2. 開運アクション', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 本命星が教える恋愛体質</h2>
+      <p>一白水星から九紫火星まで、気学が示す引き寄せのバイオリズムを解説。</p>
+      <h2 id="section-2">2. 開運アクション</h2>
+      <p>吉方位や守護カラーを生活に取り入れましょう。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で九星気学の相性を確かめてみてください。</p>
+    `
+  },
+  {
+    id: 'col-27',
+    slug: 'estp-isjf-attraction-secrets',
+    title: '【ESTP × ISFJ】刺激的なチャレンジャーと穏やかな守護者！恋のすれ違いを防ぐコミュニケーション術',
+    metaDescription: '行動派のESTPと慎重なISFJの恋愛相性！互いのペースを理解し心地よい関係を作る秘訣。',
+    keywords: ['ESTP ISFJ 相性', 'ESTP 恋愛', 'ISFJ 恋愛', '16タイプ 相性'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-07T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 惹かれ合うギャップ', level: 1 },
+      { id: 'section-2', title: '2. すれ違いを防ぐコツ', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 惹かれ合うギャップ</h2>
+      <p>ESTPの冒険心とISFJの包容力が素敵な化学反応を起こします。</p>
+      <h2 id="section-2">2. すれ違いを防ぐコツ</h2>
+      <p>感謝の気持ちを言葉にして伝えることが大切です。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で相性鑑定を行いましょう。</p>
+    `
+  },
+  {
+    id: 'col-28',
+    slug: 'twinray-telepathy-signs',
+    title: 'ツインレイとのテレパシー・体感のサイン！魂が共鳴する瞬間に四柱推命バイオリズムで気づく方法',
+    metaDescription: 'ツインレイ同士が感じるテレパシーやシンクロニシティの兆候！四柱推命のバイオリズムと魂の共鳴サインを分析。',
+    keywords: ['ツインレイ テレパシー', 'ツインレイ サイン', 'ツインレイ シンクロ', 'ツインレイ 四柱推命'],
+    category: 'ツインレイ・運命の絆',
+    publishedAt: '2026-09-07T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. ツインレイのテレパシー現象', level: 1 },
+      { id: 'section-2', title: '2. バイオリズムと波長の同期', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. ツインレイのテレパシー現象</h2>
+      <p>離れていても相手の感情や胸の高鳴りが伝わる瞬間があります。</p>
+      <h2 id="section-2">2. バイオリズムと波長の同期</h2>
+      <p>命式の巡りが合致する時期に深い魂の共鳴が起こります。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」でツインレイ鑑定を試してみましょう。</p>
+    `
+  },
+  {
+    id: 'col-29',
+    slug: 'intp-enfj-mindset-match',
+    title: '【INTP × ENFJ】論理派哲学者と情熱的カリスマ！お互いの世界観を広げ合う唯一無二のパートナーシップ',
+    metaDescription: '探求心豊かなINTPと情熱的なENFJの好相性！お互いの思考を高め合い最高の理解者となる秘密。',
+    keywords: ['INTP ENFJ 相性', 'INTP 恋愛', 'ENFJ 恋愛', '16タイプ 恋愛'],
+    category: '16タイプ・MBTI相性',
+    publishedAt: '2026-09-08T10:00:00+09:00',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 思考と情熱の融合', level: 1 },
+      { id: 'section-2', title: '2. 深い理解者となるために', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 思考と情熱の融合</h2>
+      <p>INTPの鋭い洞察とENFJの温かな人間性が深く共鳴します。</p>
+      <h2 id="section-2">2. 深い理解者となるために</h2>
+      <p>お互いの対話を楽しむ時間が二人の絆を強固にします。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で診断してみてください。</p>
+    `
+  },
+  {
+    id: 'col-30',
+    slug: 'september-love-fortune-guide',
+    title: '【2026年9月後半の恋愛運】四柱推命×九星気学で占う「秋の恋成就」！全タイプの運気と開運アクション',
+    metaDescription: '2026年9月後半の全タイプ別恋愛運勢ガイド！四柱推命と九星気学から導く、秋の恋を加速させる開運キーワード。',
+    keywords: ['2026年9月 恋愛運', '四柱推命 9月 運勢', '秋の恋成就', '恋愛運 占い'],
+    category: '未来予測・結婚運',
+    publishedAt: '2026-09-08T18:00:00+09:00',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 9月後半の全体運気流れ', level: 1 },
+      { id: 'section-2', title: '2. 開運アドバイス', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [],
+    content: `
+      <h2 id="section-1">1. 9月後半の全体運気流れ</h2>
+      <p>秋の訪れと共に実りの運気が高まり、恋愛での大きな進展が期待できる時期です。</p>
+      <h2 id="section-2">2. 開運アドバイス</h2>
+      <p>素直な感情を伝えることで運命の引き寄せが発動します。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で二人の最新の相性と今日の運勢を占ってみましょう！</p>
+    `
   }
 ];
