@@ -193,14 +193,14 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           left: '-9999px',
           top: 0,
           width: '800px',
-          height: '1180px',
+          height: '1240px',
           backgroundColor: '#05040a',
           borderRadius: '36px',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: '44px 40px',
+          padding: '40px 40px 52px 40px',
           boxSizing: 'border-box',
           fontFamily: '"Cinzel", "Shippori Mincho", "Noto Serif JP", serif',
           zIndex: -9999
@@ -333,8 +333,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             flexDirection: 'column',
             width: '100%',
             gap: '16px',
-            margin: '14px 0',
-            transform: 'translateY(55px)'
+            margin: '10px 0',
+            transform: 'translateY(24px)'
           }}>
             {/* Boundary Line Level: 二つ名 (Center) */}
             {result.compatibilityTitle && (
@@ -412,7 +412,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             flexDirection: 'column',
             gap: '12px',
             alignItems: 'center',
-            transform: showOpponent ? 'none' : 'translateY(-65px)'
+            transform: showOpponent ? 'none' : 'translateY(-28px)'
           }}>
             <div style={{
               display: 'flex',
