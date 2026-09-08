@@ -374,7 +374,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 boxShadow: '0 4px 18px rgba(0,0,0,0.6)',
                 textAlign: 'center',
                 whiteSpace: 'nowrap',
-                lineHeight: '1.2'
+                lineHeight: '1.2',
+                transform: 'translateY(42px)'
               }}>
                 {result.compatibilityTitle}
               </div>
@@ -756,7 +757,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
                   textAlign: 'center',
                   whiteSpace: 'nowrap',
-                  lineHeight: '1.2'
+                  lineHeight: '1.2',
+                  transform: 'translateY(18px)'
                 }}>
                   {result.compatibilityTitle}
                 </div>
