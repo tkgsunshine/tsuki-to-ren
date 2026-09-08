@@ -409,40 +409,48 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
           <div style={{
             display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
             alignItems: 'center',
-            justifyContent: 'center',
-            padding: '8px 16px',
-            textAlign: 'center'
+            transform: showOpponent ? 'none' : 'translateY(-65px)'
           }}>
-            <span style={{
-              fontSize: '20px',
-              color: '#ffffff',
-              lineHeight: '1.4',
-              textAlign: 'center',
-              fontWeight: 'bold',
-              letterSpacing: '0.02em',
-              textShadow: '0 2px 12px rgba(0,0,0,0.98), 0 0 20px rgba(0,0,0,0.95)'
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '8px 16px',
+              textAlign: 'center'
             }}>
-              「{result.oneLiner}」
-            </span>
-          </div>
-
-          {!showOpponent && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{
-                background: 'rgba(59, 130, 246, 0.25)',
-                border: '1px solid rgba(59, 130, 246, 0.6)',
-                color: '#93c5fd',
-                padding: '10px 20px',
-                borderRadius: '14px',
-                fontSize: '18px',
-                fontWeight: 'bold'
+              <span style={{
+                fontSize: '20px',
+                color: '#ffffff',
+                lineHeight: '1.4',
+                textAlign: 'center',
+                fontWeight: 'bold',
+                letterSpacing: '0.02em',
+                textShadow: '0 2px 12px rgba(0,0,0,0.98), 0 0 20px rgba(0,0,0,0.95)'
               }}>
-                あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
-                {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
-              </div>
+                「{result.oneLiner}」
+              </span>
             </div>
-          )}
+
+            {!showOpponent && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{
+                  background: 'rgba(59, 130, 246, 0.25)',
+                  border: '1px solid rgba(59, 130, 246, 0.6)',
+                  color: '#93c5fd',
+                  padding: '10px 20px',
+                  borderRadius: '14px',
+                  fontSize: '18px',
+                  fontWeight: 'bold'
+                }}>
+                  あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
+                  {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div style={{
             display: 'flex',
@@ -794,36 +802,43 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
           {/* Card Bottom */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', zIndex: 2 }}>
-            {/* One Liner Message */}
             <div style={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0.2rem 0.5rem',
-              textAlign: 'center'
+              flexDirection: 'column',
+              gap: '0.3rem',
+              transform: showOpponent ? 'none' : 'translateY(-30px)'
             }}>
-              <span className="font-serif" style={{
-                fontSize: '0.72rem',
-                color: '#ffffff',
-                lineHeight: '1.4',
-                textAlign: 'center',
-                fontWeight: 'bold',
-                letterSpacing: '0.02em',
-                textShadow: '0 2px 10px rgba(0,0,0,0.98), 0 0 15px rgba(0,0,0,0.95)'
+              {/* One Liner Message */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0.2rem 0.5rem',
+                textAlign: 'center'
               }}>
-                「{result.oneLiner}」
-              </span>
-            </div>
-
-            {/* My Tags (Only in single mode) */}
-            {!showOpponent && (
-              <div style={{ fontSize: '0.6rem', color: myTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                <span style={{ background: myTagBg, padding: '4px 10px', borderRadius: '8px', border: myTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
-                  あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
-                  {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
+                <span className="font-serif" style={{
+                  fontSize: '0.72rem',
+                  color: '#ffffff',
+                  lineHeight: '1.4',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.02em',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.98), 0 0 15px rgba(0,0,0,0.95)'
+                }}>
+                  「{result.oneLiner}」
                 </span>
               </div>
-            )}
+
+              {/* My Tags (Only in single mode) */}
+              {!showOpponent && (
+                <div style={{ fontSize: '0.6rem', color: myTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                  <span style={{ background: myTagBg, padding: '4px 10px', borderRadius: '8px', border: myTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
+                    あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
+                    {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
+                  </span>
+                </div>
+              )}
+            </div>
 
             <div style={{
               display: 'flex',
