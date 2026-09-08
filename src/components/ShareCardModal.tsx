@@ -348,7 +348,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+              boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+              transform: 'translateY(54px)'
             }}>
               <span>{formatName(oppNickname)}</span>
               {(result.opponentIsKaigo || result.opponentIsRare) && (
@@ -712,7 +713,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               margin: '0.4rem 0',
               gap: '0.2rem'
             }}>
-              {/* Left Floating Badge: 相手の名前 */}
+              {/* Left Floating Badge: 相手の名前 (相手のキャラ画像の左上) */}
               <div style={{
                 background: 'rgba(5, 5, 15, 0.72)',
                 border: '1px solid rgba(255, 255, 255, 0.25)',
@@ -727,7 +728,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 alignItems: 'center',
                 gap: '4px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                flexShrink: 0
+                flexShrink: 0,
+                transform: 'translateY(24px)'
               }}>
                 <span>{formatName(oppNickname)}</span>
                 {(result.opponentIsKaigo || result.opponentIsRare) && (
