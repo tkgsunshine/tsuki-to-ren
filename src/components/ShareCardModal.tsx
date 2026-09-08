@@ -766,20 +766,20 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               <div style={{
                 background: 'rgba(5, 5, 15, 0.72)',
                 border: '1.2px solid rgba(147, 197, 253, 0.45)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                borderRadius: '14px',
                 padding: '3px 8px',
+                borderRadius: '12px',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.5)',
+                gap: '4px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
                 flexShrink: 0,
                 transform: 'translateY(50px)'
               }}>
-                <span style={{ fontSize: '0.5rem', color: '#cbd5e1' }}>今日の相性</span>
-                <span className="font-serif" style={{ fontSize: '1.1rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1.1' }}>
-                  {result.dailyScore}<span style={{ fontSize: '0.6rem' }}>点</span>
+                <span style={{ fontSize: '0.55rem', color: '#cbd5e1' }}>今日の相性</span>
+                <span className="font-serif" style={{ fontSize: '0.9rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1' }}>
+                  {result.dailyScore}<span style={{ fontSize: '0.55rem' }}>点</span>
                 </span>
               </div>
             </div>
