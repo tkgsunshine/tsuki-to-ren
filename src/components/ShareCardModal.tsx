@@ -349,7 +349,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               alignItems: 'center',
               gap: '8px',
               boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-              transform: 'translateY(54px)'
+              transform: 'translateY(110px)'
             }}>
               <span>{formatName(oppNickname)}</span>
               {(result.opponentIsKaigo || result.opponentIsRare) && (
@@ -729,7 +729,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 gap: '4px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
                 flexShrink: 0,
-                transform: 'translateY(24px)'
+                transform: 'translateY(50px)'
               }}>
                 <span>{formatName(oppNickname)}</span>
                 {(result.opponentIsKaigo || result.opponentIsRare) && (
