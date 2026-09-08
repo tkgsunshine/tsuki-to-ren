@@ -333,7 +333,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             flexDirection: 'column',
             width: '100%',
             gap: '16px',
-            margin: '14px 0'
+            margin: '14px 0',
+            transform: 'translateY(55px)'
           }}>
             {/* Boundary Line Level: 二つ名 (Center) */}
             {result.compatibilityTitle && (
@@ -714,7 +715,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               flexDirection: 'column',
               width: '100%',
               gap: '0.4rem',
-              margin: '0.2rem 0'
+              margin: '0.2rem 0',
+              transform: 'translateY(24px)'
             }}>
               {/* Boundary Line Level: 二つ名 (Center) */}
               {result.compatibilityTitle && (
