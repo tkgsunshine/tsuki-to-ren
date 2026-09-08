@@ -108,11 +108,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       const canvas = await html2canvas(targetEl, {
         useCORS: true,
         allowTaint: true,
-        scale: 3, // 3x scale for 2400x3000 ultra crisp export
+        scale: 2,
         backgroundColor: '#05040a',
         logging: false,
-        width: 800,
-        height: 1000
+        width: targetEl.offsetWidth || 800,
+        height: targetEl.offsetHeight || 1240
       });
       const dataUrl = canvas.toDataURL('image/png');
 
