@@ -359,7 +359,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               )}
             </div>
 
-            {/* Vertical Center: Compatibility Title (二つ名) */}
+            {/* Vertical Center: Compatibility Title (二つ名: 1行表示) */}
             {result.compatibilityTitle && (
               <div style={{
                 fontSize: '18px',
@@ -373,14 +373,14 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 backdropFilter: 'blur(8px)',
                 boxShadow: '0 4px 18px rgba(0,0,0,0.6)',
                 textAlign: 'center',
-                maxWidth: '340px',
-                lineHeight: '1.35'
+                whiteSpace: 'nowrap',
+                lineHeight: '1.2'
               }}>
                 {result.compatibilityTitle}
               </div>
             )}
 
-            {/* Right: 今日の相性 */}
+            {/* Right: 今日の相性 (相手のキャラの右上) */}
             <div style={{
               background: 'rgba(5, 5, 15, 0.75)',
               border: '1.5px solid rgba(147, 197, 253, 0.5)',
@@ -390,7 +390,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+              boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+              transform: 'translateY(110px)'
             }}>
               <span style={{ fontSize: '15px', color: '#cbd5e1' }}>今日の相性</span>
               <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1' }}>
@@ -739,7 +740,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 )}
               </div>
 
-              {/* Vertical Center: Compatibility Title (二つ名) */}
+              {/* Vertical Center: Compatibility Title (二つ名: 1行表示) */}
               {result.compatibilityTitle && (
                 <div style={{
                   fontSize: '0.62rem',
@@ -754,13 +755,14 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   WebkitBackdropFilter: 'blur(6px)',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
                   textAlign: 'center',
-                  lineHeight: '1.25'
+                  whiteSpace: 'nowrap',
+                  lineHeight: '1.2'
                 }}>
                   {result.compatibilityTitle}
                 </div>
               )}
 
-              {/* Right Floating Badge: 今日の相性 */}
+              {/* Right Floating Badge: 今日の相性 (相手のキャラ画像の右上) */}
               <div style={{
                 background: 'rgba(5, 5, 15, 0.72)',
                 border: '1.2px solid rgba(147, 197, 253, 0.45)',
@@ -772,7 +774,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 flexDirection: 'column',
                 alignItems: 'center',
                 boxShadow: '0 4px 14px rgba(0,0,0,0.5)',
-                flexShrink: 0
+                flexShrink: 0,
+                transform: 'translateY(50px)'
               }}>
                 <span style={{ fontSize: '0.5rem', color: '#cbd5e1' }}>今日の相性</span>
                 <span className="font-serif" style={{ fontSize: '1.1rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1.1' }}>
