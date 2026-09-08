@@ -32,14 +32,6 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   const myTagBg = isRen ? 'rgba(59, 130, 246, 0.12)' : 'rgba(168, 85, 247, 0.12)';
   const myTagBorder = isRen ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(168, 85, 247, 0.3)';
 
-
-
-  const accentColor = isRen ? 'rgba(59, 130, 246, 0.35)' : 'rgba(168, 85, 247, 0.35)';
-  const accentGlow = isRen ? '0 0 15px rgba(59, 130, 246, 0.15)' : '0 0 15px rgba(168, 85, 247, 0.15)';
-  const accentGradient = isRen 
-    ? 'linear-gradient(135deg, rgba(10, 10, 20, 0.28) 0%, rgba(59, 130, 246, 0.1) 100%)' 
-    : 'linear-gradient(135deg, rgba(10, 10, 20, 0.28) 0%, rgba(168, 85, 247, 0.1) 100%)';
-
   const cardRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -233,7 +225,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.2) 0%, rgba(5, 5, 10, 0.45) 50%, rgba(2, 2, 5, 0.95) 92%)'
+            background: 'linear-gradient(to bottom, rgba(5, 5, 12, 0.2) 0%, rgba(5, 5, 12, 0.35) 60%, rgba(5, 5, 12, 0.65) 100%)'
           }} />
         </div>
 
@@ -242,7 +234,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           {!showOpponent && (
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{
-                background: 'rgba(10, 10, 25, 0.92)',
+                background: 'rgba(10, 10, 25, 0.75)',
                 border: '2px solid rgba(255, 255, 255, 0.25)',
                 padding: '16px 28px',
                 borderRadius: '24px',
@@ -269,7 +261,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               </div>
 
               <div style={{
-                background: 'rgba(10, 10, 25, 0.92)',
+                background: 'rgba(10, 10, 25, 0.75)',
                 border: '2px solid rgba(147, 197, 253, 0.4)',
                 padding: '16px 28px',
                 borderRadius: '24px',
@@ -293,45 +285,56 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {showOpponent && (
             <div style={{
-              background: 'rgba(10, 10, 25, 0.92)',
-              borderRadius: '24px',
-              padding: '20px 24px',
-              border: '2px solid rgba(226, 192, 116, 0.4)',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
               gap: '12px',
-              boxShadow: '0 8px 30px rgba(0,0,0,0.8)'
+              width: '100%'
             }}>
-              {result.compatibilityTitle && (
-                <div style={{
-                  fontSize: '20px',
-                  color: '#fef08a',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.08em',
-                  background: 'rgba(15, 10, 25, 0.92)',
-                  border: '1px solid rgba(226, 192, 116, 0.5)',
-                  padding: '6px 20px',
-                  borderRadius: '30px'
-                }}>
-                  {result.compatibilityTitle}
-                </div>
-              )}
-
+              {/* Top Row: Compatibility Title & Names Badge */}
               <div style={{
-                fontSize: '28px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                letterSpacing: '0.04em',
                 display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
                 justifyContent: 'center',
-                textShadow: '0 2px 10px rgba(0,0,0,0.95)'
+                alignItems: 'center',
+                gap: '12px',
+                width: '100%',
+                flexWrap: 'wrap'
               }}>
-                <span>{formatName(myName)}</span>
-                <span style={{ color: '#fbbf24', fontSize: '24px' }}>×</span>
-                <span>{formatName(oppNickname)}</span>
+                {result.compatibilityTitle && (
+                  <div style={{
+                    fontSize: '18px',
+                    color: '#fef08a',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.08em',
+                    background: 'rgba(5, 5, 15, 0.75)',
+                    border: '1.5px solid rgba(226, 192, 116, 0.5)',
+                    padding: '6px 20px',
+                    borderRadius: '30px',
+                    backdropFilter: 'blur(8px)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+                  }}>
+                    {result.compatibilityTitle}
+                  </div>
+                )}
+
+                <div style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  letterSpacing: '0.04em',
+                  background: 'rgba(5, 5, 15, 0.75)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                  padding: '6px 20px',
+                  borderRadius: '30px',
+                  backdropFilter: 'blur(8px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+                }}>
+                  <span>{formatName(myName)}</span>
+                  <span style={{ color: '#fbbf24', fontSize: '20px' }}>×</span>
+                  <span>{formatName(oppNickname)}</span>
+                </div>
               </div>
 
               {(result.isKaigo || result.isRare || result.opponentIsKaigo || result.opponentIsRare) && (
@@ -365,52 +368,83 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 </div>
               )}
 
+              {/* Middle Row: Left and Right Split Floating Badges (Center is 100% open for character) */}
               <div style={{
                 display: 'flex',
-                gap: '32px',
-                marginTop: '4px'
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+                padding: '4px 0'
               }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '15px', color: '#cbd5e1' }}>基本相性</span>
-                  <span style={{ fontSize: '40px', fontWeight: 'bold', color: '#fbbf24', lineHeight: '1.1' }}>
-                    {result.baseScore}<span style={{ fontSize: '20px' }}>点</span>
+                {/* Left Floating Badge: 基本相性 */}
+                <div style={{
+                  background: 'rgba(5, 5, 15, 0.72)',
+                  border: '1.5px solid rgba(251, 191, 36, 0.45)',
+                  backdropFilter: 'blur(8px)',
+                  borderRadius: '20px',
+                  padding: '10px 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.6)'
+                }}>
+                  <span style={{ fontSize: '14px', color: '#cbd5e1' }}>基本相性</span>
+                  <span style={{ fontSize: '38px', fontWeight: 'bold', color: '#fbbf24', lineHeight: '1.1' }}>
+                    {result.baseScore}<span style={{ fontSize: '18px' }}>点</span>
                   </span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '15px', color: '#cbd5e1' }}>今日の相性</span>
-                  <span style={{ fontSize: '40px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1.1' }}>
-                    {result.dailyScore}<span style={{ fontSize: '20px' }}>点</span>
+
+                {/* Center space: EMPTY so character in center is 100% visible */}
+
+                {/* Right Floating Badge: 今日の相性 */}
+                <div style={{
+                  background: 'rgba(5, 5, 15, 0.72)',
+                  border: '1.5px solid rgba(147, 197, 253, 0.45)',
+                  backdropFilter: 'blur(8px)',
+                  borderRadius: '20px',
+                  padding: '10px 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.6)'
+                }}>
+                  <span style={{ fontSize: '14px', color: '#cbd5e1' }}>今日の相性</span>
+                  <span style={{ fontSize: '38px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1.1' }}>
+                    {result.dailyScore}<span style={{ fontSize: '18px' }}>点</span>
                   </span>
                 </div>
               </div>
 
               <div style={{
-                fontSize: '15px',
-                color: '#94a3b8',
-                marginTop: '2px'
+                fontSize: '14px',
+                color: '#cbd5e1',
+                textAlign: 'center',
+                textShadow: '0 1px 3px rgba(0,0,0,0.9)'
               }}>
                 鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
               </div>
             </div>
           )}
           <div style={{
-            background: 'rgba(15, 10, 25, 0.92)',
-            borderRadius: '20px',
-            padding: '22px 28px',
-            border: '2px solid rgba(255, 255, 255, 0.2)',
+            background: 'rgba(5, 5, 15, 0.55)',
+            borderRadius: '18px',
+            padding: '14px 24px',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(6px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '75px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
+            minHeight: '60px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
           }}>
             <span style={{
-              fontSize: '22px',
+              fontSize: '20px',
               color: '#ffffff',
-              lineHeight: '1.5',
+              lineHeight: '1.4',
               textAlign: 'center',
               fontWeight: 'bold',
-              letterSpacing: '0.02em'
+              letterSpacing: '0.02em',
+              textShadow: '0 2px 8px rgba(0,0,0,0.95)'
             }}>
               「{result.oneLiner}」
             </span>
@@ -437,11 +471,10 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            borderTop: '2px solid rgba(255, 255, 255, 0.15)',
-            paddingTop: '16px',
-            marginTop: '8px'
+            paddingTop: '8px',
+            marginTop: '2px'
           }}>
-            <span style={{ fontSize: '18px', color: '#cbd5e1', letterSpacing: '0.08em', fontWeight: '500' }}>
+            <span style={{ fontSize: '16px', color: '#cbd5e1', letterSpacing: '0.08em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
               恋愛鑑定アプリ - 蓮と月
             </span>
           </div>
@@ -582,7 +615,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to bottom, rgba(10, 10, 25, 0.2) 0%, rgba(5, 5, 10, 0.45) 50%, rgba(2, 2, 5, 0.95) 92%)'
+              background: 'linear-gradient(to bottom, rgba(5, 5, 12, 0.15) 0%, rgba(5, 5, 12, 0.3) 60%, rgba(5, 5, 12, 0.65) 100%)'
             }} />
           </div>
           {/* Card Top */}
@@ -597,7 +630,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 {/* Top Left: Title Badge */}
                 <div style={{
-                  background: 'rgba(10, 10, 25, 0.88)',
+                  background: 'rgba(10, 10, 25, 0.75)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   padding: '8px 14px',
                   borderRadius: '16px',
@@ -620,7 +653,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
                 {/* Top Right: Score & Date Card */}
                 <div style={{
-                  background: 'rgba(10, 10, 25, 0.88)',
+                  background: 'rgba(10, 10, 25, 0.75)',
                   border: '1px solid rgba(147, 197, 253, 0.3)',
                   padding: '6px 12px',
                   borderRadius: '16px',
@@ -642,108 +675,154 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           </div>
 
           {/* Card Bottom */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 2 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', zIndex: 2 }}>
             {showOpponent && (
               <div style={{
-                background: 'rgba(10, 10, 25, 0.88)',
-                border: '1px solid rgba(226, 192, 116, 0.35)',
-                borderRadius: '16px',
-                padding: '0.65rem 0.85rem',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
                 gap: '0.35rem',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.6)'
+                width: '100%'
               }}>
-                {result.compatibilityTitle && (
-                  <div style={{
-                    fontSize: '0.68rem',
-                    color: '#fef08a',
-                    fontWeight: 'bold',
-                    letterSpacing: '0.08em',
-                    background: 'rgba(15, 10, 25, 0.85)',
-                    border: '1px solid rgba(226, 192, 116, 0.35)',
-                    padding: '3px 10px',
-                    borderRadius: '20px',
-                    boxShadow: '0 0 10px rgba(226, 192, 116, 0.2)'
-                  }}>
-                    {result.compatibilityTitle}
-                  </div>
-                )}
-
-                <div className="font-serif" style={{
-                  fontSize: '0.92rem',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  letterSpacing: '0.02em',
+                {/* Top Row: Compatibility Title & Names Badge */}
+                <div style={{
                   display: 'flex',
-                  alignItems: 'center',
                   justifyContent: 'center',
+                  alignItems: 'center',
                   gap: '0.35rem',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textShadow: '0 2px 8px rgba(0,0,0,0.95)'
+                  width: '100%',
+                  flexWrap: 'wrap'
                 }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatName(myName)}</span>
-                  <span style={{ fontSize: '0.78rem', color: '#fbbf24', flexShrink: 0 }}>×</span>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatName(oppNickname)}</span>
+                  {result.compatibilityTitle && (
+                    <div style={{
+                      fontSize: '0.62rem',
+                      color: '#fef08a',
+                      fontWeight: 'bold',
+                      letterSpacing: '0.06em',
+                      background: 'rgba(5, 5, 15, 0.72)',
+                      border: '1px solid rgba(226, 192, 116, 0.4)',
+                      padding: '2px 8px',
+                      borderRadius: '20px',
+                      backdropFilter: 'blur(6px)',
+                      WebkitBackdropFilter: 'blur(6px)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                    }}>
+                      {result.compatibilityTitle}
+                    </div>
+                  )}
+
+                  <div className="font-serif" style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 'bold',
+                    color: '#ffffff',
+                    letterSpacing: '0.02em',
+                    background: 'rgba(5, 5, 15, 0.72)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    padding: '2px 10px',
+                    borderRadius: '20px',
+                    backdropFilter: 'blur(6px)',
+                    WebkitBackdropFilter: 'blur(6px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                  }}>
+                    <span>{formatName(myName)}</span>
+                    <span style={{ color: '#fbbf24', fontSize: '0.72rem' }}>×</span>
+                    <span>{formatName(oppNickname)}</span>
+                  </div>
                 </div>
 
                 {(result.isKaigo || result.isRare || result.opponentIsKaigo || result.opponentIsRare) && (
-                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     {(result.isKaigo || result.isRare) && (
-                      <span className={result.isKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.55rem', padding: '2px 6px', borderRadius: '6px' }}>
+                      <span className={result.isKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.5rem', padding: '1px 5px', borderRadius: '5px' }}>
                         {formatName(myName)}: {result.isKaigo ? '👑 魁罡' : '👑 選ばれし極星'}
                       </span>
                     )}
                     {(result.opponentIsKaigo || result.opponentIsRare) && (
-                      <span className={result.opponentIsKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.55rem', padding: '2px 6px', borderRadius: '6px' }}>
+                      <span className={result.opponentIsKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.5rem', padding: '1px 5px', borderRadius: '5px' }}>
                         {formatName(oppNickname)}: {result.opponentIsKaigo ? '👑 魁罡' : '👑 選ばれし極星'}
                       </span>
                     )}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '1.25rem', background: 'rgba(15, 10, 25, 0.75)', padding: '6px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)', marginTop: '2px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.58rem', color: '#cbd5e1' }}>基本相性</span>
-                    <span className="font-serif gold-text" style={{ fontSize: '1.35rem', fontWeight: 'bold', lineHeight: '1.1' }}>
-                      {result.baseScore}<span style={{ fontSize: '0.75rem' }}>点</span>
+                {/* Middle Row: Left & Right Split Floating Badges (Center is 100% open for character) */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%',
+                  padding: '2px 0'
+                }}>
+                  {/* Left Floating Badge: 基本相性 */}
+                  <div style={{
+                    background: 'rgba(5, 5, 15, 0.72)',
+                    border: '1.2px solid rgba(251, 191, 36, 0.45)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    borderRadius: '14px',
+                    padding: '4px 10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.5)'
+                  }}>
+                    <span style={{ fontSize: '0.52rem', color: '#cbd5e1' }}>基本相性</span>
+                    <span className="font-serif gold-text" style={{ fontSize: '1.15rem', fontWeight: 'bold', lineHeight: '1.1' }}>
+                      {result.baseScore}<span style={{ fontSize: '0.65rem' }}>点</span>
                     </span>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.58rem', color: '#cbd5e1' }}>今日の相性</span>
-                    <span className="font-serif" style={{ fontSize: '1.35rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1.1' }}>
-                      {result.dailyScore}<span style={{ fontSize: '0.75rem' }}>点</span>
+
+                  {/* Center space: EMPTY so character in center is 100% visible */}
+
+                  {/* Right Floating Badge: 今日の相性 */}
+                  <div style={{
+                    background: 'rgba(5, 5, 15, 0.72)',
+                    border: '1.2px solid rgba(147, 197, 253, 0.45)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    borderRadius: '14px',
+                    padding: '4px 10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.5)'
+                  }}>
+                    <span style={{ fontSize: '0.52rem', color: '#cbd5e1' }}>今日の相性</span>
+                    <span className="font-serif" style={{ fontSize: '1.15rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1.1' }}>
+                      {result.dailyScore}<span style={{ fontSize: '0.65rem' }}>点</span>
                     </span>
                   </div>
                 </div>
 
-                <div style={{ fontSize: '0.55rem', color: '#94a3b8', marginTop: '1px' }}>
+                <div style={{ fontSize: '0.5rem', color: '#cbd5e1', textAlign: 'center', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
                   鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
                 </div>
               </div>
             )}
             {/* One Liner Message */}
             <div style={{
-              background: accentGradient,
+              background: 'rgba(5, 5, 15, 0.5)',
               borderRadius: '12px',
-              padding: '0.65rem 0.85rem',
-              border: `1px solid ${accentColor}`,
-              boxShadow: accentGlow,
+              padding: '0.45rem 0.75rem',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '2.5rem'
+              minHeight: '2.2rem'
             }}>
               <span className="font-serif" style={{
-                fontSize: '0.75rem',
+                fontSize: '0.7rem',
                 color: '#fff',
-                lineHeight: '1.45',
+                lineHeight: '1.4',
                 textAlign: 'center',
-                fontWeight: '500',
+                fontWeight: 'bold',
                 letterSpacing: '0.02em',
-                textShadow: '0 1px 3px rgba(0,0,0,0.4)'
+                textShadow: '0 2px 6px rgba(0,0,0,0.95)'
               }}>
                 「{result.oneLiner}」
               </span>
@@ -763,11 +842,10 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              borderTop: '1px solid rgba(255,255,255,0.12)',
-              paddingTop: '0.5rem',
-              marginTop: '0.25rem'
+              paddingTop: '0.2rem',
+              marginTop: '0.1rem'
             }}>
-              <span style={{ fontSize: '0.6rem', color: '#cbd5e1', letterSpacing: '0.05em', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>恋愛鑑定アプリ - 蓮と月</span>
+              <span style={{ fontSize: '0.58rem', color: '#cbd5e1', letterSpacing: '0.05em', textShadow: '0 1px 4px rgba(0,0,0,0.95)', fontWeight: '500' }}>恋愛鑑定アプリ - 蓮と月</span>
             </div>
           </div>
         </div>

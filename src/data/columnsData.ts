@@ -23,7 +23,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-09-07T12:00:00.000Z',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80&sig=1',
     toc: [
       { id: "section-1", title: "1. 一人の夜に感じるツインレイからの強い波動と引き寄せ", level: 1 },
       { id: "section-2", title: "2. 四柱推命「魁罡・極星」が紐解く魂の相性", level: 1 },
@@ -48,7 +48,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-09-07T00:00:00.000Z',
     readTimeMinutes: 6,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&sig=2',
     toc: [
       { id: "section-1", title: "1. 9月7日の全体の恋愛バイオリズム", level: 1 },
       { id: "section-2", title: "2. 16タイプ別・本日のLINE送るべき吉時間", level: 1 },
@@ -73,7 +73,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-09-06T00:00:00.000Z',
     readTimeMinutes: 6,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&sig=3',
     toc: [
       { id: "section-1", title: "1. 9月6日の運気と全体の恋愛バイオリズム", level: 1 },
       { id: "section-2", title: "2. 16タイプ別・本日のLINE送るべき吉時間", level: 1 },
@@ -98,7 +98,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-09-06T12:00:00.000Z',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80&sig=4',
     toc: [
       { id: "section-1", title: "1. 一人の夜に感じるツインレイとの強い引き寄せ", level: 1 },
       { id: "section-2", title: "2. 四柱推命で解く「極星」属性と二人の宿命", level: 1 },
@@ -123,7 +123,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-05T06:53:15.107Z',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80&sig=5',
     toc: [
       {
             "id": "section-1",
@@ -163,7 +163,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-09-05T06:53:12.492Z',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&sig=6',
     toc: [
       {
             "id": "section-1",
@@ -203,7 +203,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-08-15T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80&sig=7',
     toc: [
       { id: 'section-1', title: '1. 魁罡（かいごう）とは？四柱推命で選ばれし約3.3%の特殊星', level: 1 },
       { id: 'section-1-1', title: '1-1. 魁罡を形成する4つの干支（庚辰・庚戌・壬辰・戊戌）', level: 2 },
@@ -274,7 +274,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-08-16T18:00:00+09:00',
     readTimeMinutes: 9,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=1200&q=80&sig=8',
     toc: [
       { id: 'section-1', title: '1. 16タイプ（MBTI）相性診断のメカニズム', level: 1 },
       { id: 'section-1-1', title: '1-1. 心理機能（直感・感覚・思考・感情）が与える恋愛への影響', level: 2 },
@@ -326,7 +326,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-08-18T10:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80&sig=9',
     toc: [
       { id: 'section-1', title: '1. ツインレイ（魂の片割れ）とは？四柱推命に見る運命の交差し', level: 1 },
       { id: 'section-1-1', title: '1-1. 前世の約束と現世での劇的な引き寄せ', level: 2 },
@@ -370,7 +370,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・アプローチ',
     publishedAt: '2026-08-19T18:00:00+09:00',
     readTimeMinutes: 6,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&sig=10',
     toc: [
       { id: 'section-1', title: '1. なぜLINE送信の「タイミング」で返信率が変わるのか？', level: 1 },
       { id: 'section-2', title: '2. 時間帯別の心理状態と返信率MAXの「吉時間」', level: 1 },
@@ -414,7 +414,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-08-21T10:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80&sig=11',
     toc: [
       { id: 'section-1', title: '1. 16タイプでこんなに違う！LINEの返信速度と心理', level: 1 },
       { id: 'section-2', title: '2. タイプグループ別・返信が遅い理由と見極め方', level: 1 },
@@ -456,7 +456,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-08-22T18:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?auto=format&fit=crop&w=1200&q=80&sig=12',
     toc: [
       { id: 'section-1', title: '1. INTJとENFP：正反対だからこそ生まれる究極の磁力', level: 1 },
       { id: 'section-2', title: '2. 二人が強烈に惹かれ合う3つの理由', level: 1 },
@@ -498,7 +498,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-08-24T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80&sig=13',
     toc: [
       { id: 'section-1', title: '1. 四柱推命の根幹「五行説（木火土金水）」とは？', level: 1 },
       { id: 'section-2', title: '2. 五行相生（そうじょう）と相剋（そうこく）の引き寄せ法則', level: 1 },
@@ -531,7 +531,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-08-25T18:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80&sig=14',
     toc: [
       { id: 'section-1', title: '1. INFPとENTJが惹かれ合う理由', level: 1 },
       { id: 'section-2', title: '2. 互いの弱点を補うシナジー', level: 1 },
@@ -559,7 +559,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-08-26T10:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80&sig=15',
     toc: [
       { id: 'section-1', title: '1. 九星気学で知る運気バイオリズムの重要性', level: 1 },
       { id: 'section-2', title: '2. 九星別の恋愛運傾向', level: 1 },
@@ -587,7 +587,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-08-27T18:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80&sig=16',
     toc: [
       { id: 'section-1', title: '1. 吉星の最高峰「天乙貴人」とは？', level: 1 },
       { id: 'section-2', title: '2. 太極貴人がもたらす始終の恩恵', level: 1 },
@@ -615,7 +615,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-08-28T10:00:00+09:00',
     readTimeMinutes: 6,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80&sig=17',
     toc: [
       { id: 'section-1', title: '1. INFJとENFJの共通点と魅力', level: 1 },
       { id: 'section-2', title: '2. 互いを癒やし合うコミュニケーション', level: 1 },
@@ -640,7 +640,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '恋愛アプローチ・トリセツ',
     publishedAt: '2026-08-29T18:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1200&q=80&sig=18',
     toc: [
       { id: 'section-1', title: '1. 四柱推命で相手の「ツボ」を把握する', level: 1 },
       { id: 'section-2', title: '2. 十干別アプローチ法', level: 1 },
@@ -665,7 +665,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-08-30T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80&sig=19',
     toc: [
       { id: 'section-1', title: '1. ISTPとISFJの関係性', level: 1 },
       { id: 'section-2', title: '2. 互いの長所', level: 1 },
@@ -690,7 +690,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-08-31T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=1200&q=80&sig=20',
     toc: [
       { id: 'section-1', title: '1. 復縁における運気タイミングの重要性', level: 1 },
       { id: 'section-2', title: '2. 復縁の兆候と吉時間', level: 1 },
@@ -715,7 +715,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-01T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&q=80&sig=21',
     toc: [
       { id: 'section-1', title: '1. 磁石のように引き合う理由', level: 1 },
       { id: 'section-2', title: '2. 会話術のコツ', level: 1 },
@@ -740,7 +740,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-09-01T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=1200&q=80&sig=22',
     toc: [
       { id: 'section-1', title: '1. サイレント期間の真の目的', level: 1 },
       { id: 'section-2', title: '2. 再会前夜のサイン', level: 1 },
@@ -765,7 +765,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-02T10:00:00+09:00',
     readTimeMinutes: 6,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?auto=format&fit=crop&w=1200&q=80&sig=23',
     toc: [
       { id: 'section-1', title: '1. 正反対な性格の魅力', level: 1 },
       { id: 'section-2', title: '2. 長続きの秘訣', level: 1 },
@@ -790,7 +790,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-09-02T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&sig=24',
     toc: [
       { id: 'section-1', title: '1. 命式表の基本構造', level: 1 },
       { id: 'section-2', title: '2. 天干・地支の意味', level: 1 },
@@ -815,7 +815,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-09-03T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80&sig=25',
     toc: [
       { id: 'section-1', title: '1. タイプ別LINEの基本原則', level: 1 },
       { id: 'section-2', title: '2. 実践文案テンプレート集', level: 1 },
@@ -840,7 +840,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-09-03T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?auto=format&fit=crop&w=1200&q=80&sig=26',
     toc: [
       { id: 'section-1', title: '1. 結婚・同棲の黄金期とは', level: 1 },
       { id: 'section-2', title: '2. 10年スケジュールの活かし方', level: 1 },
@@ -865,7 +865,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-04T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80&sig=27',
     toc: [
       { id: 'section-1', title: '1. ENFPとINTJが惹かれ合う理由', level: 1 },
       { id: 'section-2', title: '2. 長続きのための注意点', level: 1 },
@@ -890,7 +890,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '恋愛アプローチ・トリセツ',
     publishedAt: '2026-09-04T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80&sig=28',
     toc: [
       { id: 'section-1', title: '1. 命式から知るあの人の本音', level: 1 },
       { id: 'section-2', title: '2. 脈ありサインとアプローチ日', level: 1 },
@@ -915,7 +915,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-05T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80&sig=29',
     toc: [
       { id: 'section-1', title: '1. 正反対なふたりの魅力', level: 1 },
       { id: 'section-2', title: '2. 歩み寄りのコツ', level: 1 },
@@ -940,7 +940,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-09-05T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1200&q=80&sig=30',
     toc: [
       { id: 'section-1', title: '1. 魁罡（かいごう）とは', level: 1 },
       { id: 'section-2', title: '2. 魁罡の人の恋愛傾向と運命の相性', level: 1 },
@@ -965,7 +965,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-06T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&sig=31',
     toc: [
       { id: 'section-1', title: '1. 補完し合うふたりの強み', level: 1 },
       { id: 'section-2', title: '2. コミュニケーションのポイント', level: 1 },
@@ -990,7 +990,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-09-06T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1490578474895-699bc4e2cf59?auto=format&fit=crop&w=1200&q=80&sig=32',
     toc: [
       { id: 'section-1', title: '1. 本命星が教える恋愛体質', level: 1 },
       { id: 'section-2', title: '2. 開運アクション', level: 1 },
@@ -1015,7 +1015,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-07T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?auto=format&fit=crop&w=1200&q=80&sig=33',
     toc: [
       { id: 'section-1', title: '1. 惹かれ合うギャップ', level: 1 },
       { id: 'section-2', title: '2. すれ違いを防ぐコツ', level: 1 },
@@ -1040,7 +1040,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-09-07T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&sig=34',
     toc: [
       { id: 'section-1', title: '1. ツインレイのテレパシー現象', level: 1 },
       { id: 'section-2', title: '2. バイオリズムと波長の同期', level: 1 },
@@ -1065,7 +1065,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-08T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&sig=35',
     toc: [
       { id: 'section-1', title: '1. 思考と情熱の融合', level: 1 },
       { id: 'section-2', title: '2. 深い理解者となるために', level: 1 },
@@ -1090,7 +1090,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-09-08T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80&sig=36',
     toc: [
       { id: 'section-1', title: '1. 9月後半の全体運気流れ', level: 1 },
       { id: 'section-2', title: '2. 開運アドバイス', level: 1 },
@@ -1116,7 +1116,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-09T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80&sig=37',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1141,7 +1141,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-09-09T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80&sig=38',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1166,7 +1166,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-10T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80&sig=39',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1191,7 +1191,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-09-10T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80&sig=40',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1216,7 +1216,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-11T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=1200&q=80&sig=41',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1241,7 +1241,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-09-11T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=1200&q=80&sig=42',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1266,7 +1266,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-12T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80&sig=43',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1291,7 +1291,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-09-12T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507499739999-097706ad8914?auto=format&fit=crop&w=1200&q=80&sig=44',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1316,7 +1316,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-13T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1510519138161-584459eb1b37?auto=format&fit=crop&w=1200&q=80&sig=45',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1341,7 +1341,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-09-13T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=1200&q=80&sig=46',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1366,7 +1366,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-14T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80&sig=47',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1391,7 +1391,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-09-14T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=1200&q=80&sig=48',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1416,7 +1416,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-15T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80&sig=49',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1441,7 +1441,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-09-15T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80&sig=50',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1466,7 +1466,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-16T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=1200&q=80&sig=51',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1491,7 +1491,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-09-16T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80&sig=52',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1516,7 +1516,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-17T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&sig=53',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1541,7 +1541,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-09-17T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80&sig=54',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1566,7 +1566,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-18T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1200&q=80&sig=55',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1591,7 +1591,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-09-18T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=1200&q=80&sig=56',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1616,7 +1616,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-19T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80&sig=57',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1641,7 +1641,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-09-19T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=1200&q=80&sig=58',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1666,7 +1666,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-20T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80&sig=59',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1691,7 +1691,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-09-20T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=1200&q=80&sig=60',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1716,7 +1716,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-21T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=1200&q=80&sig=61',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1741,7 +1741,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-09-21T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1200&q=80&sig=62',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1766,7 +1766,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-22T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80&sig=63',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1791,7 +1791,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-09-22T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=1200&q=80&sig=64',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1816,7 +1816,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-23T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80&sig=65',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1841,7 +1841,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-09-23T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80&sig=66',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1866,7 +1866,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-24T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80&sig=67',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1891,7 +1891,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-09-24T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1554080353-a576cf803bda?auto=format&fit=crop&w=1200&q=80&sig=68',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1916,7 +1916,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-25T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=80&sig=69',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1941,7 +1941,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-09-25T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1200&q=80&sig=70',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -1966,7 +1966,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-26T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80&sig=71',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -1991,7 +1991,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-09-26T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80&sig=72',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2016,7 +2016,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-27T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80&sig=73',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2041,7 +2041,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-09-27T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80&sig=74',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2066,7 +2066,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-28T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&sig=75',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2091,7 +2091,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-09-28T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&sig=76',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2116,7 +2116,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-29T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80&sig=77',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2141,7 +2141,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-09-29T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80&sig=78',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2166,7 +2166,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-09-30T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&sig=79',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2191,7 +2191,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-09-30T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80&sig=80',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2216,7 +2216,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-01T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?auto=format&fit=crop&w=1200&q=80&sig=81',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2241,7 +2241,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-10-01T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80&sig=82',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2266,7 +2266,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-02T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&sig=83',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2291,7 +2291,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-10-02T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80&sig=84',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2316,7 +2316,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-03T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?auto=format&fit=crop&w=1200&q=80&sig=85',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2341,7 +2341,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-10-03T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80&sig=86',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2366,7 +2366,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-04T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80&sig=87',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2391,7 +2391,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-10-04T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80&sig=88',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2416,7 +2416,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-05T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80&sig=89',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2441,7 +2441,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-10-05T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80&sig=90',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2466,7 +2466,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-06T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1200&q=80&sig=91',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2491,7 +2491,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-10-06T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80&sig=92',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2516,7 +2516,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-07T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=1200&q=80&sig=93',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2541,7 +2541,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-10-07T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&q=80&sig=94',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2566,7 +2566,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-08T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=1200&q=80&sig=95',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2591,7 +2591,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-10-08T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?auto=format&fit=crop&w=1200&q=80&sig=96',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2616,7 +2616,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-09T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&sig=97',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2641,7 +2641,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-10-09T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80&sig=98',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2666,7 +2666,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-10T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1532767153582-b1a0e5145009?auto=format&fit=crop&w=1200&q=80&sig=99',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2691,7 +2691,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-10-10T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80&sig=100',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2716,7 +2716,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-11T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80&sig=101',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2741,7 +2741,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-10-11T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80&sig=102',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2766,7 +2766,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-12T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1200&q=80&sig=103',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2791,7 +2791,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-10-12T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&sig=104',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2816,7 +2816,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-13T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1490578474895-699bc4e2cf59?auto=format&fit=crop&w=1200&q=80&sig=105',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2841,7 +2841,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-10-13T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?auto=format&fit=crop&w=1200&q=80&sig=106',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2866,7 +2866,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-14T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&sig=107',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2891,7 +2891,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-10-14T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&sig=108',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2916,7 +2916,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-15T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80&sig=109',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2941,7 +2941,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-10-15T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80&sig=110',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -2966,7 +2966,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-16T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80&sig=111',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -2991,7 +2991,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-10-16T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80&sig=112',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3016,7 +3016,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-17T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80&sig=113',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3041,7 +3041,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-10-17T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=1200&q=80&sig=114',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3066,7 +3066,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-18T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=1200&q=80&sig=115',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3091,7 +3091,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-10-18T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80&sig=116',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3116,7 +3116,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-19T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507499739999-097706ad8914?auto=format&fit=crop&w=1200&q=80&sig=117',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3141,7 +3141,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-10-19T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1510519138161-584459eb1b37?auto=format&fit=crop&w=1200&q=80&sig=118',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3166,7 +3166,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-20T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=1200&q=80&sig=119',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3191,7 +3191,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-10-20T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80&sig=120',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3216,7 +3216,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-21T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?auto=format&fit=crop&w=1200&q=80&sig=121',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3241,7 +3241,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-10-21T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80&sig=122',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3266,7 +3266,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-22T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80&sig=123',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3291,7 +3291,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-10-22T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=1200&q=80&sig=124',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3316,7 +3316,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-23T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80&sig=125',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3341,7 +3341,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-10-23T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&sig=126',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3366,7 +3366,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-24T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80&sig=127',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3391,7 +3391,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-10-24T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1200&q=80&sig=128',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3416,7 +3416,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-25T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=1200&q=80&sig=129',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3441,7 +3441,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '九星気学・バイオリズム',
     publishedAt: '2026-10-25T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80&sig=130',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3466,7 +3466,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-26T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=1200&q=80&sig=131',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3491,7 +3491,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命入門',
     publishedAt: '2026-10-26T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80&sig=132',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3516,7 +3516,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-27T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=1200&q=80&sig=133',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3541,7 +3541,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '未来予測・結婚運',
     publishedAt: '2026-10-27T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=1200&q=80&sig=134',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3566,7 +3566,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-28T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1200&q=80&sig=135',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3591,7 +3591,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '四柱推命・特殊星',
     publishedAt: '2026-10-28T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80&sig=136',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3616,7 +3616,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-29T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1544717302-de2939b7ef71?auto=format&fit=crop&w=1200&q=80&sig=137',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3641,7 +3641,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'ツインレイ・運命の絆',
     publishedAt: '2026-10-29T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80&sig=138',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3666,7 +3666,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-30T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80&sig=139',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3691,7 +3691,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: 'LINE攻略・16タイプ',
     publishedAt: '2026-10-30T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80&sig=140',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
@@ -3716,7 +3716,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '16タイプ・MBTI相性',
     publishedAt: '2026-10-31T10:00:00+09:00',
     readTimeMinutes: 7,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1554080353-a576cf803bda?auto=format&fit=crop&w=1200&q=80&sig=141',
     toc: [
       { id: 'section-1', title: '1. 運気の流れと基本特性', level: 1 },
       { id: 'section-2', title: '2. 愛を深める具体的アクション', level: 1 },
@@ -3741,7 +3741,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     category: '復縁・引き寄せ',
     publishedAt: '2026-10-31T18:00:00+09:00',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1200&q=80&sig=142',
     toc: [
       { id: 'section-1', title: '1. 夜の静寂で深まる二人の波長', level: 1 },
       { id: 'section-2', title: '2. 今夜試したい開運アプローチ', level: 1 },
