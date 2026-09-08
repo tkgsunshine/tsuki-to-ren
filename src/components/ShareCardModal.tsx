@@ -324,80 +324,82 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           )}
         </div>
 
-        {/* Offscreen Card Middle (Exact Vertical Center: Opponent Name on Left, 二つ名 in Center, Today Score on Right) */}
+        {/* Offscreen Card Middle (Boundary: 二つ名, Lower Character Top: Left Opponent Name & Right Today Score) */}
         {showOpponent && (
           <div style={{
             position: 'relative',
             zIndex: 2,
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            flexDirection: 'column',
             width: '100%',
-            margin: '20px 0'
+            gap: '16px',
+            margin: '14px 0'
           }}>
-            {/* Left: Opponent Name (相手のキャラの左上) */}
-            <div style={{
-              background: 'rgba(5, 5, 15, 0.75)',
-              border: '1.5px solid rgba(255, 255, 255, 0.25)',
-              padding: '8px 20px',
-              borderRadius: '20px',
-              color: '#ffffff',
-              fontWeight: 'bold',
-              fontSize: '20px',
-              backdropFilter: 'blur(8px)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-              transform: 'translateY(110px)'
-            }}>
-              <span>{formatName(oppNickname)}</span>
-              {(result.opponentIsKaigo || result.opponentIsRare) && (
-                <span style={{ fontSize: '13px', color: '#fbbf24', fontWeight: 'bold' }}>
-                  {result.opponentIsKaigo ? '👑 魁罡' : '👑 極星'}
-                </span>
-              )}
-            </div>
-
-            {/* Vertical Center: Compatibility Title (二つ名: 1行表示) */}
+            {/* Boundary Line Level: 二つ名 (Center) */}
             {result.compatibilityTitle && (
-              <div style={{
-                fontSize: '18px',
-                color: '#fef08a',
-                fontWeight: 'bold',
-                letterSpacing: '0.08em',
-                background: 'rgba(5, 5, 15, 0.82)',
-                border: '1.5px solid rgba(226, 192, 116, 0.6)',
-                padding: '8px 20px',
-                borderRadius: '30px',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 4px 18px rgba(0,0,0,0.6)',
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-                lineHeight: '1.2',
-                transform: 'translateY(42px)'
-              }}>
-                {result.compatibilityTitle}
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                <div style={{
+                  fontSize: '18px',
+                  color: '#fef08a',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.08em',
+                  background: 'rgba(5, 5, 15, 0.85)',
+                  border: '1.5px solid rgba(226, 192, 116, 0.6)',
+                  padding: '8px 20px',
+                  borderRadius: '30px',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 4px 18px rgba(0,0,0,0.6)',
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  lineHeight: '1.2'
+                }}>
+                  {result.compatibilityTitle}
+                </div>
               </div>
             )}
 
-            {/* Right: 今日の相性 (相手のキャラの右上) */}
-            <div style={{
-              background: 'rgba(5, 5, 15, 0.75)',
-              border: '1.5px solid rgba(147, 197, 253, 0.5)',
-              backdropFilter: 'blur(8px)',
-              borderRadius: '20px',
-              padding: '8px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-              transform: 'translateY(110px)'
-            }}>
-              <span style={{ fontSize: '15px', color: '#cbd5e1' }}>今日の相性</span>
-              <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1' }}>
-                {result.dailyScore}<span style={{ fontSize: '16px' }}>点</span>
-              </span>
+            {/* Lower Character Top Level: Opponent Name on Left & Today Score on Right */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              {/* Left: Opponent Name (相手のキャラの左上) */}
+              <div style={{
+                background: 'rgba(5, 5, 15, 0.75)',
+                border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                padding: '8px 20px',
+                borderRadius: '20px',
+                color: '#ffffff',
+                fontWeight: 'bold',
+                fontSize: '20px',
+                backdropFilter: 'blur(8px)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+              }}>
+                <span>{formatName(oppNickname)}</span>
+                {(result.opponentIsKaigo || result.opponentIsRare) && (
+                  <span style={{ fontSize: '13px', color: '#fbbf24', fontWeight: 'bold' }}>
+                    {result.opponentIsKaigo ? '👑 魁罡' : '👑 極星'}
+                  </span>
+                )}
+              </div>
+
+              {/* Right: 今日の相性 (基本相性と同じ右端位置) */}
+              <div style={{
+                background: 'rgba(5, 5, 15, 0.75)',
+                border: '1.5px solid rgba(147, 197, 253, 0.5)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '20px',
+                padding: '8px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
+              }}>
+                <span style={{ fontSize: '15px', color: '#cbd5e1' }}>今日の相性</span>
+                <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1' }}>
+                  {result.dailyScore}<span style={{ fontSize: '16px' }}>点</span>
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -703,86 +705,87 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             )}
           </div>
 
-          {/* Card Middle (Exact Vertical Center: Opponent Name on Left, Center 二つ名, Right Score) */}
+          {/* Card Middle (Boundary: 二つ名, Lower Character Top: 相手の名前 on Left, 今日の相性 on Right) */}
           {showOpponent && (
             <div style={{
               position: 'relative',
               zIndex: 2,
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              flexDirection: 'column',
               width: '100%',
-              margin: '0.4rem 0',
-              gap: '0.2rem'
+              gap: '0.4rem',
+              margin: '0.2rem 0'
             }}>
-              {/* Left Floating Badge: 相手の名前 (相手のキャラ画像の左上) */}
-              <div style={{
-                background: 'rgba(5, 5, 15, 0.72)',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                padding: '3px 8px',
-                borderRadius: '12px',
-                color: '#ffffff',
-                fontWeight: 'bold',
-                fontSize: '0.75rem',
-                backdropFilter: 'blur(6px)',
-                WebkitBackdropFilter: 'blur(6px)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                flexShrink: 0,
-                transform: 'translateY(50px)'
-              }}>
-                <span>{formatName(oppNickname)}</span>
-                {(result.opponentIsKaigo || result.opponentIsRare) && (
-                  <span className={result.opponentIsKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.48rem', padding: '1px 4px', borderRadius: '4px' }}>
-                    {result.opponentIsKaigo ? '👑 魁罡' : '👑 極星'}
-                  </span>
-                )}
-              </div>
-
-              {/* Vertical Center: Compatibility Title (二つ名: 1行表示) */}
+              {/* Boundary Line Level: 二つ名 (Center) */}
               {result.compatibilityTitle && (
-                <div style={{
-                  fontSize: '0.62rem',
-                  color: '#fef08a',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.04em',
-                  background: 'rgba(5, 5, 15, 0.78)',
-                  border: '1px solid rgba(226, 192, 116, 0.5)',
-                  padding: '3px 8px',
-                  borderRadius: '20px',
-                  backdropFilter: 'blur(6px)',
-                  WebkitBackdropFilter: 'blur(6px)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap',
-                  lineHeight: '1.2',
-                  transform: 'translateY(18px)'
-                }}>
-                  {result.compatibilityTitle}
+                <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                  <div style={{
+                    fontSize: '0.62rem',
+                    color: '#fef08a',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.04em',
+                    background: 'rgba(5, 5, 15, 0.85)',
+                    border: '1px solid rgba(226, 192, 116, 0.5)',
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    backdropFilter: 'blur(6px)',
+                    WebkitBackdropFilter: 'blur(6px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                    lineHeight: '1.2'
+                  }}>
+                    {result.compatibilityTitle}
+                  </div>
                 </div>
               )}
 
-              {/* Right Floating Badge: 今日の相性 (相手のキャラ画像の右上) */}
-              <div style={{
-                background: 'rgba(5, 5, 15, 0.72)',
-                border: '1.2px solid rgba(147, 197, 253, 0.45)',
-                padding: '3px 8px',
-                borderRadius: '12px',
-                backdropFilter: 'blur(6px)',
-                WebkitBackdropFilter: 'blur(6px)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                flexShrink: 0,
-                transform: 'translateY(50px)'
-              }}>
-                <span style={{ fontSize: '0.55rem', color: '#cbd5e1' }}>今日の相性</span>
-                <span className="font-serif" style={{ fontSize: '0.9rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1' }}>
-                  {result.dailyScore}<span style={{ fontSize: '0.55rem' }}>点</span>
-                </span>
+              {/* Lower Character Top Level: 相手の名前 on Left & 今日の相性 on Right */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                {/* Left: 相手の名前 (相手のキャラ画像の左上) */}
+                <div style={{
+                  background: 'rgba(5, 5, 15, 0.72)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  padding: '3px 8px',
+                  borderRadius: '12px',
+                  color: '#ffffff',
+                  fontWeight: 'bold',
+                  fontSize: '0.75rem',
+                  backdropFilter: 'blur(6px)',
+                  WebkitBackdropFilter: 'blur(6px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                  flexShrink: 0
+                }}>
+                  <span>{formatName(oppNickname)}</span>
+                  {(result.opponentIsKaigo || result.opponentIsRare) && (
+                    <span className={result.opponentIsKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.48rem', padding: '1px 4px', borderRadius: '4px' }}>
+                      {result.opponentIsKaigo ? '👑 魁罡' : '👑 極星'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Right: 今日の相性 (基本相性と全く同じ右端揃え) */}
+                <div style={{
+                  background: 'rgba(5, 5, 15, 0.72)',
+                  border: '1.2px solid rgba(147, 197, 253, 0.45)',
+                  padding: '3px 8px',
+                  borderRadius: '12px',
+                  backdropFilter: 'blur(6px)',
+                  WebkitBackdropFilter: 'blur(6px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                  flexShrink: 0
+                }}>
+                  <span style={{ fontSize: '0.55rem', color: '#cbd5e1' }}>今日の相性</span>
+                  <span className="font-serif" style={{ fontSize: '0.9rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1' }}>
+                    {result.dailyScore}<span style={{ fontSize: '0.55rem' }}>点</span>
+                  </span>
+                </div>
               </div>
             </div>
           )}
