@@ -2276,8 +2276,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         boxShadow: visuals.shadow,
                         transition: 'all 0.3s ease'
                       }} />
-                      <span style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '2px', whiteSpace: 'nowrap' }}>
-                        {index === 0 ? '本日' : day.day.split('(')[0]}
+                      <span style={{ fontSize: '0.64rem', color: '#9ca3af', marginTop: '2px', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
+                        {index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day}
                       </span>
                     </div>
                   );
