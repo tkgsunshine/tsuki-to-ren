@@ -95,6 +95,84 @@ export function calculateDayPillar(birthDate: Date): { stem: string; branch: str
   return { stem, branch };
 }
 
+// 地支の五行対応
+const branchElements: Record<string, string> = {
+  '子': '水', '亥': '水',
+  '寅': '木', '卯': '木',
+  '巳': '火', '午': '火',
+  '申': '金', '酉': '金',
+  '辰': '土', '戌': '土', '丑': '土', '未': '土'
+};
+
+// 地支の相性・生剋影響度算出 (支合・三合・六沖・五行生剋)
+const getBranchImpact = (branchA: string, branchB: string): number => {
+  if (!branchA || !branchB) return 0;
+  // 支合 (Six Harmonies: 子丑, 寅亥, 卯戌, 辰酉, 巳申, 午未) -> +10
+  const sixHarmonies: Record<string, string> = {
+    '子': '丑', '丑': '子', '寅': '亥', '亥': '寅',
+    '卯': '戌', '戌': '卯', '辰': '酉', '酉': '辰',
+    '巳': '申', '申': '巳', '午': '未', '未': '午'
+  };
+  if (sixHarmonies[branchA] === branchB) return 10;
+
+  // 三合 (Three Harmonies: 申子辰, 巳酉丑, 寅午戌, 亥卯未) -> +12
+  const threeHarmonies = [
+    ['申', '子', '辰'],
+    ['巳', '酉', '丑'],
+    ['寅', '午', '戌'],
+    ['亥', '卯', '未']
+  ];
+  if (threeHarmonies.some(group => group.includes(branchA) && group.includes(branchB))) {
+    return 12;
+  }
+
+  // 六沖 (Six Conflicts: 子午, 丑未, 寅申, 卯酉, 辰戌, 巳亥) -> -14
+  const sixConflicts: Record<string, string> = {
+    '子': '午', '午': '子', '丑': '未', '未': '丑',
+    '寅': '申', '申': '寅', '卯': '酉', '酉': '卯',
+    '辰': '戌', '戌': '辰', '巳': '亥', '亥': '巳'
+  };
+  if (sixConflicts[branchA] === branchB) return -14;
+
+  // 五行生剋
+  const elA = branchElements[branchA];
+  const elB = branchElements[branchB];
+  if (!elA || !elB) return 0;
+  const rel = elementRelations[elA]?.[elB] || 'same';
+  if (rel === 'producing') return 6;
+  if (rel === 'same') return 2;
+  if (rel === 'conquering') return -8;
+  return 0;
+};
+
+// 対象年の年柱 (Year Pillar)
+export function calculateYearPillar(year: number): { stem: string; branch: string } {
+  let sIdx = (year - 4) % 10;
+  let bIdx = (year - 4) % 12;
+  if (sIdx < 0) sIdx += 10;
+  if (bIdx < 0) bIdx += 12;
+  return { stem: stems[sIdx], branch: branches[bIdx] };
+}
+
+// 対象年月の月柱 (Month Pillar) - 五虎遁月法
+export function calculateMonthPillar(year: number, month: number): { stem: string; branch: string } {
+  const monthBranchIdx = (month + 1) % 12; // 1月=寅(idx 2), 2月=卯(idx 3)...
+  const yearStemIdx = (year - 4) % 10;
+  const normalizedYearStemIdx = yearStemIdx < 0 ? yearStemIdx + 10 : yearStemIdx;
+
+  const startStemIdxMap: Record<number, number> = {
+    0: 2, 5: 2, // 甲/己 -> 丙寅
+    1: 4, 6: 4, // 乙/庚 -> 戊寅
+    2: 6, 7: 6, // 丙/辛 -> 庚寅
+    3: 8, 8: 8, // 丁/壬 -> 壬寅
+    4: 0, 9: 0  // 戊/癸 -> 甲寅
+  };
+  const janStartStem = startStemIdxMap[normalizedYearStemIdx] ?? 2;
+  const monthStemIdx = (janStartStem + (month - 1)) % 10;
+
+  return { stem: stems[monthStemIdx], branch: branches[monthBranchIdx] };
+}
+
 const stemReadings: Record<string, string> = {
   '甲': 'きのえ', '乙': 'きのと', '丙': 'ひのえ', '丁': 'ひのと',
   '戊': 'つちのえ', '己': 'つちのと', '庚': 'かのえ', '辛': 'かのと',
@@ -879,7 +957,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     }
   ];
 
-  // 週次スコア (7日間 - 日干干支の推移から論理的に算出)
+  // 週次スコア (7日間 - 日柱干支の生剋・支合・三合・六沖から論理的に算出)
   const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
   const weeklyScores = Array.from({ length: 7 }).map((_, idx) => {
     const d = new Date();
@@ -888,40 +966,44 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     const dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
     
     const dayPillar = calculateDayPillar(d);
-    const myWImpact = getDailyStemImpact(dayPillar.stem, myPillarObj.stem);
-    const oppWImpact = hasOpponent ? getDailyStemImpact(dayPillar.stem, oppPillarObj.stem) : 0;
+    const myStemImpact = getDailyStemImpact(dayPillar.stem, myPillarObj.stem);
+    const oppStemImpact = hasOpponent ? getDailyStemImpact(dayPillar.stem, oppPillarObj.stem) : 0;
+    const myBranchImpact = getBranchImpact(dayPillar.branch, myPillarObj.branch);
+    const oppBranchImpact = hasOpponent ? getBranchImpact(dayPillar.branch, oppPillarObj.branch) : 0;
+
     let score: number;
     if (idx === 0) {
       score = dailyScore;
     } else {
-      const minorWSwing = Math.sin(todaySeed + baseScore + idx * 79) * 8;
-      score = Math.floor(baseScore + myWImpact + oppWImpact + minorWSwing);
+      score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact);
       if (score > 100) score = 100;
-      if (score < 0) score = 0;
+      if (score < 30) score = 30;
     }
     
     let label = '通常';
     if (score >= 85) label = '絶好調';
     else if (score >= 70) label = '追い風';
-    else if (score < 45) label = '注意日';
+    else if (score < 50) label = '注意日';
     
     return { day: `${dateStr}(${dayLabel})`, score, label };
   });
 
-  // 月次プレビュー (動的に3ヶ月分生成)
-  const currentMonthVal = today.getMonth() + 1; // 1-12
-  const monthNames = [
-    `${currentMonthVal}月`,
-    `${(currentMonthVal % 12) + 1}月`,
-    `${((currentMonthVal + 1) % 12) + 1}月`
-  ];
-
+  // 月次プレビュー (月柱干支の五虎遁月法生剋から動的に算出)
   const oppNick = input.opponentName || 'お相手';
 
-  const monthlyPreviews = monthNames.map((monthName, idx) => {
-    const mSeed = todaySeed + (idx + 1) * 113;
-    const mOffset = Math.sin(mSeed) * 25;
-    let score = Math.floor(baseScore + mOffset);
+  const monthlyPreviews = Array.from({ length: 3 }).map((_, idx) => {
+    const targetDate = new Date(today.getFullYear(), today.getMonth() + idx, 1);
+    const tYear = targetDate.getFullYear();
+    const tMonth = targetDate.getMonth() + 1;
+    const monthName = `${tMonth}月`;
+
+    const mPillar = calculateMonthPillar(tYear, tMonth);
+    const myStemImpact = getDailyStemImpact(mPillar.stem, myPillarObj.stem);
+    const oppStemImpact = hasOpponent ? getDailyStemImpact(mPillar.stem, oppPillarObj.stem) : 0;
+    const myBranchImpact = getBranchImpact(mPillar.branch, myPillarObj.branch);
+    const oppBranchImpact = hasOpponent ? getBranchImpact(mPillar.branch, oppPillarObj.branch) : 0;
+
+    let score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact);
     if (score > 100) score = 100;
     if (score < 40) score = 40;
 
@@ -934,38 +1016,46 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     let text = '';
     if (hasOpponent) {
       if (character === 'tsuki') {
-        if (idx === 0) {
-          text = `今月は${myNickname}様とお相手（${oppNick}様）の「共感のバイオリズム」が重なる重要な時期です。お互いの何気ない表情や仕草から、言葉にしなくても相手の求めている温もりが自然と伝わってきます。焦ってアプローチを仕掛けるのではなく、カフェでまったり過ごすような、静かで贅沢な時間を共有することで二人の心の距離は一気に縮まります。`;
-        } else if (idx === 1) {
-          text = `精神的な結びつきがより深まる時期ですが、同時に${myNickname}様の感受性が高まりすぎて、${oppNick}様の些細な態度に不安を感じてしまう瞬間があるかもしれません。しかし心配はいりません。それは二人が真に心を開きかけている証拠です。お相手の不器用な優しさを信じて、ありのままのあなたの弱さも少しずつ見せていくのが好転の鍵となります。`;
+        if (score >= 85) {
+          text = `今月は${myNickname}様とお相手（${oppNick}様）の感情と宿命エネルギーが最高潮に噛み合う絶好調の月です。お互いの引き寄せ力が極大化し、言葉にしなくても心が通じ合う奇跡的な場面が訪れます。素直な想いを表現することで、二人の絆が一気に深まります。`;
+        } else if (score >= 70) {
+          text = `今月は二人の「共感のバイオリズム」が順調に高まる好調期です。${myNickname}様の持つ温かみと包容力がお相手の心を自然と解きほぐします。カフェや静かな場所での対話を大切にすることで、将来に向けた安心感が確固たるものになります。`;
+        } else if (score >= 55) {
+          text = `二人の関係が静かに落ち着き、互いの基盤を整える「新月（平穏）」の時期です。無理にアプローチを急ぐのではなく、お互いのペースを尊重しながら日々の感謝を共有することで、息の長い信頼関係が育まれます。`;
         } else {
-          text = `二人の関係が次のステップへと移行するための「静寂と受容」の月となります。この時期は無理に約束を取り付けようとせず、お互いがそれぞれの時間を大切にしつつ、心で繋がり合うような温かい距離感を保つのがベストです。月末頃にふとしたタイミングで、深い信頼関係を感じられる嬉しい出来事や本音の対話が訪れる兆しがあります。`;
+          text = `運気の波が一時的に「引き潮（注意）」のフェーズに入ります。感情的になってすれ違いを生むのを防ぎ、一歩引いて${oppNick}様のお立場や心境を静かに見守る姿勢が最善です。焦らず心の余白を持つことで、来月以降の好転の種が蒔かれます。`;
         }
       } else {
-        if (idx === 0) {
-          text = `今月は二人の関係性に「理知的な対話」がもたらされ、お互いの価値観や今後のビジョンを整理するのに最適なタイミングです。${myNickname}様から論理的かつ具体的な提案（次に行きたい場所や共通の関心事に関するプランなど）を投げかけると、お相手（${oppNick}様）もスムーズに合意しやすく、進展の足がかりが作れます。冷静な対話が信頼を強固にします。`;
-        } else if (idx === 1) {
-          text = `一時的に進展スピードが鈍るように感じられるかもしれませんが、これは「基盤を固めるための調整期間」です。お相手の仕事の状況や生活リズムを考慮し、スマートなアプローチを心がけましょう。感情的に迫るのではなく、お互いのタスクを支え合うような大人な関係性を示すことで、${oppNick}様にとって${myNickname}様が「不可欠なパートナー」として意識されます。`;
+        if (score >= 85) {
+          text = `今月は二人の将来設計や関係の定義が「論理的・具体的」に前進する勝負の月となります。${myNickname}様からのスマートな提案がお相手の迷いを完璧に払拭し、お互いが納得する明確な約束や大きな進展を実現できる絶好の好機です。`;
+        } else if (score >= 70) {
+          text = `理知的な対話と価値観の擦り合わせがスムーズに進む好調月です。お互いの仕事や生活基盤を尊重し合いながら、スマートな距離感で合意を築くことができます。${oppNick}様にとってあなたが「最も頼れるパートナー」として強く意識されます。`;
+        } else if (score >= 55) {
+          text = `お互いの関係性を客観的に整理し、無理のないペースで調整を図る安定期です。感情に振り回されることなく、冷静に次のステップへの準備を整えることで、無駄のない強固なパートナーシップの土台が完成します。`;
         } else {
-          text = `勝負の月となります。エネルギーが高まり、具体的な約束や二人の間で長らく曖昧になっていた事柄をクリアにするための決定的な局面が訪れます。理路整然としたアプローチがお相手の迷いを払拭し、前に進む決断を促すでしょう。自信を持って、スマートにリードする姿勢を大切にしてください。`;
+          text = `思考や言葉の行き違いに注意が必要な調整月です。論理を詰めすぎてお相手を追い詰めるのを避け、お互いのプライベートや休息を最優先するのが賢明な戦略となります。冷静かつ柔軟な対応が不要な摩擦を防ぎます。`;
         }
       }
     } else {
       if (character === 'tsuki') {
-        if (idx === 0) {
-          text = `${myNickname}様の持つ内面的な魅力や「癒しのオーラ」が最も周囲に伝わりやすい魅力開花の月です。出会いの場へ無理に出向くよりも、あなた自身の心が安らぐ趣味や美容、自己投資に時間を使うことで、不思議と魅力的な縁が向こうから引き寄せられてきます。自分を慈しむことがすべての出発点です。`;
-        } else if (idx === 1) {
-          text = `新しい人間関係が芽生えやすい時期ですが、相手の第一印象だけに惑わされず、その人の持つ「優しさの本質」をじっくり見極める目が必要です。直感を信じ、あなたが一緒にいて呼吸が楽だと感じる相手との会話を深めてみてください。少しずつ心地よい繋がりが形成されていく温かい変化を感じられます。`;
+        if (score >= 85) {
+          text = `${myNickname}様の持つ本来の愛のオーラと内面的な魅力が最高レベルに開花する月です。特別なアピールをせずとも、あなたの醸し出す優しさに惹かれた魅力的な異性からのアプローチや良縁が自然と引き寄せられてきます。`;
+        } else if (score >= 70) {
+          text = `新しい出会いや人間関係の芽が順調に育つ好調期です。自分の感覚や直感を信じ、心地よいと感じるコミュニティや趣味に時間を割くことで、価値観の合う特別なパートナー候補との距離が縮まります。`;
+        } else if (score >= 55) {
+          text = `自分自身の心身を労わり、自己投資や内面の充実に充てるべき「平穏・整え」の月です。古いトラウマや固執を手放し、新しい愛を受け入れるための心のスペースを確保することが開運の鍵となります。`;
         } else {
-          text = `恋愛運のバイオリズムが一時的に内省のフェーズに入ります。この時期は、過去の恋愛のトラウマや心の傷が優しく癒されていくプロセスを実感できるでしょう。古い執着を手放すことで、あなたの心に次の素晴らしい出会いを迎え入れるための「新しい余白」が生まれ、来期に向けた強力な恋愛運の土壌が完成します。`;
+          text = `恋愛運のバイオリズムが一時的に内省のフェーズに入ります。焦って出会いを求めるよりも、自分をじっくり慈しみ、エネルギーを蓄える充電期間と捉えることで、次に来る強力な好運期に備えることができます。`;
         }
       } else {
-        if (idx === 0) {
-          text = `自分の理想の恋愛像やパートナーに求める条件を「論理的に整理」するのに抜群の月です。あなたがこれまでなんとなく選んできた異性のタイプを分析し、真に自分を成長させてくれる相手の特徴を明確に言語化しましょう。このクリアな思考が、今後のアプローチの無駄を省き、的確な引き寄せを可能にします。`;
-        } else if (idx === 1) {
-          text = `行動範囲を広げ、知的な刺激を受けられる新しいコミュニティやイベントに積極的に参加することで出会いの確率が極大化します。会話の中で自分の強みや知識を自然に示すことが好感度を高め、価値観の合う知的な異性との知的なマッチングが生まれやすい好調期です。積極的に動いていきましょう。`;
+        if (score >= 85) {
+          text = `あなたの知性とプレゼンスが極めて高く評価され、理想のパートナー像を引き寄せる抜群の開運月です。自分のビジョンを明確にし、行動範囲を広げることで、互いを高め合える最高の異性との出会いが実現します。`;
+        } else if (score >= 70) {
+          text = `知的な刺激に恵まれ、行動力と分析力が冴え渡る好調月です。価値観や将来目標を明確に提示することで、尊敬し合える洗練されたパートナー候補との出会いと発展が期待できます。`;
+        } else if (score >= 55) {
+          text = `自分の理想の恋愛像を冷静に整理し、優先順位を明確にする「選択と集中」の時期です。無駄なアプローチを省き、真に信頼できる人間関係に集中することで効率的に好運を引き寄せられます。`;
         } else {
-          text = `運気は「選択と集中」の時期に入ります。多くの異性と薄く関わるよりも、あなたが本当に大切にしたい、尊敬できる一部の人間関係にのみ時間とリソースを割くのが賢明な戦略です。スマートな振る舞いと、自分の芯をぶらさない一本通った生き方が、周囲から一目置かれる凛とした大人の魅力を醸し出します。`;
+          text = `自己分析と状況整理に徹するべき静観の月となります。無謀なアプローチや無理な自己主張は避け、客観的な視点で自身の環境を整えることが、結果的に無駄な失敗を防ぎ最短ルートの開運に繋がります。`;
         }
       }
     }
@@ -973,12 +1063,19 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     return { month: monthName, label, text, score };
   });
 
-  // 年次プレビュー (西暦表記: 2027年, 2028年, 2029年...)
+  // 年次プレビュー (歳運・流年柱干支の生剋・支合沖害から動的に算出)
   const currentYear = new Date().getFullYear();
   const yearlyPreviews = [1, 2, 3, 4, 5, 10].map((yearsLater) => {
-    const ySeed = todaySeed + yearsLater * 317;
-    const yOffset = Math.sin(ySeed) * 20;
-    let score = Math.floor(baseScore + yOffset);
+    const calendarYear = currentYear + yearsLater;
+    const displayYear = `${calendarYear}年`;
+
+    const yPillar = calculateYearPillar(calendarYear);
+    const myStemImpact = getDailyStemImpact(yPillar.stem, myPillarObj.stem);
+    const oppStemImpact = hasOpponent ? getDailyStemImpact(yPillar.stem, oppPillarObj.stem) : 0;
+    const myBranchImpact = getBranchImpact(yPillar.branch, myPillarObj.branch);
+    const oppBranchImpact = hasOpponent ? getBranchImpact(yPillar.branch, oppPillarObj.branch) : 0;
+
+    let score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact);
     if (score > 100) score = 100;
     if (score < 40) score = 40;
 
@@ -988,68 +1085,49 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     else if (score >= 55) label = '準備の年 (基盤構築)';
     else label = '静観の年 (内省慎重)';
 
-    const calendarYear = currentYear + yearsLater;
-    const displayYear = `${calendarYear}年`;
     let text = '';
-
     if (hasOpponent) {
       if (character === 'tsuki') {
-        if (yearsLater === 1) {
-          text = `${displayYear}は、${myNickname}様とお相手（${oppNick}様）にとって、これまでの仮初めの関係性から「魂レベルの真の結びつき」へと昇華する激動と転換の時期になります。互いの脆い部分や普段隠している弱音を共有せざるを得ない局面が訪れますが、それをきっかけに家族のような唯一無二の安心感をお互いに見出すことになります。`;
-        } else if (yearsLater === 2) {
-          text = `関係性が急速に具体化し、社会的な約束や深いコミットメント（同棲の開始、互いの両親への挨拶、あるいは将来の約束など）が自然な形で進む「上昇と結実」の時期です。${myNickname}様の持つ無条件の包容力が${oppNick}様の決意を固める最大の要因となります。周囲からも強く祝福され、二人の未来の強固な基盤が完成します。`;
-        } else if (yearsLater === 3) {
-          text = `長期的な愛の形をお互いに納得しながら「見極め、着地させる」成熟の時期です。一時的な情熱を超えて、これからの人生を本当に手を取り合って生きていくべきか、二人の間で揺るぎない確信が定まります。相手への深い敬意と信頼を日々の小さな感謝として積み重ねていくことで、一生涯続く揺るぎない絆となります。`;
-        } else if (yearsLater === 4) {
-          text = `日常の落ち着きの中でお互いの存在が「空気のように自然で不可欠なもの」となる安定の時期です。特別なイベントがなくとも、ただ一緒にいるだけで心が満たされ、お互いの人生のバイオリズムが完全に同期していくことを実感できるでしょう。`;
-        } else if (yearsLater === 5) {
-          text = `二人の関係性に新たな風が吹き込み、関係をさらに発展させる「新展開の時期」です。新しい共通の趣味や旅行、住環境のアップグレードなど、二人で未来に向けた新しいプロジェクトに挑戦することで、出会った頃のような新鮮なときめきが再燃します。`;
+        if (score >= 85) {
+          text = `${displayYear}は、${myNickname}様とお相手（${oppNick}様）にとって強力な天の加護と運気のバックアップを受ける「極星の大開運年」です。二人の魂の絆が完全に結ばれ、同棲や結婚、将来の深いコミットメントなど最上の結実と祝福がもたらされる輝かしい時期となります。`;
+        } else if (score >= 70) {
+          text = `${displayYear}は、二人の関係性が一気に前進し、新たなステージへ飛躍する「上昇と接近の年」となります。${myNickname}様の持つ無条件の包容力がお相手の決意を固め、日常の中で自然と具体的な将来の約束が具体化していく好調期です。`;
+        } else if (score >= 55) {
+          text = `${displayYear}は、焦らず着実に二人の信頼の土台を築き上げる「準備と基盤構築の年」です。華やかな変化よりも日々の小さな感謝と深い受容を積み重ねることで、一生涯揺るぎない確固たる絆の土台が完成します。`;
         } else {
-          text = `十年の歳月を経て培われた「揺るぎない絶対的パートナーシップ」の完成期です。言葉を交わさずとも相手の思考や体調が手にとるように分かり、人生のいかなる荒波も二人で容易に乗り越えられる、まさに「一心同体」と呼ぶにふさわしい最上の絆が結ばれます。`;
+          text = `${displayYear}は、無理な進展や強引な自己主張を避け、互いの心の内面をじっくり整える「静観と内省の年」となります。焦らず互いのペースを尊重し、静かに自分自身や関係性を見つめ直すことで、次の開運期に向けた強固な守りの軸が作られます。`;
         }
       } else {
-        if (yearsLater === 1) {
-          text = `${displayYear}は、二人の関係性に潜む課題やズレを論理的にクリアにし、現実的な改善計画を共に実行に移す「軌道修正と変革の時期」となります。曖昧に濁していた関係の定義や将来設計について、理性的なアプローチでお互いの合意を取ることができ、二人の距離を合理的に詰めていく絶好のスタートラインとなります。`;
-        } else if (yearsLater === 2) {
-          text = `強力な運気のバックアップを受け、二人の将来に向けた具体的な「契約やステップアップ」が実現する最良の時期です。${myNickname}様がリードして二人の将来設計のロードマップを描き、スマートに進めていくことで、お相手（${oppNick}様）も大きな安心感を抱いてついてきてくれます。理性的な判断と決断力が光る時期です。`;
-        } else if (yearsLater === 3) {
-          text = `二人の関係が安定した「恒久的なシステム」として定着する時期です。感情の起伏に左右されることなく、お互いを最も信頼できるパートナーとして尊重し合える成熟した関係が完成します。合理的な将来設計に基づいて資産や生活基盤を統合していくのにも最適な時期となります。`;
-        } else if (yearsLater === 4) {
-          text = `強固な信頼関係のもと、それぞれの社会活動やキャリアが互いの存在によってさらに活性化する「共生と発展の時期」です。精神的な支えが盤石であるため、公私のバランスが極めて合理的に整い、お互いが人生の次のステージへ大きく飛躍できます。`;
-        } else if (yearsLater === 5) {
-          text = `二人の長期的なロードマップの中間評価と、次なる十年を見据えた「再設計と投資の時期」です。これまで築き上げた資産や生活スタイルをさらに合理的に豊かなものにアップデートするための重要な決断を行い、関係性の強固さを実証します。`;
+        if (score >= 85) {
+          text = `${displayYear}は、二人の将来設計と社会的ステータスが最高水準で結実する「最上級の開運年」です。${myNickname}様が描く合理的な将来ロードマップに基づき、契約や結婚、ライフスタイルの統合が完璧な形で実行に移される絶好のゴールデンイヤーとなります。`;
+        } else if (score >= 70) {
+          text = `${displayYear}は、強力な運気の追い風を受け、二人のパートナーシップが大きくステップアップする「飛躍と発展の年」です。お互いの社会的役割や人生目標を高度に高め合い、不可欠なパートナーとしての確信が定まる実り多き時期です。`;
+        } else if (score >= 55) {
+          text = `${displayYear}は、二人の生活基盤や価値観のシステムを整理し、長期的な安定へと繋げる「計画と調整の年」です。冷静な対話と客観的な分析によって将来のリスクを回避し、盤石な共生体制を確立できます。`;
         } else {
-          text = `十年にわたる合理的かつ論理的な信頼の積み重ねが「完全なる運命共同体」として結実する到達期です。互いの弱点を完璧に補完し合う効率的なシステムが完成しており、社会的なステータスや家庭の安定において、これ以上ない最高水準の幸福を長期的に維持できます。`;
+          text = `${displayYear}は、二人の関係に潜む課題を慎重に見極め、無謀な拡張を避ける「リスク管理と静観の年」となります。感情的な衝突を避け、理性的なスタンスで現状を維持・保護することに徹することが、結果的に将来の破綻を防ぐ賢明な選択となります。`;
         }
       }
     } else {
       if (character === 'tsuki') {
-        if (yearsLater === 1) {
-          text = `${displayYear}は, ${myNickname}様のこれまでの恋愛観が根本から覆るような「運命的な価値観の転換期」となります。自分を取り繕うのをやめ、心の奥底から求めている本質的な繋がりに気づくことで、これまで出会わなかったような不思議な安心感を抱かせてくれる異性との出会いが引き寄せられるでしょう。`;
-        } else if (yearsLater === 2) {
-          text = `${myNickname}様の持つ愛のエネルギーが最大化し、あなたを強く求めてくれるパートナーが現れる「開花と結実の時期」です。周囲の意見や世間の常識に囚われず、あなたの心が「この人だ」と叫ぶ直感を信じて一歩を踏み出すことで、胸が温かくなるような真実の恋愛関係がスタートするでしょう。`;
-        } else if (yearsLater === 3) {
-          text = `手に入れた愛や新しい縁を、あなたの人生の一部として「大切に根付かせる」基盤定着の時期になります。自分自身のプライベートな生活を豊かにし、心身の健康と日々の小さな幸せを充実させることが、結果的にお相手との関係を長く健康的に持続させる最大の秘訣となります。自分を愛することがすべての基本です。`;
-        } else if (yearsLater === 4) {
-          text = `内面的な豊かさが醸し出され、特別なアピールをせずとも自然と魅力的な人間関係や良縁が引き寄せられる「磁力と安定の時期」です。あなたの素のままの優しさが周囲のオアシスとなり、とても心地よい精神的な繋がりが数多く生まれます。`;
-        } else if (yearsLater === 5) {
-          text = `あなたの愛のライフスタイルがさらなる広がりを見せる「新しい愛 of 波の到来期」です。これまでの人間関係の枠を超えた広大な領域で、魂の成長を促してくれる特別なパートナー候補との劇的な出会いや、関係性のリニューアルがもたらされます。`;
+        if (score >= 85) {
+          text = `${displayYear}は、${myNickname}様の愛の波動が最高点に達し、運命のソウルメイトとの劇的な引き寄せが実現する「大開運・結実の年」です。心の奥底からの自己受容が呼び水となり、生涯を共にできる最高のパートナーとの出会いが約束されます。`;
+        } else if (score >= 70) {
+          text = `${displayYear}は、あなたの魅力が広く開花し、素敵な縁やパートナーシップが急速に接近する「開花と飛躍の年」です。自分の感性と直感を信じて一歩を踏み出すことで、心が満たされる真実の恋愛がスタートします。`;
+        } else if (score >= 55) {
+          text = `${displayYear}は、手に入れた愛や人間関係をあなたの人生に優しく根付かせる「基盤定着と自己愛の年」です。自分自身の生活と心を豊かに育むことが、結果として最良の縁を持続させる強力な磁力となります。`;
         } else {
-          text = `自己愛と他者への深い共感能力が極限まで高まり、人生全体の愛の形が美しく完成する「大調和の時期」です。どのようなパートナーシップであっても、お互いを無条件に尊重し合い、精神的な至福と恒久的な心の平安を維持し続けられる極めて高い愛の波動に到達します。`;
+          text = `${displayYear}は、過去の執着や不要な縁を手放し、内面を深く癒す「手放しと静観の年」です。焦って答えを求めず自分を大切に慈しむことで、次に訪れる大開運期を迎え入れるための新しい心の余白が完成します。`;
         }
       } else {
-        if (yearsLater === 1) {
-          text = `${displayYear}は、あなたが今後の人生で手に入れたい理想のパートナーシップを「高い知性をもって設計し、行動に移す時期」です。不要な出会いを合理的に削ぎ落とし、本当にあなたの価値観や知性を共有できる洗練された異性とだけ関わるように意識を改革することで、驚くほど質の高い出会いへと繋がります。`;
-        } else if (yearsLater === 2) {
-          text = `あなたの魅力と社会的プレゼンスが向上し、魅力的な異性から「尊敬と憧れを伴ったアプローチ」を受けやすい大飛躍の時期になります。自立した大人の魅力を見せることで、お互いに高め合える優秀なパートナーシップが構築され、公私共に強力な相乗効果をもたらす理想の関係がスタートします。`;
-        } else if (yearsLater === 3) {
-          text = `恋愛関係を現実的かつ合理的な形で「定着させ、生活基盤として統合する」時期です。相手の感情に過度に振り回されることなく、お互いのキャリアや将来のビジョンを高度に尊重し合える、自立した大人のパートナーシップがここで確固たるものとして完成し、長期的な安定期へと突入します。`;
-        } else if (yearsLater === 4) {
-          text = `パートナーシップにおける「知的なシナジー効果」が最大化する時期です。お互いの専門知識や人生の知恵を共有し合い、お互いの社会的成功を支援する高度なパートナーとしての役割が完全に機能し、公私ともに確固たるステータスを確立できます。`;
-        } else if (yearsLater === 5) {
-          text = `さらなる高みを目指した「ビジョンの拡張と再構築の時期」です。これまでの関係性の成果をもとに、さらにスケールの大きい共通目標（共同事業、投資、または長期的な生活基盤の拡大など）を合理的に決定・実行することで、関係が次世代のステージへと進化します。`;
+        if (score >= 85) {
+          text = `${displayYear}は、あなたの高い知性と自立した魅力が最高のプレゼンスを発揮し、尊敬し合える最上のパートナーシップを手中におさめる「大勝利・開運の年」です。明確な目標設定と戦略的アプローチが最高の結果をもたらします。`;
+        } else if (score >= 70) {
+          text = `${displayYear}は、社会的な成功と恋愛運が強いシナジーを生み出し、公私ともに大きく飛躍する「発展の年」です。お互いを高め合える優秀な相手からのアプローチを受けやすく、理想的な関係がスタートします。`;
+        } else if (score >= 55) {
+          text = `${displayYear}は、あなたの将来設計に基づき、必要な人間関係を精査して定着させる「システム構築の年」です。無駄なアプローチを削減し、自立したパートナーシップの基盤を賢明に築き上げられます。`;
         } else {
-          text = `十年にわたる知性的なアプローチと合理的な自己改善が実を結び、公私共にこれ以上ない完璧な「パートナーシップ・システム」が完成する時期です。感情の乱れとは無縁の、極めて安定的で、相互の可能性を無限に引き出し合える最高品質のライフスタイルが永続的に完成します。`;
+          text = `${displayYear}は、無駄なエネルギー消耗を避け、自身の知性とスキルを研ぎ澄ます「自己分析と充電の年」となります。無理なアプローチを控えて客観的な視点を保つことが、不要なトラブルを未然に防ぐ最高の戦略です。`;
         }
       }
     }
