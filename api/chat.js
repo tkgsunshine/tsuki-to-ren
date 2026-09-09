@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   if (!apiKey) {
     return res.status(200).json({ 
-      reply: getOfflineResponse(message, character),
+      reply: getOfflineResponse(message, character, diagnosedData),
       debug: "API Key is missing from process.env"
     });
   }
@@ -114,36 +114,120 @@ ${personaDescription}
   } catch (err) {
     console.error('Gemini API Error:', err);
     return res.status(200).json({ 
-      reply: getOfflineResponse(message, character),
+      reply: getOfflineResponse(message, character, diagnosedData),
       debug: `Error: ${err.message}`,
       hasKey: !!apiKey
     });
   }
 }
 
-// Offline fallback logic
-function getOfflineResponse(userInput, character) {
+// Offline fallback logic with diagnosedData integration
+function getOfflineResponse(userInput, character, diagnosedData) {
   const input = (userInput || '').toLowerCase();
-  
-  if (input.includes('何すれば') || input.includes('何をすれば') || input.includes('具体的に') || input.includes('どうすれば') || input.includes('行動') || input.includes('おすすめ')) {
-    return character === 'ren'
-      ? '本日取るべき具体的なアクションは以下の3ステップです。\n1. 身の回りのデスク整理とタスクの片付けを行い集中力を高める。\n2. 19:30〜21:00の吉時間に、相手へ短い近況報告や軽めの質問を1通のみ送る。\n3. 送信後は相手の返信速度を気にせず、自分の趣味や休息に専念する。\n感情に左右されず、この順序を守ることが最も効果的です。'
-      : '今日はまず、ご自身の心を温かく満たすことから始めましょう！\n1. 好きなお茶や白湯を飲んで深呼吸する\n2. 夜の落ち着いた時間（20時〜22時）に「今日もお疲れ様♪」と短く優しいメッセージを送る\n3. 相手のペースを尊重し、焦らずゆったりとした気持ちで過ごす\nあなたの心が穏やかでいることが、素敵な引き寄せの第一歩になりますよ。';
-  } else if (input.includes('連絡') || input.includes('返信') || input.includes('既読') || input.includes('未読') || input.includes('line')) {
-    return character === 'ren'
-      ? '感情に流されず状況を分析しましょう。相手の沈黙や未読は嫌悪ではなく、単に忙しいか、返信に迷っている確率が高いです。焦って何度も追撃するのではなく、数日置いて簡潔で返信しやすい内容を一度だけ送るのが論理的に最善の策です。'
-      : '連絡が来ないと不安で胸が締め付けられますよね。既読や未読に一喜一憂してしまうのは、それだけ真剣に想っている証拠。今は相手も心に少しの余白が必要な時期なのかもしれません。優しい風が届くのを信じて、今は自分の時間を温めましょう。';
-  } else if (input.includes('気持ち') || input.includes('分から') || input.includes('不安') || input.includes('脈') || input.includes('好き') || input.includes('嫌い')) {
-    return character === 'ren'
-      ? '他人の心を読むことは不可能です。相手の行動履歴（行動の頻度、対話の速度、共有した時間の長さ）から客観的に好意や信頼度を測定すべきです。推測や脳内補正で不安を膨らませるのではなく、冷静に事実だけを積み上げてください。'
-      : '相手の気持ちは見えなくて、霧の中にいるように感じてしまいますよね。でも言葉以上に、ふとした瞬間の優しい視線や、あなたに向けられる微笑みに真実が隠されています。あなたの温かい直感を信じて、焦らず関係を育んでいきましょう。';
-  } else if (input.includes('相性') || input.includes('点数') || input.includes('占い')) {
-    return character === 'ren'
-      ? '相性の点数は現在の星の配置とデータに基づく一つの静的なシミュレーション値です。点数に一喜一憂するのではなく、相手の性格的ボトルネックをどう補い合うかという分析的アプローチを取ることで、相性値は自ずと100%に近づけられます。'
-      : '二人の魂の引き合う力は、目に見える数字（点数）以上に素晴らしい可能性を秘めています。星々の調和が示すサインを受け止めながら、互いの光を補い合い、支え合っていくことで、最高の愛のカタチをクリエイトしていくことができますよ。';
+
+  // Extract diagnosis elements if present
+  const myStemMatch = (diagnosedData || '').match(/命式の日干（本質）:\s*([^\n\r]+)/);
+  const oppStemMatch = (diagnosedData || '').match(/【お相手の属性】[\s\S]*?命式の日干:\s*([^\n\r]+)/);
+  const oppMbtiMatch = (diagnosedData || '').match(/【お相手の属性】[\s\S]*?性格タイプ:\s*([A-Za-z]{4})/);
+  const baseScoreMatch = (diagnosedData || '').match(/基本相性値:\s*([0-9]+)/);
+  const dailyScoreMatch = (diagnosedData || '').match(/今日のバイオリズム相性値:\s*([0-9]+)/);
+
+  const myStem = myStemMatch ? myStemMatch[1].trim() : '日干';
+  const oppStem = oppStemMatch ? oppStemMatch[1].trim() : '日干';
+  const oppMbti = oppMbtiMatch ? oppMbtiMatch[1].trim().toUpperCase() : '';
+  const baseScore = baseScoreMatch ? baseScoreMatch[1] : '82';
+  const dailyScore = dailyScoreMatch ? dailyScoreMatch[1] : '78';
+
+  const isOppI = oppMbti.startsWith('I');
+  const isOppT = oppMbti.includes('T');
+  const oppAttr = oppMbti ? `${oppMbti}（${oppStem}）` : `お相手（${oppStem}）`;
+
+  // 1. 連絡頻度・LINE・返信遅延・既読未読
+  if (input.includes('連絡') || input.includes('返信') || input.includes('既読') || input.includes('未読') || input.includes('line') || input.includes('遅い') || input.includes('来ない')) {
+    if (character === 'ren') {
+      return `【${oppAttr}への返信遅延分析と最適プロトコル】
+感情に支配されず、行動特性と認知機能から状況を分解します。
+
+1. 現状の心理推定：
+${isOppI ? '内向機能(I)が優位なため、対人接触によりエネルギーを消費し、充電期間に入っている状態です。' : '外向機能(E)ながら返信が遅れている場合、他タスクの優先処理中か、言葉を吟味している段階です。'}嫌悪や拒絶による未読・遅延と即断するのは非合理的です。
+
+2. 取るべきアクション：
+・最低24〜48時間は追撃メッセージを完全に凍結してください。
+・次回連絡は要件を1件に絞り、返信の選択肢を2つ用意したクローズドクエスチョンで行うこと。
+・推奨連絡時間帯: 20:00〜21:30（相手の警戒度が最も下がる吉時間帯）。`;
+    } else {
+      return `連絡が届かない時間って、スマートフォンの画面を見るたびに胸がキュッと締め付けられますよね。不安になるのは、あなたがそれだけ相手を真っ直ぐ大切に想っている証拠です。
+
+${oppAttr}のお相手は、決してあなたを嫌っているわけではありませんよ。${isOppI ? '今は自分の殻の中で心を休め、エネルギーを蓄えているタイミングなのです。' : '少し忙しさに追われて、落ち着いてお返事を書く心の余裕を探している最中かもしれません。'}
+
+今は焦って追わず、温かい飲み物を飲んであなたの心をほぐしてあげてくださいね。相手のタイミングを信じて待つ優しさが、二人の絆を一段と深くしてくれますよ。`;
+    }
+  }
+
+  // 2. 相手の気持ち・本音・脈あり/脈なし・不安
+  if (input.includes('気持ち') || input.includes('分から') || input.includes('不安') || input.includes('脈') || input.includes('好き') || input.includes('嫌い') || input.includes('本音')) {
+    if (character === 'ren') {
+      return `【${oppAttr}の本音と脈あり判定指標】
+推測や脳内補正で相手の心理を決めつけるのは誤謬の元です。客観的事実から判定してください。
+
+🟢 脈あり指標（高確率）：
+・相手発信の自発的な質問、日常の些細な共有がある。
+・以前の会話で出たあなたの好みや日程を記憶・言及している。
+
+🔴 警戒指標：
+・会話が「了解」「はい」等の単語のみで継続意志が希薄。
+※対策: 一旦接触頻度を落とし、相手が関心を持つ専門的トピックで再アプローチすること。
+
+相手の言葉ではなく、あなたに対して割いた「時間」と「行動」の事実だけを冷静にカウントしてください。`;
+    } else {
+      return `お相手の本音が見えなくなると、霧の中を一人で歩いているような心細さを感じてしまいますよね。
+
+でも、安心してくださいね。${oppAttr}のお相手は、言葉にしなくてもあなたに向けた温かい想いを大切に抱えています。${isOppT ? '感情表現が少し控えめなところがありますが、あなたの話を真剣に聞こうとする姿勢そのものが好意の表れです。' : 'あなたの表情や気持ちにとても敏感で、どう接するのが一番喜んでくれるか考えてくれています。'}
+
+お相手のふとした笑顔や優しい気遣いを信じて、焦らず穏やかな気持ちで寄り添っていきましょうね。`;
+    }
+  }
+
+  // 3. 次のアクション・デート・誘い方
+  if (input.includes('何すれば') || input.includes('何をすれば') || input.includes('具体的に') || input.includes('どうすれば') || input.includes('行動') || input.includes('おすすめ') || input.includes('デート') || input.includes('誘')) {
+    if (character === 'ren') {
+      return `【次期アクションの合理的アプローチ案】
+二人の基本相性値（${baseScore}点）を踏まえ、成功確率を最大化する具体策を提示します。
+
+1. 推奨シチュエーション：
+${isOppI ? '騒がしい場所を避け、落ち着いて対話できる静かなカフェや予約制の飲食店。' : '開放感があり、共通の体験や話題が生まれやすい旬のスポットやイベント。'}
+
+2. アプローチメッセージ文案：
+「前話してたあのお店、今週末か来週のどこかで少し行ってみない？」
+※日付を二者択一で提示し、相手の判断コストを下げること。
+
+3. 留意事項：
+長時間の拘束を避け、初回は1.5〜2時間程度の短時間設計で満足度を最大化してください。`;
+    } else {
+      return `次の一歩を踏み出そうとするあなたの前向きな想い、星たちも温かく見守っていますよ！
+
+お二人の相性は【${baseScore}点】という素敵なご縁で結ばれています。
+${oppAttr}のお相手をお誘いするなら、${isOppI ? 'ゆったりと心が落ち着く静かなカフェやお散歩' : '楽しく会話が弾む美味しいご飯屋さん'}がぴったりです。
+
+「よかったら、今度あのお店に美味しいもの食べに行かない？」と、笑顔の絵文字を添えて軽やかに声をかけてみてくださいね。あなたの素直な可愛らしさが、必ず相手の心に響きますよ。`;
+    }
+  }
+
+  // 4. 相性・点数
+  if (input.includes('相性') || input.includes('点数') || input.includes('占い')) {
+    if (character === 'ren') {
+      return `【相性データ（基本: ${baseScore}点 / 当日バイオリズム: ${dailyScore}点）の分析】
+相性値は運命の決定論ではなく、相互作用のシミュレーション値です。日干【${myStem}】と【${oppStem}】の関係性において、互いの強みを活かし弱点を補完するルールを設ければ、関係性の実効値は100%まで高められます。数字に一喜一憂せず、相手の行動原理を攻略してください。`;
+    } else {
+      return `お二人の基本相性は【${baseScore}点】、今日の運気は【${dailyScore}点】という愛の光に満ちています。
+数字以上に大切なのは、二人が出会い、惹かれ合っているという尊い奇跡です。星々の導きを味方につけて、互いに思いやりを注ぎ合っていけば、二人の愛はもっともっと輝いていきますよ。`;
+    }
+  }
+
+  // 汎用フォールバック
+  if (character === 'ren') {
+    return `状況を論理的に整理しましょう。あなたの日干（${myStem}）とお相手の属性（${oppAttr}）を鑑みると、現在の課題はコミュニケーションの前提や価値観のズレにある可能性が高いです。感情的な即断を避け、取扱説明書のNG項目を排除した行動を積み重ねてください。`;
   } else {
-    return character === 'ren'
-      ? 'もう少し具体的に教えてもらえますか？状況を整理して、最善の一手を一緒に考えましょう。'
-      : 'もう少し詳しく聞かせてもらえると、あなたの気持ちにもっと寄り添えます。どんな状況か教えてください。';
+    return `そのお気持ち、しっかりと心に届きました。誰かを真剣に愛しているからこそ、迷いや不安が生まれるのは自然なことです。あなたの日干（${myStem}）の持つ優しいエネルギーを信じて、まずは深呼吸をしてご自分を大切にしてくださいね。月の光が、いつもあなたを見守っています。`;
   }
 }

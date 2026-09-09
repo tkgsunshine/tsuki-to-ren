@@ -22,7 +22,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
     }}>
       <div style={{
         width: '100%',
-        padding: '1.25rem 1.25rem calc(6.5rem + max(1rem, env(safe-area-inset-bottom, 16px)))',
+        padding: '0.75rem 1rem calc(6.5rem + max(1rem, env(safe-area-inset-bottom, 16px)))',
         position: 'relative',
         boxSizing: 'border-box'
       }}>
@@ -31,7 +31,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '2rem',
+          marginBottom: '1.5rem',
           position: 'sticky',
           top: 0,
           background: 'rgba(15, 12, 28, 0.95)',

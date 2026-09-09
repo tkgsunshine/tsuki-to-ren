@@ -273,7 +273,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       </div>
 
       {/* Main Integrated Form */}
-      <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '0 1rem' }}>
+      <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box' }}>
         
         {/* Your Info Section */}
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -613,7 +613,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       </form>
 
       {/* Differentiators & Rare Showcase */}
-      <div className="lp-features" style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+      <div className="lp-features" style={{ width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
         
 
 

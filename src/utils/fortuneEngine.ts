@@ -632,6 +632,90 @@ export function getMbtiTraits(oppMbti: string, name: string) {
   return mbtiTraitsMap[norm] || mbtiTraitsMap['ENFP'];
 }
 
+// 16タイプ別 脈あり（グリーンフラッグ）・危険（レッドフラッグ）・挽回策データ
+const mbtiFlagMap: Record<string, { greenL1: string; redSign: string; redRecovery: string }> = {
+  'INTJ': {
+    greenL1: '用件がなくても、関心のある本や論理的トピックについて意見を求めてくる。',
+    redSign: 'メッセージが単語一言のみになり、議論や質問を完全にスルーして会話を打ち切る。',
+    redRecovery: '感情論で理由を追及せず、数日間沈黙を守ったのち、客観的で有益な情報のみを端的に送る。'
+  },
+  'INTP': {
+    greenL1: '自分が面白いと感じたマニアックな記事や考察を、深夜でも気軽にシェアしてくる。',
+    redSign: '既読のまま長期間放置され、こちらからの知的質問に対しても「へー」「そうなんだ」と無関心。',
+    redRecovery: '催促は厳禁。相手の好きな専門ジャンルや知的好奇心を刺激する新事実をサラリと1通だけ投げる。'
+  },
+  'ENTJ': {
+    greenL1: '忙しいスケジュールの合間を縫って、具体的な空き時間や次の予定を自ら提案してくる。',
+    redSign: '「今忙しいから」と一方的にシャットアウトされ、代替日程の提示が一切なくなる。',
+    redRecovery: '言い訳や泣き言を言わず、自分の仕事や目標に集中して成果を出し、凛とした姿で再連絡する。'
+  },
+  'ENTP': {
+    greenL1: '突拍子もないアイデアや面白い思いつきを、「これどう思う？」と真っ先に相談してくる。',
+    redSign: 'こちらの冗談や提案を適当に流し、新しい別のグループや遊びに夢中になって放置する。',
+    redRecovery: '重い確認LINEはNG。予想の斜め上をいくユニークな体験やおもしろイベントの写真を送って興味を惹く。'
+  },
+  'INFJ': {
+    greenL1: '普段は他人に話さない人生の悩みや心の奥底の本音を、慎重に言葉を選んで打ち明けてくれる。',
+    redSign: 'いわゆる「ドアスラム」。丁寧で礼儀正しい敬語に戻り、心のシャッターを静かに完全に下ろす。',
+    redRecovery: '無理にこじ開けようとせず、「いつでも味方だから無理しないでね」と無条件の受容を伝え、静かに待つ。'
+  },
+  'INFP': {
+    greenL1: '自分の好きな音楽や美しいと感じた日常の写真を、「これ綺麗だったから」と送ってくれる。',
+    redSign: '未読・既読スルーが続き、SNSのアカウントに閉じこもってこちらとの接触を完全に避ける。',
+    redRecovery: '責めたり理由を問い詰めず、相手の好きな世界観（本やカフェ）の話題で温かく包み込むような短文を送る。'
+  },
+  'ENFJ': {
+    greenL1: '「今日寒かったけど大丈夫？」「無理してない？」と、あなたの体調や状況を常に最優先で気遣う。',
+    redSign: '普段の温かいリアクションが消え、事務的で冷淡な対応になり、他人のサポートを優先する。',
+    redRecovery: '日頃の献身に対する心からの感謝と労いを言葉で伝え、「いつもありがとう」と甘えさせてあげる。'
+  },
+  'ENFP': {
+    greenL1: '感嘆符やスタンプ満載で、「今日こんなことあったよ！」と日常のワクワクを連続で共有してくる。',
+    redSign: 'メッセージのトーンが露骨に低くなり、絵文字やスタンプが消えて既読時間が長くなる。',
+    redRecovery: 'マンネリや説教を避け、新しくオープンした話題のスポットや楽しそうな計画でパッと明るく誘い直す。'
+  },
+  'ISTJ': {
+    greenL1: '約束した日時を正確に守り、次に会う日程や段取りを几帳面に確認してくる。',
+    redSign: '連絡の頻度が極端に落ち、約束の調整に対して「予定が未定」と曖昧に濁し続ける。',
+    redRecovery: '曖昧な態度は改め、約束を守れなかった点があるなら誠実に謝罪し、明確な用件だけを伝える。'
+  },
+  'ISFJ': {
+    greenL1: 'あなたの好きな食べ物や前回の会話の細部を覚えていて、さりげなく差し入れやフォローをしてくれる。',
+    redSign: '相手からの自発的な気遣いが一切消え、表面的な「了解です」だけの壁を作った返答になる。',
+    redRecovery: '相手が我慢してきた不満や気疲れに配慮し、「無理させてごめんね、いつも本当に助かってる」と敬意を届ける。'
+  },
+  'ESTJ': {
+    greenL1: 'あなたのために有益な情報やアドバイスを熱心に調べ、具体的な改善策を自発的に提案してくれる。',
+    redSign: '「時間の無駄」と判断したように連絡が途絶え、業務的な連絡以外は完全に無視される。',
+    redRecovery: '感情的にすがらず、相手のアドバイスを実践した報告など、自立した前向きな成果を端的に報告する。'
+  },
+  'ESFJ': {
+    greenL1: '美味しいお店やお土産の情報をこまめに共有し、自分の大切なコミュニティの話題に引き入れてくれる。',
+    redSign: 'グループ内では普通に振る舞うものの、個別メッセージでの返信が極端に遅く形式的になる。',
+    redRecovery: '周囲への礼儀やマナーに配慮した上で、二人きりの時に特別なプレゼントや温かい感謝の言葉を伝える。'
+  },
+  'ISTP': {
+    greenL1: '「車乗っていく？」「直してあげようか？」など、自分の得意な行動や技術で手助けしてくれる。',
+    redSign: '「了解」「うん」の単語返信のみになり、こちらの質問にも答える気力を一切見せなくなる。',
+    redRecovery: '連投催促は絶対NG。完全に放っておき、相手が一人時間を満喫した頃に用件だけのショートメッセージを送る。'
+  },
+  'ISFP': {
+    greenL1: '自分のセンスで選んだお気に入りスポットや、リラックスできる空間に「一緒に行かない？」と誘ってくる。',
+    redSign: '自分の殻に完全に閉じこもり、メッセージを開封すらしないか、スタンプ1個で強制終了する。',
+    redRecovery: 'プレッシャーを与えず、美しい景色や可愛い動物の画像など、五感を癒すほっこりした話題を軽く送る。'
+  },
+  'ESTP': {
+    greenL1: '「今から飯行かない？」「ここ面白そう！」と、フットワーク軽く突発的な誘いをかけてくる。',
+    redSign: '予定を聞いても「誰かと遊んでる」「今忙しい」とスルーされ、レスポンスが途絶える。',
+    redRecovery: '過去の不満をネチネチ言わず、明るくノリの良いアクティビティや旬のグルメ情報で爽やかに誘う。'
+  },
+  'ESFP': {
+    greenL1: '面白い動画や写真を次々見せて笑わせようとし、一緒にいる時間をとにかく盛り上げようとする。',
+    redSign: '二人きりのやり取りを避け、他の友達との楽しそうなストーリーばかり更新して返信を後回しにする。',
+    redRecovery: '重い反省会は避け、相手のSNSを褒めたり「これめっちゃ笑った！」とテンポの良い楽しい話題を振る。'
+  }
+};
+
 // 1-2. 16タイプ別 LINE吉時間サブタイトル ＆ アプローチ助言エンジン
 const mbtiTimingSubtitles: Record<string, { t85: string; t73: string; t60: string; t45: string; tLow: string }> = {
   'INTJ': {
@@ -1163,42 +1247,77 @@ export function getMbtiCognitiveDynamics(myMbti: string, oppMbti: string, myNick
 
 function generateTorisetsu(
   oppStem: string,
-  _oppBranch: string,
+  oppBranch: string,
   oppMbti: string,
-  _myStem: string,
-  _myMbti: string,
+  myStem: string,
+  myMbti: string,
   oppNickName: string
 ): TorisetsuData {
   const name = oppNickName || 'お相手';
   const sTrait = getStemTraits(oppStem, name);
   const mTrait = getMbtiTraits(oppMbti, name);
+  const normMbti = (oppMbti || 'ENFP').toUpperCase();
+  const flag = mbtiFlagMap[normMbti] || mbtiFlagMap['ENFP'];
+
+  // あなたとお相手の相性（干合・支合・三合・相生・認知機能）に基づく特別な褒め言葉とNG
+  const isKango = (
+    (myStem === '甲' && oppStem === '己') || (myStem === '己' && oppStem === '甲') ||
+    (myStem === '乙' && oppStem === '庚') || (myStem === '庚' && oppStem === '乙') ||
+    (myStem === '丙' && oppStem === '辛') || (myStem === '辛' && oppStem === '丙') ||
+    (myStem === '丁' && oppStem === '壬') || (myStem === '壬' && oppStem === '丁') ||
+    (myStem === '戊' && oppStem === '癸') || (myStem === '癸' && oppStem === '戊')
+  );
+
+  const myT = (myMbti || '').toUpperCase().includes('T');
+  const oppT = normMbti.includes('T');
+
+  let chemistryPraise4 = `「${name}さんと話してると、時間があっという間に過ぎて一番自然体でいられる」`;
+  let chemistryPraise5 = `「こんなに価値観や感性がピッタリ重なる人、${name}さん以外に出会ったことないよ」`;
+  if (isKango) {
+    chemistryPraise4 = `「${name}さんといると、前世からの約束みたいに不思議な安心感と引力を感じる」`;
+    chemistryPraise5 = `「お互いの足りない部分を綺麗に埋め合える、かけがえのない特別な存在だよ」`;
+  } else if (!myT && oppT) {
+    chemistryPraise4 = `「${name}さんの冷静でブレない的確な判断力、本当に頼もしくて安心する」`;
+    chemistryPraise5 = `「言葉にしてない本音までしっかり尊重してくれる大人の知性に惹かれるよ」`;
+  } else if (myT && !oppT) {
+    chemistryPraise4 = `「${name}さんの温かい優しさに触れると、張り詰めた心の鎧がフッと解けるよ」`;
+    chemistryPraise5 = `「いつも周りや私の気持ちを真っ先に気遣ってくれて本当にありがとう」`;
+  }
+
+  let chemistryNg4 = mTrait.ngList[0] || '返信を急かして短時間に連投で催促すること';
+  let chemistryNg5 = mTrait.ngList[1] || '感謝の気持ちを伝えずに当たり前のような態度をとること';
+  if (oppT) {
+    chemistryNg4 = `感情論や理屈の通らない愚痴を長文でぶつけ、解決策を求めず困惑させること`;
+  } else {
+    chemistryNg4 = `相手の気持ちや好意を冷たい正論で論破し、心の痛みに寄り添わないこと`;
+  }
 
   return {
     killingWords: [
       sTrait.praise[0],
       mTrait.killingExtra,
       sTrait.praise[1],
-      `「${name}さんといる時が一番素になれるし居心地がいい」`,
-      `「こんなに理解し合える人、${name}さん以外にいないよ」`
+      chemistryPraise4,
+      chemistryPraise5
     ],
     ngBehaviors: [
       sTrait.ng[0],
       mTrait.ngExtra,
       sTrait.ng[1],
-      '返信を焦らせて短時間に連投で催促すること',
-      '感謝の気持ちを伝えずに当たり前のような態度をとること'
+      chemistryNg4,
+      chemistryNg5
     ],
     slowReplyPsychology: sTrait.delayReason,
     slowReplyAction: sTrait.delayAdvice,
-    greenFlagSign: `普段よりメッセージの頻度が増え、${name}さんから日常の報告が届く。`,
+    greenFlagSign: flag.greenL1,
     greenFlagLevel2: mTrait.greenL2,
     greenFlagLevel3: mTrait.greenL3,
-    redFlagSign: 'メッセージの質問返しがなく、短文や絵文字のみで会話を切り上げようとする。',
-    redFlagRecovery: '追わずに数日間あえて連絡を控え、お相手の興味がある軽やかな話題で再アプローチする。',
+    redFlagSign: flag.redSign,
+    redFlagRecovery: flag.redRecovery,
     lineTemplateInvite: mTrait.lineInvite,
     lineTemplateTopic: mTrait.lineTopic,
     idealDateSpot: mTrait.dateSpot,
-    approachTip: `${oppStem}の気質と${oppMbti}の価値観を持つ${name}さんには、誠実なリスペクトを示しつつ自立した魅力をアピールすることが成就への最短ルートです。`
+    approachTip: `${oppStem}の気質（${oppBranch}）と${oppMbti}の心理機能を持つ${name}さんには、相手の境界線を尊重しつつ、${isKango ? '宿命の引力を信じて飾らない誠実さを見せること' : '共鳴するポイントをピンポイントで褒めること'}が成就への最短ルートです。`
   };
 }
 const getAstrologyAvatar = (branch: string, gender: string): string => {
@@ -2482,37 +2601,149 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     opponentMbtiName: input.opponentMbti ? (mbtiNames[input.opponentMbti] || '未選択') : undefined,
     isKaigo,
     opponentIsKaigo: hasOpponent ? opponentIsKaigo : undefined,
-    compatibilityTitle: hasOpponent ? (
-      baseScore >= 95 ? '【100年に1度の奇跡相性】' :
-      baseScore >= 88 ? '【電撃惹かれ合う運命のソウルメイト】' :
-      baseScore >= 82 ? '【陰陽が完全調和する究極のツインレイ】' :
-      baseScore >= 76 ? '【互いを覚醒させる最強のシナジーパートナー】' :
-      baseScore >= 70 ? '【愛と信頼で満たされる相思相愛カップル】' :
-      baseScore >= 65 ? '【じわじわ深まる大器晩成カップル】' :
-      baseScore >= 60 ? '【ギャップが癖になるツンデレ沼相性】' :
-      baseScore >= 50 ? '【波乱含み！試練を越えるドラマティック相性】' : '【劇薬危険！互いを狂わせるスリリング相性】'
-    ) : '【個人運勢総合鑑定】',
-    dailyLuckTitle: hasOpponent ? (
-      dailyScore >= 85 ? '【超大吉日】\n告白・デート誘いに最適な奇跡日' :
-      dailyScore >= 73 ? '【恋の急展開日】\n予想外の返信や展開が起きる日' :
-      dailyScore >= 60 ? '【安定親密日】\n普段通りの雑談で絆が深まる日' :
-      dailyScore >= 45 ? '【連絡慎重日】\n短文・ねぎらい重視で接すべき日' : '【冷却静養日】\nあえて連絡を休み相手に意識させる日'
-    ) : (
-      dailyScore >= 85 ? '【超大開運日】\n幸運と出会いが引き寄せられる最高日' :
-      dailyScore >= 73 ? '【エネルギー充実日】\n新しい挑戦や行動で魅力が開花する日' :
-      dailyScore >= 60 ? '【安定整調日】\n心身を調和させ自分らしさを輝かせる日' :
-      dailyScore >= 45 ? '【内省静養日】\n無理せずエネルギーを充電すべき日' : '【自己愛向上日】\n自分をたっぷり甘やかし整える日'
-    ),
+    compatibilityTitle: hasOpponent ? (() => {
+      // 四柱推命（干合/支合/三合/六沖）× MBTI関係性の統合タイトル生成
+      const isKango = stemComp?.type === '干合';
+      const isShigo = branchComp?.type === '支合';
+      const isSango = branchComp?.type === '三合';
+      const isRikuchu = branchComp?.type === '六沖';
+      const pairType = mbtiDyn?.mbtiPairType || '認知補完ペア';
+
+      if (isKango && (isShigo || isSango)) {
+        return '【天地徳合・百年に一度の奇跡相性】';
+      }
+      if (isKango) {
+        return `【干合の引力】${pairType}・運命のソウルメイト`;
+      }
+      if (isShigo) {
+        return `【支合調和】${pairType}・心身が溶け合うツインレイ`;
+      }
+      if (isSango) {
+        return `【三合同盟】${pairType}・最強のシナジーパートナー`;
+      }
+      if (isRikuchu) {
+        return `【六沖覚醒】惹かれ合い試練を越えるドラマティック相性`;
+      }
+      if (baseScore >= 85) {
+        return `【五行調和】${pairType}・愛と信頼の最上相性`;
+      }
+      if (baseScore >= 70) {
+        return `【共鳴発展】${pairType}・理解を深め合う相思相愛相性`;
+      }
+      if (baseScore >= 60) {
+        return `【大器晩成】${pairType}・じわじわ絆が育つ安定相性`;
+      }
+      return `【異質刺激】${pairType}・互いを狂わせるスリリング相性`;
+    })() : '【個人運勢総合鑑定】',
+    dailyLuckTitle: hasOpponent ? (() => {
+      // 日干と本日の干の相互作用に基づく本格タイトル
+      const dayStem = todayPillar.stem;
+      const kangoMap: Record<string, string> = {
+        '甲': '己', '己': '甲', '乙': '庚', '庚': '乙',
+        '丙': '辛', '辛': '丙', '丁': '壬', '壬': '丁', '戊': '癸', '癸': '戊'
+      };
+      const isTodayKango = kangoMap[dayStem] === myPillarObj.stem || kangoMap[dayStem] === oppPillarObj?.stem;
+      const dayCategory = getTenGodsCategory(myPillarObj.stem, dayStem);
+
+      if (dailyScore >= 85) {
+        return isTodayKango
+          ? `【日干合・超大吉日】\n天の引力で心が通じ合う奇跡の好機`
+          : `【超大吉日（${dayCategory}盛運）】\n告白・デート誘いに最適な最愛日`;
+      }
+      if (dailyScore >= 73) {
+        return `【恋の急展開日（${dayCategory}活性）】\n予想外の返信や展開が引き寄せられる日`;
+      }
+      if (dailyScore >= 60) {
+        return `【安定親密日（${dayCategory}調和）】\n普段通りの自然体な雑談で絆が深まる日`;
+      }
+      if (dailyScore >= 45) {
+        return `【連絡慎重日（${dayCategory}調整）】\n短文・労い重視で相手のペースを尊重すべき日`;
+      }
+      return `【冷却静養日（${dayCategory}内省）】\nあえて連絡を控え、相手にあなたの存在を意識させる日`;
+    })() : (() => {
+      const dayCategory = getTenGodsCategory(myPillarObj.stem, todayPillar.stem);
+      if (dailyScore >= 85) {
+        return `【超大開運日（${dayCategory}絶好調）】\n魅力と自信が溢れ、幸運が味方する最高日`;
+      }
+      if (dailyScore >= 73) {
+        return `【エネルギー充実日（${dayCategory}活性）】\n新しい挑戦や積極的発信で評価が高まる日`;
+      }
+      if (dailyScore >= 60) {
+        return `【安定整調日（${dayCategory}調和）】\n心身を調和させ、自分らしさを輝かせる日`;
+      }
+      if (dailyScore >= 45) {
+        return `【内省静養日（${dayCategory}充電）】\n無理せずエネルギーを蓄積し整える日`;
+      }
+      return `【自己愛向上日（${dayCategory}自愛）】\n外部刺激を遮断し、自分を甘やかし整える日`;
+    })(),
     bestContactHour: dailyContactAdvice.bestContactHour,
     dailyActionAdvice: dailyContactAdvice.dailyActionAdvice,
-    radarScores: {
-      romance: Math.min(99, Math.max(42, Math.floor(baseScore + Math.sin(todaySeed * 1.3 + 7) * 16 + (myPillarObj.stem === oppPillarObj?.stem ? 12 : -5)))),
-      conversation: Math.min(99, Math.max(45, Math.floor(baseScore * 0.85 + Math.cos(todaySeed * 2.7 + 19) * 18 + (input.myMbti !== input.opponentMbti ? 10 : -8)))),
-      sensual: Math.min(99, Math.max(48, Math.floor(baseScore * 0.9 + Math.sin(todaySeed * 4.1 + 33) * 20 + ((isKaigo || opponentIsKaigo || isRare || opponentIsRare) ? 15 : -3)))),
-      marriage: Math.min(99, Math.max(40, Math.floor(baseScore * 0.78 + Math.cos(todaySeed * 5.9 + 51) * 17 + (myPillarObj.branch !== oppPillarObj?.branch ? 8 : -6)))),
-      obsession: Math.min(99, Math.max(50, Math.floor(baseScore * 0.95 + Math.sin(todaySeed * 7.3 + 77) * 19 + ((isKaigo || opponentIsKaigo) ? 18 : 4)))),
-      trust: Math.min(99, Math.max(43, Math.floor(baseScore * 0.82 + Math.cos(todaySeed * 8.8 + 101) * 15 + (hasOpponent ? 6 : -4))))
-    },
+    radarScores: (() => {
+      // 命式・九星・MBTIの本格パラメータに基づく6項目算出
+      const myNorm = (input.myMbti || 'ENFP').toUpperCase();
+      const oppNorm = (input.opponentMbti || 'INFJ').toUpperCase();
+
+      // 1. 恋愛度 (Romance): 日干相性 (干合=96+, 相生=86+, 比和=78+, 相剋=68+)
+      let romanceBase = 72;
+      if (stemComp?.type === '干合') romanceBase = 96;
+      else if (stemComp?.type === '相生') romanceBase = 87;
+      else if (stemComp?.type === '比和') romanceBase = 80;
+      else if (stemComp?.type === '相剋') romanceBase = 66;
+
+      // 2. 対話度 (Conversation): MBTI 認知機能ダイナミクス (F/T共鳴, E/Iバランス)
+      const myT = myNorm.includes('T');
+      const oppT = oppNorm.includes('T');
+      const myE = myNorm.includes('E');
+      const oppE = oppNorm.includes('E');
+      let convBase = 74;
+      if (myT === oppT) convBase += 12; // 思考回路の一致
+      if (myE !== oppE) convBase += 8;  // 聞き役と話し手の絶妙な補完
+      else if (myE && oppE) convBase += 6;
+      else convBase += 4;
+
+      // 3. 肉体・本能相性 (Sensual): 地支の親和性 (支合=98, 三合=92, 調和=78, 六沖=84[強烈な反発と引力])
+      let sensualBase = 75;
+      if (branchComp?.type === '支合') sensualBase = 98;
+      else if (branchComp?.type === '三合') sensualBase = 92;
+      else if (branchComp?.type === '六沖') sensualBase = 86; // 磁石の反発と強い肉体的引力
+      else sensualBase = 76;
+      if (isKaigo || opponentIsKaigo || isRare || opponentIsRare) sensualBase = Math.min(99, sensualBase + 4);
+
+      // 4. 結婚相性 (Marriage): 計画性(J/P) & 九星五行 & 命式の安定度
+      const myJ = myNorm.includes('J');
+      const oppJ = oppNorm.includes('J');
+      let marriageBase = 70;
+      if (branchComp?.type === '三合' || branchComp?.type === '支合') marriageBase += 14;
+      if (myJ && oppJ) marriageBase += 10; // 計画的堅実パートナー
+      else if (myJ !== oppJ) marriageBase += 6; // 役割分担
+      if (starComp?.type === '相生' || starComp?.type === '比和') marriageBase += 6;
+
+      // 5. 執着・引き寄せ度 (Obsession): 陰陽の極性・魁罡・干合・六沖
+      let obsessionBase = 70;
+      if (isKaigo || opponentIsKaigo) obsessionBase += 18;
+      if (stemComp?.type === '干合') obsessionBase += 14;
+      if (branchComp?.type === '六沖') obsessionBase += 12; // 離れたくても離れられない執着
+      if (myNorm !== oppNorm && !isKaigo && stemComp?.type !== '干合') obsessionBase += 6;
+
+      // 6. 信頼度 (Trust): 九星気学本命星の相生・比和 & J気質
+      let trustBase = 72;
+      if (starComp?.type === '相生') trustBase = 94;
+      else if (starComp?.type === '比和') trustBase = 88;
+      else trustBase = 68;
+      if (myJ && oppJ) trustBase += 6;
+
+      // 日々の微小な運気の波（±3点以内）のみを反映
+      const dailyTick = (seed: number) => ((seed % 7) - 3);
+
+      return {
+        romance: Math.min(99, Math.max(40, romanceBase + dailyTick(todaySeed + 1))),
+        conversation: Math.min(99, Math.max(40, convBase + dailyTick(todaySeed + 2))),
+        sensual: Math.min(99, Math.max(40, sensualBase + dailyTick(todaySeed + 3))),
+        marriage: Math.min(99, Math.max(40, marriageBase + dailyTick(todaySeed + 4))),
+        obsession: Math.min(99, Math.max(40, obsessionBase + dailyTick(todaySeed + 5))),
+        trust: Math.min(99, Math.max(40, trustBase + dailyTick(todaySeed + 6)))
+      };
+    })(),
     myTorisetsu: generateTorisetsu(
       myPillarObj.stem,
       myPillarObj.branch,
