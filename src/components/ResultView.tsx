@@ -319,7 +319,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     subCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  const detailedTopics = [
+  const detailedTopics = activeResult?.detailedTopics || [
     {
       title: hasOpponent ? '1. 二人の関係性' : '1. 本日の運勢と運気の流れ',
       intro: hasOpponent
