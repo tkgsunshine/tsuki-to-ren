@@ -66,6 +66,16 @@ const UPCOMING_TOPICS = [
   }
 ];
 
+// Double-posting prevention guard: Check if a column was already published within the last 4 hours
+const publishedAtMatches = [...fileContent.matchAll(/publishedAt:\s*'([^']+)'/g)].map(m => m[1]);
+const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+const hasRecentArticle = publishedAtMatches.some(dateStr => dateStr >= fourHoursAgo);
+
+if (hasRecentArticle) {
+  console.log('🛡️ [二重投稿防止ガード] 過去4時間以内に既に新しいコラムが生成・追加されています。重複実行を自動スキップします。');
+  process.exit(0);
+}
+
 // Pick topic to publish if not present
 let addedCount = 0;
 const nowIso = new Date().toISOString();
