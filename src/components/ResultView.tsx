@@ -2719,7 +2719,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   src={zoomedImg.src} 
                   alt={zoomedImg.astrologyName} 
                   className={zoomedImg.isKaigo ? 'kaigo-img-glow' : (zoomedImg.isRare ? 'rare-holographic-img' : '')}
-                  style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} 
+                  style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block', transform: 'translateY(16px)' }} 
                 />
                 {(zoomedImg.isKaigo || zoomedImg.isRare) && (
                   <>
