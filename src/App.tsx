@@ -236,6 +236,61 @@ function App() {
         setRelationship(rel);
         startDiagnosis(mName, mBirth, mMbti, mGender, '', '', 'UNKNOWN', 'female', rel, 'single');
       }
+    } else {
+      // Restore last diagnosis result when returning from 2-step email verification link
+      try {
+        const lastInputRaw = localStorage.getItem('hasu_last_diagnosis_input');
+        if (lastInputRaw) {
+          const lastInput = JSON.parse(lastInputRaw);
+          if (lastInput && lastInput.mName && lastInput.mBirth) {
+            setMyName(lastInput.mName);
+            setMyBirth(lastInput.mBirth);
+            if (lastInput.mMbti) setMyMbti(lastInput.mMbti);
+            if (lastInput.mGender) setMyGender(lastInput.mGender);
+            if (lastInput.runMode === 'match') {
+              if (lastInput.oName) setOppName(lastInput.oName);
+              if (lastInput.oBirth) setOppBirth(lastInput.oBirth);
+              if (lastInput.oMbti) setOppMbti(lastInput.oMbti);
+              if (lastInput.oGender) setOppGender(lastInput.oGender);
+              if (lastInput.rel) setRelationship(lastInput.rel);
+              setMode('match');
+              startDiagnosis(
+                lastInput.mName,
+                lastInput.mBirth,
+                lastInput.mMbti || 'UNKNOWN',
+                lastInput.mGender || 'female',
+                lastInput.oName || 'お相手',
+                lastInput.oBirth || '',
+                lastInput.oMbti || 'UNKNOWN',
+                lastInput.oGender || 'male',
+                lastInput.rel || '片思い中',
+                'match',
+                true,
+                lastInput.selectedCharacter
+              );
+            } else {
+              setMode('single');
+              if (lastInput.rel) setRelationship(lastInput.rel);
+              startDiagnosis(
+                lastInput.mName,
+                lastInput.mBirth,
+                lastInput.mMbti || 'UNKNOWN',
+                lastInput.mGender || 'female',
+                '',
+                '',
+                'UNKNOWN',
+                'female',
+                lastInput.rel || '片思い中',
+                'single',
+                true,
+                lastInput.selectedCharacter
+              );
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to restore last diagnosis input:', e);
+      }
     }
 
     return () => {
@@ -487,12 +542,11 @@ function App() {
     oMbti: string,
     oGender: 'male' | 'female',
     rel: string,
-    runMode: 'single' | 'match'
+    runMode: 'single' | 'match',
+    skipLoading = false,
+    presetCharacter?: 'ren' | 'tsuki'
   ) => {
-    setFlowStep('loading');
-    
-    // Simulate Loading animation for 3 seconds
-    setTimeout(() => {
+    const execute = () => {
       const input = {
         myName: mName,
         myBirth: mBirth,
@@ -504,6 +558,11 @@ function App() {
         opponentGender: runMode === 'match' ? oGender : undefined,
         relationship: rel
       };
+
+      const targetChar = presetCharacter || selectedCharacter;
+      if (presetCharacter) {
+        setSelectedCharacter(presetCharacter);
+      }
 
       // Save last diagnosis input payload to localStorage for email magic link 2-step verification restore
       try {
@@ -518,7 +577,7 @@ function App() {
           oGender,
           rel,
           runMode,
-          selectedCharacter
+          selectedCharacter: targetChar
         }));
       } catch (e) {
         console.error(e);
@@ -534,8 +593,19 @@ function App() {
       setFlowStep('result');
       // Transition active view automatically to result detail and push history entry for browser back
       setActiveTab('home');
-      window.history.pushState({ flowStep: 'result' }, '');
-    }, 3000);
+      try {
+        window.history.pushState({ flowStep: 'result' }, '');
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    if (skipLoading) {
+      execute();
+    } else {
+      setFlowStep('loading');
+      setTimeout(execute, 3000);
+    }
   };
 
   const handleRegister = async (email: string) => {
