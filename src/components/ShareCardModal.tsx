@@ -225,7 +225,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to bottom, rgba(5, 5, 12, 0.2) 0%, rgba(5, 5, 12, 0.35) 60%, rgba(5, 5, 12, 0.65) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 5, 12, 0.55) 100%)'
           }} />
         </div>
 
@@ -604,7 +604,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to bottom, rgba(5, 5, 12, 0.15) 0%, rgba(5, 5, 12, 0.3) 60%, rgba(5, 5, 12, 0.65) 100%)'
+              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 5, 12, 0.55) 100%)'
             }} />
           </div>
           {/* Card Top */}

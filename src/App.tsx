@@ -244,6 +244,9 @@ function App() {
   }, []);
 
   const handleResetFlow = () => {
+    try {
+      localStorage.removeItem('hasu_last_diagnosis_input');
+    } catch (e) {}
     setFlowStep('input');
     setActiveTab('home');
     setLoadedPartner(null);
@@ -501,6 +504,25 @@ function App() {
         opponentGender: runMode === 'match' ? oGender : undefined,
         relationship: rel
       };
+
+      // Save last diagnosis input payload to localStorage for email magic link 2-step verification restore
+      try {
+        localStorage.setItem('hasu_last_diagnosis_input', JSON.stringify({
+          mName,
+          mBirth,
+          mMbti,
+          mGender,
+          oName,
+          oBirth,
+          oMbti,
+          oGender,
+          rel,
+          runMode,
+          selectedCharacter
+        }));
+      } catch (e) {
+        console.error(e);
+      }
 
       // Generate results for both characters to allow instant tab toggling
       const resRen = generateFortuneResult(input, 'ren');
