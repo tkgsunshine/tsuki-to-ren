@@ -988,6 +988,281 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     return { day: `${dateStr}(${dayLabel})`, score, label };
   });
 
+  // 月次・年次の説明文生成ヘルパー関数
+  const generateMonthlyText = (score: number, monthIdx: number, mPillar: { stem: string; branch: string }) => {
+    const stemImp = getDailyStemImpact(mPillar.stem, myPillarObj.stem);
+    const branchImp = getBranchImpact(mPillar.branch, myPillarObj.branch);
+    let astroNote = '';
+    if (stemImp >= 16 || branchImp >= 10) {
+      astroNote = `（月柱の相性が『干合・合法』を示し、強烈なお引き寄せの追い風が吹きます）`;
+    } else if (branchImp <= -14 || stemImp <= -14) {
+      astroNote = `（月柱に『六沖・相剋』の波が生じるため、丁寧で柔軟な対話が良好な運気を保つ鍵となります）`;
+    }
+
+    if (hasOpponent) {
+      if (character === 'tsuki') {
+        if (score >= 85) {
+          const pool = [
+            `今月は${myNickname}様とお相手（${oppNick}様）の感情と宿命エネルギーが最高潮に噛み合う絶好調の月です。言葉にしなくても心が通じ合う奇跡的な場面が訪れ、素直な想いを伝えることで二人の距離が一気に縮まります。${astroNote}`,
+            `来月にかけて、二人の間に「魂レベルの共鳴」が深まる最高の幸運期を迎えます。${oppNick}様との間にある壁が消え去り、将来に向けた大切な決意や確信が芽生える充実した時間となります。${astroNote}`,
+            `再来月にかけ、二人のバイオリズムが絶頂期に達します。日常のふとした瞬間に、お互いが「なくてはならない絶対の存在」であることを実感できる至福の展開が待っています。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else if (score >= 70) {
+          const pool = [
+            `今月は二人の「共感のバイオリズム」が順調に高まる好調期です。${myNickname}様の持つ温かみと包容力がお相手（${oppNick}様）の心を自然と解きほぐします。静かなカフェ等での対話を大切にすることで安心感が深まります。${astroNote}`,
+            `来月は、お互いの距離感が心地よく縮まり、自然体で寄り添える温かい月となります。${oppNick}様からの信頼度が高まり、今後の関係発展に向けた前向きな会話が生まれやすい時期です。${astroNote}`,
+            `再来月は、二人の関係に穏やかで確実な進展がもたらされます。焦らず互いの成長を支え合うことで、将来の基盤が一段と固まります。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else if (score >= 55) {
+          const pool = [
+            `今月は二人の関係が静かに落ち着き、互いの基盤を整える「新月（平穏）」の時期です。無理にアプローチを急ぐのではなく、日々の感謝を共有することで息の長い信頼が育まれます。${astroNote}`,
+            `来月は、静かな調和が保たれる安定月です。お互いのプライベートや仕事の都合を思いやり、程よい距離感で心を通わせることで、無理のない安心感が生まれます。${astroNote}`,
+            `再来月は、次なる発展期に向けたエネルギー充填の時期となります。日常のささやかな幸せや居心地の良さを慈しむことが、結果として二人の絆を強くします。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else {
+          const pool = [
+            `今月は運気の波が一時的に「引き潮（注意）」のフェーズに入ります。感情的になってすれ違いを生むのを防ぎ、一歩引いて${oppNick}様のお立場や心境を静かに見守る姿勢が最善です。${astroNote}`,
+            `来月は、言葉の行き違いに少々注意したい調整期です。焦って答えを求めず、温かい眼差しで相手を受け止める余白を持つことで、不要な摩擦を回避できます。${astroNote}`,
+            `再来月は、自己の内面と対話し、無理な進展を控える静観の月となります。一息ついて自分自身のエネルギーを整えることで、その後の好転の種がしっかりと蒔かれます。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        }
+      } else {
+        if (score >= 85) {
+          const pool = [
+            `今月は二人の将来設計や関係の定義が「論理的・具体的」に前進する勝負の月となります。${myNickname}様からのスマートな提案がお相手（${oppNick}様）の迷いを完璧に払拭し、明確な進展を実現できる絶好の好機です。${astroNote}`,
+            `来月は、知的なアプローチと明確なロードマップが最大の成果を生む開運月です。${oppNick}様との間にあった曖昧な課題がクリアになり、次のステップへの具体的な合意が成立します。${astroNote}`,
+            `再来月は、二人の合理的パートナーシップが最高水準に到達する時期です。公私のバランスを取りながら、互いの人生目標を高度に達成できる最強のシナジーが発揮されます。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else if (score >= 70) {
+          const pool = [
+            `今月は理知的な対話と価値観の擦り合わせがスムーズに進む好調月です。お互いの生活基盤を尊重し合いながら、スマートな距離感で合意を築くことができます。${astroNote}`,
+            `来月は、計画的なアプローチが奏功する発展期です。${oppNick}様にとって${myNickname}様が「最も頼れる不変のパートナー」として意識され、良好な関係性が定着します。${astroNote}`,
+            `再来月は、互いの目標やキャリアを支え合う共生運が高まります。客観的な視点と冷静な判断が、二人の信頼をより強固なものにします。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else if (score >= 55) {
+          const pool = [
+            `今月はお互いの関係性を客観的に整理し、無理のないペースで調整を図る安定期です。感情に振り回されることなく、冷静に次のステップへの準備を整えられます。${astroNote}`,
+            `来月は、現状のシステムやコミュニケーションの無駄を省く調整月となります。スマートな振る舞いを維持することで、盤石な土台が完成します。${astroNote}`,
+            `再来月は、冷静な自己コントロールが試される平穏期です。慌てず確実な基盤を維持することで、次期戦略に向けた優位性が保たれます。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else {
+          const pool = [
+            `今月は思考や言葉の行き違いに注意が必要な調整月です。論理を詰めすぎて${oppNick}様を追い詰めるのを避け、お互いのプライベートや休息を最優先するのが賢明です。${astroNote}`,
+            `来月は、予期せぬスケジュールのズレや意見の不一致に注意したい慎重期です。感情論を避け、柔軟かつ大人な対応に徹することがリスク管理となります。${astroNote}`,
+            `再来月は、無用なトラブルを防ぐためのリスクヘッジ期間です。無理なアプローチを行わず、現状維持と観察に集中することが最善の判断となります。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        }
+      }
+    } else {
+      if (character === 'tsuki') {
+        if (score >= 85) {
+          const pool = [
+            `今月は${myNickname}様の持つ本来の愛のオーラと内面的な魅力が最高レベルに開花する月です。特別に力まずとも、あなたの醸し出す優しさに惹かれた魅力的な異性からのアプローチや良縁が自然と引き寄せられてきます。${astroNote}`,
+            `来月は、あなたの直感と愛の引き寄せ力が絶頂を迎える幸運期です。自分を大切にする時間が、そのまま理想的なパートナーとの出逢いや繋がりへと変換されます。${astroNote}`,
+            `再来月は、あなたの内面的な豊かさが最高の縁を結ぶ大開運月となります。素直な自己表現が奇跡的な展開を呼ぶでしょう。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else if (score >= 70) {
+          const pool = [
+            `今月は新しい出会いや人間関係の芽が順調に育つ好調期です。自分の感覚を信じ、心地よいと感じる空間や趣味に時間を割くことで、価値観の合う特別な候補との距離が縮まります。${astroNote}`,
+            `来月は、あなたの思いやりや穏やかな魅力が周囲に浸透する発展月です。自然体で過ごすことが良好な縁を育む秘訣となります。${astroNote}`,
+            `再来月は、穏やかで前向きな人間関係のネットワークが広がる時期です。無理のない自分らしいペースが開運へと導きます。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else if (score >= 55) {
+          const pool = [
+            `今月は自分自身の心身を労わり、自己投資や内面の充実に充てるべき「平穏・整え」の月です。古いトラウマや固執を手放し、新しい愛を受け入れる準備を整えましょう。${astroNote}`,
+            `来月は、心に栄養を与えるリフレッシュ期です。自分自身を慈しむことで、愛のエネルギーが静かに満たされていきます。${astroNote}`,
+            `再来月は、未来の開運に向けた静かな充電期間となります。焦らず自分の軸を大切にすることで、確固たる魅力の土台が完成します。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else {
+          const pool = [
+            `今月は恋愛運のバイオリズムが一時的に内省のフェーズに入ります。焦って出会いを求めるよりも、自分をじっくり慈しみ、エネルギーを蓄える充電期間と捉えましょう。${astroNote}`,
+            `来月は、無理な行動を控え、心身の休養を優先したい注意月です。自分の内面と静かに対話することで、本当に必要な縁が見極められます。${astroNote}`,
+            `再来月は、過去の不要な感情や執着をリセットする手放しの時期です。心をクリアにすることで、新しい好運期を迎える準備が整います。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        }
+      } else {
+        if (score >= 85) {
+          const pool = [
+            `今月はあなたの知性とプレゼンスが極めて高く評価され、理想のパートナー像を引き寄せる抜群の開運月です。自分のビジョンを明確にし行動範囲を広げましょう。${astroNote}`,
+            `来月は、明確な自己目標とスマートなアプローチが最高の結果を生む勝負月です。価値観を共有できる洗練された異性との大開運が期待できます。${astroNote}`,
+            `再来月は、あなたの戦略的な行動が結実し、公私ともに飛躍的な進展を手にする到達期です。自信を持って前進してください。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else if (score >= 70) {
+          const pool = [
+            `今月は知的な刺激に恵まれ、行動力と分析力が冴え渡る好調月です。価値観や将来目標を明確に提示することで、尊敬し合えるパートナー候補との発展が期待できます。${astroNote}`,
+            `来月は、自立した大人の魅力が際立つ好調期です。スマートな振る舞いが周囲から一目置かれ、質の高い人間関係が構築されます。${astroNote}`,
+            `再来月は、客観的視点と合理的な選択が運気を押し上げる発展月です。無駄のない効率的なアプローチが開運へと繋がります。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else if (score >= 55) {
+          const pool = [
+            `今月は自分の理想の恋愛像を冷静に整理し、優先順位を明確にする「選択と集中」の時期です。無駄なアプローチを省き、真に信頼できる関係に集中しましょう。${astroNote}`,
+            `来月は、自己スキルのアップデートや環境の整理に最適な安定月です。着実な準備が将来のチャンスを確実に掴む鍵となります。${astroNote}`,
+            `再来月は、客観的な自己分析に徹する平穏期です。地に足の着いた思考で自身のロードマップを洗練させましょう。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        } else {
+          const pool = [
+            `今月は自己分析と状況整理に徹するべき静観の月となります。無謀なアプローチや無理な自己主張は避け、客観的な視点で自身の環境を整えましょう。${astroNote}`,
+            `来月は、エネルギーの浪費を避け、無駄な行動をカットするリスク管理月です。静かに牙を研ぐ姿勢が失敗を防ぎます。${astroNote}`,
+            `再来月は、状況の観察と内面的な質の向上に集中すべき調整期です。焦らずリスクを排除することが最良の選択となります。${astroNote}`
+          ];
+          return pool[monthIdx] || pool[0];
+        }
+      }
+    }
+  };
+
+  const generateYearlyText = (score: number, yearsLater: number, displayYear: string, yPillar: { stem: string; branch: string }) => {
+    const stemImp = getDailyStemImpact(yPillar.stem, myPillarObj.stem);
+    const branchImp = getBranchImpact(yPillar.branch, myPillarObj.branch);
+    let astroNote = '';
+    if (stemImp >= 16 || branchImp >= 10) {
+      astroNote = `（${yPillar.stem}${yPillar.branch}の年柱干支が宿命の日柱と『干合・三合』を形成し、人生の大きな転換・開運の波をもたらします）`;
+    } else if (branchImp <= -14 || stemImp <= -14) {
+      astroNote = `（${yPillar.stem}${yPillar.branch}の年柱が『六沖・相剋』の波を示すため、慎重なリスク管理と客観的な判断が守りの軸となります）`;
+    }
+
+    if (hasOpponent) {
+      if (character === 'tsuki') {
+        if (score >= 85) {
+          if (yearsLater === 1) return `${displayYear}は、${myNickname}様とお相手（${oppNick}様）にとって仮初めの関係から「魂の真の結びつき」へ昇華する激動の大開運年です。互いの弱音を分かち合うことで家族のような絶対的安心感が芽生えます。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、関係性が急速に具体化し、同棲や結婚、将来の約束など深いコミットメントが自然と進む「上昇と結実」の時期です。周囲からも強く祝福され強固な基盤が完成します。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、長期的な愛の形をお互いに納得しながら着地させる成熟の黄金期です。相手への深い敬意と日々の感謝が、一生涯続く揺るぎない絆を完成させます。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、日常の落ち着きの中でお互いの存在が空気のように不可欠となる安定の時期です。特別なイベントがなくとも心が満たされ、バイオリズムが完全に同期します。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、二人の関係性に新たな風が吹き込み、共通の新しいプロジェクトや生活のアップグレードに挑戦する「新展開・飛躍の年」となります。出会った頃の新鮮なときめきが再燃します。${astroNote}`;
+          return `${displayYear}は、十年の歳月を経て培われた「絶対的パートナーシップ」の完成期です。言葉を交わさずとも心境がわかり、いかなる荒波も二人で乗り越えられる一心同体の絆が結ばれます。${astroNote}`;
+        } else if (score >= 70) {
+          if (yearsLater === 1) return `${displayYear}は、二人の関係性に潜む壁を乗り越え、現実的な距離が一気に縮まる「接近と好調の年」となります。${myNickname}様の温かみがお相手の決意を力強く後押しします。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、二人の将来に向けた具体的な約束やステップアップが順調に実現する発展期です。互いの存在が日々の大きな励みとなり、前向きな将来像が描けます。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、愛の深まりとともに互いの自立と尊重が両立する成熟の年です。穏やかで揺るぎない信頼関係が生活全体を明るく照らします。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、共に歩んできた軌跡が確固たる自信となり、二人で新しい目標へ挑戦できる飛躍の時期です。周囲からの信頼も高まります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、関係性にさらなる深みと広がりが生まれ、長期的視野に立った豊かさを二人で享受できる好調期です。${astroNote}`;
+          return `${displayYear}は、長年の信頼の蓄積が豊かな実りとなり、穏やかで幸福なパートナーシップを持続・享受できる到達期となります。${astroNote}`;
+        } else if (score >= 55) {
+          if (yearsLater === 1) return `${displayYear}は、焦らず着実に二人の信頼の土台を築き上げる「準備と基盤構築の年」です。華やかな変化よりも日々の小さな感謝と深い受容を積み重ねることで確固たる土台が完成します。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、互いの価値観や生活習慣を静かに擦り合わせ、無理のない安定したペースを定着させる整えの時期です。丁寧な対話が今後の支えとなります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、二人の関係が静かに落ち着き、将来に向けたエネルギーを蓄える平穏な年となります。慌てず自分の軸を保つことが愛を長持ちさせます。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、お互いのプライベートや個人の成長を温かく見守り合う着実な準備期です。深い理解が心の拠り所となります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、これまでの歩みを再確認し、次なる発展期に向けた準備を整える静かな開運年となります。${astroNote}`;
+          return `${displayYear}は、長年にわたり培った静かな信頼が盤石なものとなり、変わらない安心感に包まれる安定の時期となります。${astroNote}`;
+        } else {
+          if (yearsLater === 1) return `${displayYear}は、過去の固定観念や無理な焦りを静かに手放し、心の内面を整える「静観と内省の年」となります。${oppNick}様との関係においては過度な自己主張を避け、相手のペースを思いやる姿勢を保つことで不要な摩擦を防ぎ、次期への強い軸が作られます。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、外向きの成果を焦って求めるよりも、自身の内面的な熟成とプライベートの充実を最優先する「充電と守り」の時期となります。慌てず静かに自己のスキルや精神的基盤を養うことで、将来の試練を容易に乗り越える強靭な耐久力が育まれます。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、現状の安定と心の静寂を守り抜き、無理な拡張を行わないリスク管理の年となります。客観的な視点で環境を再点検し、無用なトラブルを未然に回避することが最善の戦略です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、公私のリソース配分を慎重に行い、エネルギーの浪費を防ぐ自己コントロールの時期です。静かな観察と調整に徹することが、長期的な安定をもたらします。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、これまでの歩みを客観的に振り返り、不要な思考のノイズを整理する思索と再構築の年となります。焦らず静かに爪を研ぐことで、次なる好運期の到来に完璧に備えられます。${astroNote}`;
+          return `${displayYear}は、十年にわたる自己探求と冷静なリスク管理が結実し、どんな波乱にも動じない確固たる精神的自立と安定した生活基盤が完成する到達期となります。${astroNote}`;
+        }
+      } else {
+        if (score >= 85) {
+          if (yearsLater === 1) return `${displayYear}は、二人の関係性に潜む課題を論理的にクリアにし、現実的な改善計画を実行に移す「軌道修正と大開運の年」となります。明確な将来設計により、二人の距離を合理的に詰める好機会です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、強力な運気のバックアップを受け、将来に向けた具体的な「契約やステップアップ」が実現する最良の時期です。${myNickname}様のリードによりスマートな進展が叶います。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、二人の関係が安定した「恒久的パートナーシップ・システム」として定着する年です。将来設計に基づいて生活基盤や資産を統合するのに最も適した時期となります。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、強固な信頼関係のもと互いのキャリアや社会活動が活性化する「共生と発展の時期」です。精神的支えが盤石になり、次のステージへ飛躍できます。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、長期ロードマップの中間評価と次なる十年を見据えた「再設計と投資の年」です。築き上げた基盤をさらに豊かなものへとアップデートできます。${astroNote}`;
+          return `${displayYear}は、十年にわたる合理的かつ論理的な信頼の積み重ねが「完全なる運命共同体」として結実する到達期です。最高水準のステータスと安定が維持されます。${astroNote}`;
+        } else if (score >= 70) {
+          if (yearsLater === 1) return `${displayYear}は、理性的な対話と明確なビジョン共有が功を奏し、二人の信頼が一段と高まる「発展と飛躍の年」です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、スマートな将来設計に基づき、お互いに不可欠なパートナーとしての確信が定まる実り多き時期となります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、感情に左右されない成熟した協力関係が定着し、公私ともに高い相乗効果を生み出す発展年です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、互いの目標を高度に尊重し合い、確固たる生活基盤の上でさらなる成果を享受できる時期となります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、安定したパートナーシップのもと、新しい共同目標や挑戦へスムーズに移行できる好期です。${astroNote}`;
+          return `${displayYear}は、長期的な合理的アプローチの成果が結実し、揺るぎない信頼と安定のパートナーシップが永続する到達年となります。${astroNote}`;
+        } else if (score >= 55) {
+          if (yearsLater === 1) return `${displayYear}は、二人の生活基盤や価値観を整理し、無理のないペースで安定へと繋げる「計画と調整の年」となります。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、客観的な現状分析とリスク管理により、堅実な信頼関係の土台を固める着実な準備期です。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、慌てず確実な基盤を維持し、将来の大きな展開に備えたシステム調整を行う安定年となります。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、お互いの自立した役割を全うしつつ、静かに信頼を蓄積していく堅実な時期です。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、これまでの成果を整理し、次なる発展に向けた戦略を再確認する着実な基盤構築年となります。${astroNote}`;
+          return `${displayYear}は、長年の堅実なリスク管理と客観的視点が実を結び、どんな環境変化にも耐えうる盤石な生活基盤が定着する時期です。${astroNote}`;
+        } else {
+          if (yearsLater === 1) return `${displayYear}は、二人の関係に潜む課題を慎重に見極め、無謀な拡張や急な進展を避ける「リスク管理と静観の年」となります。感情的な衝突を避け、理性的なスタンスで現状を維持・保護することが結果的に将来の破綻を防ぐ最善の選択となります。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、将来のロードマップを再検証し、不要なコストや無駄な感情の摩擦を省いてエネルギーを温存する「省察と調整」の年となります。お互いのプライベートや仕事のリズムを尊重するスタンスが最善の防御策となります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、無理な成果を求めず、基盤の点検と長期的戦略の練り直しに徹する調整の時期です。冷静なリスクヘッジにより不確実な波乱をスマートに回避できます。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、リソースを慎重に配分し無駄な摩擦を起こさない静観の時期です。安定した自己コントロールが最大の武器となります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、思考のノイズを削ぎ落とし再構築を図る時期です。賢明な静観が成功への最短ルートとなります。${astroNote}`;
+          return `${displayYear}は、自己管理と客観的分析の成果が結実し、どんな環境変化にも動じない強固な人生システムが完成する到達期となります。${astroNote}`;
+        }
+      }
+    } else {
+      if (character === 'tsuki') {
+        if (score >= 85) {
+          if (yearsLater === 1) return `${displayYear}は、${myNickname}様のこれまでの恋愛観がFundamentalから深まり、運命的なパートナーとの出会いが引き寄せられる「大開運・変革の年」です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、愛のエネルギーが最大化し、あなたを心から愛してくれるパートナーが現れる「開花と結実の年」となります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、手に入れた愛や新しい縁を人生に美しく根付かせる「基盤定着と自己愛の年」です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、内面的な豊かさが溢れ、特別なアピールをせずとも良縁が次々と引き寄せられる「磁力と安定の年」となります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、愛のライフスタイルがさらなる広がりを見せ、魂の成長を促す最高のご縁に恵まれる「新展開の年」です。${astroNote}`;
+          return `${displayYear}は、自己愛と共感能力が極限まで高まり、人生全体の愛の形が美しく完成する「大調和の到達期」となります。${astroNote}`;
+        } else if (score >= 70) {
+          if (yearsLater === 1) return `${displayYear}は、理想のパートナーシップに向けた第一歩が順調に踏み出せる「開花と飛躍の年」です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、あなたの魅力が周囲に浸透し、心地よい良縁との距離が急速に縮まる発展期となります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、自分らしさを大切にしながら豊かな人間関係を育める成熟の年です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、自然体のままで愛され、心が満たされるパートナーシップが定着する好調期です。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、新しいコミュニティや環境で魅力的な縁が広がる発展の年となります。${astroNote}`;
+          return `${displayYear}は、長年の前向きな姿勢が実を結び、穏やかで満ち足りた人生のパートナーシップを手に入れる時期です。${astroNote}`;
+        } else if (score >= 55) {
+          if (yearsLater === 1) return `${displayYear}は、自分自身の心身を労わり、自己投資や内面の充実に充てるべき「基盤構築の年」です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、自分自身を深く慈しむことで、新しい愛を受け入れる心のスペースを確保する整えの時期です。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、静かな充電と内面の磨き込みが未来の好運を呼び込む準備年となります。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、確固たる自己軸を築き、周囲に惑わされないしなやかな強さを育む時期です。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、これまでの成長を糧に、次なる好運期へ向けた準備を完璧に整える年となります。${astroNote}`;
+          return `${displayYear}は、豊かな自己愛と内面の安定が盤石となり、自分らしい幸せを常に維持できる定着期となります。${astroNote}`;
+        } else {
+          if (yearsLater === 1) return `${displayYear}は、過去の不要な感情や執着を手放し、内面を深く癒す「手放しと静観の年」です。焦って答えを求めず自分を大切に慈しむことで、次に訪れる大開運期を迎え入れる新しい心の余白が完成します。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、無謀な行動や焦りのアプローチを慎み、自己のケアと充電に集中する「守りの時期」です。静かにエネルギーを蓄えることで、将来の波乱を乗り越える心の強さが育まれます。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、外の喧騒から一歩引き、自分の本質的な願いを見つめ直す思考の年となります。無理を避けることが結果的に最善の選択となります。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、心身のリフレッシュと生活習慣の点検を最優先する自己調整の時期です。安定した自分軸が完成します。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、過去の経験を糧に思考の整理を行い、次の飛躍期に備える静かな充電年となります。${astroNote}`;
+          return `${displayYear}は、深い内省を経て得られた高い精神的自立が実を結び、どんな環境でもブレない強靭な心が完成する到達期となります。${astroNote}`;
+        }
+      } else {
+        if (score >= 85) {
+          if (yearsLater === 1) return `${displayYear}は、理想のパートナーシップを高い知性で設計し行動に移す「大勝利・開運の年」です。不要な出会いを削ぎ落とすことで質の高い良縁が実現します。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、あなたの魅力と社会的プレゼンスが向上し、尊敬を伴う最高の評価とアプローチを受ける大飛躍の時期です。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、理想の関係性を現実的かつ合理的な形で定着させ、生活基盤として統合する到達期となります。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、知的なシナジー効果が最大化し、互いの社会的成功を支援し合える最高水準のパートナーシップが機能します。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、スケールの大きい共通目標やビジョンの拡張を実行し、関係を次世代ステージへと進化させる時期です。${astroNote}`;
+          return `${displayYear}は、十年にわたる知性的アプローチと自己改善が結実し、完璧なライフスタイル・システムが完成する到達期となります。${astroNote}`;
+        } else if (score >= 70) {
+          if (yearsLater === 1) return `${displayYear}は、価値観や将来目標を明確に提示することで、尊敬し合える洗練されたパートナー候補と発展する「好調年」です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、自立した大人の魅力が際立ち、お互いに高め合える優秀なパートナーシップが構築される発展期です。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、キャリアとプライベートの相乗効果が高まり、合理的な将来設計が着実に形になる時期となります。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、互いの専門性や知恵を共有し、確固たるステータスを共に築ける好調年です。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、これまでの成果をベースにさらなる飛躍を目指す発展の年となります。${astroNote}`;
+          return `${displayYear}は、長年の賢明な戦略と自己研鑽を結実させ、安定的で質の高い生活を確立する到達期です。${astroNote}`;
+        } else if (score >= 55) {
+          if (yearsLater === 1) return `${displayYear}は、自分の理想像を冷静に整理し、優先順位を明確にする「選択と集中」の年です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、無駄なエネルギー消費を抑え、自身の環境やスキルを合理的に整える準備期となります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、地に足の着いた思考で将来のロードマップを精査し、盤石な土台を固める安定年です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、自己の役割を客観的に見つめ直し、効率的な行動パターンを確立する時期となります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、これまでの実績をチェックし、次なる目標への準備を万全にする基盤構築年です。${astroNote}`;
+          return `${displayYear}は、客観的リスク管理の成果が結実し、安定した自己コントロールのもとで確実な生活が営める時期です。${astroNote}`;
+        } else {
+          if (yearsLater === 1) return `${displayYear}は、自己分析と状況整理に徹するべき「リスク管理と静観の年」となります。無謀なアプローチや無理な自己主張は避け、客観的な視点で自身の環境を整えることが結果的に失敗を防ぎ最短ルートの開運に繋がります。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、無駄なエネルギー消耗を避け、自身の知性とスキルを研ぎ澄ます「自己分析と充電の年」となります。無理なアプローチを控えて客観的な視点を保つことが不要なトラブルを未然に防ぐ最高の戦略です。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、無理な拡大を避け、基盤の点検と長期的戦略の練り直しに徹する調整の時期です。冷静なリスクヘッジにより不確実な波乱をスマートに回避できます。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、リソースを慎重に配分し無駄な摩擦を起こさない静観の時期です。安定した自己コントロールが最大の武器となります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、思考のノイズを削ぎ落とし再構築を図る時期です。賢明な静観が成功への最短ルートとなります。${astroNote}`;
+          return `${displayYear}は、自己管理と客観的分析の成果が結実し、どんな環境変化にも動じない強固な人生システムが完成する到達期となります。${astroNote}`;
+        }
+      }
+    }
+  };
+
   // 月次プレビュー (月柱干支の五虎遁月法生剋から動的に算出)
   const oppNick = input.opponentName || 'お相手';
 
@@ -1013,52 +1288,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     else if (score >= 55) label = '新月 (平穏)';
     else label = '欠けていく月 (注意)';
 
-    let text = '';
-    if (hasOpponent) {
-      if (character === 'tsuki') {
-        if (score >= 85) {
-          text = `今月は${myNickname}様とお相手（${oppNick}様）の感情と宿命エネルギーが最高潮に噛み合う絶好調の月です。お互いの引き寄せ力が極大化し、言葉にしなくても心が通じ合う奇跡的な場面が訪れます。素直な想いを表現することで、二人の絆が一気に深まります。`;
-        } else if (score >= 70) {
-          text = `今月は二人の「共感のバイオリズム」が順調に高まる好調期です。${myNickname}様の持つ温かみと包容力がお相手の心を自然と解きほぐします。カフェや静かな場所での対話を大切にすることで、将来に向けた安心感が確固たるものになります。`;
-        } else if (score >= 55) {
-          text = `二人の関係が静かに落ち着き、互いの基盤を整える「新月（平穏）」の時期です。無理にアプローチを急ぐのではなく、お互いのペースを尊重しながら日々の感謝を共有することで、息の長い信頼関係が育まれます。`;
-        } else {
-          text = `運気の波が一時的に「引き潮（注意）」のフェーズに入ります。感情的になってすれ違いを生むのを防ぎ、一歩引いて${oppNick}様のお立場や心境を静かに見守る姿勢が最善です。焦らず心の余白を持つことで、来月以降の好転の種が蒔かれます。`;
-        }
-      } else {
-        if (score >= 85) {
-          text = `今月は二人の将来設計や関係の定義が「論理的・具体的」に前進する勝負の月となります。${myNickname}様からのスマートな提案がお相手の迷いを完璧に払拭し、お互いが納得する明確な約束や大きな進展を実現できる絶好の好機です。`;
-        } else if (score >= 70) {
-          text = `理知的な対話と価値観の擦り合わせがスムーズに進む好調月です。お互いの仕事や生活基盤を尊重し合いながら、スマートな距離感で合意を築くことができます。${oppNick}様にとってあなたが「最も頼れるパートナー」として強く意識されます。`;
-        } else if (score >= 55) {
-          text = `お互いの関係性を客観的に整理し、無理のないペースで調整を図る安定期です。感情に振り回されることなく、冷静に次のステップへの準備を整えることで、無駄のない強固なパートナーシップの土台が完成します。`;
-        } else {
-          text = `思考や言葉の行き違いに注意が必要な調整月です。論理を詰めすぎてお相手を追い詰めるのを避け、お互いのプライベートや休息を最優先するのが賢明な戦略となります。冷静かつ柔軟な対応が不要な摩擦を防ぎます。`;
-        }
-      }
-    } else {
-      if (character === 'tsuki') {
-        if (score >= 85) {
-          text = `${myNickname}様の持つ本来の愛のオーラと内面的な魅力が最高レベルに開花する月です。特別なアピールをせずとも、あなたの醸し出す優しさに惹かれた魅力的な異性からのアプローチや良縁が自然と引き寄せられてきます。`;
-        } else if (score >= 70) {
-          text = `新しい出会いや人間関係の芽が順調に育つ好調期です。自分の感覚や直感を信じ、心地よいと感じるコミュニティや趣味に時間を割くことで、価値観の合う特別なパートナー候補との距離が縮まります。`;
-        } else if (score >= 55) {
-          text = `自分自身の心身を労わり、自己投資や内面の充実に充てるべき「平穏・整え」の月です。古いトラウマや固執を手放し、新しい愛を受け入れるための心のスペースを確保することが開運の鍵となります。`;
-        } else {
-          text = `恋愛運のバイオリズムが一時的に内省のフェーズに入ります。焦って出会いを求めるよりも、自分をじっくり慈しみ、エネルギーを蓄える充電期間と捉えることで、次に来る強力な好運期に備えることができます。`;
-        }
-      } else {
-        if (score >= 85) {
-          text = `あなたの知性とプレゼンスが極めて高く評価され、理想のパートナー像を引き寄せる抜群の開運月です。自分のビジョンを明確にし、行動範囲を広げることで、互いを高め合える最高の異性との出会いが実現します。`;
-        } else if (score >= 70) {
-          text = `知的な刺激に恵まれ、行動力と分析力が冴え渡る好調月です。価値観や将来目標を明確に提示することで、尊敬し合える洗練されたパートナー候補との出会いと発展が期待できます。`;
-        } else if (score >= 55) {
-          text = `自分の理想の恋愛像を冷静に整理し、優先順位を明確にする「選択と集中」の時期です。無駄なアプローチを省き、真に信頼できる人間関係に集中することで効率的に好運を引き寄せられます。`;
-        } else {
-          text = `自己分析と状況整理に徹するべき静観の月となります。無謀なアプローチや無理な自己主張は避け、客観的な視点で自身の環境を整えることが、結果的に無駄な失敗を防ぎ最短ルートの開運に繋がります。`;
-        }
-      }
-    }
+    const text = generateMonthlyText(score, idx, mPillar);
 
     return { month: monthName, label, text, score };
   });
@@ -1085,52 +1315,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     else if (score >= 55) label = '準備の年 (基盤構築)';
     else label = '静観の年 (内省慎重)';
 
-    let text = '';
-    if (hasOpponent) {
-      if (character === 'tsuki') {
-        if (score >= 85) {
-          text = `${displayYear}は、${myNickname}様とお相手（${oppNick}様）にとって強力な天の加護と運気のバックアップを受ける「極星の大開運年」です。二人の魂の絆が完全に結ばれ、同棲や結婚、将来の深いコミットメントなど最上の結実と祝福がもたらされる輝かしい時期となります。`;
-        } else if (score >= 70) {
-          text = `${displayYear}は、二人の関係性が一気に前進し、新たなステージへ飛躍する「上昇と接近の年」となります。${myNickname}様の持つ無条件の包容力がお相手の決意を固め、日常の中で自然と具体的な将来の約束が具体化していく好調期です。`;
-        } else if (score >= 55) {
-          text = `${displayYear}は、焦らず着実に二人の信頼の土台を築き上げる「準備と基盤構築の年」です。華やかな変化よりも日々の小さな感謝と深い受容を積み重ねることで、一生涯揺るぎない確固たる絆の土台が完成します。`;
-        } else {
-          text = `${displayYear}は、無理な進展や強引な自己主張を避け、互いの心の内面をじっくり整える「静観と内省の年」となります。焦らず互いのペースを尊重し、静かに自分自身や関係性を見つめ直すことで、次の開運期に向けた強固な守りの軸が作られます。`;
-        }
-      } else {
-        if (score >= 85) {
-          text = `${displayYear}は、二人の将来設計と社会的ステータスが最高水準で結実する「最上級の開運年」です。${myNickname}様が描く合理的な将来ロードマップに基づき、契約や結婚、ライフスタイルの統合が完璧な形で実行に移される絶好のゴールデンイヤーとなります。`;
-        } else if (score >= 70) {
-          text = `${displayYear}は、強力な運気の追い風を受け、二人のパートナーシップが大きくステップアップする「飛躍と発展の年」です。お互いの社会的役割や人生目標を高度に高め合い、不可欠なパートナーとしての確信が定まる実り多き時期です。`;
-        } else if (score >= 55) {
-          text = `${displayYear}は、二人の生活基盤や価値観のシステムを整理し、長期的な安定へと繋げる「計画と調整の年」です。冷静な対話と客観的な分析によって将来のリスクを回避し、盤石な共生体制を確立できます。`;
-        } else {
-          text = `${displayYear}は、二人の関係に潜む課題を慎重に見極め、無謀な拡張を避ける「リスク管理と静観の年」となります。感情的な衝突を避け、理性的なスタンスで現状を維持・保護することに徹することが、結果的に将来の破綻を防ぐ賢明な選択となります。`;
-        }
-      }
-    } else {
-      if (character === 'tsuki') {
-        if (score >= 85) {
-          text = `${displayYear}は、${myNickname}様の愛の波動が最高点に達し、運命のソウルメイトとの劇的な引き寄せが実現する「大開運・結実の年」です。心の奥底からの自己受容が呼び水となり、生涯を共にできる最高のパートナーとの出会いが約束されます。`;
-        } else if (score >= 70) {
-          text = `${displayYear}は、あなたの魅力が広く開花し、素敵な縁やパートナーシップが急速に接近する「開花と飛躍の年」です。自分の感性と直感を信じて一歩を踏み出すことで、心が満たされる真実の恋愛がスタートします。`;
-        } else if (score >= 55) {
-          text = `${displayYear}は、手に入れた愛や人間関係をあなたの人生に優しく根付かせる「基盤定着と自己愛の年」です。自分自身の生活と心を豊かに育むことが、結果として最良の縁を持続させる強力な磁力となります。`;
-        } else {
-          text = `${displayYear}は、過去の執着や不要な縁を手放し、内面を深く癒す「手放しと静観の年」です。焦って答えを求めず自分を大切に慈しむことで、次に訪れる大開運期を迎え入れるための新しい心の余白が完成します。`;
-        }
-      } else {
-        if (score >= 85) {
-          text = `${displayYear}は、あなたの高い知性と自立した魅力が最高のプレゼンスを発揮し、尊敬し合える最上のパートナーシップを手中におさめる「大勝利・開運の年」です。明確な目標設定と戦略的アプローチが最高の結果をもたらします。`;
-        } else if (score >= 70) {
-          text = `${displayYear}は、社会的な成功と恋愛運が強いシナジーを生み出し、公私ともに大きく飛躍する「発展の年」です。お互いを高め合える優秀な相手からのアプローチを受けやすく、理想的な関係がスタートします。`;
-        } else if (score >= 55) {
-          text = `${displayYear}は、あなたの将来設計に基づき、必要な人間関係を精査して定着させる「システム構築の年」です。無駄なアプローチを削減し、自立したパートナーシップの基盤を賢明に築き上げられます。`;
-        } else {
-          text = `${displayYear}は、無駄なエネルギー消耗を避け、自身の知性とスキルを研ぎ澄ます「自己分析と充電の年」となります。無理なアプローチを控えて客観的な視点を保つことが、不要なトラブルを未然に防ぐ最高の戦略です。`;
-        }
-      }
-    }
+    const text = generateYearlyText(score, yearsLater, displayYear, yPillar);
 
     return { year: displayYear, label, text, score };
   });
