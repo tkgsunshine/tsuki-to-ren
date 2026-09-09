@@ -7,13 +7,23 @@ const __dirname = path.dirname(__filename);
 
 const columnsFilePath = path.join(__dirname, '../src/data/columnsData.ts');
 
-console.log('🚀 Running Daily Auto-Column Generator Engine...');
+console.log('🚀 Running Daily Auto-Column Generator Engine (Hasu-to-Tsuki)...');
 
 // Read current columns data file
 let fileContent = fs.readFileSync(columnsFilePath, 'utf-8');
 
-// List of upcoming high-intent SEO topics to generate
-const UPCOMING_TOPICS = [
+// 🛡️ Double-posting prevention guard: Check if a column was published in the last 4 hours
+const publishedAtMatches = [...fileContent.matchAll(/publishedAt:\s*'([^']+)'/g)].map(m => m[1]);
+const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+const hasRecentArticle = publishedAtMatches.some(dateStr => dateStr >= fourHoursAgo);
+
+if (hasRecentArticle) {
+  console.log('🛡️ [二重投稿防止ガード] 過去4時間以内に既に新しいコラムが生成・投稿されています。重複処理をスキップし正常終了します。');
+  process.exit(0);
+}
+
+// Extensive pool of high-intent SEO topics
+const TOPICS_POOL = [
   {
     slug: 'shichutsuimei-koki-gohou-combination',
     title: '【四柱推命】「甲己の合（こうきのごう）」が導く至高の引き寄せ！引き合いと絆の秘密',
@@ -63,27 +73,95 @@ const UPCOMING_TOPICS = [
       <h2 id="section-3">3. まとめ</h2>
       <p>「月と蓮」で相手のトリセツを解読しましょう。</p>
     `
+  },
+  {
+    slug: 'intj-enfp-golden-pair-secrets',
+    title: '【INTJ × ENFP】「建築家」と「運動家」の黄金ペア！知性と直感が織りなす究極の好相性',
+    metaDescription: 'クールな戦略家INTJと情熱的で自由なENFP。一見対極に見える二人が惹かれ合い一生のパートナーとなる理由。',
+    keywords: ['INTJ ENFP 相性', 'INTJ 恋愛', 'ENFP 恋愛', '16タイプ 黄金ペア'],
+    category: '16タイプ・MBTI相性',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. INTJとENFPが惹かれ合う心理メカニズム', level: 1 },
+      { id: 'section-2', title: '2. すれ違いを防ぐコミュニケーション秘訣', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [
+      { question: 'INTJとENFPの相性が良い理由は？', answer: 'INTJの論理的な思考とENFPの自由なアイデアがお互いの世界観を補い合い高め合えるためです。' }
+    ],
+    content: `
+      <h2 id="section-1">1. INTJとENFPが惹かれ合う心理メカニズム</h2>
+      <p>思考派のINTJは、ENFPの持つ温かいエネルギーと独創性に強い興味を抱きます。一方、ENFPはINTJのブレない軸と知的な深みに惹かれます。</p>
+      <h2 id="section-2">2. すれ違いを防ぐコミュニケーション秘訣</h2>
+      <p>お互いのパーソナルスペースを尊重し、素直な言葉で感謝を伝えることが長続きのコツです。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で二人の詳しい相性度と本日のバイオリズムを鑑定してみましょう。</p>
+    `
+  },
+  {
+    slug: 'twinray-silent-period-end-signs',
+    title: '【ツインレイ】サイレント期間終了の絶対的前兆5選！統合直前に訪れる執着の手放しとサイン',
+    metaDescription: 'ツインレイの試練「サイレント期間」が明ける前兆とは？エンジェルナンバーや体調の変化、執着の手放しについて解説。',
+    keywords: ['ツインレイ サイレント期間', 'ツインレイ 前兆', 'ツインレイ 統合', 'ソウルメイト 復縁'],
+    category: 'ツインレイ・運命の絆',
+    readTimeMinutes: 7,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. サイレント期間が終わる前兆サイン', level: 1 },
+      { id: 'section-2', title: '2. 執着を手放した瞬間に起こる引き寄せ', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [
+      { question: 'サイレント期間中に避けるべきことは？', answer: '相手に執拗に連絡を送ることです。自分自身の魂を磨き自立することに集中しましょう。' }
+    ],
+    content: `
+      <h2 id="section-1">1. サイレント期間が終わる前兆サイン</h2>
+      <p>相手への不安や焦りが消え、自分軸で生きられるようになった時、サイレント期間の終了が近づいています。</p>
+      <h2 id="section-2">2. 執着を手放した瞬間に起こる引き寄せ</h2>
+      <p>魂の波動が整うと、相手からの突然の連絡や奇跡的な再会が実現します。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で二人の魂のつながりと運勢を占ってみましょう。</p>
+    `
+  },
+  {
+    slug: 'fukuen-subconscious-line-attraction',
+    title: '【復縁・引き寄せ】潜在意識を書き換えて元カレから連絡を引き寄せる！四柱推命バイオリズム活用術',
+    metaDescription: '音信不通からの復縁成就！潜在意識のイメージングと四柱推命の連絡吉時間を組み合わせた愛の引き寄せ法則。',
+    keywords: ['復縁 引き寄せ', '潜在意識 復縁', '元カレ 連絡', '四柱推命 復縁'],
+    category: '復縁・引き寄せ',
+    readTimeMinutes: 8,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    toc: [
+      { id: 'section-1', title: '1. 潜在意識が恋を引き寄せる理由', level: 1 },
+      { id: 'section-2', title: '2. 四柱推命バイオリズムで探る連絡吉時間', level: 1 },
+      { id: 'section-3', title: '3. まとめ', level: 1 }
+    ],
+    faqs: [
+      { question: '復縁を成功させる一番のポイントは？', answer: '自分の魅力を高め、過去の執着を手放して未来の幸せを信じるマインドセットです。' }
+    ],
+    content: `
+      <h2 id="section-1">1. 潜在意識が恋を引き寄せる理由</h2>
+      <p>心の中で「愛されている自分」を強く確信することで、現実の現象が引き寄せられます。</p>
+      <h2 id="section-2">2. 四柱推命バイオリズムで探る連絡吉時間</h2>
+      <p>お相手の命式が和らぐ吉時間にアプローチすることで、返信率と好感度が跳ね上がります。</p>
+      <h2 id="section-3">3. まとめ</h2>
+      <p>「月と蓮」で本日の二人のバイオリズムを詳細チェックしてください。</p>
+    `
   }
 ];
-
-// Double-posting prevention guard: Check if a column was already published within the last 4 hours
-const publishedAtMatches = [...fileContent.matchAll(/publishedAt:\s*'([^']+)'/g)].map(m => m[1]);
-const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
-const hasRecentArticle = publishedAtMatches.some(dateStr => dateStr >= fourHoursAgo);
-
-if (hasRecentArticle) {
-  console.log('🛡️ [二重投稿防止ガード] 過去4時間以内に既に新しいコラムが生成・追加されています。重複実行を自動スキップします。');
-  process.exit(0);
-}
 
 // Pick topic to publish if not present
 let addedCount = 0;
 const nowIso = new Date().toISOString();
+const sigId = Math.floor(Math.random() * 1000) + 10;
 
-for (const topic of UPCOMING_TOPICS) {
+for (const topic of TOPICS_POOL) {
   if (!fileContent.includes(topic.slug)) {
-    console.log(`✨ Generating & appending new article: ${topic.title}`);
+    console.log(`✨ Generating & appending new auto-column: ${topic.title}`);
     
+    const thumbnailUrlWithSig = `${topic.thumbnailUrl}&sig=${sigId}`;
+
     const newArticleObj = `  {
     id: 'col-${Date.now()}',
     slug: '${topic.slug}',
@@ -93,7 +171,7 @@ for (const topic of UPCOMING_TOPICS) {
     category: '${topic.category}',
     publishedAt: '${nowIso}',
     readTimeMinutes: ${topic.readTimeMinutes},
-    thumbnailUrl: '${topic.thumbnailUrl}',
+    thumbnailUrl: '${thumbnailUrlWithSig}',
     toc: ${JSON.stringify(topic.toc, null, 6)},
     faqs: ${JSON.stringify(topic.faqs, null, 6)},
     content: \`${topic.content.trim()}\`
@@ -112,9 +190,10 @@ if (addedCount > 0) {
   try {
     const { execSync } = await import('child_process');
     execSync('node scripts/build-sitemap.js', { stdio: 'inherit' });
+    console.log('✅ Successfully rebuilt sitemap.xml!');
   } catch (err) {
     console.error('Failed to auto-rebuild sitemap:', err);
   }
 } else {
-  console.log('ℹ️ No new topics needed to be published today. All up-to-date.');
+  console.log('ℹ️ All topics in pool are already published. No new article created this run.');
 }
