@@ -34,7 +34,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
       art.metaDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
       art.keywords.some(k => k.toLowerCase().includes(searchQuery.toLowerCase()));
     return isPublished && matchesCategory && matchesSearch;
-  });
+  }).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE) || 1;
 
