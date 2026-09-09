@@ -337,20 +337,10 @@ export interface TorisetsuData {
   approachTip: string;
 }
 
-// 🌟 動的 取扱説明書 (トリセツ) エンジン
-// お相手の日干(10) × 地支(12) × 16タイプ(16) × 相性関係 から完全オーダーメイドで生成
-function generateTorisetsu(
-  oppStem: string,
-  _oppBranch: string,
-  oppMbti: string,
-  _myStem: string,
-  _myMbti: string,
-  oppNickName: string
-): TorisetsuData {
-  const name = oppNickName || 'お相手';
-  
-  // 1. 日干（十干）の性格・本質傾向
-  const stemTraits: Record<string, { praise: string[]; ng: string[]; delayReason: string; delayAdvice: string }> = {
+// 🌟 動的 取扱説明書 (トリセツ) ＆ 命式・MBTI深層分析エンジン
+
+export function getStemTraits(oppStem: string, name: string) {
+  const stemTraitsMap: Record<string, { praise: string[]; ng: string[]; delayReason: string; delayAdvice: string }> = {
     '甲': {
       praise: [`「${name}さんのまっすぐでブレない芯の強さ、本当にカッコいい」`, `「有言実行で頼りになるところ尊敬してる」`],
       ng: ['面目を潰すような前言撤回や嘘', '大勢の前で上から目線で指示すること'],
@@ -412,10 +402,24 @@ function generateTorisetsu(
       delayAdvice: '「いつも${name}さんの味方だよ」と安心感を与える温かい言葉を送る。'
     }
   };
+  return stemTraitsMap[oppStem] || stemTraitsMap['甲'];
+}
 
-  // 2. MBTI（16タイプ）のコミュニケーション・行動パターン補正
-  // 2. MBTI（16タイプ）のコミュニケーション・行動パターン補正
-  const mbtiTraits: Record<string, { killingExtra: string; ngExtra: string; greenL2: string; greenL3: string; lineInvite: string; lineTopic: string; dateSpot: string }> = {
+export function getMbtiTraits(oppMbti: string, name: string) {
+  const norm = oppMbti ? oppMbti.toUpperCase() : 'ENFP';
+  const mbtiTraitsMap: Record<string, {
+    killingExtra: string;
+    ngExtra: string;
+    greenL2: string;
+    greenL3: string;
+    lineInvite: string;
+    lineTopic: string;
+    dateSpot: string;
+    lineHabit: string;
+    delayDeepReason: string;
+    ngList: string[];
+    fallInLove: string;
+  }> = {
     'INTJ': {
       killingExtra: `「${name}さんの論理的で洗練されたビジョン、尊敬する」`,
       ngExtra: '感情論だけで押し切ろうとすること',
@@ -423,7 +427,11 @@ function generateTorisetsu(
       greenL3: '二人で過ごす知的な時間や空間を優先的に確保してくれる',
       lineInvite: `「${name}さんが興味ありそうな知的なスポット見つけたんだけど、一緒に行かない？」`,
       lineTopic: `「${name}さんが最近一番関心を持って調べてるテーマって何？」`,
-      dateSpot: '静かなブックカフェ、美術館、落ち着いた個室レストラン'
+      dateSpot: '静かなブックカフェ、美術館、落ち着いた個室レストラン',
+      lineHabit: '用件のみの短文が基本。目的のないダラダラした雑談LINEは未読で後回しにしがち。',
+      delayDeepReason: '思考や重要タスクに没頭しており、返信する論理的理由や緊急性が見当たらないため。',
+      ngList: ['非論理的な感情論で詰め寄ること', '事前相談のない突発的な予定変更', 'プライベートな時間や聖域への無断侵入'],
+      fallInLove: '自分の知性や将来ビジョンを深く理解し、精神的に完全に自立した姿を見せてくれた瞬間。'
     },
     'INTP': {
       killingExtra: `「${name}さんの独創的な発想と鋭い分析力、いつも刺激になる！」`,
@@ -432,7 +440,11 @@ function generateTorisetsu(
       greenL3: '自分のコアな趣味部屋やマニアックな世界観へ招待してくれる',
       lineInvite: `「${name}さんが詳しく知りたがってたあの話題、じっくり話さない？」`,
       lineTopic: `「${name}さんが最近思いついた面白いアイデアってある？」`,
-      dateSpot: '静かな図書館カフェ、科学館、落ち着いた隠れ家バー'
+      dateSpot: '静かな図書館カフェ、科学館、落ち着いた隠れ家バー',
+      lineHabit: '気まぐれな返信ペース。興味のある議論には長文で返す一方、日常の挨拶は放置しがち。',
+      delayDeepReason: '頭の中の思考実験や探求に熱中し、外部の人間関係の優先度が一時的に下がっているため。',
+      ngList: ['理不尽な常識やマナーの押し付け', '感情的な泣き落としや説教', '自分の趣味や好奇心を「オタクっぽい」と否定すること'],
+      fallInLove: '自分のマニアックな考察を面白がってくれ、知的な議論で対等に打ち返してくれた瞬間。'
     },
     'ENTJ': {
       killingExtra: `「${name}さんの圧倒的なリーダーシップと決断力、本当にかっこいい」`,
@@ -441,7 +453,11 @@ function generateTorisetsu(
       greenL3: '忙しいスケジュールを調整し、あなたとの最高品質な時間を予約してくれる',
       lineInvite: `「すごく素敵なハイエンドなお店見つけたから、今週末一緒に行こう」`,
       lineTopic: `「${name}さんが今年一番達成したい大きな挑戦ってなに？」`,
-      dateSpot: '眺望の良いルーフトップバー、洗練された高級レストラン'
+      dateSpot: '眺望の良いルーフトップバー、洗練された高級レストラン',
+      lineHabit: '即断即決の超効率型。無駄なやり取りを嫌い、結論と日程調整を最短で済ませたい。',
+      delayDeepReason: '重要な仕事やプロジェクトに全集中しており、優先度の低い雑談を保留しているため。',
+      ngList: ['優柔不断でいつまでも決めないこと', '言い訳が多く責任転嫁する態度', '向上心がなく愚痴ばかり話すこと'],
+      fallInLove: '自分の高い目標を理解・応援し、有能さと気品を兼ね備えた頼もしいパートナーだと感じた瞬間。'
     },
     'ENTP': {
       killingExtra: `「${name}さんと話してるとアイデアが尽きなくて最高に楽しい！」`,
@@ -450,7 +466,11 @@ function generateTorisetsu(
       greenL3: '二人だけの突発的な旅行や新しいチャレンジに連れ出してくれる',
       lineInvite: `「ちょっと面白い企画（イベント）思いついたんだけど、乗らない？」`,
       lineTopic: `「${name}さんが最近思いついた面白いアイデアってある？」`,
-      dateSpot: '体験型エンタメ施設、話題のコンセプトレストラン、夜のドライブ'
+      dateSpot: '体験型エンタメ施設、話題のコンセプトレストラン、夜のドライブ',
+      lineHabit: '気分によって返信速度が激変。深夜に突然面白いネタを連投したかと思えば、数日音信不通になることも。',
+      delayDeepReason: '新しい刺激に気を取られているか、形式的な返信が退屈で後回しにしているため。',
+      ngList: ['行動を細かく監視・束縛すること', '退屈な常識や説教を押し付けること', '議論を楽しんでいるのに「怒ってるの？」と決めつけること'],
+      fallInLove: '自分の突飛なアイデアを面白がり、予想外の切り返しでワクワクさせてくれた瞬間。'
     },
     'INFJ': {
       killingExtra: `「${name}さんの深い思いやりと豊かな世界観、本当に素敵」`,
@@ -459,7 +479,11 @@ function generateTorisetsu(
       greenL3: '二人の心のつながりを何より大切にし、特別な秘密を共有してくれる',
       lineInvite: `「静かで居心地の良いカフェ見つけたんだけど、のんびりお話ししない？」`,
       lineTopic: `「${name}さんが大切にしている人生の価値観について教えてほしいな」`,
-      dateSpot: '静かなブックカフェ、落ち着いた日本庭園、プライベート感のある茶室'
+      dateSpot: '静かなブックカフェ、落ち着いた日本庭園、プライベート感のある茶室',
+      lineHabit: '相手の感情や意図を慎重に推し量り、時間をかけて丁寧で温かい返信文を紡ぐ。',
+      delayDeepReason: '言葉の裏を考えすぎて「どう返せば傷つけないか」悩み、心のドアを一時的に閉じているため。',
+      ngList: ['表面的な損得勘定や打算的な態度', '人の痛みを笑いものにすること', '土足で内面領域に踏み込みプライベートを暴こうとすること'],
+      fallInLove: '自分の複雑で繊細な本音を否定せず、ただ静かに受け止め「そのままのあなたでいい」と包み込んでくれた瞬間。'
     },
     'INFP': {
       killingExtra: `「${name}さんの優しさと独自の世界観、一緒にいると心が洗われる」`,
@@ -468,7 +492,11 @@ function generateTorisetsu(
       greenL3: '自分の繊細な弱みや感情の波を安心して見せてくれる',
       lineInvite: `「雰囲気がすごくかわいいお店見つけたの！一緒に行けたら嬉しいな」`,
       lineTopic: `「${name}さんが最近感動した本や映画、音楽って何かある？」`,
-      dateSpot: 'レトロな古民家カフェ、小規模なミニシアター、水族館'
+      dateSpot: 'レトロな古民家カフェ、小規模なミニシアター、水族館',
+      lineHabit: '感情豊かで優しいが返信にはエネルギーが必要。既読をつけてから文面を悩み抜いて遅れることが多い。',
+      delayDeepReason: '心の社会的バッテリーが切れ、一人の安全な世界で傷つきや感情を癒しているため。',
+      ngList: ['自分の信念や大切にしている世界観を否定すること', '冷たい正論や現実的な批判を浴びせること', '威圧的な態度や大声でプレッシャーをかけること'],
+      fallInLove: '自分のピュアな理想や感受性を宝物のように扱ってくれ、弱さを見せても変わらず愛してくれた瞬間。'
     },
     'ENFJ': {
       killingExtra: `「${name}さんの周りを明るく包み込む優しさ、心から感謝してる」`,
@@ -477,7 +505,11 @@ function generateTorisetsu(
       greenL3: '大切な友人や家族にあなたを自慢のパートナーとして紹介してくれる',
       lineInvite: `「${name}さんが喜びそうな美味しいお店見つけたよ！一緒に行こう」`,
       lineTopic: `「${name}さんが最近誰かを笑顔にして嬉しかったエピソードってある？」`,
-      dateSpot: 'テラス席のあるカフェ、明るい雰囲気のイタリアン、公演イベント'
+      dateSpot: 'テラス席のあるカフェ、明るい雰囲気のイタリアン、公演イベント',
+      lineHabit: '相手を気遣う温かい長文や丁寧なスタンプ。相手が寂しがらないよう常に配慮する。',
+      delayDeepReason: '周囲の人の世話や仕事に追われ、あなたに十分な時間を割けない自分を悔やんでいる状態。',
+      ngList: ['自分の善意や気遣いを無視して雑に扱うこと', '他者への冷淡さや不誠実な嘘', '感謝の気持ちを言葉で示さないこと'],
+      fallInLove: '普段他人のために尽くしている自分に気づき、「いつも頑張ってくれてありがとう」と心から労ってくれた瞬間。'
     },
     'ENFP': {
       killingExtra: `「${name}さんの太陽みたいな笑顔と豊かな感性、大好き！」`,
@@ -486,7 +518,11 @@ function generateTorisetsu(
       greenL3: 'あなたとの未来のワクワクする旅行やプランを一緒に夢中で計画してくれる',
       lineInvite: `「行きたい面白いスポット見つけた！今すぐ一緒に行こうよ！」`,
       lineTopic: `「今一番行ってみたいワクワクする場所や挑戦してみたいことって？」`,
-      dateSpot: 'テーマパーク、話題のニューオープンカフェ、野外フェス'
+      dateSpot: 'テーマパーク、話題のニューオープンカフェ、野外フェス',
+      lineHabit: '感嘆符やスタンプが多くテンション高め。面白いことを見つけると突発的に共有したがる。',
+      delayDeepReason: '同時に複数のことに意識が散っており、返信しようとしてスマホを置いたまま忘れているため。',
+      ngList: ['自由を奪い細かく行動を制限すること', 'ワクワクする夢や情熱を冷めた態度で否定すること', 'マンネリや退屈な義務感を強いること'],
+      fallInLove: '自分の無邪気な冒険心にどこまでも付き合ってくれ、一番の味方でいてくれると感じた瞬間。'
     },
     'ISTJ': {
       killingExtra: `「${name}さんの誠実さとブレない責任感、本当に信頼できる」`,
@@ -495,7 +531,11 @@ function generateTorisetsu(
       greenL3: '着実で計画的なお付き合いを前提に、誠実な告白や言葉をくれる',
       lineInvite: `「評判のいい落ち着いたお店を予約したんだけど、週末どうかな？」`,
       lineTopic: `「${name}さんの最近のマイブームやコツコツ続けている趣味って？」`,
-      dateSpot: '老舗の和食店、伝統ある美術館、静かなホテルのラウンジ'
+      dateSpot: '老舗の和食店、伝統ある美術館、静かなホテルのラウンジ',
+      lineHabit: '几帳面で誠実。連絡頻度は一定で、約束の日時や場所を正確に確認する。',
+      delayDeepReason: '仕事や日課のルーティンをこなしている最中。私用スマホを見る時間を厳密に分けているため。',
+      ngList: ['約束の時間や締め切りを破ること', '曖昧でいい加減な態度や嘘', '常識を欠いた突飛で身勝手な行動'],
+      fallInLove: '有言実行で誠実に向き合ってくれ、安心して人生を預けられる堅実な存在だと確信した瞬間。'
     },
     'ISFJ': {
       killingExtra: `「${name}さんの細やかな気配りと温かい安心感、いつも救われてる」`,
@@ -504,7 +544,11 @@ function generateTorisetsu(
       greenL3: '手料理や身の回りの世話など、深い献身と愛を注いでくれる',
       lineInvite: `「のんびり美味しいものを食べてリフレッシュしに行かない？」`,
       lineTopic: `「${name}さんが最近リラックスできた時間ってどんな時？」`,
-      dateSpot: '温かみのあるアットホームなビストロ、景色の綺麗な公園散策'
+      dateSpot: '温かみのあるアットホームなビストロ、景色の綺麗な公園散策',
+      lineHabit: '相手の生活リズムを邪魔しないよう配慮された優しい返信。気遣いの一言が必ず添えられる。',
+      delayDeepReason: '相手の都合を考えすぎて「今送ったら迷惑かも」と躊躇しているか、日々の気疲れを溜め込んでいるため。',
+      ngList: ['横柄で感謝を伝えない態度', '身内や大切な人を軽んじる言動', '急な変化や予定のドタキャン'],
+      fallInLove: 'さりげない気配りに気づいて感謝してくれ、温かい安心感で包み守ってくれた瞬間。'
     },
     'ESTJ': {
       killingExtra: `「${name}さんの実行力と組織を引っ張る力、心から尊敬する」`,
@@ -513,7 +557,11 @@ function generateTorisetsu(
       greenL3: 'あなたとの将来設計を具体的にスケジュールに落とし込んで進めてくれる',
       lineInvite: `「効率よく回れる素敵なデートプラン立てたんだけど、今週末どう？」`,
       lineTopic: `「${name}さんが最近仕事やプライベートで達成した成果は？」`,
-      dateSpot: 'アクセスが良く評価の高い人気レストラン、話題のスポット'
+      dateSpot: 'アクセスが良く評価の高い人気レストラン、話題のスポット',
+      lineHabit: '即断即決。用件が明確で、次に何をすべきかがハッキリしている実務的メッセージ。',
+      delayDeepReason: '優先順位に従ってタスクを消化中。緊急性のない連絡は業務終了後に回すため。',
+      ngList: ['感情的で要領を得ない愚痴の連発', '約束を反故にして言い訳すること', 'ルーズで不真面目な生活態度'],
+      fallInLove: '自分の実力や努力を正当に評価してくれ、自立した凛とした強さを見せてくれた瞬間。'
     },
     'ESFJ': {
       killingExtra: `「${name}さんの細やかな心配りと温かい笑顔、本当に素敵」`,
@@ -522,7 +570,11 @@ function generateTorisetsu(
       greenL3: '大切な友人やイベントにあなたを連れて行き、自慢の相手として紹介する',
       lineInvite: `「評判の美味しいスイーツのお店があるんだけど、一緒に行こう！」`,
       lineTopic: `「${name}さんが最近人からもらって嬉しかった言葉や出来事は？」`,
-      dateSpot: 'サービスが行き届いた人気のビストロ、賑やかなイルミネーション'
+      dateSpot: 'サービスが行き届いた人気のビストロ、賑やかなイルミネーション',
+      lineHabit: 'こまめな連絡と温かいリアクション。相手とのつながりを常に維持したいタイプ。',
+      delayDeepReason: '人間関係の気遣いや周囲への配慮で精神的に疲労困憊しているため。',
+      ngList: ['冷たい態度で無視すること', '礼儀やマナーを欠いた振る舞い', '周囲の輪を乱す身勝手な単独行動'],
+      fallInLove: '自分の気配りをしっかり言葉で褒めてくれ、二人きりの時に特別扱いしてくれた瞬間。'
     },
     'ISTP': {
       killingExtra: `「${name}さんのクールなのに技量が高いところ、すごくカッコいい」`,
@@ -531,7 +583,11 @@ function generateTorisetsu(
       greenL3: '自分の秘密の作業場やプライベートな趣味空間に招いてくれる',
       lineInvite: `「ドライブ行くんだけど、横に乗っていかない？」`,
       lineTopic: `「${name}さんが最近こだわりを持って選んだアイテムってある？」`,
-      dateSpot: 'ドライブ、アクティビティ施設、静かなガレージ風バー'
+      dateSpot: 'ドライブ、アクティビティ施設、静かなガレージ風バー',
+      lineHabit: '超短文。「り」「おけ」など必要最小限。用件が終われば既読スルーが通常運転。',
+      delayDeepReason: '一人で没頭したい作業や趣味があり、誰とも話したくない充電フェーズにあるため。',
+      ngList: ['「何してるの？」「誰といるの？」などの過度な詮索', '感情的な長文メッセージの連投', '行動の自由を縛ること'],
+      fallInLove: '余計な詮索をせず自分のペースを尊重してくれ、ピンチの時にサラリと助け合えた瞬間。'
     },
     'ISFP': {
       killingExtra: `「${name}さんの洗練されたセンスと飾らない優しさ、魅力的すぎる」`,
@@ -540,7 +596,11 @@ function generateTorisetsu(
       greenL3: '二人だけでリラックスできる空間で、素の笑顔をたくさん見せてくれる',
       lineInvite: `「おしゃれなインテリアのカフェ見つけた！ふらっと散歩がてら行かない？」`,
       lineTopic: `「${name}さんが最近買ってテンション上がったお気に入りアイテムは？」`,
-      dateSpot: '景色の良い海辺のカフェ、アートギャラリー、おしゃれなアパレル街'
+      dateSpot: '景色の良い海辺のカフェ、アートギャラリー、おしゃれなアパレル街',
+      lineHabit: 'マイペースで気分屋。写真やスタンプを好むが、文字を打つ気分でない時は既読のまま静かに放置。',
+      delayDeepReason: '自分の内なる感情の波と向き合っており、プレッシャーを感じると殻に閉じこもるため。',
+      ngList: ['上から目線での説教や価値観の押し付け', '大声やトゲのある言葉で威圧すること', '返信を急かして追い詰めること'],
+      fallInLove: '自分の美意識や好みを褒めてくれ、無理に言葉を交わさずとも居心地の良い空気を作ってくれた瞬間。'
     },
     'ESTP': {
       killingExtra: `「${name}さんの臨機応変さとフットワークの軽さ、最高に爽やか！」`,
@@ -549,7 +609,11 @@ function generateTorisetsu(
       greenL3: '他の誰よりもあなたを優先し、スリリングで特別な体験へ連れ出してくれる',
       lineInvite: `「今夜サクッと美味しいお酒飲みに行かない？面白い場所見つけた！」`,
       lineTopic: `「今一番ハマってるスポーツやアクティブな趣味ってなに？」`,
-      dateSpot: 'スポーツ観戦、トレンドのダイニングバー、ドライブ'
+      dateSpot: 'スポーツ観戦、トレンドのダイニングバー、ドライブ',
+      lineHabit: '要件はテンポよく短文でやり取り。「今から行く？」など直前の誘いが多い。',
+      delayDeepReason: 'リアルな現場や遊びに夢中で、スマホ画面を長時間見つめる習慣がないため。',
+      ngList: ['過去の失敗をネチネチ掘り返すこと', '理屈っぽく説教してテンションを下げること', '行動を束縛して自由を奪うこと'],
+      fallInLove: '自分のフットワークの軽さに爽やかに付いてきてくれ、スリリングな楽しさを全力で共有できた瞬間。'
     },
     'ESFP': {
       killingExtra: `「${name}さんといると自然と笑顔になれる！最高のムードメーカー」`,
@@ -558,12 +622,195 @@ function generateTorisetsu(
       greenL3: '自分の大好きなイベントやパーティーに連れて行き盛り上げてくれる',
       lineInvite: `「盛り上がってる楽しそうなお店見つけた！一緒にパーッと行こう！」`,
       lineTopic: `「最近一番笑った面白エピソード教えて！」`,
-      dateSpot: 'ライブハウス、話題のダイニング、ナイトプール、遊園地'
+      dateSpot: 'ライブハウス、話題のダイニング、ナイトプール、遊園地',
+      lineHabit: '賑やかでスタンプや写真が多い。楽しい出来事をリアルタイムで共有したがる。',
+      delayDeepReason: '目の前にいる友達やイベントで盛り上がっており、スマホを放置しているため。',
+      ngList: ['重い空気やネガティブな説教', '二人きりの時に無言でつまらなそうにすること', '楽しんでいるところに水を差すこと'],
+      fallInLove: '自分の話を最高に楽しそうに聞いてくれ、一番のファンでいてくれると感じた瞬間。'
     }
   };
+  return mbtiTraitsMap[norm] || mbtiTraitsMap['ENFP'];
+}
 
-  const sTrait = stemTraits[oppStem] || stemTraits['甲'];
-  const mTrait = mbtiTraits[oppMbti] || mbtiTraits['ENFP'];
+// 2. 四柱推命 日干（十干）の宿命相性判定
+export function getStemCompatibility(myStem: string, oppStem: string, myNick: string, oppNick: string) {
+  const pairs: Record<string, string> = {
+    '甲己': '中正の合（誠実と包容の最上ペア）',
+    '己甲': '中正の合（誠実と包容の最上ペア）',
+    '乙庚': '仁義の合（剛柔調和のベストペア）',
+    '庚乙': '仁義の合（剛柔調和のベストペア）',
+    '丙辛': '威制の合（情熱と気品が惹かれ合う電撃ペア）',
+    '辛丙': '威制の合（情熱と気品が惹かれ合う電撃ペア）',
+    '丁壬': '情愛の合（魂の色気と惹きつけのツインレイペア）',
+    '壬丁': '情愛の合（魂の色気と惹きつけのツインレイペア）',
+    '戊癸': '慈愛の合（欠けたピースが嵌まる究極の補完ペア）',
+    '癸戊': '慈愛の合（欠けたピースが嵌まる究極の補完ペア）'
+  };
+
+  const key = `${myStem}${oppStem}`;
+  if (pairs[key]) {
+    return {
+      type: '干合',
+      title: `【干合】${pairs[key]}`,
+      detail: `お二人の日柱は十干の最高峰である【干合】を結んでいます。出会った瞬間から理屈や条件ではなく、魂の深層で互いを求め合う強烈な引力が働いています。${myNick}様と${oppNick}様の間には言葉を超えた安心感が宿り、障害があっても離れがたい宿命の絆です。`
+    };
+  }
+
+  const elA = stemElements[myStem] || '木';
+  const elB = stemElements[oppStem] || '火';
+  const rel = elementRelations[elA]?.[elB] || 'same';
+
+  if (rel === 'producing') {
+    return {
+      type: '相生',
+      title: `【相生】${elA}生${elB}（自然にエネルギーを与え育む調和）`,
+      detail: `五行において${elA}が${elB}を生み出す美しい【相生】の循環です。${myNick}様の持つ温かみや知恵が、${oppNick}様の魅力を自然と引き出し、お相手にとってあなたは「最も心が落ち着き元気になれる場所」となっています。`
+    };
+  }
+  if (elementRelations[elB]?.[elA] === 'producing') {
+    return {
+      type: '相生',
+      title: `【相生】${elB}生${elA}（相手からの愛情があなたを満たす調和）`,
+      detail: `五行において${elB}が${elA}を生み出す【相生】の配置です。${oppNick}様の存在や行動が、${myNick}様に安心感と新しい活力を与えてくれます。相手の好意を素直に受け取ることで愛が循環します。`
+    };
+  }
+  if (rel === 'same') {
+    return {
+      type: '比和',
+      title: `【比和】同じ${elA}同士（親友のように等身大でいられる波長）`,
+      detail: `同じ五行（${elA}）を分け合う【比和】の相性です。人生の価値観やテンポが似ており、まるで長年の友人のように気取らず何でも話せます。お互いの自立を尊重することで永続的なパートナーシップになります。`
+    };
+  }
+  return {
+    type: '相剋',
+    title: `【相剋】${elA}剋${elB}（未知の刺激と成長をもたらすドラマティック相性）`,
+    detail: `五行が互いを刺激し合う【相剋】の配置です。自分にはない異質な才能や感性に強烈に惹きつけられますが、感情的になると意図しない摩擦が起きやすくなります。「違いを愛する」大人の余裕を持つことが成就の秘訣です。`
+  };
+}
+
+// 3. 四柱推命 日支（十二支）の波長判定
+export function getBranchCompatibility(myBranch: string, oppBranch: string) {
+  const sixHarmonies: Record<string, string> = {
+    '子': '丑', '丑': '子', '寅': '亥', '亥': '寅',
+    '卯': '戌', '戌': '卯', '辰': '酉', '酉': '辰',
+    '巳': '申', '申': '巳', '午': '未', '未': '午'
+  };
+  if (sixHarmonies[myBranch] === oppBranch) {
+    return {
+      type: '支合',
+      title: '【支合】以心伝心の波長一致',
+      detail: '日支同士が【支合】を結んでおり、言葉にしなくても空気感や生活リズムが肌感覚で一致します。一緒にいるだけで深い安らぎが得られる稀有な配置です。'
+    };
+  }
+
+  const threeHarmonies = [
+    ['申', '子', '辰'], ['巳', '酉', '丑'], ['寅', '午', '戌'], ['亥', '卯', '未']
+  ];
+  if (threeHarmonies.some(group => group.includes(myBranch) && group.includes(oppBranch))) {
+    return {
+      type: '三合',
+      title: '【三合】共通の未来を拓く同盟相性',
+      detail: '日支が【三合】を形成しており、二人が共通の目標や人生設計に向かった時に絶大な相乗効果を発揮します。公私ともに支え合える盤石のパートナーシップです。'
+    };
+  }
+
+  const sixConflicts: Record<string, string> = {
+    '子': '午', '午': '子', '丑': '未', '未': '丑',
+    '寅': '申', '申': '寅', '卯': '酉', '酉': '卯',
+    '辰': '戌', '戌': '辰', '巳': '亥', '亥': '巳'
+  };
+  if (sixConflicts[myBranch] === oppBranch) {
+    return {
+      type: '六沖',
+      title: '【六沖】磁石のNとSのように惹かれ合う刺激相性',
+      detail: '日支が【六沖】の関係にあり、真逆の性質ゆえに強烈に意識し合いますが、プライドの衝突には注意が必要です。相手のスペースを尊重することが守りの鍵です。'
+    };
+  }
+
+  return {
+    type: '調和',
+    title: '【調和】穏やかな日常の歩み',
+    detail: '日支の五行が穏やかに調和しており、無理のない安定したペースで日々の信頼を積み重ねていくことができます。'
+  };
+}
+
+// 4. 九星気学 本命星相性判定
+export function getStarCompatibility(myStar: string, oppStar: string) {
+  const elA = starElements[myStar] || '水';
+  const elB = starElements[oppStar] || '金';
+  const rel = elementRelations[elA]?.[elB] || 'same';
+
+  if (rel === 'producing' || elementRelations[elB]?.[elA] === 'producing') {
+    return {
+      type: '相生',
+      detail: '九星気学の本命星が【相生】に位置しており、一緒に過ごす時間が自然とお互いの全体運を底上げする幸福なバイオリズムを持っています。'
+    };
+  }
+  if (rel === 'same') {
+    return {
+      type: '比和',
+      detail: '九星の本命星が同じ気運に属しており、行動パターンや心地よいと感じる空間の好みが自然とシンクロします。'
+    };
+  }
+  return {
+    type: '相剋',
+    detail: '九星の本命星が【相剋】となっており、物事の優先順位やテンポに違いが出やすいため、お互いのプライベート時間の確保が長続きの秘訣です。'
+  };
+}
+
+// 5. 16タイプ（MBTI）認知機能ダイナミクス判定
+export function getMbtiCognitiveDynamics(myMbti: string, oppMbti: string, myNick: string, oppNick: string) {
+  const myNorm = (myMbti || 'ENFP').toUpperCase();
+  const oppNorm = (oppMbti || 'INFJ').toUpperCase();
+
+  const myT = myNorm.includes('T');
+  const oppT = oppNorm.includes('T');
+  let tfText = '';
+  if (!myT && oppT) {
+    tfText = `思考（T）を優先する${oppNick}様に対し、感情（F）を大切にする${myNick}様。${oppNick}様は悪気なく「正論や解決策」を提示しますが、${myNick}様が本当に求めているのは「共感と受容」です。この認知ギャップを事前に理解しておくことで、不要な不安やすれ違いを100%防止できます。`;
+  } else if (myT && !oppT) {
+    tfText = `感情（F）を優先する${oppNick}様に対し、思考（T）を大切にする${myNick}様。${oppNick}様は解決策よりも「気持ちの共有」を求めています。正論で返す前に「それは大変だったね」と一言挟むだけで、相手の心の壁は劇的に解けていきます。`;
+  } else if (myT && oppT) {
+    tfText = `互いに思考（T）を重んじる知的なペア。感情的なもつれが少なく極めてスマートに対話できますが、互いに弱音を吐きにくいため、時には素直な感情をストレートに言葉に乗せることが親密さの鍵となります。`;
+  } else {
+    tfText = `互いに感情（F）を深く察し合える心優しいペア。お互いの痛みに共鳴できる反面、相手に気を遣いすぎて本音を我慢しやすいため、溜め込まずに小さなお願いから素直に伝えることが大切です。`;
+  }
+
+  const myJ = myNorm.includes('J');
+  const oppJ = oppNorm.includes('J');
+  let jpText = '';
+  if (myJ !== oppJ) {
+    jpText = `また、計画性を重視する側と直感・柔軟性を大切にする側で、デートの決め方や返信タイミングにテンポの違いが生じやすいですが、お互いの長所が補完し合う絶好のバランスでもあります。`;
+  } else if (myJ && oppJ) {
+    jpText = `また、両者ともに計画性を重んじる堅実な気質のため、約束や将来設計を着実に形にできる高い信頼性があります。`;
+  } else {
+    jpText = `また、両者ともに自由とワクワク感を愛する柔軟な気質のため、その場のノリや新しい体験を全力で楽しめる魅力があります。`;
+  }
+
+  let mbtiPairType = '認知補完ペア';
+  if (myNorm === oppNorm) mbtiPairType = '同調共鳴ペア';
+  else if (myT === oppT && myJ === oppJ) mbtiPairType = '価値観一致ペア';
+  else if (myT !== oppT && myJ !== oppJ) mbtiPairType = '全方位補完ペア';
+
+  return {
+    tfText,
+    jpText,
+    mbtiPairType,
+    summary: `${tfText} ${jpText}`
+  };
+}
+
+function generateTorisetsu(
+  oppStem: string,
+  _oppBranch: string,
+  oppMbti: string,
+  _myStem: string,
+  _myMbti: string,
+  oppNickName: string
+): TorisetsuData {
+  const name = oppNickName || 'お相手';
+  const sTrait = getStemTraits(oppStem, name);
+  const mTrait = getMbtiTraits(oppMbti, name);
 
   return {
     killingWords: [
@@ -662,6 +909,8 @@ function getTenGodsCategory(myStem: string, todayStem: string): '比劫' | '食�
 }
 
 export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 'tsuki'): FortuneResult {
+  const myNickname = input.myName || 'あなた';
+  const oppNickname = input.opponentName || 'お相手';
   const myDate = new Date(input.myBirth);
   const myPillarObj = calculateDayPillar(myDate);
   const myPillar = `${myPillarObj.stem}${myPillarObj.branch}`;
@@ -844,106 +1093,160 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   const myMbtiText = mbtiTexts[input.myMbti] || '感覚と感性を大切にし、状況に合わせて柔軟に動くタイプ';
   const opponentMbtiText = input.opponentMbti ? (mbtiTexts[input.opponentMbti] || '自分のペースを守りながら少しずつ心を開くタイプ') : undefined;
 
-  // キャラクターと相性に応じた「一言メッセージ」
+  // 🌟 四柱推命・九星気学・16タイプ統合ダイナミクスの算出
+  const stemComp = oppPillarObj ? getStemCompatibility(myPillarObj.stem, oppPillarObj.stem, myNickname, oppNickname) : null;
+  const branchComp = oppPillarObj ? getBranchCompatibility(myPillarObj.branch, oppPillarObj.branch) : null;
+  const starComp = opponentStarObj ? getStarCompatibility(myStarObj.name, opponentStarObj.name) : null;
+  const mbtiDyn = (input.myMbti && input.opponentMbti) ? getMbtiCognitiveDynamics(input.myMbti, input.opponentMbti, myNickname, oppNickname) : null;
+  const myStemTrait = getStemTraits(myPillarObj.stem, myNickname);
+  const oppMbtiTrait = input.opponentMbti ? getMbtiTraits(input.opponentMbti, oppNickname) : null;
+  const myMbtiTrait = getMbtiTraits(input.myMbti, myNickname);
+  const oppStemTrait = oppPillarObj ? getStemTraits(oppPillarObj.stem, oppNickname) : null;
+
   let oneLiner = '';
   let summary = '';
-  const myNickname = input.myName || 'あなた';
-  const oppNickname = input.opponentName || 'お相手';
-  
+
   if (hasOpponent) {
+    const sType = stemComp?.type || '宿命';
+    const sTitle = stemComp?.title || '【宿命の結びつき】';
+    const bType = branchComp?.type || '調和';
+
     if (character === 'tsuki') {
-      // 月 (LUNA) - 共感・感情受け止め
       if (baseScore >= 85) {
-        oneLiner = '深く惹かれ合う特別な縁。お互いの違いを認め合うことで、愛はさらに深まります。';
-        summary = `おふたりは、${myNickname}様が感情を丁寧に育み、${oppNickname}様がそれを優しく受け取る、非常に美しい調和を持っています。四柱推命の日柱で見ると互いに支え合うエネルギーが巡っており、九星気学の本命星も相生関係にあります。${oppNickname}様の16タイプ性格（${input.opponentMbti || '不明'}）は自由を愛する傾向がありますが、${myNickname}様の包容力があればすれ違いも成長の糧にできるでしょう。`;
-      } else if (baseScore >= 60) {
-        oneLiner = '歩み寄ることで絆が強まる関係。今日は焦らずに、お互いの時間を尊重しましょう。';
-        summary = `${myNickname}様と${oppNickname}様は、異なる魅力に惹かれ合うものの、距離の詰め方に少し戸惑いが出やすいタイミングです。命式からは、お互いの価値観の軸（日干）が異なる性質であることが示されています。${oppNickname}様が急に内向きになったとしても、それは嫌悪ではなく休息の合図。今日はその背中をそっと見守る優しさが縁を繋ぎ止めます。`;
+        oneLiner = `${sTitle}。魂が深く共鳴し合い、愛が奇跡的に実を結ぶ最上の好運期です。`;
+        summary = `${myNickname}様とお相手（${oppNickname}様）は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【心理機能分析】${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：現在お二人の間には強い愛の引力が働いています。技巧的な駆け引きをするのではなく、${myNickname}様の持つ純粋な温かさと包容力をそのまま届けることで、${oppNickname}様にとって「生涯手放せない唯一無二のパートナー」へと昇華します。`;
+      } else if (baseScore >= 70) {
+        oneLiner = `${sTitle}。歩み寄ることで絆が一段と深まる好調期。お互いのテンポを尊重しましょう。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【心理機能分析】${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：順調に関係が育つ好調な流れの中にあります。${oppNickname}様が急に一人の世界に入ったとしても、それは休息の合図です。焦らず笑顔で待ってあげるあなたの優しさが、相手の信頼を決定づけます。`;
+      } else if (baseScore >= 55) {
+        oneLiner = `【${bType}の波長】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【心理機能分析】${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：現在は二人の関係の根っこを深く張る「基盤構築」の時期です。無理に白黒をつけようとせず、日々の小さな感謝を積み重ねることで、次の発展期に向けた安心感が盤石になります。`;
       } else {
-        oneLiner = '焦らず心を落ち着かせる時。お互いの違いを尊重し、優しく見守る姿勢が大切です。';
-        summary = `少しすれ違いを感じやすい配置ですが、これはお互いの個性が強く自立している証拠でもあります。${myNickname}様は真剣に向き合いたいと感じる反面、${oppNickname}様は独自のペースを崩したくないと感じています。占術の流れを見ると、今日の運気は一時的に葛藤が出やすい状態です。今は焦って白黒つけず、お互いの違いを愛でる余裕を持つことが大切です。`;
+        oneLiner = `【${sType}の学び】感情の波立ちを抑え静かに見守る時。お互いの違いを愛でる姿勢が大切です。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【心理機能分析】${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：一時的な運気の揺らぎやすれ違いが生じやすい注意期です。相手の反応に一喜一憂せず、まずは自分自身の心を優しく満たしてあげることで、無用な摩擦を回避し運気を好転へと導けます。`;
       }
-    } else {
-      // 蓮 (REN) - 理性・分析・行動提案
+    } else { // ren
       if (baseScore >= 85) {
-        oneLiner = '極めて合理的な相補関係。お互いの長所が引き出され、次のステップへ論理的に進めます。';
-        summary = `客観的データ（命式）および性格分析から、両者は互いの弱点を的確に補い合う好相性であると結論づけられます。日柱の五行バランスが良好であり、意思決定プロセスにおいて衝突が起きにくい構造です。現在の高い日次相性を活かし、次のアクション（具体的な予定の提案や将来についての対話）を明確に起こすのが論理的アプローチです。`;
-      } else if (baseScore >= 60) {
-        oneLiner = 'お相手の行動パターンの予測が鍵。感情で動かず、まずは行動履歴を観察してください。';
-        summary = `相性スコアは中庸レベルです。お相手（${input.opponentMbti || '不明'}）の認知行動傾向として、プレッシャーを受けると連絡を断ちやすいパターンが検知されています。これを「気持ちが冷めた」と誤認識し、連絡を催促するのは悪手です。四柱推命のタイミングを考慮すると、静観を守り、3日後に短い事実ベースの連絡を送るのが最も成功確率が高い戦略です。`;
+        oneLiner = `${sTitle}。論理的データが証明する最高峰のシナジー。次の具体的合意へ進むべきです。`;
+        summary = `客観的命式データおよび認知機能の解析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【認知行動分析】${mbtiDyn?.summary}\n\n🔮 蓮からの戦略提言：現在、アプローチ成功確率が極大化しています。感情論ではなく、具体的な日時・場所・提案内容を5W1Hで明確に提示する論理的アプローチにより、確実な関係性のステップアップ（将来の約束や合意）を達成してください。`;
+      } else if (baseScore >= 70) {
+        oneLiner = `${sTitle}。関係性は着実な上昇トレンド。相手の認知行動パターンに合わせたアプローチを。`;
+        summary = `命式および心理機能の相性指標：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【認知行動分析】${mbtiDyn?.summary}\n\n🔮 蓮からの戦略提言：運気の追い風を活かし、相手の関心が高いテーマからスマートに会話を展開してください。感情の押し付けを排し、共通の利害や楽しい体験を共有することが最短ルートでの進展を担保します。`;
+      } else if (baseScore >= 55) {
+        oneLiner = `【${bType}の推移】相性パラメータは安定推移中。無謀な拡張を控え、現状維持が合理的です。`;
+        summary = `命式および心理機能の評価：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【認知行動分析】${mbtiDyn?.summary}\n\n🔮 蓮からの戦略提言：過剰なアプローチはコスト対効果が低調です。お相手のバイオリズムを考慮し、3〜5日のインターバルを空けた事実ベースの定期連絡に留め、リスクヘッジを徹底してください。`;
       } else {
-        oneLiner = '価値観の乖離を認識すべきです。感情的な期待を下げ、ルールに基づくアプローチを。';
-        summary = `日柱および本命星が相剋（衝突）関係にあり、かつ16タイプの判断軸（感情重視か論理重視か）にズレが見られます。${oppNickname}様はあなたの期待する反応を示さない可能性が高いです。しかしこれは悪意ではなく、単に認知処理パターンが異なるためです。感情的な不安から長文を送るのを避け、連絡は5W1Hを明確にした業務連絡に近いシンプルな文面にとどめるべきです。`;
+        oneLiner = `【${sType}のリスク管理】摩擦リスクを検知。感情的アプローチを即刻停止し、静観戦略を取るべきです。`;
+        summary = `命式相互作用およびリスク指標：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【認知行動分析】${mbtiDyn?.summary}\n\n🔮 蓮からの戦略提言：現在、お相手は心理的防衛フェーズにあります。長文メッセージや返信の催促は致命的な関係悪化を招くため厳禁です。接触頻度を通常の30%以下に抑制し、自己のデータ改善に注力することが最適解です。`;
       }
     }
   } else {
     // 自分のみ（シングル）モード
+    const myEl = stemElements[myPillarObj.stem] || '木';
+    const elNames: Record<string, string> = { '木': '成長と向上心', '火': '情熱と美意識', '土': '包容力と信頼', '金': '知性と決断力', '水': '柔軟性と深い共感' };
+    const myElTrait = elNames[myEl] || '調和のエネルギー';
+
     if (character === 'tsuki') {
-      // 月 (LUNA) - 癒し・自己受容・共感
       if (baseScore >= 85) {
-        oneLiner = '自分を愛し、慈しむ絶好のタイミング。あなたの輝きが自然と周囲を引き寄せます。';
-        summary = `${myNickname}様、今日の運気はあなたの内側の美しさを引き出す配置になっています。九星の本命星が示す通り、今日は他人を気にするよりも、自分が「心地よい」と感じる場所へ足を運ぶことで恋愛運が向上します。焦らずに、自然体でいることを楽しんでくださいね。`;
-      } else if (baseScore >= 60) {
-        oneLiner = '心身のバランスを整え、小さな癒しを生活に取り入れると良い運気が巡ります。';
-        summary = `運気は安定しています。少し心が敏感になりやすい時期なので、お気に入りのアロマやお風呂など、五感を満たす癒しを取り入れてみましょう。自分の心に余裕が生まれると、それが魅力的なオーラとなり、良い出会いや関係の進展を呼び込む土壌になります。`;
+        oneLiner = `【${myPillarObj.stem}の輝き】あなたの内なる魅力が満開となり、理想の良縁を引き寄せる絶頂期です。`;
+        summary = `${myNickname}様の日柱（${myPillar}）は「${myElTrait}」を宿しており、本来周囲を温かく惹きつける強いオーラを持っています。九星気学の本命星（${myStarObj.name}）との相乗効果により、今日はあなた自身の自然体な笑顔が最高の開運アイテムとなります。他人への遠慮を手放し、自分が本当に心地よいと感じる選択を楽しんでください。`;
+      } else if (baseScore >= 70) {
+        oneLiner = `【${myPillarObj.stem}の循環】運気は順調な拡大傾向。心を満たす自己投資が良縁の土壌を整えます。`;
+        summary = `日柱エネルギーが安定して巡っています。あなたの16タイプ性格（${input.myMbti}）が持つ長所を素直に表現できる環境に身を置くことで、波長の合う特別な存在との距離が自然と縮まります。小さなワクワクを大切にしてください。`;
+      } else if (baseScore >= 55) {
+        oneLiner = `【${myPillarObj.stem}の休息】心を静かに整える平穏期。焦らず自分のペースを大切に慈しみましょう。`;
+        summary = `現在はエネルギーの充電と自己対話に適した平穏な時期です。無理に外向きのアクションを起こすよりも、お部屋を清めたり好きな香りに包まれるなど、五感を満たす癒しを取り入れることで魅力の土台が完成します。`;
       } else {
-        oneLiner = '今はエネルギーを充電する時。無理に外に出ず、自分の時間をおいしいお茶と楽しんで。';
-        summary = `今日の運気は少し休息を求めています。他人に意識を向けすぎて疲れていませんか？今は無理に行動を起こす必要はありません。お部屋の掃除をしたり、好きな本を読んだりして自分自身をリフレッシュさせることが、結果的に次の恋愛運を高める近道です。`;
+        oneLiner = `【${myPillarObj.stem}の内省】守りを固めエネルギーを温存する日。自分を優しく抱きしめましょう。`;
+        summary = `運気の波は一時的に内省のフェーズに入っています。他人の評価に惑わされず、まずは自分自身を思い切り甘やかしてあげてください。この休息期間こそが、次の大開運期に向けた強靭な土台となります。`;
       }
-    } else {
-      // 蓮 (REN) - 自己分析・知性・行動計画
+    } else { // ren
       if (baseScore >= 85) {
-        oneLiner = '自己分析を深め、理想のパートナーシップの設計図を描くのに完璧な日です。';
-        summary = `恋愛運は非常に論理的にコントロール可能な状態です。あなたの持つ強みや魅力を紙に書き出し、どのような関係を望むのか整理してみましょう。この計画的な思考が、今後の人間関係におけるミスマッチを防ぎ、望み通りの結果を引き寄せるエンジンとなります。`;
-      } else if (baseScore >= 60) {
-        oneLiner = '学びや対話を通じて視野を広げる好機。スマートな情報収集を行いましょう。';
-        summary = `自分の興味のある分野の勉強をしたり、知的なイベントに参加してみましょう。直感で選ぶのではなく、共通の話題や価値観を持つ人が集まる場所を意図的に選ぶことが、結果として満足度の高いパートナーとの出会いに繋がります。`;
+        oneLiner = `【${myPillarObj.stem}の最高効率】知性と判断力が極限まで冴え渡る開運日。理想の設計図を実行に移すべきです。`;
+        summary = `四柱推命・気学・性格分析データ統合評価：日柱（${myPillar}）のポテンシャルが最高水準で発揮されています。あなたの16タイプ（${input.myMbti}）の強みである分析力と実行力をフル活用し、今後のパートナーシップやキャリアの具体的な目標設定に着手してください。成果は極大化されます。`;
+      } else if (baseScore >= 70) {
+        oneLiner = `【${myPillarObj.stem}の安定運用】理性的な選択が好循環を生む好調日。スマートな情報収集を進めてください。`;
+        summary = `認知パフォーマンスは良好です。感情論を排し、共通の価値観や将来目標を持つ人々が集まる環境をリサーチ・選択することで、高次元のパートナーシップ候補との接点を論理的に創出できます。`;
+      } else if (baseScore >= 55) {
+        oneLiner = `【${myPillarObj.stem}の現状維持】パラメータはフラット推移。これまでの行動データの見直しと調整を推奨します。`;
+        summary = `運気指標は中庸レベルです。無謀な新規アクションは控え、身の回りのタスク整理や環境整備に注力することが、次期の飛躍に向けたリソース配分の最適解です。`;
       } else {
-        oneLiner = '現状の行動データを見直し、次に向けた合理的な計画を立てる冷静な日。';
-        summary = `運気は静観期です。これまでのアプローチ方法や出会いのプロセスに無駄がなかったか、客観的に振り返ってみましょう。感情的な焦りは不要です。課題を特定し、次はどう動くべきか冷静に戦略を練り直すことが、来期以降の成功率を飛躍的に高めます。`;
+        oneLiner = `【${myPillarObj.stem}のリスクヘッジ】判断ノイズが増加する静観日。無駄なアプローチを凍結してください。`;
+        summary = `感情的バイアスが生じやすい配置です。重要な意思決定や突発的なコミュニケーションは避け、客観的な自己観察と心身のメンテナンスに徹することで、潜在的リスクを完全に遮断できます。`;
       }
     }
   }
 
-  // 蓮と月からの本日の行動指針（キャラクター別メッセージ - 日干連動による動的アドバイス）
+  // 🌟 蓮と月からの本日の行動指針（十神 × 日干五行 × MBTI認知の多重連動アドバイス）
   const adviceCategory = getTenGodsCategory(myPillarObj.stem, todayPillar.stem);
+  const myEl = stemElements[myPillarObj.stem] || '木';
+
+  // 日干五行別の自然メタファー
+  const elementMetaphors: Record<string, string> = {
+    '木': '大地に深く根を張り枝を伸ばす樹木のように、',
+    '火': '周囲を温かく照らす太陽や灯火のように、',
+    '土': 'すべてを大らかに受け止める山や大地のように、',
+    '金': '研ぎ澄まされた刃や輝く宝石のように、',
+    '水': 'どんな器にも寄り添い潤す清らかな水のように、'
+  };
+  const meta = elementMetaphors[myEl] || '';
 
   let firstCardText = '';
   let secondCardText = '';
 
   if (character === 'tsuki') {
     if (adviceCategory === '比劫') {
-      firstCardText = `今日のあなたに贈る言葉は「自分を最優先に」です。相手にどう思われるかを気にして、自分の本音を閉じ込めていませんか？あなたの心が「心地よい」と感じる選択をすることが、結果的にすべての人間関係を最も美しい調和へと導きます。`;
-      secondCardText = `関係を動かす一番の鍵は、お相手の弱さを見た時に、それを優しく包み込んであげることです。完璧でいようとするお相手の肩の力を抜いてあげられるのは、${myNickname}様のあたたかい笑顔だけなのです。`;
+      firstCardText = `${meta}今日のあなたに贈る言葉は「自分らしさの誇り」です。他人の期待に応えようとして、自分の本音を閉じ込めていませんか？あなたの心が「心地よい」と感じる選択をすることが、結果的に二人の関係を最も美しい調和へと導きます。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `関係を動かす一番の鍵は、${oppNickname}様の弱さを見た時に、それを優しく包み込んであげることです。${oppMbtiTrait.killingExtra}と伝えてみてください。素直な笑顔が相手の心の鎧を溶かします。`
+        : `自分を最優先に慈しみ、お気に入りの服や心地よい音楽で自分自身を満たしてあげてください。その満たされたオーラが最高の良縁を引き寄せます。`;
     } else if (adviceCategory === '食傷') {
-      firstCardText = `あなたの言葉と笑顔に不思議な魅力が宿る日です。難しい話をするよりも、「美味しいね」「楽しいね」といった温かな感情の共有が、お相手の頑なな心をやわらかく溶かしてくれます。`;
-      secondCardText = `${myNickname}様が感じた直感やワクワクした気持ちをストレートに言葉に乗せて伝えてみましょう。あなたの無邪気な自己表現がお相手の心を惹きつけます。`;
+      firstCardText = `${meta}あなたの言葉と無邪気な笑顔に不思議な引力が宿る日です。難しい話をするよりも、「美味しいね」「楽しいね」といった温かな感情の共有が、頑なな心をやわらかく溶かしてくれます。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `${myNickname}様が感じたワクワクした気持ちをストレートに言葉に乗せてみましょう。LINEでは${oppMbtiTrait.lineTopic}について軽く振ってみると、相手は嬉しそうに乗ってきます。`
+        : `直感に従って好きなカフェやアートに触れてみましょう。あなたの自由で豊かな表現力が、周囲を惹きつける磁石となります。`;
     } else if (adviceCategory === '財星') {
-      firstCardText = `焦らず、段階的な進展を信じて進めましょう。関係を急激に発展させようとするよりも、目の前の事実を静かに見つめ、二人の安全な居場所を少しずつ広げていくような丁寧な関わりが鍵になります。`;
-      secondCardText = `お互いのリアルな日常を支え合う姿勢が信頼を深めます。小さな気遣いや、相手の生活リズムを邪魔しないスマートな距離感を大切にしてください。`;
+      firstCardText = `${meta}焦らず、丁寧な日常の積み重ねを信じて進めましょう。関係を急激に発展させようとするよりも、目の前の事実を静かに見つめ、二人の安全な居場所を少しずつ広げていくような丁寧な関わりが鍵になります。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `お互いのリアルな日常を支え合う姿勢が信頼を深めます。${oppStemTrait?.delayAdvice || '相手のペースを温かく尊重し、焦らず信頼を育みましょう。'}`
+        : `身の回りの整理や小さな自己投資が吉となります。地に足の着いた丁寧な暮らしが、運命の出会いを呼び込む土壌を作ります。`;
     } else if (adviceCategory === '官殺') {
-      firstCardText = `相手との波長にズレを感じても心配はいりません。相手の感情の波を無理に引き受けず、今は「相手には相手のペースがある」と受け入れることで、結果的に心地よい信頼が芽生えます。`;
-      secondCardText = `今は過度にアプローチせず、自分の軸をしっかり保ちましょう。感情的にならずに一歩引いて見守るあなたの凛とした姿が、相手の興味を呼び戻します。`;
+      firstCardText = `${meta}相手との波長にズレを感じても心配はいりません。相手の感情の波を無理に引き受けず、今は「相手には相手のペースがある」と受け入れることで、結果的に心地よい信頼が芽生えます。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `今は過度にアプローチせず、自分の軸をしっかり保ちましょう。お相手の地雷行動である『${oppMbtiTrait.ngList[0]}』を避け、一歩引いて見守る凛とした優しさが相手の心を呼び戻します。`
+        : `プレッシャーを感じやすい日です。無理に誰かと関わろうとせず、暖かいお風呂でゆっくり深呼吸してエネルギーを充電してください。`;
     } else { // 印星
-      firstCardText = `今日はずっと頑張ってきた自分をたっぷり甘やかして、お相手からの優しさも素直に受け取る日です。「尽くさなければ愛されない」という思い込みを手放し、愛される心地よさを実感してください。`;
-      secondCardText = `${myNickname}様が素直に「頼る」「甘える」姿勢を見せることが、お相手の「あなたを守りたい」という保護欲求を強く刺激します。`;
+      firstCardText = `${meta}今日はずっと頑張ってきた自分をたっぷり甘やかして、優しさを素直に受け取る日です。「尽くさなければ愛されない」という思い込みを手放し、愛される心地よさを実感してください。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `${myNickname}様が素直に「頼る」「甘える」姿勢を見せることが、${oppNickname}様の「あなたを守りたい」という欲求を強く刺激します。感謝の言葉を一言添えてお願いしてみましょう。`
+        : `本を読んだり知的なインスピレーションを得るのに最高の日です。内面を豊かに耕す時間が、未来のあなたを美しく輝かせます。`;
     }
   } else { // ren
     if (adviceCategory === '比劫') {
-      firstCardText = `今日は自分自身の境界線を守り、依存でもなく過保護でもない「対等な対話」を意識すべき日です。相手の顔色をうかがうアプローチは合理的ではありません。自分の意見を等身大で提示することが信頼度を高めます。`;
-      secondCardText = `最終結論：占術のタイミングデータによると、今週後半から運気が上昇します。この好機において、具体的な日程（日時・場所）を明記した食事またはイベントの提案を一度行い、白黒つける対話フェーズに進むべきです。`;
+      firstCardText = `${meta}本日は自分自身の境界線を守り、依存でも過保護でもない「対等な対話」を意識すべき日です。相手の顔色をうかがうアプローチは合理的ではありません。等身大の客観的事実を提示することが信頼度を高めます。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `最終結論：相手の認知パターン（${input.opponentMbti}）を考慮し、白黒をつける対話へ進む好機です。${oppMbtiTrait.lineInvite}と具体的な日程・場所を明記して論理的に提案してください。`
+        : `自己のスキルセットや長期ロードマップの棚卸しを行ってください。自立した大人の魅力こそが、質の高いパートナーを引き寄せる最大のレバレッジです。`;
     } else if (adviceCategory === '食傷') {
-      firstCardText = `今日の行動戦略として「楽しそう」「面白そう」といったポジティブな体験の共有を優先した文面でのアプローチを推奨します。感情のままに話すのではなく、相手が興味を持つ話題をスマートに提示してください。`;
-      secondCardText = `次回のデートや二人で取り組める楽しい企画をライトに提案してみましょう。相手が「それなら乗ってみたい」と思える論理的かつ楽しげな仕掛けが効果的です。`;
+      firstCardText = `${meta}本日の行動戦略として「ポジティブな共通体験の提供」を最優先にしたアプローチを推奨します。感情のままに話すのではなく、相手の関心が高いテーマをスマートに提示してください。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `お相手が乗ってきやすい話題として、${oppMbtiTrait.lineTopic}に関する質問を簡潔に投げかけてください。返信率は85%以上と試算されます。`
+        : `新しい分野の情報収集や体験型イベントへの参加が吉です。知的好奇心を満たす行動が、思わぬ好機や人脈をもたらします。`;
     } else if (adviceCategory === '財星') {
-      firstCardText = `本日は関係性のロードマップを現実的に評価する日です。曖昧な感情論ではなく、互いの目的や状況が一致しているかを冷静に見極め、着実な進展ルートを選択してください。`;
-      secondCardText = `具体的なスケジュール調整や将来の約束など、事実ベースの合意形成をロジカルに提案し、次のフェーズへ進めるための決断力を示してください。`;
+      firstCardText = `${meta}関係性のロードマップを客観的に評価する日です。曖昧な感情論ではなく、互いの目的やリソース配分が一致しているかを冷静に見極め、着実な進展ルートを選択してください。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `事実ベースの合意形成をロジカルに提案してください。お相手のデートスポットとして『${oppMbtiTrait.dateSpot}』を選定することで、合意確率は大幅に向上します。`
+        : `支出の見直しや将来計画の精査に最適な日です。無駄を省き合理的システムを構築することが、精神的余裕と魅力を生みます。`;
     } else if (adviceCategory === '官殺') {
-      firstCardText = `お相手の状況や心理的プレッシャー（仕事の繁忙期など）を静かに分析し、あえて「引き気味でサポートする」のがベスト戦略です。返信を急かさず、理知的な冷静さを保ってください。`;
-      secondCardText = `今日の連絡は、労いの一言を含めたシンプルな短文のみに留めましょう。お相手にとって余計な負担を感じさせないスマートな配慮が、長期的な関係を守る盾になります。`;
+      firstCardText = `${meta}お相手の状況や心理的プレッシャーを静かに分析し、あえて「引き気味でサポートする」のがベスト戦略です。返信を急かさず、理知的な冷静さを保ってください。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `リスクヘッジ戦略：お相手の心理的NG行動である『${oppMbtiTrait.ngList[0]}』を厳重に警戒してください。本日の連絡は労いの一言を含めた短文のみに限定することが最善策です。`
+        : `突発的なトラブルや予定変更に備え、余裕を持ったスケジュール管理を徹底してください。冷静なトラブル処理能力があなたの価値を高めます。`;
     } else { // 印星
-      firstCardText = `これまでの二人のやり取りのテキストや反応データを冷静に振り返り、成功パターンと改善点を客観的に抽出する内省の日です。感情的な焦りはデータ分析のノイズになります。`;
-      secondCardText = `次に動くべき好機に向け、情報収集とアプローチの計画を綿密に練り直しましょう。分析を踏まえた準備こそが、次回のアプローチ成功率を飛躍的に高めます。`;
+      firstCardText = `${meta}これまでの二人のやり取りのテキストや反応データを冷静に振り返り、成功パターンと改善点を客観的に抽出する内省の日です。感情的な焦りはデータ分析のノイズになります。`;
+      secondCardText = hasOpponent && oppMbtiTrait
+        ? `次に動くべき好機に向け、情報収集とアプローチの計画を綿密に練り直しましょう。相手の褒め言葉として『${oppMbtiTrait.killingExtra}』を準備しておくことが次回接触時の切り札となります。`
+        : `専門スキルのアップデートや読書に専念してください。蓄積された知識と冷静な洞察力が、今後の対人関係において圧倒的な優位性を担保します。`;
     }
   }
 
@@ -1265,274 +1568,235 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   };
 
   const generateDetailedTopics = (score: number) => {
-    const oppNick = input.opponentName || 'お相手';
+    const oppNick = oppNickname;
     const mbtiLabel = input.opponentMbti && input.opponentMbti !== 'UNKNOWN' ? input.opponentMbti : '未選択';
-    let stemImp = 0;
-    let branchImp = 0;
-    if (hasOpponent && oppPillarObj) {
-      stemImp = getDailyStemImpact(oppPillarObj.stem, myPillarObj.stem);
-      branchImp = getBranchImpact(oppPillarObj.branch, myPillarObj.branch);
-    }
-    let astroNote = '';
-    if (stemImp >= 16 || branchImp >= 10) {
-      astroNote = `（お二人の日柱は『干合・支合』の強い引き寄せ構造にあり、宿命的な縁が作用しています）`;
-    } else if (branchImp <= -14 || stemImp <= -14) {
-      astroNote = `（日柱に『六沖・相剋』の波動があり、互いの個性が強く響き合う配置です）`;
-    }
+    const myMbtiLabel = input.myMbti && input.myMbti !== 'UNKNOWN' ? input.myMbti : '未選択';
 
     if (hasOpponent) {
+      const sTitle = stemComp?.title || '【宿命の調和】';
+      const sDetail = stemComp?.detail || '二人の間には穏やかな縁の循環が働いています。';
+      const bDetail = branchComp?.detail || '日支の波長は安定した調和を保っています。';
+      const starDetail = starComp?.detail || '九星の配置はお互いを補い合う好相性です。';
+
+      // Topic 1: 宿命と命式バランス
+      let topic1Intro = '';
+      let topic1Detail = '';
       if (character === 'tsuki') {
         if (score >= 85) {
-          return [
-            {
-              title: '1. 二人の関係性',
-              intro: `四柱推命の日柱重ね合わせにおいて最高峰の共鳴エネルギーが示されています。${myNickname}様とお相手（${oppNick}様）の間には、言葉を超えた魂の引き寄せと絶対的な信頼が宿っています。${astroNote}`,
-              detail: `九星気学の本命星相性も相生関係にあり、二人の結びつきは永続的です。日柱の五行バランスが完璧に調和しており、${oppNick}様は${myNickname}様を唯一無二の理解者として強く認識しています。この好機において、お互いの弱みを開示し合うことが更なる絆の深まりをもたらします。`
-            },
-            {
-              title: '2. 会話と伝わり方',
-              intro: `お二人の間には、言葉の裏にある優しさやニュアンスが直感的に伝わる最高の対話運が巡っています。`,
-              detail: `${myNickname}様の温かな言葉選びが${oppNick}様の心を深く癒します。16タイプ（${mbtiLabel}）のお相手が最も安心するメッセージのトーンや、心を開かせる黄金の時間帯（21:00〜23:00）を活用して、素直な感情を共有しましょう。`
-            },
-            {
-              title: '3. 惹かれ合うポイント',
-              intro: `二人が互いに持つ五行のエネルギーが完璧なグラデーションを描いて惹かれ合っています。`,
-              detail: `${myNickname}様の持つ柔らかな共感力と、${oppNick}様の持つ独自のこだわりが奇跡的に噛み合っています。一般的な恋愛テクニックではなく、あなた本来のありのままの優しさが相手の心を掴んで離しません。絶対にやってはいけない地雷行動（過度な疑念や試し行為）を避け、相手をそのまま信じ抜くことが絆の黄金律です。`
-            },
-            {
-              title: '4. 運命の転機日とアプローチ',
-              intro: `今後1ヶ月の運気推移の中で、二人の距離が急激に縮まる絶好の「運命の転機日」が特定されています。`,
-              detail: `日柱干支の共鳴が最高潮に達する Xデー（今週後半〜来月上旬の吉日）において、二人きりになれる機会や特別な会話のチャンスが巡ってきます。その日は躊躇せず、素直な気持ちや今後の願いを伝えることで、一気に進展へ結びつけることができます。`
-            },
-            {
-              title: '5. 最終的な結びつき',
-              intro: `月と蓮の鑑定が示す最終結論。お二人の絆はどんな試練も乗り越えられる本物の愛へと結びついています。`,
-              detail: `四柱推命・九星気学・16タイプ統合診断の全データが、${myNickname}様と${oppNick}様が将来にわたって深く愛し合い、互いを支え合う最高の相性であることを証明しています。自分を信じ、相手を愛するその温かな心を持ち続ければ、理想の未来は確実にあなたの手の中にあります。`
-            }
-          ];
+          topic1Intro = `四柱推命の日柱重ね合わせにおいて${sTitle}が成立。${myNickname}様とお相手（${oppNick}様）の間には、言葉を超えた魂の引き寄せと絶対的な信頼が宿っています。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} さらに${starDetail}\n\n🌙 月からの導き：${oppNick}様にとって、${myNickname}様は「他では決して得られない深い安らぎ」を感じる存在です。お互いの弱さや本音を素直に打ち明け合うことで、魂の結びつきは一生涯揺るぎないものへと昇華します。`;
         } else if (score >= 70) {
-          return [
-            {
-              title: '1. 二人の関係性',
-              intro: `お互いの五行バランスが心地よく補い合い、順調な前進が見込める好相性です。${myNickname}様の包容力とあたたかみが${oppNick}様の警戒心を自然と解きほぐしています。${astroNote}`,
-              detail: `命式を分析すると、時間の経過とともに信頼が深まる「大器晩成」のエネルギーが巡っています。${oppNick}様の16タイプ（${mbtiLabel}）特有のテンポを尊重しつつ、静かなカフェなど落ち着いた環境で対話を重ねることで関係が一段と安定します。`
-            },
-            {
-              title: '2. 会話と伝わり方',
-              intro: `会話の波長は良好で、お互いの価値観を穏やかに共有できる時期です。`,
-              detail: `${oppNick}様が悩みや本音を漏らした時は、アドバイスを焦らず「受け止める」姿勢が鍵となります。日々の労いの言葉や、相手の好きな話題を中心にしたテンポの良いやり取りが絆を定着させます。`
-            },
-            {
-              title: '3. 惹かれ合うポイント',
-              intro: `異なる魅力が互いを引き寄せ合い、知るほどに愛おしさが増す相性です。`,
-              detail: `お相手は${myNickname}様の前で見せる素の表情に安らぎを感じています。相手のパーソナルスペースを尊重しつつ、たまに見せる素直なおねだりや甘えが相手の「守りたい」意欲を刺激します。`
-            },
-            {
-              title: '4. 運命の転機日とアプローチ',
-              intro: `運気が追い風に変わるチャンス日が複数特定されています。`,
-              detail: `焦って勝負をかける必要はありませんが、吉日に合わせた自然なお誘いや、心のこもったメッセージを送ることで、相手の心が大きくあなたへ傾くきっかけが作れます。`
-            },
-            {
-              title: '5. 最終的な結びつき',
-              intro: `時間を重ねるほどに味わいと信頼が増していく、素晴らしい未来が約束されています。`,
-              detail: `焦らず二人のペースを慈しんで進んでください。お互いへの感謝と気遣いを忘れないことで、二人の関係は永久に輝き続ける温かな愛の居場所となります。`
-            }
-          ];
+          topic1Intro = `お互いの五行バランスが心地よく補い合い、時間を重ねるほどに信頼が深まる「大器晩成」の好相性です。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：${oppNick}様は${myNickname}様の持つ柔らかな包容力に安心感を覚えています。急いで関係を定義しようとせず、二人の心地よい歩調を慈しむことが愛の結実を約束します。`;
         } else if (score >= 55) {
-          return [
-            {
-              title: '1. 二人の関係性',
-              intro: `二人の関係は現在、静かに土台を整える「基盤構築」のフェーズにあります。無理に距離を詰めようとせず、安定した距離感を保つことが最善です。${astroNote}`,
-              detail: `日柱干支の波動を見ると、一時的に双方のプライベートな課題が優先される時期です。${oppNick}様が距離を置いているように感じられても、それは拒絶ではなくエネルギー補充です。焦らず温かく見守る姿勢が信頼の種となります。`
-            },
-            {
-              title: '2. 会話と伝わり方',
-              intro: `言葉のニュアンスに少しズレが生じやすい時期ですが、思いやりを持ったシンプルな表現で十分に補えます。`,
-              detail: `${oppNick}様は現在、自分のペースを守りたい気持ちが強まっています。長文や返信を急かす表現を避け、「返信は気にしないでね」という一言を添える余裕が安心感を与えます。`
-            },
-            {
-              title: '3. 惹かれ合うポイント',
-              intro: `お互いの価値観の違いが目につきやすい時期ですが、それはお互いを深く知るための貴重なプロセスです。`,
-              detail: `相手の行動を自分の価値観で決めつけず、「そういう考えもあるんだね」と受け止める広い心が引き寄せの鍵です。自分の時間も大切にすることで、魅力的なオーラが復活します。`
-            },
-            {
-              title: '4. 運命の転機日とアプローチ',
-              intro: `運気は静かな調整期ですが、小さなチャンスの種が蒔かれています。`,
-              detail: `無理に大きなアプローチをせず、相手の誕生日やイベントなどの自然な口実を活用した軽やかな連絡が吉となります。`
-            },
-            {
-              title: '5. 最終的な結びつき',
-              intro: `今は焦らず、自分自身の幸せの軸をしっかり整えることで未来が開かれます。`,
-              detail: `一歩一歩着実に歩みを進めることで、必要なタイミングで必要な絆が結ばれます。自分の内なる声を大切にし、笑顔で過ごす日々が最高の幸運を引き寄せます。`
-            }
-          ];
+          topic1Intro = `二人の関係は現在、互いの境界線を尊重し土台を整える「基盤構築」のフェーズにあります。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：一時的にお相手が自分の世界に入り込んでいるように見えても、それはあなたを拒絶しているのではなく、エネルギーを補給している合図です。焦らず温かい見守りを続けることが信頼の種となります。`;
         } else {
-          return [
-            {
-              title: '1. 二人の関係性',
-              intro: `運気の波が一時的に「六沖・相剋」の波紋を描いており、些細なすれ違いが起きやすい注意期です。感情に任せたアプローチは避け、静観を保ちましょう。${astroNote}`,
-              detail: `${myNickname}様とお相手（${oppNick}様）の思考パターンの違いから、意思疎通にギャップが生じやすい配置です。今は白黒をつけようとせず、相手のスペースを確保してあげることで、無用な摩擦を回避し未来の好転に繋がります。`
-            },
-            {
-              title: '2. 会話と伝わり方',
-              intro: `感情が先走りやすく、誤解を生みやすい会話の波動が出ているため、慎重なコミュニケーションが必要です。`,
-              detail: `今は重大な話し合いや白黒をつける対話は避けてください。日常の短い挨拶程度にとどめ、相手が落ち着くまで時間の猶予を与えることが関係修復の最短ルートです。`
-            },
-            {
-              title: '3. 惹かれ合うポイント',
-              intro: `価値観の衝突が起きやすく、引き寄せの磁力が一時的に低下している状態です。`,
-              detail: `今はお相手への依存や過剰な期待を手放し、自分の好きなことや内面の充実に意識を向けるべき時です。あなたが自分を愛することで、お相手からの引き寄せも自然と戻ってきます。`
-            },
-            {
-              title: '4. 運命の転機日とアプローチ',
-              intro: `今は無理に運命を動かそうとせず、嵐が過ぎるのを待つ充電の時期です。`,
-              detail: `転機日は少し先になります。今は自分磨きやお部屋の模様替えなど、エネルギーを蓄えるアクションに集中することで、次の好運期を最高の状態で迎えられます。`
-            },
-            {
-              title: '5. 最終的な結びつき',
-              intro: `どんな運気の波であっても、あなたの選択と行動次第で未来はいくらでも好転させられます。`,
-              detail: `今の試練はお互いが大きく成長するための大切なレッスンです。執着を手放し、まずは自分自身を慈しむことで、運命の流れる方向が劇的に好転していきます。`
-            }
-          ];
+          topic1Intro = `命式の波が一時的に「相剋・慎重」の波紋を描いており、些細なすれ違いが起きやすい注意期です。感情に任せたアプローチは避け、静観を保ちましょう。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：今は無理に白黒をつけようとせず、相手のスペースを確保してあげることが最善の選択です。まずはあなた自身の心を優しく満たすことで、不要な摩擦を回避し運気の好転を促せます。`;
         }
-      } else {
+      } else { // ren
         if (score >= 85) {
-          return [
-            {
-              title: '1. 二人の関係性',
-              intro: `命式データおよび認知傾向の分析により、両者は極めて高い補完構造を有していると実証されます。${myNickname}様の行動力と${oppNick}様の思考様式が最高水準で噛み合っています。${astroNote}`,
-              detail: `四柱推命の日干生剋パラメータおよび16タイプ分析（${mbtiLabel}）において、衝突リスクが極限まで低いゴールデンペアと判定されます。現在の高いスコアを活かし、将来の具体的な方針や約束を取り付ける論理的交渉を実行すべきタイミングです。`
-            },
-            {
-              title: '2. 会話と伝わり方',
-              intro: `会話の伝達効率が最高水準にあります。${myNickname}様の論理的で明確な発言が${oppNick}様にストレートに響きます。`,
-              detail: `${oppNick}様（${mbtiLabel}）の意思決定プロセスの特性を踏まえ、具体的提案（場所・日時・目的）を5W1Hで提示してください。返信率は90%以上と試算され、確実な合意形成が可能です。`
-            },
-            {
-              title: '3. 惹かれ合うポイント',
-              intro: `双方の弱点を補う最高水準のシナジー効果がデータ上確認されています。`,
-              detail: `${myNickname}様と${oppNick}様（${mbtiLabel}）は、片方が欠いている意思決定軸や感性を相手が完璧にカバーできる関係です。ただし、相手のプライベートゾーンを侵害する行為（過度な干渉・スケジュール管理）は絶対厳禁の地雷となります。対等な個としてのリスペクトを維持することが長期的関係の絶対条件です。`
-            },
-            {
-              title: '4. 運命の転機日とアプローチ',
-              intro: `定量データ分析により、二人のアプローチ成功確率が最大化する「最適Xデー」を特定しました。`,
-              detail: `本日の運気予測および月柱バイオリズムの交差点において、対話の合意形成率が90%を超える転機日が導き出されます。この日付に合わせて具体的なプラン（時間帯・場所・提案内容）を準備し、迷わず実行することが成功を確定させます。`
-            },
-            {
-              title: '5. 最終的な結びつき',
-              intro: `全占術・性格分析データの統合評価における最終結論を出力します。`,
-              detail: `${myNickname}様と${oppNick}様のパートナーシップは、理論的にも感情的にも極めて強固な成功確率を示しています。提示されたアクションプランとロジックを忠実に実行することで、望む関係性の定義（成就・将来の約束）は極めて高確率で達成されると結論づけられます。`
-            }
-          ];
+          topic1Intro = `命式データおよび認知機能の定量分析により、両者は極めて高い補完シナジー構造を有していると実証されます。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：日干の五行生剋バランスおよび九星気学のデータから、両者の衝突リスクは極小と算出されます。この追い風の局面を逃さず、将来の具体的な方針や約束を取り付ける論理的交渉を進めるべきタイミングです。`;
         } else if (score >= 70) {
-          return [
-            {
-              title: '1. 二人の関係性',
-              intro: `両者の関係性は着実な上昇トレンドを描いています。${oppNick}様の行動パターンを客観的に観察し、相手の認知特性に合わせたスマートなコミュニケーション設計が有効です。${astroNote}`,
-              detail: `命式における五行分配率から、双方が良好なビジネスパートナー兼恋愛相手として機能する構造が確認できます。感情的な要求ではなく、事実に基く共通の目標・趣味を設定することで、効率的に親密性を向上させられます。`
-            },
-            {
-              title: '2. 会話と伝わり方',
-              intro: `対話における情報伝達は円滑です。感情論ではなく、共通の話題や事実情報を中心としたコミュニケーションが最も奏功します。`,
-              detail: `お相手の認知スタイルに合わせた文面構成（要点を最初に書く、疑問形は1つに絞る等）を徹底することで、無駄なすれ違いを完全に防止し、信頼度を高められます。`
-            },
-            {
-              title: '3. 惹かれ合うポイント',
-              intro: `互いの長所が引き出される良好なアライアンス関係が構築されています。`,
-              detail: `お相手は${myNickname}様の判断力や自立した姿勢に強い敬意を抱いています。感情的な依存を避け、目標に向かって高め合える「良きパートナー」としてのスタンスを提示することがアプローチ成功の秘訣です。`
-            },
-            {
-              title: '4. 運命の転機日とアプローチ',
-              intro: `運気の好調期を活用したスケジュール策定が推奨されます。`,
-              detail: `週次スコアが高水準を示す日にフォーカスし、相手が承諾しやすい負荷の低いオファー（短時間のランチやコーヒー等）を提示するのが最も再現性の高い戦略です。`
-            },
-            {
-              title: '5. 最終的な結びつき',
-              intro: `計画的かつ継続的なアプローチにより、安定した成就への到達が期待されます。`,
-              detail: `感情の揺れを抑え、客観的な戦略に基づいてコミュニケーションを継続してください。確かな信頼の積み重ねが、最終的な勝利（永続的パートナーシップ）を担保します。`
-            }
-          ];
+          topic1Intro = `両者の関係性は着実な上昇トレンドを描いています。相手の認知行動パターンを客観的に観察し、スマートな関係構築が可能です。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：感情論ではなく、共通の目標や趣味、事実情報をベースに対話を重ねることで、効率的に親密性を高められます。`;
         } else if (score >= 55) {
-          return [
-            {
-              title: '1. 二人の関係性',
-              intro: `現在の相性パラメータはボラティリティの低いフラット状態です。強引なプロモーション（アプローチ）はコストに見合わないため、リソースを現状維持に配分すべきです。${astroNote}`,
-              detail: `${oppNick}様のストレス耐性と意思決定プロセスの遅れが検知されています。これは個人的感情ではなくバイオリズムの周期に依存するため、返信催促等の過剰アプローチは厳禁です。3〜5日スパンでの事実ベースの定期連絡を推奨します。`
-            },
-            {
-              title: '2. 会話と伝わり方',
-              intro: `対話の応答速度が低下しやすい調整期です。お相手の処理能力を超えた情報量を送信しないよう制御が必要です。`,
-              detail: `${oppNick}様は現在仕事や個人的課題にリソースを割いており、恋愛優先度が低下しています。メッセージは3行以内の短い確認・労い文章に制限し、プレッシャーをゼロに抑えるのが合理的です。`
-            },
-            {
-              title: '3. 惹かれ合うポイント',
-              intro: `価値観の差異が目立つものの、適切な距離感を保てば問題になりません。`,
-              detail: `お相手（${oppNick}様）の防衛本能を刺激するNG行動（返信の催促、感情的な詰問）は厳禁です。相手の行動原理を「異文化」として客観認識し、ドライかつクールな接し方を維持してください。`
-            },
-            {
-              title: '4. 運命の転機日とアプローチ',
-              intro: `現在はローリスク・ローリターンの安定運用期です。`,
-              detail: `大きな提案は避け、相手のスケジュールの空き状況や関心事をリサーチするデータ収集フェーズと位置づけて行動してください。`
-            },
-            {
-              title: '5. 最終的な結びつき',
-              intro: `現状の課題を分析・改善し、適切な軌道修正を行うことで着実な進展が可能です。`,
-              detail: `課題を特定し、相手の認知特性に合わせたアプローチのアップデートを継続してください。論理的な修正が次の成果を生みます。`
-            }
-          ];
+          topic1Intro = `現在の相性パラメータはボラティリティの低いフラット推移です。強引なアプローチはコストに見合わないため、現状維持戦略が合理的です。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：相手の意思決定プロセスや心理的余裕の低下が検知されています。返信催促などの過剰アプローチは厳禁とし、3〜5日スパンの事実ベースの定期連絡に留めるのが最適解です。`;
         } else {
-          return [
-            {
-              title: '1. 二人の関係性',
-              intro: `現在の相性指標には「摩擦リスク」が検知されています。相手のパーソナルゾーンに対する不用意な侵入は、致命的な距離拡大を引き起こします。${astroNote}`,
-              detail: `日柱の干支相互作用において一時的な相剋関係が発生しています。${oppNick}様（${mbtiLabel}）は現在防衛フェーズにあり、感情的な長文メッセージは強い拒否反応を誘発します。コンタクト頻度を通常の30%以下に削減し、静観戦略を取ることが最善のリスクヘッジです。`
-            },
-            {
-              title: '2. 会話と伝わり方',
-              intro: `コミュニケーションにおけるノイズと誤解の発生率が高まっています。不用意な発言は裏目に出る可能性が大です。`,
-              detail: `お相手の「NGワード」や心理的拒絶反応を引き起こす文面傾向が検出されています。議論や問い詰めるような連絡は即刻中止し、必要最小限の業務連絡的トーンに留めてください。`
-            },
-            {
-              title: '3. 惹かれ合うポイント',
-              intro: `性格タイプおよび命式の相互干渉において不協和音が検知されています。`,
-              detail: `現在の配置では、アプローチを強化するほどお相手の回避傾向が高まります。一時的にアプローチを完全停止し、自己のデータ（環境・スキル・外見）を再設計することが再浮上の最適戦略です。`
-            },
-            {
-              title: '4. 運命の転機日とアプローチ',
-              intro: `アプローチにおけるハイリスク期が続いています。`,
-              detail: `現在の転機日データは「静観推奨」を示しています。アクションを起こすほど成功確率は低下するため、次期の運気上昇期まで一切の仕掛けを凍結するのが論理的最適解です。`
-            },
-            {
-              title: '5. 最終的な結びつき',
-              intro: `現時点での評価とリスク管理に関する最終アドバイスです。`,
-              detail: `無謀な突入は避け、状況を客観的に再評価してください。戦略を練り直す冷却期間を設けることが、将来的な成功確率を最大化させる唯一の合理ルートです。`
-            }
-          ];
+          topic1Intro = `現在の命式相互作用には一時的な「摩擦リスク」が検知されています。相手のパーソナルゾーンに対する不用意な侵入は厳禁です。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：お相手（${mbtiLabel}）は現在防衛フェーズにあり、感情的な長文メッセージは強い反発を招きます。接触頻度を通常の30%以下に抑制し、静観戦略を取ることが最善のリスクヘッジです。`;
         }
       }
+
+      // Topic 2: 会話と伝わり方・LINE心理学
+      const oppLineHabit = oppMbtiTrait?.lineHabit || 'マイペースで丁寧なやり取りを好む傾向があります。';
+      const oppDelayReason = oppMbtiTrait?.delayDeepReason || oppStemTrait?.delayReason || '自分の作業やタスクに没頭し、一人の充電時間を必要としているため。';
+      const oppLineTopic = oppMbtiTrait?.lineTopic || '「最近ハマっていることや好きなこと」';
+      const tfText = mbtiDyn?.tfText || '';
+      const jpText = mbtiDyn?.jpText || '';
+
+      let topic2Intro = '';
+      let topic2Detail = '';
+      if (character === 'tsuki') {
+        if (score >= 85) {
+          topic2Intro = `お二人の間には、言葉の裏にある優しさやニュアンスが直感的に伝わる最高の対話運が巡っています。`;
+          topic2Detail = `📱 お相手（${oppNick}様）のLINE癖：${oppLineHabit}\n\n⏳ 返信が遅い深層理由：${oppDelayReason}\n\n💡 心を通わせるヒント：${tfText} ${jpText}\n\n🌙 月からのアドバイス：メッセージを送るなら、相手がホッと一息つける21:00〜23:00頃が黄金時間帯です。${oppLineTopic}について軽く振ってみると、相手は嬉しそうに心を開いてくれます。`;
+        } else if (score >= 70) {
+          topic2Intro = `会話の波長は良好で、お互いの価値観を穏やかに共有できる時期です。`;
+          topic2Detail = `📱 お相手（${oppNick}様）のLINE癖：${oppLineHabit}\n\n⏳ 返信が遅い深層理由：${oppDelayReason}\n\n💡 対話のポイント：${tfText} ${jpText}\n\n🌙 月からのアドバイス：相手が悩みや本音を漏らした時は、急いでアドバイスをせず「そうだったんだね」と優しく受け止める姿勢が絆を定着させます。`;
+        } else if (score >= 55) {
+          topic2Intro = `言葉の受け取り方に少しズレが生じやすい時期ですが、相手のペースを尊重することで安心感が深まります。`;
+          topic2Detail = `📱 お相手（${oppNick}様）のLINE癖：${oppLineHabit}\n\n⏳ 返信が遅い深層理由：${oppDelayReason}\n\n💡 すれ違いを防ぐ鍵：${tfText} ${jpText}\n\n🌙 月からのアドバイス：長文や返信を急かすメッセージは避け、「返信は時間がある時で大丈夫だよ」という一言を添える余裕が相手に絶大な安心感を与えます。`;
+        } else {
+          topic2Intro = `感情が先走りやすく、誤解を生みやすい会話の波動が出ているため、慎重なコミュニケーションが必要です。`;
+          topic2Detail = `📱 お相手（${oppNick}様）のLINE癖：${oppLineHabit}\n\n⏳ 返信が遅い深層理由：${oppDelayReason}\n\n💡 リスク回避の注意点：${tfText} ${jpText}\n\n🌙 月からのアドバイス：今は重大な話し合いや白黒をつける対話は避けてください。日常の短い挨拶程度にとどめ、相手が落ち着くまで時間の猶予を与えることが関係修復の最短ルートです。`;
+        }
+      } else { // ren
+        if (score >= 85) {
+          topic2Intro = `認知行動分析により、会話の伝達効率が最高水準にあります。${myNickname}様の明確な発信がお相手にストレートに響きます。`;
+          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信遅延の内部ロジック：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：お相手の意思決定プロセスに合わせ、5W1Hで用件を明確にした3行以内の提案が極めて高い返信率（90%以上）をもたらします。話題には${oppLineTopic}を選定してください。`;
+        } else if (score >= 70) {
+          topic2Intro = `対話における情報伝達は円滑です。感情論ではなく、事実情報や共通の興味を中心としたコミュニケーションが奏功します。`;
+          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信遅延の内部ロジック：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：要点を冒頭に置き、疑問形は1通につき1つに絞ることで、相手の返信負荷を最小化し安定したやり取りを継続できます。`;
+        } else if (score >= 55) {
+          topic2Intro = `対話の応答速度が低下しやすい調整期です。相手の情報処理キャパシティを超えない文量制御が必須です。`;
+          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信遅延の内部ロジック：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：現在は仕事等の個人的タスクに相手のリソースが割かれています。メッセージは労いを含む短文に限定し、返信プレッシャーをゼロに抑えるのが合理的です。`;
+        } else {
+          topic2Intro = `コミュニケーションにおけるノイズと誤解の発生率が高まっています。不用意な発言は裏目に出るリスクが大です。`;
+          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信遅延の内部ロジック：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：議論や問い詰めるような文面は即刻中止してください。必要最小限の業務連絡トーンに留め、冷却期間を置くことが最適です。`;
+        }
+      }
+
+      // Topic 3: 惹かれ合うポイント＆地雷行動3選
+      const oppFallInLove = oppMbtiTrait?.fallInLove || '飾らない素直な笑顔と、自分の世界観を認めてくれた瞬間。';
+      const oppKilling = oppMbtiTrait?.killingExtra || (oppStemTrait ? `「${oppStemTrait.praise}」` : '「あなたの誠実さを心から尊敬している」');
+      const ng1 = oppMbtiTrait?.ngList[0] || '相手のペースを無視した連絡の連投';
+      const ng2 = oppMbtiTrait?.ngList[1] || '感情的な詰問や試し行為';
+      const ng3 = oppMbtiTrait?.ngList[2] || 'プライベートな領域への過度な干渉';
+      const stemNgNote = oppStemTrait ? `（さらに日干【${oppPillarObj?.stem}】の宿命上、『${oppStemTrait.ng}』も強い拒絶反応を招きます）` : '';
+
+      let topic3Intro = '';
+      let topic3Detail = '';
+      if (character === 'tsuki') {
+        if (score >= 85) {
+          topic3Intro = `二人が互いに持つ五行と心のエネルギーが完璧なグラデーションを描いて惹かれ合っています。`;
+          topic3Detail = `💘 お相手（${oppNick}様）が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 相手の心を溶かす黄金の褒め言葉：\n${oppKilling}\n\n⚠️ 【絶対にやってはいけない地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：小手先の駆け引きではなく、相手の良さを素直に言葉で讃え、地雷行動を避けることが永続的な愛の絆を育みます。`;
+        } else if (score >= 70) {
+          topic3Intro = `異なる魅力が互いを引き寄せ合い、知るほどに愛おしさが増す相性です。`;
+          topic3Detail = `💘 お相手が惹かれる本質：\n${oppFallInLove}\n\n✨ 相手を喜ばせる褒め言葉：\n${oppKilling}\n\n⚠️ 【注意すべき地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：相手のパーソナルスペースを大切に守りながら、たまに見せる素直な甘えや感謝が、相手の「守りたい」意欲を強く刺激します。`;
+        } else if (score >= 55) {
+          topic3Intro = `お互いの価値観の違いが目につきやすい時期ですが、それはお互いを深く知るための大切なステップです。`;
+          topic3Detail = `💘 お相手の心を開く鍵：\n${oppFallInLove}\n\n✨ 響く褒め言葉：\n${oppKilling}\n\n⚠️ 【警戒すべき地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：自分の価値観を押し付けず、「そういう考えもあるんだね」と受け止める広い心が、引き寄せの磁力を再び強くします。`;
+        } else {
+          topic3Intro = `価値観の衝突が起きやすく、引き寄せの磁力が一時的に低下している状態です。`;
+          topic3Detail = `💘 本来お相手が心を開くポイント：\n${oppFallInLove}\n\n⚠️ 【絶対に避けるべき地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：今は相手への過剰な期待や執着を手放し、自分の好きなことや内面の充実に意識を向けるべき時です。あなたが自分を慈しむことで、お相手からの引き寄せも自然と戻ってきます。`;
+        }
+      } else { // ren
+        if (score >= 85) {
+          topic3Intro = `双方の弱点を補い合う最高水準のシナジー効果がデータ上確認されています。`;
+          topic3Detail = `💘 お相手（${mbtiLabel}）の意思決定トリガー：\n${oppFallInLove}\n\n✨ 効果的な評価フィードバック：\n${oppKilling}\n\n⚠️ 【リスク管理：厳禁の地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：対等な個としてのリスペクトを維持し、上記地雷を100%回避することが、関係性の破綻リスクをゼロに抑える絶対条件です。`;
+        } else if (score >= 70) {
+          topic3Intro = `互いの長所が引き出される良好なアライアンス関係が構築されています。`;
+          topic3Detail = `💘 お相手が惹かれるポイント：\n${oppFallInLove}\n\n✨ 推奨する褒め言葉：\n${oppKilling}\n\n⚠️ 【警戒すべきNG行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：感情的な依存を避け、目標に向かって高め合える「良きパートナー」としてのスタンスを提示することがアプローチ成功の秘訣です。`;
+        } else if (score >= 55) {
+          topic3Intro = `価値観の差異が目立つものの、適切な距離感を維持すれば摩擦は防げます。`;
+          topic3Detail = `💘 お相手の心理トリガー：\n${oppFallInLove}\n\n⚠️ 【防衛反応を誘発するNG行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手の行動原理を「異文化」として客観認識し、ドライかつ礼儀正しい接し方を維持してください。`;
+        } else {
+          topic3Intro = `性格タイプおよび命式の相互干渉において不協和音が検知されています。`;
+          topic3Detail = `⚠️ 【致命的拒絶を引き起こす地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：現在の配置では、アプローチを強化するほど相手の回避傾向が高まります。上記地雷を厳重に避け、一時的にアプローチを完全停止するのが論理的最適解です。`;
+        }
+      }
+
+      // Topic 4: 運命の転機日とアプローチ計画
+      const oppDateSpot = oppMbtiTrait?.dateSpot || '落ち着いた雰囲気の静かなカフェや景色の良いレストラン';
+      const oppLineInvite = oppMbtiTrait?.lineInvite || '「素敵なお店を見つけたんだけど、今度一緒に行かない？」';
+
+      let topic4Intro = '';
+      let topic4Detail = '';
+      if (character === 'tsuki') {
+        if (score >= 85) {
+          topic4Intro = `今後1ヶ月の運気推移の中で、二人の距離が急接近する絶好の「運命の転機日」が特定されています。`;
+          topic4Detail = `📍 お相手（${oppNick}様）が最も喜ぶデートスポット：\n${oppDateSpot}\n\n💌 心を動かすお誘いテンプレート：\n${oppLineInvite}\n\n🌙 月からのアドバイス：日柱干支の共鳴が最高潮に達する好運日（週次予測の絶好調日）において、二人きりになれる機会が巡ってきます。その日は躊躇せず、このスポットとお誘い文句を活用して素直な想いを伝えましょう。一気に進展へ結びつきます。`;
+        } else if (score >= 70) {
+          topic4Intro = `運気が追い風に変わるチャンス日が複数特定されています。自然なお誘いが奏功します。`;
+          topic4Detail = `📍 お相手がリラックスできるスポット：\n${oppDateSpot}\n\n💌 おすすめのお誘いフレーズ：\n${oppLineInvite}\n\n🌙 月からのアドバイス：焦って勝負をかける必要はありませんが、吉日に合わせた軽やかなお誘いで、相手の心が大きくあなたへ傾くきっかけを作れます。`;
+        } else if (score >= 55) {
+          topic4Intro = `運気は静かな調整期ですが、小さなチャンスの種が蒔かれています。`;
+          topic4Detail = `📍 負担の少ないおすすめスポット：\n${oppDateSpot}\n\n💌 重くならないお誘い表現：\n${oppLineInvite}\n\n🌙 月からのアドバイス：無理に大きな提案をせず、相手の趣味やイベントなどの自然な口実を活用した軽やかな連絡が吉となります。`;
+        } else {
+          topic4Intro = `今は無理に運命を動かそうとせず、嵐が過ぎるのを待つ充電の時期です。`;
+          topic4Detail = `🌙 月からのアドバイス：転機日は少し先になります。今は直接のアプローチを控え、自分磨きやお部屋の模様替えなど、エネルギーを蓄えるアクションに集中することで、次の好運期を最高の状態で迎えられます。`;
+        }
+      } else { // ren
+        if (score >= 85) {
+          topic4Intro = `定量データ分析により、二人のアプローチ成功確率が最大化（90%以上）する「最適Xデー」を特定しました。`;
+          topic4Detail = `📍 承諾率最大化スポット：\n${oppDateSpot}\n\n💌 黄金お誘いテンプレート：\n${oppLineInvite}\n\n🔮 蓮のアクションプラン：週次スコアが85点を超えるXデーに焦点を合わせ、上記テンプレートの日程・場所を具体的に埋めて提示してください。迷わず実行することが成功を確定させます。`;
+        } else if (score >= 70) {
+          topic4Intro = `運気の好調期を活用したスケジュール策定が推奨されます。`;
+          topic4Detail = `📍 推奨ロケーション：\n${oppDateSpot}\n\n💌 アプローチテンプレート：\n${oppLineInvite}\n\n🔮 蓮のアクションプラン：週次スコアが高水準を示す日にフォーカスし、相手が承諾しやすい負荷の低いオファー（短時間のランチやコーヒー等）を提示するのが最も再現性の高い戦略です。`;
+        } else if (score >= 55) {
+          topic4Intro = `現在はローリスク運用の安定期です。`;
+          topic4Detail = `📍 将来の候補スポット：\n${oppDateSpot}\n\n🔮 蓮のアクションプラン：大きな提案は避け、相手のスケジュールの空き状況や関心事をリサーチするデータ収集フェーズと位置づけて行動してください。`;
+        } else {
+          topic4Intro = `アプローチにおけるハイリスク期が続いています。`;
+          topic4Detail = `🔮 蓮のアクションプラン：現在のアプローチ成功確率は低調です。アクションを起こすほど摩擦リスクが高まるため、次期の運気上昇期まで一切の仕掛けを凍結するのが論理的最適解です。`;
+        }
+      }
+
+      // Topic 5: 最終的な結びつき
+      const pairType = mbtiDyn?.mbtiPairType || '認知補完ペア';
+      let topic5Intro = '';
+      let topic5Detail = '';
+      if (character === 'tsuki') {
+        if (score >= 85) {
+          topic5Intro = `月と蓮の鑑定が示す最終結論。お二人の絆はどんな試練も乗り越えられる本物の愛へと結びついています。`;
+          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}。\n\n全天文学・心理学データが、${myNickname}様と${oppNick}様が将来にわたって深く愛し合い、互いを支え合う最高の相性であることを証明しています。自分を信じ、相手を愛するその温かな心を持ち続ければ、理想の未来は確実にあなたの手の中にあります。`;
+        } else if (score >= 70) {
+          topic5Intro = `時間を重ねるほどに味わいと信頼が増していく、素晴らしい未来が約束されています。`;
+          topic5Detail = `命式と性格タイプの相互作用は、安定した絆の形成を示しています。焦らず二人のペースを慈しんで進んでください。お互いへの感謝と気遣いを忘れないことで、二人の関係は永久に輝き続ける温かな愛の居場所となります。`;
+        } else if (score >= 55) {
+          topic5Intro = `今は焦らず、自分自身の幸せの軸をしっかり整えることで未来が開かれます。`;
+          topic5Detail = `一歩一歩着実に歩みを進めることで、必要なタイミングで必要な絆が結ばれます。自分の内なる声を大切にし、笑顔で過ごす日々が最高の幸運を引き寄せます。`;
+        } else {
+          topic5Intro = `どんな運気の波であっても、あなたの選択とあり方次第で未来はいくらでも好転させられます。`;
+          topic5Detail = `今の試練はお互いが大きく成長するための大切なレッスンです。執着を手放し、まずは自分自身を慈しむことで、運命の流れる方向が劇的に好転していきます。`;
+        }
+      } else { // ren
+        if (score >= 85) {
+          topic5Intro = `四柱推命・九星気学・16タイプ統合診断の全データに基づく最終結論を出力します。`;
+          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}。\n\n理論的にも実証的にも極めて強固な成功確率を示しています。提示されたアクションプランとロジックを忠実に実行することで、望む関係性の定義（成就・将来の約束）は極めて高確率で達成されると結論づけられます。`;
+        } else if (score >= 70) {
+          topic5Intro = `計画的かつ継続的なアプローチにより、安定した成就への到達が期待されます。`;
+          topic5Detail = `感情の揺れを抑え、客観的な戦略に基づいてコミュニケーションを継続してください。確かな信頼の積み重ねが、最終的な勝利（永続的パートナーシップ）を担保します。`;
+        } else if (score >= 55) {
+          topic5Intro = `現状の課題を分析・改善し、適切な軌道修正を行うことで着実な進展が可能です。`;
+          topic5Detail = `課題を特定し、相手の認知特性に合わせたアプローチのアップデートを継続してください。論理的な修正が次の成果を生みます。`;
+        } else {
+          topic5Intro = `現時点での評価とリスク管理に関する最終アドバイスです。`;
+          topic5Detail = `無謀な突入は避け、状況を客観的に再評価してください。戦略を練り直す冷却期間を設けることが、将来的な成功確率を最大化させる唯一の合理ルートです。`;
+        }
+      }
+
+      return [
+        { title: '1. 二人の宿命と命式バランス', intro: topic1Intro, detail: topic1Detail },
+        { title: '2. 会話と伝わり方・LINE心理学', intro: topic2Intro, detail: topic2Detail },
+        { title: '3. 惹かれ合うポイント＆地雷行動3選', intro: topic3Intro, detail: topic3Detail },
+        { title: '4. 運命の転機日とアプローチ計画', intro: topic4Intro, detail: topic4Detail },
+        { title: '5. 最終的な結びつき', intro: topic5Intro, detail: topic5Detail }
+      ];
     } else {
+      // シングル（自分のみ）モード
+      const myStemPraise = myStemTrait?.praise || '芯の強さと誠実さ';
+      const myStemNg = myStemTrait?.ng || '無理な自己犠牲や我慢';
+      const myMbtiHabit = myMbtiTrait?.lineHabit || '自分のペースを守りながら丁寧に伝えるコミュニケーション。';
+      const myDateSpot = myMbtiTrait?.dateSpot || '落ち着いた雰囲気のおしゃれなカフェや自然のあるスポット';
+      const myNgItem = myMbtiTrait?.ngList[0] || '自分をすり減らすような無理な付き合い';
+
       if (character === 'tsuki') {
         if (score >= 85) {
           return [
             {
               title: '1. 本日の運勢と運気の流れ',
-              intro: `本日の運気はあなたの内なる感性と魅力を最高レベルに引き出す絶好調の配置となっています。`,
-              detail: `九星気学と四柱推命のエネルギーが一致し、あなたの自然体なオーラが周囲を引き寄せる一日です。無理に周囲に合わせる必要はありません。自分自身の心地よさを優先し、輝く時間を楽しみましょう。`
+              intro: `日柱（${myPillar}）と本命星（${myStarObj.name}）のエネルギーが完璧に共鳴する絶好調日です。`,
+              detail: `あなたの持つ本来のオーラ（${myStemPraise}）が最高潮に輝いています。周囲に無理に合わせる必要はありません。自分自身の心地よさを最優先することで、素晴らしい良縁が自然と引き寄せられます。`
             },
             {
-              title: '2. 自己表現と周囲へのアプローチ',
+              title: '2. 自己表現と周囲への伝わり方',
               intro: `素直な感情表現と温かな言葉遣いが、素敵な縁を手繰り寄せる秘訣です。`,
-              detail: `あなたの醸し出す優しさが周囲に伝わりやすい日です。感謝の言葉や笑顔を積極的に届けることで、思わぬ良縁やアプローチのきっかけが生まれます。`
+              detail: `あなたの16タイプ（${myMbtiLabel}）の特性（${myMbtiHabit}）が、周囲に大きな安心感を与えています。感謝の言葉や笑顔を積極的に届けることで、思わぬ良縁のきっかけが生まれます。`
             },
             {
-              title: '3. あなたの内に秘められた魅力',
+              title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `繊細な共感力と包容力が、本日の最大の引き寄せアイテムとなります。`,
-              detail: `他人を思いやる優しさが、異性にとって特別な安らぎとして映ります。自分自身の感性を誇りに思い、自信を持って人と接してください。`
+              detail: `✨ あなたの天性の魅力：${myStemPraise}\n⚠️ 注意すべき落とし穴：『${myNgItem}』や『${myStemNg}』に注意し、自分を安売りしない凛とした自尊心を保ってください。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
               intro: `五感を満たす新しい体験や、お気に入りの場所への外出が大開運を呼び込みます。`,
-              detail: `カフェやアートギャラリー、心地よい音楽が流れる場所へ足を運んでみましょう。偶然の素晴らしい出会いやアイデアがもたらされる大吉日です。`
+              detail: `おすすめの開運スポットは『${myDateSpot}』です。心地よい空間に身を置き、自分へのご褒美を楽しむことで、偶然の素晴らしい出会いやアイデアがもたらされます。`
             },
             {
               title: '5. 今後の可能性と総合アドバイス',
@@ -1548,19 +1812,19 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
               detail: `日柱のエネルギーが安定しており、周囲とのコミュニケーションがスムーズに進みます。小さな挑戦や新しい場所への参加が吉となります。`
             },
             {
-              title: '2. 自己表現と周囲へのアプローチ',
+              title: '2. 自己表現と周囲への伝わり方',
               intro: `自然体の笑顔と柔らかな立ち振る舞いが好印象を与える鍵となります。`,
               detail: `飾らない言葉で自分の好きなことや価値観を共有してみましょう。共感してくれる特別な候補者との距離が縮まります。`
             },
             {
-              title: '3. あなたの内に秘められた魅力',
+              title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `親しみやすさと上品な優しさが同居する魅力的なオーラが光っています。`,
-              detail: `聞き手に回る姿勢が相手に安心感を与えます。自分のペースを守りながら、心地よい関係を築いていきましょう。`
+              detail: `✨ 魅力の源泉：${myStemPraise}\n⚠️ 気をつけたい点：${myNgItem}を避け、自分のペースを守りましょう。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
               intro: `趣味の時間の充実や、気になっていたことへのアプローチが運気を押し上げます。`,
-              detail: `自分へのご褒美を準備したり、会いたい人に軽い連絡を入れてみることで、良い流れが生まれます。`
+              detail: `開運スポット（${myDateSpot}）に足を運んだり、自分を労わる時間を作ることで運気の循環が良くなります。`
             },
             {
               title: '5. 今後の可能性と総合アドバイス',
@@ -1576,14 +1840,14 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
               detail: `運気の波は落ち着いており、焦って新しい動きを起こす必要はありません。マイペースに自分自身を労わる時間を取りましょう。`
             },
             {
-              title: '2. 自己表現と周囲へのアプローチ',
+              title: '2. 自己表現と周囲への伝わり方',
               intro: `一歩引いた穏やかな接し方が、周囲に安心感を与える日です。`,
               detail: `無理に自己アピールをするのではなく、周囲の様子を優しく見守るスタンスが好感度を高めます。`
             },
             {
-              title: '3. あなたの内に秘められた魅力',
+              title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `芯の強さと温かい配慮があなたの隠れた魅力です。`,
-              detail: `目立たずとも確実な思いやりが周囲に安心感を与えています。自分を安売りせず、自尊心を大切にしてください。`
+              detail: `目立たずとも確実な思いやりが安心感を与えています。『${myStemNg}』に陥らないよう、自分へのご褒美を忘れずに。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
@@ -1604,12 +1868,12 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
               detail: `疲れや不安を感じやすい配置となっています。無理に出かけたり重要な決断を下すのは避け、ゆっくり休息を取りましょう。`
             },
             {
-              title: '2. 自己表現と周囲へのアプローチ',
+              title: '2. 自己表現と周囲への伝わり方',
               intro: `感情的な発言を控え、聞き役に徹することがトラブル防止の鍵です。`,
               detail: `今日は相手の主張を客観的に受け止めるスタンスを保ち、自分の感情を落ち着かせることが大切です。`
             },
             {
-              title: '3. あなたの内に秘められた魅力',
+              title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `静かな忍耐力と自己を客観視できる知性が備わっています。`,
               detail: `周りの喧騒に惑わされず、静かに自分の心と向き合える姿勢が長期的には大きな強みとなります。`
             },
@@ -1625,28 +1889,28 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             }
           ];
         }
-      } else {
+      } else { // ren single
         if (score >= 85) {
           return [
             {
               title: '1. 本日の運勢と運気の流れ',
               intro: `行動力と分析力が冴え渡る最高水準の開運日です。明確な目標設定と計画実行が大きな成果を生みます。`,
-              detail: `四柱推命・九星気学のデータが示す通り、本日のパフォーマンスは極めて高く維持されます。出会いの場や自分磨きのプロジェクトを積極的に始動してください。`
+              detail: `四柱推命・九星気学のデータが示す通り、本日のパフォーマンスは極めて高く維持されます。あなたの強みである『${myStemPraise}』を存分に発揮してください。`
             },
             {
-              title: '2. 自己表現と周囲へのアプローチ',
+              title: '2. 自己表現と周囲への伝わり方',
               intro: `知的で洗練されたプレゼンテーションが周囲を魅了します。`,
-              detail: `自分のビジョンや考えをロジカルに提示することで、高いリスペクトを集め、質の高いパートナーシップの芽が育ちます。`
+              detail: `16タイプ（${myMbtiLabel}）の知性を活かし、論理的かつ端的にビジョンを提示することで、質の高いパートナーシップの芽が育ちます。`
             },
             {
-              title: '3. あなたの内に秘められた魅力',
+              title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `自立した知性と問題解決能力があなたの最大の武器です。`,
-              detail: `感情に振り回されない冷静な判断力が、大人の魅力として周囲に強く印象付けられます。自信を持って行動してください。`
+              detail: `✨ コア能力：${myStemPraise}\n⚠️ リスク要因：『${myNgItem}』や完璧主義による消耗に注意し、適度な休息を組み込んでください。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
               intro: `スキルアップや知的なコミュニティへの参加が将来の良縁を引き寄せます。`,
-              detail: `関心のあるセミナーや読書、将来の目標設定をノートにまとめることで、運命の引き寄せ確率が跳ね上がります。`
+              detail: `推奨スポットは『${myDateSpot}』。関心のある分野のインプットや目標の言語化が、運命の引き寄せ確率を跳ね上げます。`
             },
             {
               title: '5. 今後の可能性と総合アドバイス',
@@ -1662,12 +1926,12 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
               detail: `思考がクリアであり、効率的な選択が可能です。自分にとって価値ある人間関係や投資にフォーカスしてください。`
             },
             {
-              title: '2. 自己表現と周囲へのアプローチ',
+              title: '2. 自己表現と周囲への伝わり方',
               intro: `シンプルかつスマートな意思表示が相手の信頼を獲得します。`,
               detail: `冗長な説明を避け、要点を端的に伝えるコミュニケーションがあなたの知的な印象を強調します。`
             },
             {
-              title: '3. あなたの内に秘められた魅力',
+              title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `客観的な視点と冷静な判断バランスが光っています。`,
               detail: `頼り甲斐のある大人の雰囲気があり、周囲から一目置かれる存在感を発揮できます。`
             },
@@ -1690,12 +1954,12 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
               detail: `急な進展や大きな勝負をかける時期ではありません。現状のデータや行動パターンを静かにレビューしてください。`
             },
             {
-              title: '2. 自己表現と周囲へのアプローチ',
+              title: '2. 自己表現と周囲への伝わり方',
               intro: `過剰な主張を避け、冷静な観察役に徹するのが合理的です。`,
               detail: `周囲の意見や状況を客観的に分析し、次のアプローチに向けた情報収集に専念しましょう。`
             },
             {
-              title: '3. あなたの内に秘められた魅力',
+              title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `感情に捉われないドライな理知性とリスク回避能力です。`,
               detail: `無駄なトラブルを回避するスマートさが、あなたの生活の質を高めています。`
             },
@@ -1718,12 +1982,12 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
               detail: `本日は不要なエネルギー消費を避け、無謀な行動や突発的なコミュニケーションは凍結するのが安全です。`
             },
             {
-              title: '2. 自己表現と周囲へのアプローチ',
+              title: '2. 自己表現と周囲への伝わり方',
               intro: `誤解を防ぐため、必要最小限のシンプルなやり取りに留めてください。`,
               detail: `自身の発言が意図と異なる伝わり方をするリスクがあるため、慎重かつ控えめな対応を推奨します。`
             },
             {
-              title: '3. あなたの内に秘められた魅力',
+              title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `危機察知能力と高い自己コントロール能力が備わっています。`,
               detail: `感情的にならず自制心を保てる点が、混乱した状況下で最大の防御力となります。`
             },
