@@ -1652,11 +1652,11 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
 
       // Topic 3: 惹かれ合うポイント＆地雷行動3選
       const oppFallInLove = oppMbtiTrait?.fallInLove || '飾らない素直な笑顔と、自分の世界観を認めてくれた瞬間。';
-      const oppKilling = oppMbtiTrait?.killingExtra || (oppStemTrait ? `「${oppStemTrait.praise}」` : '「あなたの誠実さを心から尊敬している」');
+      const oppKilling = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「あなたの誠実さを心から尊敬している」');
       const ng1 = oppMbtiTrait?.ngList[0] || '相手のペースを無視した連絡の連投';
       const ng2 = oppMbtiTrait?.ngList[1] || '感情的な詰問や試し行為';
       const ng3 = oppMbtiTrait?.ngList[2] || 'プライベートな領域への過度な干渉';
-      const stemNgNote = oppStemTrait ? `（さらに日干【${oppPillarObj?.stem}】の宿命上、『${oppStemTrait.ng}』も強い拒絶反応を招きます）` : '';
+      const stemNgNote = oppStemTrait ? `（さらに日干【${oppPillarObj?.stem}】の宿命上、『${oppStemTrait.ng.join('』『')}』も強い拒絶反応を招きます）` : '';
 
       let topic3Intro = '';
       let topic3Detail = '';
@@ -1769,8 +1769,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       ];
     } else {
       // シングル（自分のみ）モード
-      const myStemPraise = myStemTrait?.praise || '芯の強さと誠実さ';
-      const myStemNg = myStemTrait?.ng || '無理な自己犠牲や我慢';
+      const myStemPraise = myStemTrait ? myStemTrait.praise[0] : '芯の強さと誠実さ';
+      const myStemNg = myStemTrait ? myStemTrait.ng.join('、') : '無理な自己犠牲や我慢';
       const myMbtiHabit = myMbtiTrait?.lineHabit || '自分のペースを守りながら丁寧に伝えるコミュニケーション。';
       const myDateSpot = myMbtiTrait?.dateSpot || '落ち着いた雰囲気のおしゃれなカフェや自然のあるスポット';
       const myNgItem = myMbtiTrait?.ngList[0] || '自分をすり減らすような無理な付き合い';
