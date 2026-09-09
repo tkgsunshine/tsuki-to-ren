@@ -412,7 +412,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             flexDirection: 'column',
             gap: '12px',
             alignItems: 'center',
-            transform: showOpponent ? 'none' : 'translateY(-28px)'
+            transform: 'none'
           }}>
             <div style={{
               display: 'flex',
@@ -806,7 +806,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               display: 'flex',
               flexDirection: 'column',
               gap: '0.3rem',
-              transform: showOpponent ? 'none' : 'translateY(-30px)'
+              transform: 'none'
             }}>
               {/* One Liner Message */}
               <div style={{
