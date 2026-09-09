@@ -2328,7 +2328,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span className="font-serif" style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#f8fafc' }}>
-                          {m.month}：<span style={{ color: visuals.textColor }}>{m.label}</span>
+                          {m.month}：<span style={{ 
+                            color: visuals.textColor,
+                            filter: isSubscribed ? 'none' : 'blur(4.5px)',
+                            userSelect: isSubscribed ? 'auto' : 'none'
+                          }}>{m.label}</span>
                         </span>
                         <span style={{
                           color: visuals.textColor,
@@ -2409,7 +2413,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span className="font-serif" style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#f8fafc' }}>
-                          {y.year}：<span style={{ color: visuals.textColor }}>{y.label}</span>
+                          {y.year}：<span style={{ 
+                            color: visuals.textColor,
+                            filter: isSubscribed ? 'none' : 'blur(4.5px)',
+                            userSelect: isSubscribed ? 'auto' : 'none'
+                          }}>{y.label}</span>
                         </span>
                         <span style={{
                           color: visuals.textColor,
