@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, X, Sparkles } from 'lucide-react';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
+import { generateChatResponse } from '../utils/chatEngine';
 
 interface ChatModalProps {
   character: 'ren' | 'tsuki';
@@ -59,203 +60,21 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  const oppDisplayName = result?.opponentAstrologyName?.replace(/👑魁罡👑 |👑極稀👑 /g, '') || 'お相手';
   const presetOptions = [
-    { key: 'no_reply', text: '好きな人から連絡が来ません' },
-    { key: 'unknown_feelings', text: '相手の気持ちが分からなくて不安です' },
-    { key: 'next_action', text: '次のアクションをどう起こすべきか迷っています' },
+    { key: 'no_reply', text: `${oppDisplayName}から連絡が来ない理由と対策は？` },
+    { key: 'unknown_feelings', text: `${oppDisplayName}の本音や脈ありサインを教えて` },
+    { key: 'next_action', text: `次のデートやお誘いはどう切り出すべき？` },
+    { key: 'torisetsu', text: `${oppDisplayName}の地雷（NG行為）と喜ぶツボは？` },
   ];
 
-  // Rotating fallback message index to prevent repeating identical messages
-  const [renFallbackIndex, setRenFallbackIndex] = useState(0);
-  const [tsukiFallbackIndex, setTsukiFallbackIndex] = useState(0);
-
   const getBotResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase();
-    const hasOpp = !!result?.opponentPillar;
-    const oppName = hasOpp ? (result?.opponentAstrologyName?.replace(/👑魁罡👑 |👑極稀👑 /g, '') || 'お相手') : 'お相手';
-    const oppMbti = result?.opponentMbtiCode || '不明';
-    const oppT = oppMbti.includes('T');
-    const myStem = result?.myPillar?.[0] || '甲';
-    const oppStem = result?.opponentPillar?.[0] || '己';
-    const torisetsu = result?.opponentTorisetsu;
-    const bestHour = result?.bestContactHour || '20:00〜21:30';
-
-    // 1. LINE・連絡・返信・既読スルー・未読に関する相談
-    if (input.includes('連絡') || input.includes('返信') || input.includes('既読') || input.includes('未読') || input.includes('line') || input.includes('ライン')) {
-      if (character === 'ren') {
-        const deepReason = torisetsu?.slowReplyPsychology || `${oppMbti}の認知特性上、重要タスクの処理中は私用連絡を後回しにする傾向があります。`;
-        const actionAdvice = torisetsu?.slowReplyAction || '焦って連投せず、要件を絞った軽やかな1通に留めるのが賢明です。';
-        return `【客観的データ分析】
-${oppName}様（${oppMbti}）の返信遅延の本質的な理由は「嫌悪」ではありません。
-命式と認知行動パターンから解析すると、${deepReason}
-
-🔮 蓮の戦略的一手：
-1. 追撃・催促メッセージは即時凍結してください。
-2. 送信推奨タイミングは本日【${bestHour}】。
-3. ${actionAdvice}
-
-感情で動くのではなく、相手の認知的キャパシティを計算に入れたアプローチが最短で既読・返信を勝ち取る唯一の方法です。`;
-      } else {
-        const deepReason = torisetsu?.slowReplyPsychology || '今は少し心のエネルギーを充電しているところです。';
-        return `連絡が途絶えたり返信が遅いと、胸がぎゅっと締め付けられて本当に不安になりますよね。そのお気持ち、月は痛いほどよくわかります。
-
-でも安心してくださいね。${oppName}様はあなたのことを嫌いになったわけではありません。${deepReason}
-
-🌙 月からの温かいメッセージ：
-本日の推奨時間帯は【${bestHour}】です。
-もし連絡するなら、「今日もお疲れ様♪ 返信は落ち着いた時でいいからね」と、相手の心の重荷をふわりと下ろしてあげる言葉を添えてみてください。あなたの優しさは、必ずお相手の心に光として届きますよ。`;
-      }
-    }
-
-    // 2. 相手の気持ち・本音・脈あり/脈なし・不安に関する相談
-    if (input.includes('気持ち') || input.includes('分から') || input.includes('不安') || input.includes('脈') || input.includes('好き') || input.includes('嫌い') || input.includes('本音')) {
-      const green1 = torisetsu?.greenFlagSign || 'メッセージの頻度が増え、日常の報告が届く。';
-      const green2 = torisetsu?.greenFlagLevel2 || 'あなたの好みや過去の言動を細かく覚えている。';
-      const redSign = torisetsu?.redFlagSign || '質問返しがなく、短文のみで会話を切り上げようとする。';
-      const recovery = torisetsu?.redFlagRecovery || '数日間連絡を控え、軽やかな話題で再アプローチする。';
-
-      if (character === 'ren') {
-        return `【相手の本音と脈あり判定データ】
-主観的な妄想や不安で相手の心理を推し量るのは極めて非合理的です。${oppName}様（${oppMbti}）の行動指標から測定してください。
-
-🟢 脈ありシグナル（高確率）：
-・Lv.1: ${green1}
-・Lv.2（本気度高）: ${green2}
-
-🔴 警戒シグナル（リスク検知）：
-・${redSign}
-・挽回プロトコル: ${recovery}
-
-推測ではなく、お相手があなたに対して選択した『実際の行動』だけを冷静にカウントしてください。手応えのデータは必ずそこにあります。`;
-      } else {
-        return `お相手の気持ちが見えないと、まるで暗闇を一人で歩いているように心細くなってしまいますよね。誰かを大切に想うからこそ、些細な変化にも心が揺れてしまうのです。
-
-${oppName}様（${oppMbti}）が見せるサインを、星の視点からそっとお伝えしますね。
-
-✨ 心を開いてくれているサイン：
-${green1}
-また、${green2}といった行動が見られたら、あなたの存在が相手の中でとても大きくなっている証拠です。
-
-⚠️ もし少し冷たく感じたら：
-${redSign}のような時は、相手が少し疲れているだけです。${recovery}を意識して、優しく見守ってあげてくださいね。`;
-      }
-    }
-
-    // 3. 次のアクション・デート・誘い方・どう動くべきか
-    if (input.includes('アクション') || input.includes('動く') || input.includes('どうすべき') || input.includes('迷って') || input.includes('デート') || input.includes('誘う') || input.includes('次')) {
-      const dateSpot = torisetsu?.idealDateSpot || '落ち着いた雰囲気のカフェや静かなレストラン';
-      const inviteMsg = torisetsu?.lineTemplateInvite || '「前話してたあのお店、行ってみない？」';
-      const killingWord = torisetsu?.killingWords?.[0] || '「有言実行で頼りになるところ尊敬してる」';
-
-      if (character === 'ren') {
-        return `【次期アプローチの最適解】
-感情論ではなく、5W1Hに基づく段階的アプローチを設計しましょう。
-
-📍 推奨スポット：
-『${dateSpot}』
-※${oppName}様の価値観（${oppMbti}）と日干五行（${oppStem}）に最も調和する環境です。
-
-💬 送信すべき招待メッセージ例文：
-${inviteMsg}
-
-💡 刺さる褒め言葉（心理的トリガー）：
-${killingWord}
-
-曖昧な「いつかご飯行こう」は承諾率を著しく低下させます。日程の二者択一（「金曜の夜か日曜の昼」等）を提示し、論理的に合意を取り付けてください。`;
-      } else {
-        return `次のステップへ進もうとするあなたの前向きな勇気、とても素敵です！
-
-${oppName}様と距離をぐっと縮めるための開運アクションをお伝えしますね。
-
-🌸 惹かれやすいデート空間：
-『${dateSpot}』
-お二人が自然体でいられ、心地よい波長が重なり合う特別な場所です。
-
-💌 そのまま送れるお誘いメッセージ：
-${inviteMsg}
-
-💕 心をキュンとさせる魔法の言葉：
-会話の合間に${killingWord}と伝えてみてください。お相手の警戒心がふっと解けて、あなたを特別な人として意識し始めますよ。`;
-      }
-    }
-
-    // 4. 相性・運勢・点数・宿命に関する相談
-    if (input.includes('相性') || input.includes('点数') || input.includes('占い') || input.includes('運勢') || input.includes('運命')) {
-      const base = result?.baseScore || 75;
-      const daily = result?.dailyScore || 80;
-      const title = result?.compatibilityTitle || '【宿命の調和】';
-      const oneLine = result?.oneLiner || 'お互いの長所を引き出し合う好運相性です。';
-
-      if (character === 'ren') {
-        return `【相性スコアおよび構造解析】
-二人の基本相性値：${base}点（${title}）
-本日のバイオリズム相性：${daily}点
-
-判定サマリー：
-${oneLine}
-
-命式（日柱：あなた【${myStem}】× 相手【${oppStem}】）と認知機能（MBTI：${oppMbti}）の複合データが示す通り、点数は運気の天井ではなく「攻略のベースライン」です。相手の心理特性（${oppT ? '論理・課題解決志向' : '共感・心情共有志向'}）に合わせたコミュニケーションを徹底することで、関係値は確実に引き上げられます。`;
-      } else {
-        return `星々の配置とお二人の魂のつながりを紐解いてみましょう。
-
-現在、二人の基本相性は【${base}点】、今日の運気は【${daily}点】という温かい光に包まれています。
-タイトルは『${title}』。
-
-${oneLine}
-
-数字以上に、あなたとお相手の間には見えない魂の結びつきがあります。焦らず、お互いの持っている優しさを信じて一歩ずつ歩んでいけば、必ず理想の未来へと花開いていきますよ。`;
-      }
-    }
-
-    // 5. 例文・テンプレ・文案の要求
-    if (input.includes('例文') || input.includes('文案') || input.includes('文章') || input.includes('なんて送') || input.includes('テンプレート')) {
-      const inviteMsg = torisetsu?.lineTemplateInvite || '「気になってたあのお店、今度一緒に行かない？」';
-      const topicMsg = torisetsu?.lineTemplateTopic || '「最近何かハマってることってある？」';
-
-      if (character === 'ren') {
-        return `【即実践可能なLINEメッセージ文案】
-
-① デート・食事への誘導文：
-${inviteMsg}
-
-② 雑談を再開させる質問文：
-${topicMsg}
-
-⚠️ 送信時の鉄則：
-長文は避け、スマホ画面でスクロール不要な3行以内に収めてください。送信タイミングは本日【${bestHour}】を推奨します。`;
-      } else {
-        return `お相手の心にすっと届く、優しいメッセージ文案をご用意しました♪
-
-💌 お誘いしたいとき：
-${inviteMsg}
-
-💬 自然に会話を始めたいとき：
-${topicMsg}
-
-絵文字やスタンプを添えて、あなたの温かい笑顔が目に浮かぶようなトーンで届けてあげてくださいね。応援しています！`;
-      }
-    }
-
-    // 6. 汎用フォールバック（命式・MBTI個別データ織り込み）
-    if (character === 'ren') {
-      const renFallbacks = [
-        `状況を論理的に整理しましょう。あなたの本質（日干【${myStem}】）とお相手の認知傾向（${oppMbti}）を照らし合わせると、現在の課題は「互いのコミュニケーション前提のズレ」に起因している可能性が高いです。感情で動く前に、お相手の取扱説明書（トリセツ）のNG行動を再確認し、リスクを排除した行動を取ってください。`,
-        `その疑問に対してデータから回答します。現在お二人の関係性は${result?.baseScore ? `基本相性${result.baseScore}点の軌道上` : '安定した推移'}にあります。感情に左右されて拙速な行動を起こすのではなく、相手の関心領域に合わせた的確な話題提供から対話を再構築するのが合理的です。`,
-        `お悩みの本質を見極めましょう。相手の心理機能（${oppT ? '思考機能T優位' : '感情機能F優位'}）を理解すれば、どのようなアプローチが相手の心を開くかは数学的に導き出せます。まずは日頃の接し方において、相手の境界線を尊重できているか見直してください。`
-      ];
-      const reply = renFallbacks[renFallbackIndex];
-      setRenFallbackIndex((prev) => (prev + 1) % renFallbacks.length);
-      return reply;
-    } else {
-      const tsukiFallbacks = [
-        `その深い想い、しっかりと受け止めました。誰かを真剣に愛しているからこそ、答えが見えなくて立ち止まってしまうのですよね。あなたの日干【${myStem}】の持つ温かいエネルギーは、間違いなく相手の心を癒やす力を持っています。焦らず、自分の心もたっぷり愛してあげてくださいね。`,
-        `胸の内のモヤモヤを打ち明けてくださってありがとうございます。お相手（${oppName}様）の星とあなたの星は、今も静かに共鳴し合っています。言葉にできない想いも、二人の絆を育む大切な糧になります。月の光が、あなたの恋路を優しく照らし守っていますよ。`,
-        `愛することに迷いを感じた時は、深呼吸して一度心を空っぽにしてみてください。宇宙の星々は、あなたにとって一番美しく花開くタイミングを知っています。あなたのピュアな優しさを信じて、穏やかな笑顔で過ごしてくださいね。奇跡はすぐそばにあります。`
-      ];
-      const reply = tsukiFallbacks[tsukiFallbackIndex];
-      setTsukiFallbackIndex((prev) => (prev + 1) % tsukiFallbacks.length);
-      return reply;
-    }
+    return generateChatResponse({
+      userInput,
+      character,
+      result,
+      history: messages
+    });
   };
 
   const getDiagnosedDataText = (): string => {
@@ -330,17 +149,25 @@ ${topicMsg}
         })
       });
       
+      if (!response.ok) {
+        throw new Error(`Chat API HTTP ${response.status}`);
+      }
+      
       const data = await response.json();
       setIsTyping(false);
       
+      const replyText = data.reply && !data.debug?.includes('API Key is missing') && !data.debug?.includes('Error')
+        ? data.reply
+        : getBotResponse(text);
+
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: data.reply || getBotResponse(text)
+        text: replyText
       };
       setMessages(prev => [...prev, botMsg]);
     } catch (err) {
-      console.error('Chat API error, falling back to local engine:', err);
+      console.log('Chat falling back to local engine:', err);
       setIsTyping(false);
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
