@@ -215,6 +215,11 @@ body {
   box-sizing: border-box;
 }
 
+.main-content > * {
+  flex-shrink: 0;
+  width: 100%;
+}
+
 .character-select-container {
   display: flex;
   flex-direction: column;

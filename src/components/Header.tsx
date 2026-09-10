@@ -9,7 +9,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
   return (
-    <header className="app-header" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden', padding: 'calc(0.6rem + var(--safe-top, 0px)) 0.75rem 0.75rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
+    <header className="app-header" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', flexShrink: 0, padding: 'calc(0.6rem + var(--safe-top, 0px)) 0.75rem 0.75rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
       {/* Top Auth Bar (Pinned Absolute Top-Right) */}
       {onOpenAuth && (
         <div style={{

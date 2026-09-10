@@ -11,7 +11,8 @@ export interface SavedPartner {
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { ChatModal } from './components/ChatModal';
-import { UnifiedInputView, mbtiOptions } from './components/UnifiedInputView';
+import { UnifiedInputView } from './components/UnifiedInputView';
+import { mbtiOptions } from './constants/mbti';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
@@ -62,6 +63,18 @@ function App() {
       const route = getInitialRoute();
       setActiveTab(route.tab);
       setSelectedColumnSlug(route.slug);
+      if (route.tab === 'home') {
+        setFlowStep('input');
+        setLoadedPartner(null);
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        requestAnimationFrame(() => {
+          const mainEl = document.querySelector('.main-content');
+          if (mainEl) mainEl.scrollTop = 0;
+          window.scrollTo(0, 0);
+        });
+      }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -78,6 +91,7 @@ function App() {
     if (tab === 'home') {
       setFlowStep('input');
       setLoadedPartner(null);
+      setSelectedColumnSlug(null);
       if (window.location.pathname !== '/') {
         window.history.pushState({ tab: 'home', slug: null }, '', '/');
       }
@@ -86,6 +100,11 @@ function App() {
       document.body.scrollTop = 0;
       const mainEl = document.querySelector('.main-content');
       if (mainEl) mainEl.scrollTop = 0;
+      requestAnimationFrame(() => {
+        const el = document.querySelector('.main-content');
+        if (el) el.scrollTop = 0;
+        window.scrollTo(0, 0);
+      });
     } else if (tab === 'profile') {
       setSettingsSubView('main');
     } else if (tab === 'column') {
@@ -96,6 +115,11 @@ function App() {
       window.scrollTo(0, 0);
       const mainEl = document.querySelector('.main-content');
       if (mainEl) mainEl.scrollTop = 0;
+      requestAnimationFrame(() => {
+        const el = document.querySelector('.main-content');
+        if (el) el.scrollTop = 0;
+        window.scrollTo(0, 0);
+      });
     }
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
@@ -682,7 +706,7 @@ function App() {
         {activeTab === 'home' && (
           <>
             {flowStep === 'input' && (
-              <>
+              <div className="home-input-flow" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', flexShrink: 0 }}>
                 <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />
                 <UnifiedInputView
                   selectedCharacter={selectedCharacter}
@@ -695,7 +719,8 @@ function App() {
                   isRegistered={isRegistered}
                   isSubscribed={isSubscribed}
                 />
-              </>
+                <SeoFooterSection />
+              </div>
             )}
 
             {flowStep === 'loading' && <LoadingScreen />}
@@ -2081,9 +2106,6 @@ function App() {
             )}
           </div>
         )}
-
-        {/* SEO Keyword & Rich FAQ Footer Section (Only visible on Home / Top page) */}
-        {activeTab === 'home' && flowStep === 'input' && <SeoFooterSection />}
 
         {/* Global Bottom Scroll Spacer for Mobile Safe Area & Navbar Coverage */}
         <div style={{ height: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))', width: '100%', flexShrink: 0 }} />

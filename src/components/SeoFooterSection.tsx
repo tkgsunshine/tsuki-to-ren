@@ -31,7 +31,10 @@ export const SeoFooterSection: React.FC = () => {
       borderTop: '1px solid rgba(226, 192, 116, 0.15)',
       color: '#cbd5e1',
       fontSize: '0.78rem',
-      lineHeight: '1.6'
+      lineHeight: '1.6',
+      flexShrink: 0,
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       <div style={{ maxWidth: '640px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         

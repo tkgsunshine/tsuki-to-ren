@@ -2,25 +2,8 @@ import React, { useState } from 'react';
 import { Sparkles, Calendar, MessageCircle } from 'lucide-react';
 import type { SavedPartner } from '../App';
 import { CustomDatePicker } from './CustomDatePicker';
-export const mbtiOptions = [
-  { value: 'UNKNOWN', label: 'わからない / 未設定' },
-  { value: 'INFJ', label: 'INFJ（提唱者）' },
-  { value: 'INFP', label: 'INFP（仲介者）' },
-  { value: 'ENFJ', label: 'ENFJ（主人公）' },
-  { value: 'ENFP', label: 'ENFP（運動家）' },
-  { value: 'INTJ', label: 'INTJ（建築家）' },
-  { value: 'INTP', label: 'INTP（論理学者）' },
-  { value: 'ENTJ', label: 'ENTJ（指揮官）' },
-  { value: 'ENTP', label: 'ENTP（討論者）' },
-  { value: 'ISFJ', label: 'ISFJ（擁護者）' },
-  { value: 'ISFP', label: 'ISFP（冒険家）' },
-  { value: 'ESFJ', label: 'ESFJ（領事官）' },
-  { value: 'ESFP', label: 'ESFP（エンターテイナー）' },
-  { value: 'ISTJ', label: 'ISTJ（管理者）' },
-  { value: 'ISTP', label: 'ISTP（巨匠）' },
-  { value: 'ESTJ', label: 'ESTJ（幹部）' },
-  { value: 'ESTP', label: 'ESTP（起業家）' }
-];
+import { mbtiOptions } from '../constants/mbti';
+export { mbtiOptions };
 
 interface UnifiedInputViewProps {
   selectedCharacter: 'ren' | 'tsuki';
@@ -190,7 +173,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden', flexShrink: 0 }}>
       
       {/* Character selection instruction */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', margin: '0.6rem 0 -0.25rem' }}>
