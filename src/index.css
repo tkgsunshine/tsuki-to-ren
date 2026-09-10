@@ -433,12 +433,18 @@ body {
   border-right: none !important;
   display: grid !important;
   grid-template-columns: repeat(5, 1fr) !important;
-  padding: 0.45rem 0.25rem max(0.45rem, env(safe-area-inset-bottom, 0.45rem)) !important;
+  padding: 0.4rem 0.25rem max(0.45rem, calc(0.2rem + env(safe-area-inset-bottom, 0px) * 0.55)) !important;
   z-index: 99999 !important;
   box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.8) !important;
   pointer-events: auto !important;
   box-sizing: border-box !important;
   margin: 0 !important;
+}
+
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .navbar-container {
+    padding-bottom: max(0.45rem, calc(0.15rem + env(safe-area-inset-bottom, 0px) * 0.5)) !important;
+  }
 }
 
 .navbar-item {
