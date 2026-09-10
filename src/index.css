@@ -31,12 +31,13 @@
 }
 
 html, body {
-  background-color: #020205;
+  background-color: #090714;
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   min-height: 100%;
+  min-height: -webkit-fill-available;
   overflow-x: hidden;
 }
 
@@ -45,6 +46,7 @@ body {
   color: #f3f4f6;
   min-height: 100vh;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -59,6 +61,7 @@ body {
   height: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -72,6 +75,7 @@ body {
   min-width: min(100vw, 480px);
   height: 100vh;
   height: 100dvh;
+  height: -webkit-fill-available;
   margin: 0 auto;
   position: relative;
   overflow-x: hidden;
@@ -417,23 +421,23 @@ body {
 }
 
 .navbar-container {
-  position: absolute !important;
+  position: fixed !important;
   bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  transform: none !important;
-  -webkit-transform: none !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  -webkit-transform: translateX(-50%) !important;
   width: 100% !important;
-  max-width: 100% !important;
-  background: rgba(10, 8, 22, 0.97) !important;
+  max-width: 480px !important;
+  background: rgba(10, 8, 22, 0.98) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-left: none !important;
-  border-right: none !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
   display: grid !important;
   grid-template-columns: repeat(5, 1fr) !important;
-  padding: 0.4rem 0.25rem max(0.45rem, calc(0.2rem + env(safe-area-inset-bottom, 0px) * 0.55)) !important;
+  padding: 0.45rem 0.25rem calc(0.45rem + env(safe-area-inset-bottom, 0px)) !important;
   z-index: 99999 !important;
   box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.8) !important;
   pointer-events: auto !important;
@@ -441,9 +445,14 @@ body {
   margin: 0 !important;
 }
 
-@media (display-mode: standalone), (display-mode: fullscreen) {
+@media (max-width: 480px) {
   .navbar-container {
-    padding-bottom: max(0.45rem, calc(0.15rem + env(safe-area-inset-bottom, 0px) * 0.5)) !important;
+    left: 0 !important;
+    max-width: 100% !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    border-left: none !important;
+    border-right: none !important;
   }
 }
 
@@ -1087,8 +1096,14 @@ body {
   .app-container {
     border-radius: 0 !important;
     max-height: none !important;
+    height: 100% !important;
     height: 100dvh !important;
+    height: -webkit-fill-available !important;
+    min-height: 100% !important;
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
     padding-top: calc(0.5rem + var(--safe-top, 0px)) !important;
+    padding-bottom: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 100% !important;
