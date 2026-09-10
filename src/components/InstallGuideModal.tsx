@@ -66,41 +66,38 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
             top: '1rem',
             right: '1rem',
             background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '50%',
+            border: 'none',
+            color: '#cbd5e1',
             width: '32px',
             height: '32px',
+            borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#9ca3af',
             cursor: 'pointer',
             transition: 'all 0.2s'
           }}
         >
-          <X size={16} />
+          <X size={18} />
         </button>
 
         {/* Header App Icon & Title */}
-        <div style={{ textAlign: 'center', marginBottom: '1.25rem', marginTop: '0.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.25rem', marginTop: '0.25rem' }}>
           <div style={{ position: 'relative', display: 'inline-block', marginBottom: '0.75rem' }}>
             <img
-              src="/icon-192.png"
+              src="/icon-512.png"
               alt="月と蓮"
               style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '16px',
-                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(226, 192, 116, 0.3)',
-                border: '1.5px solid rgba(226, 192, 116, 0.5)'
-              }}
-              onError={(e) => {
-                // Fallback icon if not found
-                (e.target as HTMLElement).style.display = 'none';
+                width: '68px',
+                height: '68px',
+                borderRadius: '18px',
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(226, 192, 116, 0.35)',
+                border: '1.5px solid rgba(226, 192, 116, 0.5)',
+                objectFit: 'cover'
               }}
             />
           </div>
-          <h3 className="font-serif gold-text" style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '0 0 0.35rem 0' }}>
+          <h3 className="font-serif gold-text" style={{ fontSize: '1.3rem', fontWeight: 'bold', margin: '0 0 0.35rem 0', letterSpacing: '0.04em' }}>
             ホーム画面に追加
           </h3>
           <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0 }}>
@@ -286,17 +283,20 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="consult-btn"
+          className="consult-btn font-serif"
           style={{
             width: '100%',
-            padding: '0.75rem',
-            fontSize: '0.88rem',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '14px',
-            color: '#e2e8f0',
-            fontWeight: '600',
-            cursor: 'pointer'
+            padding: '0.85rem',
+            fontSize: '0.95rem',
+            background: 'linear-gradient(135deg, #e2c074 0%, #b89850 100%)',
+            border: 'none',
+            borderRadius: '16px',
+            color: '#0a0a14',
+            fontWeight: 'bold',
+            letterSpacing: '0.05em',
+            boxShadow: '0 4px 15px rgba(226, 192, 116, 0.35)',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
           }}
         >
           閉じる
