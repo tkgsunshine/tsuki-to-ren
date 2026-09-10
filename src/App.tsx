@@ -35,10 +35,37 @@ const formatBirthDate = (val: string): string => {
   return `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
 };
 
+const getInitialRoute = () => {
+  if (typeof window === 'undefined') return { tab: 'home', slug: null as string | null };
+  const path = window.location.pathname;
+  if (path.startsWith('/column/')) {
+    const slug = path.replace('/column/', '').replace(/\/$/, '');
+    if (slug) {
+      return { tab: 'column', slug };
+    }
+    return { tab: 'column', slug: null };
+  }
+  if (path === '/column' || path === '/column/') {
+    return { tab: 'column', slug: null };
+  }
+  return { tab: 'home', slug: null };
+};
+
 function App() {
-  // Navigation & Flow
-  const [activeTab, setActiveTab] = useState('home');
-  const [selectedColumnSlug, setSelectedColumnSlug] = useState<string | null>(null);
+  // Navigation & Flow with URL Routing Sync
+  const initialRoute = getInitialRoute();
+  const [activeTab, setActiveTab] = useState(initialRoute.tab);
+  const [selectedColumnSlug, setSelectedColumnSlug] = useState<string | null>(initialRoute.slug);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = getInitialRoute();
+      setActiveTab(route.tab);
+      setSelectedColumnSlug(route.slug);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -51,6 +78,9 @@ function App() {
     if (tab === 'home') {
       setFlowStep('input');
       setLoadedPartner(null);
+      if (window.location.pathname !== '/') {
+        window.history.pushState({ tab: 'home', slug: null }, '', '/');
+      }
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
@@ -60,6 +90,9 @@ function App() {
       setSettingsSubView('main');
     } else if (tab === 'column') {
       setSelectedColumnSlug(null);
+      if (window.location.pathname !== '/column') {
+        window.history.pushState({ tab: 'column', slug: null }, '', '/column');
+      }
       window.scrollTo(0, 0);
       const mainEl = document.querySelector('.main-content');
       if (mainEl) mainEl.scrollTop = 0;
@@ -910,6 +943,7 @@ function App() {
                 slug={selectedColumnSlug}
                 onBackToList={() => {
                   setSelectedColumnSlug(null);
+                  window.history.pushState({ tab: 'column', slug: null }, '', '/column');
                   window.scrollTo(0, 0);
                   const mainContentEl = document.querySelector('.main-content');
                   if (mainContentEl) mainContentEl.scrollTop = 0;
@@ -917,6 +951,7 @@ function App() {
                 onNavigateHome={() => handleTabChange('home')}
                 onSelectArticle={(slug) => {
                   setSelectedColumnSlug(slug);
+                  window.history.pushState({ tab: 'column', slug }, '', `/column/${slug}`);
                   window.scrollTo(0, 0);
                   const mainContentEl = document.querySelector('.main-content');
                   if (mainContentEl) mainContentEl.scrollTop = 0;
@@ -926,6 +961,7 @@ function App() {
               <ColumnListView
                 onSelectArticle={(slug) => {
                   setSelectedColumnSlug(slug);
+                  window.history.pushState({ tab: 'column', slug }, '', `/column/${slug}`);
                   window.scrollTo(0, 0);
                   const mainContentEl = document.querySelector('.main-content');
                   if (mainContentEl) mainContentEl.scrollTop = 0;

@@ -239,6 +239,8 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
           <img
             src={article.thumbnailUrl}
             alt={article.title}
+            loading="lazy"
+            decoding="async"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </div>
