@@ -388,6 +388,25 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const activeResult = selectedChar === 'ren' ? renResult : tsukiResult;
   const oppNickname = opponentName || 'お相手';
   const [isNotified, setIsNotified] = useState(false);
+  const [isPastGuardian, setIsPastGuardian] = useState(false);
+  const myAstrologyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const mainEl = document.querySelector('.main-content');
+    if (!mainEl) return;
+
+    const handleScroll = () => {
+      if (!myAstrologyRef.current) return;
+      const rect = myAstrologyRef.current.getBoundingClientRect();
+      const isPast = rect.bottom < 140;
+      setIsPastGuardian(isPast);
+    };
+
+    mainEl.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => mainEl.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const registerCardRef = React.useRef<HTMLDivElement>(null);
   const subCardRef = React.useRef<HTMLDivElement>(null);
   const handleScrollToSub = () => {
@@ -549,7 +568,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
         border: '1.5px solid rgba(226, 192, 116, 0.3)',
         borderRadius: '18px',
         padding: '0.45rem 0.5rem',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.65), 0 0 15px rgba(226, 192, 116, 0.15)'
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.65), 0 0 15px rgba(226, 192, 116, 0.15)',
+        opacity: isPastGuardian ? 0 : 1,
+        transform: isPastGuardian ? 'translateY(-16px)' : 'translateY(0)',
+        pointerEvents: isPastGuardian ? 'none' : 'auto',
+        transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}>
         <div style={{ 
           fontSize: '0.65rem', 
@@ -817,6 +840,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const colors = getAstrologyColors(activeResult.myAstrologyColor, activeResult.myAstrologyElement);
           return (
             <div 
+              ref={myAstrologyRef}
               className={activeResult.isKaigo ? 'kaigo-border' : (activeResult.isRare ? 'rare-rainbow-border' : 'glass-panel')}
               style={{
                 display: 'flex',
@@ -3044,7 +3068,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
         position: 'fixed',
         bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
         left: '50%',
-        transform: 'translateX(-50%)',
+        transform: isPastGuardian ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(24px)',
+        opacity: isPastGuardian ? 1 : 0,
+        pointerEvents: isPastGuardian ? 'auto' : 'none',
+        transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         width: 'calc(100% - 2rem)',
         maxWidth: '440px',
         zIndex: 9990,
