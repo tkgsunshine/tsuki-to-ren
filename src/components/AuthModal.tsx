@@ -96,7 +96,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: '1.25rem 1.25rem calc(5.5rem + var(--safe-bottom, 0px))',
+      padding: 'calc(1.5rem + env(safe-area-inset-top, 28px)) 1.25rem calc(5.5rem + env(safe-area-inset-bottom, 20px))',
       overflowY: 'auto'
     }}>
       <div style={{

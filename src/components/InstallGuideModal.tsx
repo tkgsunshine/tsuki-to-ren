@@ -35,7 +35,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
         alignItems: 'center',
         zIndex: 10000,
         animation: 'fadeIn 0.25s ease',
-        padding: '1rem',
+        padding: 'calc(1.5rem + env(safe-area-inset-top, 28px)) 1rem calc(2rem + env(safe-area-inset-bottom, 20px))',
         boxSizing: 'border-box'
       }}
       onClick={onClose}

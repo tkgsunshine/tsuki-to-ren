@@ -182,7 +182,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: '1rem 1rem calc(5.5rem + var(--safe-bottom, 0px))',
+      padding: 'calc(1.5rem + env(safe-area-inset-top, 28px)) 1rem calc(5.5rem + env(safe-area-inset-bottom, 20px))',
       overflowY: 'auto'
     }}>
       {/* Hidden 800x1180 Off-screen DOM Container for high-res lossless capture */}

@@ -22,7 +22,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
     }}>
       <div style={{
         width: '100%',
-        padding: '0.75rem 1rem calc(6.5rem + max(1rem, env(safe-area-inset-bottom, 16px)))',
+        padding: 'calc(1rem + env(safe-area-inset-top, 28px)) 1rem calc(6.5rem + max(1rem, env(safe-area-inset-bottom, 16px)))',
         position: 'relative',
         boxSizing: 'border-box'
       }}>

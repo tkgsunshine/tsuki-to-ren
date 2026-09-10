@@ -67,7 +67,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: '0.75rem'
+      padding: 'calc(1.25rem + env(safe-area-inset-top, 28px)) 0.75rem calc(1.5rem + env(safe-area-inset-bottom, 20px))'
     }}>
       <div style={{
         width: '100%',
