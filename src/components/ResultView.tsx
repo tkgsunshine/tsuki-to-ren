@@ -226,22 +226,51 @@ export const ResultView: React.FC<ResultViewProps> = ({
     if (pwaStatus.isStandalone) return;
 
     let hasTriggered = false;
-    const handleScroll = () => {
-      if (hasTriggered || isA2hsDismissed) return;
-      const scrollPos = window.scrollY || document.documentElement.scrollTop;
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercentage = scrollHeight > 0 ? (scrollPos / scrollHeight) * 100 : 0;
+    const checkScroll = (target: HTMLElement | Window) => {
+      if (hasTriggered) return;
+      
+      let scrollTop = 0;
+      let scrollHeight = 0;
+      let clientHeight = 0;
 
-      // Trigger after scrolling 25% of ResultView or 300px
-      if (scrollPercentage > 25 || scrollPos > 300) {
+      if (target === window) {
+        scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+        clientHeight = window.innerHeight;
+        scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+      } else {
+        const el = target as HTMLElement;
+        scrollTop = el.scrollTop;
+        clientHeight = el.clientHeight;
+        scrollHeight = el.scrollHeight;
+      }
+
+      const scrollPercent = scrollHeight > clientHeight ? (scrollTop / (scrollHeight - clientHeight)) * 100 : 0;
+
+      // Trigger after 180px scroll or 15% scroll
+      if (scrollTop > 180 || scrollPercent > 15) {
         setShowA2hsBanner(true);
         hasTriggered = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isA2hsDismissed]);
+    const handleWindowScroll = () => checkScroll(window);
+    const mainEl = document.querySelector('.main-content') as HTMLElement;
+    const handleMainScroll = () => {
+      if (mainEl) checkScroll(mainEl);
+    };
+
+    window.addEventListener('scroll', handleWindowScroll, { passive: true });
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleMainScroll, { passive: true });
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleWindowScroll);
+      if (mainEl) {
+        mainEl.removeEventListener('scroll', handleMainScroll);
+      }
+    };
+  }, []);
 
   const handleDismissA2hsBanner = (e: React.MouseEvent) => {
     e.stopPropagation();
