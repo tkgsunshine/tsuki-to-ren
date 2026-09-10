@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
-import { Sparkles, Lock, Calendar, Download, X, Heart, Bell } from 'lucide-react';
+import { Sparkles, Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
+import { InstallGuideModal } from './InstallGuideModal';
+import { getDevicePwaStatus } from '../utils/pwaHelper';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -205,6 +207,50 @@ export const ResultView: React.FC<ResultViewProps> = ({
 }
   const [zoomedImg, setZoomedImg] = useState<ZoomedImgData | null>(null);
   const [explanation, setExplanation] = useState<{ title: string; reading: string; body: string } | null>(null);
+  
+  // A2HS (Add to Home Screen) Floating Banner state & Scroll detection
+  const [showA2hsModal, setShowA2hsModal] = useState(false);
+  const [showA2hsBanner, setShowA2hsBanner] = useState(false);
+  const [isA2hsDismissed, setIsA2hsDismissed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const dismissed = localStorage.getItem('hasu_a2hs_banner_dismissed');
+      if (dismissed === 'true') {
+        setIsA2hsDismissed(true);
+      }
+    } catch {}
+
+    const pwaStatus = getDevicePwaStatus();
+    // Do not show if already in standalone PWA
+    if (pwaStatus.isStandalone) return;
+
+    let hasTriggered = false;
+    const handleScroll = () => {
+      if (hasTriggered || isA2hsDismissed) return;
+      const scrollPos = window.scrollY || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercentage = scrollHeight > 0 ? (scrollPos / scrollHeight) * 100 : 0;
+
+      // Trigger after scrolling 25% of ResultView or 300px
+      if (scrollPercentage > 25 || scrollPos > 300) {
+        setShowA2hsBanner(true);
+        hasTriggered = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isA2hsDismissed]);
+
+  const handleDismissA2hsBanner = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowA2hsBanner(false);
+    setIsA2hsDismissed(true);
+    try {
+      localStorage.setItem('hasu_a2hs_banner_dismissed', 'true');
+    } catch {}
+  };
 
   const getKanjiReading = (pillar: string): string => {
     if (!pillar || pillar.length !== 2) return '';
@@ -2875,6 +2921,95 @@ export const ResultView: React.FC<ResultViewProps> = ({
         )}
 
       </div>
+      {/* Floating Sticky Bottom A2HS Prompt Banner (Above Share CTA) */}
+      {showA2hsBanner && !isA2hsDismissed && (
+        <div style={{
+          position: 'fixed',
+          bottom: 'calc(8.6rem + var(--safe-bottom, 0px))',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'calc(100% - 2rem)',
+          maxWidth: '440px',
+          zIndex: 9980,
+          boxSizing: 'border-box',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <div
+            onClick={() => setShowA2hsModal(true)}
+            className="glass-panel"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.75rem 0.95rem',
+              background: 'linear-gradient(135deg, rgba(26, 20, 42, 0.94) 0%, rgba(15, 12, 28, 0.96) 100%)',
+              border: '1.5px solid rgba(226, 192, 116, 0.45)',
+              borderRadius: '16px',
+              boxShadow: '0 8px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(226, 192, 116, 0.2)',
+              cursor: 'pointer',
+              color: '#f3f4f6'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+              <div style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #e2c074 0%, #b89850 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(226, 192, 116, 0.3)'
+              }}>
+                <Smartphone size={18} style={{ color: '#0a0a14' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#fef08a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  ホーム画面に追加してアプリ化 ✦
+                </div>
+                <div style={{ fontSize: '0.68rem', color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  毎日の運気・LINE吉時間をすぐ確認
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+              <span style={{
+                fontSize: '0.72rem',
+                fontWeight: 'bold',
+                padding: '4px 10px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #e2c074 0%, #ca8a04 100%)',
+                color: '#0a0a14'
+              }}>
+                追加する
+              </span>
+              <button
+                type="button"
+                onClick={handleDismissA2hsBanner}
+                aria-label="閉じる"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '22px',
+                  height: '22px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#9ca3af',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                <X size={12} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Sticky Bottom Share CTA Bar */}
       <div style={{
         position: 'fixed',
@@ -2913,6 +3048,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <span>鑑定結果をシェアする</span>
         </button>
       </div>
+
+      {/* A2HS Step Guide Modal */}
+      <InstallGuideModal
+        isOpen={showA2hsModal}
+        onClose={() => setShowA2hsModal(false)}
+      />
     </div>
   );
 };

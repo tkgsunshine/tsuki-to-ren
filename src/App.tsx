@@ -17,11 +17,12 @@ import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
-import { Sparkles, HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, Calendar, Bell, MessageCircle, Crown } from 'lucide-react';
+import { Sparkles, HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, Calendar, Bell, MessageCircle, Crown, Smartphone } from 'lucide-react';
 import { CustomDatePicker } from './components/CustomDatePicker';
 import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
+import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
@@ -76,6 +77,7 @@ function App() {
   const [showLegalPage, setShowLegalPage] = useState(false);
   const [showEmailPromptModal, setShowEmailPromptModal] = useState(false);
   const [promptEmailInput, setPromptEmailInput] = useState('');
+  const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
 
   useEffect(() => {
     completeEmailMagicLinkSignIn().then((res) => {
@@ -1186,6 +1188,35 @@ function App() {
                   </button>
                 </div>
 
+                {/* ホーム画面に追加（PWAインストール・案内） */}
+                <div 
+                  onClick={() => setShowInstallGuideModal(true)}
+                  className="glass-panel" 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.08) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(226, 192, 116, 0.3)',
+                    borderRadius: '16px',
+                    color: '#f3f4f6',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
+                    <Smartphone size={20} style={{ color: '#fef08a' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                      <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>ホーム画面に追加（アプリ化）</span>
+                      <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>毎日ワンタップで運気やLINE吉時間をチェック</span>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} style={{ color: '#e2c074' }} />
+                </div>
+
                 <div 
                   onClick={() => setSettingsSubView('about')}
                   className="glass-panel" 
@@ -2268,6 +2299,12 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Global Add to Home Screen (A2HS) Guide Modal */}
+      <InstallGuideModal
+        isOpen={showInstallGuideModal}
+        onClose={() => setShowInstallGuideModal(false)}
+      />
 
       {/* Global Bottom Navbar (Always visible on top of all pages) */}
       <Navbar activeTab={activeTab} setActiveTab={handleTabChange} />
