@@ -13,8 +13,8 @@ function generateSitemap() {
   const fileContent = fs.readFileSync(columnsFilePath, 'utf-8');
 
   // Extract slugs and publishedAt dates
-  const slugRegex = /slug:\s*['"]([^'"]+)['"]/g;
-  const publishedAtRegex = /publishedAt:\s*['"]([^'"]+)['"]/g;
+  const slugRegex = /"?slug"?:\s*['"]([^'"]+)['"]/g;
+  const publishedAtRegex = /"?publishedAt"?:\s*['"]([^'"]+)['"]/g;
 
   const slugs = [];
   let match;
