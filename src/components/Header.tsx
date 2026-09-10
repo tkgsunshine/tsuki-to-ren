@@ -9,13 +9,13 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
   return (
-    <header className="app-header" style={{ padding: 'calc(0.6rem + var(--safe-top, 0px)) 1rem 1rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
+    <header className="app-header" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden', padding: 'calc(0.6rem + var(--safe-top, 0px)) 0.75rem 0.75rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
       {/* Top Auth Bar (Pinned Absolute Top-Right) */}
       {onOpenAuth && (
         <div style={{
           position: 'absolute',
           top: 'calc(-0.3rem + var(--safe-top, 0px))',
-          right: '1rem',
+          right: '0.75rem',
           zIndex: 10
         }}>
           <button
@@ -76,6 +76,8 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
       {/* Subtitle Badge - High Impact */}
       <div style={{
         margin: '0.65rem auto 0',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.4rem',
@@ -95,11 +97,13 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
       {/* Impact Catchphrase Box */}
       <div style={{
         marginTop: '1rem',
-        padding: '1.1rem 1.25rem',
+        padding: '1.1rem 1.1rem',
         background: 'linear-gradient(135deg, rgba(20, 16, 35, 0.85) 0%, rgba(30, 20, 50, 0.85) 100%)',
         border: '1.5px solid rgba(226, 192, 116, 0.4)',
         borderRadius: '18px',
+        width: '100%',
         maxWidth: '380px',
+        boxSizing: 'border-box',
         margin: '1rem auto 0',
         fontSize: '0.88rem',
         color: '#f3f4f6',
@@ -113,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
           東洋の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>命式</span>と西洋の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>心理統計</span>が解き明かす<br />
           あの人の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>隠された本心</span>。
         </div>
-        <div style={{ color: '#cbd5e1', fontSize: '0.78rem', fontWeight: '500', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>
+        <div style={{ color: '#cbd5e1', fontSize: '0.78rem', fontWeight: '500', letterSpacing: '-0.01em', wordBreak: 'break-word' }}>
           二人だけの運命のバイオリズムと攻略法を徹底鑑定します。
         </div>
       </div>

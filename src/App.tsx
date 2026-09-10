@@ -2050,7 +2050,7 @@ function App() {
         {activeTab === 'home' && flowStep === 'input' && <SeoFooterSection />}
 
         {/* Global Bottom Scroll Spacer for Mobile Safe Area & Navbar Coverage */}
-        <div style={{ height: 'calc(7.5rem + var(--safe-bottom, 0px))', width: '100%', flexShrink: 0 }} />
+        <div style={{ height: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))', width: '100%', flexShrink: 0 }} />
       </main>
 
       {/* Interactive Chat Modal Simulator (Lobby active) */}

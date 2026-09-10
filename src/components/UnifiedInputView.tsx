@@ -190,7 +190,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
       
       {/* Character selection instruction */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', margin: '0.6rem 0 -0.25rem' }}>
