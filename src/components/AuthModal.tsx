@@ -94,14 +94,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
       WebkitBackdropFilter: 'blur(12px)',
       zIndex: 100000,
       display: 'flex',
-      justifyContent: 'center',
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
       alignItems: 'center',
       padding: 'calc(1.5rem + env(safe-area-inset-top, 28px)) 1.25rem calc(5.5rem + env(safe-area-inset-bottom, 20px))',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      boxSizing: 'border-box'
     }}>
       <div style={{
         width: '100%',
         maxWidth: '380px',
+        margin: 'auto auto',
+        flexShrink: 0,
+        boxSizing: 'border-box',
         background: 'linear-gradient(145deg, rgba(20, 16, 35, 0.95) 0%, rgba(10, 10, 22, 0.98) 100%)',
         border: '1.5px solid rgba(226, 192, 116, 0.35)',
         borderRadius: '24px',

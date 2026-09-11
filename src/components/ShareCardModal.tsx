@@ -180,10 +180,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       zIndex: 100000,
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
       alignItems: 'center',
       padding: 'calc(1.5rem + env(safe-area-inset-top, 28px)) 1rem calc(5.5rem + env(safe-area-inset-bottom, 20px))',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      boxSizing: 'border-box'
     }}>
       {/* Hidden 800x1180 Off-screen DOM Container for high-res lossless capture */}
       <div
@@ -477,6 +478,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
+        margin: 'auto auto',
+        flexShrink: 0,
+        boxSizing: 'border-box',
         animation: 'fadeIn 0.3s ease'
       }}>
         
