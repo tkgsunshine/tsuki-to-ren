@@ -437,12 +437,27 @@ body {
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
   display: grid !important;
   grid-template-columns: repeat(5, 1fr) !important;
-  padding: 0.45rem 0.25rem max(1.25rem, calc(0.45rem + env(safe-area-inset-bottom, 24px))) !important;
+  padding-top: 0.5rem !important;
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+  padding-bottom: 24px !important;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 24px)) !important;
   z-index: 99999 !important;
   box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.8) !important;
   pointer-events: auto !important;
   box-sizing: border-box !important;
   margin: 0 !important;
+}
+
+.navbar-container::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(10, 8, 22, 0.98);
+  pointer-events: none;
 }
 
 @media (max-width: 480px) {

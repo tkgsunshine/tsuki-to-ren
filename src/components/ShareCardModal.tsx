@@ -35,8 +35,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   const cardRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [savedImageUrl, setSavedImageUrl] = useState<string | null>(null);
 
   const [myAvatarBase64, setMyAvatarBase64] = useState<string>(result.myAvatarUrl);
   const [oppAvatarBase64, setOppAvatarBase64] = useState<string>(result.opponentAvatarUrl || '');
@@ -101,8 +101,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         await document.fonts.ready;
       }
 
-      // Small delay to ensure Base64 images are rendered
-      await new Promise(r => setTimeout(r, 120));
+      await new Promise(r => setTimeout(r, 60));
 
       const html2canvas = (await import('html2canvas')).default;
 
@@ -120,46 +119,45 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         ? `月と蓮_相性カード_${myName}_${oppNickname}.png`
         : `月と蓮_運勢カード_${myName}.png`;
 
-      // 1. Try Native Web Share API (Direct save to iOS / Android Photo Library)
-      if (navigator.canShare && canvas.toBlob) {
+      // Convert to Blob for direct high-speed download & WebShare
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Blob creation failed');
+
+      // 1. Try Native Web Share API (Files API) for native iOS / Android photo saving
+      if (navigator.canShare) {
         try {
-          const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
-          if (blob) {
-            const file = new File([blob], filename, { type: 'image/png' });
-            if (navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                files: [file],
-                title: '月と蓮 鑑定カード'
-              });
-              setIsSaving(false);
-              return;
-            }
+          const file = new File([blob], filename, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: '月と蓮 鑑定カード'
+            });
+            setSavedSuccess(true);
+            setTimeout(() => setSavedSuccess(false), 2500);
+            return;
           }
         } catch (shareErr: any) {
           if (shareErr?.name === 'AbortError') {
-            setIsSaving(false);
             return;
           }
-          console.warn('WebShare file export skipped, using fallback:', shareErr);
         }
       }
 
-      // 2. DataURL fallback
-      const dataUrl = canvas.toDataURL('image/png');
-
-      // Attempt anchor download (Works on Desktop / some Android)
+      // 2. Direct instant download via Object URL
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.download = filename;
-      link.href = dataUrl;
+      link.href = blobUrl;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
 
-      // On iOS Safari / PWA where anchor download is blocked, open instant save modal
-      setSavedImageUrl(dataUrl);
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 2500);
     } catch (err) {
       console.error('Failed to save image:', err);
-      alert('画像の生成に失敗しました。もう一度お試しください。');
+      alert('画像の保存に失敗しました。もう一度お試しください。');
     } finally {
       setIsSaving(false);
     }
@@ -917,7 +915,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 cursor: isSaving ? 'not-allowed' : 'pointer'
               }}
             >
-              <span>{isSaving ? '保存中...' : '画像で保存'}</span>
+              <span style={{ color: savedSuccess ? '#4ade80' : 'white', fontWeight: 'bold' }}>
+                {isSaving ? '生成・保存中...' : savedSuccess ? '✓ 保存しました' : '画像で保存'}
+              </span>
             </button>
 
             <button
@@ -996,83 +996,6 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         </div>
 
       </div>
-
-      {/* Instant Image Preview & Long-press Save Modal for iOS / PWA */}
-      {savedImageUrl && (
-        <div 
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.92)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            zIndex: 110000,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '1.5rem',
-            boxSizing: 'border-box',
-            animation: 'fadeIn 0.25s ease'
-          }}
-          onClick={() => setSavedImageUrl(null)}
-        >
-          <div 
-            style={{
-              width: '100%',
-              maxWidth: '340px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.85rem'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
-              border: '1px solid rgba(226, 192, 116, 0.4)',
-              borderRadius: '20px',
-              padding: '0.5rem 1rem',
-              color: '#fef08a',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              textAlign: 'center',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
-            }}>
-              💡 画像を長押しして「写真に追加」で保存
-            </div>
-
-            <img 
-              src={savedImageUrl} 
-              alt="シェアカード" 
-              style={{
-                width: '100%',
-                maxHeight: '65vh',
-                objectFit: 'contain',
-                borderRadius: '16px',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.8), 0 0 25px rgba(226, 192, 116, 0.2)'
-              }}
-            />
-
-            <button
-              onClick={() => setSavedImageUrl(null)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                borderRadius: '24px',
-                background: 'rgba(255, 255, 255, 0.12)',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                color: 'white',
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-                cursor: 'pointer'
-              }}
-            >
-              閉じる
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
