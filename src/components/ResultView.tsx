@@ -453,6 +453,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   const zoomedCardRef = useRef<HTMLDivElement>(null);
   const [isZoomedSaving, setIsZoomedSaving] = useState(false);
+  const [savedAvatarUrl, setSavedAvatarUrl] = useState<string | null>(null);
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -463,7 +464,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
       }
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 120));
 
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(zoomedCardRef.current, {
@@ -474,22 +475,46 @@ export const ResultView: React.FC<ResultViewProps> = ({
         logging: false
       });
 
+      const filename = `月と蓮_${zoomedImg?.astrologyName || '守護化身'}_カード.jpg`;
+
+      // 1. Try Native Web Share API (Direct save to Camera Roll)
+      if (navigator.canShare && canvas.toBlob) {
+        try {
+          const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+          if (blob) {
+            const file = new File([blob], filename, { type: 'image/jpeg' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: '月と蓮 守護化身カード'
+              });
+              setIsZoomedSaving(false);
+              return;
+            }
+          }
+        } catch (shareErr: any) {
+          if (shareErr?.name === 'AbortError') {
+            setIsZoomedSaving(false);
+            return;
+          }
+          console.warn('WebShare avatar export skipped, using fallback:', shareErr);
+        }
+      }
+
+      // 2. DataURL fallback
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `月と蓮_${zoomedImg?.astrologyName || '守護化身'}_カード.jpg`;
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      setSavedAvatarUrl(dataUrl);
     } catch (err) {
       console.error('Download failed:', err);
       if (zoomedImg) {
-        const link = document.createElement('a');
-        link.href = zoomedImg.src;
-        link.download = `月と蓮_${zoomedImg.astrologyName || '守護化身'}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        setSavedAvatarUrl(zoomedImg.src);
       }
     } finally {
       setIsZoomedSaving(false);
@@ -521,7 +546,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.4s ease', paddingTop: 'calc(1rem + var(--safe-top, 0px))', paddingBottom: '7.5rem' }}>
+    <div style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.4s ease', paddingTop: '0.25rem', paddingBottom: '7.5rem' }}>
       
       {/* Top Back Navigation Button */}
       {onReset && (
@@ -3110,6 +3135,83 @@ export const ResultView: React.FC<ResultViewProps> = ({
         isOpen={showA2hsModal}
         onClose={() => setShowA2hsModal(false)}
       />
+
+      {/* Avatar Image Long-Press Save Modal */}
+      {savedAvatarUrl && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.92)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            zIndex: 110000,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '1.5rem',
+            boxSizing: 'border-box',
+            animation: 'fadeIn 0.25s ease'
+          }}
+          onClick={() => setSavedAvatarUrl(null)}
+        >
+          <div 
+            style={{
+              width: '100%',
+              maxWidth: '340px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.85rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
+              border: '1px solid rgba(226, 192, 116, 0.4)',
+              borderRadius: '20px',
+              padding: '0.5rem 1rem',
+              color: '#fef08a',
+              fontSize: '0.85rem',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+            }}>
+              💡 画像を長押しして「写真に追加」で保存
+            </div>
+
+            <img 
+              src={savedAvatarUrl} 
+              alt="守護化身カード" 
+              style={{
+                width: '100%',
+                maxHeight: '65vh',
+                objectFit: 'contain',
+                borderRadius: '16px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.8), 0 0 25px rgba(226, 192, 116, 0.2)'
+              }}
+            />
+
+            <button
+              onClick={() => setSavedAvatarUrl(null)}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                borderRadius: '24px',
+                background: 'rgba(255, 255, 255, 0.12)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                color: 'white',
+                fontSize: '0.9rem',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
