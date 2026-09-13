@@ -37,6 +37,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No new column updates this run. Exiting safely."
           else
-            git commit -m "Auto-generate scheduled column for Hasu-to-Tsuki [skip ci]"
+            git commit -m "feat(column): auto-publish scheduled column for Hasu-to-Tsuki"
             git push origin main
           fi
