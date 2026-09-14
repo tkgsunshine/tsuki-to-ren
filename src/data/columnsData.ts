@@ -15,6 +15,52 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1789347508122",
+    "slug": "enfp-intj-soul-resonance-attraction",
+    "title": "【ENFP × INTJ】「運動家」と「建築家」の運命的ケミストリー！正反対の二人が最強の絆を結ぶ理由",
+    "metaDescription": "MBTI界で不動の人気を誇るベストカップル「ENFP×INTJ」。天真爛漫な情熱と冷徹な知性が生み出す奇跡の引力と、生涯のパートナーへ成長するための秘訣を徹底解説。",
+    "keywords": [
+      "ENFP INTJ 相性",
+      "運動家 建築家 恋愛",
+      "MBTI 恋愛 ベストペア",
+      "INTJ デレる",
+      "ENFP 好きになる人"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-09-14T00:58:28.122Z",
+    "readTimeMinutes": 9,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. なぜENFPとINTJは磁石のように引き寄せ合うのか？",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. INTJの心の城壁をENFPが無邪気に溶かす瞬間",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. 二人が長く幸せに続くためのコミュニケーションの極意",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. まとめ",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "INTJがENFPに本気になった時のサインは？",
+        "answer": "普段は無駄を嫌うINTJが、ENFPの他愛のないおしゃべりを何時間も笑顔で聞き続け、具体的なスケジュールを調整して率先して会おうとする姿勢が最大の愛情表現です。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. なぜENFPとINTJは磁石のように引き寄せ合うのか？</h2>\n<p>世界中のMBTIコミュニティで「奇跡のペアリング」と称賛されるのが、ENFP（運動家）とINTJ（建築家）です。</p>\n<p>外向的で感情豊かなENFPと、内向的で論理を重んじるINTJ。一見すると水と油のように正反対ですが、魂の深層ではお互いに「自分に欠けている最後のピース」を相手の中に見出すのです。</p>\n<h2 id=\"section-2\">2. INTJの心の城壁をENFPが無邪気に溶かす瞬間</h2>\n<p>人に対して警戒心の強いINTJですが、ENFPの裏表のない純粋な好意と好奇心の前には、頑丈な防壁も自然と崩れ去ります。INTJにとってENFPは「世界で唯一、弱音や本音を預けられる太陽」となるのです。</p>\n<h2 id=\"section-3\">3. 二人が長く幸せに続くためのコミュニケーションの極意</h2>\n<p>INTJの「一人の時間の必要性」をENFPが尊重し、ENFPの「豊かな感情表現」をINTJが論理で否定せずに受け止めること。この調和が取れた時、二人は無敵のソウルメイトとなります。</p>\n<h2 id=\"section-4\">4. まとめ</h2>\n<p>『月と蓮』の本格診断で、二人の宿命相性と毎日の運命バイオリズムを今すぐチェックしてみましょう。</p>"
+  },
+  {
     "id": "col-1789320846034",
     "slug": "line-unread-through-psychology-mbti",
     "title": "【LINE既読スルー】なぜ返信が来ない？16タイプ別の心理と「思わず返したくなる」追いLINEの技術",
