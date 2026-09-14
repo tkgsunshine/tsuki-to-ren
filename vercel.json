@@ -2,6 +2,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/__/auth/:path*",
+      "destination": "https://tsuki-to-ren-dba8c.firebaseapp.com/__/auth/:path*"
+    },
+    {
       "source": "/((?!api/|.*\\..*).*)",
       "destination": "/index.html"
     }
