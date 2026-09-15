@@ -1077,27 +1077,27 @@ export function getDailyContactAndAdvice(
   }
 }
 
-// 2. 四柱推命 日干（十干）の宿命相性判定
+// 2. 日干（生まれ持ったエネルギー）の宿命相性判定
 export function getStemCompatibility(myStem: string, oppStem: string, myNick: string, oppNick: string) {
   const pairs: Record<string, string> = {
-    '甲己': '中正の合（誠実と包容の最上ペア）',
-    '己甲': '中正の合（誠実と包容の最上ペア）',
-    '乙庚': '仁義の合（剛柔調和のベストペア）',
-    '庚乙': '仁義の合（剛柔調和のベストペア）',
-    '丙辛': '威制の合（情熱と気品が惹かれ合う電撃ペア）',
-    '辛丙': '威制の合（情熱と気品が惹かれ合う電撃ペア）',
-    '丁壬': '情愛の合（魂の色気と惹きつけのツインレイペア）',
-    '壬丁': '情愛の合（魂の色気と惹きつけのツインレイペア）',
-    '戊癸': '慈愛の合（欠けたピースが嵌まる究極の補完ペア）',
-    '癸戊': '慈愛の合（欠けたピースが嵌まる究極の補完ペア）'
+    '甲己': '誠実と優しさで包み込む最高の相性',
+    '己甲': '誠実と優しさで包み込む最高の相性',
+    '乙庚': 'お互いを高め合えるベストパートナー',
+    '庚乙': 'お互いを高め合えるベストパートナー',
+    '丙辛': '情熱と憧れで惹かれ合う電撃カップル',
+    '辛丙': '情熱と憧れで惹かれ合う電撃カップル',
+    '丁壬': '心と心が深く溶け合う運命の絆',
+    '壬丁': '心と心が深く溶け合う運命の絆',
+    '戊癸': 'パズルのピースのようにぴったり重なる奇跡の相性',
+    '癸戊': 'パズルのピースのようにぴったり重なる奇跡の相性'
   };
 
   const key = `${myStem}${oppStem}`;
   if (pairs[key]) {
     return {
-      type: '干合',
-      title: `【干合】${pairs[key]}`,
-      detail: `お二人の日柱は十干の最高峰である【干合】を結んでいます。出会った瞬間から理屈や条件ではなく、魂の深層で互いを求め合う強烈な引力が働いています。${myNick}様と${oppNick}様の間には言葉を超えた安心感が宿り、障害があっても離れがたい宿命の絆です。`
+      type: '運命の絆',
+      title: `【運命の相性】${pairs[key]}`,
+      detail: `お二人は出会った瞬間から理屈や条件ではなく、心と心の深い部分で惹かれ合う特別な相性です。${myNick}様と${oppNick}様の間には言葉にしなくても伝わる安心感があり、どんな壁があっても自然と寄り添い合える強い絆で結ばれています。`
     };
   }
 
@@ -1107,33 +1107,33 @@ export function getStemCompatibility(myStem: string, oppStem: string, myNick: st
 
   if (rel === 'producing') {
     return {
-      type: '相生',
-      title: `【相生】${elA}生${elB}（自然にエネルギーを与え育む調和）`,
-      detail: `五行において${elA}が${elB}を生み出す美しい【相生】の循環です。${myNick}様の持つ温かみや知恵が、${oppNick}様の魅力を自然と引き出し、お相手にとってあなたは「最も心が落ち着き元気になれる場所」となっています。`
+      type: '支え合い',
+      title: '【自然と惹かれ合う相性】自然にパワーを与え合える関係',
+      detail: `お二人は自然とお互いを高め合える、とても心地よい関係です。${myNick}様の優しさや気配りが、${oppNick}様の魅力を自然と引き出し、お相手にとってあなたは「一緒にいると一番ホッとして元気になれる特別な存在」になっています。`
     };
   }
   if (elementRelations[elB]?.[elA] === 'producing') {
     return {
-      type: '相生',
-      title: `【相生】${elB}生${elA}（相手からの愛情があなたを満たす調和）`,
-      detail: `五行において${elB}が${elA}を生み出す【相生】の配置です。${oppNick}様の存在や行動が、${myNick}様に安心感と新しい活力を与えてくれます。相手の好意を素直に受け取ることで愛が循環します。`
+      type: '愛され運',
+      title: '【安心感に包まれる相性】相手からの優しさがあなたを満たす関係',
+      detail: `お相手からたくさんのエネルギーと愛情をもらえる相性です。${oppNick}様と一緒にいると、${myNick}様は自然体でいられて前向きな気持ちになれます。相手の優しさを素直に受け取ることで、二人の仲はどんどん深まっていきます。`
     };
   }
   if (rel === 'same') {
     return {
-      type: '比和',
-      title: `【比和】同じ${elA}同士（親友のように等身大でいられる波長）`,
-      detail: `同じ五行（${elA}）を分け合う【比和】の相性です。人生の価値観やテンポが似ており、まるで長年の友人のように気取らず何でも話せます。お互いの自立を尊重することで永続的なパートナーシップになります。`
+      type: '自然体',
+      title: '【親友のように等身大でいられる相性】',
+      detail: `お互いのテンポや物事の感じ方がとてもよく似ている相性です。まるで昔からの大親友のように、飾らずに何でも本音で話せます。お互いに一人の時間も大切にしてあげることで、ずっと仲良しでいられる最高の関係になれます。`
     };
   }
   return {
-    type: '相剋',
-    title: `【相剋】${elA}剋${elB}（未知の刺激と成長をもたらすドラマティック相性）`,
-    detail: `五行が互いを刺激し合う【相剋】の配置です。自分にはない異質な才能や感性に強烈に惹きつけられますが、感情的になると意図しない摩擦が起きやすくなります。「違いを愛する」大人の余裕を持つことが成就の秘訣です。`
+    type: '刺激的',
+    title: '【お互いを刺激し合うドラマティック相性】',
+    detail: `自分にはない新しい魅力や世界観を見せてくれる、ドキドキする相性です。正反対だからこそ強烈に惹かれ合いますが、お互いのやり方にこだわりすぎると小さなすれ違いが起きることも。「自分と違ってそこが素敵！」と面白がるゆとりを持つことが、ずっとラブラブでいるコツです。`
   };
 }
 
-// 3. 四柱推命 日支（十二支）の波長判定
+// 3. 生まれ月・十二支の波長判定
 export function getBranchCompatibility(myBranch: string, oppBranch: string) {
   const sixHarmonies: Record<string, string> = {
     '子': '丑', '丑': '子', '寅': '亥', '亥': '寅',
@@ -1142,9 +1142,9 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string) {
   };
   if (sixHarmonies[myBranch] === oppBranch) {
     return {
-      type: '支合',
-      title: '【支合】以心伝心の波長一致',
-      detail: '日支同士が【支合】を結んでおり、言葉にしなくても空気感や生活リズムが肌感覚で一致します。一緒にいるだけで深い安らぎが得られる稀有な配置です。'
+      type: '最高のフィーリング',
+      title: '【以心伝心】言葉にしなくても伝わる空気感',
+      detail: 'お二人は言葉にしなくても空気感や生活リズムがぴったり一致する相性です。一緒にいるだけで不思議と緊張が解けて、深い安心感に包まれます。'
     };
   }
 
@@ -1153,9 +1153,9 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string) {
   ];
   if (threeHarmonies.some(group => group.includes(myBranch) && group.includes(oppBranch))) {
     return {
-      type: '三合',
-      title: '【三合】共通の未来を拓く同盟相性',
-      detail: '日支が【三合】を形成しており、二人が共通の目標や人生設計に向かった時に絶大な相乗効果を発揮します。公私ともに支え合える盤石のパートナーシップです。'
+      type: 'ベストパートナー',
+      title: '【相乗効果バツグン】一緒に未来へ進める相性',
+      detail: '二人が同じ目標や楽しい計画に向かって力を合わせた時に、何倍ものパワーを発揮できる相性です。お互いを助け合いながら、理想の未来を一緒に作っていけます。'
     };
   }
 
@@ -1166,16 +1166,16 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string) {
   };
   if (sixConflicts[myBranch] === oppBranch) {
     return {
-      type: '六沖',
-      title: '【六沖】磁石のNとSのように惹かれ合う刺激相性',
-      detail: '日支が【六沖】の関係にあり、真逆の性質ゆえに強烈に意識し合いますが、プライドの衝突には注意が必要です。相手のスペースを尊重することが守りの鍵です。'
+      type: '磁石のような魅力',
+      title: '【真逆だから惹かれ合う】刺激的な相性',
+      detail: '磁石のプラスとマイナスのように、お互いにない部分に強く惹かれ合う関係です。意見が違う時は「相手の世界を知るチャンス」と捉えることで、深いつながりに変わります。'
     };
   }
 
   return {
-    type: '調和',
-    title: '【調和】穏やかな日常の歩み',
-    detail: '日支の五行が穏やかに調和しており、無理のない安定したペースで日々の信頼を積み重ねていくことができます。'
+    type: '穏やかな調和',
+    title: '【居心地バツグン】ほっと落ち着く相性',
+    detail: '無理をせず自然体でいられる関係です。焦らずマイペースに日々のやり取りを楽しむことで、じわじわと確かな信頼関係を育てていけます。'
   };
 }
 
@@ -1187,23 +1187,23 @@ export function getStarCompatibility(myStar: string, oppStar: string) {
 
   if (rel === 'producing' || elementRelations[elB]?.[elA] === 'producing') {
     return {
-      type: '相生',
-      detail: '九星気学の本命星が【相生】に位置しており、一緒に過ごす時間が自然とお互いの全体運を底上げする幸福なバイオリズムを持っています。'
+      type: '運気アップ',
+      detail: '一緒に過ごせば過ごすほど、自然とお互いの運気やモチベーションがアップしていくハッピーな組み合わせです。'
     };
   }
   if (rel === 'same') {
     return {
-      type: '比和',
-      detail: '九星の本命星が同じ気運に属しており、行動パターンや心地よいと感じる空間の好みが自然とシンクロします。'
+      type: '息ぴったり',
+      detail: '好きなことや休日の過ごし方の好みが似ていて、一緒にいて気疲れしないスムーズな関係です。'
     };
   }
   return {
-    type: '相剋',
-    detail: '九星の本命星が【相剋】となっており、物事の優先順位やテンポに違いが出やすいため、お互いのプライベート時間の確保が長続きの秘訣です。'
+    type: '新しい刺激',
+    detail: 'お互いに新しい発見やワクワクする体験を与え合える、前向きな刺激に満ちた組み合わせです。'
   };
 }
 
-// 5. 16タイプ（MBTI）認知機能ダイナミクス判定
+// 5. 16タイプ（MBTI）性格・コミュニケーション相性判定
 export function getMbtiCognitiveDynamics(myMbti: string, oppMbti: string, myNick: string, oppNick: string) {
   const myNorm = (myMbti || 'ENFP').toUpperCase();
   const oppNorm = (oppMbti || 'INFJ').toUpperCase();
@@ -1212,27 +1212,27 @@ export function getMbtiCognitiveDynamics(myMbti: string, oppMbti: string, myNick
   const oppT = oppNorm.includes('T');
   let tfText = '';
   if (!myT && oppT) {
-    tfText = `思考（T）を優先する${oppNick}様に対し、感情（F）を大切にする${myNick}様。${oppNick}様は悪気なく「正論や解決策」を提示しますが、${myNick}様が本当に求めているのは「共感と受容」です。この認知ギャップを事前に理解しておくことで、不要な不安やすれ違いを100%防止できます。`;
+    tfText = `論理的に物事を考えるタイプの${oppNick}様に対し、気持ちや共感を大切にするタイプの${myNick}様。${oppNick}様は悪気なくアドバイスや解決策を言いがちですが、${myNick}様が本当に求めているのは「共感して話を聞いてくれること」です。この考え方の違いをあらかじめ知っておくだけで、些細なすれ違いやモヤモヤをスッキリ解消できます。`;
   } else if (myT && !oppT) {
-    tfText = `感情（F）を優先する${oppNick}様に対し、思考（T）を大切にする${myNick}様。${oppNick}様は解決策よりも「気持ちの共有」を求めています。正論で返す前に「それは大変だったね」と一言挟むだけで、相手の心の壁は劇的に解けていきます。`;
+    tfText = `気持ちや共感を大切にするタイプの${oppNick}様に対し、冷静で論理的なタイプの${myNick}様。${oppNick}様は解決策よりも「気持ちを分かってほしい」と思っています。アドバイスする前にまず「それは大変だったね」「わかるよ」と共感してあげるだけで、相手の心は一気にあなたに開いていきます。`;
   } else if (myT && oppT) {
-    tfText = `互いに思考（T）を重んじる知的なペア。感情的なもつれが少なく極めてスマートに対話できますが、互いに弱音を吐きにくいため、時には素直な感情をストレートに言葉に乗せることが親密さの鍵となります。`;
+    tfText = `お互いに冷静で論理的な考え方ができるスマートな二人。感情的にならずサバサバと話し合える相性ですが、お互いに素直な弱音を吐きづらい面もあります。照れずに「嬉しい」「寂しい」などの素直な気持ちを言葉で伝えることが、もっと仲良くなる秘密です。`;
   } else {
-    tfText = `互いに感情（F）を深く察し合える心優しいペア。お互いの痛みに共鳴できる反面、相手に気を遣いすぎて本音を我慢しやすいため、溜め込まずに小さなお願いから素直に伝えることが大切です。`;
+    tfText = `お互いに相手の気持ちを優しく察し合える、思いやりいっぱいの二人。相手の痛みに寄り添える一方で、気を遣いすぎて言いたいことを我慢してしまいがちです。我慢を溜め込まずに、小さなお願いや本音を可愛く伝えることが長続きのコツです。`;
   }
 
   const myJ = myNorm.includes('J');
   const oppJ = oppNorm.includes('J');
   let jpText = '';
   if (myJ !== oppJ) {
-    jpText = `また、計画性を重視する側と直感・柔軟性を大切にする側で、デートの決め方や返信タイミングにテンポの違いが生じやすいですが、お互いの長所が補完し合う絶好のバランスでもあります。`;
+    jpText = `また、きっちり計画を立てたいタイプと、その場の直感やノリを大切にしたいタイプで、デートの予定決めや連絡のペースに少し違いが出やすいですが、お互いの足りない部分を補い合える絶妙なグッドバランスです。`;
   } else if (myJ && oppJ) {
-    jpText = `また、両者ともに計画性を重んじる堅実な気質のため、約束や将来設計を着実に形にできる高い信頼性があります。`;
+    jpText = `また、二人ともしっかり計画を立てて行動するタイプなので、約束や将来の計画を安心して進められる抜群の信頼関係があります。`;
   } else {
-    jpText = `また、両者ともに自由とワクワク感を愛する柔軟な気質のため、その場のノリや新しい体験を全力で楽しめる魅力があります。`;
+    jpText = `また、二人とも自由で楽しいことが大好きなタイプなので、思いつきのドライブや新しいスポット巡りなど、二人だけの楽しい思い出をどんどん作っていける最高のノリがあります。`;
   }
 
-  let mbtiPairType = '認知補完ペア';
+  let mbtiPairType = '性格補完ペア';
   if (myNorm === oppNorm) mbtiPairType = '同調共鳴ペア';
   else if (myT === oppT && myJ === oppJ) mbtiPairType = '価値観一致ペア';
   else if (myT !== oppT && myJ !== oppJ) mbtiPairType = '全方位補完ペア';
@@ -1593,31 +1593,31 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
 
     if (character === 'tsuki') {
       if (baseScore >= 85) {
-        oneLiner = `${sTitle}。魂が深く共鳴し合い、愛が奇跡的に実を結ぶ最上の好運期です。`;
-        summary = `${myNickname}様とお相手（${oppNickname}様）は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【心理機能分析】${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：現在お二人の間には強い愛の引力が働いています。技巧的な駆け引きをするのではなく、${myNickname}様の持つ純粋な温かさと包容力をそのまま届けることで、${oppNickname}様にとって「生涯手放せない唯一無二のパートナー」へと昇華します。`;
+        oneLiner = `${sTitle}。心と心が深く通じ合い、自然と愛が深まる最高の幸運期です。`;
+        summary = `${myNickname}様とお相手（${oppNickname}様）は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：現在お二人の間にはとても強い絆が育まれています。難しい駆け引きをしようとせず、${myNickname}様の持つ純粋な温かさと優しさをそのまま届けることで、${oppNickname}様にとって「かけがえのない大切な人」へと自然にステップアップします。`;
       } else if (baseScore >= 70) {
-        oneLiner = `${sTitle}。歩み寄ることで絆が一段と深まる好調期。お互いのテンポを尊重しましょう。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【心理機能分析】${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：順調に関係が育つ好調な流れの中にあります。${oppNickname}様が急に一人の世界に入ったとしても、それは休息の合図です。焦らず笑顔で待ってあげるあなたの優しさが、相手の信頼を決定づけます。`;
+        oneLiner = `${sTitle}。お互いを思いやることで絆がぐんと深まる好調期。素直な気持ちを届けましょう。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：お互いに心を開きやすいとても良い流れの中にあります。${oppNickname}様が少し連絡を休んでいる時も、無理に急かさず「お疲れさま」と温かく包み込んであげるあなたの優しさが、相手の心を一番惹きつけます。`;
       } else if (baseScore >= 55) {
-        oneLiner = `【${bType}の波長】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【心理機能分析】${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：現在は二人の関係の根っこを深く張る「基盤構築」の時期です。無理に白黒をつけようとせず、日々の小さな感謝を積み重ねることで、次の発展期に向けた安心感が盤石になります。`;
+        oneLiner = `【${bType}】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：今は二人の絆をゆっくり育てる「準備と安心」の時期です。すぐに答えを求めようと焦らず、日々の小さな「ありがとう」や笑顔を積み重ねることで、ずっと仲良しでいられる安心感が育ちます。`;
       } else {
-        oneLiner = `【${sType}の学び】感情の波立ちを抑え静かに見守る時。お互いの違いを愛でる姿勢が大切です。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【心理機能分析】${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：一時的な運気の揺らぎやすれ違いが生じやすい注意期です。相手の反応に一喜一憂せず、まずは自分自身の心を優しく満たしてあげることで、無用な摩擦を回避し運気を好転へと導けます。`;
+        oneLiner = `【${sType}】焦らず穏やかに見守る時。お互いの違いをポジティブに楽しむ姿勢が大切です。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：タイミングのズレやすれ違いが少し起きやすい時期です。相手の反応に振り回されすぎず、まずは自分自身の時間を楽しんで笑顔でいることで、自然と良い運気を引き寄せられます。`;
       }
     } else { // ren
       if (baseScore >= 85) {
-        oneLiner = `${sTitle}。論理的データが証明する最高峰のシナジー。次の具体的合意へ進むべきです。`;
-        summary = `客観的命式データおよび認知機能の解析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【認知行動分析】${mbtiDyn?.summary}\n\n🔮 蓮からの戦略提言：現在、アプローチ成功確率が極大化しています。感情論ではなく、具体的な日時・場所・提案内容を5W1Hで明確に提示する論理的アプローチにより、確実な関係性のステップアップ（将来の約束や合意）を達成してください。`;
+        oneLiner = `${sTitle}。データが証明する抜群の相性シナジー。具体的なお誘いに進むベストタイミングです。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：現在、アプローチの成功率が最も高まっています。難しく考えすぎず、「いつ・どこで・何をするか」を分かりやすくシンプルに提案することで、スムーズに次の約束を確定させることができます。`;
       } else if (baseScore >= 70) {
-        oneLiner = `${sTitle}。関係性は着実な上昇トレンド。相手の認知行動パターンに合わせたアプローチを。`;
-        summary = `命式および心理機能の相性指標：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【認知行動分析】${mbtiDyn?.summary}\n\n🔮 蓮からの戦略提言：運気の追い風を活かし、相手の関心が高いテーマからスマートに会話を展開してください。感情の押し付けを排し、共通の利害や楽しい体験を共有することが最短ルートでの進展を担保します。`;
+        oneLiner = `${sTitle}。関係性は着実に上昇中。相手の好む会話のペースに合わせるのが効果的です。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：良い流れに乗っています。相手が興味を持っている話題や共通の趣味から会話を広げてください。楽しい体験を一緒に共有することが、一番確実に二人の距離を縮める近道です。`;
       } else if (baseScore >= 55) {
-        oneLiner = `【${bType}の推移】相性パラメータは安定推移中。無謀な拡張を控え、現状維持が合理的です。`;
-        summary = `命式および心理機能の評価：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【認知行動分析】${mbtiDyn?.summary}\n\n🔮 蓮からの戦略提言：過剰なアプローチはコスト対効果が低調です。お相手のバイオリズムを考慮し、3〜5日のインターバルを空けた事実ベースの定期連絡に留め、リスクヘッジを徹底してください。`;
+        oneLiner = `【${bType}】相性は安定キープ中。無理にペースを乱さず、心地よい現状維持がスマートです。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：急なアプローチを連発するよりも、相手のペースを尊重したやり取りが効果的です。数日ほど適度な間隔を空けつつ、爽やかで答えやすいメッセージを届けていきましょう。`;
       } else {
-        oneLiner = `【${sType}のリスク管理】摩擦リスクを検知。感情的アプローチを即刻停止し、静観戦略を取るべきです。`;
-        summary = `命式相互作用およびリスク指標：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【認知行動分析】${mbtiDyn?.summary}\n\n🔮 蓮からの戦略提言：現在、お相手は心理的防衛フェーズにあります。長文メッセージや返信の催促は致命的な関係悪化を招くため厳禁です。接触頻度を通常の30%以下に抑制し、自己のデータ改善に注力することが最適解です。`;
+        oneLiner = `【${sType}】少しすれ違いやすい時期。感情的な追撃は控え、落ち着いて見守るのがベストです。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：現在、お相手は自分のことに集中したいタイミングのようです。長文のLINEや返信の催促は避け、連絡の頻度を少し控えめにして、お互いにリフレッシュする時間を取りましょう。`;
       }
     }
   } else {

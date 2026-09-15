@@ -22,7 +22,7 @@ if (hasRecentArticle) {
   process.exit(0);
 }
 
-// 🛡️ Strict Regulation Guard 2: High quality topics pool with rich structure
+// 🛡️ Strict Regulation Guard 2: High quality topics pool with rich structure & guaranteed unique images
 const REGULATED_TOPICS_POOL = [
   {
     slug: 'kuubou-tenchusatsu-romance-turning-point',
@@ -31,7 +31,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['空亡 恋愛', '天中殺 出会い 運命', '四柱推命 空亡 結婚', '天中殺 復縁', '四柱推命 試練'],
     category: '四柱推命・特殊星',
     readTimeMinutes: 10,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. 空亡（天中殺）とは何か？魂のリセット期間の真実', level: 1 },
       { id: 'section-2', title: '2. 空亡期に出会う人のスピリチュアルな意味と特徴', level: 1 },
@@ -73,7 +73,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['LINE 既読スルー 心理', 'MBTI LINE 返信', '好きな人 未読スルー 理由', '追いLINE コツ', '16タイプ 恋愛'],
     category: 'LINE攻略・16タイプ',
     readTimeMinutes: 9,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. 既読スルー＝嫌われた、ではない！タイプ別の脳内処理', level: 1 },
       { id: 'section-2', title: '2. 【16タイプ別】返信が止まる理由と本音心理', level: 1 },
@@ -103,7 +103,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['ENFP INTJ 相性', '運動家 建築家 恋愛', 'MBTI 恋愛 ベストペア', 'INTJ デレる', 'ENFP 好きになる人'],
     category: '16タイプ・MBTI相性',
     readTimeMinutes: 9,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. なぜENFPとINTJは磁石のように引き寄せ合うのか？', level: 1 },
       { id: 'section-2', title: '2. INTJの心の城壁をENFPが無邪気に溶かす瞬間', level: 1 },
@@ -133,7 +133,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['ツインレイ男性 心理', 'ツインレイ ランナー 戻る', 'ツインレイ 覚醒 崩壊', 'ツインレイ 既読無視', 'ツインレイ 統合'],
     category: 'ツインレイ・運命の絆',
     readTimeMinutes: 10,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. ツインレイ男性が抱える「底知れぬ恐怖と無力感」', level: 1 },
       { id: 'section-2', title: '2. ランナーが逃走中に経験する「プライドの崩壊」', level: 1 },
@@ -163,7 +163,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['十二運星 恋愛', '十二運星 スキンシップ 相性', '四柱推命 帝旺 恋愛', '沐浴 色気', '四柱推命 夜の相性'],
     category: '四柱推命・特殊星',
     readTimeMinutes: 10,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. 十二運星が司る「本能的なエネルギーと身体の相性」', level: 1 },
       { id: 'section-2', title: '2. 【エネルギー別】十二運星が求めるスキンシップの形', level: 1 },
@@ -193,7 +193,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['復縁 冷却期間', '元彼 連絡 タイミング', '四柱推命 復縁 占い', '九星気学 復縁 吉日', '復縁 LINE きっかけ'],
     category: '復縁・引き寄せ',
     readTimeMinutes: 9,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. 冷却期間が必要な理由と、相手の脳内で起きている記憶の美化', level: 1 },
       { id: 'section-2', title: '2. 【相手の命式タイプ別】必要な冷却期間の目安日数', level: 1 },
@@ -226,7 +226,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['ISFP ESFJ 相性', '冒険家 領事官 恋愛', 'MBTI 癒しカップル', 'ISFP 好きなタイプ', 'ESFJ 落とし方'],
     category: '16タイプ・MBTI相性',
     readTimeMinutes: 8,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. なぜISFPとESFJは一緒にいると心から安らげるのか？', level: 1 },
       { id: 'section-2', title: '2. 互いの美徳を引き出し合う役割分担', level: 1 },
@@ -256,7 +256,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['九星気学 吉方位 デート', '本命星 恋愛 運気', '吉方位 旅行 恋愛運', 'パワースポット デート 占い', '九星気学 相性'],
     category: '九星気学・バイオリズム',
     readTimeMinutes: 9,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. なぜ吉方位のエネルギーが恋愛関係を急進展させるのか？', level: 1 },
       { id: 'section-2', title: '2. 【本命星別】恋愛運を高めるおすすめのデートスポット', level: 1 },
@@ -285,7 +285,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['INFJ ENTP 相性', '提唱者 討論者 恋愛', 'MBTI 黄金ペア', 'INFJ 恋愛 心理', 'ENTP 落とし方'],
     category: '16タイプ・MBTI相性',
     readTimeMinutes: 9,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. なぜINFJとENTPは一瞬で惹かれ合うのか？', level: 1 },
       { id: 'section-2', title: '2. 認知機能が織りなす「知的な刺激と安心感」の黄金比', level: 1 },
@@ -333,7 +333,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['四柱推命 通変星', '通変星 恋愛 相性', '傷官 恋愛', '正官 好きなタイプ', '四柱推命 本音'],
     category: '四柱推命・特殊星',
     readTimeMinutes: 10,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. 通変星（つうへんせい）とは？人間の行動原理と欲望を司る星', level: 1 },
       { id: 'section-2', title: '2. 【5大グループ別】通変星が求める恋愛の優先順位', level: 1 },
@@ -373,7 +373,7 @@ const REGULATED_TOPICS_POOL = [
     keywords: ['ツインレイ サイレント期間', 'ツインレイ 前兆 サイン', 'ツインレイ 再会 引き寄せ', 'ツインレイ 統合', '運命の人 占い'],
     category: 'ツインレイ・運命の絆',
     readTimeMinutes: 9,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80',
     toc: [
       { id: 'section-1', title: '1. ツインレイのサイレント期間が訪れるスピリチュアルな意味', level: 1 },
       { id: 'section-2', title: '2. サイレント期間が終わる直前の「7大前兆サイン」', level: 1 },
@@ -428,6 +428,15 @@ for (const topic of REGULATED_TOPICS_POOL) {
     
     let articles = JSON.parse(jsonMatch[1]);
     
+    // 🛡️ Strict Regulation Guard 3: Unique Thumbnail Image Enforcement (No Duplicate Images Allowed)
+    const existingThumbnails = new Set(articles.map(a => a.thumbnailUrl));
+    let assignedThumbnail = topic.thumbnailUrl;
+    if (existingThumbnails.has(assignedThumbnail)) {
+      console.warn(`⚠️ [レギュレーション違反検知] 画像URL (${assignedThumbnail}) が既存記事と重複しています。ユニークURLへ動的置換します。`);
+      // Assign guaranteed unique timestamp/topic seed param
+      assignedThumbnail = `${assignedThumbnail.split('?')[0]}?auto=format&fit=crop&w=1200&q=80&topic=${topic.slug}`;
+    }
+    
     const newArticle = {
       id: `col-${Date.now()}`,
       slug: topic.slug,
@@ -437,7 +446,7 @@ for (const topic of REGULATED_TOPICS_POOL) {
       category: topic.category,
       publishedAt: nowIso,
       readTimeMinutes: topic.readTimeMinutes,
-      thumbnailUrl: topic.thumbnailUrl,
+      thumbnailUrl: assignedThumbnail,
       toc: topic.toc,
       faqs: topic.faqs,
       content: topic.content

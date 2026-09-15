@@ -121,7 +121,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-14T00:58:28.122Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -268,7 +268,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "ツインレイ・運命の絆",
     "publishedAt": "2026-09-14T02:00:00.000Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -323,7 +323,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-13T18:00:00.000Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -373,7 +373,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-13T08:00:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -428,7 +428,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "九星気学・バイオリズム",
     "publishedAt": "2026-09-12T12:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1532693322450-2cb5c511067d?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -483,7 +483,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・16タイプ",
     "publishedAt": "2026-09-12T08:00:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -538,7 +538,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-11T12:00:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -593,7 +593,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-10T00:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -652,7 +652,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-09T12:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -707,7 +707,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-08T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -762,7 +762,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・アプローチ",
     "publishedAt": "2026-09-08T00:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -817,7 +817,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "ツインレイ・運命の絆",
     "publishedAt": "2026-09-07T12:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -978,7 +978,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-09-04T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -1029,7 +1029,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-03T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -1074,7 +1074,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-02T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -1120,7 +1120,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "九星気学・バイオリズム",
     "publishedAt": "2026-09-01T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
@@ -1166,7 +1166,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-08-31T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1200&q=80",
     "toc": [
       {
         "id": "section-1",
