@@ -566,7 +566,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.4s ease', paddingTop: '0.25rem', paddingBottom: '7.5rem' }}>
+    <div style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.4s ease', paddingTop: '0.25rem', paddingBottom: 'calc(5.5rem + var(--safe-bottom, 0px))' }}>
       
       {/* Top Back Navigation Button */}
       {onReset && (
@@ -2761,8 +2761,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         )}
 
-        {/* Scroll Spacer to prevent Navbar coverage */}
-        <div style={{ height: 'calc(4rem + var(--safe-bottom, 0px))', width: '100%', flexShrink: 0 }} />
 
         {/* Zoomed Avatar Modal */}
         {zoomedImg && (
