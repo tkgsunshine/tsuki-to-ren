@@ -84,14 +84,23 @@ function generateSitemap() {
     });
   });
 
-  // 6. Legal & Company Pages
-  const institutionalPages = ['terms', 'privacy', 'tokushoho', 'company'];
-  institutionalPages.forEach(p => {
+  // 6. App Tabs & Institutional Pages
+  const appPages = [
+    { path: 'result', priority: '0.8', freq: 'daily' },
+    { path: 'chat', priority: '0.8', freq: 'daily' },
+    { path: 'mypage', priority: '0.6', freq: 'weekly' },
+    { path: 'about', priority: '0.6', freq: 'weekly' },
+    { path: 'terms', priority: '0.5', freq: 'monthly' },
+    { path: 'privacy', priority: '0.5', freq: 'monthly' },
+    { path: 'tokushoho', priority: '0.5', freq: 'monthly' },
+    { path: 'company', priority: '0.5', freq: 'monthly' }
+  ];
+  appPages.forEach(p => {
     xml += `  <url>\n`;
-    xml += `    <loc>${BASE_URL}/${p}</loc>\n`;
+    xml += `    <loc>${BASE_URL}/${p.path}</loc>\n`;
     xml += `    <lastmod>${today}</lastmod>\n`;
-    xml += `    <changefreq>monthly</changefreq>\n`;
-    xml += `    <priority>0.5</priority>\n`;
+    xml += `    <changefreq>${p.freq}</changefreq>\n`;
+    xml += `    <priority>${p.priority}</priority>\n`;
     xml += `  </url>\n`;
   });
 
@@ -99,7 +108,7 @@ function generateSitemap() {
 
   const outputPath = path.resolve(__dirname, '../public/sitemap.xml');
   fs.writeFileSync(outputPath, xml, 'utf-8');
-  const totalUrls = 1 + 1 + slugs.length + 1 + (16 * 16) + institutionalPages.length;
+  const totalUrls = 1 + 1 + slugs.length + 1 + (16 * 16) + appPages.length;
   console.log(`✅ sitemap.xml successfully generated with ${totalUrls} URLs at ${outputPath}`);
 }
 

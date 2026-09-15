@@ -65,6 +65,18 @@ const getInitialRoute = (): InitialRoute => {
   if (path === '/company' || path === '/company/') {
     return { tab: 'profile', slug: null, legal: false, settingsSubView: 'company', compatibilityPair: null };
   }
+  if (path === '/about' || path === '/about/') {
+    return { tab: 'profile', slug: null, legal: false, settingsSubView: 'about', compatibilityPair: null };
+  }
+  if (path === '/result' || path === '/result/' || path === '/fortune' || path === '/fortune/') {
+    return { tab: 'fortune', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/chat' || path === '/chat/') {
+    return { tab: 'chat', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/mypage' || path === '/mypage/' || path === '/profile' || path === '/profile/') {
+    return { tab: 'profile', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
   const compMatch = path.match(/^\/compatibility\/([a-zA-Z]{4})-([a-zA-Z]{4})/i);
   if (compMatch) {
     return {
@@ -136,13 +148,13 @@ function App() {
       document.body.scrollTop = 0;
       const mainEl = document.querySelector('.main-content');
       if (mainEl) mainEl.scrollTop = 0;
-      requestAnimationFrame(() => {
-        const el = document.querySelector('.main-content');
-        if (el) el.scrollTop = 0;
-        window.scrollTo(0, 0);
-      });
-    } else if (tab === 'profile') {
-      setSettingsSubView('main');
+    } else if (tab === 'fortune') {
+      if (window.location.pathname !== '/result') {
+        window.history.pushState({ tab: 'fortune', slug: null }, '', '/result');
+      }
+      window.scrollTo(0, 0);
+      const mainEl = document.querySelector('.main-content');
+      if (mainEl) mainEl.scrollTop = 0;
     } else if (tab === 'column') {
       setSelectedColumnSlug(null);
       if (window.location.pathname !== '/column') {
@@ -151,11 +163,21 @@ function App() {
       window.scrollTo(0, 0);
       const mainEl = document.querySelector('.main-content');
       if (mainEl) mainEl.scrollTop = 0;
-      requestAnimationFrame(() => {
-        const el = document.querySelector('.main-content');
-        if (el) el.scrollTop = 0;
-        window.scrollTo(0, 0);
-      });
+    } else if (tab === 'chat') {
+      if (window.location.pathname !== '/chat') {
+        window.history.pushState({ tab: 'chat', slug: null }, '', '/chat');
+      }
+      window.scrollTo(0, 0);
+      const mainEl = document.querySelector('.main-content');
+      if (mainEl) mainEl.scrollTop = 0;
+    } else if (tab === 'profile') {
+      setSettingsSubView('main');
+      if (window.location.pathname !== '/mypage') {
+        window.history.pushState({ tab: 'profile', slug: null }, '', '/mypage');
+      }
+      window.scrollTo(0, 0);
+      const mainEl = document.querySelector('.main-content');
+      if (mainEl) mainEl.scrollTop = 0;
     }
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
@@ -793,7 +815,10 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
-                onShowLegal={() => setShowLegalPage(true)}
+                onShowLegal={() => {
+                  setShowLegalPage(true);
+                  window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
+                }}
               />
             )}
           </>
@@ -821,7 +846,10 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
-                onShowLegal={() => setShowLegalPage(true)}
+                onShowLegal={() => {
+                  setShowLegalPage(true);
+                  window.history.pushState({ tab: 'fortune', legal: true }, '', '/terms');
+                }}
               />
             ) : (
               <div className="glass-panel" style={{ padding: '2.5rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem', marginTop: '2rem' }}>
@@ -1021,9 +1049,7 @@ function App() {
                 <button
                   onClick={() => {
                     setSettingsSubView('main');
-                    if (window.location.pathname === '/tokushoho' || window.location.pathname === '/company') {
-                      window.history.pushState({ tab: 'profile', slug: null }, '', '/');
-                    }
+                    window.history.pushState({ tab: 'profile', subView: 'main' }, '', '/mypage');
                   }}
                   style={{
                     background: 'rgba(255,255,255,0.06)',
@@ -1299,7 +1325,10 @@ function App() {
                 </div>
 
                 <div 
-                  onClick={() => setSettingsSubView('about')}
+                  onClick={() => {
+                    setSettingsSubView('about');
+                    window.history.pushState({ tab: 'profile', subView: 'about' }, '', '/about');
+                  }}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -1324,7 +1353,10 @@ function App() {
                 </div>
 
                 <div 
-                  onClick={() => setSettingsSubView('tokushoho')}
+                  onClick={() => {
+                    setSettingsSubView('tokushoho');
+                    window.history.pushState({ tab: 'profile', subView: 'tokushoho' }, '', '/tokushoho');
+                  }}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -1349,7 +1381,10 @@ function App() {
                 </div>
 
                 <div 
-                  onClick={() => setShowLegalPage(true)}
+                  onClick={() => {
+                    setShowLegalPage(true);
+                    window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
+                  }}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -1374,7 +1409,10 @@ function App() {
                 </div>
 
                 <div 
-                  onClick={() => setSettingsSubView('company')}
+                  onClick={() => {
+                    setSettingsSubView('company');
+                    window.history.pushState({ tab: 'profile', subView: 'company' }, '', '/company');
+                  }}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -2174,9 +2212,8 @@ function App() {
       {showLegalPage && (
         <LegalPage onClose={() => {
           setShowLegalPage(false);
-          if (window.location.pathname === '/terms' || window.location.pathname === '/privacy') {
-            window.history.pushState({ tab: 'home', slug: null }, '', '/');
-          }
+          const fallbackPath = activeTab === 'profile' ? '/mypage' : (activeTab === 'fortune' ? '/result' : (activeTab === 'column' ? '/column' : (activeTab === 'chat' ? '/chat' : '/')));
+          window.history.pushState({ tab: activeTab, slug: null }, '', fallbackPath);
         }} />
       )}
 

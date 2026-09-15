@@ -1693,6 +1693,30 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.tsuki-to-ren.com/result</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.tsuki-to-ren.com/chat</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.tsuki-to-ren.com/mypage</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.tsuki-to-ren.com/about</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://www.tsuki-to-ren.com/terms</loc>
     <lastmod>2026-09-15</lastmod>
     <changefreq>monthly</changefreq>

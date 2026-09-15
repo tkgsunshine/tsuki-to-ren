@@ -230,7 +230,134 @@ writePage(
   ]
 );
 
-console.log('✅ Pre-rendered Legal & Company pages successfully.');
+// 5. /result
+writePage(
+  'result',
+  '【鑑定結果】四柱推命×16タイプ恋愛相性診断 | 月と蓮',
+  '四柱推命と16タイプで鑑定した二人の魂の相性スコア、深層心理、返信率MAXのLINE吉時間、お相手の攻略トリセツ結果画面です。',
+  '月と蓮, 鑑定結果, 四柱推命 相性, 16タイプ 相性, LINE吉時間',
+  `${BASE_URL}/result`,
+  `
+    <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
+      <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>鑑定結果</span>
+      </nav>
+      <article style="text-align: center;">
+        <h1 style="font-size: 1.6rem; color: #fef08a; margin-bottom: 1rem;">二人の精密恋愛相性・鑑定結果</h1>
+        <p style="font-size: 0.9rem; color: #d1d5db; margin-bottom: 2rem;">生年月日から導く四柱推命の魂の結びつき、日盤バイオリズム、16タイプの心理傾向を統合した鑑定結果が表示されます。</p>
+        <a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.8rem 2rem; border-radius: 30px; text-decoration: none; font-weight: bold;">今すぐ無料で相性を占う</a>
+      </article>
+    </div>
+  `,
+  [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
+        { '@type': 'ListItem', 'position': 2, 'name': '鑑定結果', 'item': `${BASE_URL}/result` }
+      ]
+    }
+  ]
+);
+
+// 6. /chat
+writePage(
+  'chat',
+  '【AI恋愛チャット相談】守護キャラクター月・蓮が寄り添う相性対話 | 月と蓮',
+  '四柱推命の命式とお相手の16タイプ傾向を熟知した守護AIキャラクター「月（直感と優しさ）」と「蓮（理性と導き）」による24時間リアルタイム恋愛チャット相談。',
+  'AI占いチャット, 恋愛相談, 月と蓮, チャット占い',
+  `${BASE_URL}/chat`,
+  `
+    <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
+      <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>AIチャット相談</span>
+      </nav>
+      <article style="text-align: center;">
+        <h1 style="font-size: 1.6rem; color: #fef08a; margin-bottom: 1rem;">守護キャラクター（月・蓮）とAI恋愛相談</h1>
+        <p style="font-size: 0.9rem; color: #d1d5db; margin-bottom: 2rem;">お相手の気持ちやLINEの返信内容に迷ったとき、命式と心理タイプを踏まえた的確なアドバイスをいつでも受けられます。</p>
+        <a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.8rem 2rem; border-radius: 30px; text-decoration: none; font-weight: bold;">恋愛診断・チャットを始める</a>
+      </article>
+    </div>
+  `,
+  [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
+        { '@type': 'ListItem', 'position': 2, 'name': 'チャット相談', 'item': `${BASE_URL}/chat` }
+      ]
+    }
+  ]
+);
+
+// 7. /mypage
+writePage(
+  'mypage',
+  '【マイページ】お相手データ管理・会員プラン設定 | 月と蓮',
+  '月と蓮（つきとれん）のマイページ。保存したお相手のデータ一覧、会員ステータス（無料・プレミアム）、各種設定の確認・変更が行えます。',
+  '月と蓮, マイページ, アプリ設定, お相手保存',
+  `${BASE_URL}/mypage`,
+  `
+    <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
+      <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>マイページ</span>
+      </nav>
+      <article style="text-align: center;">
+        <h1 style="font-size: 1.6rem; color: #fef08a; margin-bottom: 1rem;">マイページ・設定</h1>
+        <p style="font-size: 0.9rem; color: #d1d5db; margin-bottom: 2rem;">Google / X ログイン、保存したお相手の管理、特定商取引法表記や規約の確認はこちらから行えます。</p>
+        <a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.8rem 2rem; border-radius: 30px; text-decoration: none; font-weight: bold;">ホームへ戻る</a>
+      </article>
+    </div>
+  `,
+  [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
+        { '@type': 'ListItem', 'position': 2, 'name': 'マイページ', 'item': `${BASE_URL}/mypage` }
+      ]
+    }
+  ]
+);
+
+// 8. /about
+writePage(
+  'about',
+  '【占術解説】四柱推命×九星気学×16タイプの精密ハイブリッド鑑定ロジック | 月と蓮',
+  '東洋最高峰の四柱推命（日柱天干地支・五行相生）、九星気学（日盤バイオリズム）、西洋16タイプ心理学を融合させた『月と蓮』の独自鑑定ロジックと特殊星（魁罡・極星）を詳しく解説。',
+  '月と蓮, 四柱推命ロジック, 魁罡, 極星, 16タイプ 心理学, 九星気学',
+  `${BASE_URL}/about`,
+  `
+    <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
+      <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>占い解説</span>
+      </nav>
+      <article>
+        <h1 style="font-size: 1.6rem; color: #fef08a; border-bottom: 1px solid rgba(226,192,116,0.3); padding-bottom: 0.5rem;">月と蓮の占術ロジック解説</h1>
+        <section style="margin-top: 1.5rem;">
+          <h2 style="font-size: 1.15rem; color: #e2c074;">4つの多角アプローチの融合</h2>
+          <p>四柱推命による「日干・魂の本質相性」、九星気学による「日盤運気バイオリズム」、西洋16タイプ理論による「会話の癖とLINEコミュニケーション」、そして3.3%の強運特殊星「魁罡（かいごう）」の判定を統合した高精度相性エンジンです。</p>
+        </section>
+        <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
+      </article>
+    </div>
+  `,
+  [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
+        { '@type': 'ListItem', 'position': 2, 'name': '占い解説', 'item': `${BASE_URL}/about` }
+      ]
+    }
+  ]
+);
+
+console.log('✅ Pre-rendered Legal, Company, Result, Chat, Mypage & About pages successfully.');
 
 // MBTI Types Data
 const MBTI_TYPES = [
