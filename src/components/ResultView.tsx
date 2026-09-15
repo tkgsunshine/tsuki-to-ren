@@ -101,19 +101,19 @@ export const formatAppraisalText = (text: string | undefined | null): string => 
   if (!text) return '';
   let formatted = text;
 
-  // Insert double line break before major headers or icons if not already preceded by \n
-  formatted = formatted.replace(/([^\n])(【二人の|【状況：|【宿命|【相乗|【以心|【真逆|【居心地|🌙|🔮|📱|⌛|💡|🟢|🔴|🎁)/g, '$1\n\n$2');
+  // 1. Insert double line break before any emoji section header or bracket header if not preceded by \n
+  formatted = formatted.replace(/([^\n])\s*(📱|⌛|💡|🌙|🔮|💘|✨|📍|💌|⚠️|🟢|🔴|🎁|💬|【二人の|【状況：|【宿命|【相乗|【以心|【真逆|【居心地|【絶対|【注意|【警戒|【リスク|【致命)/g, '$1\n\n$2');
 
-  // Insert single line break after header brackets if followed immediately by text
+  // 2. Insert single line break after header brackets if followed immediately by text
   formatted = formatted.replace(/(【[^】]+】)([^\n])/g, '$1\n$2');
 
-  // Insert single line break after character advice titles
-  formatted = formatted.replace(/([🌙🔮]\s*(?:月からのメッセージ|蓮からのアドバイス)[：:])([^\n])/g, '$1\n$2');
+  // 3. Insert single line break after emoji headers with colons if followed immediately by text
+  formatted = formatted.replace(/([📱⌛💡🌙🔮💘✨📍💌⚠️🟢🔴🎁💬]\s*[^：:\n]+[：:])([^\n])/g, '$1\n$2');
 
-  // Break between sentences when a sentence ends with period and next block begins with common subject/conjunction
+  // 4. Break between sentences when a sentence ends with period and next block begins with common subject/conjunction
   formatted = formatted.replace(/(。[」』]?)\s*(お二人は|一緒に|お互いに|また、|相手の|さらに|特に)/g, '$1\n\n$2');
 
-  // Clean up 3+ newlines
+  // 5. Clean up 3+ newlines
   return formatted.replace(/\n{3,}/g, '\n\n').trim();
 };
 
