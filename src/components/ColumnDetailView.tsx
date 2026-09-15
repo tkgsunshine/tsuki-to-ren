@@ -36,7 +36,7 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
     >
       <div
         style={{
-          padding: '4px 14px',
+          padding: '0.35rem 0.85rem',
           borderRadius: '20px',
           background: 'rgba(254, 240, 138, 0.2)',
           border: '1px solid rgba(254, 240, 138, 0.5)',
@@ -49,7 +49,7 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
         }}
       >
         <Sparkles size={14} />
-        <span>完全無料・即時鑑定</span>
+        <span>完全無料・約2.7億通り即時鑑定</span>
       </div>
       <Heading
         className="font-serif gold-text"
@@ -58,7 +58,7 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
         あなたとお相手の運命の相性を今すぐ確かめてみませんか？
       </Heading>
       <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0, maxWidth: '500px' }}>
-        生年月日と16タイプを入力するだけで、二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間が瞬時に鑑定できます。
+        生年月日と16タイプを入力するだけで、全273,088,320通り（約2.7億通り）の算術マトリクスから二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間が瞬時に鑑定できます。
       </p>
       <button
         type="button"

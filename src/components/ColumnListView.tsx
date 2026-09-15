@@ -342,7 +342,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
           あなたとお相手の本格相性を今すぐ占ってみませんか？
         </h3>
         <p style={{ fontSize: '0.75rem', color: '#cbd5e1', margin: 0 }}>
-          四柱推命×16タイプ診断で、二人の運命スコア・トリセツ・LINE吉時間を完全鑑定できます。
+          全273,088,320通り（約2.7億通り）の算術マトリクスで、二人の運命スコア・トリセツ・LINE吉時間を完全鑑定できます。
         </p>
         <button
           type="button"
