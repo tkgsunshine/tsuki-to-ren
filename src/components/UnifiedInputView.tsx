@@ -62,7 +62,23 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     return '';
   });
 
+  const urlPair = React.useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    const compMatch = window.location.pathname.match(/\/compatibility\/([a-zA-Z]{4})-([a-zA-Z]{4})/i);
+    if (compMatch) {
+      return { my: compMatch[1].toUpperCase(), opp: compMatch[2].toUpperCase() };
+    }
+    const params = new URLSearchParams(window.location.search);
+    const mm = params.get('mm') || params.get('mMbti');
+    const om = params.get('om') || params.get('oMbti');
+    if (mm && om) {
+      return { my: mm.toUpperCase(), opp: om.toUpperCase() };
+    }
+    return null;
+  }, []);
+
   const [myMbti, setMyMbti] = useState(() => {
+    if (urlPair?.my) return urlPair.my;
     try {
       const stored = localStorage.getItem('hasu_user_profile');
       if (stored) {
@@ -89,7 +105,10 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   // Opponent Info states
   const [oppName, setOppName] = useState('');
   const [oppBirth, setOppBirth] = useState('');
-  const [oppMbti, setOppMbti] = useState('UNKNOWN');
+  const [oppMbti, setOppMbti] = useState(() => {
+    if (urlPair?.opp) return urlPair.opp;
+    return 'UNKNOWN';
+  });
   const [oppGender, setOppGender] = useState<'male' | 'female'>(() => (myGender === 'female' ? 'male' : 'female'));
   const [relationship, setRelationship] = useState('single'); // 片思い中
 
@@ -258,6 +277,27 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       {/* Main Integrated Form */}
       <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box' }}>
         
+        {urlPair && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+            border: '1px solid rgba(226, 192, 116, 0.4)',
+            borderRadius: '14px',
+            padding: '0.85rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.75rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <Sparkles size={18} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
+              <span style={{ fontSize: '0.82rem', color: '#fef08a', fontWeight: 'bold' }}>
+                【{urlPair.my} × {urlPair.opp}】相性診断モード適用中
+              </span>
+            </div>
+            <span style={{ fontSize: '0.7rem', color: '#cbd5e1', background: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '6px' }}>16タイプ設定済</span>
+          </div>
+        )}
+
         {/* Your Info Section */}
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.5rem', marginBottom: '0.25rem', fontWeight: 'bold' }}>

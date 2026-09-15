@@ -7,6 +7,13 @@ const __dirname = path.dirname(__filename);
 
 const BASE_URL = 'https://www.tsuki-to-ren.com';
 
+const MBTI_CODES = [
+  'infj', 'infp', 'enfj', 'enfp',
+  'intj', 'intp', 'entj', 'entp',
+  'isfj', 'isfp', 'esfj', 'esfp',
+  'istj', 'istp', 'estj', 'estp'
+];
+
 function generateSitemap() {
   const today = new Date().toISOString().split('T')[0];
   const columnsFilePath = path.resolve(__dirname, '../src/data/columnsData.ts');
@@ -57,11 +64,43 @@ function generateSitemap() {
     xml += `  </url>\n`;
   });
 
+  // 4. Compatibility Hub Page
+  xml += `  <url>\n`;
+  xml += `    <loc>${BASE_URL}/compatibility</loc>\n`;
+  xml += `    <lastmod>${today}</lastmod>\n`;
+  xml += `    <changefreq>weekly</changefreq>\n`;
+  xml += `    <priority>0.8</priority>\n`;
+  xml += `  </url>\n`;
+
+  // 5. MBTI 256 Combination Pages
+  MBTI_CODES.forEach(t1 => {
+    MBTI_CODES.forEach(t2 => {
+      xml += `  <url>\n`;
+      xml += `    <loc>${BASE_URL}/compatibility/${t1}-${t2}</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += `    <changefreq>weekly</changefreq>\n`;
+      xml += `    <priority>0.7</priority>\n`;
+      xml += `  </url>\n`;
+    });
+  });
+
+  // 6. Legal & Company Pages
+  const institutionalPages = ['terms', 'privacy', 'tokushoho', 'company'];
+  institutionalPages.forEach(p => {
+    xml += `  <url>\n`;
+    xml += `    <loc>${BASE_URL}/${p}</loc>\n`;
+    xml += `    <lastmod>${today}</lastmod>\n`;
+    xml += `    <changefreq>monthly</changefreq>\n`;
+    xml += `    <priority>0.5</priority>\n`;
+    xml += `  </url>\n`;
+  });
+
   xml += `</urlset>\n`;
 
   const outputPath = path.resolve(__dirname, '../public/sitemap.xml');
   fs.writeFileSync(outputPath, xml, 'utf-8');
-  console.log(`✅ sitemap.xml successfully generated with ${slugs.length + 2} URLs at ${outputPath}`);
+  const totalUrls = 1 + 1 + slugs.length + 1 + (16 * 16) + institutionalPages.length;
+  console.log(`✅ sitemap.xml successfully generated with ${totalUrls} URLs at ${outputPath}`);
 }
 
 generateSitemap();

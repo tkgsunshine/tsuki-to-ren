@@ -142,6 +142,81 @@ export const SeoFooterSection: React.FC = () => {
           </div>
         </div>
 
+        {/* Popular 16-Type Combinations Section */}
+        <div style={{
+          padding: '1rem',
+          background: 'rgba(255, 255, 255, 0.02)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          borderRadius: '14px'
+        }}>
+          <h3 className="font-serif gold-text" style={{ fontSize: '0.85rem', fontWeight: 'bold', margin: '0 0 0.6rem 0', textAlign: 'center' }}>
+            人気の16タイプ（MBTI）恋愛相性診断
+          </h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center' }}>
+            {[
+              { pair: 'infp-enfj', label: 'INFP × ENFJ' },
+              { pair: 'enfp-intj', label: 'ENFP × INTJ' },
+              { pair: 'infj-entp', label: 'INFJ × ENTP' },
+              { pair: 'intp-entj', label: 'INTP × ENTJ' },
+              { pair: 'isfj-esfp', label: 'ISFJ × ESFP' },
+              { pair: 'isfp-esfj', label: 'ISFP × ESFJ' },
+              { pair: 'istj-estp', label: 'ISTJ × ESTP' },
+              { pair: 'istp-estj', label: 'ISTP × ESTJ' },
+              { pair: 'enfp-infj', label: 'ENFP × INFJ' },
+              { pair: 'infp-intp', label: 'INFP × INTP' },
+              { pair: 'enfj-esfj', label: 'ENFJ × ESFJ' },
+              { pair: 'intj-entp', label: 'INTJ × ENTP' }
+            ].map(item => (
+              <a
+                key={item.pair}
+                href={`/compatibility/${item.pair}`}
+                style={{
+                  fontSize: '0.72rem',
+                  color: '#cbd5e1',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  border: '1px solid rgba(255, 255, 255, 0.08)'
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '0.75rem' }}>
+            <a
+              href="/compatibility"
+              style={{
+                fontSize: '0.75rem',
+                color: 'var(--color-gold)',
+                textDecoration: 'underline',
+                fontWeight: 'bold'
+              }}
+            >
+              全256通りの16タイプ恋愛相性一覧を見る →
+            </a>
+          </div>
+        </div>
+
+        {/* Footer Navigation Links */}
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '0.75rem 1.25rem',
+          justifyContent: 'center',
+          fontSize: '0.72rem',
+          color: '#94a3b8'
+        }}>
+          <a href="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>恋愛診断ホーム</a>
+          <a href="/column" style={{ color: '#cbd5e1', textDecoration: 'none' }}>開運コラム</a>
+          <a href="/compatibility" style={{ color: '#cbd5e1', textDecoration: 'none' }}>16タイプ相性一覧</a>
+          <a href="/terms" style={{ color: '#94a3b8', textDecoration: 'none' }}>利用規約</a>
+          <a href="/privacy" style={{ color: '#94a3b8', textDecoration: 'none' }}>プライバシーポリシー</a>
+          <a href="/tokushoho" style={{ color: '#94a3b8', textDecoration: 'none' }}>特定商取引法に基づく表記</a>
+          <a href="/company" style={{ color: '#94a3b8', textDecoration: 'none' }}>運営会社</a>
+        </div>
+
         {/* Copyright */}
         <div style={{
           textAlign: 'center',

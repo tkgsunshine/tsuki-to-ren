@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/build-sitemap.js && node scripts/prerender-columns.js",
+    "build": "tsc -b && vite build && node scripts/build-sitemap.js && node scripts/prerender-columns.js && node scripts/prerender-seo-pages.js",
     "lint": "oxlint",
     "preview": "vite preview"
   },

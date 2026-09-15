@@ -36,20 +36,49 @@ const formatBirthDate = (val: string): string => {
   return `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
 };
 
-const getInitialRoute = () => {
-  if (typeof window === 'undefined') return { tab: 'home', slug: null as string | null };
+interface InitialRoute {
+  tab: string;
+  slug: string | null;
+  legal: boolean;
+  settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company';
+  compatibilityPair: { myMbti: string; oppMbti: string } | null;
+}
+
+const getInitialRoute = (): InitialRoute => {
+  if (typeof window === 'undefined') {
+    return { tab: 'home', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
   const path = window.location.pathname;
   if (path.startsWith('/column/')) {
     const slug = path.replace('/column/', '').replace(/\/$/, '');
-    if (slug) {
-      return { tab: 'column', slug };
-    }
-    return { tab: 'column', slug: null };
+    return { tab: 'column', slug: slug || null, legal: false, settingsSubView: 'main', compatibilityPair: null };
   }
   if (path === '/column' || path === '/column/') {
-    return { tab: 'column', slug: null };
+    return { tab: 'column', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
   }
-  return { tab: 'home', slug: null };
+  if (path === '/terms' || path === '/terms/' || path === '/privacy' || path === '/privacy/') {
+    return { tab: 'home', slug: null, legal: true, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/tokushoho' || path === '/tokushoho/') {
+    return { tab: 'profile', slug: null, legal: false, settingsSubView: 'tokushoho', compatibilityPair: null };
+  }
+  if (path === '/company' || path === '/company/') {
+    return { tab: 'profile', slug: null, legal: false, settingsSubView: 'company', compatibilityPair: null };
+  }
+  const compMatch = path.match(/^\/compatibility\/([a-zA-Z]{4})-([a-zA-Z]{4})/i);
+  if (compMatch) {
+    return {
+      tab: 'home',
+      slug: null,
+      legal: false,
+      settingsSubView: 'main',
+      compatibilityPair: {
+        myMbti: compMatch[1].toUpperCase(),
+        oppMbti: compMatch[2].toUpperCase()
+      }
+    };
+  }
+  return { tab: 'home', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
 };
 
 function App() {
@@ -63,6 +92,13 @@ function App() {
       const route = getInitialRoute();
       setActiveTab(route.tab);
       setSelectedColumnSlug(route.slug);
+      setShowLegalPage(route.legal);
+      if (route.settingsSubView) setSettingsSubView(route.settingsSubView);
+      if (route.compatibilityPair) {
+        setMyMbti(route.compatibilityPair.myMbti);
+        setOppMbti(route.compatibilityPair.oppMbti);
+        setMode('match');
+      }
       if (route.tab === 'home') {
         setFlowStep('input');
         setLoadedPartner(null);
@@ -131,7 +167,7 @@ function App() {
   // Firebase Auth State
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showLegalPage, setShowLegalPage] = useState(false);
+  const [showLegalPage, setShowLegalPage] = useState(initialRoute.legal);
   const [showEmailPromptModal, setShowEmailPromptModal] = useState(false);
   const [promptEmailInput, setPromptEmailInput] = useState('');
   const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
@@ -178,7 +214,7 @@ function App() {
   const [showPremiumLP, setShowPremiumLP] = useState(false);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
-  const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company'>('main');
+  const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company'>(initialRoute.settingsSubView);
 
   // My Info (Step 1)
   const [userProfile] = useState(() => {
@@ -192,7 +228,7 @@ function App() {
 
   const [myName, setMyName] = useState(userProfile?.name || 'あなた');
   const [myBirth, setMyBirth] = useState(userProfile?.birth || '');
-  const [myMbti, setMyMbti] = useState(userProfile?.mbti || 'UNKNOWN');
+  const [myMbti, setMyMbti] = useState(initialRoute.compatibilityPair ? initialRoute.compatibilityPair.myMbti : (userProfile?.mbti || 'UNKNOWN'));
   const [myGender, setMyGender] = useState<'female' | 'male'>(userProfile?.gender || 'female');
   const [showProfileDatePicker, setShowProfileDatePicker] = useState(false);
   const [mode, setMode] = useState<'single' | 'match'>('match');
@@ -200,7 +236,7 @@ function App() {
   // Opponent Info (Step 2)
   const [oppName, setOppName] = useState('お相手');
   const [oppBirth, setOppBirth] = useState('');
-  const [oppMbti, setOppMbti] = useState('UNKNOWN');
+  const [oppMbti, setOppMbti] = useState(initialRoute.compatibilityPair ? initialRoute.compatibilityPair.oppMbti : 'UNKNOWN');
   const [oppGender, setOppGender] = useState<'male' | 'female'>('male');
   const [relationship, setRelationship] = useState('single');
   const [loadedPartner, setLoadedPartner] = useState<SavedPartner | null>(null);
@@ -276,9 +312,11 @@ function App() {
     const runMode = (rawMode === 's' || rawMode === 'single') ? 'single' : (rawMode === 'm' || rawMode === 'match' || (oBirth && oMbti)) ? 'match' : null;
 
     // Dynamic SEO Metadata Injection for 256 MBTI combinations & search terms
-    if (mMbti && oMbti && mMbti !== 'UNKNOWN' && oMbti !== 'UNKNOWN') {
-      const dynamicTitle = `【16タイプ相性診断】${mMbti} × ${oMbti} の恋愛相性・トリセツ | 月と蓮`;
-      const dynamicDesc = `${mMbti}と${oMbti}の恋愛相性スコア、会話のコツ、刺さるLINEメッセージ例、返信率MAXの吉時間を四柱推命×16タイプ診断で完全鑑定。`;
+    const effectiveMMbti = mMbti || initialRoute.compatibilityPair?.myMbti;
+    const effectiveOMbti = oMbti || initialRoute.compatibilityPair?.oppMbti;
+    if (effectiveMMbti && effectiveOMbti && effectiveMMbti !== 'UNKNOWN' && effectiveOMbti !== 'UNKNOWN') {
+      const dynamicTitle = `【16タイプ相性診断】${effectiveMMbti} × ${effectiveOMbti} の恋愛相性・トリセツ | 月と蓮`;
+      const dynamicDesc = `${effectiveMMbti}と${effectiveOMbti}の恋愛相性スコア、会話のコツ、刺さるLINEメッセージ例、返信率MAXの吉時間を四柱推命×16タイプ診断で完全鑑定。`;
       document.title = dynamicTitle;
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', dynamicDesc);
@@ -981,7 +1019,12 @@ function App() {
             {settingsSubView !== 'main' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <button
-                  onClick={() => setSettingsSubView('main')}
+                  onClick={() => {
+                    setSettingsSubView('main');
+                    if (window.location.pathname === '/tokushoho' || window.location.pathname === '/company') {
+                      window.history.pushState({ tab: 'profile', slug: null }, '', '/');
+                    }
+                  }}
                   style={{
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -2129,7 +2172,12 @@ function App() {
 
       {/* Legal Page (利用規約・プライバシーポリシー) */}
       {showLegalPage && (
-        <LegalPage onClose={() => setShowLegalPage(false)} />
+        <LegalPage onClose={() => {
+          setShowLegalPage(false);
+          if (window.location.pathname === '/terms' || window.location.pathname === '/privacy') {
+            window.history.pushState({ tab: 'home', slug: null }, '', '/');
+          }
+        }} />
       )}
 
       {/* Email Notification Setup Modal */}
