@@ -21,10 +21,21 @@ declare global {
   }
 }
 
+// Dynamic auth domain to enable same-origin OAuth proxy on production (solving mobile Safari/SP cookie isolation)
+const getAuthDomain = (): string => {
+  if (typeof window !== 'undefined' && window.location.hostname) {
+    const host = window.location.hostname;
+    if (host.includes('tsuki-to-ren.com') || host.includes('vercel.app')) {
+      return host; // e.g. www.tsuki-to-ren.com
+    }
+  }
+  return import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'tsuki-to-ren-dba8c.firebaseapp.com';
+};
+
 // Firebase production configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC8KuxFTkHR_3nLX7h8b-L_G40n59ymyY8',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'tsuki-to-ren-dba8c.firebaseapp.com',
+  authDomain: getAuthDomain(),
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'tsuki-to-ren-dba8c',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'tsuki-to-ren-dba8c.firebasestorage.app',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '670709162172',
@@ -53,14 +64,6 @@ export interface UserProfile {
   photoURL: string | null;
   providerId: 'google.com' | 'apple.com' | 'twitter.com' | 'demo' | string;
 }
-
-// Check if current browser is mobile or standalone PWA where popup window is problematic
-const isMobileOrStandalone = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  return isStandalone || isMobile;
-};
 
 // Check and handle redirect sign-in result (called on page load)
 export const checkRedirectAuthResult = async (): Promise<UserProfile | null> => {
@@ -92,16 +95,6 @@ export const checkRedirectAuthResult = async (): Promise<UserProfile | null> => 
 export const signInWithGoogle = async (): Promise<UserProfile> => {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  
-  // On mobile or standalone PWA, prefer redirect to avoid cross-window/popup blocking
-  if (isMobileOrStandalone()) {
-    try {
-      await signInWithRedirect(auth, provider);
-      return new Promise(() => {}); // Wait for redirect to happen
-    } catch (redirectErr) {
-      console.warn('signInWithRedirect failed, trying popup as fallback:', redirectErr);
-    }
-  }
 
   try {
     const result = await signInWithPopup(auth, provider);
@@ -119,8 +112,13 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
     return userProfile;
   } catch (err: any) {
     const code = err?.code || '';
-    if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment' || code === 'auth/cancelled-popup-request') {
-      console.log('Popup blocked or cancelled, falling back to signInWithRedirect...');
+    console.warn('signInWithPopup error:', code, err?.message);
+    if (
+      code === 'auth/popup-blocked' ||
+      code === 'auth/operation-not-supported-in-this-environment' ||
+      code === 'auth/cancelled-popup-request'
+    ) {
+      console.log('Falling back to signInWithRedirect for Google Auth...');
       await signInWithRedirect(auth, provider);
       return new Promise(() => {});
     }
@@ -131,15 +129,6 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
 // X (formerly Twitter) Sign-In via Firebase Auth
 export const signInWithX = async (): Promise<UserProfile> => {
   const provider = new TwitterAuthProvider();
-  
-  if (isMobileOrStandalone()) {
-    try {
-      await signInWithRedirect(auth, provider);
-      return new Promise(() => {});
-    } catch (redirectErr) {
-      console.warn('signInWithRedirect failed, trying popup as fallback:', redirectErr);
-    }
-  }
 
   try {
     const result = await signInWithPopup(auth, provider);
@@ -157,8 +146,9 @@ export const signInWithX = async (): Promise<UserProfile> => {
     return userProfile;
   } catch (err: any) {
     const code = err?.code || '';
+    console.warn('signInWithX error:', code, err?.message);
     if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
-      console.log('Popup blocked, falling back to signInWithRedirect...');
+      console.log('Falling back to signInWithRedirect for X Auth...');
       await signInWithRedirect(auth, provider);
       return new Promise(() => {});
     }
