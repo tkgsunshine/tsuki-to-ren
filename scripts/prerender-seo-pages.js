@@ -326,9 +326,9 @@ writePage(
 // 8. /about
 writePage(
   'about',
-  '【占術解説】四柱推命×九星気学×16タイプの精密ハイブリッド鑑定ロジック | 月と蓮',
-  '東洋最高峰の四柱推命（日柱天干地支・五行相生）、九星気学（日盤バイオリズム）、西洋16タイプ心理学を融合させた『月と蓮』の独自鑑定ロジックと特殊星（魁罡・極星）を詳しく解説。',
-  '月と蓮, 四柱推命ロジック, 魁罡, 極星, 16タイプ 心理学, 九星気学',
+  '【全2.7億通り】四柱推命×九星気学×16タイプの精密ハイブリッド鑑定ロジック | 月と蓮',
+  '東洋最高峰の四柱推命（日柱天干地支3,600通り）、九星気学（81通り）、西洋16タイプ心理学（289通り）、特殊星（9通り）等を融合した全273,088,320通り（約2.7億通り）の完全オーダーメイド鑑定ロジックを解説。',
+  '月と蓮, 約2.7億通り, 四柱推命ロジック, 魁罡, 極星, 16タイプ 心理学, 九星気学',
   `${BASE_URL}/about`,
   `
     <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
@@ -338,8 +338,8 @@ writePage(
       <article>
         <h1 style="font-size: 1.6rem; color: #fef08a; border-bottom: 1px solid rgba(226,192,116,0.3); padding-bottom: 0.5rem;">月と蓮の占術ロジック解説</h1>
         <section style="margin-top: 1.5rem;">
-          <h2 style="font-size: 1.15rem; color: #e2c074;">4つの多角アプローチの融合</h2>
-          <p>四柱推命による「日干・魂の本質相性」、九星気学による「日盤運気バイオリズム」、西洋16タイプ理論による「会話の癖とLINEコミュニケーション」、そして3.3%の強運特殊星「魁罡（かいごう）」の判定を統合した高精度相性エンジンです。</p>
+          <h2 style="font-size: 1.15rem; color: #e2c074;">全273,088,320通り（約2.7億通り）の算術マトリクス</h2>
+          <p>四柱推命（日柱3,600通り）× 九星気学（81通り）× 西洋16タイプ理論（289通り）× 特殊星（9通り）× 性別・関係性（20通り）× 守護AI観点（2通り）＝ 全273,088,320通り（約2.7億通り）の多角アプローチを完全自動算出するオーダーメイド相性鑑定エンジンです。</p>
         </section>
         <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
       </article>

@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
       }}>
         <Sparkles size={12} style={{ color: 'var(--color-gold)' }} />
         <span className="font-serif gold-text" style={{ fontSize: '0.82rem', fontWeight: '700', letterSpacing: '0.06em', textAlign: 'center', lineHeight: '1.45' }}>
-          四柱推命 × 九星気学 × 16タイプで紐解く<br />本格恋愛診断
+          四柱推命 × 九星気学 × 16タイプで解き明かす<br />約2.7億通りの超精密本格恋愛診断
         </span>
         <Sparkles size={12} style={{ color: 'var(--color-gold)' }} />
       </div>
@@ -114,11 +114,11 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
         WebkitBackdropFilter: 'blur(16px)'
       }}>
         <div style={{ fontWeight: 'bold', color: '#ffffff', marginBottom: '0.35rem', fontSize: '0.86rem', letterSpacing: '0.01em', lineHeight: '1.5' }}>
-          東洋の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>命式</span>と西洋の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>心理統計</span>が解き明かす<br />
-          あの人の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>隠された本心</span>。
+          東洋の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>命式</span>と西洋の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>心理統計</span>が導く<br />
+          <span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>全273,088,320通り（約2.7億通り）</span>の運命マトリクス
         </div>
         <div style={{ color: '#cbd5e1', fontSize: '0.78rem', fontWeight: '500', letterSpacing: '-0.01em', wordBreak: 'break-word' }}>
-          二人だけの運命のバイオリズムと攻略法を徹底鑑定します。
+          二人の魂の相性・運気のバイオリズム・LINE攻略法を徹底鑑定します。
         </div>
       </div>
     </header>

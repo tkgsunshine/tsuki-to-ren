@@ -1911,8 +1911,32 @@ function App() {
                     </h3>
                   </div>
                   <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
-                    『月と蓮』は、東洋最古にして最高峰の伝承占術「四柱推命」「九星気学」と、西洋の多角性格分類学「16タイプ心理診断」を独自アルゴリズムで統合した超精密相性鑑定エンジンです。感情の引き寄せから行動パターンの一致度、日々の運勢の波まで、多層的かつ論理的に解析します。
+                    『月と蓮』は、東洋最古にして最高峰の伝承占術「四柱推命」「九星気学」と、西洋の多角性格分類学「16タイプ心理診断」を独自アルゴリズムで統合した超精密相性鑑定エンジンです。感情の引き寄せから行動パターンの一致度、日々の運勢の波まで、全273,088,320通り（約2.7億通り）のマトリクスで多層的かつ論理的に解析します。
                   </p>
+                </div>
+
+                {/* 2.7億通り Calculation Matrix Card */}
+                <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.08) 0%, rgba(168, 85, 247, 0.1) 100%)', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
+                    <span style={{ fontSize: '1.1rem' }}>🔮</span>
+                    <h4 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0 }}>
+                      全273,088,320通り（約2.7億通り）の算術マトリクス
+                    </h4>
+                  </div>
+                  <p style={{ fontSize: '0.76rem', color: '#cbd5e1', lineHeight: '1.6', margin: '0 0 0.85rem 0' }}>
+                    『月と蓮』の鑑定結果は単なる属性の当てはめではありません。お二人それぞれの「四柱推命」「九星気学」「16タイプ性格」「特殊星」「関係性」「守護AI観点」を掛け合わせた全273,088,320通り（約2.7億通り）の完全オーダーメイド判定プログラムです。
+                  </p>
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', borderRadius: '12px', padding: '0.75rem', border: '1px solid rgba(226, 192, 116, 0.2)', fontSize: '0.72rem', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <div>・四柱推命 日柱干支相性：60 × 60 ＝ <strong style={{ color: '#ffffff' }}>3,600通り</strong></div>
+                    <div>・九星気学 本命星相性：9 × 9 ＝ <strong style={{ color: '#ffffff' }}>81通り</strong></div>
+                    <div>・16タイプ（MBTI）相性：17 × 17 ＝ <strong style={{ color: '#ffffff' }}>289通り</strong></div>
+                    <div>・特殊星・神殺（魁罡・貴人・羊刃等）：<strong style={{ color: '#ffffff' }}>9パターン</strong></div>
+                    <div>・性別・関係性（片思い/復縁/既婚等）：<strong style={{ color: '#ffffff' }}>20パターン</strong></div>
+                    <div>・守護AIキャラクター（月/蓮）：<strong style={{ color: '#ffffff' }}>2観点</strong></div>
+                    <div style={{ borderTop: '1px solid rgba(226, 192, 116, 0.25)', paddingTop: '0.4rem', marginTop: '0.2rem', color: '#fef08a', fontWeight: 'bold', fontSize: '0.78rem', textAlign: 'right' }}>
+                      ＝ 3,600 × 81 × 289 × 9 × 20 × 2 ＝ 273,088,320通り（約2.7億通り）
+                    </div>
+                  </div>
                 </div>
 
                 {/* Rare Character / Stars Highlight Card */}

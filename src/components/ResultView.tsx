@@ -718,6 +718,22 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <Heart size={14} style={{ fill: '#fef08a', color: '#fef08a' }} />
           <span>{hasOpponent ? `${myName} × ${oppNickname}` : `${myName} の全運勢`}</span>
         </div>
+
+        {/* 2.7億通り Custom Matrix Badge */}
+        <div style={{
+          fontSize: '0.66rem',
+          color: '#e2c074',
+          background: 'rgba(226, 192, 116, 0.08)',
+          border: '1px solid rgba(226, 192, 116, 0.25)',
+          borderRadius: '12px',
+          padding: '0.25rem 0.65rem',
+          margin: '0 auto -0.1rem',
+          textAlign: 'center',
+          fontWeight: '600',
+          letterSpacing: '0.02em'
+        }}>
+          ✨ 全273,088,320通り（約2.7億通り）の算術マトリクスから算出
+        </div>
         
         {/* Luxury Score Pods Side-by-Side */}
         <div style={{ display: 'grid', gridTemplateColumns: hasOpponent ? '1fr 1fr' : '1fr', gap: '0.75rem', margin: '0.2rem 0' }}>
