@@ -169,8 +169,13 @@ export const signInWithX = async (): Promise<UserProfile> => {
 // Sign Out
 // Send Email Magic Link (Passwordless Sign-In)
 export const sendEmailMagicLink = async (email: string): Promise<void> => {
-  // ローカル開発中はlocalhostにリダイレクト、本番は本番URLへ
-  const redirectUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  // ローカル開発・LAN検証中は現在オリジンにリダイレクト、本番は本番URLへ
+  const isLocal = window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.startsWith('192.168.') ||
+    window.location.hostname.startsWith('10.') ||
+    window.location.hostname.startsWith('172.');
+  const redirectUrl = isLocal
     ? window.location.origin + '/'
     : 'https://www.tsuki-to-ren.com/';
   const actionCodeSettings = {
