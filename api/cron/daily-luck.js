@@ -1,8 +1,4 @@
-/**
- * api/cron/daily-luck.js
- * Vercel Serverless Function & Cron Job
- * Triggered daily at 0 23 * * * UTC (8:00 AM JST)
- */
+import { Resend } from 'resend';
 
 export default async function handler(req, res) {
   // 1. Verify Authorization (Vercel Cron header or Secret)
@@ -23,7 +19,7 @@ export default async function handler(req, res) {
 
   console.log(`🚀 Starting Hasu-to-Tsuki Daily Fortune Email Job for ${year}/${month}/${day} JST...`);
 
-  // Today's Luck Generator Helper (Serverless light edition)
+  // Today's Luck Generator Helper
   const calculateDailyLuck = (birthStr) => {
     if (!birthStr || birthStr.length < 8) return { score: 88, bestHour: '21:30' };
     const clean = birthStr.replace(/\D/g, '');
@@ -160,21 +156,42 @@ export default async function handler(req, res) {
     `;
   };
 
-  // 2. Fetch or prepare delivery (Supports Resend API / SendGrid API if environment variable set)
+  // 2. Fetch or prepare delivery via Resend API
   const resendApiKey = process.env.RESEND_API_KEY;
 
   let deliveryStatus = 'ready';
+  let emailCount = 0;
 
   if (resendApiKey) {
     try {
-      console.log('📬 RESEND_API_KEY detected. Executing transactional batch email send...');
-      deliveryStatus = 'sent_via_resend';
+      const resend = new Resend(resendApiKey);
+      const fromEmail = process.env.RESEND_FROM_EMAIL || '月と蓮 <onboarding@resend.dev>';
+
+      // If subscriber payload passed or mock batch test
+      const testEmail = req.query?.email || req.body?.email;
+      if (testEmail) {
+        const dummyLuck = calculateDailyLuck('19950401');
+        const dummyHtml = generateEmailHtml({ myName: '会員', oppName: '' }, dummyLuck);
+
+        await resend.emails.send({
+          from: fromEmail,
+          to: testEmail,
+          subject: `🌙【月と蓮】本日の相性運勢＆LINE吉時間のお届け (${year}/${month}/${day})`,
+          html: dummyHtml
+        });
+        emailCount = 1;
+        deliveryStatus = 'sent_via_resend';
+        console.log(`✅ Test fortune email sent to ${testEmail} via Resend.`);
+      } else {
+        deliveryStatus = 'resend_ready_waiting_subscribers';
+        console.log('✅ Resend API client initialized and ready for scheduled batch dispatch.');
+      }
     } catch (e) {
-      console.error('Error sending via Resend API:', e);
+      console.error('❌ Error sending via Resend API:', e);
       deliveryStatus = 'error_resend';
     }
   } else {
-    console.log('ℹ️ RESEND_API_KEY is not configured in environment variables. Daily fortune calculation complete in dry-run mode.');
+    console.log('ℹ️ RESEND_API_KEY is not set. Resend client is ready. Set RESEND_API_KEY in Vercel environment variables to enable live delivery.');
   }
 
   return res.status(200).json({
@@ -182,6 +199,7 @@ export default async function handler(req, res) {
     message: 'Daily fortune calculation & 8:00 AM delivery cron completed successfully.',
     date: dateStr,
     deliveryStatus,
+    emailsSent: emailCount,
     timestamp: new Date().toISOString()
   });
 }
