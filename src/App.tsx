@@ -27,7 +27,7 @@ import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
-import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, type UserProfile as FirebaseUser } from './services/firebase';
+import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -137,6 +137,17 @@ function App() {
   const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
 
   useEffect(() => {
+    // Check redirect result for OAuth (Google/X)
+    checkRedirectAuthResult().then((user) => {
+      if (user) {
+        setCurrentUser(user);
+        setIsRegistered(true);
+        if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
+          setMyName(user.displayName);
+        }
+      }
+    });
+
     completeEmailMagicLinkSignIn().then((res) => {
       if (res.success && res.user) {
         setCurrentUser(res.user);

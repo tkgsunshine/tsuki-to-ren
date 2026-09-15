@@ -2,6 +2,8 @@ import { initializeApp, getApps } from 'firebase/app';
 import {
   getAuth,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   TwitterAuthProvider,
   sendSignInLinkToEmail,
@@ -52,42 +54,116 @@ export interface UserProfile {
   providerId: 'google.com' | 'apple.com' | 'twitter.com' | 'demo' | string;
 }
 
+// Check if current browser is mobile or standalone PWA where popup window is problematic
+const isMobileOrStandalone = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return isStandalone || isMobile;
+};
+
+// Check and handle redirect sign-in result (called on page load)
+export const checkRedirectAuthResult = async (): Promise<UserProfile | null> => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      const user = result.user;
+      const rawProvider = user.providerData[0]?.providerId || 'google.com';
+      const isX = rawProvider === 'twitter.com' || user.providerData.some(p => p.providerId === 'twitter.com');
+      const email = user.email || user.providerData[0]?.email || null;
+      const userProfile: UserProfile = {
+        uid: user.uid,
+        displayName: user.displayName || (isX ? 'X ユーザー' : 'Google ユーザー'),
+        email: email,
+        photoURL: user.photoURL,
+        providerId: isX ? 'twitter.com' : 'google.com'
+      };
+      safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
+      safeSetItem('hasu_to_tsuki_registered', 'oauth_complete');
+      return userProfile;
+    }
+  } catch (err: any) {
+    console.warn('Firebase getRedirectResult error:', err?.code, err?.message);
+  }
+  return null;
+};
+
 // Google Sign-In via Firebase Auth
-// OAuth認証は本人確認済みのため、即座に registered=true をセットする
 export const signInWithGoogle = async (): Promise<UserProfile> => {
   const provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(auth, provider);
-  const user = result.user;
-  const email = user.email || user.providerData[0]?.email || null;
-  const userProfile: UserProfile = {
-    uid: user.uid,
-    displayName: user.displayName || 'Google ユーザー',
-    email: email,
-    photoURL: user.photoURL,
-    providerId: 'google.com'
-  };
-  safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
-  safeSetItem('hasu_to_tsuki_registered', 'oauth_complete');
-  return userProfile;
+  provider.setCustomParameters({ prompt: 'select_account' });
+  
+  // On mobile or standalone PWA, prefer redirect to avoid cross-window/popup blocking
+  if (isMobileOrStandalone()) {
+    try {
+      await signInWithRedirect(auth, provider);
+      return new Promise(() => {}); // Wait for redirect to happen
+    } catch (redirectErr) {
+      console.warn('signInWithRedirect failed, trying popup as fallback:', redirectErr);
+    }
+  }
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const email = user.email || user.providerData[0]?.email || null;
+    const userProfile: UserProfile = {
+      uid: user.uid,
+      displayName: user.displayName || 'Google ユーザー',
+      email: email,
+      photoURL: user.photoURL,
+      providerId: 'google.com'
+    };
+    safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
+    safeSetItem('hasu_to_tsuki_registered', 'oauth_complete');
+    return userProfile;
+  } catch (err: any) {
+    const code = err?.code || '';
+    if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment' || code === 'auth/cancelled-popup-request') {
+      console.log('Popup blocked or cancelled, falling back to signInWithRedirect...');
+      await signInWithRedirect(auth, provider);
+      return new Promise(() => {});
+    }
+    throw err;
+  }
 };
 
 // X (formerly Twitter) Sign-In via Firebase Auth
-// OAuth認証は本人確認済みのため、即座に registered=oauth_complete をセットする
 export const signInWithX = async (): Promise<UserProfile> => {
   const provider = new TwitterAuthProvider();
-  const result = await signInWithPopup(auth, provider);
-  const user = result.user;
-  const email = user.email || user.providerData[0]?.email || null;
-  const userProfile: UserProfile = {
-    uid: user.uid,
-    displayName: user.displayName || 'X ユーザー',
-    email: email,
-    photoURL: user.photoURL,
-    providerId: 'twitter.com'
-  };
-  safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
-  safeSetItem('hasu_to_tsuki_registered', 'oauth_complete');
-  return userProfile;
+  
+  if (isMobileOrStandalone()) {
+    try {
+      await signInWithRedirect(auth, provider);
+      return new Promise(() => {});
+    } catch (redirectErr) {
+      console.warn('signInWithRedirect failed, trying popup as fallback:', redirectErr);
+    }
+  }
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const email = user.email || user.providerData[0]?.email || null;
+    const userProfile: UserProfile = {
+      uid: user.uid,
+      displayName: user.displayName || 'X ユーザー',
+      email: email,
+      photoURL: user.photoURL,
+      providerId: 'twitter.com'
+    };
+    safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
+    safeSetItem('hasu_to_tsuki_registered', 'oauth_complete');
+    return userProfile;
+  } catch (err: any) {
+    const code = err?.code || '';
+    if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
+      console.log('Popup blocked, falling back to signInWithRedirect...');
+      await signInWithRedirect(auth, provider);
+      return new Promise(() => {});
+    }
+    throw err;
+  }
 };
 
 // Sign Out
@@ -184,56 +260,44 @@ export const logOutUser = async (): Promise<void> => {
 };
 
 // Auth State Listener
-// - OAuth (google/twitter): firebase auth user が存在し registered=oauth_complete なら会員扱い
-// - Email: firebase auth user が存在し registered=email_verified なら会員扱い
-// - それ以外（メール送信中など）: 非会員扱い
 export const subscribeAuthChange = (callback: (user: UserProfile | null) => void) => {
   const unsubscribeFirebase = onAuthStateChanged(auth, (user: User | null) => {
     if (!user) {
+      const stored = safeGetItem('hasu_tsuki_user');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.uid) {
+            callback(parsed);
+            return;
+          }
+        } catch {}
+      }
       callback(null);
       return;
     }
 
     const rawProvider = user.providerData[0]?.providerId || '';
-    let providerId = 'email';
-    if (rawProvider === 'google.com' || user.providerData.some(p => p.providerId === 'google.com')) {
-      providerId = 'google.com';
-    } else if (rawProvider === 'twitter.com' || user.providerData.some(p => p.providerId === 'twitter.com')) {
+    let providerId: 'google.com' | 'twitter.com' | 'email' = 'google.com';
+    if (rawProvider === 'twitter.com' || user.providerData.some(p => p.providerId === 'twitter.com')) {
       providerId = 'twitter.com';
+    } else if (rawProvider === 'password' || rawProvider === 'email' || user.providerData.some(p => p.providerId === 'emailLink')) {
+      providerId = 'email';
     }
 
-    const regFlag = safeGetItem('hasu_to_tsuki_registered');
+    const email = user.email || user.providerData[0]?.email || null;
+    const userProfile: UserProfile = {
+      uid: user.uid,
+      displayName: user.displayName || (providerId === 'twitter.com' ? 'X ユーザー' : providerId === 'google.com' ? 'Google ユーザー' : '会員ユーザー'),
+      email: email,
+      photoURL: user.photoURL,
+      providerId
+    };
 
-    // OAuthプロバイダー（Google/X）: oauth_complete フラグがあれば会員
-    if ((providerId === 'google.com' || providerId === 'twitter.com') && regFlag === 'oauth_complete') {
-      const email = user.email || user.providerData[0]?.email || null;
-      callback({
-        uid: user.uid,
-        displayName: user.displayName,
-        email: email,
-        photoURL: user.photoURL,
-        providerId
-      });
-      return;
-    }
+    safeSetItem('hasu_tsuki_user', JSON.stringify(userProfile));
+    safeSetItem('hasu_to_tsuki_registered', providerId === 'email' ? 'email_verified' : 'oauth_complete');
 
-    // メール認証: email_verified フラグがあれば会員
-    // ※Firebaseはメールリンク認証を既存Googleアカウントと自動リンクするため、
-    //   providerIdがgoogle.comになっていてもemail_verifiedフラグがあれば会員扱いとする
-    if (regFlag === 'email_verified') {
-      const email = user.email || user.providerData[0]?.email || null;
-      callback({
-        uid: user.uid,
-        displayName: user.displayName,
-        email: email,
-        photoURL: user.photoURL,
-        providerId: 'email'
-      });
-      return;
-    }
-
-    // それ以外（メール送信済みだが未クリック等）は非会員
-    callback(null);
+    callback(userProfile);
   });
 
   return unsubscribeFirebase;

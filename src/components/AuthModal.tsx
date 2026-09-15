@@ -40,17 +40,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
     setErrorMsg(null);
     try {
       const user = await signInWithGoogle();
-      onAuthSuccess(user);
-      onClose();
+      if (user && user.uid) {
+        onAuthSuccess(user);
+        onClose();
+      }
     } catch (err: any) {
       console.error('Google Sign-in error:', err);
       const code = err?.code || '';
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-        setErrorMsg(null); // User closed popup - smoothly reset loading state
+        setErrorMsg(null);
       } else if (code === 'auth/popup-blocked') {
-        setErrorMsg('ポップアップがブロックされました。ブラウザの許可設定をご確認ください。');
+        setErrorMsg('ポップアップが制限されています。画面の指示に従ってログインを完了してください。');
+      } else if (code === 'auth/network-request-failed') {
+        setErrorMsg('通信環境が不安定です。ネットワーク接続をご確認ください。');
       } else {
-        setErrorMsg('Googleログインに失敗しました。もう一度お試しください。');
+        setErrorMsg('Googleログインに失敗しました。メールアドレスでの登録もお試しいただけます。');
       }
     } finally {
       setLoading(null);
@@ -62,17 +66,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
     setErrorMsg(null);
     try {
       const user = await signInWithX();
-      onAuthSuccess(user);
-      onClose();
+      if (user && user.uid) {
+        onAuthSuccess(user);
+        onClose();
+      }
     } catch (err: any) {
       console.error('X Sign-in error:', err);
       const code = err?.code || '';
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-        setErrorMsg(null); // User closed popup - smoothly reset loading state
+        setErrorMsg(null);
+      } else if (code === 'auth/operation-not-allowed' || code === 'auth/configuration-not-found' || code === 'auth/invalid-api-key') {
+        setErrorMsg('X（旧Twitter）連携は現在準備中です。Googleアカウントまたはメールアドレスでご登録ください。');
       } else if (code === 'auth/popup-blocked') {
-        setErrorMsg('ポップアップがブロックされました。ブラウザの許可設定をご確認ください。');
+        setErrorMsg('ポップアップが制限されています。画面の指示に従ってログインを完了してください。');
       } else {
-        setErrorMsg('Xログインに失敗しました。もう一度お試しください。');
+        setErrorMsg('Xログインに失敗しました。Googleまたはメール登録をお試しください。');
       }
     } finally {
       setLoading(null);
