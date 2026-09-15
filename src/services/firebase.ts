@@ -15,6 +15,8 @@ import {
   type User
 } from 'firebase/auth';
 
+import { getFirestore, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+
 declare global {
   interface Window {
     google?: any;
@@ -44,9 +46,10 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:670709162172:web:b648f2f1ad11cbff59f0b9'
 };
 
-// Initialize Firebase App
+// Initialize Firebase App & Firestore
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const auth = getAuth(app);
+export const db = getFirestore(app);
 
 // Safe LocalStorage helpers for private browsing environments
 const safeSetItem = (key: string, value: string) => {
@@ -359,4 +362,68 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
   });
 
   return unsubscribe;
+};
+
+export interface EmailSubscriptionData {
+  email: string;
+  enabled: boolean;
+  myName?: string;
+  myBirth?: string;
+  myGender?: 'male' | 'female';
+  myMbti?: string;
+  oppName?: string;
+  oppBirth?: string;
+  oppGender?: 'male' | 'female';
+  oppMbti?: string;
+  relationship?: string;
+}
+
+/**
+ * Saves or updates user's daily fortune email notification settings in Firestore
+ */
+export const saveEmailSubscriptionData = async (data: EmailSubscriptionData): Promise<boolean> => {
+  if (!data.email || !data.email.includes('@')) return false;
+  try {
+    const docId = data.email.trim().toLowerCase().replace(/[^a-z0-9_@.-]/g, '_');
+    const docRef = doc(db, 'subscriptions', docId);
+    await setDoc(docRef, {
+      email: data.email.trim().toLowerCase(),
+      enabled: data.enabled,
+      myName: data.myName || 'あなた',
+      myBirth: data.myBirth || '',
+      myGender: data.myGender || 'female',
+      myMbti: data.myMbti || 'UNKNOWN',
+      oppName: data.oppName || '',
+      oppBirth: data.oppBirth || '',
+      oppGender: data.oppGender || '',
+      oppMbti: data.oppMbti || 'UNKNOWN',
+      relationship: data.relationship || '片思い中',
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    console.log('✅ Daily fortune email subscription saved to Firestore:', docId);
+    return true;
+  } catch (err) {
+    console.warn('⚠️ Could not save email subscription to Firestore (offline or rule error):', err);
+    return false;
+  }
+};
+
+/**
+ * Disables daily fortune email notification for the given email
+ */
+export const unsubscribeEmailSubscription = async (email: string): Promise<boolean> => {
+  if (!email || !email.includes('@')) return false;
+  try {
+    const docId = email.trim().toLowerCase().replace(/[^a-z0-9_@.-]/g, '_');
+    const docRef = doc(db, 'subscriptions', docId);
+    await updateDoc(docRef, {
+      enabled: false,
+      updatedAt: serverTimestamp()
+    });
+    console.log('✅ Daily fortune email unsubscribed in Firestore:', docId);
+    return true;
+  } catch (err) {
+    console.warn('⚠️ Could not unsubscribe email in Firestore:', err);
+    return false;
+  }
 };

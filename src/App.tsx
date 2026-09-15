@@ -27,7 +27,7 @@ import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
-import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, type UserProfile as FirebaseUser } from './services/firebase';
+import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, unsubscribeEmailSubscription, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -1263,6 +1263,9 @@ function App() {
                         setShowPremiumLP(true);
                       } else if (notifyDailyLuck) {
                         setNotifyDailyLuck(false);
+                        if (notifyEmail) {
+                          unsubscribeEmailSubscription(notifyEmail);
+                        }
                       } else {
                         setNotifyEmailInput(notifyEmail || currentUser?.email || '');
                         setShowNotifyEmailModal(true);
@@ -2371,9 +2374,25 @@ function App() {
                   alert('有効なメールアドレスを入力してください。');
                   return;
                 }
-                setNotifyEmail(notifyEmailInput.trim());
+                const cleanEmail = notifyEmailInput.trim().toLowerCase();
+                setNotifyEmail(cleanEmail);
                 setNotifyDailyLuck(true);
                 setShowNotifyEmailModal(false);
+
+                // Asynchronously sync subscription to Firestore for daily 8:00 AM Cron delivery
+                saveEmailSubscriptionData({
+                  email: cleanEmail,
+                  enabled: true,
+                  myName: myName || currentUser?.displayName || 'あなた',
+                  myBirth: myBirth || '',
+                  myGender: myGender,
+                  myMbti: myMbti,
+                  oppName: oppName || '',
+                  oppBirth: oppBirth || '',
+                  oppGender: oppGender,
+                  oppMbti: oppMbti,
+                  relationship: relationship
+                });
               }}
               className="gold-button"
               style={{
