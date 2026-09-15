@@ -2742,7 +2742,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         )}
 
         {/* Scroll Spacer to prevent Navbar coverage */}
-        <div style={{ height: '9rem', width: '100%', flexShrink: 0 }} />
+        <div style={{ height: 'calc(4rem + var(--safe-bottom, 0px))', width: '100%', flexShrink: 0 }} />
 
         {/* Zoomed Avatar Modal */}
         {zoomedImg && (
