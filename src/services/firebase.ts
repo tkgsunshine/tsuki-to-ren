@@ -42,9 +42,17 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:670709162172:web:b648f2f1ad11cbff59f0b9'
 };
 
-// Initialize Firebase App
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Initialize Main Firebase App
+const app = getApps().find(a => a.name === '[DEFAULT]') || initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+
+// Secondary app for providers (like Twitter/X) whose developer portal callback URL is registered under firebaseapp.com
+const twitterConfig = {
+  ...firebaseConfig,
+  authDomain: 'tsuki-to-ren-dba8c.firebaseapp.com'
+};
+const twitterApp = getApps().find(a => a.name === 'twitterApp') || initializeApp(twitterConfig, 'twitterApp');
+export const twitterAuth = getAuth(twitterApp);
 
 // Safe LocalStorage helpers for private browsing environments
 const safeSetItem = (key: string, value: string) => {
@@ -68,7 +76,12 @@ export interface UserProfile {
 // Check and handle redirect sign-in result (called on page load)
 export const checkRedirectAuthResult = async (): Promise<UserProfile | null> => {
   try {
-    const result = await getRedirectResult(auth);
+    let result = await getRedirectResult(auth);
+    if (!result || !result.user) {
+      try {
+        result = await getRedirectResult(twitterAuth);
+      } catch (_) {}
+    }
     if (result && result.user) {
       const user = result.user;
       const rawProvider = user.providerData[0]?.providerId || 'google.com';
@@ -131,7 +144,7 @@ export const signInWithX = async (): Promise<UserProfile> => {
   const provider = new TwitterAuthProvider();
 
   try {
-    const result = await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(twitterAuth, provider);
     const user = result.user;
     const email = user.email || user.providerData[0]?.email || null;
     const userProfile: UserProfile = {
@@ -149,7 +162,7 @@ export const signInWithX = async (): Promise<UserProfile> => {
     console.warn('signInWithX error:', code, err?.message);
     if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
       console.log('Falling back to signInWithRedirect for X Auth...');
-      await signInWithRedirect(auth, provider);
+      await signInWithRedirect(twitterAuth, provider);
       return new Promise(() => {});
     }
     throw err;
@@ -252,11 +265,14 @@ export const logOutUser = async (): Promise<void> => {
   } catch (e) {
     console.warn('Firebase signOut error:', e);
   }
+  try {
+    await signOut(twitterAuth);
+  } catch (_) {}
 };
 
 // Auth State Listener
 export const subscribeAuthChange = (callback: (user: UserProfile | null) => void) => {
-  const unsubscribeFirebase = onAuthStateChanged(auth, (user: User | null) => {
+  const handleUser = (user: User | null) => {
     if (!user) {
       const stored = safeGetItem('hasu_tsuki_user');
       if (stored) {
@@ -293,7 +309,19 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
     safeSetItem('hasu_to_tsuki_registered', providerId === 'email' ? 'email_verified' : 'oauth_complete');
 
     callback(userProfile);
+  };
+
+  const unsub1 = onAuthStateChanged(auth, (user) => {
+    if (user) handleUser(user);
+    else if (!twitterAuth.currentUser) handleUser(null);
+  });
+  const unsub2 = onAuthStateChanged(twitterAuth, (user) => {
+    if (user) handleUser(user);
+    else if (!auth.currentUser) handleUser(null);
   });
 
-  return unsubscribeFirebase;
+  return () => {
+    unsub1();
+    unsub2();
+  };
 };
