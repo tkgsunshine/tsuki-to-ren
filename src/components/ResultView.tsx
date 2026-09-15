@@ -97,6 +97,26 @@ const getScoreVisuals = (score: number) => {
   }
 };
 
+export const formatAppraisalText = (text: string | undefined | null): string => {
+  if (!text) return '';
+  let formatted = text;
+
+  // Insert double line break before major headers or icons if not already preceded by \n
+  formatted = formatted.replace(/([^\n])(【二人の|【状況：|【宿命|【相乗|【以心|【真逆|【居心地|🌙|🔮|📱|⌛|💡|🟢|🔴|🎁)/g, '$1\n\n$2');
+
+  // Insert single line break after header brackets if followed immediately by text
+  formatted = formatted.replace(/(【[^】]+】)([^\n])/g, '$1\n$2');
+
+  // Insert single line break after character advice titles
+  formatted = formatted.replace(/([🌙🔮]\s*(?:月からのメッセージ|蓮からのアドバイス)[：:])([^\n])/g, '$1\n$2');
+
+  // Break between sentences when a sentence ends with period and next block begins with common subject/conjunction
+  formatted = formatted.replace(/(。[」』]?)\s*(お二人は|一緒に|お互いに|また、|相手の|さらに|特に)/g, '$1\n\n$2');
+
+  // Clean up 3+ newlines
+  return formatted.replace(/\n{3,}/g, '\n\n').trim();
+};
+
 const getMbtiColor = (mbtiCode: string) => {
   const code = (mbtiCode || '').toUpperCase();
   if (code.includes('N') && code.includes('F')) return '#34d399'; // Emerald Green
@@ -856,7 +876,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {hasOpponent ? '基本相性サマリー' : '基本運勢サマリー'}
         </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', whiteSpace: 'pre-wrap', margin: 0 }}>
-          {activeResult.summary}
+          {formatAppraisalText(activeResult.summary)}
         </p>
       </div>
 
@@ -868,7 +888,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {topic.title}
               </h3>
               <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', margin: 0, whiteSpace: 'pre-wrap' }}>
-                {topic.text}
+                {formatAppraisalText(topic.text)}
               </p>
             </div>
           ))}
@@ -1630,16 +1650,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
               
               {isRegistered ? (
                 <p className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
-                  {topic.intro} {topic.detail}
+                  {formatAppraisalText(`${topic.intro}\n\n${topic.detail}`)}
                 </p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
-                    {topic.intro}
+                    {formatAppraisalText(topic.intro)}
                   </p>
                   <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleScrollToRegister}>
                     <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
-                      {topic.detail + " " + topic.detail + " " + topic.detail}
+                      {formatAppraisalText(`${topic.detail} ${topic.detail}`)}
                     </p>
                     
                     {/* Glowing Lock Overlay */}

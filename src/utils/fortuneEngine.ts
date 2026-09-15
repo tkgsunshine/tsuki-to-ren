@@ -1241,7 +1241,7 @@ export function getMbtiCognitiveDynamics(myMbti: string, oppMbti: string, myNick
     tfText,
     jpText,
     mbtiPairType,
-    summary: `${tfText} ${jpText}`
+    summary: `${tfText}\n\n${jpText}`
   };
 }
 
@@ -1619,30 +1619,30 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     if (character === 'tsuki') {
       if (baseScore >= 85) {
         oneLiner = `${sTitle}。心と心が深く通じ合い、自然と愛が深まる最高の幸運期です。`;
-        summary = `${myNickname}様とお相手（${oppNickname}様）は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：${curRelAdvice.tsuki}`;
+        summary = `${myNickname}様とお相手（${oppNickname}様）は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：\n${curRelAdvice.tsuki}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。お互いを思いやることで絆がぐんと深まる好調期。素直な気持ちを届けましょう。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：${curRelAdvice.tsuki}`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：\n${curRelAdvice.tsuki}`;
       } else if (baseScore >= 55) {
         oneLiner = `【${bType}】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：${curRelAdvice.tsuki}`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：\n${curRelAdvice.tsuki}`;
       } else {
         oneLiner = `【${sType}】焦らず穏やかに見守る時。お互いの違いをポジティブに楽しむ姿勢が大切です。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：${curRelAdvice.tsuki}`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：\n${curRelAdvice.tsuki}`;
       }
     } else { // ren
       if (baseScore >= 85) {
         oneLiner = `${sTitle}。データが証明する抜群の相性シナジー。具体的なお誘いに進むベストタイミングです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：${curRelAdvice.ren}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。関係性は着実に上昇中。相手の好む会話のペースに合わせるのが効果的です。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：${curRelAdvice.ren}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
       } else if (baseScore >= 55) {
         oneLiner = `【${bType}】相性は安定キープ中。無理にペースを乱さず、心地よい現状維持がスマートです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：${curRelAdvice.ren}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
       } else {
         oneLiner = `【${sType}】少しすれ違いやすい時期。感情的な追撃は控え、落ち着いて見守るのがベストです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：${curRelAdvice.ren}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
       }
     }
   } else {
