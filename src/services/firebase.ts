@@ -21,10 +21,22 @@ declare global {
   }
 }
 
+// Determine authDomain: on custom domain (tsuki-to-ren.com), route through first-party Vercel rewrite proxy
+// to avoid third-party cookie blocking (Safari ITP) and cross-origin popup issues.
+const getAuthDomain = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host.includes('tsuki-to-ren.com')) {
+      return host;
+    }
+  }
+  return 'tsuki-to-ren-dba8c.firebaseapp.com';
+};
+
 // Firebase production configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC8KuxFTkHR_3nLX7h8b-L_G40n59ymyY8',
-  authDomain: 'tsuki-to-ren-dba8c.firebaseapp.com',
+  authDomain: getAuthDomain(),
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'tsuki-to-ren-dba8c',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'tsuki-to-ren-dba8c.firebasestorage.app',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '670709162172',
