@@ -18,7 +18,7 @@ import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
-import { Sparkles, HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, Calendar, Bell, MessageCircle, Crown, Smartphone } from 'lucide-react';
+import { Sparkles, HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
 import { CustomDatePicker } from './components/CustomDatePicker';
 import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
@@ -786,57 +786,23 @@ function App() {
                 onShowLegal={() => setShowLegalPage(true)}
               />
             ) : (
-              <div className="glass-panel" style={{ padding: '2rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '2rem' }}>
+              <div className="glass-panel" style={{ padding: '2.5rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem', marginTop: '2rem' }}>
                 <div style={{ color: 'var(--color-gold)', display: 'flex', justifyContent: 'center' }}>
                   <Sparkles size={48} className="animate-float" />
                 </div>
-                <h3 className="font-serif gold-text" style={{ fontSize: '1.2rem', fontWeight: '600' }}>
-                  まだ恋愛相性鑑定がありません
+                <h3 className="font-serif gold-text" style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>
+                  まだ鑑定結果がありません
                 </h3>
-                <p style={{ fontSize: '0.8rem', color: '#d1d5db', lineHeight: '1.5' }}>
-                  四柱推命・九星気学・16タイプ診断を掛け合わせた詳細な相性診断を行うには、ホーム画面から占いを開始してください。
+                <p style={{ fontSize: '0.85rem', color: '#d1d5db', lineHeight: '1.6', maxWidth: '340px', margin: 0 }}>
+                  ホームから生年月日を入力すると、二人の本音・相性スコア・LINE吉時間がここに表示されます。
                 </p>
-                <button className="consult-btn" onClick={() => { setActiveTab('home'); setFlowStep('input'); }}>
+                <button 
+                  className="consult-btn font-serif" 
+                  onClick={() => { setActiveTab('home'); setFlowStep('input'); }}
+                  style={{ marginTop: '0.5rem', padding: '0.9rem 2rem', fontSize: '0.95rem', fontWeight: 'bold' }}
+                >
                   今すぐ相性を占う
                 </button>
-
-                {/* 3 Approaches Showcase in Fortune Tab Empty State */}
-                <div style={{ marginTop: '1.5rem', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
-                  <h2 className="font-serif text-center" style={{ fontSize: '1.1rem', color: '#e2c074', marginBottom: '0.25rem', marginTop: '0.5rem', fontWeight: 'bold' }}>
-                    四柱推命・九星気学・16タイプ診断を融合した3大アプローチ
-                  </h2>
-                  
-                  <div className="glass-panel" style={{ display: 'flex', padding: '1rem', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.5rem', borderRadius: '50%', color: '#3b82f6', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                      <Calendar size={18} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3f4f6' }}>① 東洋占術の極み「四柱推命」で本質・本音を見抜く</span>
-                      <span style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: '1.45' }}>あなたの生年月日（十干・十二支）から導き出される本質的な「命式」を多角的に分析。相手が言葉にしない本音、建前、そして既読スルーや沈黙の裏に隠された本当の理由を、確かな占術理論に基づいて論理的かつ具体的に解明します。深層心理レベルでのズレを見落としません。</span>
-                    </div>
-                  </div>
-
-                  <div className="glass-panel" style={{ display: 'flex', padding: '1rem', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    <div style={{ background: 'rgba(168, 85, 247, 0.1)', padding: '0.5rem', borderRadius: '50%', color: '#a855f7', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                      <Sparkles size={18} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3f4f6' }}>② 「九星気学」で動くべき黄金のタイミングを特定</span>
-                      <span style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: '1.45' }}>運気のサイクルと時の流れを司る九星気学を用いて、二人の運勢のバイオリズムが交差する瞬間を特定。今週、あなたが取るべき「攻めの日」と「待つべき日」をピンポイントで可視化し、すれ違いを最小限に抑えながら最も引き寄せの力が強まる最適な行動タイミングを導き出します。</span>
-                    </div>
-                  </div>
-
-                  <div className="glass-panel" style={{ display: 'flex', padding: '1rem', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    <div style={{ background: 'rgba(226, 192, 116, 0.1)', padding: '0.5rem', borderRadius: '50%', color: '#e2c074', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                      <MessageCircle size={18} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3f4f6' }}>③ 心理統計学「16タイプ診断」で具体的アプローチを提示</span>
-                      <span style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: '1.45' }}>西洋の心理統計学である16タイプ性格理論と相性論を融合し、日常の会話で生じる意思疎通のすれ違いや認知の癖を解剖。お相手のタイプに最も響くコミュニケーションの取り方を分析し、今日すぐにそのままコピー＆ペーストして送信できる具体的なLINEのメッセージ文案やアプローチ法を提示します。</span>
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
           </div>

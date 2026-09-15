@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
         onClick={() => setActiveTab('fortune')}
       >
         <Sparkles />
-        <span>恋愛運</span>
+        <span>鑑定結果</span>
       </button>
 
       <button
