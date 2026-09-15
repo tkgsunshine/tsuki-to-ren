@@ -101,8 +101,8 @@ export const formatAppraisalText = (text: string | undefined | null): string => 
   if (!text) return '';
   let formatted = text;
 
-  // 1. Insert double line break before any emoji section header or bracket header if not preceded by \n
-  formatted = formatted.replace(/([^\n])\s*(📱|⌛|💡|🌙|🔮|💘|✨|📍|💌|⚠️|🟢|🔴|🎁|💬|【二人の|【状況：|【宿命|【相乗|【以心|【真逆|【居心地|【絶対|【注意|【警戒|【リスク|【致命)/g, '$1\n\n$2');
+  // 1. Insert single line break before any emoji section header or bracket header if not preceded by \n
+  formatted = formatted.replace(/([^\n])\s*(📱|⌛|💡|🌙|🔮|💘|✨|📍|💌|⚠️|🟢|🔴|🎁|💬|【二人の|【状況：|【宿命|【相乗|【以心|【真逆|【居心地|【絶対|【注意|【警戒|【リスク|【致命)/g, '$1\n$2');
 
   // 2. Insert single line break after header brackets if followed immediately by text
   formatted = formatted.replace(/(【[^】]+】)([^\n])/g, '$1\n$2');
@@ -111,10 +111,10 @@ export const formatAppraisalText = (text: string | undefined | null): string => 
   formatted = formatted.replace(/([📱⌛💡🌙🔮💘✨📍💌⚠️🟢🔴🎁💬]\s*[^：:\n]+[：:])([^\n])/g, '$1\n$2');
 
   // 4. Break between sentences when a sentence ends with period and next block begins with common subject/conjunction
-  formatted = formatted.replace(/(。[」』]?)\s*(お二人は|一緒に|お互いに|また、|相手の|さらに|特に)/g, '$1\n\n$2');
+  formatted = formatted.replace(/(。[」』]?)\s*(お二人は|一緒に|お互いに|また、|相手の|さらに|特に)/g, '$1\n$2');
 
-  // 5. Clean up 3+ newlines
-  return formatted.replace(/\n{3,}/g, '\n\n').trim();
+  // 5. Clean up multiple newlines to single newline \n
+  return formatted.replace(/\n{2,}/g, '\n').trim();
 };
 
 const getMbtiColor = (mbtiCode: string) => {
@@ -431,6 +431,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const subCardRef = React.useRef<HTMLDivElement>(null);
   const handleScrollToSub = () => {
     subCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const handleLockTagClick = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (onOpenPremiumLP) {
+      onOpenPremiumLP();
+    } else if (!isRegistered) {
+      handleScrollToRegister();
+    } else {
+      handleScrollToSub();
+    }
   };
 
   const detailedTopics = activeResult?.detailedTopics || [
@@ -1657,14 +1668,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
                     {formatAppraisalText(topic.intro)}
                   </p>
-                  <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleScrollToRegister}>
+                  <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleLockTagClick}>
                     <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
                       {formatAppraisalText(`${topic.detail} ${topic.detail}`)}
                     </p>
                     
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
-                      <button className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); handleScrollToRegister(); }}>
+                      <button className="premium-lock-tag" onClick={handleLockTagClick}>
                         <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                       </button>
                     </div>
@@ -1888,16 +1899,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      handleScrollToSub();
-                    }
-                  }}
+                  onClick={handleLockTagClick}
                 >
                   <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
@@ -1950,16 +1952,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      handleScrollToSub();
-                    }
-                  }}
+                  onClick={handleLockTagClick}
                 >
                   <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
@@ -2005,16 +1998,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      handleScrollToSub();
-                    }
-                  }}
+                  onClick={handleLockTagClick}
                 >
                   <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
@@ -2056,16 +2040,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      handleScrollToSub();
-                    }
-                  }}
+                  onClick={handleLockTagClick}
                 >
                   <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
@@ -2106,16 +2081,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      handleScrollToSub();
-                    }
-                  }}
+                  onClick={handleLockTagClick}
                 >
                   <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
@@ -2164,16 +2130,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      handleScrollToSub();
-                    }
-                  }}
+                  onClick={handleLockTagClick}
                 >
                   <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
@@ -2215,16 +2172,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      handleScrollToSub();
-                    }
-                  }}
+                  onClick={handleLockTagClick}
                 >
                   <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
@@ -2265,16 +2213,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isRegistered) {
-                      handleScrollToRegister();
-                    } else if (onOpenPremiumLP) {
-                      onOpenPremiumLP();
-                    } else {
-                      handleScrollToSub();
-                    }
-                  }}
+                  onClick={handleLockTagClick}
                 >
                   <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                 </button>
@@ -2444,18 +2383,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 })}
               </div>
               {!isSubscribed && (
-                <div className="premium-lock-overlay" style={{ borderRadius: '8px' }}>
+                <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
                   <button 
                     type="button"
                     className="premium-lock-tag" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!isRegistered) {
-                        handleScrollToRegister();
-                      } else {
-                        handleScrollToSub();
-                      }
-                    }}
+                    onClick={handleLockTagClick}
                   >
                     <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で開封'}
                   </button>
@@ -2523,18 +2455,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {m.text}
                       </p>
                       {!isSubscribed && (
-                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(10, 10, 20, 0.25)', backdropFilter: 'none' }}>
+                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(10, 10, 20, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
                           <button 
                             type="button"
                             className="premium-lock-tag" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isRegistered) {
-                                handleScrollToRegister();
-                              } else {
-                                handleScrollToSub();
-                              }
-                            }}
+                            onClick={handleLockTagClick}
                           >
                             <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で開封'}
                           </button>
@@ -2608,20 +2533,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {y.text}
                       </p>
                       {!isSubscribed && (
-                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(10, 10, 20, 0.25)', backdropFilter: 'none' }}>
+                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(10, 10, 20, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
                           <button 
                             type="button"
                             className="premium-lock-tag" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isRegistered) {
-                                handleScrollToRegister();
-                              } else if (onOpenPremiumLP) {
-                                onOpenPremiumLP();
-                              } else {
-                                handleScrollToSub();
-                              }
-                            }}
+                            onClick={handleLockTagClick}
                           >
                             <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で開封'}
                           </button>
