@@ -855,7 +855,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <Sparkles size={16} />
           {hasOpponent ? '基本相性サマリー' : '基本運勢サマリー'}
         </h2>
-        <p className="font-serif" style={{ fontSize: '0.85rem', lineHeight: '1.6', color: '#d1d5db' }}>
+        <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', whiteSpace: 'pre-wrap', margin: 0 }}>
           {activeResult.summary}
         </p>
       </div>
@@ -867,7 +867,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#93c5fd' : '#d8b4fe', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold' }}>
                 {topic.title}
               </h3>
-              <p className="font-serif" style={{ fontSize: '0.85rem', lineHeight: '1.6', color: '#d1d5db', margin: 0 }}>
+              <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {topic.text}
               </p>
             </div>
@@ -1629,16 +1629,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </h3>
               
               {isRegistered ? (
-                <p className="font-serif" style={{ fontSize: "0.85rem", lineHeight: "1.6", color: "#d1d5db", margin: 0 }}>
+                <p className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
                   {topic.intro} {topic.detail}
                 </p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <p className="font-serif" style={{ fontSize: "0.82rem", lineHeight: "1.6", color: "#d1d5db", margin: 0 }}>
+                  <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
                     {topic.intro}
                   </p>
                   <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleScrollToRegister}>
-                    <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.82rem", lineHeight: "1.6", color: "#d1d5db", margin: 0 }}>
+                    <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
                       {topic.detail + " " + topic.detail + " " + topic.detail}
                     </p>
                     
