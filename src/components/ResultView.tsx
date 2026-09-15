@@ -1959,7 +1959,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 fontSize: '0.8rem',
                 color: '#dbeafe',
                 margin: 0,
-                lineHeight: '1.6'
+                lineHeight: '1.8'
               }}>
                 <p style={{ margin: '0 0 0.35rem 0' }}><strong>【本音の裏心理】</strong> {activeResult.opponentTorisetsu.slowReplyPsychology?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
                 <div style={{ position: 'relative' }}>
@@ -2012,7 +2012,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <div className="font-serif" style={{
                 fontSize: '0.78rem',
                 color: '#dcfce7',
-                lineHeight: '1.6',
+                lineHeight: '1.8',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.3rem'
@@ -2063,7 +2063,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <div className="font-serif" style={{
                 fontSize: '0.78rem',
                 color: '#ffe4e6',
-                lineHeight: '1.6',
+                lineHeight: '1.8',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.3rem'
@@ -2173,7 +2173,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   fontSize: '0.78rem',
                   color: '#fef9c3',
                   margin: 0,
-                  lineHeight: '1.6',
+                  lineHeight: '1.8',
                   filter: !isSubscribed ? 'blur(4.5px)' : 'none',
                   userSelect: !isSubscribed ? 'none' : 'auto',
                   opacity: !isSubscribed ? 0.65 : 1
@@ -2223,7 +2223,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   fontSize: '0.78rem',
                   color: '#e2e8f0',
                   margin: 0,
-                  lineHeight: '1.6',
+                  lineHeight: '1.8',
                   filter: !isSubscribed ? 'blur(4.5px)' : 'none',
                   userSelect: !isSubscribed ? 'none' : 'auto',
                   opacity: !isSubscribed ? 0.65 : 1
