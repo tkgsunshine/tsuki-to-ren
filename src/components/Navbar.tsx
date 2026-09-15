@@ -19,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
           <path d="M12 8C12 8 7 10 5 12C3 14 5 16 7 16C10 16 12 13 12 13C12 13 14 16 17 16C19 16 21 14 19 12C17 10 12 8 12 8Z" fill={activeTab === 'home' ? 'rgba(226, 192, 116, 0.15)' : 'none'} />
           <path d="M12 12C12 12 8 14 6 17C4.5 19.25 7 21 9 21C11.5 21 12 17 12 17C12 17 12.5 21 15 21C17 21 19.5 19.25 18 17C16 14 12 12 12 12Z" fill={activeTab === 'home' ? 'rgba(226, 192, 116, 0.1)' : 'none'} />
         </svg>
-        <span>ホーム</span>
+        <span>恋愛診断</span>
       </button>
 
       <button

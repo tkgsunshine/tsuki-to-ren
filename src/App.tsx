@@ -794,7 +794,7 @@ function App() {
                   まだ鑑定結果がありません
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: '#d1d5db', lineHeight: '1.6', maxWidth: '340px', margin: 0 }}>
-                  ホームから生年月日を入力すると、二人の本音・相性スコア・LINE吉時間がここに表示されます。
+                  「恋愛診断」から生年月日を入力すると、二人の本音・相性スコア・LINE吉時間がここに表示されます。
                 </p>
                 <button 
                   className="consult-btn font-serif" 
