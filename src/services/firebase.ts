@@ -21,38 +21,19 @@ declare global {
   }
 }
 
-// Dynamic auth domain to enable same-origin OAuth proxy on production (solving mobile Safari/SP cookie isolation)
-const getAuthDomain = (): string => {
-  if (typeof window !== 'undefined' && window.location.hostname) {
-    const host = window.location.hostname;
-    if (host.includes('tsuki-to-ren.com') || host.includes('vercel.app')) {
-      return host; // e.g. www.tsuki-to-ren.com
-    }
-  }
-  return import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'tsuki-to-ren-dba8c.firebaseapp.com';
-};
-
 // Firebase production configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC8KuxFTkHR_3nLX7h8b-L_G40n59ymyY8',
-  authDomain: getAuthDomain(),
+  authDomain: 'tsuki-to-ren-dba8c.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'tsuki-to-ren-dba8c',
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'tsuki-to-ren-dba8c.firebasestorage.app',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '670709162172',
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:670709162172:web:b648f2f1ad11cbff59f0b9'
 };
 
-// Initialize Main Firebase App
-const app = getApps().find(a => a.name === '[DEFAULT]') || initializeApp(firebaseConfig);
+// Initialize Firebase App
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const auth = getAuth(app);
-
-// Secondary app for providers (like Twitter/X) whose developer portal callback URL is registered under firebaseapp.com
-const twitterConfig = {
-  ...firebaseConfig,
-  authDomain: 'tsuki-to-ren-dba8c.firebaseapp.com'
-};
-const twitterApp = getApps().find(a => a.name === 'twitterApp') || initializeApp(twitterConfig, 'twitterApp');
-export const twitterAuth = getAuth(twitterApp);
 
 // Safe LocalStorage helpers for private browsing environments
 const safeSetItem = (key: string, value: string) => {
@@ -73,15 +54,19 @@ export interface UserProfile {
   providerId: 'google.com' | 'apple.com' | 'twitter.com' | 'demo' | string;
 }
 
+// Check if current browser is mobile device or standalone PWA where popup window gets stuck
+const isMobileDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+  return isMobileUA || isStandalone;
+};
+
 // Check and handle redirect sign-in result (called on page load)
 export const checkRedirectAuthResult = async (): Promise<UserProfile | null> => {
   try {
-    let result = await getRedirectResult(auth);
-    if (!result || !result.user) {
-      try {
-        result = await getRedirectResult(twitterAuth);
-      } catch (_) {}
-    }
+    const result = await getRedirectResult(auth);
     if (result && result.user) {
       const user = result.user;
       const rawProvider = user.providerData[0]?.providerId || 'google.com';
@@ -109,6 +94,13 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
 
+  // On SP / mobile browsers, use same-window redirect to avoid detached popup tabs that cannot close
+  if (isMobileDevice()) {
+    await signInWithRedirect(auth, provider);
+    return new Promise(() => {}); // Execution continues after redirect back
+  }
+
+  // On desktop, use popup
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
@@ -143,8 +135,13 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
 export const signInWithX = async (): Promise<UserProfile> => {
   const provider = new TwitterAuthProvider();
 
+  if (isMobileDevice()) {
+    await signInWithRedirect(auth, provider);
+    return new Promise(() => {});
+  }
+
   try {
-    const result = await signInWithPopup(twitterAuth, provider);
+    const result = await signInWithPopup(auth, provider);
     const user = result.user;
     const email = user.email || user.providerData[0]?.email || null;
     const userProfile: UserProfile = {
@@ -162,7 +159,7 @@ export const signInWithX = async (): Promise<UserProfile> => {
     console.warn('signInWithX error:', code, err?.message);
     if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
       console.log('Falling back to signInWithRedirect for X Auth...');
-      await signInWithRedirect(twitterAuth, provider);
+      await signInWithRedirect(auth, provider);
       return new Promise(() => {});
     }
     throw err;
@@ -265,9 +262,6 @@ export const logOutUser = async (): Promise<void> => {
   } catch (e) {
     console.warn('Firebase signOut error:', e);
   }
-  try {
-    await signOut(twitterAuth);
-  } catch (_) {}
 };
 
 // Auth State Listener
@@ -311,17 +305,9 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
     callback(userProfile);
   };
 
-  const unsub1 = onAuthStateChanged(auth, (user) => {
-    if (user) handleUser(user);
-    else if (!twitterAuth.currentUser) handleUser(null);
-  });
-  const unsub2 = onAuthStateChanged(twitterAuth, (user) => {
-    if (user) handleUser(user);
-    else if (!auth.currentUser) handleUser(null);
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    handleUser(user);
   });
 
-  return () => {
-    unsub1();
-    unsub2();
-  };
+  return unsubscribe;
 };
