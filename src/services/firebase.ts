@@ -4,6 +4,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  getAdditionalUserInfo,
   GoogleAuthProvider,
   TwitterAuthProvider,
   sendSignInLinkToEmail,
@@ -75,18 +76,29 @@ const isMobileDevice = (): boolean => {
   return isMobileUA || isStandalone;
 };
 
-// Check and handle redirect sign-in result (called on page load)
 export const checkRedirectAuthResult = async (): Promise<UserProfile | null> => {
   try {
     const result = await getRedirectResult(auth);
     if (result && result.user) {
       const user = result.user;
-      const rawProvider = user.providerData[0]?.providerId || 'google.com';
+      const additionalInfo = getAdditionalUserInfo(result);
+      const rawProvider = user.providerData[0]?.providerId || '';
       const isX = rawProvider === 'twitter.com' || user.providerData.some(p => p.providerId === 'twitter.com');
-      const email = user.email || user.providerData[0]?.email || null;
+      
+      // Attempt to extract email from all possible Firebase / Twitter auth payload locations
+      let email = user.email || user.providerData.find(p => p.email)?.email || null;
+      if (!email && additionalInfo?.profile) {
+        const profile = additionalInfo.profile as Record<string, any>;
+        email = profile.email || null;
+      }
+
+      // Extract username handle if available
+      const username = (additionalInfo?.username) ? `@${additionalInfo.username}` : null;
+      const displayName = user.displayName || username || (isX ? 'X ユーザー' : 'Google ユーザー');
+
       const userProfile: UserProfile = {
         uid: user.uid,
-        displayName: user.displayName || (isX ? 'X ユーザー' : 'Google ユーザー'),
+        displayName: displayName,
         email: email,
         photoURL: user.photoURL,
         providerId: isX ? 'twitter.com' : 'google.com'
@@ -155,10 +167,20 @@ export const signInWithX = async (): Promise<UserProfile> => {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    const email = user.email || user.providerData[0]?.email || null;
+    const additionalInfo = getAdditionalUserInfo(result);
+
+    let email = user.email || user.providerData.find(p => p.email)?.email || null;
+    if (!email && additionalInfo?.profile) {
+      const profile = additionalInfo.profile as Record<string, any>;
+      email = profile.email || null;
+    }
+
+    const username = (additionalInfo?.username) ? `@${additionalInfo.username}` : null;
+    const displayName = user.displayName || username || 'X ユーザー';
+
     const userProfile: UserProfile = {
       uid: user.uid,
-      displayName: user.displayName || 'X ユーザー',
+      displayName: displayName,
       email: email,
       photoURL: user.photoURL,
       providerId: 'twitter.com'
@@ -302,10 +324,25 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
       providerId = 'email';
     }
 
-    const email = user.email || user.providerData[0]?.email || null;
+    const stored = safeGetItem('hasu_tsuki_user');
+    let cachedEmail: string | null = null;
+    let cachedName: string | null = null;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.uid === user.uid) {
+          cachedEmail = parsed.email || null;
+          cachedName = parsed.displayName || null;
+        }
+      } catch {}
+    }
+
+    const email = user.email || user.providerData.find(p => p.email)?.email || cachedEmail || null;
+    const displayName = user.displayName || cachedName || (providerId === 'twitter.com' ? 'X ユーザー' : providerId === 'google.com' ? 'Google ユーザー' : '会員ユーザー');
+
     const userProfile: UserProfile = {
       uid: user.uid,
-      displayName: user.displayName || (providerId === 'twitter.com' ? 'X ユーザー' : providerId === 'google.com' ? 'Google ユーザー' : '会員ユーザー'),
+      displayName,
       email: email,
       photoURL: user.photoURL,
       providerId
