@@ -110,7 +110,18 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     return 'UNKNOWN';
   });
   const [oppGender, setOppGender] = useState<'male' | 'female'>(() => (myGender === 'female' ? 'male' : 'female'));
-  const [relationship, setRelationship] = useState('single'); // 片思い中
+  const [relationship, setRelationship] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const r = params.get('r');
+      if (r === 'r') return '両思い・交際中';
+      if (r === 'f') return '復縁したい';
+      if (r === 'm') return '結婚・夫婦';
+      if (r === 'c') return '複雑愛・秘密の恋';
+      if (r === 'k') return '片思い中';
+    }
+    return '片思い中';
+  });
 
   React.useEffect(() => {
     if (loadedPartner) {
@@ -186,7 +197,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       oppBirth,
       oppMbti,
       oppGender,
-      relationship: relationship === 'single' ? '片思い中' : 'パートナー',
+      relationship: relationship || '片思い中',
       mode
     });
   };
@@ -573,6 +584,33 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 {mbtiOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>
+                お相手との関係性 <span style={{ color: '#e2c074' }}>(必須)</span>
+              </label>
+              <select
+                value={relationship}
+                onChange={(e) => setRelationship(e.target.value)}
+                style={{
+                  background: '#0a0a14',
+                  border: '1px solid rgba(226, 192, 116, 0.35)',
+                  borderRadius: '10px',
+                  padding: '0.65rem 0.75rem',
+                  color: '#fef08a',
+                  outline: 'none',
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  boxShadow: '0 0 10px rgba(226, 192, 116, 0.1)'
+                }}
+              >
+                <option value="片思い中">💕 片思い中</option>
+                <option value="両思い・交際中">💖 両思い・交際中</option>
+                <option value="復縁したい">🔄 復縁したい</option>
+                <option value="結婚・夫婦">💍 結婚・夫婦</option>
+                <option value="複雑愛・秘密の恋">🌙 複雑愛・秘密の恋</option>
               </select>
             </div>
 

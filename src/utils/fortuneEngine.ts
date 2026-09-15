@@ -1587,6 +1587,31 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   let summary = '';
 
   if (hasOpponent) {
+    const relKey = input.relationship || '片思い中';
+    const relAdviceMap: Record<string, { tsuki: string; ren: string }> = {
+      '片思い中': {
+        tsuki: `【状況：片思い中】お相手の警戒心を無理なく解き、${myNickname}様の持つ自然な優しさや気配りをそのまま届けることで、${oppNickname}様にとって「かけがえのない大切な存在」へ一歩ずつ進展します。`,
+        ren: `【状況：片思い中】お相手の16タイプ特性を意識し、「返信しやすく負担のない具体的提案」を届けることで、最も高いアプローチ成就率を発揮できます。`
+      },
+      '両思い・交際中': {
+        tsuki: `【状況：交際中】二人の信頼関係は非常に良好です。日頃の「ありがとう」や素直な感謝の言葉を日常的に伝えることで、愛の絆はより一層深まります。`,
+        ren: `【状況：交際中】マンネリを回避し、共有できる新しい体験や将来のビジョンを具体的に提案・対話することで、パートナーシップが格段に向上します。`
+      },
+      '復縁したい': {
+        tsuki: `【状況：復縁希望】過去のわだかまりを刺激せず、相手のプレッシャーにならない「温かい見守り」と軽やかな気配りが、再び心を開かせる最良の鍵となります。`,
+        ren: `【状況：復縁希望】感情的な追撃や催促は逆効果です。お相手の思考整理期間を尊重し、吉時間に短く答えやすいメッセージを送るのが最善戦略です。`
+      },
+      '結婚・夫婦': {
+        tsuki: `【状況：結婚・夫婦】日常の小さな思いやりの積み重ねが二人の幸運の土台です。互いにリラックスできる温かな家庭のエネルギーを育みましょう。`,
+        ren: `【状況：結婚・夫婦】長期的視点での生活リズム共有と役割分担の相互リスペクトが、二人の運気シナジーを最大限に引き上げる鍵となります。`
+      },
+      '複雑愛・秘密の恋': {
+        tsuki: `【状況：複雑愛・秘密の恋】周囲のノイズに心を乱されず、二人だけの空間における「純粋な魂の繋がり」と心の安全地帯を優しく守り育ててください。`,
+        ren: `【状況：複雑愛・秘密の恋】感情に振り回されない冷静なリスクマネジメントが不可欠です。時間帯と接点戦略を極めて慎重に選び、スマートなアプローチを徹底しましょう。`
+      }
+    };
+    const curRelAdvice = relAdviceMap[relKey] || relAdviceMap['片思い中'];
+
     const sType = stemComp?.type || '宿命';
     const sTitle = stemComp?.title || '【宿命の結びつき】';
     const bType = branchComp?.type || '調和';
@@ -1594,30 +1619,30 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     if (character === 'tsuki') {
       if (baseScore >= 85) {
         oneLiner = `${sTitle}。心と心が深く通じ合い、自然と愛が深まる最高の幸運期です。`;
-        summary = `${myNickname}様とお相手（${oppNickname}様）は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：現在お二人の間にはとても強い絆が育まれています。難しい駆け引きをしようとせず、${myNickname}様の持つ純粋な温かさと優しさをそのまま届けることで、${oppNickname}様にとって「かけがえのない大切な人」へと自然にステップアップします。`;
+        summary = `${myNickname}様とお相手（${oppNickname}様）は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：${curRelAdvice.tsuki}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。お互いを思いやることで絆がぐんと深まる好調期。素直な気持ちを届けましょう。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：お互いに心を開きやすいとても良い流れの中にあります。${oppNickname}様が少し連絡を休んでいる時も、無理に急かさず「お疲れさま」と温かく包み込んであげるあなたの優しさが、相手の心を一番惹きつけます。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：${curRelAdvice.tsuki}`;
       } else if (baseScore >= 55) {
         oneLiner = `【${bType}】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：今は二人の絆をゆっくり育てる「準備と安心」の時期です。すぐに答えを求めようと焦らず、日々の小さな「ありがとう」や笑顔を積み重ねることで、ずっと仲良しでいられる安心感が育ちます。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：${curRelAdvice.tsuki}`;
       } else {
         oneLiner = `【${sType}】焦らず穏やかに見守る時。お互いの違いをポジティブに楽しむ姿勢が大切です。`;
-        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：タイミングのズレやすれ違いが少し起きやすい時期です。相手の反応に振り回されすぎず、まずは自分自身の時間を楽しんで笑顔でいることで、自然と良い運気を引き寄せられます。`;
+        summary = `${myNickname}様と${oppNickname}様は、${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：${curRelAdvice.tsuki}`;
       }
     } else { // ren
       if (baseScore >= 85) {
         oneLiner = `${sTitle}。データが証明する抜群の相性シナジー。具体的なお誘いに進むベストタイミングです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：現在、アプローチの成功率が最も高まっています。難しく考えすぎず、「いつ・どこで・何をするか」を分かりやすくシンプルに提案することで、スムーズに次の約束を確定させることができます。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：${curRelAdvice.ren}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。関係性は着実に上昇中。相手の好む会話のペースに合わせるのが効果的です。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：良い流れに乗っています。相手が興味を持っている話題や共通の趣味から会話を広げてください。楽しい体験を一緒に共有することが、一番確実に二人の距離を縮める近道です。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：${curRelAdvice.ren}`;
       } else if (baseScore >= 55) {
         oneLiner = `【${bType}】相性は安定キープ中。無理にペースを乱さず、心地よい現状維持がスマートです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：急なアプローチを連発するよりも、相手のペースを尊重したやり取りが効果的です。数日ほど適度な間隔を空けつつ、爽やかで答えやすいメッセージを届けていきましょう。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：${curRelAdvice.ren}`;
       } else {
         oneLiner = `【${sType}】少しすれ違いやすい時期。感情的な追撃は控え、落ち着いて見守るのがベストです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：現在、お相手は自分のことに集中したいタイミングのようです。長文のLINEや返信の催促は避け、連絡の頻度を少し控えめにして、お互いにリフレッシュする時間を取りましょう。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail} ${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：${curRelAdvice.ren}`;
       }
     }
   } else {
