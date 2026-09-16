@@ -236,7 +236,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
         >
           <div className="top-char-avatar" style={{ position: 'relative' }}>
             <img 
-              src="/assets/tsuki.jpg" 
+              src="/assets/tsuki.webp" 
               alt="月" 
               fetchPriority="high"
               decoding="async"
@@ -264,7 +264,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
         >
           <div className="top-char-avatar" style={{ position: 'relative' }}>
             <img 
-              src="/assets/ren.jpg" 
+              src="/assets/ren.webp" 
               alt="蓮" 
               fetchPriority="high"
               decoding="async"

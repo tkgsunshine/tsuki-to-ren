@@ -195,39 +195,61 @@ function App() {
   const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
 
   useEffect(() => {
-    // Check redirect result for OAuth (Google/X)
-    checkRedirectAuthResult().then((user) => {
-      if (user) {
-        setCurrentUser(user);
-        setIsRegistered(true);
-        if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
-          setMyName(user.displayName);
+    // Check cached user in localStorage for instant UI rendering without network delay
+    try {
+      const stored = localStorage.getItem('hasu_tsuki_user');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.uid) {
+          setCurrentUser(parsed);
+          setIsRegistered(true);
+          if (parsed.displayName && parsed.displayName !== 'Google ユーザー' && parsed.displayName !== 'Apple ユーザー' && parsed.displayName !== 'X ユーザー') {
+            setMyName(parsed.displayName);
+          }
         }
       }
-    });
+    } catch {}
 
-    completeEmailMagicLinkSignIn().then((res) => {
-      if (res.success && res.user) {
-        setCurrentUser(res.user);
-        setIsRegistered(true);
-      } else if (res.needsEmailPrompt) {
-        setShowEmailPromptModal(true);
-      }
-    });
-
-    const unsubscribe = subscribeAuthChange((user) => {
-      if (user) {
-        setCurrentUser(user);
-        setIsRegistered(true);
-        if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
-          setMyName(user.displayName);
+    // Defer network-based Firebase Auth subscription to idle time after critical rendering completes
+    let unsubscribe: (() => void) | undefined;
+    const timer = setTimeout(() => {
+      checkRedirectAuthResult().then((user) => {
+        if (user) {
+          setCurrentUser(user);
+          setIsRegistered(true);
+          if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
+            setMyName(user.displayName);
+          }
         }
-      } else {
-        setCurrentUser(null);
-        setIsRegistered(false);
-      }
-    });
-    return () => unsubscribe();
+      });
+
+      completeEmailMagicLinkSignIn().then((res) => {
+        if (res.success && res.user) {
+          setCurrentUser(res.user);
+          setIsRegistered(true);
+        } else if (res.needsEmailPrompt) {
+          setShowEmailPromptModal(true);
+        }
+      });
+
+      unsubscribe = subscribeAuthChange((user) => {
+        if (user) {
+          setCurrentUser(user);
+          setIsRegistered(true);
+          if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
+            setMyName(user.displayName);
+          }
+        } else {
+          setCurrentUser(null);
+          setIsRegistered(false);
+        }
+      });
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // Registration & Subscription Wall
