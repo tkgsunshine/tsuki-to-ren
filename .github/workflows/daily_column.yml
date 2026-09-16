@@ -38,5 +38,6 @@ jobs:
             echo "No new column updates this run. Exiting safely."
           else
             git commit -m "feat(column): auto-publish scheduled column for Hasu-to-Tsuki"
+            git pull --rebase origin main
             git push origin main
           fi

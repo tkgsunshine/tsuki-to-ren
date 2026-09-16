@@ -13,7 +13,7 @@ console.log('🚀 Running Regulated Auto-Column Generator Engine (Hasu-to-Tsuki 
 let fileContent = fs.readFileSync(columnsFilePath, 'utf-8');
 
 // 🛡️ Strict Regulation Guard 1: Post interval (At least 12 hours between auto-posts)
-const publishedAtMatches = [...fileContent.matchAll(/"?publishedAt"?:\s*'([^']+)'/g)].map(m => m[1]);
+const publishedAtMatches = [...fileContent.matchAll(/"?publishedAt"?:\s*["']([^"']+)["']/g)].map(m => m[1]);
 const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
 const hasRecentArticle = publishedAtMatches.some(dateStr => dateStr >= twelveHoursAgo);
 
