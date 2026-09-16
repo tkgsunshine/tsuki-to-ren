@@ -15,6 +15,52 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1789521635604",
+    "slug": "isfp-esfj-healing-romance-secrets",
+    "title": "【ISFP × ESFJ】「冒険家」と「領事官」の温かな愛！優しさが循環する理想のパートナーシップ",
+    "metaDescription": "16タイプ性格診断における心温まるベストパートナー「ISFP×ESFJ」。マイペースな芸術家と献身的なケアテイカーが紡ぐ、穏やかで長続きする愛情の秘密を徹底解説。",
+    "keywords": [
+      "ISFP ESFJ 相性",
+      "冒険家 領事官 恋愛",
+      "MBTI 癒しカップル",
+      "ISFP 好きなタイプ",
+      "ESFJ 落とし方"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-09-16T01:20:35.603Z",
+    "readTimeMinutes": 8,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. なぜISFPとESFJは一緒にいると心から安らげるのか？",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. 互いの美徳を引き出し合う役割分担",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. すれ違いを防ぐための注意点",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. まとめ",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "ISFPがESFJの世話焼きを負担に感じることはありませんか？",
+        "answer": "ESFJが「良かれと思って先回りしすぎる」とISFPは窮屈さを覚えます。ISFPに選択の自由を残し、静かに見守る姿勢を持つことで最高の信頼関係になります。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. なぜISFPとESFJは一緒にいると心から安らげるのか？</h2>\n<p>繊細で穏やかな感性を持つISFP（冒険家）と、周囲を温かく見守り尽くすESFJ（領事官）。</p>\n<p>お互いに五感を通じた現実の体験（S）と優しい感情（F）を大切にするため、派手な駆け引きのない、陽だまりのような安心感に満ちた関係を築くことができます。</p>\n<h2 id=\"section-2\">2. 互いの美徳を引き出し合う役割分担</h2>\n<p>ESFJが日常の段取りや心地よい環境を整え、ISFPが新鮮な驚きや美しい色彩を二人の生活にもたらします。</p>\n<h2 id=\"section-3\">3. すれ違いを防ぐための注意点</h2>\n<p>ESFJは感謝を言葉にして受け取りたいタイプであり、ISFPは行動で示すタイプです。小さなことでも「ありがとう、嬉しいよ」と言葉で伝え合うことが絆を永遠にします。</p>\n<h2 id=\"section-4\">4. まとめ</h2>\n<p>『月と蓮』の本格診断で、二人の相性詳細を今すぐチェックしてみましょう。</p>"
+  },
+  {
     "id": "col-1789478758469",
     "slug": "fukuen-cooling-off-period-strategy",
     "title": "【復縁占い】別れてから連絡するまでの「冷却期間」は何日がベスト？四柱推命と九星気学で導く再アプローチ吉日",
