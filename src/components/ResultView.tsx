@@ -669,7 +669,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             }}
           >
             <img 
-              src="/assets/tsuki.jpg" 
+              src="/assets/tsuki.webp" 
               alt="月" 
               style={{ 
                 width: '32px', 
@@ -702,7 +702,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             }}
           >
             <img 
-              src="/assets/ren.jpg" 
+              src="/assets/ren.webp" 
               alt="蓮" 
               style={{ 
                 width: '32px', 

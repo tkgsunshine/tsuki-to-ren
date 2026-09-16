@@ -42,7 +42,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const characterName = character === 'ren' ? '蓮' : '月';
-  const characterAvatar = character === 'ren' ? '/assets/ren.jpg' : '/assets/tsuki.jpg';
+  const characterAvatar = character === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp';
 
   // Initial greeting
   useEffect(() => {

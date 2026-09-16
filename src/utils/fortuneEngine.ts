@@ -1362,7 +1362,7 @@ const getAstrologyAvatar = (branch: string, gender: string): string => {
     return isMale ? '/assets/astrology_boar_sample_male.jpg' : '/assets/astrology_boar_sample.jpg';
   }
 
-  return isMale ? '/assets/ren.jpg' : '/assets/tsuki.jpg';
+  return isMale ? '/assets/ren.webp' : '/assets/tsuki.webp';
 };
 
 
