@@ -15,6 +15,52 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1789651295920",
+    "slug": "infp-enfj-soul-mate-romance",
+    "title": "【INFP × ENFJ】「仲介者」と「主人公」が織りなす究極の純愛！お互いを唯一無二と認める理由",
+    "metaDescription": "16タイプ性格診断で最高の精神的相性と称されるINFP×ENFJ。繊細な理想主義者と情熱的な指導者が惹かれ合い、深い信頼と無償の愛を育てる秘訣を徹底解説。",
+    "keywords": [
+      "INFP ENFJ 相性",
+      "仲介者 主人公 恋愛",
+      "MBTI 理想のカップル",
+      "INFP 落とし方",
+      "ENFJ 好きなタイプ"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-09-17T13:21:35.919Z",
+    "readTimeMinutes": 9,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=infp-enfj-soul-mate-romance",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. なぜINFPとENFJは魂のレベルで共鳴するのか？",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. ENFJの包容力とINFPの純粋さが生み出す癒しの聖域",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. すれ違いを防ぐためのコミュニケーションの秘訣",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. まとめ＆二人の本格相性を鑑定する",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "INFPがENFJに対して心を閉ざしてしまう原因は何ですか？",
+        "answer": "ENFJが良かれと思って「こうすべき」と価値観を押し付けすぎると、INFPは自分の内面を否定されたと感じて殻に閉じこもります。ありのままを受容する姿勢が大切です。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. なぜINFPとENFJは魂のレベルで共鳴するのか？</h2>\n<p>16タイプ性格診断において、「おとぎ話のような美しい純愛」を実現できる最高峰のペアリングがINFP（仲介者）とENFJ（主人公）です。</p>\n<p>豊かな感受性と優しい道徳観を共有する二人は、言葉を発さずともお互いの心の機微を察し合える特別な引力を持っています。</p>\n<h2 id=\"section-2\">2. ENFJの包容力とINFPの純粋さが生み出す癒しの聖域</h2>\n<p>他者のために尽くしすぎて疲れやすいENFJにとって、INFPの飾らない本音と温かい共感は最大の癒しとなります。また、自己肯定感に悩みやすいINFPにとって、ENFJの惜しみない肯定と励ましは生きる希望となります。</p>\n<h2 id=\"section-3\">3. すれ違いを防ぐためのコミュニケーションの秘訣</h2>\n<p>ENFJは自分の弱音を遠慮せずにINFPに打ち明けること、INFPは感謝の気持ちを行動と言葉で積極的に表現することが、永遠の絆を維持する鍵です。</p>\n<h2 id=\"section-4\">4. まとめ＆二人の本格相性を鑑定する</h2>\n<p>『月と蓮』では、16タイプと四柱推命を組み合わせた独自の相性診断を無料でお試しいただけます。</p>"
+  },
+  {
     "id": "col-1789565107773",
     "slug": "nine-star-ki-kyusei-auspicious-date-directions",
     "title": "【九星気学】吉方位デートで二人の距離が一気に縮まる！恋を成就させる運気チャージの法則",
