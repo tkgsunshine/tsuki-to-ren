@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles, Crown, ShieldCheck, Heart, Bell, MessageCircle, Calendar, BookOpen, ChevronDown, Zap, ArrowRight, X } from 'lucide-react';
+import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 
 interface PremiumLPModalProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface PremiumLPModalProps {
   isSubscribed: boolean;
   isRegistered: boolean;
   onRegisterFirst: () => void;
+  onCancelSubscription?: () => void;
 }
 
 export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
@@ -16,10 +18,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   onSubscribe,
   isSubscribed,
   isRegistered,
-  onRegisterFirst
+  onRegisterFirst,
+  onCancelSubscription
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   if (!isOpen) return null;
 
@@ -468,19 +472,41 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           flexShrink: 0
         }}>
           {isSubscribed ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '0.75rem',
-              background: 'rgba(52, 211, 153, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid #34d399',
-              borderRadius: '14px',
-              color: '#000',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-            }}>
-              ✓ あなたは現在プレミアム会員です
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', alignItems: 'center', width: '100%' }}>
+              <div style={{
+                width: '100%',
+                textAlign: 'center',
+                padding: '0.75rem',
+                background: 'rgba(52, 211, 153, 0.95)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid #34d399',
+                borderRadius: '14px',
+                color: '#000',
+                fontSize: '0.85rem',
+                fontWeight: 'bold',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
+                boxSizing: 'border-box'
+              }}>
+                ✓ あなたは現在プレミアム会員です
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCancelModal(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#9ca3af',
+                  fontSize: '0.75rem',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  padding: '0.2rem 0.5rem',
+                  transition: 'color 0.2s'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#fca5a5')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+              >
+                プレミアム会員の解約手続きはこちら
+              </button>
             </div>
           ) : (
             <button
@@ -520,6 +546,16 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           )}
         </div>
       </div>
+
+      <SubscriptionCancelModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirmCancel={() => {
+          setShowCancelModal(false);
+          onCancelSubscription?.();
+          onClose();
+        }}
+      />
     </div>
   );
 };

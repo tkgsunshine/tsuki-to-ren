@@ -2441,6 +2441,7 @@ function App() {
         isOpen={showPremiumLP}
         onClose={() => setShowPremiumLP(false)}
         onSubscribe={() => setIsSubscribed(true)}
+        onCancelSubscription={() => setIsSubscribed(false)}
         isSubscribed={isSubscribed}
         isRegistered={isRegistered}
         onRegisterFirst={() => setShowAuthModal(true)}
