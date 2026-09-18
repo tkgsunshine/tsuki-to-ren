@@ -168,6 +168,7 @@ writePage(
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af; width: 140px;">販売事業者</th><td style="padding: 0.75rem 0;">Ill株式会社</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">運営責任者</th><td style="padding: 0.75rem 0;">山下 高志</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">08053565283</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">販売価格</th><td style="padding: 0.75rem 0;">プレミアムプラン: 月額500円（税込）</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">商品の引き渡し</th><td style="padding: 0.75rem 0;">決済完了後、ただちにご利用可能</td></tr>
@@ -210,6 +211,7 @@ writePage(
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">代表取締役</th><td style="padding: 0.75rem 0;">山下 高志</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">設立</th><td style="padding: 0.75rem 0;">2022年6月1日</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">08053565283</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">事業内容</th><td style="padding: 0.75rem 0;">AI占いコンテンツ開発、次世代マッチングプラットフォーム『月と蓮』の企画運営・システム提供。</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
           </tbody>

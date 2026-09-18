@@ -251,6 +251,10 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                   <td style={{ color: '#e2e8f0' }}>support@tsuki-to-ren.com</td>
                 </tr>
                 <tr>
+                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>電話番号</td>
+                  <td style={{ color: '#e2e8f0' }}>08053565283</td>
+                </tr>
+                <tr>
                   <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
                   <td style={{ color: '#e2e8f0' }}>2026年9月1日</td>
                 </tr>

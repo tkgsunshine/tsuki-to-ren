@@ -2154,6 +2154,10 @@ function App() {
                   <span style={{ color: 'white' }}>support@tsuki-to-ren.com</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af' }}>電話番号</span>
+                  <span style={{ color: 'white' }}>08053565283</span>
+                </div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>販売価格</span>
                   <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額500円 (税込)</span>
                 </div>
