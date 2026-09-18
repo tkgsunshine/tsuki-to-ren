@@ -89,7 +89,7 @@ writePage(
           <h2 style="font-size: 1.1rem; color: #e2c074;">第4条（サービス内容と免責事項）</h2>
           <p>本サービスが提供する鑑定結果・運勢予測・AIによるアドバイスは、エンターテインメント目的のコンテンツであり、科学的根拠に基づく保証をするものではありません。鑑定結果に基づく判断・行動はユーザー自身の責任において行ってください。</p>
           <h2 style="font-size: 1.1rem; color: #e2c074;">第5条（有料サブスクリプションサービス）</h2>
-          <p>本サービスでは、月額500円（税込）等の有料サブスクリプション機能を提供しています。契約期間満了までに解約手続きが行われない場合、自動更新されます。デジタルコンテンツの特性上、決済完了後のキャンセル・返金には応じられません。いつでも解約可能です。</p>
+          <p>本サービスでは、月額500円（税込）等の有料サブスクリプション機能を提供しています。契約期間満了までに解約手続きが行われない場合、自動更新されます。デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</p>
           <h2 style="font-size: 1.1rem; color: #e2c074;">第6条（運営会社）</h2>
           <p>運営会社：Ill株式会社 / お問合せ：support@tsuki-to-ren.com</p>
         </section>
@@ -172,7 +172,7 @@ writePage(
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">販売価格</th><td style="padding: 0.75rem 0;">プレミアムプラン: 月額500円（税込）</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">商品の引き渡し</th><td style="padding: 0.75rem 0;">決済完了後、ただちにご利用可能</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">返品・解約</th><td style="padding: 0.75rem 0;">デジタルコンテンツの特性上、決済完了後の返金はできません。プラン解約は設定画面よりいつでも即時可能です。</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">返品・解約</th><td style="padding: 0.75rem 0;">デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</td></tr>
           </tbody>
         </table>
         <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>

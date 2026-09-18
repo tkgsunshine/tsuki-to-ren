@@ -2170,8 +2170,8 @@ function App() {
                   <span style={{ color: 'white' }}>購入手続き完了後、ただちにご利用可能</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>返品・退会について</span>
-                  <span style={{ color: 'white' }}>デジタルコンテンツの特性上、決済完了後の返金はできません。プラン解約は設定よりいつでも即時可能です。</span>
+                  <span style={{ color: '#9ca3af' }}>返品・返金および解約について</span>
+                  <span style={{ color: 'white' }}>デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</span>
                 </div>
               </div>
             )}
