@@ -15,6 +15,52 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1789780043383",
+    "slug": "istp-estp-realist-attraction",
+    "title": "【ISTP × ESTP】「巨匠」と「起業家」の刺激的で縛られない大人の恋愛！自立した二人の最強タッグ",
+    "metaDescription": "16タイプ性格診断におけるリアリスト同士の爽快カップル「ISTP×ESTP」。互いの自由を尊重しながら、刺激と信頼に満ちた心地よい関係を築く法則を徹底解説。",
+    "keywords": [
+      "ISTP ESTP 相性",
+      "巨匠 起業家 恋愛",
+      "MBTI サバサバカップル",
+      "ISTP 恋愛 傾向",
+      "ESTP 落とし方"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-09-19T01:07:23.382Z",
+    "readTimeMinutes": 8,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80&topic=istp-estp-realist-attraction",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. なぜISTPとESTPは言葉が少なくても通じ合えるのか？",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. 束縛ゼロ！自立した大人が惹かれ合う最高の距離感",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. 感情のすれ違いを防ぐためのリアルな対処法",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. まとめ",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "お互いに淡白になりすぎて自然消滅することはありませんか？",
+        "answer": "共通のアクティビティや趣味（ドライブ、スポーツ、グルメなど）を一緒に楽しむ時間を意識的に作ることで、過度な連絡がなくても強固な絆が続きます。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. なぜISTPとESTPは言葉が少なくても通じ合えるのか？</h2>\n<p>現実的な五感と思考を重んじるISTP（巨匠）とESTP（起業家）。</p>\n<p>面倒な感情の駆け引きや重苦しい束縛を嫌う二人は、出会った瞬間から「この人となら気を使わずに自然体でいられる」と意気投合します。</p>\n<h2 id=\"section-2\">2. 束縛ゼロ！自立した大人が惹かれ合う最高の距離感</h2>\n<p>自分の時間を最優先したいISTPのペースをESTPは無理に崩さず、ESTPの行動力にISTPは的確なサポートを与えます。お互いに依存しない大人の関係が実現します。</p>\n<h2 id=\"section-3\">3. 感情のすれ違いを防ぐためのリアルな対処法</h2>\n<p>問題が起きた時は感情論ではなく、具体的な事実と解決策を淡々と話し合うことが最もスムーズな関係修復につながります。</p>\n<h2 id=\"section-4\">4. まとめ</h2>\n<p>『月と蓮』の本格診断で、二人の相性詳細をチェックしてみましょう。</p>"
+  },
+  {
     "id": "col-1789736290616",
     "slug": "shichutsuimei-kango-fukugo-destiny-partner",
     "title": "【四柱推命】干合（かんごう）でわかる「運命の伴侶」！前世からの引力と魂の結びつき",
