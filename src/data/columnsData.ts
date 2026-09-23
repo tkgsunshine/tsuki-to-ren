@@ -15,6 +15,52 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1790126759976",
+    "slug": "entp-intj-intellectual-chemistry",
+    "title": "【ENTP × INTJ】「討論者」と「建築家」の知性爆発カップル！議論するほど愛が深まる理由",
+    "metaDescription": "16タイプ性格診断における最高峰の知性派ペア「ENTP×INTJ」。鋭い洞察と斬新な発想がぶつかり合い、お互いを唯一の理解者として認め合う大人の恋愛戦略を徹底解説。",
+    "keywords": [
+      "ENTP INTJ 相性",
+      "討論者 建築家 恋愛",
+      "MBTI 知性カップル",
+      "INTJ 本音 ENTP",
+      "ENTP 好きになる人"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-09-23T01:25:59.975Z",
+    "readTimeMinutes": 9,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=entp-intj-intellectual-chemistry",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. なぜENTPとINTJの会話は朝まで止まらないのか？",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. お互いのプライドを尊重しながら愛を深める黄金ルール",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. 感情表現が苦手な二人がすれ違いを回避する秘訣",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. まとめ",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "議論がヒートアップして喧嘩になりませんか？",
+        "answer": "二人にとって議論は「知的なスキンシップ」です。人格攻撃を避け、相手のロジックの美しさを認めることで絆はより強固になります。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. なぜENTPとINTJの会話は朝まで止まらないのか？</h2>\n<p>知的好奇心と本質志向を持つENTP（討論者）とINTJ（建築家）。</p>\n<p>世間の常識に囚われない二人は、未来のビジョンや哲学的な問いについて語り合える「唯一の対等なパートナー」として惹かれ合います。</p>\n<h2 id=\"section-2\">2. お互いのプライドを尊重しながら愛を深める黄金ルール</h2>\n<p>ENTPの独創的なアイデアをINTJが綿密に構造化し、INTJのストイックな計画をENTPが柔軟に活性化させます。</p>\n<h2 id=\"section-3\">3. 感情表現が苦手な二人がすれ違いを回避する秘訣</h2>\n<p>感謝や好意は察してもらうのを待たず、ストレートに言葉で伝えることが長続きの秘訣です。</p>\n<h2 id=\"section-4\">4. まとめ</h2>\n<p>『月と蓮』で、二人の本格相性と今日の運勢を診断してみましょう。</p>"
+  },
+  {
     "id": "col-1790083272317",
     "slug": "fukuen-mindset-law-of-attraction",
     "title": "【引き寄せの法則】復縁を確実に実現する潜在意識の書き換えワーク！元彼から連絡が来る波動の整え方",
