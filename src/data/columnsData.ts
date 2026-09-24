@@ -15,6 +15,52 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1790256593548",
+    "slug": "infj-intp-deep-thinker-chemistry",
+    "title": "【INFJ × INTP】「提唱者」と「論理学者」の静寂な愛！言葉を超えて分かり合える魂の聖域",
+    "metaDescription": "16タイプ性格診断における静かで深いベストパートナー「INFJ×INTP」。哲学的な思考と深い洞察が調和し、穏やかで生涯続く信頼関係を築く秘訣を徹底解説。",
+    "keywords": [
+      "INFJ INTP 相性",
+      "提唱者 論理学者 恋愛",
+      "MBTI 落ち着くカップル",
+      "INTP 恋愛 心理",
+      "INFJ 好きになる人"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-09-24T13:29:53.547Z",
+    "readTimeMinutes": 9,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=1200&q=80",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. なぜINFJとINTPは一緒にいると無言でも心地よいのか？",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. 感情（Fe）と論理（Ti）が織りなす極上の調和",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. すれ違いを防ぐための優しい歩み寄り方",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. まとめ",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "INTPが無口で感情を表に出さない時はどう接すればいいですか？",
+        "answer": "INTPは思考の世界に没頭しているだけです。無理に話させようとせず、温かいお茶を出して静かに見守るだけで深い愛情を感じ取ります。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. なぜINFJとINTPは一緒にいると無言でも心地よいのか？</h2>\n<p>内向的直感を備えたINFJ（提唱者）と内向的思考を備えたINTP（論理学者）。</p>\n<p>人混みや表面的な社交を好まない二人は、二人だけの静かな空間で深い思索や趣味を共有することで、最高の安らぎを得られます。</p>\n<h2 id=\"section-2\">2. 感情（Fe）と論理（Ti）が織りなす極上の調和</h2>\n<p>INFJの温かい気配りがINTPの孤独を癒し、INTPの客観的で冷静な知性がINFJの不安を解消します。</p>\n<h2 id=\"section-3\">3. すれ違いを防ぐための優しい歩み寄り方</h2>\n<p>INFJは感情をストレートに言葉にし、INTPは論理的な正しさよりも相手の気持ちへの共感を一言添えることが絆を深めます。</p>\n<h2 id=\"section-4\">4. まとめ</h2>\n<p>『月と蓮』で、二人の本格相性と日々の運気リズムを鑑定してみましょう。</p>"
+  },
+  {
     "id": "col-1790170468307",
     "slug": "shichutsuimei-daiun-kibakuzai-marriage",
     "title": "【四柱推命】大運の変わり目に訪れる「電撃婚・大恋愛」の前兆！10年周期の運命バイオリズム",
