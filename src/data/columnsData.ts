@@ -15,6 +15,52 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1790427503711",
+    "slug": "esfp-isfj-warmth-daily-happiness",
+    "title": "【ESFP × ISFJ】「エンターテイナー」と「擁護者」の笑顔あふれる日常！お互いを最高に癒し合う関係",
+    "metaDescription": "16タイプ性格診断における温かく家庭的なベストカップル「ESFP×ISFJ」。明るい社交性と献身的な気配りが絶妙に調和し、笑いの絶えない幸せな関係を築く秘訣を徹底解説。",
+    "keywords": [
+      "ESFP ISFJ 相性",
+      "エンターテイナー 擁護者 恋愛",
+      "MBTI ほんわかカップル",
+      "ESFP 好きなタイプ",
+      "ISFJ 落とし方"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-09-26T12:58:23.711Z",
+    "readTimeMinutes": 8,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1516726817505-f5ed825624d8?auto=format&fit=crop&w=1200&q=80",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. なぜESFPとISFJは一緒にいると自然と笑顔になれるのか？",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. 互いの優しさに感謝し合える温かいパートナーシップ",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. すれ違いを防ぐためのコミュニケーション術",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. まとめ",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "ESFPの交友関係の広さにISFJが不安になることはありませんか？",
+        "answer": "ESFPが二人きりの時間をしっかり大切にし、「あなたが一番特別だよ」と言葉とスキンシップで安心感を与え続けることで不安は完全に解消されます。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. なぜESFPとISFJは一緒にいると自然と笑顔になれるのか？</h2>\n<p>今この瞬間を明るく楽しむESFP（エンターテイナー）と、周囲を温かく気遣い支えるISFJ（擁護者）。</p>\n<p>どちらも温かい心と現実的な優しさを持ち、お互いの存在が最大の癒しと活力になります。</p>\n<h2 id=\"section-2\">2. 互いの優しさに感謝し合える温かいパートナーシップ</h2>\n<p>ISFJの献身的なサポートにESFPは心から感謝し、ESFPの明るいユーモアがISFJの心配性を優しく吹き飛ばします。</p>\n<h2 id=\"section-3\">3. すれ違いを防ぐためのコミュニケーション術</h2>\n<p>ISFJは我慢せずに希望を伝え、ESFPは落ち着いたお家デートの時間も大切にすることが円満の秘訣です。</p>\n<h2 id=\"section-4\">4. まとめ</h2>\n<p>『月と蓮』で、二人の相性詳細を今すぐ診断してみましょう。</p>"
+  },
+  {
     "id": "col-1790343411651",
     "slug": "shichutsuimei-tsuhensei-seikan-henkan-male",
     "title": "【四柱推命】官星（正官・偏官）を持つ男性の落とし方！プライドをくすぐり本気で惚れさせる極意",
