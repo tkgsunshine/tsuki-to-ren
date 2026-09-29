@@ -2167,7 +2167,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>支払方法</span>
-                  <span style={{ color: 'white' }}>クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Pay、PayPay</span>
+                  <span style={{ color: 'white' }}>クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Pay</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#9ca3af' }}>商品代金以外の料金</span>
