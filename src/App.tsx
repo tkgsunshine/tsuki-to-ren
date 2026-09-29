@@ -2162,6 +2162,10 @@ function App() {
                   <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額500円 (税込)</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af' }}>契約期間</span>
+                  <span style={{ color: 'white' }}>30日間のサブスクリプション（契約期間満了時に自動更新）</span>
+                </div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>支払方法</span>
                   <span style={{ color: 'white' }}>クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Pay、PayPay</span>
                 </div>
