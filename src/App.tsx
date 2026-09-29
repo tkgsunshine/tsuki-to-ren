@@ -2161,9 +2161,9 @@ function App() {
                   <span style={{ color: '#9ca3af' }}>販売価格</span>
                   <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額500円 (税込)</span>
                 </div>
-                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>契約期間</span>
-                  <span style={{ color: 'white' }}>30日間のサブスクリプション（契約期間満了時に自動更新）</span>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <span style={{ color: '#9ca3af' }}>契約期間・自動更新</span>
+                  <span style={{ color: 'white' }}>30日間のサブスクリプション。契約期間満了日までに解約手続き（自動更新の停止）を行わない限り、同一条件で30日ごとに自動的に契約が更新され、継続課金が発生します。</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>支払方法</span>
@@ -2178,8 +2178,8 @@ function App() {
                   <span style={{ color: 'white' }}>購入手続き完了後、ただちにご利用可能</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>解約方法</span>
-                  <span style={{ color: 'white' }}>マイページ（設定画面）内の「プレミアム会員の解約手続き」より、いつでも即座に定期課金の自動更新停止・解約手続きが可能です。解約完了後も次回更新日までは有料機能をご利用いただけます。</span>
+                  <span style={{ color: '#9ca3af' }}>解約方法（自動更新の停止）</span>
+                  <span style={{ color: 'white' }}>マイページ（設定画面）内の「プレミアム会員の解約手続き」より、いつでも即座に定期課金の自動更新停止・解約手続きが可能です。解約を行わない限り契約は自動更新されます。解約完了後も次回更新日（有効期限満了日）までは有料機能を引き続きご利用いただけます。</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#9ca3af' }}>動作環境</span>
