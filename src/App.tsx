@@ -2213,6 +2213,17 @@ function App() {
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>3. 情報の保護と管理</h4>
                   <p>お預かりした生年月日等のデータは暗号化通信を行い、法令に基づく場合を除いて第三者への無断共有や提供は一切行いません。</p>
                 </div>
+                <div>
+                  <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>4. 個人データの保存期間と削除方法</h4>
+                  <p>個人データはアカウント保有中およびサービス提供に必要な期間に限り保管します。ユーザーは設定画面またはサポート窓口（support@tsuki-to-ren.com）よりいつでもデータの開示・訂正・完全削除を請求可能です。端末内のローカルデータはブラウザのキャッシュ消去により即座に削除されます。</p>
+                </div>
+                <div>
+                  <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>5. 苦情・相談対応体制</h4>
+                  <p>個人情報の取扱いに関するご質問、苦情、相談等は下記窓口までお申し出ください。<br/>
+                  【苦情・相談窓口】Ill株式会社（担当：山下 高志）<br/>
+                  所在地：東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702<br/>
+                  連絡先：support@tsuki-to-ren.com / 08053565283（平日10:00〜18:00）</p>
+                </div>
               </div>
             )}
 

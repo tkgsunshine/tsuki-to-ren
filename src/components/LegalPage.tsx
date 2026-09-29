@@ -95,9 +95,10 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
 
             <Article title="第4条（サービス内容と免責事項）">
               <ul style={{ margin: '0.4rem 0 0 1rem', padding: 0, listStyle: 'disc' }}>
-                <li style={{ marginBottom: '0.35rem' }}>本サービスが提供する鑑定結果・運勢予測・AIによるアドバイスは、エンターテインメント目的のコンテンツであり、科学的根拠に基づく保証をするものではありません。</li>
-                <li style={{ marginBottom: '0.35rem' }}>鑑定結果に基づく判断・行動はユーザー自身の責任において行ってください。</li>
-                <li style={{ marginBottom: '0.35rem' }}>本サービスの利用により生じた直接的・間接的な損害について、運営者は一切の責任を負いません。</li>
+                <li style={{ marginBottom: '0.35rem' }}>本サービスが提供する相性鑑定結果、運勢予測、バイオリズム、およびAIキャラクターによるアドバイス等は、東洋占術および性格類型論に基づく参考情報・エンターテインメント目的のコンテンツであり、<strong>将来の出来事、恋愛・婚姻の成就、特定の成果や効果を確実に保証・実証するものではありません</strong>。</li>
+                <li style={{ marginBottom: '0.35rem' }}>本サービス内の表現には占術理論上の傾向や象意を解説するための表現が含まれますが、特定の事実を断定するものではありません。</li>
+                <li style={{ marginBottom: '0.35rem' }}>鑑定結果およびAIによる回答に基づく判断・意思決定・行動は、すべてユーザーご自身の責任において行ってください。</li>
+                <li style={{ marginBottom: '0.35rem' }}>本サービスの利用により生じた直接的・間接的な損害について、運営者に故意または重大な過失がある場合を除き、一切の責任を負いません。</li>
               </ul>
             </Article>
 
@@ -180,7 +181,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
               <ul style={{ margin: '0.4rem 0 0 1rem', padding: 0, listStyle: 'disc' }}>
                 <li style={{ marginBottom: '0.35rem' }}>ユーザー本人の同意がある場合</li>
                 <li style={{ marginBottom: '0.35rem' }}>法令に基づく開示要求がある場合</li>
-                <li style={{ marginBottom: '0.35rem' }}>サービス提供に必要な業務委託先（Firebase 等のクラウドサービス）への提供。この場合、適切な管理・監督を行います。</li>
+                <li style={{ marginBottom: '0.35rem' }}>サービス提供に必要な業務委託先（Google Firebase、Resend 等のクラウドサービス）への提供。この場合、適切な管理・監督を行います。</li>
               </ul>
             </Article>
 
@@ -188,29 +189,35 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
               本サービスは、ユーザーの Google アカウントまたは X アカウントに対して、<strong>無断で投稿・共有を行うことは一切ありません</strong>。ソーシャルログインはアカウント認証のみに使用されます。
             </Article>
 
-            <Article title="5. データの保管と安全管理">
-              ユーザーデータは、Google Firebase のセキュアなクラウド環境に保管され、不正アクセス・漏洩・紛失を防止するための適切な安全管理措置を講じています。
-            </Article>
-
-            <Article title="6. ローカルストレージの使用">
-              本サービスでは、ユーザー体験の向上および快適な機能提供（ログイン状態の保持、入力データの一時保存、通知設定の記憶等）のために、ブラウザのローカルストレージ（localStorage）およびWebストレージ機能を使用しています。追跡目的の不要なCookie等は使用しておりません。
-            </Article>
-
-            <Article title="7. ユーザーの権利">
-              ユーザーは、以下の権利を有します。
+            <Article title="5. 個人データの保存期間と削除方法">
               <ul style={{ margin: '0.4rem 0 0 1rem', padding: 0, listStyle: 'disc' }}>
-                <li style={{ marginBottom: '0.35rem' }}>アカウントのログアウトおよびデータの削除をいつでも要求できます</li>
-                <li style={{ marginBottom: '0.35rem' }}>収集されたデータの内容について問い合わせることができます</li>
-                <li style={{ marginBottom: '0.35rem' }}>メール通知の受信をいつでも停止できます</li>
+                <li style={{ marginBottom: '0.35rem' }}><strong>保存期間</strong>：お預かりした個人データは、ユーザーがアカウントを保有している期間、およびサービス提供・法令遵守に必要な期間に限り保管します。</li>
+                <li style={{ marginBottom: '0.35rem' }}><strong>削除手続き</strong>：ユーザーは、アプリ内の設定画面またはサポート窓口（support@tsuki-to-ren.com）へのご連絡により、いつでも自己の個人データの開示・訂正・利用停止・完全消去を請求できます。請求を受領後、本人確認を経て速やかに安全な消去処理を実施します。また、端末内のローカルストレージに保存されたデータは、ブラウザのキャッシュ・閲覧履歴の消去操作により即時に削除可能です。</li>
               </ul>
             </Article>
 
-            <Article title="8. ポリシーの変更">
-              本プライバシーポリシーは、必要に応じて変更されることがあります。重要な変更がある場合は、サービス内で通知します。
+            <Article title="6. データの保管と安全管理">
+              ユーザーデータは、Google Firebase の暗号化されたセキュアなクラウド環境に保管され、不正アクセス・漏洩・滅失または毀損を防止するための厳格なセキュリティ措置を講じています。
             </Article>
 
-            <Article title="9. お問い合わせ">
-              本ポリシーに関するお問い合わせは、下記の運営会社までご連絡ください。
+            <Article title="7. ローカルストレージの使用">
+              本サービスでは、ユーザー体験の向上および快適な機能提供（ログイン状態の保持、入力データの一時保存、通知設定の記憶等）のために、ブラウザのローカルストレージ（localStorage）およびWebストレージ機能を使用しています。追跡目的の不要なCookie等は使用しておりません。
+            </Article>
+
+            <Article title="8. 苦情・相談対応体制">
+              当社は、個人情報の取扱いに関する苦情、相談、および異議申し立てに対して、迅速かつ誠実に対応するための体制を整備しています。ご不明な点や苦情がございましたら、下記窓口までご連絡ください。
+              <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <strong>【個人情報苦情・相談窓口】</strong><br />
+                ・運営事業者：Ill株式会社<br />
+                ・所在地：東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702<br />
+                ・代表責任者：山下 高志<br />
+                ・メールアドレス：support@tsuki-to-ren.com<br />
+                ・電話番号：08053565283（受付時間：平日 10:00〜18:00）
+              </div>
+            </Article>
+
+            <Article title="9. ポリシーの変更">
+              本プライバシーポリシーは、法令の改正やサービス内容の変更に応じて適宜見直しを行います。重要な変更がある場合は、サービス内またはウェブサイト上で分かりやすく通知します。
             </Article>
           </div>
         </section>
@@ -247,6 +254,10 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                   <td style={{ fontWeight: '600', color: '#e2e8f0' }}>Ill株式会社</td>
                 </tr>
                 <tr>
+                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>所在地</td>
+                  <td style={{ color: '#e2e8f0' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</td>
+                </tr>
+                <tr>
                   <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>お問合せ</td>
                   <td style={{ color: '#e2e8f0' }}>support@tsuki-to-ren.com</td>
                 </tr>
@@ -256,7 +267,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
-                  <td style={{ color: '#e2e8f0' }}>2026年9月1日</td>
+                  <td style={{ color: '#e2e8f0' }}>2026年9月1日（最終改定日：2026年9月29日）</td>
                 </tr>
               </tbody>
             </table>
