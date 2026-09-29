@@ -24,6 +24,95 @@ if (hasRecentArticle) {
 
 // 🛡️ Strict Regulation Guard 2: High quality topics pool with rich structure & guaranteed unique images
 const REGULATED_TOPICS_POOL = [
+{
+  "slug": "infp-entj-polar-attraction-chemistry",
+  "title": "【INFP × ENTJ】「仲介者」と「指揮官」の運命的ケミストリー！正反対の二人が最強の絆を結ぶ理由",
+  "metaDescription": "16タイプ（MBTI）で理想の補完関係として名高いINFP×ENTJ。繊細な理想主義者と冷徹なリーダーが惹かれ合い、お互いを成長させる愛の法則を徹底解説。",
+  "keywords": [
+    "INFP ENTJ 相性",
+    "仲介者 指揮官 恋愛",
+    "MBTI ベストカップル",
+    "ENTJ 好きなタイプ",
+    "INFP 落とし方"
+  ],
+  "category": "16タイプ・MBTI相性",
+  "readTimeMinutes": 9,
+  "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=infp-entj",
+  "toc": [
+    {
+      "id": "section-1",
+      "title": "1. なぜ「純粋な理想主義者」と「不屈の統率者」は惹かれ合うのか？",
+      "level": 1
+    },
+    {
+      "id": "section-2",
+      "title": "2. 認知機能が織りなす「守護と癒し」の黄金比",
+      "level": 1
+    },
+    {
+      "id": "section-3",
+      "title": "3. すれ違いを防ぐためのコミュニケーション術",
+      "level": 1
+    },
+    {
+      "id": "section-4",
+      "title": "4. まとめ＆二人の本格相性を無料鑑定する",
+      "level": 1
+    }
+  ],
+  "faqs": [
+    {
+      "question": "ENTJの厳しい物言いにINFPが傷ついた時はどうすべきですか？",
+      "answer": "ENTJは悪気なく効率を重視しているだけです。INFPは「その言い方は悲しい」と素直に感情を伝え、ENTJは言葉の語尾を柔らかくする工夫をすることで即座に調和します。"
+    }
+  ],
+  "content": "<h2 id=\"section-1\">1. なぜ「純粋な理想主義者」と「不屈の統率者」は惹かれ合うのか？</h2>\n<p>16タイプ性格診断（MBTI）において、ドラマのような深い愛を育むのが<strong>INFP（仲介者）とENTJ（指揮官）</strong>の組み合わせです。</p>\n<p>高い目標に向かって突き進むENTJにとって、損得勘定のないINFPの純粋な優しさは唯一の心のオアシスとなります。また、現実を切り拓く力に自信が持てないINFPにとって、圧倒的な行動力で自分を守り導いてくれるENTJは頼もしいヒーローとなるのです。</p>\n<h2 id=\"section-2\">2. 認知機能が織りなす「守護と癒し」の黄金比</h2>\n<p>ENTJの主機能「外向的思考（Te）」とINFPの主機能「内向的感情（Fi）」は、お互いが最も憧れる資質を鏡のように映し出します。</p>\n<h2 id=\"section-3\">3. すれ違いを防ぐためのコミュニケーション術</h2>\n<p>ENTJは結論を急かさずINFPの想いに耳を傾け、INFPは感謝と尊敬を言葉で伝えることが円満の秘訣です。</p>\n<h2 id=\"section-4\">4. まとめ＆二人の本格相性を無料鑑定する</h2>\n<p>『月と蓮』の本格診断で、二人の宿命相性を今すぐチェックしてみましょう。</p>"
+},
+{
+  "slug": "shichutsuimei-choukou-soukoku-remedy",
+  "title": "【四柱推命】五行の相剋（木剋土・水剋火等）を調和させる開運法！相性が悪い相手と愛を深める秘術",
+  "metaDescription": "四柱推命で「相剋（ぶつかり合い）」の関係にある二人でも幸せになれる！五行のバランスを整え、摩擦をエネルギーに変える「通関用神（仲立ちの気）」の使い方を完全解説。",
+  "keywords": [
+    "四柱推命 相剋 恋愛",
+    "五行 相性 悪い 克服",
+    "通関用神 恋愛",
+    "四柱推命 相性 改善",
+    "四柱推命 夫婦 相性"
+  ],
+  "category": "四柱推命入門",
+  "readTimeMinutes": 10,
+  "thumbnailUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80&topic=gogyo-harmony",
+  "toc": [
+    {
+      "id": "section-1",
+      "title": "1. 相剋（そうこく）とは？「相性が悪い」と決めつけるのは大間違い",
+      "level": 1
+    },
+    {
+      "id": "section-2",
+      "title": "2. 【5大相剋パターン別】摩擦が起きる理由と愛の活かし方",
+      "level": 1
+    },
+    {
+      "id": "section-3",
+      "title": "3. 仲立ちとなる「通関五行」を取り入れて関係を劇的改善する裏技",
+      "level": 1
+    },
+    {
+      "id": "section-4",
+      "title": "4. まとめ＆二人の五行バランスを鑑定する",
+      "level": 1
+    }
+  ],
+  "faqs": [
+    {
+      "question": "日干が相剋しているカップルは別れやすいですか？",
+      "answer": "いいえ。相剋は強い刺激と成長をもたらすため、お互いの違いを認め合えるとお互いを誰よりも高め合う最強の戦友・夫婦になれます。"
+    }
+  ],
+  "content": "<h2 id=\"section-1\">1. 相剋（そうこく）とは？「相性が悪い」と決めつけるのは大間違い</h2>\n<p>四柱推命の五行（木・火・土・金・水）において、相手を剋す・剋される関係を<strong>「相剋（そうこく）」</strong>と呼びます。</p>\n<p>相剋は決して「不吉」なものではなく、<strong>「お互いを鍛え、磨き合うための神聖な摩擦」</strong>なのです。</p>\n<h2 id=\"section-2\">2. 【5大相剋パターン別】摩擦が起きる理由と愛の活かし方</h2>\n<p>水剋火なら「水の冷静さが火の情熱を暴走から救う」、木剋土なら「木の根が土を耕し豊かな実りをもたらす」など、捉え方次第で大きな成長へと転換できます。</p>\n<h2 id=\"section-3\">3. 仲立ちとなる「通関五行」を取り入れて関係を劇的改善する裏技</h2>\n<p>例えば水と火の相剋なら「木（観葉植物、緑色、森林デート）」を間に入れることで、水生木・木生火の滑らかな循環が生まれ、摩擦はゼロになります。</p>\n<h2 id=\"section-4\">4. まとめ＆二人の五行バランスを鑑定する</h2>\n<p>『月と蓮』の本格鑑定で、二人の五行バランスと開運調律法を今すぐ確認してみましょう。</p>"
+},
+
   {
     slug: 'kuubou-tenchusatsu-romance-turning-point',
     title: '【四柱推命】空亡・天中殺の時期に出会った人は運命の相手？試練を絆に変える恋愛開運法',
