@@ -2147,7 +2147,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#9ca3af' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
+                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>お問合せ</span>
@@ -2161,6 +2161,10 @@ function App() {
                   <span style={{ color: '#9ca3af' }}>販売価格</span>
                   <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額500円 (税込)</span>
                 </div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af' }}>支払方法</span>
+                  <span style={{ color: 'white' }}>クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Pay、PayPay</span>
+                </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#9ca3af' }}>商品代金以外の料金</span>
                   <span style={{ color: 'white' }}>パケット通信料等（お使いの回線に応じます）</span>
@@ -2169,8 +2173,22 @@ function App() {
                   <span style={{ color: '#9ca3af' }}>商品の引き渡し</span>
                   <span style={{ color: 'white' }}>購入手続き完了後、ただちにご利用可能</span>
                 </div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <span style={{ color: '#9ca3af' }}>解約方法</span>
+                  <span style={{ color: 'white' }}>マイページ（設定画面）内の「プレミアム会員の解約手続き」より、いつでも即座に定期課金の自動更新停止・解約手続きが可能です。解約完了後も次回更新日までは有料機能をご利用いただけます。</span>
+                </div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <span style={{ color: '#9ca3af' }}>動作環境</span>
+                  <span style={{ color: 'white' }}>
+                    【スマートフォン・タブレット・PC】<br />
+                    ・iOS: 最新バージョンのSafari<br />
+                    ・Android: 最新バージョンのGoogle Chrome<br />
+                    ・PC (Windows / Mac): 最新バージョンのGoogle Chrome, Safari, Microsoft Edge<br />
+                    ※インターネット接続環境が必要です。
+                  </span>
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>返品・返金および解約について</span>
+                  <span style={{ color: '#9ca3af' }}>返品・返金について</span>
                   <span style={{ color: 'white' }}>デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</span>
                 </div>
               </div>
@@ -2208,6 +2226,18 @@ function App() {
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#9ca3af' }}>設立</span>
                   <span style={{ color: 'white' }}>2022年6月1日</span>
+                </div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <span style={{ color: '#9ca3af' }}>所在地</span>
+                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</span>
+                </div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af' }}>電話番号</span>
+                  <span style={{ color: 'white' }}>08053565283</span>
+                </div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af' }}>お問合せ</span>
+                  <span style={{ color: 'white' }}>support@tsuki-to-ren.com</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#9ca3af' }}>事業内容</span>

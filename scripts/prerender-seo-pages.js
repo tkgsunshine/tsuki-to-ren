@@ -167,12 +167,15 @@ writePage(
           <tbody>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af; width: 140px;">販売事業者</th><td style="padding: 0.75rem 0;">Ill株式会社</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">運営責任者</th><td style="padding: 0.75rem 0;">山下 高志</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">08053565283</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">販売価格</th><td style="padding: 0.75rem 0;">プレミアムプラン: 月額500円（税込）</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">支払方法</th><td style="padding: 0.75rem 0;">クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Pay、PayPay</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">商品の引き渡し</th><td style="padding: 0.75rem 0;">決済完了後、ただちにご利用可能</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">返品・解約</th><td style="padding: 0.75rem 0;">デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">解約方法</th><td style="padding: 0.75rem 0;">マイページ（設定画面）内の「プレミアム会員の解約手続き」より、いつでも即座に定期課金の自動更新停止・解約手続きが可能です。解約完了後も次回更新日までは有料機能をご利用いただけます。</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">動作環境</th><td style="padding: 0.75rem 0;">【スマートフォン・タブレット・PC】<br/>・iOS: 最新バージョンのSafari<br/>・Android: 最新バージョンのGoogle Chrome<br/>・PC (Windows / Mac): 最新バージョンのGoogle Chrome, Safari, Microsoft Edge<br/>※インターネット接続環境が必要です。</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">返品・返金について</th><td style="padding: 0.75rem 0;">デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</td></tr>
           </tbody>
         </table>
         <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
@@ -210,7 +213,7 @@ writePage(
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af; width: 140px;">社名</th><td style="padding: 0.75rem 0; font-weight: bold;">Ill株式会社</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">代表取締役</th><td style="padding: 0.75rem 0;">山下 高志</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">設立</th><td style="padding: 0.75rem 0;">2022年6月1日</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">08053565283</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">事業内容</th><td style="padding: 0.75rem 0;">AI占いコンテンツ開発、次世代マッチングプラットフォーム『月と蓮』の企画運営・システム提供。</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
