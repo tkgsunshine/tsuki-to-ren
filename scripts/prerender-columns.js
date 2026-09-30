@@ -167,27 +167,25 @@ for (const article of columns) {
   // Insert structured data before </head>
   articleHtml = articleHtml.replace('</head>', `${schemaTags}\n</head>`);
 
-  // Prerender semantic fallback into <div id="root">
-  const noscriptFallback = `
-    <noscript>
-      <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205;">
-        <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
-          <a href="/" style="color: #e2c074;">ホーム</a> &gt; <a href="/column" style="color: #e2c074;">開運コラム</a> &gt; <span>${article.title}</span>
-        </nav>
-        <article>
-          <header style="margin-bottom: 1.5rem;">
-            <p style="color: #d8b4fe; font-size: 0.8rem; font-weight: bold;">${article.category} | 読了目安 ${article.readTimeMinutes}分</p>
-            <h1 style="font-size: 1.6rem; color: #fef08a; line-height: 1.4;">${article.title}</h1>
-          </header>
-          <div style="line-height: 1.8; color: #e2e8f0;">
-            ${article.content}
-          </div>
-        </article>
-      </div>
-    </noscript>
+  // Prerender semantic HTML directly into <div id="root"> for instant Googlebot indexation
+  const semanticArticleContent = `
+    <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205;">
+      <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <a href="/column" style="color: #e2c074;">開運コラム</a> &gt; <span>${article.title}</span>
+      </nav>
+      <article>
+        <header style="margin-bottom: 1.5rem;">
+          <p style="color: #d8b4fe; font-size: 0.8rem; font-weight: bold;">${article.category} | 読了目安 ${article.readTimeMinutes}分</p>
+          <h1 style="font-size: 1.6rem; color: #fef08a; line-height: 1.4;">${article.title}</h1>
+        </header>
+        <div style="line-height: 1.8; color: #e2e8f0;">
+          ${article.content}
+        </div>
+      </article>
+    </div>
   `;
 
-  articleHtml = articleHtml.replace('<div id="root"></div>', `<div id="root"></div>\n${noscriptFallback}`);
+  articleHtml = articleHtml.replace('<div id="root"></div>', `<div id="root">${semanticArticleContent}</div>`);
 
   fs.writeFileSync(path.join(articleDir, 'index.html'), articleHtml, 'utf-8');
   count++;

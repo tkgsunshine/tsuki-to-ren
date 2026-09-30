@@ -53,12 +53,7 @@ function writePage(subDir, title, description, keywords, canonicalUrl, noscriptC
     pageHtml = pageHtml.replace('</head>', `${schemaTags}\n</head>`);
   }
 
-  const noscriptBlock = `
-    <noscript>
-      ${noscriptContent}
-    </noscript>
-  `;
-  pageHtml = pageHtml.replace('<div id="root"></div>', `<div id="root"></div>\n${noscriptBlock}`);
+  pageHtml = pageHtml.replace('<div id="root"></div>', `<div id="root">${noscriptContent}</div>`);
 
   fs.writeFileSync(path.join(targetDir, 'index.html'), pageHtml, 'utf-8');
 }
