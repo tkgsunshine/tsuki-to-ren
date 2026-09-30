@@ -15,6 +15,52 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1790733683022",
+    "slug": "infp-entj-polar-attraction-chemistry",
+    "title": "【INFP × ENTJ】「仲介者」と「指揮官」の運命的ケミストリー！正反対の二人が最強の絆を結ぶ理由",
+    "metaDescription": "16タイプ（MBTI）で理想の補完関係として名高いINFP×ENTJ。繊細な理想主義者と冷徹なリーダーが惹かれ合い、お互いを成長させる愛の法則を徹底解説。",
+    "keywords": [
+      "INFP ENTJ 相性",
+      "仲介者 指揮官 恋愛",
+      "MBTI ベストカップル",
+      "ENTJ 好きなタイプ",
+      "INFP 落とし方"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-09-30T02:01:23.021Z",
+    "readTimeMinutes": 9,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=infp-entj",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. なぜ「純粋な理想主義者」と「不屈の統率者」は惹かれ合うのか？",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. 認知機能が織りなす「守護と癒し」の黄金比",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. すれ違いを防ぐためのコミュニケーション術",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. まとめ＆二人の本格相性を無料鑑定する",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "ENTJの厳しい物言いにINFPが傷ついた時はどうすべきですか？",
+        "answer": "ENTJは悪気なく効率を重視しているだけです。INFPは「その言い方は悲しい」と素直に感情を伝え、ENTJは言葉の語尾を柔らかくする工夫をすることで即座に調和します。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. なぜ「純粋な理想主義者」と「不屈の統率者」は惹かれ合うのか？</h2>\n<p>16タイプ性格診断（MBTI）において、ドラマのような深い愛を育むのが<strong>INFP（仲介者）とENTJ（指揮官）</strong>の組み合わせです。</p>\n<p>高い目標に向かって突き進むENTJにとって、損得勘定のないINFPの純粋な優しさは唯一の心のオアシスとなります。また、現実を切り拓く力に自信が持てないINFPにとって、圧倒的な行動力で自分を守り導いてくれるENTJは頼もしいヒーローとなるのです。</p>\n<h2 id=\"section-2\">2. 認知機能が織りなす「守護と癒し」の黄金比</h2>\n<p>ENTJの主機能「外向的思考（Te）」とINFPの主機能「内向的感情（Fi）」は、お互いが最も憧れる資質を鏡のように映し出します。</p>\n<h2 id=\"section-3\">3. すれ違いを防ぐためのコミュニケーション術</h2>\n<p>ENTJは結論を急かさずINFPの想いに耳を傾け、INFPは感謝と尊敬を言葉で伝えることが円満の秘訣です。</p>\n<h2 id=\"section-4\">4. まとめ＆二人の本格相性を無料鑑定する</h2>\n<p>『月と蓮』の本格診断で、二人の宿命相性を今すぐチェックしてみましょう。</p>"
+  },
+  {
     "id": "col-1790515800000",
     "slug": "intj-infp-soul-bond-attraction",
     "title": "【INTJ × INFP】「建築家」と「仲介者」の静かなる引力！論理と感情が共鳴する運命の恋",
