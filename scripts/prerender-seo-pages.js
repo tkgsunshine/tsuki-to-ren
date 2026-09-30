@@ -596,3 +596,87 @@ for (const t1 of MBTI_TYPES) {
 }
 
 console.log(`🎉 Successfully pre-rendered 4 legal pages + 1 hub page + ${mbtiCount} MBTI combination pages!`);
+
+// 6. Pre-render root homepage (dist/index.html) with semantic HTML and internal link network
+console.log('🚀 Pre-rendering root homepage (dist/index.html)...');
+const homeSemanticHtml = `
+  <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
+    <header style="text-align: center; margin-bottom: 2rem;">
+      <p style="color: #e2c074; font-size: 0.85rem; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 0.5rem;">四柱推命 × 九星気学 × 16タイプ心理学</p>
+      <h1 style="font-size: 1.7rem; color: #fef08a; margin: 0 0 0.75rem 0; line-height: 1.35; font-weight: bold;">
+        【公式】月と蓮 | 約2.7億通りの四柱推命×九星気学×16タイプ本格恋愛相性診断
+      </h1>
+      <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; max-width: 580px; margin: 0 auto;">
+        東洋最高峰の四柱推命・九星気学と西洋の16タイプ（MBTI）心理統計学を融合した完全無料の本格恋愛占い『月と蓮』。片思い・復縁・好きな人との本日の相性バイオリズム、LINEを送るべき吉時間、お相手の取扱説明書（トリセツ）、奇跡のレア属性「魁罡（かいごう）」「極星」を即座に精密鑑定します。
+      </p>
+      <div style="margin-top: 1.5rem;">
+        <a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.85rem 2.2rem; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1.05rem; box-shadow: 0 4px 20px rgba(226,192,116,0.35);">
+          今すぐ完全無料で恋愛相性を占う
+        </a>
+      </div>
+    </header>
+
+    <section style="margin-bottom: 2rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(226,192,116,0.2); border-radius: 16px; padding: 1.25rem;">
+      <h2 style="font-size: 1.15rem; color: #fef08a; margin-top: 0; margin-bottom: 0.5rem;">全273,088,320通り（約2.7億通り）の超精密マトリクス</h2>
+      <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.75rem;">
+        『月と蓮』は、単なる16タイプ診断や星座占いとは一線を画す、以下の多角算術プログラムを搭載しています。
+      </p>
+      <ul style="padding-left: 1.2rem; font-size: 0.82rem; color: #cbd5e1; line-height: 1.8;">
+        <li><strong>四柱推命（日柱3,600通り）</strong>：魂の宿命、本質的な恋愛欲求、夜の相性を解明</li>
+        <li><strong>九星気学（81通り）</strong>：日々の運気バイオリズム、最も返信率が高まるLINE吉時間を算出</li>
+        <li><strong>16タイプ心理統計学（289通り）</strong>：会話のテンポ、すれ違いの防ぎ方、お相手の攻略トリセツを導出</li>
+        <li><strong>特殊星判定（魁罡・極星など9通り）</strong>：約3.3%のレア属性や運命のソウルメイト属性を自動検出</li>
+      </ul>
+    </section>
+
+    <!-- Popular Combinations & Quick Links -->
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.75rem; text-align: center;">人気の16タイプ（MBTI）恋愛相性診断</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
+        <a href="/compatibility/infp-enfj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">INFP × ENFJ</a>
+        <a href="/compatibility/enfp-intj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ENFP × INTJ</a>
+        <a href="/compatibility/infj-entp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">INFJ × ENTP</a>
+        <a href="/compatibility/intp-entj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">INTP × ENTJ</a>
+        <a href="/compatibility/isfj-esfp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ISFJ × ESFP</a>
+        <a href="/compatibility/isfp-esfj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ISFP × ESFJ</a>
+        <a href="/compatibility/istj-estp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ISTJ × ESTP</a>
+        <a href="/compatibility/istp-estj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ISTP × ESTJ</a>
+        <a href="/compatibility/enfp-infj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ENFP × INFJ</a>
+        <a href="/compatibility/intj-infp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">INTJ × INFP</a>
+        <a href="/compatibility/enfj-istp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ENFJ × ISTP</a>
+      </div>
+      <p style="text-align: center; margin-top: 0.75rem;">
+        <a href="/compatibility" style="font-size: 0.8rem; color: #e2c074; font-weight: bold; text-decoration: underline;">全256通りの16タイプ相性一覧を見る →</a>
+      </p>
+    </section>
+
+    <!-- Column Quick Links -->
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.75rem; text-align: center;">恋愛開運・相性コラム</h2>
+      <p style="text-align: center; font-size: 0.85rem; color: #cbd5e1;">四柱推命の特殊星やLINE攻略、ツインレイの深層知識を徹底解説。</p>
+      <p style="text-align: center; margin-top: 0.5rem;">
+        <a href="/column" style="font-size: 0.8rem; color: #e2c074; font-weight: bold; text-decoration: underline;">開運コラム一覧を見る（全46記事） →</a>
+      </p>
+    </section>
+
+    <!-- Footer Links -->
+    <footer style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; text-align: center; font-size: 0.75rem; color: #9ca3af;">
+      <nav style="display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; justify-content: center; margin-bottom: 1rem;">
+        <a href="/" style="color: #cbd5e1; text-decoration: none;">恋愛診断ホーム</a>
+        <a href="/column" style="color: #cbd5e1; text-decoration: none;">開運コラム</a>
+        <a href="/compatibility" style="color: #cbd5e1; text-decoration: none;">16タイプ相性一覧</a>
+        <a href="/about" style="color: #cbd5e1; text-decoration: none;">占い解説</a>
+        <a href="/terms" style="color: #9ca3af; text-decoration: none;">利用規約</a>
+        <a href="/privacy" style="color: #9ca3af; text-decoration: none;">プライバシーポリシー</a>
+        <a href="/tokushoho" style="color: #9ca3af; text-decoration: none;">特定商取引法に基づく表記</a>
+        <a href="/company" style="color: #9ca3af; text-decoration: none;">運営会社</a>
+      </nav>
+      <p style="margin: 0; font-size: 0.7rem; color: #64748b;">© 2026 月と蓮（Hasu to Tsuki） - Ill株式会社</p>
+    </footer>
+  </div>
+`;
+
+// Insert into dist/index.html
+const updatedIndexHtml = baseHtml.replace('<div id="root"></div>', `<div id="root">${homeSemanticHtml}</div>`);
+fs.writeFileSync(indexHtmlPath, updatedIndexHtml, 'utf-8');
+console.log('✅ Pre-rendered root homepage: dist/index.html');
