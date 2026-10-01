@@ -7,6 +7,10 @@ const __dirname = path.dirname(__filename);
 
 const columnsFilePath = path.join(__dirname, '../src/data/columnsData.ts');
 
+// 🛑 Auto-Column generation has been disabled by user instruction
+console.log('🛑 [自動コラム設定停止] 自動生成機能はユーザー指示により停止されています。記事追加を行わずに正常終了します。');
+process.exit(0);
+
 console.log('🚀 Running Regulated Auto-Column Generator Engine (Hasu-to-Tsuki v2.0)...');
 
 // Read current columns data file
