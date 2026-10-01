@@ -3,7 +3,7 @@
 ## 役割分担
 | 項目 | 担当 | 仕組み |
 |---|---|---|
-| コラムの公開 | GitHub Actions | `daily_column.yml`（毎日8:07 / 17:07 JST ほか）が `scripts/generate-column.js` を実行。12時間ガード付き |
+| コラムの公開 | GitHub Actions | `daily_column.yml`（毎日8:07 / 17:07 JST ほか）が `scripts/generate-column.js` を実行。5時間ガード付き（1日2本） |
 | コラムの補充 | Claude Code（マーケAI社員） | `scripts/column-pool.json` に記事を追記（未公開10本を維持） |
 | 検索データの分析 | GitHub Actions ＋ Claude Code | 毎週月曜9:07 JSTに `docs/marketing/weekly/` へレポートを出力 → AI社員が改善案を作成 |
 
