@@ -12,14 +12,14 @@ console.log('🚀 Running Regulated Auto-Column Generator Engine (Hasu-to-Tsuki 
 // Read current columns data file
 let fileContent = fs.readFileSync(columnsFilePath, 'utf-8');
 
-// 🛡️ Strict Regulation Guard 1: Post interval (At least 12 hours between auto-posts)
+// 🛡️ Strict Regulation Guard 1: Post interval (At least 5 hours between auto-posts: allows the 8:07 and 17:07 JST slots to each publish, while blocking the 15-minute retries)
 const publishedAtMatches = [...fileContent.matchAll(/"?publishedAt"?:\s*["']([^"']+)["']/g)].map(m => m[1]);
-const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
-const hasRecentArticle = publishedAtMatches.some(dateStr => dateStr >= twelveHoursAgo);
+const minIntervalAgo = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
+const hasRecentArticle = publishedAtMatches.some(dateStr => dateStr >= minIntervalAgo);
 
 const forceRun = process.argv.includes('--force');
 if (hasRecentArticle && !forceRun) {
-  console.log('🛡️ [レギュレーションガード] 過去12時間以内に既に新しいコラムが生成・投稿されています。品質維持のため重複処理をスキップし正常終了します。');
+  console.log('🛡️ [レギュレーションガード] 過去5時間以内に既に新しいコラムが生成・投稿されています。品質維持のため重複処理をスキップし正常終了します。');
   process.exit(0);
 }
 
