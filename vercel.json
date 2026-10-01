@@ -6,6 +6,18 @@
       "schedule": "0 23 * * *"
     }
   ],
+  "redirects": [
+    {
+      "source": "/column/infp-entj-polar-attraction-chemistry",
+      "destination": "/column/infp-entj-contrast-relationship",
+      "permanent": true
+    },
+    {
+      "source": "/column/enfp-intj-soul-resonance-attraction",
+      "destination": "/column/intj-enfp-love-chemistry",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/__/auth/:path*",

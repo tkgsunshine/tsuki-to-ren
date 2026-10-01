@@ -26,50 +26,6 @@ if (hasRecentArticle && !forceRun) {
 // 🛡️ Strict Regulation Guard 2: High quality topics pool with rich structure & guaranteed unique images
 const REGULATED_TOPICS_POOL = [
 {
-  "slug": "infp-entj-polar-attraction-chemistry",
-  "title": "【INFP × ENTJ】「仲介者」と「指揮官」の運命的ケミストリー！正反対の二人が最強の絆を結ぶ理由",
-  "metaDescription": "16タイプ（MBTI）で理想の補完関係として名高いINFP×ENTJ。繊細な理想主義者と冷徹なリーダーが惹かれ合い、お互いを成長させる愛の法則を徹底解説。",
-  "keywords": [
-    "INFP ENTJ 相性",
-    "仲介者 指揮官 恋愛",
-    "MBTI ベストカップル",
-    "ENTJ 好きなタイプ",
-    "INFP 落とし方"
-  ],
-  "category": "16タイプ・MBTI相性",
-  "readTimeMinutes": 9,
-  "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=infp-entj",
-  "toc": [
-    {
-      "id": "section-1",
-      "title": "1. なぜ「純粋な理想主義者」と「不屈の統率者」は惹かれ合うのか？",
-      "level": 1
-    },
-    {
-      "id": "section-2",
-      "title": "2. 認知機能が織りなす「守護と癒し」の黄金比",
-      "level": 1
-    },
-    {
-      "id": "section-3",
-      "title": "3. すれ違いを防ぐためのコミュニケーション術",
-      "level": 1
-    },
-    {
-      "id": "section-4",
-      "title": "4. まとめ＆二人の本格相性を無料鑑定する",
-      "level": 1
-    }
-  ],
-  "faqs": [
-    {
-      "question": "ENTJの厳しい物言いにINFPが傷ついた時はどうすべきですか？",
-      "answer": "ENTJは悪気なく効率を重視しているだけです。INFPは「その言い方は悲しい」と素直に感情を伝え、ENTJは言葉の語尾を柔らかくする工夫をすることで即座に調和します。"
-    }
-  ],
-  "content": "<h2 id=\"section-1\">1. なぜ「純粋な理想主義者」と「不屈の統率者」は惹かれ合うのか？</h2>\n<p>16タイプ性格診断（MBTI）において、ドラマのような深い愛を育むのが<strong>INFP（仲介者）とENTJ（指揮官）</strong>の組み合わせです。</p>\n<p>高い目標に向かって突き進むENTJにとって、損得勘定のないINFPの純粋な優しさは唯一の心のオアシスとなります。また、現実を切り拓く力に自信が持てないINFPにとって、圧倒的な行動力で自分を守り導いてくれるENTJは頼もしいヒーローとなるのです。</p>\n<h2 id=\"section-2\">2. 認知機能が織りなす「守護と癒し」の黄金比</h2>\n<p>ENTJの主機能「外向的思考（Te）」とINFPの主機能「内向的感情（Fi）」は、お互いが最も憧れる資質を鏡のように映し出します。</p>\n<h2 id=\"section-3\">3. すれ違いを防ぐためのコミュニケーション術</h2>\n<p>ENTJは結論を急かさずINFPの想いに耳を傾け、INFPは感謝と尊敬を言葉で伝えることが円満の秘訣です。</p>\n<h2 id=\"section-4\">4. まとめ＆二人の本格相性を無料鑑定する</h2>\n<p>『月と蓮』の本格診断で、二人の宿命相性を今すぐチェックしてみましょう。</p>"
-},
-{
   "slug": "shichutsuimei-choukou-soukoku-remedy",
   "title": "【四柱推命】五行の相剋（木剋土・水剋火等）を調和させる開運法！相性が悪い相手と愛を深める秘術",
   "metaDescription": "四柱推命で「相剋（ぶつかり合い）」の関係にある二人でも幸せになれる！五行のバランスを整え、摩擦をエネルギーに変える「通関用神（仲立ちの気）」の使い方を完全解説。",
@@ -185,36 +141,6 @@ const REGULATED_TOPICS_POOL = [
 <p>「おーい」「返事待ってるよ」などの催促は厳禁です。「そういえば前に言ってた〇〇の件、これ見つけたよ！」と、相手にとって有益かつ答えやすい話題をサラッと投げかけるのが鉄則です。</p>
 <h2 id="section-4">4. まとめ＆相手の返信しやすい吉時間を鑑定する</h2>
 <p>『月と蓮』では、相手のタイプと運気から「最も返信率が高まるLINE吉時間」を毎日割り出せます。適切なタイミングでメッセージを届けましょう。</p>`
-  },
-  {
-    slug: 'enfp-intj-soul-resonance-attraction',
-    title: '【ENFP × INTJ】「運動家」と「建築家」の運命的ケミストリー！正反対の二人が最強の絆を結ぶ理由',
-    metaDescription: 'MBTI界で不動の人気を誇るベストカップル「ENFP×INTJ」。天真爛漫な情熱と冷徹な知性が生み出す奇跡の引力と、生涯のパートナーへ成長するための秘訣を徹底解説。',
-    keywords: ['ENFP INTJ 相性', '運動家 建築家 恋愛', 'MBTI 恋愛 ベストペア', 'INTJ デレる', 'ENFP 好きになる人'],
-    category: '16タイプ・MBTI相性',
-    readTimeMinutes: 9,
-    thumbnailUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80',
-    toc: [
-      { id: 'section-1', title: '1. なぜENFPとINTJは磁石のように引き寄せ合うのか？', level: 1 },
-      { id: 'section-2', title: '2. INTJの心の城壁をENFPが無邪気に溶かす瞬間', level: 1 },
-      { id: 'section-3', title: '3. 二人が長く幸せに続くためのコミュニケーションの極意', level: 1 },
-      { id: 'section-4', title: '4. まとめ', level: 1 }
-    ],
-    faqs: [
-      {
-        question: 'INTJがENFPに本気になった時のサインは？',
-        answer: '普段は無駄を嫌うINTJが、ENFPの他愛のないおしゃべりを何時間も笑顔で聞き続け、具体的なスケジュールを調整して率先して会おうとする姿勢が最大の愛情表現です。'
-      }
-    ],
-    content: `<h2 id="section-1">1. なぜENFPとINTJは磁石のように引き寄せ合うのか？</h2>
-<p>世界中のMBTIコミュニティで「奇跡のペアリング」と称賛されるのが、ENFP（運動家）とINTJ（建築家）です。</p>
-<p>外向的で感情豊かなENFPと、内向的で論理を重んじるINTJ。一見すると水と油のように正反対ですが、魂の深層ではお互いに「自分に欠けている最後のピース」を相手の中に見出すのです。</p>
-<h2 id="section-2">2. INTJの心の城壁をENFPが無邪気に溶かす瞬間</h2>
-<p>人に対して警戒心の強いINTJですが、ENFPの裏表のない純粋な好意と好奇心の前には、頑丈な防壁も自然と崩れ去ります。INTJにとってENFPは「世界で唯一、弱音や本音を預けられる太陽」となるのです。</p>
-<h2 id="section-3">3. 二人が長く幸せに続くためのコミュニケーションの極意</h2>
-<p>INTJの「一人の時間の必要性」をENFPが尊重し、ENFPの「豊かな感情表現」をINTJが論理で否定せずに受け止めること。この調和が取れた時、二人は無敵のソウルメイトとなります。</p>
-<h2 id="section-4">4. まとめ</h2>
-<p>『月と蓮』の本格診断で、二人の宿命相性と毎日の運命バイオリズムを今すぐチェックしてみましょう。</p>`
   },
   {
     slug: 'twinray-runner-male-psychology-awakening',
