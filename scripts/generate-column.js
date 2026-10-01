@@ -17,7 +17,8 @@ const publishedAtMatches = [...fileContent.matchAll(/"?publishedAt"?:\s*["']([^"
 const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
 const hasRecentArticle = publishedAtMatches.some(dateStr => dateStr >= twelveHoursAgo);
 
-if (hasRecentArticle) {
+const forceRun = process.argv.includes('--force');
+if (hasRecentArticle && !forceRun) {
   console.log('🛡️ [レギュレーションガード] 過去12時間以内に既に新しいコラムが生成・投稿されています。品質維持のため重複処理をスキップし正常終了します。');
   process.exit(0);
 }
@@ -928,6 +929,14 @@ const REGULATED_TOPICS_POOL = [
 <p>『月と蓮』で、相手の運気と本日のベスト連絡時間を今すぐ無料診断してみましょう。</p>`
   }
 ];
+
+// Topics maintained as JSON (scripts/column-pool.json) are appended after the in-file pool.
+// Add new articles there (same shape as the objects above) instead of editing this file.
+const poolJsonPath = path.join(__dirname, 'column-pool.json');
+if (fs.existsSync(poolJsonPath)) {
+  const extraTopics = JSON.parse(fs.readFileSync(poolJsonPath, 'utf-8'));
+  REGULATED_TOPICS_POOL.push(...extraTopics);
+}
 
 // Check if topic is already published
 let addedCount = 0;

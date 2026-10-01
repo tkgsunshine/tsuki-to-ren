@@ -68,7 +68,7 @@
    - 自動投稿間隔：品質維持およびSEO評価のため、前回の投稿から**最低12時間以上**空けること（`Guard 1`）。
 
 4. **自動更新バッチ（CI/CD）**:
-   - GitHub Actions（`.github/workflows/daily_column.yml`）により、毎日午前9時（UTC）に最新コラムが自動生成・静的HTML事前レンダリング・サイトマップ更新され、自動コミット＆プッシュされる構成を維持すること。
+   - GitHub Actions（`.github/workflows/daily_column.yml`）により、毎日 8:07 / 17:07 JST（リトライ含む）に `scripts/generate-column.js` が実行され、公開待ちのコラムが1件ずつ自動公開される（12時間ガードあり）。公開待ちの記事は `scripts/column-pool.json` に追記して補充する（Claude Code が担当。詳細は `docs/AI_EMPLOYEE_SETUP.md`）。**このworkflowはAGを含め変更しない**。
 
 ---
 
