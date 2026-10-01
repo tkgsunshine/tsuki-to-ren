@@ -22,10 +22,9 @@ creds = service_account.Credentials.from_service_account_file(
 service = build("searchconsole", "v1", credentials=creds)
 
 if not SITE_URL:
+    # Do not guess: this service account can see several sites, and a report for the wrong site is worse than none.
     sites = [s["siteUrl"] for s in service.sites().list().execute().get("siteEntry", [])]
-    if not sites:
-        sys.exit("No Search Console sites accessible by this service account.")
-    SITE_URL = sites[0]
+    sys.exit("GSC_SITE_URL is not set. Set the repository variable GSC_SITE_URL to one of: " + ", ".join(sites))
 
 today = datetime.date.today()
 # GSC data lags ~2 days
