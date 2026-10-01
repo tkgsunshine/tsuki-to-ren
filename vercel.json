@@ -16,6 +16,17 @@
       "source": "/column/enfp-intj-soul-resonance-attraction",
       "destination": "/column/intj-enfp-love-chemistry",
       "permanent": true
+    },
+    {
+      "source": "/:path(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "tsuki-to-ren.com"
+        }
+      ],
+      "destination": "https://www.tsuki-to-ren.com/:path",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -24,7 +35,51 @@
       "destination": "https://tsuki-to-ren-dba8c.firebaseapp.com/__/auth/:path*"
     },
     {
-      "source": "/((?!api/|.*\\..*).*)",
+      "source": "/fortune",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/result",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/mypage",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/column",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/tokushoho",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/company",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/compatibility",
       "destination": "/index.html"
     }
   ]
