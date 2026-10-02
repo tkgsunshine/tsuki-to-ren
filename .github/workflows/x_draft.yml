@@ -1,0 +1,65 @@
+name: X Draft Generator (Hasu-to-Tsuki)
+
+# 毎晩21:07 JSTに、翌日のX投稿3本を生成する。
+#  - data/x/config.json の mode が "approval": 下書きをPRにする（PRをマージ＝承認）
+#  - mode が "auto": そのままmainへコミットする
+on:
+  schedule:
+    - cron: '7 12 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '対象日 YYYY-MM-DD（空なら明日JST）'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: x-queue
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci || npm install
+
+      - name: Generate drafts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+        run: node scripts/x/generate-drafts.mjs ${{ github.event.inputs.date }}
+
+      - name: Commit (auto) or open PR (approval)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/x
+          if git diff --staged --quiet; then
+            echo "No new drafts."
+            exit 0
+          fi
+          MODE=$(node -p "require('./data/x/config.json').mode")
+          DATE=$(git diff --staged -U0 data/x/queue.json | grep -oE '"date": "[0-9-]+"' | head -1 | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+          if [ "$MODE" = "auto" ]; then
+            git commit -m "feat(x): auto-schedule X posts for ${DATE}"
+            git pull --rebase origin main
+            git push origin main
+          else
+            BRANCH="x-drafts/${DATE}"
+            git checkout -b "$BRANCH"
+            git commit -m "feat(x): X post drafts for ${DATE}"
+            git push -u origin "$BRANCH"
+            gh pr create --base main --head "$BRANCH" \
+              --title "X投稿の下書き ${DATE}（マージで承認）" \
+              --body "data/x/queue.json の ${DATE} の3本を確認してください。直したい場合はPR上で本文を編集し、不要なら閉じてください。マージした時点で投稿予約になります（投稿は当日8:15 / 12:15 / 20:15 JST）。" \
+              || echo "PRの自動作成に失敗しました（Settings > Actions > General の 'Allow GitHub Actions to create and approve pull requests' を確認）。ブランチ ${BRANCH} は作成済みです。"
+          fi
