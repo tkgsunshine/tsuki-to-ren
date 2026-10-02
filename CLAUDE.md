@@ -11,4 +11,3 @@
 - 作業完了前に `npm run build` を通す（AGENTS.md §1-3は有効）。
 - マーケ業務（コラム補充・週次GSCレビュー・記事リライト）は `@marketing-employee`（`.claude/agents/marketing-employee.md`）。詳細は `docs/AI_EMPLOYEE_SETUP.md`。
 - **`.github/workflows/daily_column.yml` は本番の公開の仕組みなので、依頼なく変更しない。**
-- `scratch/` はAG時代の使い捨て置き場（`save_key.sh` 等）。新規の恒久スクリプトは `scripts/` へ。
