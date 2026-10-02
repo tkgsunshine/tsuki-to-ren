@@ -1,0 +1,52 @@
+<!doctype html><meta charset="utf-8">
+<style>
+@font-face{font-family:'SM';font-weight:700;src:url('fonts/sm700.woff2') format('woff2')}
+@font-face{font-family:'SM';font-weight:500;src:url('fonts/sm500.woff2') format('woff2')}
+html,body{margin:0;width:1500px;height:500px;overflow:hidden}
+.h{position:relative;width:1500px;height:500px;font-family:'SM','IPAPGothic',serif;color:#f4efe2;
+ background:radial-gradient(900px 420px at 78% 28%,rgba(168,85,247,.35),transparent 60%),
+            radial-gradient(700px 380px at 12% 90%,rgba(59,130,246,.28),transparent 60%),
+            linear-gradient(135deg,#0a0a14 0%,#14142b 55%,#1c1236 100%)}
+svg.bg{position:absolute;inset:0}
+.t{position:absolute;left:330px;top:150px;width:900px}
+.t1{font-weight:700;font-size:72px;letter-spacing:.04em;line-height:1.15;text-shadow:0 0 28px rgba(226,192,116,.35)}
+.t1 b{color:#e2c074;font-weight:700}
+.t2{margin-top:22px;font-weight:500;font-size:30px;letter-spacing:.06em;color:#d9d3f0}
+.badge{position:absolute;right:56px;top:46px;font-weight:500;font-size:24px;letter-spacing:.12em;color:#e2c074;
+ border:1.5px solid rgba(226,192,116,.6);border-radius:999px;padding:8px 24px;background:rgba(10,10,20,.45)}
+</style>
+<div class="h">
+<svg class="bg" width="1500" height="500" viewBox="0 0 1500 500">
+ <defs>
+  <radialGradient id="moon" cx="40%" cy="38%" r="70%"><stop offset="0" stop-color="#fff7de"/><stop offset="1" stop-color="#e2c074"/></radialGradient>
+  <linearGradient id="petal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3b6d8" stop-opacity=".95"/><stop offset="1" stop-color="#a855f7" stop-opacity=".55"/></linearGradient>
+ </defs>
+ <g fill="#fff" id="stars"></g>
+ <!-- moon -->
+ <g transform="translate(1330,215) scale(.8)">
+  <circle r="120" fill="rgba(226,192,116,.10)"/>
+  <circle r="78" fill="url(#moon)"/>
+  <circle cx="30" cy="-14" r="70" fill="#14142b"/>
+ </g>
+ <!-- lotus (bottom right, partially cropped) -->
+ <g transform="translate(1330,530) scale(.9)" opacity=".92">
+  <path d="M0 0 C-60 -60 -62 -150 0 -230 C62 -150 60 -60 0 0Z" fill="url(#petal)"/>
+  <path d="M0 0 C-110 -20 -170 -90 -150 -170 C-80 -150 -20 -90 0 0Z" fill="url(#petal)" opacity=".8"/>
+  <path d="M0 0 C110 -20 170 -90 150 -170 C80 -150 20 -90 0 0Z" fill="url(#petal)" opacity=".8"/>
+  <path d="M0 0 C-170 10 -240 -40 -250 -100 C-170 -100 -60 -60 0 0Z" fill="url(#petal)" opacity=".55"/>
+  <path d="M0 0 C170 10 240 -40 250 -100 C170 -100 60 -60 0 0Z" fill="url(#petal)" opacity=".55"/>
+ </g>
+ <path d="M0 470 Q375 430 750 470 T1500 470" stroke="rgba(226,192,116,.25)" fill="none" stroke-width="1.5"/>
+</svg>
+<div class="badge">月と蓮 運営</div>
+<div class="t">
+ <div class="t1">今日の空気を、<b>そっと。</b></div>
+ <div class="t2">四柱推命 × 16タイプ｜毎日の運勢と月のリズム</div>
+</div>
+</div>
+<script>
+// 星（座標固定の疑似乱数）
+let s=7,r=()=>(s=(s*16807)%2147483647)/2147483647,g=document.getElementById('stars'),o='';
+for(let i=0;i<70;i++){const x=r()*1500,y=r()*380,z=r()*1.6+.4;o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${z.toFixed(1)}" opacity="${(r()*.6+.2).toFixed(2)}"/>`}
+g.innerHTML=o;
+</script>
