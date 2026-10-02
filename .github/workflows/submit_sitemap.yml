@@ -1,0 +1,23 @@
+name: Submit Sitemap (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install google-auth google-api-python-client
+      - name: Submit sitemap
+        env:
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+          GSC_SITE_URL: ${{ vars.GSC_SITE_URL }}
+          SITEMAP_URL: https://www.tsuki-to-ren.com/sitemap.xml
+        run: |
+          printf '%s' "$GSC_CREDENTIALS" > gsc-credentials.json
+          python3 scripts/gsc_submit_sitemap.py
+          rm -f gsc-credentials.json
