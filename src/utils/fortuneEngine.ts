@@ -79,19 +79,20 @@ function getMBTICompatibilityScore(mbtiA: string, mbtiB: string): number {
 
 // 生年月日から日柱（十干・十二支）を算出する
 export function calculateDayPillar(birthDate: Date): { stem: string; branch: string } {
-  // 1970年1月1日 (癸巳 - index 29) を基準日とする
-  const baseDate = new Date(1970, 0, 1);
-  const diffTime = birthDate.getTime() - baseDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
-  let cycleIndex = (29 + diffDays) % 60;
+  // 1970年1月1日 (辛巳 - 60干支の index 17) を基準日とする
+  // （2000-01-01=戊午、2024-01-01=甲子 と一致）
+  // 端末のタイムゾーン・夏時間に左右されないよう、年月日だけをUTCに直して日数差を数える
+  const dayUtc = Date.UTC(birthDate.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+  const diffDays = Math.round((dayUtc - Date.UTC(1970, 0, 1)) / (1000 * 60 * 60 * 24));
+
+  let cycleIndex = (17 + diffDays) % 60;
   if (cycleIndex < 0) {
     cycleIndex += 60;
   }
-  
+
   const stem = stems[cycleIndex % 10];
   const branch = branches[cycleIndex % 12];
-  
+
   return { stem, branch };
 }
 
