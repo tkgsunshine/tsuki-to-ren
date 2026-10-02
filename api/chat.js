@@ -1,9 +1,56 @@
+const ALLOWED_HOSTS = ['tsuki-to-ren.com', 'www.tsuki-to-ren.com'];
+const MAX_MESSAGE = 500;
+const MAX_DIAGNOSED = 2000;
+const MAX_HISTORY = 10;
+const MAX_HISTORY_TEXT = 500;
+const RATE_LIMIT = 20; // requests per IP per minute (best effort, per serverless instance)
+const hits = new Map();
+
+function isAllowedOrigin(req) {
+  const src = req.headers.origin || req.headers.referer || '';
+  if (!src) return false;
+  try {
+    const host = new URL(src).hostname;
+    return ALLOWED_HOSTS.includes(host) || host.endsWith('.vercel.app') || host === 'localhost';
+  } catch (e) {
+    return false;
+  }
+}
+
+function rateLimited(req) {
+  const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim();
+  const now = Date.now();
+  const recent = (hits.get(ip) || []).filter(t => now - t < 60000);
+  recent.push(now);
+  hits.set(ip, recent);
+  if (hits.size > 5000) hits.clear();
+  return recent.length > RATE_LIMIT;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
+  if (!isAllowedOrigin(req)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  if (rateLimited(req)) {
+    return res.status(429).json({ error: 'Too Many Requests' });
+  }
 
-  const { message, character, diagnosedData, history } = req.body;
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  const message = typeof body.message === 'string' ? body.message.trim().slice(0, MAX_MESSAGE) : '';
+  if (!message) {
+    return res.status(400).json({ error: 'message is required' });
+  }
+  const character = body.character === 'ren' ? 'ren' : 'tsuki';
+  const diagnosedData = typeof body.diagnosedData === 'string' ? body.diagnosedData.slice(0, MAX_DIAGNOSED) : '';
+  const history = Array.isArray(body.history)
+    ? body.history.slice(-MAX_HISTORY).map(h => ({
+        role: h && h.role === 'user' ? 'user' : 'model',
+        text: typeof (h && h.text) === 'string' ? h.text.slice(0, MAX_HISTORY_TEXT) : ''
+      }))
+    : [];
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -60,6 +107,8 @@ ${personaDescription}
     });
 
     const modelCandidates = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
       'gemini-1.5-flash-002',
       'gemini-1.5-flash-001',
       'gemini-1.5-pro-002',
@@ -112,8 +161,7 @@ ${personaDescription}
     console.error('Gemini API Error:', err);
     return res.status(200).json({ 
       reply: getOfflineResponse(message, character, diagnosedData),
-      debug: `Error: ${err.message}`,
-      hasKey: !!apiKey
+      debug: 'Error'
     });
   }
 }
