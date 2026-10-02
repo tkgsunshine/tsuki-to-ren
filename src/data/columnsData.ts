@@ -15,6 +15,66 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1790952067848",
+    "slug": "isfj-estp-opposites-attract-balance",
+    "title": "【ISFJ × ESTP】「擁護者」と「起業家」は正反対だから惹かれる！安心感とワクワクを両立する秘訣",
+    "metaDescription": "16タイプ（MBTI）のISFJとESTPの相性を解説。思いやり深い擁護者と、行動的な起業家が惹かれ合う理由、価値観の違いから起きるすれ違い、うまく付き合うコツを紹介します。",
+    "keywords": [
+      "ISFJ ESTP 相性",
+      "擁護者 起業家 恋愛",
+      "MBTI ISFJ ESTP カップル",
+      "ESTP 好きなタイプ",
+      "ISFJ 付き合い方"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-10-02T14:41:07.847Z",
+    "readTimeMinutes": 7,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80&topic=isfj-estp-opposites-attract-balance",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. 安定を求めるISFJと、刺激を求めるESTP",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. お互いが与え合えるもの",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. すれ違いやすいポイント",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. こんな場面ではこう伝える！安心と自由を両立する声かけ",
+        "level": 1
+      },
+      {
+        "id": "section-5",
+        "title": "5. お互いの「当たり前」を、違いとして楽しむコツ",
+        "level": 1
+      },
+      {
+        "id": "section-6",
+        "title": "6. うまく付き合うための3つのコツ",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "ISFJとESTPは、長く続く組み合わせですか？",
+        "answer": "違いが大きい分、最初は戸惑うこともありますが、お互いを補い合える関係です。相手のペースを尊重できれば、安心感と刺激のバランスが取れた関係を築けます。"
+      },
+      {
+        "question": "ESTPの行動が自由すぎて不安になったときは？",
+        "answer": "不安な気持ちを責める形ではなく「こうしてくれると安心する」と具体的に伝えるのがおすすめです。ESTPは、頼まれると応えたいタイプなので、前向きな言い方が効果的です。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. 安定を求めるISFJと、刺激を求めるESTP</h2>\n<p>ISFJ（擁護者）は思いやりが深く、相手を支えることに喜びを感じるタイプ。ESTP（起業家）は行動力があり、今この瞬間を楽しむタイプです。</p>\n<p>性格は正反対ですが、だからこそ<strong>自分にないものを持つ相手に魅力を感じる</strong>組み合わせです。ISFJはESTPの明るさに元気をもらい、ESTPはISFJの優しさに安らぎを感じます。</p>\n\n<h2 id=\"section-2\">2. お互いが与え合えるもの</h2>\n<ul>\n  <li><strong>ISFJ→ESTP</strong>：気配りと安心感。疲れたときに帰れる「居場所」になる。</li>\n  <li><strong>ESTP→ISFJ</strong>：新しい体験や勢い。慎重になりすぎる気持ちを前に押してくれる。</li>\n</ul><p>ISFJが計画を立て、ESTPが当日の流れを盛り上げる、という役割分担もよく合います。</p>\n\n<h2 id=\"section-3\">3. すれ違いやすいポイント</h2>\n<h3>① 予定と約束の考え方</h3><p>ISFJは事前に計画を立てたい一方、ESTPは直前に動きたい派。ESTPは「ごめん、ちょっと遅れる」だけでもISFJにとっては大きな不安になります。<strong>連絡の一言</strong>を習慣にしましょう。</p><h3>② 気持ちの伝え方</h3><p>ISFJは我慢してしまいがちです。ESTPは「言ってくれたら直すよ」と伝えて、本音を話しやすい空気を作ってあげましょう。</p>\n\n<h2 id=\"section-4\">4. こんな場面ではこう伝える！安心と自由を両立する声かけ</h2>\n<h3>場面①：ESTPが急に予定を入れたいとき</h3><p>ESTPは<strong>「今日の夜、急だけど空いてたらどう？」</strong>と、断りやすい形で誘いましょう。ISFJは準備する時間が必要なので、前日までに伝えられると理想です。</p><h3>場面②：ISFJが不安を我慢しているとき</h3><p>ISFJは「迷惑かな」と思って言い出せないことがあります。ESTPは<strong>「何か気になってることある？聞かせて」</strong>と、話しやすい空気を作ってあげましょう。</p><h3>場面③：休日の過ごし方が違うとき</h3><p><strong>午前は外出、午後は家でのんびり</strong>のように、二人の好みを組み合わせると、どちらも満足しやすくなります。</p>\n\n<h2 id=\"section-5\">5. お互いの「当たり前」を、違いとして楽しむコツ</h2>\n<p>ISFJにとって、約束を守ることや丁寧な気配りは当たり前のこと。ESTPにとっては、その場の楽しさを大切にすることが当たり前です。どちらも<strong>相手を大切にしたい気持ちの表れ</strong>であることを忘れないようにしましょう。</p><ul>\n  <li>ISFJは、ESTPの自由さを「責任がない」とは受け取らない</li>\n  <li>ESTPは、ISFJの慎重さを「ノリが悪い」と決めつけない</li>\n  <li>二人の違いを話題にして、笑い合える関係を目指す</li>\n</ul>\n\n<h2 id=\"section-6\">6. うまく付き合うための3つのコツ</h2>\n<ul>\n  <li><strong>計画8割・自由2割</strong>：デートは大枠を決めつつ、自由な時間も残す。</li>\n  <li><strong>感謝を言葉にする</strong>：ISFJの気配りに、ESTPが具体的に「ありがとう」を伝える。</li>\n  <li><strong>違いを面白がる</strong>：相手の行動を直そうとせず、新鮮な視点として楽しむ。</li>\n</ul><p>あなたとお相手の相性は、生年月日を組み合わせるとさらに詳しく分かります。</p>\n<p>※占い・性格診断は、二人の関係を考えるきっかけとしてお楽しみください。結果を保証するものではありません。</p>"
+  },
+  {
     "id": "col-1790906951644",
     "slug": "entj-intp-power-couple-communication",
     "title": "【ENTJ × INTP】「指揮官」と「論理学者」の知的カップル！決断力と探究心を活かす恋愛術",
