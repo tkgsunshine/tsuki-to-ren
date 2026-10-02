@@ -1,10 +1,40 @@
+import Anthropic from '@anthropic-ai/sdk';
+
+// 使用モデルは環境変数 ANTHROPIC_MODEL で切り替え可能（未設定時は claude-opus-5-5）
+const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
+
+// Claude API は user/assistant が交互で、先頭が user である必要があるため整形する
+function buildMessages(history, message) {
+  const turns = [];
+  if (Array.isArray(history)) {
+    for (const item of history) {
+      if (item && typeof item.text === 'string' && item.text.trim()) {
+        turns.push({ role: item.role === 'user' ? 'user' : 'assistant', content: item.text });
+      }
+    }
+  }
+  turns.push({ role: 'user', content: String(message ?? '') });
+
+  const merged = [];
+  for (const t of turns) {
+    const last = merged[merged.length - 1];
+    if (last && last.role === t.role) {
+      last.content += `\n\n${t.content}`;
+    } else {
+      merged.push({ ...t });
+    }
+  }
+  while (merged.length && merged[0].role !== 'user') merged.shift();
+  return merged;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   const { message, character, diagnosedData, history } = req.body;
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
     return res.status(200).json({ 
@@ -28,88 +58,40 @@ ${personaDescription}
 1. 堅苦しいレポート、箇条書きの羅列、形式的な見出し（【〇〇】など）は一切禁止。自然な会話の段落で話すこと。
 2. 1回の返答は200〜350文字程度で、スマホのチャット画面で読みやすい分量にすること。
 3. ユーザーの質問を冒頭でオウム返ししない（「〜とのことですね」等は禁止）。相手の質問に直接、親身に答える。
-4. 相談者の鑑定データ（命式の日干、九星、MBTI）を会話の中に自然に織り交ぜ、「当たっている！」という納得感と安心感を与える。`;
+4. 相談者の鑑定データ（命式の日干、九星、MBTI）を会話の中に自然に織り交ぜ、「当たっている！」という納得感と安心感を与える。
 
-    // Construct full contents array for Gemini API with conversation history
-    const contents = [
-      {
-        role: 'user',
-        parts: [{ text: `${systemInstruction}\n\n【相談者の鑑定データ】\n${diagnosedData || '特になし'}` }]
-      },
-      {
-        role: 'model',
-        parts: [{ text: character === 'ren' ? 'こんにちは。どのようなことでも気軽にお話ししてくださいね。' : 'こんにちは。あなたの心に優しく寄り添いますね。なんでもお話ししてください。' }]
-      }
-    ];
+【相談者の鑑定データ】
+${diagnosedData || '特になし'}`;
 
-    if (Array.isArray(history)) {
-      for (const item of history) {
-        if (item.text && item.text.trim()) {
-          contents.push({
-            role: item.role === 'user' ? 'user' : 'model',
-            parts: [{ text: item.text }]
-          });
-        }
-      }
-    }
-
-    // Add current message
-    contents.push({
-      role: 'user',
-      parts: [{ text: message }]
+    const client = new Anthropic({ apiKey });
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 4000,
+      system: systemInstruction,
+      output_config: { effort: 'low' },
+      messages: buildMessages(history, message),
     });
 
-    const modelCandidates = [
-      'gemini-1.5-flash-002',
-      'gemini-1.5-flash-001',
-      'gemini-1.5-pro-002',
-      'gemini-1.5-flash-8b',
-      'gemini-2.0-flash-exp',
-      'gemini-1.5-flash'
-    ];
-    let reply = null;
-    let usedModel = '';
-    let lastErr = null;
-
-    for (const modelName of modelCandidates) {
-      try {
-        const apiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            contents,
-            generationConfig: {
-              maxOutputTokens: 1000,
-              temperature: 0.7
-            }
-          })
-        });
-
-        const data = await apiRes.json();
-        if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-          reply = data.candidates[0].content.parts[0].text.trim();
-          usedModel = modelName;
-          break;
-        } else if (data.error) {
-          lastErr = `${modelName}: ${data.error.message || JSON.stringify(data.error)}`;
-        }
-      } catch (e) {
-        lastErr = `${modelName}: ${e.message}`;
-      }
+    if (response.stop_reason === 'refusal') {
+      throw new Error('Claude declined the request (refusal)');
     }
-    
-    if (reply) {
-      return res.status(200).json({ 
-        reply: reply,
-        debug: `Success calling ${usedModel}`
-      });
-    } else {
-      throw new Error(lastErr || 'All Gemini models failed');
+
+    const reply = response.content
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('')
+      .trim();
+
+    if (!reply) {
+      throw new Error('Empty response from Claude');
     }
+
+    return res.status(200).json({
+      reply,
+      debug: `Success calling ${response.model}`
+    });
   } catch (err) {
-    console.error('Gemini API Error:', err);
+    console.error('Claude API Error:', err);
     return res.status(200).json({ 
       reply: getOfflineResponse(message, character, diagnosedData),
       debug: `Error: ${err.message}`,

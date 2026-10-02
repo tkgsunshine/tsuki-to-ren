@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@vercel/og": "^1.0.0",
     "firebase": "^12.18.0",
     "html2canvas": "^1.4.1",
