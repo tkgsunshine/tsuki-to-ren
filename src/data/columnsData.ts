@@ -15,6 +15,66 @@ export interface ColumnArticle {
 
 export const COLUMNS_DATA: ColumnArticle[] = [
   {
+    "id": "col-1790992361727",
+    "slug": "istj-esfp-stability-and-spark",
+    "title": "【ISTJ × ESFP】「管理者」と「エンターテイナー」の凸凹ペア！真面目さと楽しさがかみ合う関係とは",
+    "metaDescription": "16タイプ（MBTI）のISTJとESFPの相性を解説。堅実な管理者と、場を楽しませるエンターテイナーが補い合う理由、お金や時間の感覚の違い、仲良く続けるコツをまとめました。",
+    "keywords": [
+      "ISTJ ESFP 相性",
+      "管理者 エンターテイナー 恋愛",
+      "MBTI ISTJ ESFP カップル",
+      "ESFP 好きなタイプ",
+      "ISTJ 付き合い方"
+    ],
+    "category": "16タイプ・MBTI相性",
+    "publishedAt": "2026-10-03T01:52:41.725Z",
+    "readTimeMinutes": 7,
+    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=istj-esfp-stability-and-spark",
+    "toc": [
+      {
+        "id": "section-1",
+        "title": "1. 真面目なISTJが、自由なESFPに惹かれる理由",
+        "level": 1
+      },
+      {
+        "id": "section-2",
+        "title": "2. 生活の中で活きる役割分担",
+        "level": 1
+      },
+      {
+        "id": "section-3",
+        "title": "3. お金と時間の感覚の違いにご用心",
+        "level": 1
+      },
+      {
+        "id": "section-4",
+        "title": "4. こんな場面ではこう話す！ケンカを防ぐ具体例",
+        "level": 1
+      },
+      {
+        "id": "section-5",
+        "title": "5. 二人の「得意」を活かして暮らしをもっと豊かに",
+        "level": 1
+      },
+      {
+        "id": "section-6",
+        "title": "6. 仲良く続けるための3つのコツ",
+        "level": 1
+      }
+    ],
+    "faqs": [
+      {
+        "question": "ISTJとESFPは、価値観の違いで別れやすいですか？",
+        "answer": "違いは大きいですが、お互いの強みを尊重できれば補い合える関係になります。お金や時間のルールを早めに話し合うと、すれ違いを防げます。"
+      },
+      {
+        "question": "ESFPに真面目に話を聞いてほしいときは？",
+        "answer": "「大事な話があるから、5分だけ時間をもらえる？」と前置きしてから話すと、ESFPも受け止めやすくなります。"
+      }
+    ],
+    "content": "<h2 id=\"section-1\">1. 真面目なISTJが、自由なESFPに惹かれる理由</h2>\n<p>ISTJ（管理者）は責任感が強く、約束や計画を大切にするタイプ。ESFP（エンターテイナー）は人を楽しませるのが得意で、気持ちに素直なタイプです。</p>\n<p>ISTJは「自分にはない明るさ」に惹かれ、ESFPは「頼れる安定感」に惹かれます。<strong>足りない部分を補い合える</strong>ので、うまくかみ合うと互いを大きく成長させます。</p>\n\n<h2 id=\"section-2\">2. 生活の中で活きる役割分担</h2>\n<ul>\n  <li><strong>ISTJが得意</strong>：家計や予定の管理、手続き、約束を守ること。</li>\n  <li><strong>ESFPが得意</strong>：デートの盛り上げ、雰囲気づくり、周りとの人間関係。</li>\n</ul><p>二人で暮らすなら、お金や予定の管理はISTJ、楽しい企画はESFPと分けると、お互いの負担が少なくなります。</p>\n\n<h2 id=\"section-3\">3. お金と時間の感覚の違いにご用心</h2>\n<h3>① お金の使い方</h3><p>ISTJは貯蓄や計画を重視し、ESFPは「今を楽しむこと」にお金を使いがちです。<strong>毎月の「自由に使える金額」</strong>をお互いに決めておくと、ケンカになりにくくなります。</p><h3>② 時間の使い方</h3><p>ISTJは時間に正確で、ESFPはマイペース。待ち合わせは「ちょうど」ではなく、少し余裕を持った時間設定にすると穏やかに過ごせます。</p>\n\n<h2 id=\"section-4\">4. こんな場面ではこう話す！ケンカを防ぐ具体例</h2>\n<h3>場面①：ISTJが予定通りに進めたいとき</h3><p>ISTJは「決まりだから」と言うより、<strong>「こうすると私は安心できる」</strong>と気持ちを添えると、ESFPも協力しやすくなります。</p><h3>場面②：ESFPがその場のノリで決めたいとき</h3><p>ESFPは<strong>「これ、やってみたいんだけど、いいかな？」</strong>と先に一言伝えましょう。ISTJは事前に聞かれると、前向きに検討しやすくなります。</p><h3>場面③：お金の使い方で意見が分かれたとき</h3><p>「いくらまでなら自由に使える」という<strong>上限を二人で決める</strong>と、お互いに気持ちよく過ごせます。</p>\n\n<h2 id=\"section-5\">5. 二人の「得意」を活かして暮らしをもっと豊かに</h2>\n<ul>\n  <li><strong>ISTJ</strong>：家計の管理や旅行の手配など、土台を整える役割が得意。</li>\n  <li><strong>ESFP</strong>：記念日の演出や、友人との交流など、楽しさを広げる役割が得意。</li>\n</ul><p>「ISTJが整え、ESFPが彩る」という関係が築けると、安定感と楽しさの両方がある暮らしになります。お互いに「ありがとう」を伝え合うことが、長く続く秘訣です。</p>\n\n<h2 id=\"section-6\">6. 仲良く続けるための3つのコツ</h2>\n<ul>\n  <li><strong>褒めるときは具体的に</strong>：ESFPは言葉で認められると力を発揮する。</li>\n  <li><strong>ルールは最小限に</strong>：ISTJは細かい決まりを押し付けすぎない。</li>\n  <li><strong>二人の「定番デート」を作る</strong>：安心感と楽しさを両立できる。</li>\n</ul><p>二人の相性を、生年月日と16タイプの組み合わせで無料診断してみましょう。</p>\n<p>※占い・性格診断は、二人の関係を考えるきっかけとしてお楽しみください。結果を保証するものではありません。</p>"
+  },
+  {
     "id": "col-1790952067848",
     "slug": "isfj-estp-opposites-attract-balance",
     "title": "【ISFJ × ESTP】「擁護者」と「起業家」は正反対だから惹かれる！安心感とワクワクを両立する秘訣",
