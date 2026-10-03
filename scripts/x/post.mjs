@@ -36,6 +36,27 @@ if (!hasCreds && !process.argv.includes('--dry-run')) {
 
 const forceId = (process.argv.find((a) => a.startsWith('--id=')) || '').slice(5) || process.env.X_FORCE_ID || '';
 
+// 401（認証エラー）の切り分け用。値そのものは出さず、長さと形式だけを表示する
+function describeCreds() {
+  const info = (name, v, hint) => {
+    const t = v || '';
+    const flags = [];
+    if (!t) flags.push('未設定');
+    if (t !== t.trim()) flags.push('前後に空白/改行あり');
+    if (/\s/.test(t.trim())) flags.push('途中に空白あり');
+    if (hint && t && !hint(t)) flags.push('形式が想定と違う');
+    return `${name}: 長さ${t.length}${flags.length ? ' ⚠ ' + flags.join('、') : ''}`;
+  };
+  return [
+    '--- 認証情報の形式チェック（値は表示しません）',
+    info('X_API_KEY', creds.apiKey),
+    info('X_API_SECRET', creds.apiSecret),
+    info('X_ACCESS_TOKEN', creds.accessToken, (t) => /^\d+-/.test(t)),
+    info('X_ACCESS_TOKEN_SECRET', creds.accessTokenSecret),
+    '（目安: API Key=約25, API Secret=約50, Access Token=約50で「数字-」で始まる, Access Token Secret=約45）',
+  ].join('\n');
+}
+
 let changed = false;
 
 // 1) 期限切れ（日付が過去、または枠から expireAfterMinutes 超過）を expired にする
@@ -106,6 +127,7 @@ async function main() {
   }
   // 重複投稿(403)などは再試行しても通らないので failed にする。それ以外は次回再試行
   post.lastError = `${res.status} ${body.slice(0, 300)}`;
+  if (res.status === 401) console.error(describeCreds());
   changed = true;
   if (res.status === 403) post.status = 'failed';
   console.error(`投稿に失敗: ${post.id} ${post.lastError}`);
