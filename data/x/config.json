@@ -1,0 +1,9 @@
+{
+  "mode": "approval",
+  "_modeNote": "approval=承認済み(PRマージ済み)の投稿のみ投稿 / auto=下書き生成後そのまま投稿。切り替えはこの値だけ",
+  "dailySlots": ["morning", "noon", "night"],
+  "slots": { "morning": "08:15", "noon": "12:15", "night": "20:15" },
+  "minIntervalMinutes": 120,
+  "expireAfterMinutes": 240,
+  "promoEveryNthDay": 2
+}
