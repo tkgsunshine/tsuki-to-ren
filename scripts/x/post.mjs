@@ -1,5 +1,6 @@
 // 投稿時刻を過ぎた "scheduled" の投稿を1件だけ X に投稿する（cronで複数回起動してもOK）。
-// 使い方: node scripts/x/post.mjs [--dry-run]
+// 使い方: node scripts/x/post.mjs [--dry-run] [--id=<投稿ID>]
+//   --id（または環境変数 X_FORCE_ID）を付けると、日付・枠の時刻・期限切れを無視して、その1件だけを投稿する（動作確認・臨時投稿用。lintと最小間隔は有効）
 // 必要な環境変数: X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_TOKEN_SECRET（無いと dry-run 扱い）
 import { jstDateString } from './lib/signals.mjs';
 import { lintPost, promoRatioOk } from './lib/lint.mjs';
@@ -33,11 +34,13 @@ if (!hasCreds && !process.argv.includes('--dry-run')) {
   console.warn('X の認証情報が未設定のため dry-run で動作します。');
 }
 
+const forceId = (process.argv.find((a) => a.startsWith('--id=')) || '').slice(5) || process.env.X_FORCE_ID || '';
+
 let changed = false;
 
 // 1) 期限切れ（日付が過去、または枠から expireAfterMinutes 超過）を expired にする
 for (const p of queue) {
-  if (p.status !== 'scheduled') continue;
+  if (forceId || p.status !== 'scheduled') continue;
   const late = p.date < today || (p.date === today && jstMinutes - slotMinutes(p.slot) > config.expireAfterMinutes);
   if (late) {
     p.status = 'expired';
@@ -52,7 +55,11 @@ const last = history[history.length - 1];
 const minutesSinceLast = last ? (now.getTime() - new Date(last.postedAt).getTime()) / 60000 : Infinity;
 
 const due = queue
-  .filter((p) => p.status === 'scheduled' && p.date === today && slotMinutes(p.slot) <= jstMinutes)
+  .filter((p) =>
+    forceId
+      ? p.id === forceId && p.status === 'scheduled'
+      : p.status === 'scheduled' && p.date === today && slotMinutes(p.slot) <= jstMinutes,
+  )
   .sort((a, b) => slotMinutes(a.slot) - slotMinutes(b.slot));
 
 async function main() {
