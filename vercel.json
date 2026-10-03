@@ -81,6 +81,21 @@
     {
       "source": "/compatibility",
       "destination": "/index.html"
+    },
+    {
+      "source": "/compatibility/:pair([a-zA-Z]{4}-[a-zA-Z]{4})",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/compatibility/:pair([a-zA-Z]{4}-[a-zA-Z]{4})",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
     }
   ]
 }
