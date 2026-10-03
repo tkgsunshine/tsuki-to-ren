@@ -7,13 +7,6 @@ const __dirname = path.dirname(__filename);
 
 const BASE_URL = 'https://www.tsuki-to-ren.com';
 
-const MBTI_CODES = [
-  'infj', 'infp', 'enfj', 'enfp',
-  'intj', 'intp', 'entj', 'entp',
-  'isfj', 'isfp', 'esfj', 'esfp',
-  'istj', 'istp', 'estj', 'estp'
-];
-
 function generateSitemap() {
   const today = new Date().toISOString().split('T')[0];
   const columnsFilePath = path.resolve(__dirname, '../src/data/columnsData.ts');
@@ -72,17 +65,8 @@ function generateSitemap() {
   xml += `    <priority>0.8</priority>\n`;
   xml += `  </url>\n`;
 
-  // 5. MBTI 256 Combination Pages
-  MBTI_CODES.forEach(t1 => {
-    MBTI_CODES.forEach(t2 => {
-      xml += `  <url>\n`;
-      xml += `    <loc>${BASE_URL}/compatibility/${t1}-${t2}</loc>\n`;
-      xml += `    <lastmod>${today}</lastmod>\n`;
-      xml += `    <changefreq>weekly</changefreq>\n`;
-      xml += `    <priority>0.7</priority>\n`;
-      xml += `  </url>\n`;
-    });
-  });
+  // 5. MBTI 256 combination pages are intentionally excluded: they are thin templated pages
+  //    (A x B and B x A are near-identical) and are served with noindex by prerender-seo-pages.js.
 
   // 6. App Tabs & Institutional Pages
   const appPages = [
@@ -108,7 +92,7 @@ function generateSitemap() {
 
   const outputPath = path.resolve(__dirname, '../public/sitemap.xml');
   fs.writeFileSync(outputPath, xml, 'utf-8');
-  const totalUrls = 1 + 1 + slugs.length + 1 + (16 * 16) + appPages.length;
+  const totalUrls = 1 + 1 + slugs.length + 1 + appPages.length;
   console.log(`✅ sitemap.xml successfully generated with ${totalUrls} URLs at ${outputPath}`);
 }
 

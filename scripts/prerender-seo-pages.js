@@ -20,7 +20,7 @@ function escapeAttr(str) {
   return str ? str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
 }
 
-function writePage(subDir, title, description, keywords, canonicalUrl, noscriptContent, customSchemas = []) {
+function writePage(subDir, title, description, keywords, canonicalUrl, noscriptContent, customSchemas = [], options = {}) {
   const targetDir = path.join(distDir, subDir);
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
@@ -51,6 +51,10 @@ function writePage(subDir, title, description, keywords, canonicalUrl, noscriptC
       .map(s => `<script type="application/ld+json">\n${JSON.stringify(s, null, 2)}\n</script>`)
       .join('\n');
     pageHtml = pageHtml.replace('</head>', `${schemaTags}\n</head>`);
+  }
+
+  if (options.noindex) {
+    pageHtml = pageHtml.replace('</head>', '<meta name="robots" content="noindex, follow" />\n</head>');
   }
 
   pageHtml = pageHtml.replace('<div id="root"></div>', `<div id="root">${noscriptContent}</div>`);
@@ -588,7 +592,8 @@ for (const t1 of MBTI_TYPES) {
       pairKeywords,
       pairCanonical,
       noscriptContent,
-      [breadcrumbs, faqSchema]
+      [breadcrumbs, faqSchema],
+      { noindex: true }
     );
 
     mbtiCount++;
