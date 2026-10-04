@@ -16,7 +16,8 @@
     "kind": "value",
     "text": "おはよう。今日は「見極め」の空気が流れる日。空には下弦の月が浮かぶ、少しずつ欠けていく時期だから、恋のモヤモヤもひとつ手放しやすいかも。返事を待ちすぎていた気持ちに、そっと区切りをつけてみて。伝えるときは、やわらかい言葉を選んでね。\n#恋愛占い\n—月",
     "status": "scheduled",
-    "createdAt": "2026-10-03T06:58:43.414Z"
+    "createdAt": "2026-10-03T06:58:43.414Z",
+    "lastError": "401 {\n  \"title\": \"Unauthorized\",\n  \"type\": \"about:blank\",\n  \"status\": 401,\n  \"detail\": \"Unauthorized\"\n}"
   },
   {
     "id": "2026-10-04-noon",
