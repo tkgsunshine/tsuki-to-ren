@@ -1,6 +1,6 @@
 // 投稿時刻を過ぎた "scheduled" の投稿を1件だけ X に投稿する（cronで複数回起動してもOK）。
 // 使い方: node scripts/x/post.mjs [--dry-run] [--id=<投稿ID>]
-//   --id（または環境変数 X_FORCE_ID）を付けると、日付・枠の時刻・期限切れを無視して、その1件だけを投稿する（動作確認・臨時投稿・失敗/期限切れの再投稿用。lintと最小間隔は有効）
+//   --id（または環境変数 X_FORCE_ID）を付けると、日付・枠の時刻・期限切れを無視して、その1件だけを投稿する（動作確認・臨時投稿・失敗/期限切れの再投稿用。lintは有効。人間が明示した操作なので最小間隔は無視する）
 // 必要な環境変数: X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_TOKEN_SECRET（無いと dry-run 扱い）
 import { jstDateString } from './lib/signals.mjs';
 import { lintPost, promoRatioOk } from './lib/lint.mjs';
@@ -88,7 +88,7 @@ async function main() {
     console.log('今投稿するものはありません。');
     return;
   }
-  if (minutesSinceLast < config.minIntervalMinutes) {
+  if (!forceId && minutesSinceLast < config.minIntervalMinutes) {
     console.log(`直近の投稿から${Math.floor(minutesSinceLast)}分。最小間隔${config.minIntervalMinutes}分のため見送ります。`);
     return;
   }
