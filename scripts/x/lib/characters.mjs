@@ -1,6 +1,8 @@
 // 守護獣（日柱60パターン）ごとの「今日の恋愛運」を、アプリの鑑定ロジック（fortuneEngine.ts）で算出する。
 // ts を直接読むため、実行は node --experimental-strip-types で行う。
 import { generateFortuneResult, calculateDayPillar, calculateHonmeiStar } from '../../../src/utils/fortuneEngine.ts';
+import { dayPillar } from './signals.mjs';
+import { lintPost } from './lint.mjs';
 
 // 十干の読み（名前のふりがな用）と、動物の読み
 export const STEM_YOMI = {
@@ -92,8 +94,19 @@ export function computeAll(dateStr) {
         oneLine, hours, imageF, imageM: imageF.replace(/\.jpg$/, '_male.jpg'),
       });
     }
-    return out;
+    // 60干支の順（甲子=0, 乙丑=1, …）に並べる
+    return out.sort((a, b) => cycleIndex(a) - cycleIndex(b));
   });
+}
+
+const STEMS = '甲乙丙丁戊己庚辛壬癸';
+const BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
+/** 60干支の番号（甲子=0）。i%10=十干、i%12=十二支 になる i */
+export function cycleIndex(c) {
+  const si = STEMS.indexOf(c.stem);
+  const bi = BRANCHES.indexOf(c.branch);
+  for (let i = 0; i < 60; i++) if (i % 10 === si && i % 12 === bi) return i;
+  throw new Error(`不正な干支: ${c.key}`);
 }
 
 /** 日柱の並び（甲子=0）で、dateStr の日柱に対応する守護獣を返す */
@@ -108,4 +121,61 @@ export function pickStar(c, dateStr) {
   let h = 0;
   for (const ch of `${dateStr}:${c.key}`) h = (h * 31 + ch.codePointAt(0)) >>> 0;
   return c.stars[h % c.stars.length];
+}
+
+/** その日に取り上げる守護獣を n 個（既定4）。日ごとに n ずつ進むので、60÷n 日で全60タイプが一巡する */
+export function pickMany(all, dateStr, n = 4) {
+  const base = dayPillar(dateStr).index * n;
+  return Array.from({ length: n }, (_, k) => all[(base + k) % all.length]);
+}
+
+// おすすめ時間の窓（例 "18:00〜20:00"）が、投稿時刻（"HH:MM"）より前に終わっているときは、行ごと省く
+function hoursLine(hours, postTime) {
+  if (!hours) return '';
+  const m = hours.match(/(\d{1,2}):(\d{2})〜(\d{1,2}):(\d{2})/);
+  if (m && postTime) {
+    const end = Number(m[3]) * 60 + Number(m[4]);
+    const [ph, pm] = postTime.split(':').map(Number);
+    if (end <= ph * 60 + pm) return '';
+  }
+  return `LINEのおすすめ時間：${hours}`;
+}
+
+/** 投稿文を組み立てる。sign は「-月-」「-蓮-」。postTime（"HH:MM"）を渡すと、すでに過ぎた時間帯のおすすめは省く */
+export function buildPostText(c, dateStr, sign, postTime = '') {
+  const st = pickStar(c, dateStr); // 本命星を投稿ごとに1つ選び、その星の人に実際に出る点数を出す
+  const [, mm, dd] = dateStr.split('-').map(Number);
+  const lines = [
+    `【今日（${mm}月${dd}日）の${c.name}（${c.stemYomi}・${c.animalYomi}）タイプの恋愛運】`,
+    `＝${c.theme}×${c.animalYomi}の守護獣`,
+    `今日の点数：${st.score}点（本命星が${st.name}の場合）`,
+    st.oneLine,
+    hoursLine(st.hours, postTime),
+    '',
+    '守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開',
+    sign,
+  ];
+  return { text: lines.filter((l, i) => l !== '' || (lines[i - 1] !== '' && i !== 0)).join('\n'), star: st };
+}
+
+/** 朝2・夜2の守護獣の投稿（queue 用の項目）を作る。署名は「-月-」「-蓮-」を交互に。lint 不合格なら例外 */
+export function buildBeastItems(all, dateStr, history = [], opts = {}) {
+  const slots = [{ slot: 'morning' }, { slot: 'morning', time: '08:45' }, { slot: 'night' }, { slot: 'night', time: '20:45' }];
+  return pickMany(all, dateStr, 4).map((c, k) => {
+    const postTime = slots[k].time || (slots[k].slot === 'morning' ? '08:15' : '20:15');
+    const { text } = buildPostText(c, dateStr, k % 2 === 0 ? '-月-' : '-蓮-', postTime);
+    const item = {
+      id: `${dateStr}-chara-${k + 1}`,
+      date: dateStr,
+      ...slots[k],
+      kind: 'value',
+      text,
+      image: c.imageF, // 女性版の1枚
+      status: 'scheduled',
+      createdAt: new Date().toISOString(),
+    };
+    const problems = lintPost(item, history, opts);
+    if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
+    return item;
+  });
 }

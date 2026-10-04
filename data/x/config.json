@@ -11,9 +11,10 @@
     "noon": "12:15",
     "night": "20:15"
   },
-  "minIntervalMinutes": 120,
+  "minIntervalMinutes": 20,
   "expireAfterMinutes": 240,
   "promoEveryNthDay": 2,
   "allowLinks": false,
-  "_allowLinksNote": "false=サイト公開前。投稿にURL・リンク誘導・「無料」を入れず、promo枠は「近日公開」の予告にする。公開後に true にする"
+  "_allowLinksNote": "false=サイト公開前。投稿にURL・リンク誘導・「無料」を入れず、promo枠は「近日公開」の予告にする。公開後に true にする",
+  "_minIntervalNote": "同じ枠で2本（例: 08:15 と 08:45）出すため20分。通常の定期実行にだけ適用（臨時投稿は無視）"
 }
