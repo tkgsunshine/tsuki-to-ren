@@ -2,12 +2,18 @@
 // 使い方: node scripts/x/post.mjs [--dry-run] [--id=<投稿ID>]
 //   --id（または環境変数 X_FORCE_ID）を付けると、日付・枠の時刻・期限切れを無視して、その1件だけを投稿する（動作確認・臨時投稿・失敗/期限切れの再投稿用。lintは有効。人間が明示した操作なので最小間隔は無視する）
 // 必要な環境変数: X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_TOKEN_SECRET（無いと dry-run 扱い）
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { jstDateString } from './lib/signals.mjs';
 import { lintPost, promoRatioOk } from './lib/lint.mjs';
 import { readQueue, writeQueue, readConfig, postedHistory } from './lib/queue.mjs';
 import { signOAuth1, authHeader } from './lib/oauth1.mjs';
 
 const TWEET_URL = process.env.X_TWEET_URL || 'https://api.x.com/2/tweets'; // X_TWEET_URL はテスト用
+const MEDIA_V2_URL = process.env.X_MEDIA_V2_URL || 'https://api.x.com/2/media/upload'; // テスト用に上書き可
+const MEDIA_V1_URL = process.env.X_MEDIA_V1_URL || 'https://upload.twitter.com/1.1/media/upload.json';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const config = readConfig();
 const queue = readQueue();
@@ -83,6 +89,34 @@ const due = queue
   )
   .sort((a, b) => slotMinutes(a.slot) - slotMinutes(b.slot));
 
+
+// 画像（キューの image: リポジトリ内の相対パス）をアップロードして media_id を返す。v2 → 失敗したら v1.1
+async function uploadMedia(imagePath) {
+  const abs = path.resolve(ROOT, imagePath);
+  if (!abs.startsWith(ROOT + path.sep) || !fs.existsSync(abs)) throw new Error(`画像が見つかりません: ${imagePath}`);
+  const bytes = fs.readFileSync(abs);
+  const type = /\.png$/i.test(abs) ? 'image/png' : /\.webp$/i.test(abs) ? 'image/webp' : 'image/jpeg';
+  const attempts = [
+    { url: MEDIA_V2_URL, field: (fd) => { fd.append('media_category', 'tweet_image'); fd.append('media_type', type); }, id: (j) => j?.data?.id },
+    { url: MEDIA_V1_URL, field: () => {}, id: (j) => j?.media_id_string },
+  ];
+  const errors = [];
+  for (const a of attempts) {
+    const fd = new FormData();
+    fd.append('media', new Blob([bytes], { type }), path.basename(abs));
+    a.field(fd);
+    const oauth = signOAuth1({ method: 'POST', url: a.url, creds }); // multipart本文は署名に含めない
+    const res = await fetch(a.url, { method: 'POST', headers: { Authorization: authHeader(oauth) }, body: fd });
+    const body = await res.text();
+    if (res.ok) {
+      const id = a.id(JSON.parse(body));
+      if (id) return String(id);
+    }
+    errors.push(`${a.url} → ${res.status} ${body.slice(0, 200)}`);
+  }
+  throw new Error('画像のアップロードに失敗\n' + errors.join('\n'));
+}
+
 async function main() {
   if (!due.length) {
     console.log('今投稿するものはありません。');
@@ -105,15 +139,27 @@ async function main() {
   }
 
   if (dryRun) {
-    console.log(`[dry-run] 投稿予定 ${post.id} (${post.kind})\n${post.text}`);
+    console.log(`[dry-run] 投稿予定 ${post.id} (${post.kind})${post.image ? ' 画像: ' + post.image : ''}\n${post.text}`);
     return;
   }
 
+  const payload = { text: post.text };
+  if (post.image) {
+    try {
+      payload.media = { media_ids: [await uploadMedia(post.image)] };
+    } catch (e) {
+      post.lastError = String(e.message).slice(0, 600);
+      changed = true;
+      console.error(`画像のアップロードに失敗: ${post.id}\n${e.message}`);
+      process.exitCode = 1;
+      return;
+    }
+  }
   const oauth = signOAuth1({ method: 'POST', url: TWEET_URL, creds });
   const res = await fetch(TWEET_URL, {
     method: 'POST',
     headers: { Authorization: authHeader(oauth), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: post.text }),
+    body: JSON.stringify(payload),
   });
   const body = await res.text();
   if (res.status === 201) {
