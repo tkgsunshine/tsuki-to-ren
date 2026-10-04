@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-06",
+  "internal": {
+    "stem": "癸",
+    "branch": "丑",
+    "element": "水"
+  },
+  "todayMood": {
+    "name": "ゆらぎ",
+    "hint": "感じる・休む・人の話を聴く",
+    "caution": "考えすぎて動けなくならない"
+  },
+  "moon": {
+    "age": 24.3,
+    "name": "細くなる月"
+  },
+  "featuredTypes": [
+    {
+      "code": "INFJ",
+      "nick": "提唱者",
+      "trait": "人の気持ちを深く汲み取る・理想を静かに抱く"
+    },
+    {
+      "code": "INFP",
+      "nick": "仲介者",
+      "trait": "自分の感性を大切にする・やさしい理想家"
+    },
+    {
+      "code": "ENFJ",
+      "nick": "主人公",
+      "trait": "人を巻き込み励ます・面倒見がいい"
+    },
+    {
+      "code": "ENFP",
+      "nick": "運動家",
+      "trait": "好奇心旺盛・ひらめきで動く"
+    }
+  ]
+}
