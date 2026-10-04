@@ -146,9 +146,9 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   const st = pickStar(c, dateStr); // 本命星を投稿ごとに1つ選び、その星の人に実際に出る点数を出す
   const [, mm, dd] = dateStr.split('-').map(Number);
   const lines = [
-    `【今日（${mm}月${dd}日）の${c.name}（${c.stemYomi}・${c.animalYomi}）タイプの恋愛運】`,
+    `【今日（${mm}月${dd}日）の${c.name}（${c.stemYomi}・${c.animalYomi}）× ${st.name}の恋愛運】`,
     `＝${c.theme}×${c.animalYomi}の守護獣`,
-    `今日の点数：${st.score}点（本命星が${st.name}の場合）`,
+    `今日の点数：${st.score}点`,
     st.oneLine,
     hoursLine(st.hours, postTime),
     '',
