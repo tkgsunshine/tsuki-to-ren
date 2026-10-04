@@ -170,5 +170,56 @@
     "image": "public/assets/astrology_sample.jpg",
     "status": "scheduled",
     "createdAt": "2026-10-04T17:26:04.827Z"
+  },
+  {
+    "id": "2026-10-06-noon",
+    "date": "2026-10-06",
+    "slot": "noon",
+    "kind": "value",
+    "text": "気持ちがゆらいで決めきれない人へ🌙\n16タイプ（MBTI）別ひとこと\nINFJ：相手を読みすぎず、自分の心にも耳をすませて\nINFP：言えない想いは、メモに書くと少し軽くなるよ\nENFJ：今日は励ますより、そっと聴く側に\nENFP：ひらめきの連絡は、ひと晩置いても大丈夫\n#恋愛占い\n-月-",
+    "status": "scheduled",
+    "createdAt": "2026-10-04T16:48:08.711Z"
+  },
+  {
+    "id": "2026-10-06-chara-1",
+    "date": "2026-10-06",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日（10月6日）の庚龍（かのえ・たつ）× 二黒土星の恋愛運】\n＝鋼鉄の戦神×たつの守護獣\n今日の点数：99点\n魅力と自信が溢れ、幸運が味方する最高日\nLINEのおすすめ時間：20:00〜22:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-月-",
+    "image": "public/assets/astrology_dragon_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-04T17:26:46.697Z"
+  },
+  {
+    "id": "2026-10-06-chara-2",
+    "date": "2026-10-06",
+    "slot": "morning",
+    "time": "08:45",
+    "kind": "value",
+    "text": "【今日（10月6日）の辛蛇（かのと・へび）× 九紫火星の恋愛運】\n＝宝石貴族×へびの守護獣\n今日の点数：81点\n新しい挑戦や積極的発信で評価が高まる日\nLINEのおすすめ時間：18:00〜20:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-蓮-",
+    "image": "public/assets/astrology_snake_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-04T17:26:46.698Z"
+  },
+  {
+    "id": "2026-10-06-chara-3",
+    "date": "2026-10-06",
+    "slot": "night",
+    "kind": "value",
+    "text": "【今日（10月6日）の壬馬（みずのえ・うま）× 七赤金星の恋愛運】\n＝海王、嵐使い×うまの守護獣\n今日の点数：94点\n魅力と自信が溢れ、幸運が味方する最高日\nLINEのおすすめ時間：20:00〜22:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-月-",
+    "image": "public/assets/astrology_horse_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-04T17:26:46.698Z"
+  },
+  {
+    "id": "2026-10-06-chara-4",
+    "date": "2026-10-06",
+    "slot": "night",
+    "time": "20:45",
+    "kind": "value",
+    "text": "【今日（10月6日）の癸羊（みずのと・ひつじ）× 一白水星の恋愛運】\n＝深海の術師×ひつじの守護獣\n今日の点数：75点\n新しい挑戦や積極的発信で評価が高まる日\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-蓮-",
+    "image": "public/assets/astrology_sheep_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-04T17:26:46.698Z"
   }
 ]
