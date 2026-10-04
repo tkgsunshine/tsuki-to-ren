@@ -57,13 +57,24 @@ export function computeAll(dateStr) {
         'tsuki',
       );
       if (r.isKaigo || r.isRare) continue; // レア属性の演出は対象外（別の日付で再挑戦）
-      m.set(star, { score: r.dailyScore, r });
+      m.set(star, { star, score: r.dailyScore, r });
     }
     const out = [];
     for (const [key, m] of byKey) {
       const list = [...m.values()];
       if (list.length < 9) throw new Error(`${key}: 本命星が9種そろいませんでした（${list.length}）`);
       const scores = list.map((x) => x.score);
+      const textOf = (r) => {
+        const lines = String(r.dailyLuckTitle || '').split('\n').map((s) => s.trim()).filter(Boolean);
+        return {
+          oneLine: (lines[1] || lines[0] || '').replace(/【.*?】/g, '').trim(),
+          hours: String(r.bestContactHour || '').split('（')[0].replace(/\s+/g, ''),
+        };
+      };
+      // 本命星ごとの結果（九星気学の本命星 1〜9）。投稿では、このうち1つを選んで、そのままの点数を出す
+      const stars = list
+        .map((x) => ({ num: x.star, name: String(x.r.myStar).replace(/\s*\(.*?\)\s*$/, ''), score: x.score, ...textOf(x.r) }))
+        .sort((a, b) => a.num - b.num);
       const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
       const rep = list.reduce((best, x) => (Math.abs(x.score - avg) < Math.abs(best.score - avg) ? x : best)).r;
       const stem = key[0];
@@ -77,7 +88,7 @@ export function computeAll(dateStr) {
       out.push({
         key, stem, branch: key[1], name, animal, theme,
         stemYomi: STEM_YOMI[stem], animalYomi: ANIMAL_YOMI[animal],
-        avg, min: Math.min(...scores), max: Math.max(...scores),
+        avg, min: Math.min(...scores), max: Math.max(...scores), stars,
         oneLine, hours, imageF, imageM: imageF.replace(/\.jpg$/, '_male.jpg'),
       });
     }
@@ -90,4 +101,11 @@ export function pickByDay(all, dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
   const p = calculateDayPillar(new Date(y, m - 1, d));
   return all.find((x) => x.key === p.stem + p.branch);
+}
+
+/** 投稿ごとに本命星を（日付＋守護獣から決まる値で）1つ選ぶ。同じ日・同じ守護獣なら、いつ実行しても同じ星 */
+export function pickStar(c, dateStr) {
+  let h = 0;
+  for (const ch of `${dateStr}:${c.key}`) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  return c.stars[h % c.stars.length];
 }
