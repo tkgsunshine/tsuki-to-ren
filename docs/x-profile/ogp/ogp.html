@@ -4,29 +4,28 @@
 @font-face{font-family:'SM';font-weight:500;src:url('fonts/sm500.woff2') format('woff2')}
 html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#0a0714}
 .o{position:relative;width:1200px;height:630px;font-family:'SM','IPAPGothic',serif;color:#f4efe2;
- background:radial-gradient(700px 520px at 22% 50%,rgba(168,85,247,.28),transparent 65%),
-            radial-gradient(600px 400px at 90% 100%,rgba(59,130,246,.18),transparent 60%),
+ background:radial-gradient(420px 460px at 18% 55%,rgba(168,85,247,.38),transparent 65%),
+            radial-gradient(420px 460px at 82% 55%,rgba(59,130,246,.32),transparent 65%),
             linear-gradient(135deg,#0a0714 0%,#150f2c 55%,#1c1236 100%)}
 svg{position:absolute;inset:0}
-.e{position:absolute;left:70px;top:45px;width:540px;height:540px;
- -webkit-mask-image:radial-gradient(closest-side,#000 82%,transparent 100%);mask-image:radial-gradient(closest-side,#000 82%,transparent 100%)}
-.e img{width:540px;height:540px;display:block}
-.t{position:absolute;left:620px;top:165px;width:540px}
-.n{font-weight:700;font-size:110px;letter-spacing:.08em;color:#e2c074;text-shadow:0 0 36px rgba(226,192,116,.35);line-height:1.1}
-.s1{margin-top:18px;font-weight:500;font-size:32px;letter-spacing:.05em;color:#e8e2f7}
-.s2{margin-top:10px;font-weight:700;font-size:40px;letter-spacing:.04em;color:#f4efe2}
-.s2 b{color:#e2c074;font-weight:700}
-.u{position:absolute;left:620px;bottom:46px;font-size:24px;letter-spacing:.12em;color:rgba(232,226,247,.7);font-family:sans-serif}
+.c{position:absolute;top:16px;width:470px;height:630px;
+ -webkit-mask-image:radial-gradient(ellipse 52% 54% at 50% 46%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 52% 54% at 50% 46%,#000 55%,transparent 100%)}
+.c img{width:470px;height:630px;display:block}
+.tsuki{left:-30px}.ren{left:760px}
+.t{position:absolute;left:380px;top:190px;width:440px;text-align:center}
+.n{font-weight:700;font-size:104px;letter-spacing:.08em;color:#e2c074;text-shadow:0 0 34px rgba(226,192,116,.4);line-height:1.1}
+.s1{margin-top:16px;font-weight:500;font-size:28px;letter-spacing:.04em;color:#e8e2f7}
+.s2{margin-top:12px;font-weight:700;font-size:40px;letter-spacing:.1em;color:#f4efe2}
 </style>
 <div class="o">
 <svg width="1200" height="630" id="st"></svg>
-<div class="e"><img src="emblem.jpg"></div>
+<div class="c tsuki"><img src="tsuki.jpg"></div>
+<div class="c ren"><img src="ren.jpg"></div>
 <div class="t">
  <div class="n">月と蓮</div>
  <div class="s1">四柱推命 × 16タイプ（MBTI）</div>
- <div class="s2">恋愛相性診断<b>【無料】</b></div>
+ <div class="s2">恋愛占い</div>
 </div>
-<div class="u">tsuki-to-ren.com</div>
 </div>
 <script>
 let s=11,r=()=>(s=(s*16807)%2147483647)/2147483647,o='';

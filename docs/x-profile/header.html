@@ -2,43 +2,34 @@
 <style>
 @font-face{font-family:'SM';font-weight:700;src:url('fonts/sm700.woff2') format('woff2')}
 @font-face{font-family:'SM';font-weight:500;src:url('fonts/sm500.woff2') format('woff2')}
-html,body{margin:0;width:1500px;height:500px;overflow:hidden}
+html,body{margin:0;width:1500px;height:500px;overflow:hidden;background:#0a0714}
 .h{position:relative;width:1500px;height:500px;font-family:'SM','IPAPGothic',serif;color:#f4efe2;
- background:radial-gradient(900px 420px at 78% 28%,rgba(168,85,247,.35),transparent 60%),
-            radial-gradient(700px 380px at 12% 90%,rgba(59,130,246,.28),transparent 60%),
-            linear-gradient(135deg,#0a0a14 0%,#14142b 55%,#1c1236 100%)}
-svg.bg{position:absolute;inset:0}
-.t{position:absolute;left:430px;top:205px;width:850px}
-.t1{font-weight:700;font-size:72px;letter-spacing:.04em;line-height:1.15;text-shadow:0 0 28px rgba(226,192,116,.35)}
+ background:radial-gradient(520px 420px at 25% 55%,rgba(168,85,247,.35),transparent 65%),
+            radial-gradient(520px 420px at 75% 55%,rgba(59,130,246,.30),transparent 65%),
+            linear-gradient(135deg,#0a0714 0%,#150f2c 55%,#1c1236 100%)}
+svg{position:absolute;inset:0}
+.c{position:absolute;top:30px;height:500px;width:372px;
+ -webkit-mask-image:radial-gradient(ellipse 52% 56% at 50% 46%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 52% 56% at 50% 46%,#000 55%,transparent 100%)}
+.c img{width:372px;height:500px;display:block}
+.tsuki{left:262px}.ren{left:866px}
+.t{position:absolute;left:564px;top:150px;width:400px;text-align:center}
+.badge{display:inline-block;font-weight:500;font-size:20px;letter-spacing:.12em;color:#e2c074;border:1.5px solid rgba(226,192,116,.6);border-radius:999px;padding:6px 20px;background:rgba(10,10,20,.5)}
+.t1{margin-top:18px;font-weight:700;font-size:50px;letter-spacing:.03em;line-height:1.25;text-shadow:0 0 26px rgba(226,192,116,.4)}
 .t1 b{color:#e2c074;font-weight:700}
-.t2{margin-top:22px;font-weight:500;font-size:28px;letter-spacing:.03em;color:#d9d3f0}
-.badge{display:inline-block;margin-bottom:20px;font-weight:500;font-size:24px;letter-spacing:.12em;color:#e2c074;
- border:1.5px solid rgba(226,192,116,.6);border-radius:999px;padding:8px 24px;background:rgba(10,10,20,.45)}
+.t2{margin-top:16px;font-weight:500;font-size:22px;letter-spacing:.04em;color:#e8e2f7}
 </style>
 <div class="h">
-<svg class="bg" width="1500" height="500" viewBox="0 0 1500 500">
- <defs>
-  <radialGradient id="moon" cx="40%" cy="38%" r="70%"><stop offset="0" stop-color="#fff7de"/><stop offset="1" stop-color="#e2c074"/></radialGradient>
-  <linearGradient id="petal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3b6d8" stop-opacity=".95"/><stop offset="1" stop-color="#a855f7" stop-opacity=".55"/></linearGradient>
- </defs>
- <g fill="#fff" id="stars"></g>
- <!-- moon -->
- <g transform="translate(1110,165) scale(.5)">
-  <circle r="120" fill="rgba(226,192,116,.10)"/>
-  <circle r="78" fill="url(#moon)"/>
-  <circle cx="30" cy="-14" r="70" fill="#14142b"/>
- </g>
- <path d="M0 470 Q375 430 750 470 T1500 470" stroke="rgba(226,192,116,.25)" fill="none" stroke-width="1.5"/>
-</svg>
+<svg width="1500" height="500" id="st"></svg>
+<div class="c tsuki"><img src="tsuki.jpg"></div>
+<div class="c ren"><img src="ren.jpg"></div>
 <div class="t">
  <div class="badge">月と蓮 運営</div>
- <div class="t1">今日の空気を、<b>そっと。</b></div>
- <div class="t2">四柱推命 × 16タイプ（MBTI）｜毎日の恋愛運と月のリズム</div>
+ <div class="t1">今日の空気を、<br><b>そっと。</b></div>
+ <div class="t2">四柱推命 × 16タイプ（MBTI）</div>
 </div>
 </div>
 <script>
-// 星（座標固定の疑似乱数）
-let s=7,r=()=>(s=(s*16807)%2147483647)/2147483647,g=document.getElementById('stars'),o='';
-for(let i=0;i<70;i++){const x=r()*1500,y=r()*380,z=r()*1.6+.4;o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${z.toFixed(1)}" opacity="${(r()*.6+.2).toFixed(2)}"/>`}
-g.innerHTML=o;
+let s=7,r=()=>(s=(s*16807)%2147483647)/2147483647,o='';
+for(let i=0;i<60;i++){const x=r()*1500,y=r()*400,z=r()*1.6+.4;o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${z.toFixed(1)}" fill="#fff" opacity="${(r()*.5+.2).toFixed(2)}"/>`}
+document.getElementById('st').innerHTML=o;
 </script>
