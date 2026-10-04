@@ -15,7 +15,7 @@
     "slot": "morning",
     "kind": "value",
     "text": "おはよう。今日は「見極め」の空気が流れる日。空には下弦の月が浮かぶ、少しずつ欠けていく時期だから、恋のモヤモヤもひとつ手放しやすいかも。返事を待ちすぎていた気持ちに、そっと区切りをつけてみて。伝えるときは、やわらかい言葉を選んでね。\n#恋愛占い\n—月",
-    "status": "scheduled",
+    "status": "expired",
     "createdAt": "2026-10-03T06:58:43.414Z",
     "lastError": "401 {\n  \"title\": \"Unauthorized\",\n  \"type\": \"about:blank\",\n  \"status\": 401,\n  \"detail\": \"Unauthorized\"\n}"
   },
@@ -25,7 +25,7 @@
     "slot": "noon",
     "kind": "value",
     "text": "16タイプ（MBTI）別・今日の恋のひとこと\nISFJ：支えるばかりでなく、本音も少し見せて\nISFP：迷ったら、心がほっとする方を選んでいい\nESFJ：みんなに合わせすぎず、大切な人を優先して\nESFP：楽しい予定の中で、本当に会いたい人を見極めて\n—蓮",
-    "status": "scheduled",
+    "status": "expired",
     "createdAt": "2026-10-03T06:58:43.414Z"
   },
   {
