@@ -83,3 +83,37 @@ test('今日の十二支と支合・三合になる十二支は、六沖にな�
   assert.ok(avgFor('丑') > avgFor('午'), '子の日: 丑（支合）は午（六沖）より高い');
   assert.ok(avgFor('申') > avgFor('午'), '子の日: 申（三合）は午（六沖）より高い');
 });
+
+// ───────── P2: 十二運と、単身の基本点・日ごとの運気の波 ─────────
+import { getJuniUn } from '../src/utils/fortuneEngine.ts';
+
+test('十二運の表（日本で一般的な表）: 既知の組み合わせ', () => {
+  const cases = [
+    ['甲', '子', '沐浴'], ['甲', '亥', '長生'], ['甲', '卯', '帝旺'], ['甲', '申', '絶'],
+    ['乙', '午', '長生'], ['乙', '丑', '衰'], ['乙', '寅', '帝旺'],
+    ['丙', '午', '帝旺'], ['丙', '寅', '長生'], ['壬', '子', '帝旺'], ['壬', '申', '長生'],
+    ['庚', '申', '建禄'], ['庚', '巳', '長生'], ['癸', '卯', '長生'], ['辛', '子', '長生'],
+    ['戊', '午', '帝旺'], ['己', '酉', '長生'], ['丁', '酉', '長生'],
+  ];
+  for (const [stem, branch, want] of cases) assert.equal(getJuniUn(stem, branch), want, `${stem}×${branch}`);
+  // 12の十二支に、12段階が1つずつ現れる
+  for (const stem of '甲乙丙丁戊己庚辛壬癸') {
+    assert.equal(new Set([...'子丑寅卯辰巳午未申酉戌亥'].map((b) => getJuniUn(stem, b))).size, 12, stem);
+  }
+});
+
+test('点数に乱数・疑似乱数が入らない（同じ入力・同じ日なら、何度でも同じ点数）', () => {
+  const r = reps[0];
+  const a = run('2026-10-05', r).dailyScore;
+  for (let i = 0; i < 5; i++) assert.equal(run('2026-10-05', r).dailyScore, a);
+});
+
+test('単身の基本点は、日柱の十二運と、本命星・日主の五行の調和だけで決まる（30〜100）', () => {
+  const seen = new Set();
+  for (const r of reps) {
+    const x = run('2026-10-05', r);
+    assert.ok(x.baseScore >= 30 && x.baseScore <= 100);
+    seen.add(x.baseScore);
+  }
+  assert.ok(seen.size >= 10, `基本点の種類が少なすぎる: ${seen.size}`);
+});
