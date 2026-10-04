@@ -5,9 +5,10 @@
     "slot": "night",
     "kind": "promo",
     "text": "はじめまして、月と蓮の運営アカウントです🌙\n毎日、朝・昼・夜の3回、今日の恋の空気と16タイプ（MBTI）のひとことをお届けします（自動投稿です）。\n生年月日と16タイプで見る無料の相性鑑定はこちら\nhttps://www.tsuki-to-ren.com\n—月と蓮 運営",
-    "status": "expired",
+    "status": "posted",
     "createdAt": "2026-10-03T00:00:00.000Z",
-    "lastError": "401 {\n  \"title\": \"Unauthorized\",\n  \"type\": \"about:blank\",\n  \"status\": 401,\n  \"detail\": \"Unauthorized\"\n}"
+    "postedAt": "2026-10-04T11:24:07.876Z",
+    "tweetId": "2106706932761326002"
   },
   {
     "id": "2026-10-04-morning",
@@ -15,8 +16,9 @@
     "slot": "morning",
     "kind": "value",
     "text": "おはよう。今日は「見極め」の空気が流れる日。空には下弦の月が浮かぶ、少しずつ欠けていく時期だから、恋のモヤモヤもひとつ手放しやすいかも。返事を待ちすぎていた気持ちに、そっと区切りをつけてみて。伝えるときは、やわらかい言葉を選んでね。\n#恋愛占い\n—月",
-    "status": "scheduled",
-    "createdAt": "2026-10-03T06:58:43.414Z"
+    "status": "expired",
+    "createdAt": "2026-10-03T06:58:43.414Z",
+    "lastError": "401 {\n  \"title\": \"Unauthorized\",\n  \"type\": \"about:blank\",\n  \"status\": 401,\n  \"detail\": \"Unauthorized\"\n}"
   },
   {
     "id": "2026-10-04-noon",
@@ -24,7 +26,7 @@
     "slot": "noon",
     "kind": "value",
     "text": "16タイプ（MBTI）別・今日の恋のひとこと\nISFJ：支えるばかりでなく、本音も少し見せて\nISFP：迷ったら、心がほっとする方を選んでいい\nESFJ：みんなに合わせすぎず、大切な人を優先して\nESFP：楽しい予定の中で、本当に会いたい人を見極めて\n—蓮",
-    "status": "scheduled",
+    "status": "expired",
     "createdAt": "2026-10-03T06:58:43.414Z"
   },
   {
@@ -33,8 +35,9 @@
     "slot": "night",
     "kind": "promo",
     "text": "今日もおつかれさま。下弦の月の夜は、心の荷物をひとつ下ろす時間。言えなかった言葉は、明日やさしく伝えればいいよ。気になる人との関係のヒントがほしくなったら、16タイプ×四柱推命の無料鑑定を月と蓮でどうぞ。\nhttps://www.tsuki-to-ren.com\n—月",
-    "status": "scheduled",
-    "createdAt": "2026-10-03T06:58:43.414Z"
+    "status": "skipped",
+    "createdAt": "2026-10-03T06:58:43.414Z",
+    "skipReason": "サイト公開前のため、URL入りの投稿は見送り（運営判断）"
   },
   {
     "id": "2026-10-05-morning",

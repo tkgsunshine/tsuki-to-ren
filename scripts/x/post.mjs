@@ -1,6 +1,6 @@
 // 投稿時刻を過ぎた "scheduled" の投稿を1件だけ X に投稿する（cronで複数回起動してもOK）。
 // 使い方: node scripts/x/post.mjs [--dry-run] [--id=<投稿ID>]
-//   --id（または環境変数 X_FORCE_ID）を付けると、日付・枠の時刻・期限切れを無視して、その1件だけを投稿する（動作確認・臨時投稿用。lintと最小間隔は有効）
+//   --id（または環境変数 X_FORCE_ID）を付けると、日付・枠の時刻・期限切れを無視して、その1件だけを投稿する（動作確認・臨時投稿・失敗/期限切れの再投稿用。lintと最小間隔は有効）
 // 必要な環境変数: X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_TOKEN_SECRET（無いと dry-run 扱い）
 import { jstDateString } from './lib/signals.mjs';
 import { lintPost, promoRatioOk } from './lib/lint.mjs';
@@ -78,7 +78,7 @@ const minutesSinceLast = last ? (now.getTime() - new Date(last.postedAt).getTime
 const due = queue
   .filter((p) =>
     forceId
-      ? p.id === forceId && p.status === 'scheduled'
+      ? p.id === forceId && ['scheduled', 'expired', 'failed'].includes(p.status)
       : p.status === 'scheduled' && p.date === today && slotMinutes(p.slot) <= jstMinutes,
   )
   .sort((a, b) => slotMinutes(a.slot) - slotMinutes(b.slot));
@@ -94,7 +94,7 @@ async function main() {
   }
 
   const post = due[0];
-  const problems = lintPost(post, history);
+  const problems = lintPost(post, history, { allowLinks: config.allowLinks !== false });
   if (post.kind === 'promo' && !promoRatioOk(history)) problems.push('直近の投稿でpromoが多いため見送り');
   if (problems.length) {
     post.status = 'skipped';
@@ -121,6 +121,8 @@ async function main() {
     post.status = 'posted';
     post.postedAt = now.toISOString();
     post.tweetId = id;
+    delete post.lastError;
+    delete post.skipReason;
     changed = true;
     console.log(`投稿しました: ${post.id} → tweet ${id}`);
     return;

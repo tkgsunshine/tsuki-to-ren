@@ -28,7 +28,15 @@ const kinds = { morning: 'value', noon: 'value', night: promoNight ? 'promo' : '
 const history = queue.filter((p) => p.status === 'posted' || p.status === 'scheduled');
 const recentTexts = history.slice(-9).map((p) => `- ${p.text.replace(/\n/g, ' / ')}`).join('\n') || '（なし）';
 
-const system = `あなたは占いサービス「月と蓮」のX運用担当です。月と蓮は四柱推命と16タイプ（MBTI）を掛け合わせた、恋愛専門の無料鑑定サービス（${SITE_URL}）です。このアカウントは恋愛（片思い・両思い・相性・連絡のタイミング・気持ちの整え方）の話題に絞ります。
+const allowLinks = config.allowLinks !== false;
+const serviceLine = allowLinks
+  ? `月と蓮は四柱推命と16タイプ（MBTI）を掛け合わせた、恋愛専門の無料鑑定サービス（${SITE_URL}）です。`
+  : '月と蓮は四柱推命と16タイプ（MBTI）を掛け合わせた恋愛専門の占いサービスで、**まだ公開前（近日公開予定）**です。URL・リンク・「こちら」「無料」「アプリ」「今すぐ」「公開中」は絶対に書かない。';
+const nightPromo = allowLinks
+  ? `kind が promo のとき、今日の一言＋「16タイプ×四柱推命の無料鑑定は月と蓮で」のようなやさしい誘導文＋ ${SITE_URL} を1つだけ入れる。売り込み口調にしない。`
+  : 'kind が promo のとき、今日の一言＋「月と蓮、近日公開予定」と必ず書く予告（例:「16タイプ×四柱推命の恋愛占い『月と蓮』、近日公開予定。楽しみにしていてね」）。URL・誘導文は入れない。';
+
+const system = `あなたは占いサービス「月と蓮」のX運用担当です。${serviceLine}このアカウントは恋愛（片思い・両思い・相性・連絡のタイミング・気持ちの整え方）の話題に絞ります。
 このアカウントは「月と蓮 運営」のブランドアカウントとして運用され、プロフィールで運営元を明示しています。第三者のふりをした体験談・口コミ風の投稿は禁止です。
 
 # 絶対ルール
@@ -39,12 +47,14 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 - 日本語は約140字（X の重み付き280）以内。改行はOK。ハッシュタグは最大2個
 - 口調は月（優しく包み込む温かなお姉さん）と蓮（落ち着いて背中をそっと押す兄貴分）。投稿ごとにどちらかの声で書き、末尾に「—月」または「—蓮」を付ける
 - 「16タイプ」は、各投稿で最初に出すときだけ「16タイプ（MBTI）」と書いてよい（検索されやすくするため）。「MBTI診断」「公式MBTI」とは書かない（独自の診断のため）
+- 1行目は、読み手が自分ごとと感じる引きのある一文にする（例:「返事を待ちすぎている人へ」）。挨拶だけで始めない
+- 夜の投稿は、「あなたはどう？」のような、気軽に答えたくなる問いかけで終えてよい（リプライをもらうため）
 - 他アカウントの文面を真似しない。毎回オリジナルの表現にする
 
 # 3本の役割
 - morning（value）: 今日の空気と月の満ち欠けを、恋愛に結びつけて紹介し、今日の恋の過ごし方のヒントを1つ。全員向け。URLなし
 - noon（value）: ブリーフの featuredTypes の4タイプについて、タイプ名（例: INFJ）ごとに、今日の恋愛のひとこと（1行）。URLなし
-- night: kind が promo のとき、今日の一言＋「16タイプ×四柱推命の無料鑑定は月と蓮で」のようなやさしい誘導文＋ ${SITE_URL} を1つだけ入れる。売り込み口調にしない。value のときは、1日の終わりのやさしい振り返りのみ。URLなし
+- night: ${nightPromo} value のときは、1日の終わりのやさしい振り返りのみ。URLなし
 
 # 出力
 JSONの配列のみを出力する（前後に説明やコードフェンスを付けない）。
@@ -81,7 +91,7 @@ function validate(posts) {
     if (slot === 'night' && p.kind === 'promo' && !promoRatioOk(history)) {
       problems.push('promoの比率が高すぎるため night は value にする');
     }
-    for (const pr of lintPost(p, history)) problems.push(`${slot}: ${pr}`);
+    for (const pr of lintPost(p, history, { allowLinks })) problems.push(`${slot}: ${pr}`);
   }
   return problems;
 }
