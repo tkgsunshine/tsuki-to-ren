@@ -392,51 +392,55 @@ export interface EmailSubscriptionData {
   oppGender?: 'male' | 'female';
   oppMbti?: string;
   relationship?: string;
+  mode?: 'single' | 'match';
+  character?: 'ren' | 'tsuki';
 }
 
 /**
- * Saves or updates user's daily fortune email notification settings in Firestore
+ * Saves or updates the signed-in user's daily fortune email subscription (subscriptions/{uid}).
+ * The address must be the verified email of the signed-in account (enforced by firestore.rules too).
  */
 export const saveEmailSubscriptionData = async (data: EmailSubscriptionData): Promise<boolean> => {
-  if (!data.email || !data.email.includes('@')) return false;
+  const user = getFirebaseAuth().currentUser;
+  if (!user || !user.email) return false;
+  const email = data.email.trim().toLowerCase();
+  if (email !== user.email.toLowerCase()) return false;
   try {
-    const docId = data.email.trim().toLowerCase().replace(/[^a-z0-9_@.-]/g, '_');
-    const docRef = doc(db, 'subscriptions', docId);
-    await setDoc(docRef, {
-      email: data.email.trim().toLowerCase(),
+    await setDoc(doc(db, 'subscriptions', user.uid), {
+      uid: user.uid,
+      email,
       enabled: data.enabled,
-      myName: data.myName || 'あなた',
+      myName: (data.myName || 'あなた').slice(0, 40),
       myBirth: data.myBirth || '',
       myGender: data.myGender || 'female',
       myMbti: data.myMbti || 'UNKNOWN',
-      oppName: data.oppName || '',
+      oppName: (data.oppName || '').slice(0, 40),
       oppBirth: data.oppBirth || '',
       oppGender: data.oppGender || '',
       oppMbti: data.oppMbti || 'UNKNOWN',
-      relationship: data.relationship || '片思い中',
+      relationship: data.relationship || 'single',
+      mode: data.mode === 'single' ? 'single' : 'match',
+      character: data.character === 'ren' ? 'ren' : 'tsuki',
       updatedAt: serverTimestamp()
     }, { merge: true });
-    console.log('✅ Daily fortune email subscription saved to Firestore:', docId);
     return true;
   } catch (err) {
-    console.warn('⚠️ Could not save email subscription to Firestore (offline or rule error):', err);
+    console.warn('⚠️ Could not save email subscription to Firestore:', err);
     return false;
   }
 };
 
 /**
- * Disables daily fortune email notification for the given email
+ * Turns off the signed-in user's daily fortune email notification
  */
-export const unsubscribeEmailSubscription = async (email: string): Promise<boolean> => {
-  if (!email || !email.includes('@')) return false;
+export const unsubscribeEmailSubscription = async (): Promise<boolean> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) return false;
   try {
-    const docId = email.trim().toLowerCase().replace(/[^a-z0-9_@.-]/g, '_');
-    const docRef = doc(db, 'subscriptions', docId);
-    await updateDoc(docRef, {
+    await updateDoc(doc(db, 'subscriptions', user.uid), {
       enabled: false,
       updatedAt: serverTimestamp()
     });
-    console.log('✅ Daily fortune email unsubscribed in Firestore:', docId);
     return true;
   } catch (err) {
     console.warn('⚠️ Could not unsubscribe email in Firestore:', err);

@@ -1,0 +1,42 @@
+rules_version = '2';
+
+// Daily-fortune email subscriptions: one document per signed-in user (document id = uid).
+// Only the owner can read/write it, and the address must be the verified email of the signed-in account,
+// so nobody can subscribe a third party's address.
+// The daily cron reads every document with the Admin SDK, which bypasses these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /subscriptions/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.auth.token.email_verified == true
+        && request.resource.data.keys().hasOnly([
+          'uid', 'email', 'enabled', 'myName', 'myBirth', 'myGender', 'myMbti',
+          'oppName', 'oppBirth', 'oppGender', 'oppMbti', 'relationship', 'mode', 'character', 'updatedAt'
+        ])
+        && request.resource.data.uid == uid
+        && request.resource.data.email is string
+        && request.resource.data.email.lower() == request.auth.token.email.lower()
+        && request.resource.data.enabled is bool
+        && request.resource.data.myName is string && request.resource.data.myName.size() <= 40
+        && request.resource.data.myBirth is string && request.resource.data.myBirth.size() <= 10
+        && request.resource.data.oppName is string && request.resource.data.oppName.size() <= 40
+        && request.resource.data.oppBirth is string && request.resource.data.oppBirth.size() <= 10
+        && request.resource.data.myMbti is string && request.resource.data.myMbti.size() <= 10
+        && request.resource.data.oppMbti is string && request.resource.data.oppMbti.size() <= 10
+        && request.resource.data.myGender is string && request.resource.data.myGender.size() <= 10
+        && request.resource.data.oppGender is string && request.resource.data.oppGender.size() <= 10
+        && request.resource.data.relationship is string && request.resource.data.relationship.size() <= 20
+        && request.resource.data.mode in ['single', 'match']
+        && request.resource.data.character in ['ren', 'tsuki']
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    // Everything else is closed to clients.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
