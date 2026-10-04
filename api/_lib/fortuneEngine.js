@@ -166,6 +166,43 @@ const getBranchImpact = (branchA, branchB) => {
         return -8;
     return 0;
 };
+const STEM_YANG = ['甲', '丙', '戊', '庚', '壬'];
+export function getTenGod(personStem, otherStem) {
+    const order = ['木', '火', '土', '金', '水'];
+    const diff = (order.indexOf(stemElements[otherStem]) - order.indexOf(stemElements[personStem]) + 5) % 5;
+    const samePolarity = STEM_YANG.includes(personStem) === STEM_YANG.includes(otherStem);
+    // diff: 0=同じ五行 / 1=自分が生む / 2=自分が剋す / 3=自分を剋す / 4=自分を生む
+    if (diff === 0)
+        return samePolarity ? '比肩' : '劫財';
+    if (diff === 1)
+        return samePolarity ? '食神' : '傷官';
+    if (diff === 2)
+        return samePolarity ? '偏財' : '正財';
+    if (diff === 3)
+        return samePolarity ? '偏官' : '正官';
+    return samePolarity ? '偏印' : '正印';
+}
+// 今日（その日）の天干が、自分の日主に与える影響の点数。
+// 干合は、四柱推命の伝統（甲己・乙庚・丙辛・丁壬・戊癸）。十神ごとの点数への換算は、アプリが決めた値。
+// 旧版は、陰陽も生剋の向きも区別せず、五行の関係だけで点数化していた（印・食傷+10／比和+4／財・官殺-16）。
+// 新版は、向き（自分を生む／自分が生む／自分が剋す／自分を剋す）と陰陽で10種に分けた。
+// 傾向: 自分を支える印星・気持ちを外へ出す食神は吉、自分を縛る官殺は凶（偏官＝七殺が最も強い）。
+export const TEN_GOD_POINTS = {
+    '正印': 10, '偏印': 6, '食神': 6, '傷官': 0,
+    '比肩': 4, '劫財': -2, '正財': 2, '偏財': 2,
+    '正官': -8, '偏官': -16
+};
+const STEM_COMBINATIONS = {
+    '甲': '己', '己': '甲', '乙': '庚', '庚': '乙',
+    '丙': '辛', '辛': '丙', '丁': '壬', '壬': '丁', '戊': '癸', '癸': '戊'
+};
+export const getDailyStemImpact = (dayStem, personStem) => {
+    if (STEM_COMBINATIONS[dayStem] === personStem)
+        return 16; // 干合は大吉 (+16)
+    if (!stemElements[dayStem] || !stemElements[personStem])
+        return 0;
+    return TEN_GOD_POINTS[getTenGod(personStem, dayStem)];
+};
 // 対象年の年柱 (Year Pillar)
 export function calculateYearPillar(year) {
     let sIdx = (year - 4) % 10;
@@ -1441,27 +1478,6 @@ export function generateFortuneResult(input, character) {
         baseScore = 30;
     // 日次スコア (その日の日干干支のエネルギーと自身の宿命日干の相互作用から論理的に算出)
     const today = new Date();
-    const todaySeed = today.getFullYear() * 1000 + (today.getMonth() + 1) * 31 + today.getDate();
-    const getDailyStemImpact = (dayStem, personStem) => {
-        const combinations = {
-            '甲': '己', '己': '甲', '乙': '庚', '庚': '乙',
-            '丙': '辛', '辛': '丙', '丁': '壬', '壬': '丁', '戊': '癸', '癸': '戊'
-        };
-        if (combinations[dayStem] === personStem)
-            return 16; // 干合は大吉 (+16)
-        const dayEl = stemElements[dayStem];
-        const personEl = stemElements[personStem];
-        if (!dayEl || !personEl)
-            return 0;
-        const rel = elementRelations[dayEl]?.[personEl] || 'same';
-        if (rel === 'producing')
-            return 10; // 相生は中吉 (+10)
-        if (rel === 'same')
-            return 4; // 比和は小吉 (+4)
-        if (rel === 'conquering')
-            return -16; // 相剋は注意 (-16)
-        return 0;
-    };
     const todayPillar = calculateDayPillar(today);
     const myDailyImpact = getDailyStemImpact(todayPillar.stem, myPillarObj.stem);
     const oppDailyImpact = hasOpponent ? getDailyStemImpact(todayPillar.stem, oppPillarObj.stem) : 0;
@@ -2852,15 +2868,20 @@ export function generateFortuneResult(input, character) {
                 trustBase = 68;
             if (myJ && oppJ)
                 trustBase += 6;
-            // 日々の微小な運気の波（±3点以内）のみを反映
-            const dailyTick = (seed) => ((seed % 7) - 3);
+            // 日々の運気の波（±3点以内）。旧版は日付から作った疑似乱数だった。
+            // 新版は、今日の天干・地支・十二運と、二人（相手がいない場合は自分）との関係から決める（点数への換算の重みは、アプリ独自）。
+            const clampTick = (v) => Math.max(-3, Math.min(3, Math.round(v)));
+            const avg2 = (mine, opp) => (hasOpponent ? (mine + opp) / 2 : mine);
+            const stemTick = clampTick(avg2(myDailyImpact, oppDailyImpact) / 4); // 今日の天干と二人の天干（干合・十神）
+            const branchTick = clampTick(avg2(myBranchDaily, oppBranchDaily) / 4); // 今日の地支と二人の地支（支合・三合・六沖）
+            const unTick = clampTick(juniUnDaily / 2.5); // 今日の十二運（日ごとのエネルギーの波）
             return {
-                romance: Math.min(99, Math.max(40, romanceBase + dailyTick(todaySeed + 1))),
-                conversation: Math.min(99, Math.max(40, convBase + dailyTick(todaySeed + 2))),
-                sensual: Math.min(99, Math.max(40, sensualBase + dailyTick(todaySeed + 3))),
-                marriage: Math.min(99, Math.max(40, marriageBase + dailyTick(todaySeed + 4))),
-                obsession: Math.min(99, Math.max(40, obsessionBase + dailyTick(todaySeed + 5))),
-                trust: Math.min(99, Math.max(40, trustBase + dailyTick(todaySeed + 6)))
+                romance: Math.min(99, Math.max(40, romanceBase + stemTick)),
+                conversation: Math.min(99, Math.max(40, convBase + unTick)),
+                sensual: Math.min(99, Math.max(40, sensualBase + branchTick)),
+                marriage: Math.min(99, Math.max(40, marriageBase + clampTick((stemTick + branchTick) / 2))),
+                obsession: Math.min(99, Math.max(40, obsessionBase + branchTick)),
+                trust: Math.min(99, Math.max(40, trustBase + unTick))
             };
         })(),
         myTorisetsu: generateTorisetsu(myPillarObj.stem, myPillarObj.branch, input.myMbti || 'ENFP', oppPillarObj?.stem || '甲', input.opponentMbti || 'ENFP', input.myName || 'あなた'),

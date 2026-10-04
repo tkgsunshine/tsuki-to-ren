@@ -85,7 +85,7 @@ test('今日の十二支と支合・三合になる十二支は、六沖にな�
 });
 
 // ───────── P2: 十二運と、単身の基本点・日ごとの運気の波 ─────────
-import { getJuniUn } from '../src/utils/fortuneEngine.ts';
+import { getJuniUn, getTenGod, getDailyStemImpact, TEN_GOD_POINTS } from '../src/utils/fortuneEngine.ts';
 
 test('十二運の表（日本で一般的な表）: 既知の組み合わせ', () => {
   const cases = [
@@ -116,4 +116,33 @@ test('単身の基本点は、日柱の十二運と、本命星・日主の五�
     seen.add(x.baseScore);
   }
   assert.ok(seen.size >= 10, `基本点の種類が少なすぎる: ${seen.size}`);
+});
+
+test('通変星（十神）: 甲から見た各天干。陰陽で正・偏が分かれる（四柱推命の表）', () => {
+  const want = { 甲: '比肩', 乙: '劫財', 丙: '食神', 丁: '傷官', 戊: '偏財', 己: '正財', 庚: '偏官', 辛: '正官', 壬: '偏印', 癸: '正印' };
+  for (const [other, god] of Object.entries(want)) assert.equal(getTenGod('甲', other), god, `甲×${other}`);
+  // 乙（陰）から見ると、正・偏が入れ替わる
+  assert.equal(getTenGod('乙', '甲'), '劫財');
+  assert.equal(getTenGod('乙', '庚'), '正官');
+  assert.equal(getTenGod('乙', '辛'), '偏官');
+  assert.equal(getTenGod('乙', '壬'), '正印');
+  // どの日主でも、10種が1つずつ現れる
+  for (const p of '甲乙丙丁戊己庚辛壬癸') assert.equal(new Set([...'甲乙丙丁戊己庚辛壬癸'].map((o) => getTenGod(p, o))).size, 10, p);
+});
+
+test('今日の天干の影響: 干合は+16、それ以外は十神の点数（偏官が最も低い）', () => {
+  assert.equal(getDailyStemImpact('己', '甲'), 16); // 甲己合
+  assert.equal(getDailyStemImpact('癸', '甲'), TEN_GOD_POINTS['正印']);
+  assert.equal(getDailyStemImpact('庚', '甲'), TEN_GOD_POINTS['偏官']);
+  assert.equal(Math.min(...Object.values(TEN_GOD_POINTS)), TEN_GOD_POINTS['偏官']);
+});
+
+test('レーダーチャート: 乱数を使わず、同じ入力なら同じ値。40〜99に収まる', () => {
+  const pair = () =>
+    withNow('2026-10-05', () =>
+      generateFortuneResult({ myName: 'a', myBirth: '2001-07-09', myMbti: 'ENFP', myGender: 'female', opponentName: 'b', opponentBirth: '1999-02-14', opponentMbti: 'ISFJ', opponentGender: 'male', relationship: 'partner' }, 'tsuki'),
+    );
+  const a = pair().radarScores;
+  assert.deepEqual(pair().radarScores, a);
+  for (const v of Object.values(a)) assert.ok(v >= 40 && v <= 99);
 });
