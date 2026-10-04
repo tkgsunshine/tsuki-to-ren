@@ -94,7 +94,7 @@ async function main() {
   }
 
   const post = due[0];
-  const problems = lintPost(post, history);
+  const problems = lintPost(post, history, { allowLinks: config.allowLinks !== false });
   if (post.kind === 'promo' && !promoRatioOk(history)) problems.push('直近の投稿でpromoが多いため見送り');
   if (problems.length) {
     post.status = 'skipped';

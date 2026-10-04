@@ -1,9 +1,19 @@
 {
   "mode": "approval",
   "_modeNote": "approval=承認済み(PRマージ済み)の投稿のみ投稿 / auto=下書き生成後そのまま投稿。切り替えはこの値だけ",
-  "dailySlots": ["morning", "noon", "night"],
-  "slots": { "morning": "08:15", "noon": "12:15", "night": "20:15" },
+  "dailySlots": [
+    "morning",
+    "noon",
+    "night"
+  ],
+  "slots": {
+    "morning": "08:15",
+    "noon": "12:15",
+    "night": "20:15"
+  },
   "minIntervalMinutes": 120,
   "expireAfterMinutes": 240,
-  "promoEveryNthDay": 2
+  "promoEveryNthDay": 2,
+  "allowLinks": false,
+  "_allowLinksNote": "false=サイト公開前。投稿にURL・リンク誘導・「無料」を入れず、promo枠は「近日公開」の予告にする。公開後に true にする"
 }

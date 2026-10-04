@@ -33,11 +33,16 @@ const STEALTH = [
   '教えてもらった', '友達に聞いた', '使ってみたら', '試してみたら', 'やってみたら当たった', '当たりすぎ', '口コミ', 'レビュー',
 ];
 
+// サイト公開前に使わない言い回し（誘導・無料・公開中と誤解される表現）
+const PRELAUNCH_NG = ['リンク', 'こちら', '無料', '今すぐ', '公開中', 'ダウンロード', 'アプリ'];
+
 const SLOTS = ['morning', 'noon', 'night'];
 const KINDS = ['value', 'promo'];
 
 /** 投稿1件を検査。問題の配列（空なら合格） */
-export function lintPost(post, history = []) {
+// opts.allowLinks=false: サイト公開前。URLと誘導文言を禁止し、promoは「近日公開」の予告にする
+export function lintPost(post, history = [], opts = {}) {
+  const allowLinks = opts.allowLinks !== false;
   const problems = [];
   const text = (post.text || '').trim();
   if (!text) problems.push('本文が空');
@@ -52,13 +57,18 @@ export function lintPost(post, history = []) {
   for (const w of STEALTH) if (text.includes(w)) problems.push(`第三者を装う表現「${w}」は使わない（ステマ防止）`);
 
   const urls = text.match(URL_RE) || [];
-  if (post.kind === 'promo') {
-    if (!urls.some((u) => u.startsWith(SITE_URL))) problems.push(`promoには ${SITE_URL} のURLが必要`);
-  } else if (urls.length) {
-    problems.push('valueにはURLを入れない（誘導はpromoのみ）');
+  if (allowLinks) {
+    if (post.kind === 'promo') {
+      if (!urls.some((u) => u.startsWith(SITE_URL))) problems.push(`promoには ${SITE_URL} のURLが必要`);
+    } else if (urls.length) {
+      problems.push('valueにはURLを入れない（誘導はpromoのみ）');
+    }
+    if (urls.some((u) => !u.startsWith(SITE_URL))) problems.push('月と蓮以外のURLは入れない');
+  } else {
+    if (urls.length) problems.push('サイト公開前のためURLは入れない');
+    for (const w of PRELAUNCH_NG) if (text.includes(w)) problems.push(`サイト公開前のため「${w}」は使わない`);
+    if (post.kind === 'promo' && !text.includes('近日公開')) problems.push('promoは「近日公開」の予告にする');
   }
-  if (urls.some((u) => !u.startsWith(SITE_URL))) problems.push('月と蓮以外のURLは入れない');
-
   const hashtags = (text.match(/[#＃]\S+/g) || []).length;
   if (hashtags > 2) problems.push('ハッシュタグは2個まで');
 
