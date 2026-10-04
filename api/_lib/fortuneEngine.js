@@ -95,6 +95,8 @@ const branchElements = {
     '申': '金', '酉': '金',
     '辰': '土', '戌': '土', '丑': '土', '未': '土'
 };
+// 今日の運勢（dailyScore）に足す、十二支の関係の強さ。1 = 週次スコアの2日目以降と同じ強度、0 = 足さない
+export const DAILY_BRANCH_WEIGHT = 1;
 // 地支の相性・生剋影響度算出 (支合・三合・六沖・五行生剋)
 const getBranchImpact = (branchA, branchB) => {
     if (!branchA || !branchB)
@@ -1375,7 +1377,11 @@ export function generateFortuneResult(input, character) {
     const oppDailyImpact = hasOpponent ? getDailyStemImpact(todayPillar.stem, oppPillarObj.stem) : 0;
     // 日にちの揺らぎ（サイン波）を隠し味として少々プラス
     const minorSwing = Math.sin(todaySeed + baseScore) * 8;
-    let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + minorSwing);
+    // 今日の十二支と、自分（と相手）の十二支の関係（支合・三合・六沖・五行の生剋）も足す。
+    // 週次スコア（weeklyScores の2日目以降）と同じ式・同じ強度に揃えている。0 にすると十二支の影響なし（旧仕様）。
+    const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
+    const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
+    let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + myBranchDaily + oppBranchDaily + minorSwing);
     if (dailyScore > 100)
         dailyScore = 100;
     if (dailyScore < 0)
