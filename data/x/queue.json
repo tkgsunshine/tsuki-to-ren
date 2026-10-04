@@ -7,7 +7,7 @@
     "text": "はじめまして、月と蓮の運営アカウントです🌙\n毎日、朝・昼・夜の3回、今日の恋の空気と16タイプ（MBTI）のひとことをお届けします（自動投稿です）。\n生年月日と16タイプで見る無料の相性鑑定はこちら\nhttps://www.tsuki-to-ren.com\n—月と蓮 運営",
     "status": "expired",
     "createdAt": "2026-10-03T00:00:00.000Z",
-    "lastError": "401 {\n  \"title\": \"Unauthorized\",\n  \"type\": \"about:blank\",\n  \"status\": 401,\n  \"detail\": \"Unauthorized\"\n}"
+    "lastError": "402 {\"detail\":\"credits depleted\",\"status\":402,\"title\":\"Payment Required\",\"type\":\"https://api.x.com/2/problems/credits-depleted\"}"
   },
   {
     "id": "2026-10-04-morning",
