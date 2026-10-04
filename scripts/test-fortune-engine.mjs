@@ -85,7 +85,7 @@ test('今日の十二支と支合・三合になる十二支は、六沖にな�
 });
 
 // ───────── P2: 十二運と、単身の基本点・日ごとの運気の波 ─────────
-import { getJuniUn, getTenGod, getDailyStemImpact, TEN_GOD_POINTS } from '../src/utils/fortuneEngine.ts';
+import { getJuniUn, getTenGod, getDailyStemImpact, TEN_GOD_POINTS, getDayStarNumber, getDayStarPoints, DAY_STAR_WEIGHT } from '../src/utils/fortuneEngine.ts';
 
 test('十二運の表（日本で一般的な表）: 既知の組み合わせ', () => {
   const cases = [
@@ -145,4 +145,32 @@ test('レーダーチャート: 乱数を使わず、同じ入力なら同じ値
   const a = pair().radarScores;
   assert.deepEqual(pair().radarScores, a);
   for (const v of Object.values(a)) assert.ok(v >= 40 && v <= 99);
+});
+
+test('日盤（日の九星）: 日本の暦サイトで確認した日と一致する（陽遁・陰遁の両方）', () => {
+  // 出典: 日家九星の暦（2026-05-01=六白、2026-07-01=六白、2026-09-05=三碧）。2025-12-21 は冬至の甲子日（陽遁の始まり=一白）
+  assert.equal(getDayStarNumber(2025, 12, 21), 1);
+  assert.equal(getDayStarNumber(2026, 5, 1), 6);
+  assert.equal(getDayStarNumber(2026, 7, 1), 6);
+  assert.equal(getDayStarNumber(2026, 9, 5), 3);
+});
+
+test('日盤: 陽遁は一白から増え、陰遁は九紫から減る（夏至に最も近い甲子=2026-06-19）', () => {
+  assert.equal(getDayStarNumber(2026, 6, 19), 9);
+  assert.equal(getDayStarNumber(2026, 6, 20), 8);
+  assert.equal(getDayStarNumber(2026, 6, 28), 9 - (9 % 9)); // 9日後は一巡して九紫
+  assert.equal(getDayStarNumber(2025, 12, 22), 2);
+  // どの日も1〜9
+  const d = new Date(2026, 0, 1);
+  for (let i = 0; i < 800; i++, d.setDate(d.getDate() + 1)) {
+    const n = getDayStarNumber(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    assert.ok(n >= 1 && n <= 9);
+  }
+});
+
+test('日の九星と本命星の関係: 日の星が生む+4／同じ+2／日の星が剋す-4', () => {
+  // 2025-12-21 は一白（水）。木の本命星は、水に生まれる=+4。火の本命星は、水に剋される=-4。水の本命星は同じ=+2
+  assert.equal(getDayStarPoints(2025, 12, 21, '木'), 4 * DAY_STAR_WEIGHT);
+  assert.equal(getDayStarPoints(2025, 12, 21, '火'), -4 * DAY_STAR_WEIGHT);
+  assert.equal(getDayStarPoints(2025, 12, 21, '水'), 2 * DAY_STAR_WEIGHT);
 });

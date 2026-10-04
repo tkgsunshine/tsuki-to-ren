@@ -270,13 +270,8 @@ const solarApparentLongitude = (jd) => {
     return ((lambda % 360) + 360) % 360;
 };
 const setsuCache = new Map();
-/** その年（暦年）の節 idx（0=小寒 … 11=大雪）の時刻（UTCのミリ秒） */
-export function getSetsuTimeMs(year, idx) {
-    const key = `${year}:${idx}`;
-    const hit = setsuCache.get(key);
-    if (hit !== undefined)
-        return hit;
-    const angle = SETSU_ANGLES[idx];
+/** 太陽の視黄経が angle 度（-90〜0〜285…の表記は、春分を0として年内の位置にそろえた値）になる時刻（UTCのミリ秒）。year の3月20日ごろを起点にニュートン法で詰める */
+function solveSolarLongitudeMs(year, angle) {
     // 春分（黄経0度）は3月20.5日ごろ。そこからの角度で、おおよその日を見積もり、ニュートン法で詰める
     const march = Date.UTC(year, 2, 20, 12) / 86400000 + 2440587.5;
     let jd = march + ((angle >= 285 ? angle - 360 : angle) / 360) * 365.2422;
@@ -286,7 +281,15 @@ export function getSetsuTimeMs(year, idx) {
         if (Math.abs(diff) < 1e-7)
             break;
     }
-    const ms = Math.round((jd - 2440587.5) * 86400000);
+    return Math.round((jd - 2440587.5) * 86400000);
+}
+/** その年（暦年）の節 idx（0=小寒 … 11=大雪）の時刻（UTCのミリ秒） */
+export function getSetsuTimeMs(year, idx) {
+    const key = `${year}:${idx}`;
+    const hit = setsuCache.get(key);
+    if (hit !== undefined)
+        return hit;
+    const ms = solveSolarLongitudeMs(year, SETSU_ANGLES[idx]);
     setsuCache.set(key, ms);
     return ms;
 }
@@ -294,6 +297,47 @@ export function getSetsuTimeMs(year, idx) {
 export const getRisshunMs = (year) => getSetsuTimeMs(year, 1);
 /** 生年月日だけで時刻が不明な場合に使う「その日の日本時間の正午」（UTCのミリ秒） */
 const jstNoonMs = (year, month, day) => Date.UTC(year, month - 1, day, 3, 0, 0);
+// ───────── 九星気学の日盤（日の九星） ─────────
+// 日の九星は、冬至に最も近い甲子の日から「陽遁」（一白から順に増える）、夏至に最も近い甲子の日から「陰遁」（九紫から順に減る）で巡る。
+// 切替の甲子日は、冬至・夏至の日（日本時間）の前後で、近いほうを採る。
+const JST_MS = 9 * 3600000;
+const dayNumberJst = (ms) => Math.floor((ms + JST_MS) / 86400000); // 1970-01-01 を 0 とした日本時間の日数
+/** 冬至・夏至の日に最も近い甲子の日（日数）。前後が同じ近さなら前のほうを採る */
+function nearestKoshiDay(solsticeMs) {
+    const day = dayNumberJst(solsticeMs);
+    const prev = day - ((((17 + day) % 60) + 60) % 60);
+    return day - prev <= prev + 60 - day ? prev : prev + 60;
+}
+/** その日（年月日）の日の九星（1=一白〜9=九紫）。日盤 */
+export function getDayStarNumber(year, month, day) {
+    const dayNumber = Math.round((Date.UTC(year, month - 1, day) - Date.UTC(1970, 0, 1)) / 86400000);
+    const starts = [];
+    for (const y of [year - 1, year, year + 1]) {
+        starts.push({ day: nearestKoshiDay(solveSolarLongitudeMs(y + 1, -90)), yang: true }); // 冬至（y年12月）
+        starts.push({ day: nearestKoshiDay(solveSolarLongitudeMs(y, 90)), yang: false }); // 夏至（y年6月）
+    }
+    starts.sort((a, b) => a.day - b.day);
+    let cur = starts[0];
+    for (const x of starts)
+        if (x.day <= dayNumber)
+            cur = x;
+    const k = (dayNumber - cur.day) % 9;
+    return cur.yang ? k + 1 : 9 - k;
+}
+const DAY_STAR_ELEMENT = ['', '水', '土', '木', '木', '土', '金', '金', '土', '火']; // 一白〜九紫の五行（index = 九星の番号）
+/**
+ * その日の日盤の中宮の星（日の九星）と、本命星の五行の関係の点数。九星気学の「日の星と本命星の相生・比和・相剋」。
+ * 日の星が本命星を生む=+4／同じ五行=+2／本命星が日の星を生む（力を出す）=-1／本命星が日の星を剋す=0／日の星が本命星を剋す=-4。
+ * 点数への換算の重みは、アプリが決めた値。方位（五黄殺・暗剣殺など）は、対象外。
+ */
+export const DAY_STAR_WEIGHT = 1;
+export function getDayStarPoints(year, month, day, honmeiElement) {
+    const order = ['木', '火', '土', '金', '水'];
+    const dayElement = DAY_STAR_ELEMENT[getDayStarNumber(year, month, day)];
+    const diff = (order.indexOf(honmeiElement) - order.indexOf(dayElement) + 5) % 5; // 日の星から見た本命星
+    const points = [2, 4, -4, 0, -1][diff]; // 0=同じ／1=日の星が生む／2=日の星が剋す／3=本命星が剋す／4=本命星が生む
+    return DAY_STAR_WEIGHT * points;
+}
 /** 時刻 ms の月支（0=子 … 11=亥）と、立春で区切った年（四柱推命の年）を返す */
 function getSetsuMonthAt(ms) {
     const jstYear = new Date(ms + 9 * 3600000).getUTCFullYear();
@@ -1489,7 +1533,15 @@ export function generateFortuneResult(input, character) {
     // 週次スコア（weeklyScores の2日目以降）と同じ式・同じ強度に揃えている。0 にすると十二支の影響なし（旧仕様）。
     const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
     const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
-    let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + myBranchDaily + oppBranchDaily + juniUnDaily);
+    // 今日の日盤の中宮の星（日の九星）と、本命星の関係（九星気学）。相手がいる場合は、二人の平均。
+    const dayStarOf = (d) => {
+        const mine = getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), myStarObj.element);
+        return hasOpponent && opponentStarObj
+            ? (mine + getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), opponentStarObj.element)) / 2
+            : mine;
+    };
+    const dayStarDaily = dayStarOf(today);
+    let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + myBranchDaily + oppBranchDaily + juniUnDaily + dayStarDaily);
     if (dailyScore > 100)
         dailyScore = 100;
     if (dailyScore < 0)
@@ -1752,7 +1804,7 @@ export function generateFortuneResult(input, character) {
         else {
             const myJuniUn = juniUnPoints(myPillarObj.stem, dayPillar.branch);
             const dayJuniUn = hasOpponent ? (myJuniUn + juniUnPoints(oppPillarObj.stem, dayPillar.branch)) / 2 : myJuniUn;
-            score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact + dayJuniUn);
+            score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact + dayJuniUn + dayStarOf(d));
             if (score > 100)
                 score = 100;
             if (score < 30)
