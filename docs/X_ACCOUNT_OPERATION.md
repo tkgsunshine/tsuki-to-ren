@@ -44,6 +44,12 @@
 ## 手動で投稿案を書く場合
 `@marketing-employee` が `data/x/queue.json` に `status:"scheduled"` で追記してもよい（`id` は `YYYY-MM-DD-slot`、`kind` は `value`/`promo`）。追記後に `node scripts/x/post.mjs --dry-run` と `node --test scripts/x/test.mjs` を実行し、`lint.mjs` の `lintPost` を通すこと。
 
+## 画像つき投稿・キャラ別の「今日の恋愛運」（テスト）
+- キューの投稿に `"image": "public/assets/xxx.jpg"`（リポジトリ内の相対パス）を付けると、`post.mjs` が画像をアップロードして添付する（X API v2 の `/2/media/upload`、失敗したら v1.1 にフォールバック）。画像アップロードが使えるかは、実際の投稿で確認する
+- `scripts/x/character-post.mjs` が、守護獣（十二支）ごとの今日の恋愛運（点数・ひとこと・連絡のおすすめ時間）を、アプリの鑑定ロジック（`fortuneEngine.ts`）で計算して、投稿をキューに追加する。点数は、その十二支の代表的な日付・性別・16タイプ未設定の目安で、本文に「（目安）」と書く。魁罡・極稀は対象外
+  - 実行: `node --experimental-strip-types scripts/x/character-post.mjs --branch=卯 --gender=female --add`
+- サイト公開前（`allowLinks: false`）は、URL・「無料」・誘導を入れない。公開後は、本文にURLを足せる
+
 ## 動作確認コマンド
 ```bash
 node --test scripts/x/test.mjs                              # 単体テスト
