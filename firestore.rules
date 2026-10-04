@@ -14,7 +14,7 @@ service cloud.firestore {
         && request.auth.token.email_verified == true
         && request.resource.data.keys().hasOnly([
           'uid', 'email', 'enabled', 'myName', 'myBirth', 'myGender', 'myMbti',
-          'oppName', 'oppBirth', 'oppGender', 'oppMbti', 'relationship', 'updatedAt'
+          'oppName', 'oppBirth', 'oppGender', 'oppMbti', 'relationship', 'mode', 'character', 'updatedAt'
         ])
         && request.resource.data.uid == uid
         && request.resource.data.email is string
@@ -29,6 +29,8 @@ service cloud.firestore {
         && request.resource.data.myGender is string && request.resource.data.myGender.size() <= 10
         && request.resource.data.oppGender is string && request.resource.data.oppGender.size() <= 10
         && request.resource.data.relationship is string && request.resource.data.relationship.size() <= 20
+        && request.resource.data.mode in ['single', 'match']
+        && request.resource.data.character in ['ren', 'tsuki']
         && request.resource.data.updatedAt == request.time;
     }
 

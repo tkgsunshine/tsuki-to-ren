@@ -392,6 +392,8 @@ export interface EmailSubscriptionData {
   oppGender?: 'male' | 'female';
   oppMbti?: string;
   relationship?: string;
+  mode?: 'single' | 'match';
+  character?: 'ren' | 'tsuki';
 }
 
 /**
@@ -416,7 +418,9 @@ export const saveEmailSubscriptionData = async (data: EmailSubscriptionData): Pr
       oppBirth: data.oppBirth || '',
       oppGender: data.oppGender || '',
       oppMbti: data.oppMbti || 'UNKNOWN',
-      relationship: data.relationship || '片思い中',
+      relationship: data.relationship || 'single',
+      mode: data.mode === 'single' ? 'single' : 'match',
+      character: data.character === 'ren' ? 'ren' : 'tsuki',
       updatedAt: serverTimestamp()
     }, { merge: true });
     return true;

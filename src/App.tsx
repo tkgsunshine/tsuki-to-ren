@@ -2464,7 +2464,9 @@ function App() {
                   oppBirth: oppBirth || '',
                   oppGender: oppGender,
                   oppMbti: oppMbti,
-                  relationship: relationship
+                  relationship: relationship,
+                  mode: mode,
+                  character: selectedCharacter
                 });
                 if (!saved) {
                   alert('通知の登録に失敗しました。ログインし直してから、もう一度お試しください。');
