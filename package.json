@@ -8,7 +8,7 @@
     "build": "node scripts/build-engine.js && tsc -b && vite build && node scripts/build-sitemap.js && node scripts/prerender-columns.js && node scripts/prerender-seo-pages.js",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test:engine": "node --experimental-strip-types --test scripts/test-fortune-engine.mjs"
+    "test:engine": "node --experimental-strip-types --test scripts/test-fortune-engine.mjs scripts/test-solar-terms.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

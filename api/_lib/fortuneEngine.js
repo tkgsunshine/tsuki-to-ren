@@ -151,11 +151,12 @@ export function calculateYearPillar(year) {
         bIdx += 12;
     return { stem: stems[sIdx], branch: branches[bIdx] };
 }
-// 対象年月の月柱 (Month Pillar) - 五虎遁月法
+// 対象年月の月柱 (Month Pillar) - 五虎遁月法。
+// 月柱は暦の月ではなく「節入り」で切り替わる（寅月は立春〜啓蟄）。暦の月 month の月柱は、その月の15日（日本時間の正午）が属する節月とする。
+// 月の天干は、その時点の年柱（立春で切り替え）の天干から五虎遁で決める。
 export function calculateMonthPillar(year, month) {
-    const monthBranchIdx = (month + 1) % 12; // 1月=寅(idx 2), 2月=卯(idx 3)...
-    const yearStemIdx = (year - 4) % 10;
-    const normalizedYearStemIdx = yearStemIdx < 0 ? yearStemIdx + 10 : yearStemIdx;
+    const { branchIdx, sexagenaryYear } = getSetsuMonthAt(jstNoonMs(year, month, 15));
+    const yearStemIdx = (((sexagenaryYear - 4) % 10) + 10) % 10;
     const startStemIdxMap = {
         0: 2, 5: 2, // 甲/己 -> 丙寅
         1: 4, 6: 4, // 乙/庚 -> 戊寅
@@ -163,9 +164,10 @@ export function calculateMonthPillar(year, month) {
         3: 8, 8: 8, // 丁/壬 -> 壬寅
         4: 0, 9: 0 // 戊/癸 -> 甲寅
     };
-    const janStartStem = startStemIdxMap[normalizedYearStemIdx] ?? 2;
-    const monthStemIdx = (janStartStem + (month - 1)) % 10;
-    return { stem: stems[monthStemIdx], branch: branches[monthBranchIdx] };
+    const toraStartStem = startStemIdxMap[yearStemIdx] ?? 2;
+    const offsetFromTora = (branchIdx - 2 + 12) % 12; // 寅=0, 卯=1, … 丑=11
+    const monthStemIdx = (toraStartStem + offsetFromTora) % 10;
+    return { stem: stems[monthStemIdx], branch: branches[branchIdx] };
 }
 const stemReadings = {
     '甲': 'きのえ', '乙': 'きのと', '丙': 'ひのえ', '丁': 'ひのと',
@@ -187,17 +189,74 @@ export function getPillarWithReading(pillar) {
     }
     return pillar;
 }
-// 生年月日から九星気学の本命星を算出する
+// ───────── 二十四節気のうち「節」（立春・啓蟄・清明…）の計算 ─────────
+// 四柱推命の年柱は「立春」、月柱は「節入り」で切り替わる。九星気学の本命星も立春で切り替わる。
+// 太陽の視黄経（Meeus「Astronomical Algorithms」の低精度式。精度およそ0.01度＝約15分）が、
+// 節ごとの角度に達する時刻を求める。生年月日だけで出生時刻が不明なため、判定には日本時間の正午を使う。
+const SETSU_ANGLES = [285, 315, 345, 15, 45, 75, 105, 135, 165, 195, 225, 255]; // 小寒・立春・啓蟄・清明・立夏・芒種・小暑・立秋・白露・寒露・立冬・大雪
+const SETSU_MONTH_BRANCH_IDX = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0]; // 丑・寅・卯・辰・巳・午・未・申・酉・戌・亥・子
+const solarApparentLongitude = (jd) => {
+    const T = (jd - 2451545.0) / 36525;
+    const rad = Math.PI / 180;
+    const L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+    const M = (357.52911 + 35999.05029 * T - 0.0001537 * T * T) * rad;
+    const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M)
+        + (0.019993 - 0.000101 * T) * Math.sin(2 * M)
+        + 0.000289 * Math.sin(3 * M);
+    const omega = (125.04 - 1934.136 * T) * rad;
+    const lambda = L0 + C - 0.00569 - 0.00478 * Math.sin(omega);
+    return ((lambda % 360) + 360) % 360;
+};
+const setsuCache = new Map();
+/** その年（暦年）の節 idx（0=小寒 … 11=大雪）の時刻（UTCのミリ秒） */
+export function getSetsuTimeMs(year, idx) {
+    const key = `${year}:${idx}`;
+    const hit = setsuCache.get(key);
+    if (hit !== undefined)
+        return hit;
+    const angle = SETSU_ANGLES[idx];
+    // 春分（黄経0度）は3月20.5日ごろ。そこからの角度で、おおよその日を見積もり、ニュートン法で詰める
+    const march = Date.UTC(year, 2, 20, 12) / 86400000 + 2440587.5;
+    let jd = march + ((angle >= 285 ? angle - 360 : angle) / 360) * 365.2422;
+    for (let i = 0; i < 8; i++) {
+        const diff = ((angle - solarApparentLongitude(jd) + 540) % 360) - 180;
+        jd += diff / 0.9856473;
+        if (Math.abs(diff) < 1e-7)
+            break;
+    }
+    const ms = Math.round((jd - 2440587.5) * 86400000);
+    setsuCache.set(key, ms);
+    return ms;
+}
+/** 立春の時刻（UTCのミリ秒） */
+export const getRisshunMs = (year) => getSetsuTimeMs(year, 1);
+/** 生年月日だけで時刻が不明な場合に使う「その日の日本時間の正午」（UTCのミリ秒） */
+const jstNoonMs = (year, month, day) => Date.UTC(year, month - 1, day, 3, 0, 0);
+/** 時刻 ms の月支（0=子 … 11=亥）と、立春で区切った年（四柱推命の年）を返す */
+function getSetsuMonthAt(ms) {
+    const jstYear = new Date(ms + 9 * 3600000).getUTCFullYear();
+    const times = [];
+    for (const y of [jstYear - 1, jstYear]) {
+        SETSU_ANGLES.forEach((_, i) => times.push({ t: getSetsuTimeMs(y, i), branchIdx: SETSU_MONTH_BRANCH_IDX[i] }));
+    }
+    times.sort((a, b) => a.t - b.t);
+    let branchIdx = 0;
+    for (const x of times)
+        if (x.t <= ms)
+            branchIdx = x.branchIdx;
+    return { branchIdx, sexagenaryYear: ms >= getRisshunMs(jstYear) ? jstYear : jstYear - 1 };
+}
+// 生年月日から九星気学の本命星を算出する（年の切替は立春）
 export function calculateHonmeiStar(birthDate) {
     const year = birthDate.getFullYear();
     const month = birthDate.getMonth() + 1;
     const day = birthDate.getDate();
+    // 九星気学の年は立春で切り替わる（年により2/3〜2/5）。出生時刻が不明なので、その日の日本時間の正午で判定する
     let targetYear = year;
-    // 節分（立春の前日）付近の簡易判定。2月4日以前は前年とする。
-    if (month < 2 || (month === 2 && day < 4)) {
+    if (jstNoonMs(year, month, day) < getRisshunMs(year)) {
         targetYear -= 1;
     }
-    // 2026年が「一白水星 (1)」であることを基準にした簡易公式
+    // 2026年が「一白水星 (1)」であることを基準に、年から本命星を求める
     let starNum = 1 - (targetYear - 2026) % 9;
     while (starNum <= 0)
         starNum += 9;
