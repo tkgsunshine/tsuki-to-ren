@@ -506,7 +506,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         logging: false
       });
 
-      const filename = `月と蓮_${zoomedImg?.astrologyName || '守護化身'}_カード.jpg`;
+      const filename = `月と蓮_${zoomedImg?.astrologyName || '守護獣'}_カード.jpg`;
 
       // Convert to Blob for direct high-speed download & WebShare
       const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
@@ -519,7 +519,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
               files: [file],
-              title: '月と蓮 守護化身カード'
+              title: '月と蓮 守護獣カード'
             });
             setAvatarSavedSuccess(true);
             setTimeout(() => setAvatarSavedSuccess(false), 2500);
@@ -960,7 +960,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   textShadow: '0 0 10px rgba(254, 240, 138, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
                   letterSpacing: '0.05em'
                 }}>
-                  ✦ あなたの守護化身 ✦
+                  ✦ あなたの守護獣 ✦
                 </span>
               </div>
 
@@ -984,9 +984,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}
                 onClick={() => setZoomedImg({ 
                   src: activeResult.myAvatarUrl || '', 
-                  headerTitle: '✦ あなたの守護化身 ✦',
+                  headerTitle: '✦ あなたの守護獣 ✦',
                   nickname: myName || 'あなた',
-                  astrologyName: activeResult.myAstrologyName || '守護化身',
+                  astrologyName: activeResult.myAstrologyName || '守護獣',
                   astrologyTheme: activeResult.myAstrologyTheme || '',
                   isKaigo: activeResult.isKaigo,
                   isRare: activeResult.isRare,
@@ -1047,7 +1047,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
-                <span>※タップで守護化身画像を保存できます</span>
+                <span>※タップで守護獣画像を保存できます</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.25rem' }}>
@@ -1254,7 +1254,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   textShadow: '0 0 10px rgba(254, 240, 138, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
                   letterSpacing: '0.05em'
                 }}>
-                  ✦ お相手の守護化身 ✦
+                  ✦ お相手の守護獣 ✦
                 </span>
               </div>
 
@@ -1278,9 +1278,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}
                 onClick={() => setZoomedImg({ 
                   src: activeResult.opponentAvatarUrl || '', 
-                  headerTitle: '✦ お相手の守護化身 ✦',
+                  headerTitle: '✦ お相手の守護獣 ✦',
                   nickname: opponentName || 'お相手',
-                  astrologyName: activeResult.opponentAstrologyName || '守護化身',
+                  astrologyName: activeResult.opponentAstrologyName || '守護獣',
                   astrologyTheme: activeResult.opponentAstrologyTheme || '',
                   isKaigo: activeResult.opponentIsKaigo,
                   isRare: activeResult.opponentIsRare,
@@ -1341,7 +1341,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
-                <span>※タップで守護化身画像を保存できます</span>
+                <span>※タップで守護獣画像を保存できます</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.25rem' }}>
