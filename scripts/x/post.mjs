@@ -139,14 +139,17 @@ async function main() {
   }
 
   if (dryRun) {
-    console.log(`[dry-run] 投稿予定 ${post.id} (${post.kind})${post.image ? ' 画像: ' + post.image : ''}\n${post.text}`);
+    console.log(`[dry-run] 投稿予定 ${post.id} (${post.kind})${post.images ? ' 画像: ' + post.images.join(', ') : post.image ? ' 画像: ' + post.image : ''}\n${post.text}`);
     return;
   }
 
   const payload = { text: post.text };
-  if (post.image) {
+  const imagePaths = (post.images && post.images.length ? post.images : post.image ? [post.image] : []).slice(0, 4);
+  if (imagePaths.length) {
     try {
-      payload.media = { media_ids: [await uploadMedia(post.image)] };
+      const ids = [];
+      for (const img of imagePaths) ids.push(await uploadMedia(img));
+      payload.media = { media_ids: ids };
     } catch (e) {
       post.lastError = String(e.message).slice(0, 600);
       changed = true;
