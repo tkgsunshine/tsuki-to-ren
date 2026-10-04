@@ -97,6 +97,31 @@ const branchElements = {
 };
 // 今日の運勢（dailyScore）に足す、十二支の関係の強さ。1 = 週次スコアの2日目以降と同じ強度、0 = 足さない
 export const DAILY_BRANCH_WEIGHT = 1;
+// ───────── 十二運（長生・沐浴・冠帯・建禄・帝旺・衰・病・死・墓・絶・胎・養）─────────
+// 日主（十干）が、ある十二支でどの「運の段階」にあるかを表す四柱推命の伝統的な考え方。
+// 陽干は十二支を順に、陰干は逆に進む。長生の位置は日本で一般的な表（戊は丙と、己は丁と同じ）。
+const JUNIUN_NAMES = ['長生', '沐浴', '冠帯', '建禄', '帝旺', '衰', '病', '死', '墓', '絶', '胎', '養'];
+const JUNIUN_CHOSEI_BRANCH = {
+    '甲': 11, '乙': 6, '丙': 2, '丁': 9, '戊': 2, '己': 9, '庚': 5, '辛': 0, '壬': 8, '癸': 3
+}; // 十二支の番号（子=0 … 亥=11）: 甲=亥、乙=午、丙=寅、丁=酉、戊=寅、己=酉、庚=巳、辛=子、壬=申、癸=卯
+const YANG_STEMS = ['甲', '丙', '戊', '庚', '壬'];
+/** 日主 stem が、十二支 branch でどの運の段階か（例: 甲×子=沐浴、丙×午=帝旺） */
+export function getJuniUn(stem, branch) {
+    const chosei = JUNIUN_CHOSEI_BRANCH[stem];
+    const bi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'].indexOf(branch);
+    if (chosei === undefined || bi < 0)
+        return '胎';
+    const step = YANG_STEMS.includes(stem) ? (bi - chosei + 12) % 12 : (chosei - bi + 12) % 12;
+    return JUNIUN_NAMES[step];
+}
+// 運の段階を点数に換算する重み（伝統には点数の概念がないため、アプリが決めた値）。
+// 強い段階（長生〜帝旺）はプラス、弱い段階（衰〜絶）はマイナス、移行の段階（沐浴・胎・養）は小さめ。
+const JUNIUN_POINTS = {
+    '長生': 5, '沐浴': 1, '冠帯': 6, '建禄': 8, '帝旺': 8, '衰': -2, '病': -5, '死': -7, '墓': -4, '絶': -6, '胎': 0, '養': 2
+};
+const juniUnPoints = (stem, branch) => JUNIUN_POINTS[getJuniUn(stem, branch)] ?? 0;
+// 単身の基本点の定数（旧版の基本点の平均 約82.8 に、新しい式の平均が合うように決めた値）
+const SOLO_BASE_CONSTANT = 80;
 // 地支の相性・生剋影響度算出 (支合・三合・六沖・五行生剋)
 const getBranchImpact = (branchA, branchB) => {
     if (!branchA || !branchB)
@@ -1401,8 +1426,14 @@ export function generateFortuneResult(input, character) {
         baseScore = fourPillarsScore + starScore + mbtiScore;
     }
     else if (!hasOpponent) {
-        // 自分だけの場合は、自身の命式のバランス度からベーススコア（自己恋愛指数）を算出
-        baseScore = 65 + (myStarObj.num % 4) * 8 + (myPillarObj.stem.charCodeAt(0) % 5) * 2;
+        // 自分だけの場合のベーススコア（自己恋愛指数）。
+        //  ・日柱の十二運（日主が自分の日支でどの運の段階か＝本人のエネルギー）… 四柱推命
+        //  ・本命星の五行と日主の五行の調和（相生+8／同+4／相剋-6）… 九星気学と四柱推命の掛け合わせ（アプリ独自）
+        // 点数への換算の重みは、アプリが決めた値（旧版は、本命星の番号と十干の「文字コード」の余りを使っており、占術の根拠がなかった）。
+        const soloEnergy = juniUnPoints(myPillarObj.stem, myPillarObj.branch);
+        const soloStarRel = elementRelations[myStarObj.element]?.[stemElements[myPillarObj.stem]] || 'same';
+        const soloStarHarmony = soloStarRel === 'producing' ? 8 : (soloStarRel === 'same' ? 4 : -6);
+        baseScore = SOLO_BASE_CONSTANT + soloEnergy + soloStarHarmony;
     }
     if (baseScore > 100)
         baseScore = 100;
@@ -1434,13 +1465,15 @@ export function generateFortuneResult(input, character) {
     const todayPillar = calculateDayPillar(today);
     const myDailyImpact = getDailyStemImpact(todayPillar.stem, myPillarObj.stem);
     const oppDailyImpact = hasOpponent ? getDailyStemImpact(todayPillar.stem, oppPillarObj.stem) : 0;
-    // 日にちの揺らぎ（サイン波）を隠し味として少々プラス
-    const minorSwing = Math.sin(todaySeed + baseScore) * 8;
+    // 今日の十二支が、自分（と相手）の日主にとってどの運の段階か（十二運）。日ごとの運気の波として足す。
+    // 旧版は、日付から作った疑似的な揺らぎ（sin関数）を足していた。相手がいる場合は、二人の平均。
+    const myJuniUnDaily = juniUnPoints(myPillarObj.stem, todayPillar.branch);
+    const juniUnDaily = hasOpponent ? (myJuniUnDaily + juniUnPoints(oppPillarObj.stem, todayPillar.branch)) / 2 : myJuniUnDaily;
     // 今日の十二支と、自分（と相手）の十二支の関係（支合・三合・六沖・五行の生剋）も足す。
     // 週次スコア（weeklyScores の2日目以降）と同じ式・同じ強度に揃えている。0 にすると十二支の影響なし（旧仕様）。
     const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
     const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
-    let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + myBranchDaily + oppBranchDaily + minorSwing);
+    let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + myBranchDaily + oppBranchDaily + juniUnDaily);
     if (dailyScore > 100)
         dailyScore = 100;
     if (dailyScore < 0)
@@ -1701,7 +1734,9 @@ export function generateFortuneResult(input, character) {
             score = dailyScore;
         }
         else {
-            score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact);
+            const myJuniUn = juniUnPoints(myPillarObj.stem, dayPillar.branch);
+            const dayJuniUn = hasOpponent ? (myJuniUn + juniUnPoints(oppPillarObj.stem, dayPillar.branch)) / 2 : myJuniUn;
+            score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact + dayJuniUn);
             if (score > 100)
                 score = 100;
             if (score < 30)
