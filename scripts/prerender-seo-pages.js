@@ -467,11 +467,11 @@ const homeSemanticHtml = `
         【公式】月と蓮 | 約2.7億通りの四柱推命×九星気学×16タイプ本格恋愛相性診断
       </h1>
       <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; max-width: 580px; margin: 0 auto;">
-        東洋最高峰の四柱推命・九星気学と西洋の16タイプ（MBTI）心理統計学を融合した完全無料の本格恋愛占い『月と蓮』。片思い・復縁・好きな人との本日の相性バイオリズム、LINEを送るべき吉時間、お相手の取扱説明書（トリセツ）、奇跡のレア属性「魁罡（かいごう）」「極星」を即座に精密鑑定します。
+        東洋最高峰の四柱推命・九星気学と西洋の16タイプ（MBTI）心理統計学を融合した無料の本格恋愛占い『月と蓮』。片思い・復縁・好きな人との本日の相性バイオリズム、LINEを送るべき吉時間、お相手の取扱説明書（トリセツ）、奇跡のレア属性「魁罡（かいごう）」「極星」を即座に精密鑑定します。
       </p>
       <div style="margin-top: 1.5rem;">
         <a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.85rem 2.2rem; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1.05rem; box-shadow: 0 4px 20px rgba(226,192,116,0.35);">
-          今すぐ完全無料で恋愛相性を占う
+          今すぐ無料で恋愛相性を占う
         </a>
       </div>
     </header>
