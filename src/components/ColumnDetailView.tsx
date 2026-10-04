@@ -49,7 +49,7 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
         }}
       >
         <Sparkles size={14} />
-        <span>完全無料・約2.7億通り即時鑑定</span>
+        <span>無料・約2.7億通り即時鑑定</span>
       </div>
       <Heading
         className="font-serif gold-text"
