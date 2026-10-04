@@ -44,11 +44,16 @@
 ## 手動で投稿案を書く場合
 `@marketing-employee` が `data/x/queue.json` に `status:"scheduled"` で追記してもよい（`id` は `YYYY-MM-DD-slot`、`kind` は `value`/`promo`）。追記後に `node scripts/x/post.mjs --dry-run` と `node --test scripts/x/test.mjs` を実行し、`lint.mjs` の `lintPost` を通すこと。
 
-## 画像つき投稿・キャラ別の「今日の恋愛運」（テスト）
-- キューの投稿に `"image": "public/assets/xxx.jpg"`（リポジトリ内の相対パス）を付けると、`post.mjs` が画像をアップロードして添付する（X API v2 の `/2/media/upload`、失敗したら v1.1 にフォールバック）。画像アップロードが使えるかは、実際の投稿で確認する
-- `scripts/x/character-post.mjs` が、守護獣（十二支）ごとの今日の恋愛運（点数・ひとこと・連絡のおすすめ時間）を、アプリの鑑定ロジック（`fortuneEngine.ts`）で計算して、投稿をキューに追加する。点数は、その十二支の代表的な日付・性別・16タイプ未設定の目安で、本文に「（目安）」と書く。魁罡・極稀は対象外
-  - 実行: `node --experimental-strip-types scripts/x/character-post.mjs --branch=卯 --gender=female --add`
+## 画像つき投稿・守護獣（60タイプ）の「今日の恋愛運」
+- 用語は**「守護獣」**に統一（アプリの結果画面も「守護獣」。全60タイプ＝日柱60パターン。画像は動物12種×男女の24枚）
+- `scripts/x/lib/characters.mjs`: アプリの鑑定ロジック（`fortuneEngine.ts`）で、**60パターンすべて**の今日の恋愛運を算出する。同じ守護獣でも本命星（9種）で点数が変わるため、9つの本命星すべてで算出し、**平均**を点数、最小〜最大を併記する。ひとこと・連絡時間は、平均に最も近い本命星の結果。レア属性（魁罡・極稀）の演出は対象外
+- `scripts/x/character-post.mjs`: その日の守護獣（既定: 日柱に対応する守護獣。60日で一巡）の投稿を作り、キューに追加（`--add`）。署名は日替わりで「—月」「—蓮」。女性版・男性版の2枚の画像を付ける
+  - 実行: `node --experimental-strip-types scripts/x/character-post.mjs --date=2026-10-05 --add`
+- キューの投稿に `images`（最大4枚）または `image`（リポジトリ内の相対パス）を付けると、`post.mjs` が画像をアップロードして添付する（`/2/media/upload`、失敗したら v1.1）
+- 本文の表記ルール: 名前にふりがな（例: 辛猪（かのと・いのしし））と簡単な説明（＝宝石貴族×いのししの守護獣）を付け、「守護獣は全60タイプ。診断は近日公開」と明記する。「24タイプ」とは書かない
+- 毎日の投稿の署名は「—月」「—蓮」。「- 本格恋愛占い 月と蓮 運営 -」は、プロフィールと固定ポストだけ
 - サイト公開前（`allowLinks: false`）は、URL・「無料」・誘導を入れない。公開後は、本文にURLを足せる
+- テスト: `node --experimental-strip-types --test scripts/x/test-characters.mjs`
 
 ## 動作確認コマンド
 ```bash

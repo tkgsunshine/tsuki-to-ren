@@ -99,5 +99,18 @@
     "createdAt": "2026-10-04T12:39:28.572Z",
     "postedAt": "2026-10-04T12:40:19.149Z",
     "tweetId": "2106726107265515624"
+  },
+  {
+    "id": "chara-2026-10-04-辛猪",
+    "date": "2026-10-04",
+    "slot": "night",
+    "kind": "value",
+    "text": "【今日の辛猪（かのと・いのしし）タイプの恋愛運】\n＝宝石貴族×いのししの守護獣\n今日の点数：87点（本命星で82〜99点）\n新しい挑戦や積極的発信で評価が高まる日\n連絡のおすすめ時間：18:00〜20:00\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n—蓮",
+    "images": [
+      "public/assets/astrology_boar_sample.jpg",
+      "public/assets/astrology_boar_sample_male.jpg"
+    ],
+    "status": "scheduled",
+    "createdAt": "2026-10-04T13:13:36.630Z"
   }
 ]

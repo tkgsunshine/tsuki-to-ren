@@ -1,60 +1,45 @@
-// 守護獣（日柱）ごとの「今日の恋愛運」投稿を、アプリの鑑定ロジックで作ってキューに追加する。
-// 使い方: node --experimental-strip-types scripts/x/character-post.mjs --branch=卯 [--gender=female] [--id=<投稿ID>] [--slot=night] [--add]
-//   --add を付けないと内容を表示するだけ。点数は、その十二支の代表的な日付・性別・16タイプ未設定で計算した目安。
-import path from 'node:path';
-import { generateFortuneResult, calculateDayPillar } from '../../src/utils/fortuneEngine.ts';
-import { jstDateString } from './lib/signals.mjs';
+// 守護獣（日柱60パターン）の「今日の恋愛運」投稿を、アプリの鑑定ロジックで作って、キューに追加する。
+// 使い方: node --experimental-strip-types scripts/x/character-post.mjs [--date=YYYY-MM-DD] [--pick=day|<守護獣名 例:癸兎>] [--slot=night] [--id=<投稿ID>] [--add]
+//   --pick=day（既定）: その日の日柱に対応する守護獣（60日で一巡）
+//   --add を付けないと内容を表示するだけ。点数は、9つの本命星すべてで算出した平均（最小〜最大を併記）。
+import { computeAll, pickByDay } from './lib/characters.mjs';
+import { jstDateString, dayPillar } from './lib/signals.mjs';
 import { lintPost } from './lib/lint.mjs';
 import { readQueue, writeQueue, readConfig } from './lib/queue.mjs';
 
 const arg = (k, d = '') => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').slice(k.length + 3) || d;
-const branch = arg('branch', '卯');
-const gender = arg('gender', 'female') === 'male' ? 'male' : 'female';
+const date = arg('date', jstDateString());
+const pick = arg('pick', 'day');
 const slot = arg('slot', 'night');
 const add = process.argv.includes('--add');
 
-// 代表の生年月日（その十二支の日柱になる日）を探す
-let d = new Date(1995, 0, 1);
-let birth = '';
-for (let i = 0; i < 400 && !birth; i++) {
-  if (calculateDayPillar(d).branch === branch) {
-    birth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
-  d.setDate(d.getDate() + 1);
-}
-if (!birth) throw new Error(`十二支が不正: ${branch}`);
+const all = computeAll(date);
+const c = pick === 'day' ? pickByDay(all, date) : all.find((x) => x.name === pick);
+if (!c) throw new Error(`守護獣が見つかりません: ${pick}`);
 
-const r = generateFortuneResult(
-  { myName: 'あなた', myBirth: birth, myMbti: 'UNKNOWN', myGender: gender, relationship: 'single' },
-  'tsuki',
-);
-if (r.isKaigo || r.isRare) {
-  console.error('レア属性（魁罡・極稀）の演出になったため、別の日付で作り直してください');
-  process.exit(1);
-}
-
-// アプリの文面から、専門用語（括弧内の通変星名など）と UNKNOWN を除いてひとことにする
-const lines = String(r.dailyLuckTitle || '').split('\n').map((s) => s.trim()).filter(Boolean);
-const oneLine = (lines[1] || lines[0] || '').replace(/【.*?】/g, '').trim();
-const hours = String(r.bestContactHour || '').split('（')[0].replace(/\s+/g, '').replace('〜', '〜');
-const name = r.myAstrologyName; // 例: 癸兎
+// 署名は、日替わりで月・蓮を交代
+const sign = dayPillar(date).index % 2 === 0 ? '—月' : '—蓮';
+const score = c.min === c.max ? `${c.avg}点` : `${c.avg}点（本命星で${c.min}〜${c.max}点）`;
 const text = [
-  `【今日の恋愛運】${name}タイプ`,
-  `今日の点数：${r.dailyScore}点（目安）`,
-  oneLine,
-  hours ? `連絡のおすすめ時間：${hours}` : '',
-  'あなたの守護獣はどのタイプ？',
-  '—月と蓮 運営',
+  `【今日の${c.name}（${c.stemYomi}・${c.animalYomi}）タイプの恋愛運】`,
+  `＝${c.theme}×${c.animalYomi}の守護獣`,
+  `今日の点数：${score}`,
+  c.oneLine,
+  c.hours ? `連絡のおすすめ時間：${c.hours}` : '',
+  '守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開',
+  sign,
 ].filter(Boolean).join('\n');
 
-const image = `public${r.myAvatarUrl}`; // 例: public/assets/astrology_sample.jpg
-const today = jstDateString();
-const id = arg('id', `chara-${today}-${branch}`);
-const item = { id, date: today, slot, kind: 'value', text, image, status: 'scheduled', createdAt: new Date().toISOString() };
+const id = arg('id', `chara-${date}-${c.name}`);
+const item = {
+  id, date, slot, kind: 'value', text,
+  images: [c.imageF, c.imageM], // 女性版・男性版の2枚
+  status: 'scheduled', createdAt: new Date().toISOString(),
+};
 
 const config = readConfig();
 const problems = lintPost(item, [], { allowLinks: config.allowLinks !== false });
-console.log(JSON.stringify({ birth, pillar: r.myPillar, score: r.dailyScore, image }, null, 1));
+console.log(JSON.stringify({ date, key: c.key, avg: c.avg, min: c.min, max: c.max, images: item.images }, null, 1));
 console.log('---\n' + text + '\n---');
 if (problems.length) {
   console.error('lint不合格:\n - ' + problems.join('\n - '));
