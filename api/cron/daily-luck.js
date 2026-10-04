@@ -1,48 +1,41 @@
 import { Resend } from 'resend';
+import { timingSafeEqual } from 'node:crypto';
+import { getDb } from '../_lib/firestore.js';
+import { signUid } from '../_lib/unsubscribe-token.js';
 
-export default async function handler(req, res) {
-  // 1. Verify Authorization (Vercel Cron header or Secret)
-  const authHeader = req.headers.authorization;
-  const cronSecret = process.env.CRON_SECRET;
-  
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    console.warn('⚠️ Unauthorized cron execution attempt.');
-  }
+const SITE = 'https://www.tsuki-to-ren.com';
+const BATCH_SIZE = 100; // Resend batch limit
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const now = new Date();
-  // Target date in JST (UTC + 9 hours)
-  const jstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  const dateStr = jstNow.toISOString().split('T')[0];
-  const year = jstNow.getFullYear();
-  const month = jstNow.getMonth() + 1;
-  const day = jstNow.getDate();
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  console.log(`🚀 Starting Hasu-to-Tsuki Daily Fortune Email Job for ${year}/${month}/${day} JST...`);
+const isAuthorized = (req, secret) => {
+  const given = Buffer.from(String(req.headers.authorization || ''));
+  const expected = Buffer.from(`Bearer ${secret}`);
+  return given.length === expected.length && timingSafeEqual(given, expected);
+};
 
-  // Today's Luck Generator Helper
-  const calculateDailyLuck = (birthStr) => {
-    if (!birthStr || birthStr.length < 8) return { score: 88, bestHour: '21:30' };
-    const clean = birthStr.replace(/\D/g, '');
-    const bYear = parseInt(clean.slice(0, 4), 10) || 1995;
-    const bMonth = parseInt(clean.slice(4, 6), 10) || 1;
-    const bDay = parseInt(clean.slice(6, 8), 10) || 1;
+// Deterministic daily "luck" from the date and the subscriber's birth date
+const calculateDailyLuck = (birthStr, { year, month, day }) => {
+  const clean = String(birthStr || '').replace(/\D/g, '');
+  if (clean.length < 8) return { score: 88, bestHour: '21:30' };
+  const bYear = parseInt(clean.slice(0, 4), 10) || 1995;
+  const bMonth = parseInt(clean.slice(4, 6), 10) || 1;
+  const bDay = parseInt(clean.slice(6, 8), 10) || 1;
 
-    // Deterministic daily hash
-    const hash = (year * 365 + month * 31 + day + bYear * 12 + bMonth * 31 + bDay) % 100;
-    const score = Math.max(72, Math.min(99, 78 + (hash % 22)));
+  const hash = (year * 365 + month * 31 + day + bYear * 12 + bMonth * 31 + bDay) % 100;
+  const score = Math.max(72, Math.min(99, 78 + (hash % 22)));
+  const hours = ['19:30', '20:15', '21:00', '21:45', '22:30', '23:00'];
+  return { score, bestHour: hours[hash % hours.length] };
+};
 
-    const hours = ['19:30', '20:15', '21:00', '21:45', '22:30', '23:00'];
-    const bestHour = hours[hash % hours.length];
+// Luxury Dark & Gold HTML email template
+const generateEmailHtml = (sub, luck, { year, month, day }, stopUrl) => {
+  const name = sub.myName || 'あなた';
+  const oppName = sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
 
-    return { score, bestHour };
-  };
-
-  // Build Luxury Dark & Gold HTML Email Template
-  const generateEmailHtml = (sub, luck) => {
-    const name = sub.myName || 'あなた';
-    const oppName = sub.oppName ? `とお相手（${sub.oppName}様）` : '';
-
-    return `
+  return `
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -63,7 +56,7 @@ export default async function handler(req, res) {
                 🌙 月と蓮 🪷
               </div>
               <div style="font-size: 11px; color: #e2c074; margin-top: 4px; letter-spacing: 0.05em;">
-                四柱推命 × 九星気学 × 16タイプ 本格恋愛相性占い
+                生年月日 × 16タイプの恋愛相性占い
               </div>
             </td>
           </tr>
@@ -80,7 +73,7 @@ export default async function handler(req, res) {
           <!-- Greeting -->
           <tr>
             <td style="padding: 15px 25px; font-size: 14px; line-height: 1.6; color: #e2e8f0;">
-              ${name} 様${oppName}<br>
+              ${esc(name)} 様${oppName}<br>
               おはようございます。本日も素敵な一日をお過ごしいただけますよう、『月と蓮』守護エンジンより本日の個別バイオリズムをお届けします。
             </td>
           </tr>
@@ -126,7 +119,7 @@ export default async function handler(req, res) {
           <tr>
             <td style="padding: 0 25px 20px; font-size: 13px; line-height: 1.6; color: #cbd5e1;">
               <strong style="color: #fef08a;">✦ 本日のアドバイス：</strong><br>
-              本日は日盤五行の巡りが調和しやすい好運期です。${luck.bestHour}前後に軽い挨拶や共感のメッセージを送ることで、二人の心の距離がグッと縮まります。
+              本日は運気の流れが整いやすい日です。${luck.bestHour}前後に軽い挨拶や共感のメッセージを送ることで、二人の心の距離がグッと縮まります。
             </td>
           </tr>
 
@@ -143,7 +136,7 @@ export default async function handler(req, res) {
           <tr>
             <td style="padding: 15px 20px 25px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 10px; color: #6b7280; line-height: 1.5;">
               本メールは『月と蓮』にて毎朝の運勢通知を有効化された方へお送りしています。<br>
-              運営会社: Ill株式会社 | <a href="https://www.tsuki-to-ren.com/mypage" style="color: #9ca3af;">通知設定の変更・停止はこちら</a>
+              運営会社: Ill株式会社 | <a href="${esc(stopUrl)}" style="color: #9ca3af;">通知の停止はこちら</a>
             </td>
           </tr>
 
@@ -153,53 +146,99 @@ export default async function handler(req, res) {
   </table>
 </body>
 </html>
-    `;
-  };
+  `;
+};
 
-  // 2. Fetch or prepare delivery via Resend API
-  const resendApiKey = process.env.RESEND_API_KEY;
-
-  let deliveryStatus = 'ready';
-  let emailCount = 0;
-
-  if (resendApiKey) {
-    try {
-      const resend = new Resend(resendApiKey);
-      const fromEmail = process.env.RESEND_FROM_EMAIL || '月と蓮 <onboarding@resend.dev>';
-
-      // If subscriber payload passed or mock batch test
-      const testEmail = req.query?.email || req.body?.email;
-      if (testEmail) {
-        const dummyLuck = calculateDailyLuck('19950401');
-        const dummyHtml = generateEmailHtml({ myName: '会員', oppName: '' }, dummyLuck);
-
-        await resend.emails.send({
-          from: fromEmail,
-          to: testEmail,
-          subject: `🌙【月と蓮】本日の相性運勢＆LINE吉時間のお届け (${year}/${month}/${day})`,
-          html: dummyHtml
-        });
-        emailCount = 1;
-        deliveryStatus = 'sent_via_resend';
-        console.log(`✅ Test fortune email sent to ${testEmail} via Resend.`);
-      } else {
-        deliveryStatus = 'resend_ready_waiting_subscribers';
-        console.log('✅ Resend API client initialized and ready for scheduled batch dispatch.');
-      }
-    } catch (e) {
-      console.error('❌ Error sending via Resend API:', e);
-      deliveryStatus = 'error_resend';
-    }
-  } else {
-    console.log('ℹ️ RESEND_API_KEY is not set. Resend client is ready. Set RESEND_API_KEY in Vercel environment variables to enable live delivery.');
+export default async function handler(req, res) {
+  // 1. Authorization: Vercel Cron sends "Authorization: Bearer $CRON_SECRET". Fail closed.
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    return res.status(500).json({ status: 'error', message: 'CRON_SECRET is not configured' });
+  }
+  if (!isAuthorized(req, cronSecret)) {
+    return res.status(401).json({ status: 'error', message: 'Unauthorized' });
   }
 
-  return res.status(200).json({
-    status: 'success',
-    message: 'Daily fortune calculation & 8:00 AM delivery cron completed successfully.',
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    return res.status(500).json({ status: 'error', message: 'RESEND_API_KEY is not configured' });
+  }
+
+  // Target date in JST (UTC + 9h); read with the UTC getters so the server time zone does not matter
+  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const date = { year: jstNow.getUTCFullYear(), month: jstNow.getUTCMonth() + 1, day: jstNow.getUTCDate() };
+  const dateStr = jstNow.toISOString().split('T')[0];
+  const subject = `🌙【月と蓮】本日の運勢＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || '月と蓮 <onboarding@resend.dev>';
+  const resend = new Resend(resendApiKey);
+
+  // 2. Test mode: authorized callers can send one sample mail to check the sender domain (?testEmail=...)
+  const testEmail = typeof req.query?.testEmail === 'string' ? req.query.testEmail.trim() : '';
+  if (testEmail) {
+    if (!EMAIL_RE.test(testEmail)) return res.status(400).json({ status: 'error', message: 'Invalid testEmail' });
+    const sub = { myName: '会員', oppName: '' };
+    const { error } = await resend.emails.send({
+      from: fromEmail,
+      to: testEmail,
+      subject,
+      html: generateEmailHtml(sub, calculateDailyLuck('', date), date, `${SITE}/mypage`)
+    });
+    if (error) {
+      console.error('❌ Resend test send failed:', error.message);
+      return res.status(502).json({ status: 'error', message: 'Resend rejected the test email', detail: error.message });
+    }
+    return res.status(200).json({ status: 'success', mode: 'test', date: dateStr, sent: 1 });
+  }
+
+  // 3. Load the subscribers (Admin SDK bypasses firestore.rules)
+  let subscribers;
+  try {
+    const snap = await getDb().collection('subscriptions').where('enabled', '==', true).get();
+    const seen = new Set();
+    subscribers = snap.docs
+      .map((d) => ({ uid: d.id, ...d.data() }))
+      .filter((s) => typeof s.email === 'string' && EMAIL_RE.test(s.email) && !seen.has(s.email) && seen.add(s.email));
+  } catch (e) {
+    console.error('❌ Could not read subscriptions:', e?.message);
+    return res.status(500).json({ status: 'error', message: 'Could not read subscriptions' });
+  }
+
+  // 4. Send in batches, checking every result (the Resend SDK returns errors instead of throwing)
+  let sent = 0;
+  let failed = 0;
+  for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+    const chunk = subscribers.slice(i, i + BATCH_SIZE);
+    const emails = chunk.map((sub) => {
+      const stopUrl = `${SITE}/api/unsubscribe?uid=${encodeURIComponent(sub.uid)}&t=${signUid(sub.uid, cronSecret)}`;
+      return {
+        from: fromEmail,
+        to: sub.email,
+        subject,
+        html: generateEmailHtml(sub, calculateDailyLuck(sub.myBirth, date), date, stopUrl),
+        headers: { 'List-Unsubscribe': `<${stopUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' }
+      };
+    });
+    try {
+      const { error } = await resend.batch.send(emails);
+      if (error) {
+        failed += chunk.length;
+        console.error('❌ Resend batch failed:', error.message);
+      } else {
+        sent += chunk.length;
+      }
+    } catch (e) {
+      failed += chunk.length;
+      console.error('❌ Resend batch threw:', e?.message);
+    }
+    if (i + BATCH_SIZE < subscribers.length) await sleep(600); // stay under Resend's rate limit
+  }
+
+  console.log(`📮 Daily fortune email ${dateStr}: subscribers=${subscribers.length} sent=${sent} failed=${failed}`);
+  return res.status(failed > 0 ? 500 : 200).json({
+    status: failed > 0 ? 'partial_failure' : 'success',
     date: dateStr,
-    deliveryStatus,
-    emailsSent: emailCount,
-    timestamp: new Date().toISOString()
+    subscribers: subscribers.length,
+    sent,
+    failed
   });
 }

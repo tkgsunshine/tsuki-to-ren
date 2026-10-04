@@ -1281,13 +1281,9 @@ function App() {
                     onClick={() => {
                       if (!isRegistered) {
                         setShowAuthModal(true);
-                      } else if (!isSubscribed) {
-                        setShowPremiumLP(true);
                       } else if (notifyDailyLuck) {
                         setNotifyDailyLuck(false);
-                        if (notifyEmail) {
-                          unsubscribeEmailSubscription(notifyEmail);
-                        }
+                        unsubscribeEmailSubscription();
                       } else {
                         setNotifyEmailInput(notifyEmail || currentUser?.email || '');
                         setShowNotifyEmailModal(true);
@@ -2440,18 +2436,24 @@ function App() {
 
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 if (!notifyEmailInput || !notifyEmailInput.includes('@')) {
                   alert('有効なメールアドレスを入力してください。');
                   return;
                 }
                 const cleanEmail = notifyEmailInput.trim().toLowerCase();
-                setNotifyEmail(cleanEmail);
-                setNotifyDailyLuck(true);
-                setShowNotifyEmailModal(false);
+                const accountEmail = currentUser?.email?.toLowerCase();
+                if (!accountEmail) {
+                  alert('メール通知には、メールアドレス付きのアカウントでのログインが必要です。Googleまたはメールリンクでログインしてください。');
+                  return;
+                }
+                if (cleanEmail !== accountEmail) {
+                  alert('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。');
+                  return;
+                }
 
-                // Asynchronously sync subscription to Firestore for daily 8:00 AM Cron delivery
-                saveEmailSubscriptionData({
+                // Sync the subscription to Firestore; the 8:00 AM cron reads it for delivery
+                const saved = await saveEmailSubscriptionData({
                   email: cleanEmail,
                   enabled: true,
                   myName: myName || currentUser?.displayName || 'あなた',
@@ -2464,6 +2466,13 @@ function App() {
                   oppMbti: oppMbti,
                   relationship: relationship
                 });
+                if (!saved) {
+                  alert('通知の登録に失敗しました。ログインし直してから、もう一度お試しください。');
+                  return;
+                }
+                setNotifyEmail(cleanEmail);
+                setNotifyDailyLuck(true);
+                setShowNotifyEmailModal(false);
               }}
               className="gold-button"
               style={{
