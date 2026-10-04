@@ -42,6 +42,17 @@ test('lint: 合格・不合格', () => {
   assert.deepEqual(lintPost({ ...ok, kind: 'promo', text: `無料鑑定は月と蓮で ${SITE_URL}` }), []);
 });
 
+test('lint: サイト公開前（allowLinks=false）はURL・誘導・無料を禁止し、promoは近日公開にする', () => {
+  const pre = { allowLinks: false };
+  const v = { id: 'a', slot: 'morning', kind: 'value', text: '今日は無理せず、ゆっくり過ごす日。—月' };
+  assert.deepEqual(lintPost(v, [], pre), []);
+  assert.ok(lintPost({ ...v, text: `無料の鑑定はこちら ${SITE_URL}` }, [], pre).length);
+  assert.ok(lintPost({ ...v, text: 'リンクから見てね' }, [], pre).length);
+  const promo = { id: 'b', slot: 'night', kind: 'promo' };
+  assert.ok(lintPost({ ...promo, text: '今日もおつかれさま。—月' }, [], pre).length, '近日公開が無い');
+  assert.deepEqual(lintPost({ ...promo, text: '今日もおつかれさま。恋愛占い『月と蓮』、近日公開予定。—月' }, [], pre), []);
+});
+
 test('OAuth1署名: X公式ドキュメントのテストベクタと一致する', () => {
   const sig = signOAuth1({
     method: 'POST',
