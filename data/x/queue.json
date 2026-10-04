@@ -35,7 +35,8 @@
     "slot": "night",
     "kind": "promo",
     "text": "今日もおつかれさま。下弦の月の夜は、心の荷物をひとつ下ろす時間。言えなかった言葉は、明日やさしく伝えればいいよ。気になる人との関係のヒントがほしくなったら、16タイプ×四柱推命の無料鑑定を月と蓮でどうぞ。\nhttps://www.tsuki-to-ren.com\n—月",
-    "status": "scheduled",
-    "createdAt": "2026-10-03T06:58:43.414Z"
+    "status": "skipped",
+    "createdAt": "2026-10-03T06:58:43.414Z",
+    "skipReason": "サイト公開前のため、URL入りの投稿は見送り（運営判断）"
   }
 ]
