@@ -23,8 +23,9 @@ const jstMinutes = (() => {
   const j = new Date(now.getTime() + 9 * 3600 * 1000);
   return j.getUTCHours() * 60 + j.getUTCMinutes();
 })();
-const slotMinutes = (slot) => {
-  const [h, m] = (config.slots?.[slot] || '00:00').split(':').map(Number);
+// 投稿ごとの time（例: "08:45"）があれば、それを枠（config.slots）の時刻より優先する
+const slotMinutes = (p) => {
+  const [h, m] = (p.time || config.slots?.[p.slot] || '00:00').split(':').map(Number);
   return h * 60 + m;
 };
 
@@ -68,7 +69,7 @@ let changed = false;
 // 1) 期限切れ（日付が過去、または枠から expireAfterMinutes 超過）を expired にする
 for (const p of queue) {
   if (forceId || p.status !== 'scheduled') continue;
-  const late = p.date < today || (p.date === today && jstMinutes - slotMinutes(p.slot) > config.expireAfterMinutes);
+  const late = p.date < today || (p.date === today && jstMinutes - slotMinutes(p) > config.expireAfterMinutes);
   if (late) {
     p.status = 'expired';
     changed = true;
@@ -85,9 +86,9 @@ const due = queue
   .filter((p) =>
     forceId
       ? p.id === forceId && ['scheduled', 'expired', 'failed'].includes(p.status)
-      : p.status === 'scheduled' && p.date === today && slotMinutes(p.slot) <= jstMinutes,
+      : p.status === 'scheduled' && p.date === today && slotMinutes(p) <= jstMinutes,
   )
-  .sort((a, b) => slotMinutes(a.slot) - slotMinutes(b.slot));
+  .sort((a, b) => slotMinutes(a) - slotMinutes(b));
 
 
 // 画像（キューの image: リポジトリ内の相対パス）をアップロードして media_id を返す。v2 → 失敗したら v1.1

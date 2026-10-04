@@ -34,7 +34,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
-        run: node scripts/x/generate-drafts.mjs ${{ github.event.inputs.date }}
+        run: node --experimental-strip-types scripts/x/generate-drafts.mjs ${{ github.event.inputs.date }}
 
       - name: Commit (auto) or open PR (approval)
         env:
@@ -60,6 +60,6 @@ jobs:
             git push -u origin "$BRANCH"
             gh pr create --base main --head "$BRANCH" \
               --title "X投稿の下書き ${DATE}（マージで承認）" \
-              --body "data/x/queue.json の ${DATE} の3本を確認してください。直したい場合はPR上で本文を編集し、不要なら閉じてください。マージした時点で投稿予約になります（投稿は当日8:15 / 12:15 / 20:15 JST）。" \
+              --body "data/x/queue.json の ${DATE} の5本（守護獣4本・昼の16タイプ1本）を確認してください。直したい場合はPR上で本文を編集し、不要なら閉じてください。マージした時点で投稿予約になります（投稿は当日 8:15・8:45・12:15・20:15・20:45 JST）。" \
               || echo "PRの自動作成に失敗しました（Settings > Actions > General の 'Allow GitHub Actions to create and approve pull requests' を確認）。ブランチ ${BRANCH} は作成済みです。"
           fi
