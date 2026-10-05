@@ -11,8 +11,12 @@ export function parseServiceAccount(raw) {
   try {
     sa = JSON.parse(json);
   } catch (e) {
+    // The most common paste mistake: the last "}" is dropped. Close the object and try once more.
+    if (json.startsWith('{') && !json.endsWith('}')) {
+      try { sa = JSON.parse(`${json}\n}`); } catch { /* fall through to the error below */ }
+    }
     // Never include the value itself in the message: it is a secret.
-    throw new Error(`FIREBASE_SERVICE_ACCOUNT is not valid JSON (or base64 of it): ${e.message}. Paste the whole key file, from { to }.`);
+    if (!sa) throw new Error(`FIREBASE_SERVICE_ACCOUNT is not valid JSON (or base64 of it): ${e.message}. Paste the whole key file, from { to }.`);
   }
   if (!sa || typeof sa !== 'object' || !sa.client_email || !sa.private_key) {
     throw new Error('FIREBASE_SERVICE_ACCOUNT is missing client_email or private_key. Use the key file generated under Firebase > Project settings > Service accounts.');
