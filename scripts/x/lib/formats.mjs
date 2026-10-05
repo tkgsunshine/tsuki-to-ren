@@ -113,97 +113,57 @@ const FACTS = {
       }),
     };
   },
-  star_rank: ({ all }) => {
-    const sums = new Map();
-    for (const c of all) for (const s of c.stars) sums.set(s.num, (sums.get(s.num) || 0) + s.score);
-    const ranking = [...sums.entries()]
-      .map(([num, sum]) => ({ star: STAR_NAMES[num - 1], avgScore: Math.round(sum / all.length) }))
-      .sort((a, b) => b.avgScore - a.avgScore);
-    return { note: '今日の恋愛運を、本命星（九星気学）ごとに、全60タイプの平均で出したランキング（アプリの鑑定ロジックで算出）。同点は同順位にしてよい', ranking };
-  },
-  stem_traits: ({ date, all }) => {
-    const types = stemTypes(all);
-    return {
-      note: '生まれた日（日柱）ごとの恋愛のクセ。アプリの鑑定ロジックの文章。これ以外の特徴は足さない',
-      types: pickN(STEMS, 3, `${date}:stem`).map((s) => {
-        const t = getStemTraits(s, '相手');
-        return { type: `${types[s].name}タイプ（${s}・${types[s].yomi}）`, praise: t.praise[0], ng: t.ng[0], delayReason: t.delayReason };
-      }),
-    };
-  },
-  kyusei_compat: ({ date }) => ({
-    note: '本命星（九星気学）の組み合わせの相性。アプリの鑑定ロジックの結果。これ以外の相性は足さない',
-    pairs: pickN(STAR_NAMES, 6, `${date}:star`).reduce((acc, s, i, a) => {
-      if (i % 2 === 0) {
-        const c = getStarCompatibility(s, a[i + 1]);
-        acc.push({ a: s, b: a[i + 1], result: c.type, detail: c.detail });
-      }
-      return acc;
-    }, []),
-  }),
-  mbti_birth: ({ date, all }) => {
-    const types = stemTypes(all);
-    const mbti = pickN(MBTI_TYPES, 1, `${date}:mb`)[0];
-    return {
-      note: '16タイプの性格だけで決めつけず、生まれた日のタイプ（日柱）を重ねると恋愛のクセが分かれる、という考え方を伝える。生まれた日のタイプの特徴は、下の事実だけを使う',
-      mbti,
-      stems: pickN(STEMS, 2, `${date}:mbs`).map((s) => {
-        const t = getStemTraits(s, '相手');
-        return { type: `${types[s].name}タイプ`, praise: t.praise[0], delayReason: t.delayReason };
-      }),
-    };
+  pair_types: ({ date }) => {
+    const [a, b] = pickN(MBTI_TYPES, 2, `${date}:pairtypes`);
+    return { note: '今日取り上げる16タイプの2人（点数・％は書かない。2人の気持ちのすれ違いと、歩み寄りのヒントを、ストーリーで）', types: [a, b] };
   },
   mbti_types: ({ date }) => ({ note: '取り上げる16タイプ（この4つ）', types: pickN(MBTI_TYPES, 4, `${date}:types`) }),
 };
 
-/** 型の一覧。facts は FACTS のキー（なしならAIの文章だけ）。promo=アプリ誘導（近日公開の予告） */
+/** 型の一覧（市場調査にもとづく A〜F）。facts は FACTS のキー、build はAIを使わず本文を作る型、poll は答え合わせの返信つき。promo=アプリ誘導（近日公開の予告） */
 export const FORMATS = [
-  { id: 'mbti_attitude', system: 'mbti_love', purpose: 'buzz', facts: 'mbti_types',
-    guide: '「【16タイプ別】好きな人にだけ出る態度」。取り上げる4タイプそれぞれに、1行の行動（例: 返信を何度も考える／急に距離が近くなる）。最後に「あなたは当たってる？」のような問いかけ' },
-  { id: 'mbti_heartbreak', system: 'mbti_love', purpose: 'buzz', facts: 'mbti_types',
-    guide: '「【16タイプ別】失恋したあとの行動」。4タイプそれぞれ「タイプ → 行動」を1行。最後は「一番引きずるのは……？」のような問い' },
-  { id: 'mbti_mendokusai', system: 'mbti_love', purpose: 'buzz', facts: 'mbti_types',
-    guide: '「【16タイプ別・恋愛で面倒な瞬間】」。4タイプそれぞれ、愛嬌のある「面倒さ」を1行（例: 好きでも素直に言わない／恋愛まで効率化する）。人を傷つけない。最後は「異論は認めます」のような軽い一言' },
-  { id: 'year_star', system: 'birth_love', purpose: 'follow', facts: 'year_star',
-    guide: '「○○年生まれの人の恋愛」。事実の3つの生まれ年と本命星を使い、それぞれ1〜2行で、恋愛のクセを星の五行のイメージから書く（傾向として）。最後は「あなたの生まれ年は当たってる？」' },
-  { id: 'star_rank', system: 'kyusei', purpose: 'buzz', facts: 'star_rank',
-    guide: '「【今日の恋愛運ランキング・本命星別】」。事実のランキングの上位3つ＋最下位を、点数つきで紹介。最後に「あなたの本命星は何位？」（本命星の調べ方は書かない。リンク・アプリの誘導は禁止）' },
-  { id: 'stem_traits', system: 'shichusuimei', purpose: 'follow', facts: 'stem_traits',
-    guide: '「生年月日には恋愛のクセが出る」。難しく説明しない。事実の3タイプについて、恋愛でのクセ（そばにいる人に言われると嬉しい言葉／されると苦手なこと）を1〜2行ずつ。最後は「あなたはどのタイプ？」。専門用語は出さない' },
-  { id: 'stem_delay', system: 'shichusuimei', purpose: 'follow', facts: 'stem_traits',
-    guide: '「連絡が遅くなるのは、冷めたからとは限らない」。事実の3タイプの、連絡が遅れる理由（delayReason）を、やさしい言葉で1行ずつ。最後に「あなたの返信が遅い理由は？」' },
-  { id: 'kyusei_compat', system: 'kyusei', purpose: 'follow', facts: 'kyusei_compat',
-    guide: '「【九星気学で見る相性】自分と同じタイプがいいとは限らない」。事実の本命星の組み合わせ2〜3組と、その相性（result）を一言ずつ。最後に「あなたと気になる人は？」' },
-  { id: 'mbti_birth', system: 'mbti_birth', purpose: 'app', kind: 'promo', facts: 'mbti_birth',
-    guide: '「同じ16タイプでも、生まれた日で恋愛のクセは変わる」。事実の16タイプ1つと、生まれた日のタイプ2つを並べて、「同じ○○でも、△△タイプは〜／□□タイプは〜」と書く。最後に「16タイプ×生年月日で見る恋愛占いは、近日公開」（「近日公開」を必ず入れる）' },
-  { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true,
-    guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
-  { id: 'pair_teaser', system: 'pair', purpose: 'app', kind: 'promo',
-    guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
+  // A: ギャップ・キャラ化（「見た目は〇〇、恋愛は△△」。名乗り・引用をねらう）
+  { id: 'gap_rank', system: 'mbti_love', purpose: 'buzz',
+    guide: '「見た目は〇〇、恋愛は△△な16タイプ（月と蓮の見立て）」の形のランキング。4タイプを、1位〜4位で、1行ずつ（タイプ名のみ。理由は書かない）。テーマは毎回変える（例: 見た目はおだやか、恋愛はいちばん重い／連絡はマメそうで、返信がいちばん遅い／好きになると、急に行動力が出る／好きでも、素直に言えない／別れたあと、いちばん引きずる／嫉妬を隠すのがうまい）。必ず「（月と蓮の見立て）」と書き、統計・調査ではないことが分かるようにする。最後は「あなたは何位に入ってる？ 違うと思ったら、タイプを教えて」のような、名乗りたくなる問い' },
+  // B: 一言代弁（共感。返信・保存をねらう）
+  { id: 'voice', system: 'psychology', purpose: 'buzz',
+    guide: '好きな人にまつわる「あるある」な心の動きを、具体的な場面で、そっと代弁する。例:「LINEを送ったあと、スマホを裏返して置いたのに、3分後にもう見てる人へ」。3〜5行。説教せず、最後は、そっと肯定する一言（例:「それ、ちゃんと恋してる証拠だよ」）。場面は毎回オリジナル' },
+  // C: 名乗りセット（16タイプ×生まれ年の本命星。自己申告のコメントをねらう）
+  { id: 'name_self', system: 'quiz', purpose: 'follow', facts: 'year_star',
+    guide: '「あなたの16タイプと、生まれ年の本命星を、コメントで教えて」という、名乗りの募集。事実の3つの生まれ年と本命星を、早見として載せる（例:「1995年生まれ＝三碧木星」）。「1〜2月（立春前）生まれは、前の年の星」と、注記する。最後は「同じ組み合わせの人が、何人いるか数えてみよう」。返信は約束しない（運営がすべてに返せるとは限らないため）' },
+  // D: 問いかけ＋返信で解説
   { id: 'psych_poll', system: 'psychology', purpose: 'buzz', poll: true,
-    guide: '恋愛の「これ、脈あり？」を、2〜3択（A/B/C）で問う投稿（答えは書かない。解説は、あとで返信として出す）。場面の例: 「また今度ご飯行こう」と言われた／「返信遅くてごめん」が来た／元恋人から「久しぶり」が来た。場面は毎回オリジナル。最後は「あなたならどう思う？」' },
-  { id: 'relatable', system: 'psychology', purpose: 'buzz',
-    guide: '恋愛あるある。好きな人からLINEが来た瞬間の心の動きを、矢印（↓）でテンポよく並べる。占いを知らない人にも伝わる、共感だけの投稿。場面は毎回オリジナル' },
-  { id: 'spicy', system: 'psychology', purpose: 'buzz',
-    guide: '辛口恋愛占い。「〜がしたいと言いながら、〜してない？」のように、読み手の選び方や癖を、愛のある辛口でそっと突く。人格を責めない。最後は軽く着地する（例: 相手じゃなくて「選び方」かもしれない）' },
+    guide: '恋愛の「これ、脈あり？」を、2〜3択（A/B/C）で問う投稿（答えは書かない。解説は、あとで返信として出す）。場面の例: 「また今度ご飯行こう」と言われた／「最近忙しくて」と返信が来た／「返信遅くてごめん」が来た。場面は毎回オリジナル。最後は「あなたならどう思う？」' },
   { id: 'comeback', system: 'psychology', purpose: 'follow', poll: true,
-    guide: '復縁の問い。「元恋人から連絡が来た。復縁の可能性は？」をA/B/Cで問い、「大事なのは、連絡が来たかより、なぜ今連絡してきたか」という視点を添える。復縁の強要や、相手を操作する方法は書かない' },
+    guide: '復縁の問い。「元恋人から連絡が来た。復縁の可能性は？」をA/B/Cで問い、「大事なのは、連絡が来たかより、なぜ今連絡してきたか」という視点を、返信の解説に入れる。復縁の強要や、相手を操作する方法は書かない' },
   { id: 'quiz_ab', system: 'quiz', purpose: 'buzz', poll: true,
     guide: '「恋愛するならどっち？」のA/B。例: 毎日LINEする／会うときだけ濃く話す。最後に「あなたはどっち？」' },
-  { id: 'timing', system: 'kyusei', purpose: 'app', kind: 'promo',
-    guide: '「今、告白していい？」恋愛占いで一番知りたいのは、相性だけじゃなくタイミング。「今動くべきか、もう少し待つべきか」を、生年月日から見る占いが近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
-  { id: 'comment_type', system: 'quiz', purpose: 'follow',
-    guide: '「あなたの16タイプと、恋愛でやりがちなことを、一言で教えて」というコメント募集。返信を約束しない（運営がすべてに返せるとは限らないため）。「見つけたら、そっと読んでます」程度に留める' },
+  // E: 相性
+  { id: 'pair_story', system: 'pair', purpose: 'follow', facts: 'pair_types',
+    guide: '16タイプの2人（事実）の相性を、短いストーリーで。「惹かれ合うのに、すれ違う場所は決まっている」の形で、2人それぞれの「愛情の表し方」の違いと、歩み寄りのヒントを書く。点数・％は書かない。最後は「あなたの好きな人は、どっち寄り？」' },
+  { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true,
+    guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
+  // F: 保存型リスト（保存・フォローをねらう）
+  { id: 'save_list', system: 'psychology', purpose: 'follow',
+    guide: '「好きな人に〇〇するときの、3つのコツ」の、保存したくなる短いリスト（① ② ③）。具体的で、すぐ使える内容（例: LINEの送り方／デートの別れ際／告白の前に確認すること）。最後は「あとで見返せるように、保存しておいてね」。テーマは毎回変える。相手を操作するコツは書かない' },
+  // アプリ誘導（予告。1日に最大1本）
+  { id: 'pair_teaser', system: 'pair', purpose: 'app', kind: 'promo',
+    guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
 ];
 
-/** その日の2本の型を決める（日ごとに2つ進む。全型が一巡する） */
+/** 毎日2本（昼・夕）の並び。10日で一巡（A〜Fを、バランスよく混ぜる）。2026-10-08 が先頭 */
+const PLAN = ['gap_rank', 'pair_story', 'voice', 'save_list', 'name_self', 'psych_poll', 'gap_rank', 'beast_pair_rank', 'voice', 'pair_story',
+  'comeback', 'save_list', 'name_self', 'gap_rank', 'voice', 'pair_teaser', 'gap_rank', 'quiz_ab', 'name_self', 'save_list'];
+const PLAN_START_DAYS = dayPillar('2026-10-08').days;
+
+/** その日の2本の型を決める（PLAN を、日ごとに2つ進む。1日にアプリ誘導は最大1本） */
 export function pickFormats(date) {
-  const idx = dayPillar(date).days;
-  const base = (((idx * 2) % FORMATS.length) + FORMATS.length) % FORMATS.length;
-  const noon = FORMATS[base];
-  let evening = FORMATS[(base + 1) % FORMATS.length];
-  // 1日に、アプリ誘導（予告）は最大1本
-  if (noon.purpose === 'app' && evening.purpose === 'app') evening = FORMATS.find((f) => f.purpose !== 'app' && f.id !== noon.id) || evening;
+  const n = PLAN.length;
+  const base = ((((dayPillar(date).days - PLAN_START_DAYS) * 2) % n) + n) % n;
+  const byId = (id) => FORMATS.find((f) => f.id === id);
+  const noon = byId(PLAN[base]);
+  let evening = byId(PLAN[(base + 1) % n]);
+  if (noon.purpose === 'app' && evening.purpose === 'app') evening = byId('voice');
   return { noon, evening };
 }
 

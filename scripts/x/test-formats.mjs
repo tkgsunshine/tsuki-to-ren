@@ -14,8 +14,8 @@ import { getPillarPairScore } from '../../src/utils/fortuneEngine.ts';
 
 const OPTS = { allowLinks: false };
 
-test('型の一覧: 8系統すべてと、3つの目的（バズ・フォロー・アプリ誘導）がそろう。アプリ誘導はpromo', () => {
-  assert.equal(new Set(FORMATS.map((f) => f.system)).size, Object.keys(SYSTEMS).length);
+test('型の一覧（A〜F）: 3つの目的（バズ・フォロー・アプリ誘導）がそろう。アプリ誘導はpromo', () => {
+  for (const id of ['gap_rank', 'voice', 'name_self', 'psych_poll', 'pair_story', 'save_list']) assert.ok(FORMATS.some((f) => f.id === id), id);
   for (const p of Object.keys(PURPOSES)) assert.ok(FORMATS.some((f) => f.purpose === p), p);
   for (const f of FORMATS) {
     assert.ok(SYSTEMS[f.system] && PURPOSES[f.purpose], f.id);
@@ -36,15 +36,12 @@ test('毎日2本: 日ごとに型が変わり、1日にアプリ誘導は最大1
   assert.equal(seen.size, FORMATS.length, '全ての型が一巡する');
 });
 
-test('事実はアプリの鑑定ロジックから出る（相性点・ランキング・生まれ年の本命星）', () => {
+test('事実はアプリの鑑定ロジックから出る（生まれ年の本命星・2人の16タイプ）', () => {
   const all = computeAll('2026-10-07');
   const ctx = { date: '2026-10-07', all };
   for (const f of FORMATS.filter((x) => x.facts)) assert.ok(buildFacts(f, ctx), f.id);
-  const rank = buildFacts(FORMATS.find((f) => f.id === 'star_rank'), ctx).ranking;
-  assert.equal(rank.length, 9);
-  for (let i = 1; i < rank.length; i++) assert.ok(rank[i - 1].avgScore >= rank[i].avgScore);
   // 同じ日なら、何度実行しても同じ事実
-  assert.deepEqual(buildFacts(FORMATS.find((f) => f.id === 'year_star'), ctx), buildFacts(FORMATS.find((f) => f.id === 'year_star'), ctx));
+  assert.deepEqual(buildFacts(FORMATS.find((f) => f.id === 'name_self'), ctx), buildFacts(FORMATS.find((f) => f.id === 'name_self'), ctx));
 });
 
 test('夕方（evening）の枠で投稿できる。promoは「近日公開」が必須', () => {

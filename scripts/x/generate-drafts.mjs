@@ -110,7 +110,7 @@ function validate(posts) {
 // アプリの鑑定ロジックだけで作る本文（ランキングなど）を、先にチェックする
 const detPosts = detSlots.map((slot) => {
   const f = planned[slot];
-  const out = f.build({ date });
+  const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
   if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks }).map((x) => `返信: ${x}`));
   if (problems.length) {
