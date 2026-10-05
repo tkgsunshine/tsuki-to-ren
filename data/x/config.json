@@ -18,5 +18,7 @@
   "promoEveryNthDay": 2,
   "allowLinks": false,
   "_allowLinksNote": "false=サイト公開前。投稿にURL・リンク誘導・「無料」を入れず、promo枠は「近日公開」の予告にする。公開後に true にする",
-  "_minIntervalNote": "同じ枠で2本（例: 08:15 と 08:45）出すため20分。通常の定期実行にだけ適用（臨時投稿は無視）"
+  "_minIntervalNote": "同じ枠で2本（例: 08:15 と 08:45）出すため20分。通常の定期実行にだけ適用（臨時投稿は無視）",
+  "replyDelayMinutes": 60,
+  "_replyNote": "replyTo付きの投稿（答え合わせの返信）は、親の投稿から何分後に出すか。実際の投稿は、その後の最初の定期実行（:15/:45）"
 }

@@ -8,7 +8,7 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
-import { pickFormats, buildFacts, SYSTEMS, PURPOSES } from './lib/formats.mjs';
+import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 
 const args = process.argv.slice(2);
@@ -56,14 +56,14 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 
 # 出力
 指定された2本（noon・evening）を、JSONの配列のみで出力する（前後に説明やコードフェンスを付けない）。
-[{"slot":"noon","text":"..."},{"slot":"evening","text":"..."}]`;
+[{"slot":"noon","text":"...","replyText":"（問いかけ型のときだけ）"},{"slot":"evening","text":"..."}]`;
 
-const { noon: noonFormat, evening: eveningFormat } = pickFormats(date, history);
+const { noon: noonFormat, evening: eveningFormat } = pickFormats(date);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
-  const prev = f.answerTo ? `\n- 昨日の投稿（この答え合わせを書く）: ${f.answerTo.text.replace(/\n/g, ' / ')}` : '';
-  return `## ${slot}（${SYSTEMS[f.system]}／${PURPOSES[f.purpose]}／kind=${f.kind || 'value'}）\n- 型: ${f.guide}${prev}${facts ? `\n- 事実: ${JSON.stringify(facts)}` : '\n- 事実: なし（数字は出さない）'}`;
+  const reply = f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : '';
+  return `## ${slot}（${SYSTEMS[f.system]}／${PURPOSES[f.purpose]}／kind=${f.kind || 'value'}）\n- 型: ${f.guide}${reply}${facts ? `\n- 事実: ${JSON.stringify(facts)}` : '\n- 事実: なし（数字は出さない）'}`;
 };
 const userBase = `# 対象日: ${date}
 # ブリーフ（今日の空気。参考）
@@ -98,6 +98,10 @@ function validate(posts) {
     const candidate = { ...p, slot, kind: f.kind || 'value' };
     for (const pr of lintPost(candidate, history, { allowLinks })) problems.push(`${slot}: ${pr}`);
     if (!/-(月|蓮)-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」か「-蓮-」の署名を付ける`);
+    if (f.poll) {
+      if (!p.replyText) problems.push(`${slot}: 問いかけ型は replyText（答え合わせの返信）も書く`);
+      else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
+    } else if (p.replyText) problems.push(`${slot}: 問いかけ型ではないので replyText は不要`);
   }
   return problems;
 }
@@ -154,7 +158,18 @@ const buzzItem = (slot, time) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   };
 };
-const items = [...beastItems.slice(0, 2), buzzItem('noon'), buzzItem('evening'), ...beastItems.slice(2)];
+// 問いかけ型は、答え合わせの返信（親のあとに出す）を、別の項目として追加する
+const replyOf = (slot) => {
+  const f = planned[slot];
+  const p = posts.find((x) => x.slot === slot);
+  if (!f.poll || !p.replyText) return [];
+  return [{
+    id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: p.replyText.trim(), replyTo: `${date}-${slot}`,
+    format: `${f.id}_reply`, system: f.system, purpose: f.purpose,
+    status: 'scheduled', createdAt: new Date().toISOString(),
+  }];
+};
+const items = [...beastItems.slice(0, 2), buzzItem('noon'), ...replyOf('noon'), buzzItem('evening'), ...replyOf('evening'), ...beastItems.slice(2)];
 
 if (dryRun) {
   console.log(JSON.stringify(items, null, 2));

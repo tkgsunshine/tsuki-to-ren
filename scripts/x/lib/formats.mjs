@@ -146,7 +146,7 @@ export const FORMATS = [
   { id: 'pair_teaser', system: 'pair', purpose: 'app', kind: 'promo',
     guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
   { id: 'psych_poll', system: 'psychology', purpose: 'buzz', poll: true,
-    guide: '恋愛の「これ、脈あり？」を、2〜3択（A/B/C）で問う投稿。場面の例: 「また今度ご飯行こう」と言われた／「返信遅くてごめん」が来た／元恋人から「久しぶり」が来た。場面は毎回オリジナル。最後は「あなたならどう思う？」' },
+    guide: '恋愛の「これ、脈あり？」を、2〜3択（A/B/C）で問う投稿（答えは書かない。解説は、あとで返信として出す）。場面の例: 「また今度ご飯行こう」と言われた／「返信遅くてごめん」が来た／元恋人から「久しぶり」が来た。場面は毎回オリジナル。最後は「あなたならどう思う？」' },
   { id: 'relatable', system: 'psychology', purpose: 'buzz',
     guide: '恋愛あるある。好きな人からLINEが来た瞬間の心の動きを、矢印（↓）でテンポよく並べる。占いを知らない人にも伝わる、共感だけの投稿。場面は毎回オリジナル' },
   { id: 'spicy', system: 'psychology', purpose: 'buzz',
@@ -161,28 +161,20 @@ export const FORMATS = [
     guide: '「あなたの16タイプと、恋愛でやりがちなことを、一言で教えて」というコメント募集。返信を約束しない（運営がすべてに返せるとは限らないため）。「見つけたら、そっと読んでます」程度に留める' },
 ];
 
-/** 答え合わせの型（問いかけの翌日に出す） */
-export const ANSWER_FORMAT = {
-  id: 'poll_answer', system: 'quiz', purpose: 'follow',
-  guide: '昨日の問いかけの「答え合わせ」。昨日の投稿を踏まえ、「どれが正解」と決めず、それぞれの選択肢が示す心理・見方のヒントを短く書く。統計・調査・「〇〇タイプに多い」などの事実は作らない。最後は「あなたは当たってた？」',
-};
-
-/** その日の2本の型を決める。昨日に問いかけ型（poll）があれば、昼は答え合わせにする */
-export function pickFormats(date, history = []) {
-  const idx = dayPillar(date).days; // 日ごとに2つ進む（FORMATS.length 日弱で一巡）
+/** その日の2本の型を決める（日ごとに2つ進む。全型が一巡する） */
+export function pickFormats(date) {
+  const idx = dayPillar(date).days;
   const base = (((idx * 2) % FORMATS.length) + FORMATS.length) % FORMATS.length;
-  let noon = FORMATS[base];
+  const noon = FORMATS[base];
   let evening = FORMATS[(base + 1) % FORMATS.length];
-  const yesterday = new Date(Date.UTC(...date.split('-').map((n, i) => (i === 1 ? n - 1 : Number(n)))) - 86400000).toISOString().slice(0, 10);
-  const prevPoll = [...history].reverse().find((p) => p.date === yesterday && p.pollOf !== false && p.format && FORMATS.find((f) => f.id === p.format)?.poll);
-  if (prevPoll) {
-    noon = { ...ANSWER_FORMAT, answerTo: prevPoll };
-    if (evening.poll || evening.id === noon.id) evening = FORMATS.find((f) => !f.poll && f.id !== FORMATS[base].id && f.id !== evening.id) || evening;
-  }
   // 1日に、アプリ誘導（予告）は最大1本
   if (noon.purpose === 'app' && evening.purpose === 'app') evening = FORMATS.find((f) => f.purpose !== 'app' && f.id !== noon.id) || evening;
   return { noon, evening };
 }
+
+/** 問いかけ型（poll）の、答え合わせ・解説の返信の書き方。親の投稿へのスレッド返信として、あとから出す */
+export const REPLY_GUIDE =
+  '親の投稿への返信（スレッド）として、答え合わせと解説を書く。「どれが正解」と決めつけず、各選択肢が示す心理・見方のヒントを短く。統計・調査・「〇〇タイプに多い」などの事実は作らない。最後は「あなたは何を選んだ？」のような問い。親の投稿の言い回しを繰り返さない';
 
 /** 型に必要な事実（アプリの鑑定ロジックで算出）を作る */
 export function buildFacts(format, ctx) {

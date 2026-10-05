@@ -750,7 +750,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <span>{hasOpponent ? `${myName} × ${oppNickname}` : `${myName} の全運勢`}</span>
         </div>
 
-        {/* 2.7億通り Custom Matrix Badge */}
+        {/* 7,465万通り Custom Matrix Badge */}
         <div style={{
           fontSize: '0.66rem',
           color: '#e2c074',
@@ -763,7 +763,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           fontWeight: '600',
           letterSpacing: '0.02em'
         }}>
-          ✨ 全273,088,320通り（約2.7億通り）の算術マトリクスから算出
+          ✨ 全74,649,600通り（約7,465万通り）の算術マトリクスから算出
         </div>
         
         {/* Luxury Score Pods Side-by-Side */}

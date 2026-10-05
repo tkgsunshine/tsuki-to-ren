@@ -254,5 +254,18 @@
     "purpose": "buzz",
     "status": "scheduled",
     "createdAt": "2026-10-05T02:55:23.221Z"
+  },
+  {
+    "id": "2026-10-06-evening-reply",
+    "date": "2026-10-06",
+    "slot": "evening",
+    "kind": "value",
+    "replyTo": "2026-10-06-evening",
+    "format": "psych_poll_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T07:23:57.860Z",
+    "text": "答え合わせ。実は、どれか1つが正解という問いではありません。\n\n「また今度」は、誘いにも社交辞令にもなる言葉。見るポイントは、日にちや場所の話に進むかどうか。具体的な話が出たら脈あり寄り、曖昧なままなら様子見。\n\nあなたはどれを選んだ？\n-蓮-"
   }
 ]

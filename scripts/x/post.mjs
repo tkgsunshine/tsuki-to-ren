@@ -17,7 +17,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 const config = readConfig();
 const queue = readQueue();
-const now = new Date();
+const now = process.env.X_FAKE_NOW ? new Date(process.env.X_FAKE_NOW) : new Date(); // X_FAKE_NOW はテスト用
 const today = jstDateString(now);
 const jstMinutes = (() => {
   const j = new Date(now.getTime() + 9 * 3600 * 1000);
@@ -66,9 +66,32 @@ function describeCreds() {
 
 let changed = false;
 
+// 返信（replyTo: 親の投稿ID）: 親が投稿された replyDelayMinutes 分後から投稿できる。親が投稿されなかったら、返信も出さない
+const byId = new Map(queue.map((p) => [p.id, p]));
+const replyDelayMs = (config.replyDelayMinutes ?? 60) * 60000;
+const replyReadyAt = (p) => {
+  const parent = byId.get(p.replyTo);
+  return parent && parent.status === 'posted' && parent.tweetId && parent.postedAt ? new Date(parent.postedAt).getTime() + replyDelayMs : null;
+};
+
 // 1) 期限切れ（日付が過去、または枠から expireAfterMinutes 超過）を expired にする
 for (const p of queue) {
   if (forceId || p.status !== 'scheduled') continue;
+  if (p.replyTo) {
+    const parent = byId.get(p.replyTo);
+    const ready = replyReadyAt(p);
+    if (!parent || ['expired', 'skipped', 'failed'].includes(parent.status)) {
+      p.status = 'skipped';
+      p.skipReason = '親の投稿が出なかったため';
+      changed = true;
+      console.log(`返信を見送り: ${p.id}`);
+    } else if (ready && now.getTime() - ready > 8 * 3600000) {
+      p.status = 'expired';
+      changed = true;
+      console.log(`返信が期限切れ: ${p.id}`);
+    }
+    continue;
+  }
   const late = p.date < today || (p.date === today && jstMinutes - slotMinutes(p) > config.expireAfterMinutes);
   if (late) {
     p.status = 'expired';
@@ -86,9 +109,9 @@ const due = queue
   .filter((p) =>
     forceId
       ? p.id === forceId && ['scheduled', 'expired', 'failed'].includes(p.status)
-      : p.status === 'scheduled' && p.date === today && slotMinutes(p) <= jstMinutes,
+      : p.status === 'scheduled' && (p.replyTo ? (replyReadyAt(p) ?? Infinity) <= now.getTime() : p.date === today && slotMinutes(p) <= jstMinutes),
   )
-  .sort((a, b) => slotMinutes(a) - slotMinutes(b));
+  .sort((a, b) => (a.replyTo ? 1 : 0) - (b.replyTo ? 1 : 0) || slotMinutes(a) - slotMinutes(b)); // 通常の投稿を先に、返信はあと
 
 
 // 画像（キューの image: リポジトリ内の相対パス）をアップロードして media_id を返す。v2 → 失敗したら v1.1
@@ -123,7 +146,7 @@ async function main() {
     console.log('今投稿するものはありません。');
     return;
   }
-  if (!forceId && minutesSinceLast < config.minIntervalMinutes) {
+  if (!forceId && !due[0].replyTo && minutesSinceLast < config.minIntervalMinutes) {
     console.log(`直近の投稿から${Math.floor(minutesSinceLast)}分。最小間隔${config.minIntervalMinutes}分のため見送ります。`);
     return;
   }
@@ -140,11 +163,15 @@ async function main() {
   }
 
   if (dryRun) {
-    console.log(`[dry-run] 投稿予定 ${post.id} (${post.kind})${post.images ? ' 画像: ' + post.images.join(', ') : post.image ? ' 画像: ' + post.image : ''}\n${post.text}`);
+    console.log(`[dry-run] 投稿予定 ${post.id} (${post.kind})${post.replyTo ? ' ↳返信先: ' + post.replyTo : ''}${post.images ? ' 画像: ' + post.images.join(', ') : post.image ? ' 画像: ' + post.image : ''}\n${post.text}`);
     return;
   }
 
   const payload = { text: post.text };
+  if (post.replyTo) {
+    const parent = byId.get(post.replyTo);
+    payload.reply = { in_reply_to_tweet_id: parent.tweetId }; // 自分の投稿へのスレッド返信
+  }
   const imagePaths = (post.images && post.images.length ? post.images : post.image ? [post.image] : []).slice(0, 4);
   if (imagePaths.length) {
     try {
