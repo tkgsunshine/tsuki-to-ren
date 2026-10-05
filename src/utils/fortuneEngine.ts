@@ -177,6 +177,41 @@ const getBranchImpact = (branchA: string, branchB: string): number => {
   return 0;
 };
 
+// 通変星（十神）: 相手の天干が、自分の日主から見てどの星か。五行の生剋に、陰陽（同じ極性か）を加えて10種に分ける。四柱推命の伝統的な分類。
+export type TenGod = '比肩' | '劫財' | '食神' | '傷官' | '偏財' | '正財' | '偏官' | '正官' | '偏印' | '正印';
+const STEM_YANG = ['甲', '丙', '戊', '庚', '壬'];
+export function getTenGod(personStem: string, otherStem: string): TenGod {
+  const order = ['木', '火', '土', '金', '水'];
+  const diff = (order.indexOf(stemElements[otherStem]) - order.indexOf(stemElements[personStem]) + 5) % 5;
+  const samePolarity = STEM_YANG.includes(personStem) === STEM_YANG.includes(otherStem);
+  // diff: 0=同じ五行 / 1=自分が生む / 2=自分が剋す / 3=自分を剋す / 4=自分を生む
+  if (diff === 0) return samePolarity ? '比肩' : '劫財';
+  if (diff === 1) return samePolarity ? '食神' : '傷官';
+  if (diff === 2) return samePolarity ? '偏財' : '正財';
+  if (diff === 3) return samePolarity ? '偏官' : '正官';
+  return samePolarity ? '偏印' : '正印';
+}
+
+// 今日（その日）の天干が、自分の日主に与える影響の点数。
+// 干合は、四柱推命の伝統（甲己・乙庚・丙辛・丁壬・戊癸）。十神ごとの点数への換算は、アプリが決めた値。
+// 旧版は、陰陽も生剋の向きも区別せず、五行の関係だけで点数化していた（印・食傷+10／比和+4／財・官殺-16）。
+// 新版は、向き（自分を生む／自分が生む／自分が剋す／自分を剋す）と陰陽で10種に分けた。
+// 傾向: 自分を支える印星・気持ちを外へ出す食神は吉、自分を縛る官殺は凶（偏官＝七殺が最も強い）。
+export const TEN_GOD_POINTS: Record<TenGod, number> = {
+  '正印': 10, '偏印': 6, '食神': 6, '傷官': 0,
+  '比肩': 4, '劫財': -2, '正財': 2, '偏財': 2,
+  '正官': -8, '偏官': -16
+};
+const STEM_COMBINATIONS: Record<string, string> = {
+  '甲': '己', '己': '甲', '乙': '庚', '庚': '乙',
+  '丙': '辛', '辛': '丙', '丁': '壬', '壬': '丁', '戊': '癸', '癸': '戊'
+};
+export const getDailyStemImpact = (dayStem: string, personStem: string): number => {
+  if (STEM_COMBINATIONS[dayStem] === personStem) return 16; // 干合は大吉 (+16)
+  if (!stemElements[dayStem] || !stemElements[personStem]) return 0;
+  return TEN_GOD_POINTS[getTenGod(personStem, dayStem)];
+};
+
 // 対象年の年柱 (Year Pillar)
 export function calculateYearPillar(year: number): { stem: string; branch: string } {
   let sIdx = (year - 4) % 10;
@@ -251,12 +286,8 @@ const solarApparentLongitude = (jd: number): number => {
 
 const setsuCache = new Map<string, number>();
 
-/** その年（暦年）の節 idx（0=小寒 … 11=大雪）の時刻（UTCのミリ秒） */
-export function getSetsuTimeMs(year: number, idx: number): number {
-  const key = `${year}:${idx}`;
-  const hit = setsuCache.get(key);
-  if (hit !== undefined) return hit;
-  const angle = SETSU_ANGLES[idx];
+/** 太陽の視黄経が angle 度（-90〜0〜285…の表記は、春分を0として年内の位置にそろえた値）になる時刻（UTCのミリ秒）。year の3月20日ごろを起点にニュートン法で詰める */
+function solveSolarLongitudeMs(year: number, angle: number): number {
   // 春分（黄経0度）は3月20.5日ごろ。そこからの角度で、おおよその日を見積もり、ニュートン法で詰める
   const march = Date.UTC(year, 2, 20, 12) / 86400000 + 2440587.5;
   let jd = march + ((angle >= 285 ? angle - 360 : angle) / 360) * 365.2422;
@@ -265,7 +296,15 @@ export function getSetsuTimeMs(year: number, idx: number): number {
     jd += diff / 0.9856473;
     if (Math.abs(diff) < 1e-7) break;
   }
-  const ms = Math.round((jd - 2440587.5) * 86400000);
+  return Math.round((jd - 2440587.5) * 86400000);
+}
+
+/** その年（暦年）の節 idx（0=小寒 … 11=大雪）の時刻（UTCのミリ秒） */
+export function getSetsuTimeMs(year: number, idx: number): number {
+  const key = `${year}:${idx}`;
+  const hit = setsuCache.get(key);
+  if (hit !== undefined) return hit;
+  const ms = solveSolarLongitudeMs(year, SETSU_ANGLES[idx]);
   setsuCache.set(key, ms);
   return ms;
 }
@@ -275,6 +314,50 @@ export const getRisshunMs = (year: number): number => getSetsuTimeMs(year, 1);
 
 /** 生年月日だけで時刻が不明な場合に使う「その日の日本時間の正午」（UTCのミリ秒） */
 const jstNoonMs = (year: number, month: number, day: number): number => Date.UTC(year, month - 1, day, 3, 0, 0);
+
+// ───────── 九星気学の日盤（日の九星） ─────────
+// 日の九星は、冬至に最も近い甲子の日から「陽遁」（一白から順に増える）、夏至に最も近い甲子の日から「陰遁」（九紫から順に減る）で巡る。
+// 切替の甲子日は、冬至・夏至の日（日本時間）の前後で、近いほうを採る。
+const JST_MS = 9 * 3600000;
+const dayNumberJst = (ms: number): number => Math.floor((ms + JST_MS) / 86400000); // 1970-01-01 を 0 とした日本時間の日数
+
+/** 冬至・夏至の日に最も近い甲子の日（日数）。前後が同じ近さなら前のほうを採る */
+function nearestKoshiDay(solsticeMs: number): number {
+  const day = dayNumberJst(solsticeMs);
+  const prev = day - ((((17 + day) % 60) + 60) % 60);
+  return day - prev <= prev + 60 - day ? prev : prev + 60;
+}
+
+/** その日（年月日）の日の九星（1=一白〜9=九紫）。日盤 */
+export function getDayStarNumber(year: number, month: number, day: number): number {
+  const dayNumber = Math.round((Date.UTC(year, month - 1, day) - Date.UTC(1970, 0, 1)) / 86400000);
+  const starts: { day: number; yang: boolean }[] = [];
+  for (const y of [year - 1, year, year + 1]) {
+    starts.push({ day: nearestKoshiDay(solveSolarLongitudeMs(y + 1, -90)), yang: true }); // 冬至（y年12月）
+    starts.push({ day: nearestKoshiDay(solveSolarLongitudeMs(y, 90)), yang: false });      // 夏至（y年6月）
+  }
+  starts.sort((a, b) => a.day - b.day);
+  let cur = starts[0];
+  for (const x of starts) if (x.day <= dayNumber) cur = x;
+  const k = (dayNumber - cur.day) % 9;
+  return cur.yang ? k + 1 : 9 - k;
+}
+
+const DAY_STAR_ELEMENT = ['', '水', '土', '木', '木', '土', '金', '金', '土', '火']; // 一白〜九紫の五行（index = 九星の番号）
+
+/**
+ * その日の日盤の中宮の星（日の九星）と、本命星の五行の関係の点数。九星気学の「日の星と本命星の相生・比和・相剋」。
+ * 日の星が本命星を生む=+4／同じ五行=+2／本命星が日の星を生む（力を出す）=-1／本命星が日の星を剋す=0／日の星が本命星を剋す=-4。
+ * 点数への換算の重みは、アプリが決めた値。方位（五黄殺・暗剣殺など）は、対象外。
+ */
+export const DAY_STAR_WEIGHT = 1;
+export function getDayStarPoints(year: number, month: number, day: number, honmeiElement: string): number {
+  const order = ['木', '火', '土', '金', '水'];
+  const dayElement = DAY_STAR_ELEMENT[getDayStarNumber(year, month, day)];
+  const diff = (order.indexOf(honmeiElement) - order.indexOf(dayElement) + 5) % 5; // 日の星から見た本命星
+  const points = [2, 4, -4, 0, -1][diff]; // 0=同じ／1=日の星が生む／2=日の星が剋す／3=本命星が剋す／4=本命星が生む
+  return DAY_STAR_WEIGHT * points;
+}
 
 /** 時刻 ms の月支（0=子 … 11=亥）と、立春で区切った年（四柱推命の年）を返す */
 function getSetsuMonthAt(ms: number): { branchIdx: number; sexagenaryYear: number } {
@@ -1606,26 +1689,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   
   // 日次スコア (その日の日干干支のエネルギーと自身の宿命日干の相互作用から論理的に算出)
   const today = new Date();
-  const todaySeed = today.getFullYear() * 1000 + (today.getMonth() + 1) * 31 + today.getDate();
   
-  const getDailyStemImpact = (dayStem: string, personStem: string): number => {
-    const combinations: Record<string, string> = {
-      '甲': '己', '己': '甲', '乙': '庚', '庚': '乙',
-      '丙': '辛', '辛': '丙', '丁': '壬', '壬': '丁', '戊': '癸', '癸': '戊'
-    };
-    if (combinations[dayStem] === personStem) return 16; // 干合は大吉 (+16)
-    
-    const dayEl = stemElements[dayStem];
-    const personEl = stemElements[personStem];
-    if (!dayEl || !personEl) return 0;
-    
-    const rel = elementRelations[dayEl]?.[personEl] || 'same';
-    if (rel === 'producing') return 10;   // 相生は中吉 (+10)
-    if (rel === 'same') return 4;        // 比和は小吉 (+4)
-    if (rel === 'conquering') return -16; // 相剋は注意 (-16)
-    return 0;
-  };
-
   const todayPillar = calculateDayPillar(today);
   const myDailyImpact = getDailyStemImpact(todayPillar.stem, myPillarObj.stem);
 
@@ -1641,7 +1705,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
   const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
 
-  let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + myBranchDaily + oppBranchDaily + juniUnDaily);
+  // 今日の日盤の中宮の星（日の九星）と、本命星の関係（九星気学）。相手がいる場合は、二人の平均。
+  const dayStarOf = (d: Date) => {
+    const mine = getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), myStarObj.element);
+    return hasOpponent && opponentStarObj
+      ? (mine + getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), opponentStarObj.element)) / 2
+      : mine;
+  };
+  const dayStarDaily = dayStarOf(today);
+
+  let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + myBranchDaily + oppBranchDaily + juniUnDaily + dayStarDaily);
   if (dailyScore > 100) dailyScore = 100;
   if (dailyScore < 0) dailyScore = 0;
   
@@ -1893,7 +1966,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     } else {
       const myJuniUn = juniUnPoints(myPillarObj.stem, dayPillar.branch);
       const dayJuniUn = hasOpponent ? (myJuniUn + juniUnPoints(oppPillarObj.stem, dayPillar.branch)) / 2 : myJuniUn;
-      score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact + dayJuniUn);
+      score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact + dayJuniUn + dayStarOf(d));
       if (score > 100) score = 100;
       if (score < 30) score = 30;
     }
@@ -2866,16 +2939,21 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       else trustBase = 68;
       if (myJ && oppJ) trustBase += 6;
 
-      // 日々の微小な運気の波（±3点以内）のみを反映
-      const dailyTick = (seed: number) => ((seed % 7) - 3);
+      // 日々の運気の波（±3点以内）。旧版は日付から作った疑似乱数だった。
+      // 新版は、今日の天干・地支・十二運と、二人（相手がいない場合は自分）との関係から決める（点数への換算の重みは、アプリ独自）。
+      const clampTick = (v: number) => Math.max(-3, Math.min(3, Math.round(v)));
+      const avg2 = (mine: number, opp: number) => (hasOpponent ? (mine + opp) / 2 : mine);
+      const stemTick = clampTick(avg2(myDailyImpact, oppDailyImpact) / 4);        // 今日の天干と二人の天干（干合・十神）
+      const branchTick = clampTick(avg2(myBranchDaily, oppBranchDaily) / 4);      // 今日の地支と二人の地支（支合・三合・六沖）
+      const unTick = clampTick(juniUnDaily / 2.5);                                // 今日の十二運（日ごとのエネルギーの波）
 
       return {
-        romance: Math.min(99, Math.max(40, romanceBase + dailyTick(todaySeed + 1))),
-        conversation: Math.min(99, Math.max(40, convBase + dailyTick(todaySeed + 2))),
-        sensual: Math.min(99, Math.max(40, sensualBase + dailyTick(todaySeed + 3))),
-        marriage: Math.min(99, Math.max(40, marriageBase + dailyTick(todaySeed + 4))),
-        obsession: Math.min(99, Math.max(40, obsessionBase + dailyTick(todaySeed + 5))),
-        trust: Math.min(99, Math.max(40, trustBase + dailyTick(todaySeed + 6)))
+        romance: Math.min(99, Math.max(40, romanceBase + stemTick)),
+        conversation: Math.min(99, Math.max(40, convBase + unTick)),
+        sensual: Math.min(99, Math.max(40, sensualBase + branchTick)),
+        marriage: Math.min(99, Math.max(40, marriageBase + clampTick((stemTick + branchTick) / 2))),
+        obsession: Math.min(99, Math.max(40, obsessionBase + branchTick)),
+        trust: Math.min(99, Math.max(40, trustBase + unTick))
       };
     })(),
     myTorisetsu: generateTorisetsu(

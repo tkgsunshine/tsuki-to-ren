@@ -85,7 +85,7 @@ test('今日の十二支と支合・三合になる十二支は、六沖にな�
 });
 
 // ───────── P2: 十二運と、単身の基本点・日ごとの運気の波 ─────────
-import { getJuniUn } from '../src/utils/fortuneEngine.ts';
+import { getJuniUn, getTenGod, getDailyStemImpact, TEN_GOD_POINTS, getDayStarNumber, getDayStarPoints, DAY_STAR_WEIGHT } from '../src/utils/fortuneEngine.ts';
 
 test('十二運の表（日本で一般的な表）: 既知の組み合わせ', () => {
   const cases = [
@@ -116,4 +116,61 @@ test('単身の基本点は、日柱の十二運と、本命星・日主の五�
     seen.add(x.baseScore);
   }
   assert.ok(seen.size >= 10, `基本点の種類が少なすぎる: ${seen.size}`);
+});
+
+test('通変星（十神）: 甲から見た各天干。陰陽で正・偏が分かれる（四柱推命の表）', () => {
+  const want = { 甲: '比肩', 乙: '劫財', 丙: '食神', 丁: '傷官', 戊: '偏財', 己: '正財', 庚: '偏官', 辛: '正官', 壬: '偏印', 癸: '正印' };
+  for (const [other, god] of Object.entries(want)) assert.equal(getTenGod('甲', other), god, `甲×${other}`);
+  // 乙（陰）から見ると、正・偏が入れ替わる
+  assert.equal(getTenGod('乙', '甲'), '劫財');
+  assert.equal(getTenGod('乙', '庚'), '正官');
+  assert.equal(getTenGod('乙', '辛'), '偏官');
+  assert.equal(getTenGod('乙', '壬'), '正印');
+  // どの日主でも、10種が1つずつ現れる
+  for (const p of '甲乙丙丁戊己庚辛壬癸') assert.equal(new Set([...'甲乙丙丁戊己庚辛壬癸'].map((o) => getTenGod(p, o))).size, 10, p);
+});
+
+test('今日の天干の影響: 干合は+16、それ以外は十神の点数（偏官が最も低い）', () => {
+  assert.equal(getDailyStemImpact('己', '甲'), 16); // 甲己合
+  assert.equal(getDailyStemImpact('癸', '甲'), TEN_GOD_POINTS['正印']);
+  assert.equal(getDailyStemImpact('庚', '甲'), TEN_GOD_POINTS['偏官']);
+  assert.equal(Math.min(...Object.values(TEN_GOD_POINTS)), TEN_GOD_POINTS['偏官']);
+});
+
+test('レーダーチャート: 乱数を使わず、同じ入力なら同じ値。40〜99に収まる', () => {
+  const pair = () =>
+    withNow('2026-10-05', () =>
+      generateFortuneResult({ myName: 'a', myBirth: '2001-07-09', myMbti: 'ENFP', myGender: 'female', opponentName: 'b', opponentBirth: '1999-02-14', opponentMbti: 'ISFJ', opponentGender: 'male', relationship: 'partner' }, 'tsuki'),
+    );
+  const a = pair().radarScores;
+  assert.deepEqual(pair().radarScores, a);
+  for (const v of Object.values(a)) assert.ok(v >= 40 && v <= 99);
+});
+
+test('日盤（日の九星）: 日本の暦サイトで確認した日と一致する（陽遁・陰遁の両方）', () => {
+  // 出典: 日家九星の暦（2026-05-01=六白、2026-07-01=六白、2026-09-05=三碧）。2025-12-21 は冬至の甲子日（陽遁の始まり=一白）
+  assert.equal(getDayStarNumber(2025, 12, 21), 1);
+  assert.equal(getDayStarNumber(2026, 5, 1), 6);
+  assert.equal(getDayStarNumber(2026, 7, 1), 6);
+  assert.equal(getDayStarNumber(2026, 9, 5), 3);
+});
+
+test('日盤: 陽遁は一白から増え、陰遁は九紫から減る（夏至に最も近い甲子=2026-06-19）', () => {
+  assert.equal(getDayStarNumber(2026, 6, 19), 9);
+  assert.equal(getDayStarNumber(2026, 6, 20), 8);
+  assert.equal(getDayStarNumber(2026, 6, 28), 9 - (9 % 9)); // 9日後は一巡して九紫
+  assert.equal(getDayStarNumber(2025, 12, 22), 2);
+  // どの日も1〜9
+  const d = new Date(2026, 0, 1);
+  for (let i = 0; i < 800; i++, d.setDate(d.getDate() + 1)) {
+    const n = getDayStarNumber(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    assert.ok(n >= 1 && n <= 9);
+  }
+});
+
+test('日の九星と本命星の関係: 日の星が生む+4／同じ+2／日の星が剋す-4', () => {
+  // 2025-12-21 は一白（水）。木の本命星は、水に生まれる=+4。火の本命星は、水に剋される=-4。水の本命星は同じ=+2
+  assert.equal(getDayStarPoints(2025, 12, 21, '木'), 4 * DAY_STAR_WEIGHT);
+  assert.equal(getDayStarPoints(2025, 12, 21, '火'), -4 * DAY_STAR_WEIGHT);
+  assert.equal(getDayStarPoints(2025, 12, 21, '水'), 2 * DAY_STAR_WEIGHT);
 });
