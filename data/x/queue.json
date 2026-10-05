@@ -1,0 +1,258 @@
+[
+  {
+    "id": "2026-10-03-intro",
+    "date": "2026-10-03",
+    "slot": "night",
+    "kind": "promo",
+    "text": "はじめまして、月と蓮の運営アカウントです🌙\n毎日、朝・昼・夜の3回、今日の恋の空気と16タイプ（MBTI）のひとことをお届けします（自動投稿です）。\n生年月日と16タイプで見る無料の相性鑑定はこちら\nhttps://www.tsuki-to-ren.com\n—月と蓮 運営",
+    "status": "posted",
+    "createdAt": "2026-10-03T00:00:00.000Z",
+    "postedAt": "2026-10-04T11:24:07.876Z",
+    "tweetId": "2106706932761326002"
+  },
+  {
+    "id": "2026-10-04-morning",
+    "date": "2026-10-04",
+    "slot": "morning",
+    "kind": "value",
+    "text": "おはよう。今日は「見極め」の空気が流れる日。空には下弦の月が浮かぶ、少しずつ欠けていく時期だから、恋のモヤモヤもひとつ手放しやすいかも。返事を待ちすぎていた気持ちに、そっと区切りをつけてみて。伝えるときは、やわらかい言葉を選んでね。\n#恋愛占い\n—月",
+    "status": "expired",
+    "createdAt": "2026-10-03T06:58:43.414Z",
+    "lastError": "401 {\n  \"title\": \"Unauthorized\",\n  \"type\": \"about:blank\",\n  \"status\": 401,\n  \"detail\": \"Unauthorized\"\n}"
+  },
+  {
+    "id": "2026-10-04-noon",
+    "date": "2026-10-04",
+    "slot": "noon",
+    "kind": "value",
+    "text": "16タイプ（MBTI）別・今日の恋のひとこと\nISFJ：支えるばかりでなく、本音も少し見せて\nISFP：迷ったら、心がほっとする方を選んでいい\nESFJ：みんなに合わせすぎず、大切な人を優先して\nESFP：楽しい予定の中で、本当に会いたい人を見極めて\n—蓮",
+    "status": "expired",
+    "createdAt": "2026-10-03T06:58:43.414Z"
+  },
+  {
+    "id": "2026-10-04-night",
+    "date": "2026-10-04",
+    "slot": "night",
+    "kind": "promo",
+    "text": "今日もおつかれさま。下弦の月の夜は、心の荷物をひとつ下ろす時間。言えなかった言葉は、明日やさしく伝えればいいよ。気になる人との関係のヒントがほしくなったら、16タイプ×四柱推命の無料鑑定を月と蓮でどうぞ。\nhttps://www.tsuki-to-ren.com\n—月",
+    "status": "skipped",
+    "createdAt": "2026-10-03T06:58:43.414Z",
+    "skipReason": "サイト公開前のため、URL入りの投稿は見送り（運営判断）"
+  },
+  {
+    "id": "2026-10-05-morning",
+    "date": "2026-10-05",
+    "slot": "morning",
+    "kind": "value",
+    "text": "おはよう。今日は「ゆらぎ」の空気が流れる日。好きな人への気持ちが行ったり来たりしても、それは自然なことだ。空には下弦の月、ひと息つきたくなる頃。今日は話すより、相手の話をじっくり聴いてみて。考えすぎて止まりそうなら、短い返事ひとつで十分だよ。\n#恋愛占い\n-蓮-",
+    "status": "skipped",
+    "createdAt": "2026-10-03T16:09:53.879Z",
+    "skipReason": "朝・夜は守護獣の投稿（各2本）に置き換え（運営判断）"
+  },
+  {
+    "id": "2026-10-05-night",
+    "date": "2026-10-05",
+    "slot": "night",
+    "kind": "value",
+    "text": "今日もおつかれ。気持ちがゆれた日は、無理に答えを出さなくていい。細くなっていく月のように、迷いも少しずつ静かになっていく。今夜は好きな人のことを考えすぎず、ゆっくり休もう。明日の自分に、そっと任せていいんだ。\n-蓮-",
+    "status": "skipped",
+    "createdAt": "2026-10-03T16:09:53.879Z",
+    "skipReason": "朝・夜は守護獣の投稿（各2本）に置き換え（運営判断）"
+  },
+  {
+    "id": "intro-prelaunch",
+    "date": "2026-10-04",
+    "slot": "night",
+    "kind": "promo",
+    "text": "はじめまして、月と蓮の運営アカウントです🌙\n四柱推命×16タイプ（MBTI）の恋愛占いを、近日公開予定。\n公開までのあいだ、毎日、朝・昼・夜の3回、今日の恋の空気と16タイプのひとことをお届けします（自動投稿です）。\n—月と蓮 運営",
+    "status": "posted",
+    "createdAt": "2026-10-04T12:00:00.000Z",
+    "postedAt": "2026-10-04T11:59:01.201Z",
+    "tweetId": "2106715712496799972"
+  },
+  {
+    "id": "intro-prelaunch-v2",
+    "date": "2026-10-04",
+    "slot": "night",
+    "kind": "value",
+    "text": "はじめまして、月と蓮の運営アカウントです🌙\n四柱推命×九星気学×16タイプ（MBTI）の本格恋愛占いを、近日公開予定。\n公開までのあいだ、毎日、朝・昼・夜の3回、今日の恋の空気と16タイプのひとことをお届けします（自動投稿です）。\n- 本格恋愛占い 月と蓮 運営 -",
+    "status": "posted",
+    "createdAt": "2026-10-04T12:50:00.000Z",
+    "postedAt": "2026-10-04T12:40:05.703Z",
+    "tweetId": "2106726049845587980"
+  },
+  {
+    "id": "chara-2026-10-04-卯",
+    "date": "2026-10-04",
+    "slot": "night",
+    "kind": "value",
+    "text": "【今日の恋愛運】癸兎タイプ\n今日の点数：89点（目安）\n魅力と自信が溢れ、幸運が味方する最高日\n連絡のおすすめ時間：20:00〜22:00\nあなたの守護獣はどのタイプ？\n—月と蓮 運営",
+    "image": "public/assets/astrology_sample.jpg",
+    "status": "posted",
+    "createdAt": "2026-10-04T12:39:28.572Z",
+    "postedAt": "2026-10-04T12:40:19.149Z",
+    "tweetId": "2106726107265515624"
+  },
+  {
+    "id": "chara-2026-10-04-辛猪",
+    "date": "2026-10-04",
+    "slot": "night",
+    "kind": "value",
+    "text": "【今日の辛猪（かのと・いのしし）タイプの恋愛運】\n＝宝石貴族×いのししの守護獣\n今日の点数：87点（本命星で82〜99点）\n新しい挑戦や積極的発信で評価が高まる日\n連絡のおすすめ時間：18:00〜20:00\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n—蓮",
+    "images": [
+      "public/assets/astrology_boar_sample.jpg",
+      "public/assets/astrology_boar_sample_male.jpg"
+    ],
+    "status": "posted",
+    "createdAt": "2026-10-04T13:13:36.630Z",
+    "postedAt": "2026-10-04T13:14:02.936Z",
+    "tweetId": "2106734597111263576"
+  },
+  {
+    "id": "chara-2026-10-04-辛猪-v3",
+    "date": "2026-10-04",
+    "slot": "night",
+    "kind": "value",
+    "text": "【今日（10月4日）の辛猪（かのと・いのしし）タイプの恋愛運】\n＝宝石貴族×いのししの守護獣\n今日の点数：82点（本命星が四緑木星の場合）\n新しい挑戦や積極的発信で評価が高まる日\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-蓮-",
+    "image": "public/assets/astrology_boar_sample.jpg",
+    "status": "posted",
+    "createdAt": "2026-10-04T13:35:58.721Z",
+    "postedAt": "2026-10-04T13:36:36.547Z",
+    "tweetId": "2106740273392820301"
+  },
+  {
+    "id": "2026-10-05-chara-1",
+    "date": "2026-10-05",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日（10月5日）の丙鼠（ひのえ・ねずみ）× 五黄土星の恋愛運】\n＝太陽の英雄×ねずみの守護獣\n今日の点数：69点\n心身を調和させ、自分らしさを輝かせる日\nLINEのおすすめ時間：12:00〜14:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-月-",
+    "image": "public/assets/astrology_rat_sample.jpg",
+    "status": "posted",
+    "createdAt": "2026-10-04T17:50:56.926Z",
+    "postedAt": "2026-10-05T01:57:18.301Z",
+    "tweetId": "2106926675271307405"
+  },
+  {
+    "id": "2026-10-05-chara-2",
+    "date": "2026-10-05",
+    "slot": "morning",
+    "time": "08:45",
+    "kind": "value",
+    "text": "【今日（10月5日）の丁牛（ひのと・うし）× 一白水星の恋愛運】\n＝灯火の魔術師×うしの守護獣\n今日の点数：100点\n魅力と自信が溢れ、幸運が味方する最高日\nLINEのおすすめ時間：20:00〜22:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-蓮-",
+    "image": "public/assets/astrology_ox_sample.jpg",
+    "status": "skipped",
+    "createdAt": "2026-10-04T17:50:56.926Z",
+    "note": "朝の枠を過ぎたため（エンジン更新で作り直し）"
+  },
+  {
+    "id": "2026-10-05-chara-3",
+    "date": "2026-10-05",
+    "slot": "night",
+    "kind": "value",
+    "text": "【今日（10月5日）の戊虎（つちのえ・とら）× 四緑木星の恋愛運】\n＝要塞の守護者×とらの守護獣\n今日の点数：86点\n魅力と自信が溢れ、幸運が味方する最高日\nLINEのおすすめ時間：20:00〜22:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-月-",
+    "image": "public/assets/astrology_tiger_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:52:44.121Z"
+  },
+  {
+    "id": "2026-10-05-chara-4",
+    "date": "2026-10-05",
+    "slot": "night",
+    "time": "20:45",
+    "kind": "value",
+    "text": "【今日（10月5日）の己兎（つちのと・うさぎ）× 一白水星の恋愛運】\n＝巫女、治癒者×うさぎの守護獣\n今日の点数：71点\n心身を調和させ、自分らしさを輝かせる日\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-蓮-",
+    "image": "public/assets/astrology_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:52:44.121Z"
+  },
+  {
+    "id": "2026-10-06-chara-1",
+    "date": "2026-10-06",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日（10月6日）の庚龍（かのえ・たつ）× 二黒土星の恋愛運】\n＝鋼鉄の戦神×たつの守護獣\n今日の点数：90点\n魅力と自信が溢れ、幸運が味方する最高日\nLINEのおすすめ時間：20:00〜22:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-月-",
+    "image": "public/assets/astrology_dragon_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:52:44.235Z"
+  },
+  {
+    "id": "2026-10-06-chara-2",
+    "date": "2026-10-06",
+    "slot": "morning",
+    "time": "08:45",
+    "kind": "value",
+    "text": "【今日（10月6日）の辛蛇（かのと・へび）× 九紫火星の恋愛運】\n＝宝石貴族×へびの守護獣\n今日の点数：86点\n魅力と自信が溢れ、幸運が味方する最高日\nLINEのおすすめ時間：20:00〜22:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-蓮-",
+    "image": "public/assets/astrology_snake_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:52:44.235Z"
+  },
+  {
+    "id": "2026-10-06-chara-3",
+    "date": "2026-10-06",
+    "slot": "night",
+    "kind": "value",
+    "text": "【今日（10月6日）の壬馬（みずのえ・うま）× 七赤金星の恋愛運】\n＝海王、嵐使い×うまの守護獣\n今日の点数：94点\n魅力と自信が溢れ、幸運が味方する最高日\nLINEのおすすめ時間：20:00〜22:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-月-",
+    "image": "public/assets/astrology_horse_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:52:44.235Z"
+  },
+  {
+    "id": "2026-10-06-chara-4",
+    "date": "2026-10-06",
+    "slot": "night",
+    "time": "20:45",
+    "kind": "value",
+    "text": "【今日（10月6日）の癸羊（みずのと・ひつじ）× 一白水星の恋愛運】\n＝深海の術師×ひつじの守護獣\n今日の点数：72点\n心身を調和させ、自分らしさを輝かせる日\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-蓮-",
+    "image": "public/assets/astrology_sheep_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:52:44.235Z"
+  },
+  {
+    "id": "2026-10-05-noon",
+    "date": "2026-10-05",
+    "slot": "noon",
+    "kind": "promo",
+    "text": "同じ16タイプ（MBTI）のENTPでも、恋愛のクセは同じとは限らない🌙\n\n鋼鉄の戦神タイプ → 返信は結論から。無駄なやり取りは苦手\n要塞の守護者タイプ → 返信は誠実にじっくり。軽はずみな答えは避ける\n\n16タイプ×生まれた日で見る恋愛占いは、近日公開\n-月-",
+    "format": "mbti_birth",
+    "system": "mbti_birth",
+    "purpose": "app",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:55:23.220Z"
+  },
+  {
+    "id": "2026-10-05-evening",
+    "date": "2026-10-05",
+    "slot": "evening",
+    "kind": "value",
+    "text": "❤️ 2人の恋愛相性（16タイプ）\n\nINFP × ENFJ：40点／40点満点（最高の組み合わせ）\nINTJ × ESFP：34点（正反対だから惹かれ合う）\nISFP × ENFP：15点（歩み寄りが大事）\n\nあなたと好きな人は、何点？\n-蓮-",
+    "format": "pair_score",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:55:23.221Z"
+  },
+  {
+    "id": "2026-10-06-noon",
+    "date": "2026-10-06",
+    "slot": "noon",
+    "kind": "promo",
+    "text": "あなたのタイプだけでは、本当の相性はわからない。\n\n大事なのは「あなた × 好きな人」。\n16タイプ（MBTI）と生まれた日を、2人分重ねて見る相性占いを、近日公開します🌙\n-月-",
+    "format": "pair_teaser",
+    "system": "pair",
+    "purpose": "app",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:55:23.221Z"
+  },
+  {
+    "id": "2026-10-06-evening",
+    "date": "2026-10-06",
+    "slot": "evening",
+    "kind": "value",
+    "text": "好きな人から「また今度ご飯行こう」と言われた。\nこれ、脈ありだと思う？\n\nA：脈あり\nB：社交辞令\nC：誘われるまで判断できない\n\nあなたならどう思う？\n-蓮-",
+    "format": "psych_poll",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-05T02:55:23.221Z"
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-05",
+  "internal": {
+    "stem": "壬",
+    "branch": "子",
+    "element": "水"
+  },
+  "todayMood": {
+    "name": "ゆらぎ",
+    "hint": "感じる・休む・人の話を聴く",
+    "caution": "考えすぎて動けなくならない"
+  },
+  "moon": {
+    "age": 23.3,
+    "name": "下弦の月"
+  },
+  "featuredTypes": [
+    {
+      "code": "ISTJ",
+      "nick": "管理者",
+      "trait": "誠実でコツコツ・約束を守る"
+    },
+    {
+      "code": "ISTP",
+      "nick": "巨匠",
+      "trait": "冷静で器用・必要なときに動く"
+    },
+    {
+      "code": "ESTJ",
+      "nick": "幹部",
+      "trait": "段取り上手・物事をまとめて進める"
+    },
+    {
+      "code": "ESTP",
+      "nick": "起業家",
+      "trait": "行動が速い・まず試してみる"
+    }
+  ]
+}

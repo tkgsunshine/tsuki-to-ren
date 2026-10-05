@@ -454,148 +454,8 @@ writePage(
   ]
 );
 
-// 6. Generate All 256 /compatibility/[type1]-[type2] Pages
-console.log('🚀 Pre-rendering 256 MBTI Combination Pages...');
-
-let mbtiCount = 0;
-
-for (const t1 of MBTI_TYPES) {
-  for (const t2 of MBTI_TYPES) {
-    const slug = `${t1.code.toLowerCase()}-${t2.code.toLowerCase()}`;
-    const pairTitle = `【16タイプ相性】${t1.code}（${t1.name}）× ${t2.code}（${t2.name}）の恋愛相性・トリセツ | 月と蓮`;
-    const pairDesc = `${t1.code}（${t1.name}）と${t2.code}（${t2.name}）の恋愛相性、惹かれ合う理由、すれ違いの防ぎ方、LINE返信率を高める吉時間を徹底分析。四柱推命×16タイプで二人の運命バイオリズムを無料鑑定。`;
-    const pairKeywords = `${t1.code} ${t2.code} 相性, ${t1.code} ${t2.code} 恋愛, ${t1.code} ${t1.name}, ${t2.code} ${t2.name}, 16タイプ相性, LINE吉時間, 四柱推命相性, 月と蓮`;
-    const pairCanonical = `${BASE_URL}/compatibility/${slug}`;
-
-    // Dynamic relationship insight
-    const isSameType = t1.code === t2.code;
-    const isEIOpposite = t1.code[0] !== t2.code[0];
-    const isNSopposite = t1.code[1] !== t2.code[1];
-    const isTFOpposite = t1.code[2] !== t2.code[2];
-    const isJPOpposite = t1.code[3] !== t2.code[3];
-
-    let dynamicChemistry = '';
-    let adviceText = '';
-    let lineTip = '';
-
-    if (isSameType) {
-      dynamicChemistry = `同じ【${t1.code}】同士だからこそ、価値観や物事の捉え方が鏡のように一致し、言葉にしなくても相手の感情が手に取るように分かります。深い安心感と共感に包まれる理想的なパートナーシップを築けます。`;
-      adviceText = `似た者同士ゆえに、悩みやネガティブな感情に陥った際にお互いに引きずられてしまうことがあります。どちらかが一歩引いて客観的な視点を持つこと、また外部の友人や新しい趣味を取り入れると関係が活性化します。`;
-      lineTip = `共感性の高いメッセージや、お互いの共通の趣味に関する話題が最も効果的です。無理に駆け引きをせず、素直な気持ちを丁寧な言葉で伝えると即座に返信率が上がります。`;
-    } else {
-      dynamicChemistry = `【${t1.code}（${t1.name}）】の${t1.element}と、【${t2.code}（${t2.name}）】の${t2.element}が出会うことで、お互いに自分にはない視点や魅力に強く惹かれ合います。${isEIOpposite ? '内向と外向のバランスが良く、お互いの世界を広げ合える好相性です。' : 'テンポや波長が合いやすく、自然体で過ごせる心地よさがあります。'}`;
-      adviceText = `${isTFOpposite ? '感情を重視する側と論理を重んじる側で、すれ違いが生じる場面があります。「正論」よりも「共感」を先に伝えることを意識しましょう。' : '似た価値判断の基準を持つため意思疎通はスムーズですが、細かな表現の違いに気を配ることでさらに親密度が増します。'}`;
-      lineTip = `相手の生活リズムと16タイプの心理傾向に合わせた時間帯が吉です。${t2.code.includes('P') ? '相手は自由なペースを好むため、追撃LINEは避け、短くライトな質問を送るのが返信率アップの鍵です。' : '相手は計画性や誠実さを重視するため、丁寧な挨拶と明確な用件を添えると好感度が急上昇します。'}`;
-    }
-
-    const breadcrumbs = {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      'itemListElement': [
-        { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
-        { '@type': 'ListItem', 'position': 2, 'name': '16タイプ相性一覧', 'item': `${BASE_URL}/compatibility` },
-        { '@type': 'ListItem', 'position': 3, 'name': `${t1.code} × ${t2.code}`, 'item': pairCanonical }
-      ]
-    };
-
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      'mainEntity': [
-        {
-          '@type': 'Question',
-          'name': `${t1.code}（${t1.name}）と${t2.code}（${t2.name}）の恋愛相性は良いですか？`,
-          'acceptedAnswer': {
-            '@type': 'Answer',
-            'text': dynamicChemistry
-          }
-        },
-        {
-          '@type': 'Question',
-          'name': `${t1.code}から${t2.code}への効果的なLINEメッセージや接し方は？`,
-          'acceptedAnswer': {
-            '@type': 'Answer',
-            'text': lineTip
-          }
-        }
-      ]
-    };
-
-    const noscriptContent = `
-      <div style="max-width: 720px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
-        <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
-          <a href="/" style="color: #e2c074;">ホーム</a> &gt; <a href="/compatibility" style="color: #e2c074;">16タイプ相性一覧</a> &gt; <span>${t1.code} × ${t2.code}</span>
-        </nav>
-
-        <article>
-          <header style="margin-bottom: 2rem;">
-            <span style="font-size: 0.8rem; color: #e2c074; font-weight: bold; background: rgba(226,192,116,0.1); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(226,192,116,0.3);">
-              16タイプ恋愛攻略マトリクス
-            </span>
-            <h1 style="font-size: 1.6rem; color: #fef08a; margin: 0.75rem 0 0.5rem; line-height: 1.4;">
-              【16タイプ相性】${t1.code}（${t1.name}）× ${t2.code}（${t2.name}）の恋愛相性・トリセツ
-            </h1>
-            <p style="font-size: 0.85rem; color: #9ca3af; margin: 0;">
-              あなた：${t1.code}（${t1.tag}） × お相手：${t2.code}（${t2.tag}）
-            </p>
-          </header>
-
-          <section style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem;">
-            <h2 style="font-size: 1.15rem; color: #fef08a; margin-top: 0;">二人の相性と惹かれ合う理由</h2>
-            <p style="font-size: 0.9rem; color: #e2e8f0; margin: 0;">${dynamicChemistry}</p>
-          </section>
-
-          <section style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem;">
-            <h2 style="font-size: 1.15rem; color: #fef08a; margin-top: 0;">すれ違いを防ぐコミュニケーションのコツ</h2>
-            <p style="font-size: 0.9rem; color: #e2e8f0; margin: 0;">${adviceText}</p>
-          </section>
-
-          <section style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem;">
-            <h2 style="font-size: 1.15rem; color: #fef08a; margin-top: 0;">返信率を高めるLINEの送り方＆吉時間</h2>
-            <p style="font-size: 0.9rem; color: #e2e8f0; margin: 0;">${lineTip}</p>
-          </section>
-
-          <!-- Interactive Diagnostic CTA -->
-          <div style="text-align: center; padding: 2rem 1.25rem; background: linear-gradient(135deg, rgba(226,192,116,0.15) 0%, rgba(168,85,247,0.15) 100%); border: 1.5px solid rgba(226,192,116,0.4); border-radius: 18px; margin-top: 2rem;">
-            <h3 style="color: #ffffff; font-size: 1.2rem; margin: 0 0 0.5rem;">二人の生年月日でさらに深層鑑定！</h3>
-            <p style="font-size: 0.85rem; color: #e2e8f0; margin: 0 0 1.25rem; line-height: 1.6;">
-              16タイプの性格傾向に加え、東洋最古の占術「四柱推命」で二人の魂の結びつきと今日のLINE吉時間を完全算出します。
-            </p>
-            <a href="/?mm=${t1.code}&om=${t2.code}" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.85rem 2rem; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(226,192,116,0.4);">
-              ${t1.code} × ${t2.code} の相性を生年月日で無料鑑定する
-            </a>
-          </div>
-
-          <!-- Other Pairs Navigation -->
-          <div style="margin-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
-            <h4 style="color: #9ca3af; font-size: 0.85rem; margin-bottom: 0.75rem;">${t1.code} の他の組み合わせを見る</h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-              ${MBTI_TYPES.map(o => `
-                <a href="/compatibility/${t1.code.toLowerCase()}-${o.code.toLowerCase()}" style="font-size: 0.72rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 4px; text-decoration: none;">
-                  ${t1.code}×${o.code}
-                </a>
-              `).join('')}
-            </div>
-          </div>
-        </article>
-      </div>
-    `;
-
-    writePage(
-      `compatibility/${slug}`,
-      pairTitle,
-      pairDesc,
-      pairKeywords,
-      pairCanonical,
-      noscriptContent,
-      [breadcrumbs, faqSchema]
-    );
-
-    mbtiCount++;
-  }
-}
-
-console.log(`🎉 Successfully pre-rendered 4 legal pages + 1 hub page + ${mbtiCount} MBTI combination pages!`);
+// The 256 /compatibility/[type1]-[type2] pages are no longer pre-rendered (thin, near-duplicate content).
+// vercel.json rewrites them to the SPA, which reads the pair from the URL, and sends X-Robots-Tag: noindex.
 
 // 6. Pre-render root homepage (dist/index.html) with semantic HTML and internal link network
 console.log('🚀 Pre-rendering root homepage (dist/index.html)...');
@@ -607,11 +467,11 @@ const homeSemanticHtml = `
         【公式】月と蓮 | 約2.7億通りの四柱推命×九星気学×16タイプ本格恋愛相性診断
       </h1>
       <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; max-width: 580px; margin: 0 auto;">
-        東洋最高峰の四柱推命・九星気学と西洋の16タイプ（MBTI）心理統計学を融合した完全無料の本格恋愛占い『月と蓮』。片思い・復縁・好きな人との本日の相性バイオリズム、LINEを送るべき吉時間、お相手の取扱説明書（トリセツ）、奇跡のレア属性「魁罡（かいごう）」「極星」を即座に精密鑑定します。
+        東洋最高峰の四柱推命・九星気学と西洋の16タイプ（MBTI）心理統計学を融合した無料の本格恋愛占い『月と蓮』。片思い・復縁・好きな人との本日の相性バイオリズム、LINEを送るべき吉時間、お相手の取扱説明書（トリセツ）、奇跡のレア属性「魁罡（かいごう）」「極星」を即座に精密鑑定します。
       </p>
       <div style="margin-top: 1.5rem;">
         <a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.85rem 2.2rem; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1.05rem; box-shadow: 0 4px 20px rgba(226,192,116,0.35);">
-          今すぐ完全無料で恋愛相性を占う
+          今すぐ無料で恋愛相性を占う
         </a>
       </div>
     </header>

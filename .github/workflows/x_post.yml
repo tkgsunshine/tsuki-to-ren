@@ -1,0 +1,54 @@
+name: X Poster (Hasu-to-Tsuki)
+
+# 投稿枠 8:15 / 12:15 / 18:15 / 20:15 JST と、30分後の予備リトライ（UTC 23:15,23:45 / 03:15,03:45 / 09:15,09:45 / 11:15,11:45）
+# scripts/x/post.mjs が最小間隔・期限切れ・重複・自動チェックのガードを持つため、複数回起動しても二重投稿しない
+on:
+  schedule:
+    - cron: '15,45 23 * * *'
+    - cron: '15,45 3 * * *'
+    - cron: '15,45 9 * * *'
+    - cron: '15,45 11 * * *'
+  workflow_dispatch:
+    inputs:
+      item_id:
+        description: '臨時投稿する投稿ID（例: 2026-10-03-intro）。空なら通常動作'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: x-queue
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Post to X
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          X_FORCE_ID: ${{ github.event.inputs.item_id }}
+        run: node scripts/x/post.mjs
+
+      - name: Commit queue state
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/x/queue.json
+          if git diff --staged --quiet; then
+            echo "No queue changes."
+          else
+            git commit -m "chore(x): update X queue state"
+            git pull --rebase origin main
+            git push origin main
+          fi
