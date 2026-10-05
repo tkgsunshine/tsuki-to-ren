@@ -407,7 +407,7 @@ export function getStemTraits(oppStem, _name) {
             praise: [`「ブレないところ、ほんとかっこいいと思う」`, `「言ったことちゃんとやるの、尊敬してる」`],
             ng: ['面目を潰すような前言撤回や嘘', '大勢の前で上から目線で指示すること'],
             delayReason: '自分の目標や仕事に集中していて余裕がない状態。妥協した返信をしたくないためです。',
-            delayAdvice: '「忙しいと思うから返信気にしないでね！応援してるよ」と短くねぎらう。'
+            delayAdvice: '「忙しいよね、返信は気にしないで！応援してる」と短くねぎらう。'
         },
         '乙': {
             praise: [`「いつも気にかけてくれてありがとう。けっこう救われてる」`, `「一緒にいると落ち着くんだよね」`],
@@ -1003,8 +1003,8 @@ export function getDailyContactAndAdvice(dailyScore, hasOpponent, character, _my
         if (dailyScore >= 85) {
             timeSlot = '21:00 〜 23:00';
             subtitle = subs.t85;
-            const killing = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「あなたの誠実さを心から尊敬している」');
-            const invite = oppMbtiTrait?.lineInvite || '「素敵なお店見つけたから、今度一緒に行かない？」';
+            const killing = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「いつも誠実でいてくれるとこ、ほんと尊敬してる」');
+            const invite = oppMbtiTrait?.lineInvite || '「よさそうなお店見つけたから、今度一緒に行かない？」';
             if (character === 'tsuki') {
                 advice = `${oppNick}様（${oppNorm}）との魂の波長が最高潮に達する日です。小手先の駆け引きは不要です。${killing}のように相手の存在そのものを認める温かな言葉を届けたり、${invite}と素直なお誘いを送ることで、一気に進展する奇跡の好機となります。`;
             }
@@ -2296,7 +2296,7 @@ export function generateFortuneResult(input, character) {
             }
             // Topic 3: 惹かれ合うポイント＆地雷行動3選
             const oppFallInLove = oppMbtiTrait?.fallInLove || '飾らない素直な笑顔と、自分の世界観を認めてくれた瞬間。';
-            const oppKilling = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「あなたの誠実さを心から尊敬している」');
+            const oppKilling = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「いつも誠実でいてくれるとこ、ほんと尊敬してる」');
             const ng1 = oppMbtiTrait?.ngList[0] || '相手のペースを無視した連絡の連投';
             const ng2 = oppMbtiTrait?.ngList[1] || '感情的な詰問や試し行為';
             const ng3 = oppMbtiTrait?.ngList[2] || 'プライベートな領域への過度な干渉';
@@ -2341,7 +2341,7 @@ export function generateFortuneResult(input, character) {
             }
             // Topic 4: 運命の転機日とアプローチ計画
             const oppDateSpot = oppMbtiTrait?.dateSpot || '落ち着いた雰囲気の静かなカフェや景色の良いレストラン';
-            const oppLineInvite = oppMbtiTrait?.lineInvite || '「素敵なお店を見つけたんだけど、今度一緒に行かない？」';
+            const oppLineInvite = oppMbtiTrait?.lineInvite || '「よさそうなお店見つけたんだけど、今度一緒に行かない？」';
             let topic4Intro = '';
             let topic4Detail = '';
             if (character === 'tsuki') {
