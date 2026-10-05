@@ -58,7 +58,7 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
         あなたとお相手の運命の相性を今すぐ確かめてみませんか？
       </Heading>
       <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0, maxWidth: '500px' }}>
-        生年月日と16タイプを入力するだけで、全74,649,600通り（約7,465万通り）の算術マトリクスから二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間が瞬時に鑑定できます。
+        生年月日と16タイプを入力するだけで、約7,465万通りの算術マトリクスから二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間が瞬時に鑑定できます。
       </p>
       <button
         type="button"

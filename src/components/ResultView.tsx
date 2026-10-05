@@ -212,6 +212,25 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const [emailSent, setEmailSent] = useState(false);
   const [registeringEmail, setRegisteringEmail] = useState(false);
   const [subSuccess, setSubSuccess] = useState(false);
+  // サブスク登録が完了した瞬間に、鑑定結果の先頭へ戻して全解放後の結果を最初から読めるようにする
+  const resultTopRef = useRef<HTMLDivElement>(null);
+  const wasSubscribedRef = useRef(isSubscribed);
+  const [showWelcomePremium, setShowWelcomePremium] = useState(false);
+  useEffect(() => {
+    if (isSubscribed && !wasSubscribedRef.current) {
+      setShowWelcomePremium(true);
+      // モーダルが閉じてから戻す（閉じる前だと body のスクロールロック解除で位置がずれる）
+      const timer = setTimeout(() => {
+        const mainEl = document.querySelector('.main-content') as HTMLElement | null;
+        if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        resultTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+      wasSubscribedRef.current = isSubscribed;
+      return () => clearTimeout(timer);
+    }
+    wasSubscribedRef.current = isSubscribed;
+  }, [isSubscribed]);
   interface ZoomedImgData {
   src: string;
   headerTitle: string;
@@ -244,6 +263,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const pwaStatus = getDevicePwaStatus();
     // Do not show if already in standalone PWA
     if (pwaStatus.isStandalone) return;
+    // PCではホーム画面に追加する使い方をしないので出さない（スマホ・タブレットだけ）
+    if (!pwaStatus.isMobile) return;
 
     let hasTriggered = false;
     const checkScroll = (target: HTMLElement | Window) => {
@@ -577,7 +598,34 @@ export const ResultView: React.FC<ResultViewProps> = ({
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.4s ease', paddingTop: '0.25rem', paddingBottom: 'calc(5.5rem + var(--safe-bottom, 0px))' }}>
+    <div ref={resultTopRef} style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.4s ease', paddingTop: '0.25rem', paddingBottom: 'calc(5.5rem + var(--safe-bottom, 0px))', scrollMarginTop: '1rem' }}>
+
+      {/* プレミアム登録完了のお知らせ（登録直後に結果の先頭へ戻したときだけ出す） */}
+      {showWelcomePremium && (
+        <div role="status" style={{
+          position: 'relative',
+          background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(20, 16, 36, 0.96) 100%)',
+          border: '1px solid rgba(226, 192, 116, 0.55)',
+          borderRadius: '14px',
+          padding: '0.9rem 2.4rem 0.9rem 1rem',
+          color: '#fef3c7',
+          boxShadow: '0 4px 18px rgba(226, 192, 116, 0.18)',
+          animation: 'fadeIn 0.4s ease'
+        }}>
+          <div style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>🎉 プレミアム会員になりました</div>
+          <div style={{ fontSize: '0.82rem', color: '#e5e7eb', lineHeight: 1.6 }}>
+            鑑定結果のすべてが解放されました。ここから順番にお読みください。
+          </div>
+          <button
+            type="button"
+            aria-label="閉じる"
+            onClick={() => setShowWelcomePremium(false)}
+            style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'transparent', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.25rem', display: 'inline-flex' }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
       
       {/* Top Back Navigation Button */}
       {onReset && (
@@ -763,7 +811,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           fontWeight: '600',
           letterSpacing: '0.02em'
         }}>
-          ✨ 全74,649,600通り（約7,465万通り）の算術マトリクスから算出
+          ✨ 約7,465万通りの算術マトリクスから算出
         </div>
         
         {/* Luxury Score Pods Side-by-Side */}
@@ -1050,13 +1098,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <span>※タップで守護獣画像を保存できます</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.25rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold' }}>
+              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.5rem' }}>
+                <span className="astro-title-badge font-serif">
+                  {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
+                <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
                   {activeResult.myAstrologyName}
                 </span>
                 <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
-                  fontSize: '0.6rem',
-                  padding: '2px 6px',
+                  fontSize: '0.72rem',
+                  padding: '2px 7px',
                   borderRadius: '4px',
                   background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)'),
                   color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#d8b4fe' : '#93c5fd'),
@@ -1066,23 +1121,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.7rem', color: '#cbd5e1', lineHeight: '1.4', fontWeight: '500', minHeight: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1, marginBottom: '0.75rem' }}>
-                {activeResult.myAstrologyTheme}
-              </div>
-
               {/* Dynamic Attributes Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '300px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.55rem', color: '#9ca3af' }}>五行 (陰陽)</span>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: colors.primary }}>{activeResult.myAstrologyElement || '火・陰'}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
+                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d1d5db' }}>五行 (陰陽)</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyElement || '火・陰'}</span>
                 </div>
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.55rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>性格分類</span>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: colors.primary }}>{activeResult.myBranchPersonality}</span>
+                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d1d5db', whiteSpace: 'nowrap' }}>性格分類</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
                 </div>
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.55rem', color: '#9ca3af' }}>守護カラー</span>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: colors.primary }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
+                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d1d5db' }}>守護カラー</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
                 </div>
               </div>
 
@@ -1091,18 +1142,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Destiny Chart (命式表示) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
-                <span style={{ fontSize: '0.75rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● あなたの命式</span>
+                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● あなたの命式</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                   <button
                     type="button"
                     onClick={() => handleShowPillarExplanation(activeResult.myPillar)}
                     className="font-serif"
                     style={{
-                      background: 'rgba(226, 192, 116, 0.08)',
-                      border: '1px dashed rgba(226, 192, 116, 0.45)',
-                      padding: '4px 9px',
-                      borderRadius: '6px',
-                      fontSize: '0.72rem',
+                      background: 'rgba(30, 22, 10, 0.72)',
+                      border: '1px dashed rgba(226, 192, 116, 0.6)',
+                      padding: '6px 11px',
+                      borderRadius: '8px',
+                      fontSize: '0.86rem',
                       color: 'var(--color-gold)',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
@@ -1111,14 +1162,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       gap: '4px'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(226, 192, 116, 0.15)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(226, 192, 116, 0.08)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(30, 22, 10, 0.72)'}
                   >
                     日柱: {activeResult.myPillar} ({getKanjiReading(activeResult.myPillar)}) <span style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '14px',
-                      height: '14px',
+                      width: '16px',
+                      height: '16px',
                       borderRadius: '50%',
                       border: '1px solid currentColor',
                       fontSize: '0.65rem',
@@ -1133,12 +1184,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     onClick={() => handleShowStarExplanation(activeResult.myStar)}
                     className="font-serif"
                     style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px dashed rgba(255,255,255,0.25)',
-                      padding: '4px 9px',
-                      borderRadius: '6px',
-                      fontSize: '0.72rem',
-                      color: '#e5e7eb',
+                      background: 'rgba(12, 10, 24, 0.72)',
+                      border: '1px dashed rgba(255,255,255,0.4)',
+                      padding: '6px 11px',
+                      borderRadius: '8px',
+                      fontSize: '0.86rem',
+                      color: '#f3f4f6',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
                       display: 'inline-flex',
@@ -1146,14 +1197,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       gap: '4px'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(12, 10, 24, 0.72)'}
                   >
                     本命星: {activeResult.myStar.split(' ')[0]} ({getHonmeiStarReading(activeResult.myStar)}) <span style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '14px',
-                      height: '14px',
+                      width: '16px',
+                      height: '16px',
                       borderRadius: '50%',
                       border: '1px solid currentColor',
                       fontSize: '0.65rem',
@@ -1165,18 +1216,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </button>
                   {activeResult.myMbtiCode !== 'UNKNOWN' && (
                     <div style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      padding: '4px 10px 4px 6px',
+                      background: 'rgba(12, 10, 24, 0.72)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      padding: '6px 12px 6px 7px',
                       borderRadius: '8px',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.45rem',
-                      height: '24px'
+                      minHeight: '30px'
                     }}>
                       <div style={{
-                        width: '18px',
-                        height: '18px',
+                        width: '20px',
+                        height: '20px',
                         borderRadius: '50%',
                         background: 'rgba(255,255,255,0.06)',
                         border: `1.2px solid ${getMbtiColor(activeResult.myMbtiCode)}`,
@@ -1188,13 +1239,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       }}>
                         {getMbtiEmblem(activeResult.myMbtiCode, 10)}
                       </div>
-                      <span style={{ fontSize: '0.7rem', fontWeight: '500', color: '#cbd5e1', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '0.84rem', fontWeight: '500', color: '#f3f4f6', whiteSpace: 'nowrap' }}>
                         16タイプ診断: <span style={{ fontWeight: 'bold', color: getMbtiColor(activeResult.myMbtiCode) }}>{activeResult.myMbtiCode}</span> ({activeResult.myMbtiName})
                       </span>
                     </div>
                   )}
                 </div>
-                <span style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: '1.5', marginTop: '0.2rem' }}>
+                <span style={{ fontSize: '0.9rem', color: '#f1f5f9', lineHeight: '1.65', marginTop: '0.2rem', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
                   {activeResult.myMbtiText}
                 </span>
               </div>
@@ -1344,13 +1395,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <span>※タップで守護獣画像を保存できます</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.25rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold' }}>
+              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.5rem' }}>
+                <span className="astro-title-badge font-serif">
+                  {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
+                <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
                   {activeResult.opponentAstrologyName}
                 </span>
                 <span className={activeResult.opponentIsKaigo ? 'kaigo-badge' : (activeResult.opponentIsRare ? 'rare-badge' : '')} style={{
-                  fontSize: '0.6rem',
-                  padding: '2px 6px',
+                  fontSize: '0.72rem',
+                  padding: '2px 7px',
                   borderRadius: '4px',
                   background: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)'),
                   color: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '#d8b4fe' : '#93c5fd'),
@@ -1360,23 +1418,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.7rem', color: '#cbd5e1', lineHeight: '1.4', fontWeight: '500', minHeight: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1, marginBottom: '0.75rem' }}>
-                {activeResult.opponentAstrologyTheme}
-              </div>
-
               {/* Dynamic Attributes Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '300px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.55rem', color: '#9ca3af' }}>五行 (陰陽)</span>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: colors.primary }}>{activeResult.opponentAstrologyElement || '火・陰'}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
+                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d1d5db' }}>五行 (陰陽)</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyElement || '火・陰'}</span>
                 </div>
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.55rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>性格分類</span>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: colors.primary }}>{activeResult.opponentBranchPersonality}</span>
+                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d1d5db', whiteSpace: 'nowrap' }}>性格分類</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
                 </div>
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.55rem', color: '#9ca3af' }}>守護カラー</span>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: colors.primary }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
+                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d1d5db' }}>守護カラー</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
                 </div>
               </div>
 
@@ -1385,18 +1439,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Destiny Chart (命式表示) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
-                <span style={{ fontSize: '0.75rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● お相手の命式</span>
+                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● お相手の命式</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                   <button
                     type="button"
                     onClick={() => handleShowPillarExplanation(activeResult.opponentPillar || '')}
                     className="font-serif"
                     style={{
-                      background: 'rgba(226, 192, 116, 0.08)',
-                      border: '1px dashed rgba(226, 192, 116, 0.45)',
-                      padding: '4px 9px',
-                      borderRadius: '6px',
-                      fontSize: '0.72rem',
+                      background: 'rgba(30, 22, 10, 0.72)',
+                      border: '1px dashed rgba(226, 192, 116, 0.6)',
+                      padding: '6px 11px',
+                      borderRadius: '8px',
+                      fontSize: '0.86rem',
                       color: 'var(--color-gold)',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
@@ -1405,14 +1459,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       gap: '4px'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(226, 192, 116, 0.15)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(226, 192, 116, 0.08)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(30, 22, 10, 0.72)'}
                   >
                     日柱: {activeResult.opponentPillar} ({getKanjiReading(activeResult.opponentPillar || '')}) <span style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '14px',
-                      height: '14px',
+                      width: '16px',
+                      height: '16px',
                       borderRadius: '50%',
                       border: '1px solid currentColor',
                       fontSize: '0.65rem',
@@ -1427,12 +1481,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     onClick={() => handleShowStarExplanation(activeResult.opponentStar || '')}
                     className="font-serif"
                     style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px dashed rgba(255,255,255,0.25)',
-                      padding: '4px 9px',
-                      borderRadius: '6px',
-                      fontSize: '0.72rem',
-                      color: '#e5e7eb',
+                      background: 'rgba(12, 10, 24, 0.72)',
+                      border: '1px dashed rgba(255,255,255,0.4)',
+                      padding: '6px 11px',
+                      borderRadius: '8px',
+                      fontSize: '0.86rem',
+                      color: '#f3f4f6',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
                       display: 'inline-flex',
@@ -1440,14 +1494,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       gap: '4px'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(12, 10, 24, 0.72)'}
                   >
                     本命星: {activeResult.opponentStar ? activeResult.opponentStar.split(' ')[0] : ''} ({getHonmeiStarReading(activeResult.opponentStar || '')}) <span style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '14px',
-                      height: '14px',
+                      width: '16px',
+                      height: '16px',
                       borderRadius: '50%',
                       border: '1px solid currentColor',
                       fontSize: '0.65rem',
@@ -1459,18 +1513,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </button>
                   {activeResult.opponentMbtiCode && activeResult.opponentMbtiCode !== 'UNKNOWN' && (
                     <div style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      padding: '4px 10px 4px 6px',
+                      background: 'rgba(12, 10, 24, 0.72)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      padding: '6px 12px 6px 7px',
                       borderRadius: '8px',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.45rem',
-                      height: '24px'
+                      minHeight: '30px'
                     }}>
                       <div style={{
-                        width: '18px',
-                        height: '18px',
+                        width: '20px',
+                        height: '20px',
                         borderRadius: '50%',
                         background: 'rgba(255,255,255,0.06)',
                         border: `1.2px solid ${getMbtiColor(activeResult.opponentMbtiCode)}`,
@@ -1482,14 +1536,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       }}>
                         {getMbtiEmblem(activeResult.opponentMbtiCode, 10)}
                       </div>
-                      <span style={{ fontSize: '0.7rem', fontWeight: '500', color: '#cbd5e1', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '0.84rem', fontWeight: '500', color: '#f3f4f6', whiteSpace: 'nowrap' }}>
                         16タイプ診断: <span style={{ fontWeight: 'bold', color: getMbtiColor(activeResult.opponentMbtiCode) }}>{activeResult.opponentMbtiCode}</span> ({activeResult.opponentMbtiName})
                       </span>
                     </div>
                   )}
                 </div>
                 {activeResult.opponentMbtiText && (
-                  <span style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: '1.5', marginTop: '0.2rem' }}>
+                  <span style={{ fontSize: '0.9rem', color: '#f1f5f9', lineHeight: '1.65', marginTop: '0.2rem', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
                     {activeResult.opponentMbtiText}
                   </span>
                 )}
