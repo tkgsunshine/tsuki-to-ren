@@ -21,3 +21,9 @@
 - **可能な限り伝統的な方式（四柱推命・九星気学）を踏襲する。** やりたいことに対して理論的に無理な部分（入力が足りない／吉凶の点数への換算／MBTIとの掛け合わせ など）だけ、オリジナルでよい
 - 変更前に、伝統的な方式との差を `docs/design/fortune-engine-audit.md` で確認する。点数が変わる変更は、変更前後の比較（影響を受ける人の割合・変化幅）をPRに載せ、ユーザーの確認後にマージする
 - `src/utils/fortuneEngine.ts` を変えたら、`npm run build` で `api/_lib/fortuneEngine.js`（メールが使う自動生成コピー）を再生成してコミットし、`npm run test:engine` を通す
+## 担当の線引き（マーケAI社員 / PJ別の開発・運用セッション）
+- **マーケAI社員（`@marketing-employee`）**: コラム、記事キュー、SEO（タイトル・説明文・構造化データ・サイトマップ・Search Console分析）を担当する。
+- **PJ別の開発・運用セッション**: 機能、画面、運用を担当する。
+- **`.github/workflows/` の公開用workflow**: どちらも、ユーザーの依頼がない限り変更しない。
+- どちらも、PRで変更する（mainへ直接pushしない）。
+- 開発アイデア: ユーザーが新機能・改善のアイデアを話したら、`.claude/agents/dev-employee.md` の「ホーム」の節に従い、ホームのダッシュボード（https://claude.ai/artifact/9eu8jRktA8nGCC8HKN7L8A）の `ideas` に保存する（実装は依頼があるまでしない）。
