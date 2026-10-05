@@ -334,9 +334,9 @@ writePage(
 // 8. /about
 writePage(
   'about',
-  '【全2.7億通り】四柱推命×九星気学×16タイプの精密ハイブリッド鑑定ロジック | 月と蓮',
-  '東洋最高峰の四柱推命（日柱天干地支3,600通り）、九星気学（81通り）、西洋16タイプ心理学（289通り）、特殊星（9通り）等を融合した全273,088,320通り（約2.7億通り）の完全オーダーメイド鑑定ロジックを解説。',
-  '月と蓮, 約2.7億通り, 四柱推命ロジック, 魁罡, 極星, 16タイプ 心理学, 九星気学',
+  '【全7,465万通り】四柱推命×九星気学×16タイプの精密ハイブリッド鑑定ロジック | 月と蓮',
+  '東洋最高峰の四柱推命（日柱天干地支3,600通り）、九星気学（81通り）、西洋16タイプ心理学（256通り）を融合した全74,649,600通り（約7,465万通り）の完全オーダーメイド鑑定ロジックを解説。',
+  '月と蓮, 約7,465万通り, 四柱推命ロジック, 魁罡, 極星, 16タイプ 心理学, 九星気学',
   `${BASE_URL}/about`,
   `
     <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
@@ -346,8 +346,8 @@ writePage(
       <article>
         <h1 style="font-size: 1.6rem; color: #fef08a; border-bottom: 1px solid rgba(226,192,116,0.3); padding-bottom: 0.5rem;">月と蓮の占術ロジック解説</h1>
         <section style="margin-top: 1.5rem;">
-          <h2 style="font-size: 1.15rem; color: #e2c074;">全273,088,320通り（約2.7億通り）の算術マトリクス</h2>
-          <p>四柱推命（日柱3,600通り）× 九星気学（81通り）× 西洋16タイプ理論（289通り）× 特殊星（9通り）× 性別・関係性（20通り）× 守護AI観点（2通り）＝ 全273,088,320通り（約2.7億通り）の多角アプローチを完全自動算出するオーダーメイド相性鑑定エンジンです。</p>
+          <h2 style="font-size: 1.15rem; color: #e2c074;">全74,649,600通り（約7,465万通り）の算術マトリクス</h2>
+          <p>四柱推命（日柱の組み合わせ60×60＝3,600通り）× 九星気学（本命星の組み合わせ9×9＝81通り）× 西洋16タイプ理論（16×16＝256通り）＝ 全74,649,600通り（約7,465万通り）の多角アプローチを完全自動算出するオーダーメイド相性鑑定エンジンです。</p>
         </section>
         <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
       </article>
@@ -464,7 +464,7 @@ const homeSemanticHtml = `
     <header style="text-align: center; margin-bottom: 2rem;">
       <p style="color: #e2c074; font-size: 0.85rem; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 0.5rem;">四柱推命 × 九星気学 × 16タイプ心理学</p>
       <h1 style="font-size: 1.7rem; color: #fef08a; margin: 0 0 0.75rem 0; line-height: 1.35; font-weight: bold;">
-        【公式】月と蓮 | 約2.7億通りの四柱推命×九星気学×16タイプ本格恋愛相性診断
+        【公式】月と蓮 | 約7,465万通りの四柱推命×九星気学×16タイプ本格恋愛相性診断
       </h1>
       <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; max-width: 580px; margin: 0 auto;">
         東洋最高峰の四柱推命・九星気学と西洋の16タイプ（MBTI）心理統計学を融合した無料の本格恋愛占い『月と蓮』。片思い・復縁・好きな人との本日の相性バイオリズム、LINEを送るべき吉時間、お相手の取扱説明書（トリセツ）、奇跡のレア属性「魁罡（かいごう）」「極星」を即座に精密鑑定します。
@@ -477,14 +477,14 @@ const homeSemanticHtml = `
     </header>
 
     <section style="margin-bottom: 2rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(226,192,116,0.2); border-radius: 16px; padding: 1.25rem;">
-      <h2 style="font-size: 1.15rem; color: #fef08a; margin-top: 0; margin-bottom: 0.5rem;">全273,088,320通り（約2.7億通り）の超精密マトリクス</h2>
+      <h2 style="font-size: 1.15rem; color: #fef08a; margin-top: 0; margin-bottom: 0.5rem;">全74,649,600通り（約7,465万通り）の超精密マトリクス</h2>
       <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.75rem;">
         『月と蓮』は、単なる16タイプ診断や星座占いとは一線を画す、以下の多角算術プログラムを搭載しています。
       </p>
       <ul style="padding-left: 1.2rem; font-size: 0.82rem; color: #cbd5e1; line-height: 1.8;">
         <li><strong>四柱推命（日柱3,600通り）</strong>：魂の宿命、本質的な恋愛欲求、夜の相性を解明</li>
         <li><strong>九星気学（81通り）</strong>：日々の運気バイオリズム、最も返信率が高まるLINE吉時間を算出</li>
-        <li><strong>16タイプ心理統計学（289通り）</strong>：会話のテンポ、すれ違いの防ぎ方、お相手の攻略トリセツを導出</li>
+        <li><strong>16タイプ心理統計学（256通り）</strong>：会話のテンポ、すれ違いの防ぎ方、お相手の攻略トリセツを導出</li>
         <li><strong>特殊星判定（魁罡・極星など9通り）</strong>：約3.3%のレア属性や運命のソウルメイト属性を自動検出</li>
       </ul>
     </section>
