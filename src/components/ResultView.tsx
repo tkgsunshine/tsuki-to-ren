@@ -263,6 +263,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const pwaStatus = getDevicePwaStatus();
     // Do not show if already in standalone PWA
     if (pwaStatus.isStandalone) return;
+    // PCではホーム画面に追加する使い方をしないので出さない（スマホ・タブレットだけ）
+    if (!pwaStatus.isMobile) return;
 
     let hasTriggered = false;
     const checkScroll = (target: HTMLElement | Window) => {
