@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { timingSafeEqual } from 'node:crypto';
 import { getDb } from '../_lib/firestore.js';
 import { signUid } from '../_lib/unsubscribe-token.js';
+import { recordRun } from '../_lib/cron-run.js';
 import { buildDailyContent, renderEmailHtml, subjectFor } from '../_lib/daily-mail.js';
 
 const SITE = 'https://www.tsuki-to-ren.com';
@@ -28,6 +29,7 @@ export default async function handler(req, res) {
 
   const resendApiKey = process.env.RESEND_API_KEY;
   if (!resendApiKey) {
+    await recordRun('daily-luck', { date: new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().split('T')[0], status: 'error', message: 'RESEND_API_KEY is not configured' });
     return res.status(500).json({ status: 'error', message: 'RESEND_API_KEY is not configured' });
   }
 
@@ -70,6 +72,7 @@ export default async function handler(req, res) {
       .filter((s) => typeof s.email === 'string' && EMAIL_RE.test(s.email) && !seen.has(s.email) && seen.add(s.email));
   } catch (e) {
     console.error('❌ Could not read subscriptions:', e?.message);
+    await recordRun('daily-luck', { date: dateStr, status: 'error', message: 'Could not read subscriptions' });
     return res.status(500).json({ status: 'error', message: 'Could not read subscriptions' });
   }
 
@@ -115,8 +118,10 @@ export default async function handler(req, res) {
   }
 
   console.log(`📮 Daily fortune email ${dateStr}: subscribers=${subscribers.length} sent=${sent} failed=${failed} skipped=${skipped}`);
+  const status = failed > 0 ? 'partial_failure' : 'success';
+  await recordRun('daily-luck', { date: dateStr, status, subscribers: subscribers.length, sent, failed, skipped });
   return res.status(failed > 0 ? 500 : 200).json({
-    status: failed > 0 ? 'partial_failure' : 'success',
+    status,
     date: dateStr,
     subscribers: subscribers.length,
     sent,
