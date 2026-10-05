@@ -30,6 +30,8 @@ export function buildDailyContent(sub) {
   return {
     hasOpponent: isMatch,
     score: result.dailyScore,
+    mbtiCode: result.myMbtiCode && result.myMbtiCode !== 'UNKNOWN' ? result.myMbtiCode : '',
+    mbtiName: result.myMbtiName && result.myMbtiName !== '未選択' ? result.myMbtiName : '',
     hourMain: hour.split(/[（(]/)[0].trim(),
     hourNote: note ? note[1] : '',
     advice: result.dailyActionAdvice || ''
@@ -47,7 +49,7 @@ const GOLD = '#e2c074';
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
   const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
-  const { score, hourMain, hourNote, advice } = content;
+  const { score, hourMain, hourNote, advice, mbtiCode, mbtiName } = content;
   const hourTitle = content.hasOpponent ? '本日のLINE吉時間' : '本日の開運黄金時間';
   const isRen = sub.character === 'ren';
   const charName = isRen ? '蓮' : '月';
@@ -86,6 +88,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
               <span style="display: inline-block; padding: 5px 16px; background-color: #201a36; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 15px; color: ${GOLD}; font-size: 12px; font-weight: bold; letter-spacing: 0.04em;">
                 ${date.year}年${date.month}月${date.day}日（本日）の運勢
               </span>
+              ${mbtiCode ? `<div style="margin-top: 10px; font-size: 12px; color: #cbd5e1; letter-spacing: 0.04em;">あなたのタイプ（16タイプ診断）： <strong style="color: #fef08a;">${esc(mbtiCode)}</strong>${mbtiName ? `（${esc(mbtiName)}）` : ''}</div>` : ''}
             </td>
           </tr>
 
