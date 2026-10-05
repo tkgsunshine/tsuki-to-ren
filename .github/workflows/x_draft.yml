@@ -1,6 +1,6 @@
 name: X Draft Generator (Hasu-to-Tsuki)
 
-# 毎晩21:07 JSTに、翌日のX投稿3本を生成する。
+# 毎晩21:07 JSTに、翌日のX投稿6本（守護獣4・バズ検証2）を生成する。
 #  - data/x/config.json の mode が "approval": 下書きをPRにする（PRをマージ＝承認）
 #  - mode が "auto": そのままmainへコミットする
 on:
@@ -58,8 +58,9 @@ jobs:
             git checkout -b "$BRANCH"
             git commit -m "feat(x): X post drafts for ${DATE}"
             git push -u origin "$BRANCH"
+            node scripts/x/preview.mjs "${DATE}" > /tmp/pr-body.md
             gh pr create --base main --head "$BRANCH" \
               --title "X投稿の下書き ${DATE}（マージで承認）" \
-              --body "data/x/queue.json の ${DATE} の5本（守護獣4本・昼の16タイプ1本）を確認してください。直したい場合はPR上で本文を編集し、不要なら閉じてください。マージした時点で投稿予約になります（投稿は当日 8:15・8:45・12:15・20:15・20:45 JST）。" \
+              --body-file /tmp/pr-body.md \
               || echo "PRの自動作成に失敗しました（Settings > Actions > General の 'Allow GitHub Actions to create and approve pull requests' を確認）。ブランチ ${BRANCH} は作成済みです。"
           fi
