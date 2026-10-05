@@ -1,7 +1,8 @@
 // node --experimental-strip-types --test scripts/x/test-formats.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES } from './lib/formats.mjs';
+import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES, buildPairRanking, symmetricPairs } from './lib/formats.mjs';
+import { weightedLength } from './lib/lint.mjs';
 import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -39,11 +40,7 @@ test('事実はアプリの鑑定ロジックから出る（相性点・ラン�
   const all = computeAll('2026-10-07');
   const ctx = { date: '2026-10-07', all };
   for (const f of FORMATS.filter((x) => x.facts)) assert.ok(buildFacts(f, ctx), f.id);
-  const pair = buildFacts(FORMATS.find((f) => f.id === 'pair_score'), ctx);
-  for (const p of pair.pairs) {
-    assert.equal(p.score40, getMBTICompatibilityScore(p.a, p.b));
-    assert.ok(p.score40 > 0, '0点の組み合わせは取り上げない');
-  }
+  void getMBTICompatibilityScore;
   const rank = buildFacts(FORMATS.find((f) => f.id === 'star_rank'), ctx).ranking;
   assert.equal(rank.length, 9);
   for (let i = 1; i < rank.length; i++) assert.ok(rank[i - 1].avgScore >= rank[i].avgScore);
@@ -104,4 +101,40 @@ test('返信: 親の投稿から replyDelayMinutes（60分）が経つまでは�
   r = await runPost([{ ...base, status: 'failed' }, reply], { now: t0 });
   assert.equal(r.bodies.length, 0);
   assert.equal(r.queue.find((x) => x.id === 'p-reply').status, 'skipped');
+});
+
+test('16タイプ相性ランキング: アプリの採点の2.5倍（100点満点）。順位は同点で同じ。上位12組・ワースト10', () => {
+  const pairs = symmetricPairs();
+  for (const p of pairs) {
+    assert.equal(p.score, getMBTICompatibilityScore(p.a, p.b) * 2.5);
+    assert.equal(getMBTICompatibilityScore(p.a, p.b), getMBTICompatibilityScore(p.b, p.a), '順序を入れ替えても同じ点数の組だけ');
+  }
+  // 順序で点数が変わる3組は、載せない
+  const names = pairs.map((p) => p.name);
+  for (const n of ['ENFP×INFJ', 'INFJ×ENFP', 'ENFP×INTJ', 'INTJ×ENFP', 'ESFP×ISTJ', 'ISTJ×ESFP']) assert.ok(!names.includes(n), n);
+  const r = buildPairRanking('2026-10-07');
+  assert.equal(r.top.reduce((n, g) => n + g.names.length, 0), 12, '上位12組');
+  assert.equal(r.top[0].rank, 1);
+  assert.equal(r.top[0].score, 100);
+  assert.equal(r.top[1].rank, 1 + r.top[0].names.length, '同点は同じ順位、次の順位は、人数分あと');
+  assert.equal(r.worst.length, 10);
+  assert.ok(r.zeroTotal >= 10);
+  for (const n of r.worst) { const [a, b] = n.split('×'); assert.equal(getMBTICompatibilityScore(a, b), 0); }
+  // 同じ日なら同じ、日が変わると、同点のなかが入れ替わる
+  assert.deepEqual(buildPairRanking('2026-10-07'), buildPairRanking('2026-10-07'));
+  const days = new Set(Array.from({ length: 10 }, (_, i) => buildPairRanking(`2026-10-${10 + i}`).worst.join()));
+  assert.ok(days.size > 1);
+});
+
+test('16タイプ相性ランキング: 本文と返信が、自動チェックを通る（280以内・禁止語なし・「％」なし）', () => {
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(Date.UTC(2026, 9, 1 + i)).toISOString().slice(0, 10);
+    const r = buildPairRanking(d);
+    for (const [text, name] of [[r.text, '本文'], [r.replyText, '返信']]) {
+      assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), [], `${d} ${name}`);
+      assert.ok(weightedLength(text) <= 280, `${d} ${name} ${weightedLength(text)}`);
+      assert.ok(!text.includes('％') && !text.includes('%'));
+    }
+    assert.ok(r.text.includes('100点満点') && r.text.includes('リプ欄'));
+  }
 });

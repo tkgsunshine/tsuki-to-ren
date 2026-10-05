@@ -50,6 +50,53 @@ function stemTypes(all) {
 const pairLabel = (score) =>
   score >= 40 ? '最高の組み合わせ' : score >= 34 ? '正反対だから惹かれ合う' : score >= 28 ? '似た者どうし' : score >= 15 ? 'ふつう（歩み寄りが大事）' : 'ぶつかりやすい（話し合いが大事）';
 
+
+// ───────── 16タイプ相性ランキング（アプリの採点を、100点満点に直して、順位にする。AIは使わない）─────────
+// アプリの採点（40点満点）の2.5倍＝100点満点。採点は6段階（0・10・15・28・34・40）しかなく、同点が多い。
+// 「あなた×相手」の順を入れ替えると点数が変わる3組（アプリの採点表が、一方向にしか書かれていないため）は、順位に載せない。
+const TYPE_CODES = ['INFJ', 'INFP', 'ENFJ', 'ENFP', 'INTJ', 'INTP', 'ENTJ', 'ENTP', 'ISFJ', 'ISFP', 'ESFJ', 'ESFP', 'ISTJ', 'ISTP', 'ESTJ', 'ESTP'];
+export function symmetricPairs() {
+  const out = [];
+  for (let i = 0; i < 16; i++) {
+    for (let j = i; j < 16; j++) {
+      const a = TYPE_CODES[i];
+      const b = TYPE_CODES[j];
+      const s1 = getMBTICompatibilityScore(a, b);
+      if (s1 !== getMBTICompatibilityScore(b, a)) continue;
+      out.push({ a, b, score: s1 * 2.5, name: `${a}×${b}` });
+    }
+  }
+  return out;
+}
+const rotate = (arr, n, seed) => {
+  if (arr.length <= n) return arr;
+  const start = hashOf(seed) % arr.length;
+  return Array.from({ length: n }, (_, k) => arr[(start + k) % arr.length]);
+};
+/** 上位12組（同点は順位を同じにして、同点のなかは日替わり）と、ワースト10（0点のなかから日替わり）の本文 */
+export function buildPairRanking(date) {
+  const pairs = symmetricPairs();
+  const levels = [...new Set(pairs.map((p) => p.score))].sort((x, y) => y - x);
+  const top = [];
+  let rank = 1;
+  for (const lv of levels) {
+    const group = pairs.filter((p) => p.score === lv);
+    const room = 12 - (rank - 1);
+    if (room <= 0) break;
+    const shown = rotate(group, room, `${date}:top:${lv}`);
+    top.push({ rank, score: lv, names: shown.map((p) => p.name), more: group.length - shown.length });
+    rank += shown.length;
+  }
+  const zero = pairs.filter((p) => p.score === 0);
+  const worst = rotate(zero, 10, `${date}:worst`);
+  const fmt = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+  const lines = ['❤️ 16タイプ相性ランキング【上位12組】', '（100点満点）', ''];
+  for (const g of top) lines.push(`${g.rank}位 ${fmt(g.score)}点${g.more ? '（ほか' + g.more + '組）' : ''}`, g.names.join('、'));
+  lines.push('', 'あなたと好きな人は、何位？', 'ワースト10は、リプ欄に🌙', '-月-');
+  const reply = ['【16タイプ相性ワースト10】', `いずれも${fmt(0)}点（100点満点）`, worst.map((p) => p.name).join('、'), '', 'ぶつかりやすい組み合わせは、話し合いが大事。点数は低くても、お互いを知るほど深まる関係もあります🌙', '-蓮-'];
+  return { text: lines.join('\n'), replyText: reply.join('\n'), top, worst: worst.map((p) => p.name), zeroTotal: zero.length };
+}
+
 const FACTS = {
   year_star: ({ date }) => {
     const years = pickN(Array.from({ length: 25 }, (_, i) => 1985 + i), 3, `${date}:year`).sort();
@@ -101,23 +148,6 @@ const FACTS = {
       }),
     };
   },
-  pair_score: ({ date }) => {
-    const pairs = [];
-    const seen = new Set();
-    let h = hashOf(`${date}:pair`);
-    while (pairs.length < 3) {
-      const a = MBTI_TYPES[h % 16];
-      const b = MBTI_TYPES[Math.floor(h / 16) % 16];
-      h = (h * 1103515245 + 12345) >>> 0;
-      const k = [a, b].sort().join('');
-      const score0 = getMBTICompatibilityScore(a, b);
-      if (a === b || seen.has(k) || score0 === 0) continue; // 0点の組み合わせは、投稿では取り上げない（傷つけやすいため）
-      seen.add(k);
-      const score = getMBTICompatibilityScore(a, b);
-      pairs.push({ a, b, score40: score, label: pairLabel(score) });
-    }
-    return { note: '16タイプどうしの相性（アプリの採点・40点満点）。「％」には換算しない。「点」で書く', pairs };
-  },
   mbti_types: ({ date }) => ({ note: '取り上げる16タイプ（この4つ）', types: pickN(MBTI_TYPES, 4, `${date}:types`) }),
 };
 
@@ -141,8 +171,8 @@ export const FORMATS = [
     guide: '「【九星気学で見る相性】自分と同じタイプがいいとは限らない」。事実の本命星の組み合わせ2〜3組と、その相性（result）を一言ずつ。最後に「あなたと気になる人は？」' },
   { id: 'mbti_birth', system: 'mbti_birth', purpose: 'app', kind: 'promo', facts: 'mbti_birth',
     guide: '「同じ16タイプでも、生まれた日で恋愛のクセは変わる」。事実の16タイプ1つと、生まれた日のタイプ2つを並べて、「同じ○○でも、△△タイプは〜／□□タイプは〜」と書く。最後に「16タイプ×生年月日で見る恋愛占いは、近日公開」（「近日公開」を必ず入れる）' },
-  { id: 'pair_score', system: 'pair', purpose: 'buzz', facts: 'pair_score',
-    guide: '「❤️ 2人の恋愛相性（16タイプ）」。事実の3組を「A × B：〇〇点（40点満点）」＋一言。最後に「あなたと好きな人は？」。％にはしない' },
+  { id: 'pair_score', system: 'pair', purpose: 'buzz', build: buildPairRanking, reply: true,
+    guide: '16タイプ相性ランキング（上位12組・100点満点）。アプリの採点で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
   { id: 'pair_teaser', system: 'pair', purpose: 'app', kind: 'promo',
     guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
   { id: 'psych_poll', system: 'psychology', purpose: 'buzz', poll: true,
