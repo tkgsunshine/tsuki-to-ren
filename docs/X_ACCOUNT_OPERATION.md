@@ -36,6 +36,11 @@
 4. Settings > Actions > General で "Allow GitHub Actions to create and approve pull requests" を有効化（承認制の下書きPR用）
 5. Actions から "X Draft Generator" を手動実行 → 下書きPRを確認・マージ → "X Poster" を手動実行して1件目が出ることを確認
 
+## 投稿予定の確認と承認（approvalモード）
+- 毎晩21:07（JST。GitHub側の都合で数時間遅れることがある）に、翌日6本の下書きが **PR「X投稿の下書き YYYY-MM-DD」** として届く。本文に、時刻・投稿文・型・文字数が読みやすく並ぶ。**マージ＝承認**。直したい場合は PR の「Files changed」で `data/x/queue.json` の本文を編集、投稿しない投稿は `"status": "skipped"`、全部やめるならPRを閉じる
+- いまのキューにある予定を一覧したいとき: `node scripts/x/preview.mjs --all`（指定日だけなら日付を渡す）
+- 翌朝8:15の投稿に間に合うよう、前夜〜朝までにマージする。未承認の投稿は、キューに入らないので投稿されない
+
 ## 毎日の承認（approvalモード）
 - 夜に届く「X投稿の下書き」PRの本文を確認する。直す場合はPR上で `data/x/queue.json` の `text` を編集する。不要なら閉じる
 - 投稿枠までにマージされなかった分は `expired` になり、投稿されない
