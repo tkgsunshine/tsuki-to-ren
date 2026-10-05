@@ -26,7 +26,7 @@ for (const p of items) {
     day = p.date;
     out.push(`## ${day}`, '');
   }
-  const meta = [p.replyTo && `↳ ${p.replyTo} への返信（${(cfg.replyDelayMinutes ?? 60) === 0 ? '親の投稿と同時に出す' : '親の投稿の' + cfg.replyDelayMinutes + '分後以降'}）`, p.format && `型: ${p.format}`, p.purpose && `目的: ${p.purpose}`, `種別: ${LABEL[p.kind] || p.kind}`, p.image && `画像あり`, `${weightedLength(p.text)}/280`].filter(Boolean).join(' ／ ');
+  const meta = [p.replyTo && `↳ ${p.replyTo} への返信（親の投稿の${cfg.replyDelayMinutes ?? 60}分後以降）`, p.format && `型: ${p.format}`, p.purpose && `目的: ${p.purpose}`, `種別: ${LABEL[p.kind] || p.kind}`, p.image && `画像あり`, `${weightedLength(p.text)}/280`].filter(Boolean).join(' ／ ');
   out.push(`### ${timeOf(p)}　\`${p.id}\``, `<sub>${meta}</sub>`, '', ...p.text.split('\n').map((l) => `> ${l}`.trimEnd()), '');
 }
 console.log(out.join('\n'));

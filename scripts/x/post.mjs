@@ -141,55 +141,6 @@ async function uploadMedia(imagePath) {
   throw new Error('画像のアップロードに失敗\n' + errors.join('\n'));
 }
 
-// 1件を X に投稿する。成功したら true
-async function send(post) {
-  const payload = { text: post.text };
-  if (post.replyTo) {
-    const parent = byId.get(post.replyTo);
-    payload.reply = { in_reply_to_tweet_id: parent.tweetId }; // 自分の投稿へのスレッド返信
-  }
-  const imagePaths = (post.images && post.images.length ? post.images : post.image ? [post.image] : []).slice(0, 4);
-  if (imagePaths.length) {
-    try {
-      const ids = [];
-      for (const img of imagePaths) ids.push(await uploadMedia(img));
-      payload.media = { media_ids: ids };
-    } catch (e) {
-      post.lastError = String(e.message).slice(0, 600);
-      changed = true;
-      console.error(`画像のアップロードに失敗: ${post.id}\n${e.message}`);
-      process.exitCode = 1;
-      return false;
-    }
-  }
-  const oauth = signOAuth1({ method: 'POST', url: TWEET_URL, creds });
-  const res = await fetch(TWEET_URL, {
-    method: 'POST',
-    headers: { Authorization: authHeader(oauth), 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const body = await res.text();
-  if (res.status === 201) {
-    const id = JSON.parse(body).data?.id;
-    post.status = 'posted';
-    post.postedAt = now.toISOString();
-    post.tweetId = id;
-    delete post.lastError;
-    delete post.skipReason;
-    changed = true;
-    console.log(`投稿しました: ${post.id} → tweet ${id}`);
-    return true;
-  }
-  // 重複投稿(403)などは再試行しても通らないので failed にする。それ以外は次回再試行
-  post.lastError = `${res.status} ${body.slice(0, 300)}`;
-  if (res.status === 401) console.error(describeCreds());
-  changed = true;
-  if (res.status === 403) post.status = 'failed';
-  console.error(`投稿に失敗: ${post.id} ${post.lastError}`);
-  process.exitCode = 1;
-  return false;
-}
-
 async function main() {
   if (!due.length) {
     console.log('今投稿するものはありません。');
@@ -216,23 +167,50 @@ async function main() {
     return;
   }
 
-  if (!(await send(post))) return;
-  // 答え合わせの返信（replyTo: この投稿のID）は、replyDelayMinutes が 0 なら、親の投稿と同時に（この実行のなかで）続けて出す
-  {
-    for (const child of queue.filter((p) => p.replyTo === post.id && p.status === 'scheduled')) {
-      const readyAt = replyReadyAt(child);
-      if (readyAt === null || readyAt > now.getTime()) continue; // 遅らせる設定のときは、あとの実行で出す
-      const cproblems = lintPost(child, history, { allowLinks: config.allowLinks !== false });
-      if (cproblems.length) {
-        child.status = 'skipped';
-        child.skipReason = cproblems.join(' / ');
-        changed = true;
-        console.error(`返信がチェック不合格のため投稿しません: ${child.id}\n - ${cproblems.join('\n - ')}`);
-        continue;
-      }
-      await send(child);
+  const payload = { text: post.text };
+  if (post.replyTo) {
+    const parent = byId.get(post.replyTo);
+    payload.reply = { in_reply_to_tweet_id: parent.tweetId }; // 自分の投稿へのスレッド返信
+  }
+  const imagePaths = (post.images && post.images.length ? post.images : post.image ? [post.image] : []).slice(0, 4);
+  if (imagePaths.length) {
+    try {
+      const ids = [];
+      for (const img of imagePaths) ids.push(await uploadMedia(img));
+      payload.media = { media_ids: ids };
+    } catch (e) {
+      post.lastError = String(e.message).slice(0, 600);
+      changed = true;
+      console.error(`画像のアップロードに失敗: ${post.id}\n${e.message}`);
+      process.exitCode = 1;
+      return;
     }
   }
+  const oauth = signOAuth1({ method: 'POST', url: TWEET_URL, creds });
+  const res = await fetch(TWEET_URL, {
+    method: 'POST',
+    headers: { Authorization: authHeader(oauth), 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.text();
+  if (res.status === 201) {
+    const id = JSON.parse(body).data?.id;
+    post.status = 'posted';
+    post.postedAt = now.toISOString();
+    post.tweetId = id;
+    delete post.lastError;
+    delete post.skipReason;
+    changed = true;
+    console.log(`投稿しました: ${post.id} → tweet ${id}`);
+    return;
+  }
+  // 重複投稿(403)などは再試行しても通らないので failed にする。それ以外は次回再試行
+  post.lastError = `${res.status} ${body.slice(0, 300)}`;
+  if (res.status === 401) console.error(describeCreds());
+  changed = true;
+  if (res.status === 403) post.status = 'failed';
+  console.error(`投稿に失敗: ${post.id} ${post.lastError}`);
+  process.exitCode = 1;
 }
 
 try {

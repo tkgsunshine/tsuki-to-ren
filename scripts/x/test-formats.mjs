@@ -105,23 +105,3 @@ test('返信: 親の投稿から replyDelayMinutes（60分）が経つまでは�
   assert.equal(r.bodies.length, 0);
   assert.equal(r.queue.find((x) => x.id === 'p-reply').status, 'skipped');
 });
-
-test('返信: replyDelayMinutes が 0 なら、親の投稿と同じ実行で、続けて返信（スレッド）が出る', async () => {
-  const t0 = new Date('2026-10-06T09:15:00Z'); // 18:15 JST
-  const parent = { id: 'p', date: '2026-10-06', slot: 'evening', kind: 'value', text: '問い\n-蓮-', status: 'scheduled' };
-  const reply = { id: 'p-reply', date: '2026-10-06', slot: 'evening', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'p' };
-  const { bodies, queue } = await runPost([parent, reply], { now: t0, cfg: { replyDelayMinutes: 0 } });
-  assert.equal(bodies.length, 2);
-  assert.equal(bodies[0].reply, undefined);
-  assert.deepEqual(bodies[1].reply, { in_reply_to_tweet_id: 'tw1' }); // 1本目のツイートIDへの返信
-  assert.ok(queue.every((x) => x.status === 'posted'));
-});
-
-test('返信: 遅らせる設定（60分）のときは、親と同じ実行では出さない', async () => {
-  const t0 = new Date('2026-10-06T09:15:00Z');
-  const parent = { id: 'p', date: '2026-10-06', slot: 'evening', kind: 'value', text: '問い\n-蓮-', status: 'scheduled' };
-  const reply = { id: 'p-reply', date: '2026-10-06', slot: 'evening', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'p' };
-  const { bodies, queue } = await runPost([parent, reply], { now: t0, cfg: { replyDelayMinutes: 60 } });
-  assert.equal(bodies.length, 1);
-  assert.equal(queue.find((x) => x.id === 'p-reply').status, 'scheduled');
-});
