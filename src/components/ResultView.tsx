@@ -1098,8 +1098,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <span>※タップで守護獣画像を保存できます</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.25rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.5rem' }}>
+                <span className="astro-title-badge font-serif">
+                  {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
+                <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
                   {activeResult.myAstrologyName}
                 </span>
                 <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
@@ -1111,13 +1118,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)')
                 }}>
                   {activeResult.isKaigo ? '👑 魁罡' : (activeResult.isRare ? '👑 選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
-                </span>
-              </div>
-
-              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
-              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
-                <span className="astro-title-badge font-serif">
-                  {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
                 </span>
               </div>
 
@@ -1395,8 +1395,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <span>※タップで守護獣画像を保存できます</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.25rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.5rem' }}>
+                <span className="astro-title-badge font-serif">
+                  {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
+                <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
                   {activeResult.opponentAstrologyName}
                 </span>
                 <span className={activeResult.opponentIsKaigo ? 'kaigo-badge' : (activeResult.opponentIsRare ? 'rare-badge' : '')} style={{
@@ -1408,13 +1415,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)')
                 }}>
                   {activeResult.opponentIsKaigo ? '👑 魁罡' : (activeResult.opponentIsRare ? '👑 選ばれし極星' : (activeResult.opponentGender === 'female' ? '女性' : '男性'))}
-                </span>
-              </div>
-
-              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
-              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
-                <span className="astro-title-badge font-serif">
-                  {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
                 </span>
               </div>
 
