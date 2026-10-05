@@ -1130,3 +1130,39 @@ body {
 
 
 
+
+/* チャットの返信待ち表示（返信が来るまで動き続けて、実行中と分かるようにする） */
+.chat-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #d1d5db;
+}
+.chat-typing-text {
+  animation: chat-typing-blink 1.4s ease-in-out infinite;
+}
+.chat-typing-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+.chat-typing-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-gold, #e2c074);
+  animation: chat-typing-bounce 1.2s ease-in-out infinite;
+}
+.chat-typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.chat-typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes chat-typing-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes chat-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-typing-text { animation-duration: 2.4s; }
+  .chat-typing-dots span { animation: none; opacity: 0.8; }
+}

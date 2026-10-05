@@ -507,8 +507,11 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             </div>
           ))}
           {isTyping && (
-            <div className="chat-bubble bot text-gray-400 italic">
-              {characterName}が言葉を紡いでいます...
+            <div className="chat-bubble bot chat-typing" role="status" aria-live="polite">
+              <span className="chat-typing-dots" aria-hidden="true">
+                <span /><span /><span />
+              </span>
+              <span className="chat-typing-text">{characterName}が言葉を紡いでいます</span>
             </div>
           )}
           <div ref={messagesEndRef} />
