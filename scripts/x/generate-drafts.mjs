@@ -1,14 +1,14 @@
 // 指定日（既定: 明日JST）の投稿を作り、data/x/queue.json に status:"scheduled" で追記する。
-//   朝2本・夜2本: 守護獣（60タイプ）の今日の恋愛運（アプリの鑑定ロジックで算出。AI不要）。日ごとに4タイプ進み、15日で全60タイプが一巡
-//   昼1本・夕1本: バズ検証用の投稿（8系統×バズ/フォロー/アプリ誘導の型。lib/formats.mjs）。数字・ランキング・相性はアプリの鑑定ロジックで算出し、Claude は言い回しだけを書く
+//   朝1本（08:15）: 守護獣（60タイプ）の今日の恋愛運（アプリの鑑定ロジックで算出。AI不要）。日ごとに1タイプ進み、60日で全タイプが一巡
+//   バズ検証6本（10:15 / 12:15 / 15:15 / 18:15 / 20:15 / 22:15）: バズ検証用の投稿（8系統×バズ/フォロー/アプリ誘導の型。lib/formats.mjs）。数字・ランキング・相性はアプリの鑑定ロジックで算出し、Claude は言い回しだけを書く
 // 使い方: node --experimental-strip-types scripts/x/generate-drafts.mjs [YYYY-MM-DD] [--dry-run]
 // 必要な環境変数: ANTHROPIC_API_KEY（任意: ANTHROPIC_MODEL。既定 claude-opus-5-5）
 import Anthropic from '@anthropic-ai/sdk';
 import path from 'node:path';
-import { buildBrief, jstDateString, dayPillar } from './lib/signals.mjs';
+import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
-import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE } from './lib/formats.mjs';
+import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 
 const args = process.argv.slice(2);
@@ -56,17 +56,16 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 
 # 出力
 指定された本数（ユーザーメッセージの「今日の本数」にあるスロット）を、JSONの配列のみで出力する（前後に説明やコードフェンスを付けない）。
-[{"slot":"noon","text":"...","replyText":"（問いかけ型のときだけ）"},{"slot":"evening","text":"..."}]`;
+[{"slot":"am","text":"..."},{"slot":"pm","text":"...","replyText":"（問いかけ型のときだけ）"}]`;
 
-const { noon: noonFormat, evening: eveningFormat } = pickFormats(date);
-const planned = { noon: noonFormat, evening: eveningFormat };
+const planned = pickFormats(date); // { am, noon, pm, evening, night, late }
 // build() を持つ型は、アプリの鑑定ロジックだけで本文を作る（AIは使わない）。それ以外はAIが言い回しを書く
 const detSlots = Object.keys(planned).filter((k) => planned[k].build);
 const llmSlots = Object.keys(planned).filter((k) => !planned[k].build);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
-  const reply = f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : '';
+  const reply = f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : '';
   return `## ${slot}（${SYSTEMS[f.system]}／${PURPOSES[f.purpose]}／kind=${f.kind || 'value'}）\n- 型: ${f.guide}${reply}${facts ? `\n- 事実: ${JSON.stringify(facts)}` : '\n- 事実: なし（数字は出さない）'}`;
 };
 const userBase = `# 対象日: ${date}
@@ -102,6 +101,13 @@ function validate(posts) {
     if (f.poll) {
       if (!p.replyText) problems.push(`${slot}: 問いかけ型は replyText（答え合わせの返信）も書く`);
       else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
+    } else if (f.rank16) {
+      if (!p.replyText) problems.push(`${slot}: 続き（9位〜16位）の replyText も書く`);
+      else {
+        for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
+        const joined = `${p.text}\n${p.replyText}`;
+        for (const c of MBTI_TYPES.map((t) => t.code)) if ((joined.match(new RegExp(c, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、投稿と返信で1回ずつになっていない（16タイプ全員を重複なく）`);
+      }
     } else if (p.replyText) problems.push(`${slot}: 問いかけ型ではないので replyText は不要`);
   }
   return problems;
@@ -110,7 +116,7 @@ function validate(posts) {
 // アプリの鑑定ロジックだけで作る本文（ランキングなど）を、先にチェックする
 const detPosts = detSlots.map((slot) => {
   const f = planned[slot];
-  const out = f.build({ date });
+  const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
   if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks }).map((x) => `返信: ${x}`));
   if (problems.length) {
@@ -135,7 +141,7 @@ if (llmSlots.length) {
   for (let attempt = 1; attempt <= 3; attempt++) {
     const res = await client.messages.create({
       model,
-      max_tokens: 2000,
+      max_tokens: 5000,
       system,
       messages: [{ role: 'user', content: userBase + feedback }],
     });
@@ -158,7 +164,7 @@ if (llmSlots.length) {
   }
 
   if (!llmPosts) {
-    console.error('3回試しましたが検査を通る昼・夕の下書きを作れませんでした。キューは変更しません。');
+    console.error('3回試しましたが検査を通るバズ検証の下書きを作れませんでした。キューは変更しません。');
     process.exit(1);
   }
 
@@ -166,7 +172,7 @@ if (llmSlots.length) {
 }
 posts = [...detPosts, ...posts];
 
-// 守護獣の4本（朝2・夜2）。署名は「-月-」「-蓮-」を交互に
+// 守護獣の1本（朝 08:15）。署名は「-月-」「-蓮-」を日替わりで
 const beastItems = buildBeastItems(all, date, history, { allowLinks });
 
 const buzzItem = (slot, time) => {
@@ -189,7 +195,7 @@ const replyOf = (slot) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   }];
 };
-const items = [...beastItems.slice(0, 2), buzzItem('noon'), ...replyOf('noon'), buzzItem('evening'), ...replyOf('evening'), ...beastItems.slice(2)];
+const items = [...beastItems.slice(0, 1), ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
 
 if (dryRun) {
   console.log(JSON.stringify(items, null, 2));
@@ -197,4 +203,4 @@ if (dryRun) {
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);
-console.log(`${date} の6本（守護獣4・バズ検証2: ${noonFormat.id} / ${eveningFormat.id}）をキューに追記しました。`);
+console.log(`${date} の${items.filter((x) => !x.replyTo).length}本（守護獣1・バズ検証6: ${BUZZ_SLOTS.map((k) => planned[k].id).join(' / ')}）と、答え合わせの返信${items.filter((x) => x.replyTo).length}本をキューに追記しました。`);

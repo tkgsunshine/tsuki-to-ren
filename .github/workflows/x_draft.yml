@@ -1,6 +1,6 @@
 name: X Draft Generator (Hasu-to-Tsuki)
 
-# 毎晩21:07 JSTに、翌日のX投稿6本（守護獣4・バズ検証2）を生成する。
+# 毎晩21:07 JSTに、翌日のX投稿7本（守護獣1・バズ検証6）を生成する。
 #  - data/x/config.json の mode が "approval": 下書きをPRにする（PRをマージ＝承認）
 #  - mode が "auto": そのままmainへコミットする
 on:

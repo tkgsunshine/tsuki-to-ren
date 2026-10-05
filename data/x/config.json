@@ -3,15 +3,21 @@
   "_modeNote": "approval=承認済み(PRマージ済み)の投稿のみ投稿 / auto=下書き生成後そのまま投稿。切り替えはこの値だけ",
   "dailySlots": [
     "morning",
+    "am",
     "noon",
+    "pm",
     "evening",
-    "night"
+    "night",
+    "late"
   ],
   "slots": {
     "morning": "08:15",
+    "am": "10:15",
     "noon": "12:15",
+    "pm": "15:15",
     "evening": "18:15",
-    "night": "20:15"
+    "night": "20:15",
+    "late": "22:15"
   },
   "minIntervalMinutes": 20,
   "expireAfterMinutes": 240,

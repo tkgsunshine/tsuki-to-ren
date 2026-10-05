@@ -190,3 +190,14 @@ test('レーダーチャート: 干合の2人は恋愛度が高く、相剋の2�
   assert.ok(kokku.romance <= 70, `相剋の恋愛度: ${kokku.romance}`);
   assert.ok(kango.romance > kokku.romance);
 });
+
+test('16タイプの相性（理想の組）: 「あなた×相手」を入れ替えても、同じ点数（全256組）', async () => {
+  const { getMBTICompatibilityScore } = await import('../src/utils/fortuneEngine.ts');
+  const T = ['INFJ', 'INFP', 'ENFJ', 'ENFP', 'INTJ', 'INTP', 'ENTJ', 'ENTP', 'ISFJ', 'ISFP', 'ESFJ', 'ESFP', 'ISTJ', 'ISTP', 'ESTJ', 'ESTP'];
+  for (const a of T) for (const b of T) assert.equal(getMBTICompatibilityScore(a, b), getMBTICompatibilityScore(b, a), `${a}×${b}`);
+  // 旧版で、一方向だけ40点だった3組が、どちらの順でも40点
+  for (const [a, b] of [['ENFP', 'INFJ'], ['ENFP', 'INTJ'], ['ESFP', 'ISTJ']]) {
+    assert.equal(getMBTICompatibilityScore(a, b), 40);
+    assert.equal(getMBTICompatibilityScore(b, a), 40);
+  }
+});

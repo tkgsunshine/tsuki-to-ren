@@ -158,16 +158,14 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   return { text: lines.filter((l, i) => l !== '' || (lines[i - 1] !== '' && i !== 0)).join('\n'), star: st };
 }
 
-/** 朝2・夜2の守護獣の投稿（queue 用の項目）を作る。署名は「-月-」「-蓮-」を交互に。lint 不合格なら例外 */
+/** 朝1本（08:15）の守護獣の投稿（queue 用の項目）。署名は日替わりで「-月-」「-蓮-」。lint 不合格なら例外 */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
-  const slots = [{ slot: 'morning' }, { slot: 'morning', time: '08:45' }, { slot: 'night' }, { slot: 'night', time: '20:45' }];
-  return pickMany(all, dateStr, 4).map((c, k) => {
-    const postTime = slots[k].time || (slots[k].slot === 'morning' ? '08:15' : '20:15');
-    const { text } = buildPostText(c, dateStr, k % 2 === 0 ? '-月-' : '-蓮-', postTime);
+  return pickMany(all, dateStr, 1).map((c) => {
+    const { text } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-', '08:15');
     const item = {
-      id: `${dateStr}-chara-${k + 1}`,
+      id: `${dateStr}-chara-1`,
       date: dateStr,
-      ...slots[k],
+      slot: 'morning',
       kind: 'value',
       text,
       image: c.imageF, // 女性版の1枚

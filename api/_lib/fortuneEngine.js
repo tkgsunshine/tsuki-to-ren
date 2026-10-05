@@ -37,24 +37,21 @@ export const stars = [
 ];
 // 16タイプの相性スコア (0: 挑戦的 15点, 1: 普通 25点, 2: 良好 35点, 3: 最高 40点)
 // 性格の次元（E/I, S/N, T/F, J/P）に基づき簡易計算するか、またはマトリクスで判定
-const idealPairs = {
-    'INFP': 'ENFJ', 'ENFJ': 'INFP',
-    'INFJ': 'ENTP', 'ENTP': 'INFJ',
-    'ENFP': 'INFJ', // ENFP x INFJ / INTJ
-    'INTJ': 'ENFP', 'ENFP-A': 'INFJ',
-    'INTP': 'ENTJ', 'ENTJ': 'INTP',
-    'ISFP': 'ESFJ', 'ESFJ': 'ISFP',
-    'ISTP': 'ESTJ', 'ESTJ': 'ISTP',
-    'ISFJ': 'ESFP', 'ESFP': 'ISFJ',
-    'ISTJ': 'ESFP' // etc
-};
+// 「理想の組み合わせ」（40点）。順序（あなた×相手）を入れ替えても同じ点数になるよう、組（無順序）で持つ。
+// 旧版は、一方向にしか書かれていない表（例: 'ENFP':'INFJ' はあるが 'INFJ':'ENFP' がない）で、
+// ENFP×INFJ・ENFP×INTJ・ESFP×ISTJ は、「あなた」と「相手」を入れ替えると、点数が変わっていた。
+const IDEAL_MBTI_PAIRS = [
+    ['INFP', 'ENFJ'], ['INFJ', 'ENTP'], ['ENFP', 'INFJ'], ['ENFP', 'INTJ'], ['INTP', 'ENTJ'],
+    ['ISFP', 'ESFJ'], ['ISTP', 'ESTJ'], ['ISFJ', 'ESFP'], ['ISTJ', 'ESFP']
+];
+const isIdealMbtiPair = (a, b) => IDEAL_MBTI_PAIRS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
 export function getMBTICompatibilityScore(mbtiA, mbtiB) {
     if (!mbtiA || !mbtiB || mbtiA === 'UNKNOWN' || mbtiB === 'UNKNOWN') {
         return 20; // 相手情報がない場合は基準値20点
     }
     const normA = mbtiA.toUpperCase();
     const normB = mbtiB.toUpperCase();
-    if (idealPairs[normA] === normB)
+    if (isIdealMbtiPair(normA, normB))
         return 40;
     // 文字の反転度合いで相性を簡易判定
     let matchCount = 0;
