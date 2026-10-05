@@ -216,7 +216,7 @@
     "format": "mbti_birth",
     "system": "mbti_birth",
     "purpose": "app",
-    "status": "scheduled",
+    "status": "expired",
     "createdAt": "2026-10-05T02:55:23.220Z"
   },
   {
@@ -228,8 +228,10 @@
     "format": "pair_score",
     "system": "pair",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T02:55:23.221Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T02:55:23.221Z",
+    "postedAt": "2026-10-05T10:29:59.779Z",
+    "tweetId": "2107055696693067981"
   },
   {
     "id": "2026-10-06-noon",
