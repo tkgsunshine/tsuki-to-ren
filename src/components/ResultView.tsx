@@ -809,7 +809,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           fontWeight: '600',
           letterSpacing: '0.02em'
         }}>
-          ✨ 全74,649,600通り（約7,465万通り）の算術マトリクスから算出
+          ✨ 約7,465万通りの算術マトリクスから算出
         </div>
         
         {/* Luxury Score Pods Side-by-Side */}

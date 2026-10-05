@@ -882,7 +882,7 @@ function App() {
                   まだ鑑定結果がありません
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: '#d1d5db', lineHeight: '1.6', maxWidth: '340px', margin: 0 }}>
-                  「恋愛診断」から生年月日を入力すると、全74,649,600通り（約7,465万通り）の算術マトリクスから二人の本音・相性スコア・LINE吉時間がここに表示されます。
+                  「恋愛診断」から生年月日を入力すると、約7,465万通りの算術マトリクスから二人の本音・相性スコア・LINE吉時間がここに表示されます。
                 </p>
                 <button 
                   className="consult-btn font-serif" 
@@ -1932,7 +1932,7 @@ function App() {
                     </h3>
                   </div>
                   <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
-                    『月と蓮』は、東洋最古にして最高峰の伝承占術「四柱推命」「九星気学」と、西洋の多角性格分類学「16タイプ心理診断」を独自アルゴリズムで統合した超精密相性鑑定エンジンです。感情の引き寄せから行動パターンの一致度、日々の運勢の波まで、全74,649,600通り（約7,465万通り）のマトリクスで多層的かつ論理的に解析します。
+                    『月と蓮』は、東洋最古にして最高峰の伝承占術「四柱推命」「九星気学」と、西洋の多角性格分類学「16タイプ心理診断」を独自アルゴリズムで統合した超精密相性鑑定エンジンです。感情の引き寄せから行動パターンの一致度、日々の運勢の波まで、約7,465万通りのマトリクスで多層的かつ論理的に解析します。
                   </p>
                 </div>
 
@@ -1941,18 +1941,18 @@ function App() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
                     <span style={{ fontSize: '1.1rem' }}>🔮</span>
                     <h4 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0 }}>
-                      全74,649,600通り（約7,465万通り）の算術マトリクス
+                      約7,465万通りの算術マトリクス
                     </h4>
                   </div>
                   <p style={{ fontSize: '0.76rem', color: '#cbd5e1', lineHeight: '1.6', margin: '0 0 0.85rem 0' }}>
-                    『月と蓮』の鑑定結果は単なる属性の当てはめではありません。お二人それぞれの「四柱推命」「九星気学」「16タイプ性格」を掛け合わせた全74,649,600通り（約7,465万通り）の完全オーダーメイド判定プログラムです。
+                    『月と蓮』の鑑定結果は単なる属性の当てはめではありません。お二人それぞれの「四柱推命」「九星気学」「16タイプ性格」を掛け合わせた約7,465万通りの完全オーダーメイド判定プログラムです。
                   </p>
                   <div style={{ background: 'rgba(0, 0, 0, 0.4)', borderRadius: '12px', padding: '0.75rem', border: '1px solid rgba(226, 192, 116, 0.2)', fontSize: '0.72rem', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                     <div>・四柱推命 日柱干支相性：60 × 60 ＝ <strong style={{ color: '#ffffff' }}>3,600通り</strong></div>
                     <div>・九星気学 本命星相性：9 × 9 ＝ <strong style={{ color: '#ffffff' }}>81通り</strong></div>
                     <div>・16タイプ（MBTI）相性：16 × 16 ＝ <strong style={{ color: '#ffffff' }}>256通り</strong></div>
                     <div style={{ borderTop: '1px solid rgba(226, 192, 116, 0.25)', paddingTop: '0.4rem', marginTop: '0.2rem', color: '#fef08a', fontWeight: 'bold', fontSize: '0.78rem', textAlign: 'right' }}>
-                      ＝ 3,600 × 81 × 256 ＝ 74,649,600通り（約7,465万通り）
+                      ＝ 3,600 × 81 × 256 ＝ 74,649,600通り
                     </div>
                   </div>
                 </div>
