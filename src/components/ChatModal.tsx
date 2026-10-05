@@ -60,7 +60,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const oppDisplayName = result?.opponentAstrologyName?.replace(/👑魁罡👑 |👑極稀👑 /g, '') || 'お相手';
+  // 干支名（例: 辛蛇）は分かりにくいので、結果画面の称号（例: 【宝石貴族 × 蛇】）を「お相手（宝石貴族×蛇）」の形で出す
+  const oppTitle = (result?.opponentAstrologyTheme || '').replace(/[【】]/g, '').replace(/\s*×\s*/g, '×').trim();
+  const oppDisplayName = oppTitle ? `お相手（${oppTitle}）` : 'お相手';
   const presetOptions = [
     { key: 'no_reply', text: `${oppDisplayName}から連絡が来ない理由と対策は？` },
     { key: 'unknown_feelings', text: `${oppDisplayName}の本音や脈ありサインを教えて` },

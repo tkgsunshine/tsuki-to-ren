@@ -2495,6 +2495,7 @@ function App() {
         onClose={() => setShowPremiumLP(false)}
         onSubscribe={() => setIsSubscribed(true)}
         onCancelSubscription={() => setIsSubscribed(false)}
+        isResultVisible={(activeTab === 'home' && flowStep === 'result' && !!activeResult) || (activeTab === 'fortune' && !!activeResult && !!renResult && !!tsukiResult)}
         isSubscribed={isSubscribed}
         isRegistered={isRegistered}
         onRegisterFirst={() => setShowAuthModal(true)}
