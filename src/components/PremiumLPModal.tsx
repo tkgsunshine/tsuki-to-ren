@@ -10,6 +10,8 @@ interface PremiumLPModalProps {
   isRegistered: boolean;
   onRegisterFirst: () => void;
   onCancelSubscription?: () => void;
+  /** 鑑定結果が表示中なら完了のお知らせは結果の先頭に出すので、alert は出さない */
+  isResultVisible?: boolean;
 }
 
 export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
@@ -19,7 +21,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   isSubscribed,
   isRegistered,
   onRegisterFirst,
-  onCancelSubscription
+  onCancelSubscription,
+  isResultVisible = false
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -39,9 +42,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
-      onSubscribe();
-      alert('🎉 プレミアム会員へのご登録ありがとうございます！\n全機能が解放されました。');
       onClose();
+      onSubscribe();
+      // 鑑定結果の表示中は、ResultView が結果の先頭へ戻して完了のお知らせを出す
+      if (!isResultVisible) {
+        alert('🎉 プレミアム会員へのご登録ありがとうございます！\n全機能が解放されました。');
+      }
     }, 1200);
   };
 
