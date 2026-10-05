@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { wrapSeoContent } from './lib/seo-wrap.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -185,7 +186,7 @@ for (const article of columns) {
     </div>
   `;
 
-  articleHtml = articleHtml.replace('<div id="root"></div>', `<div id="root">${semanticArticleContent}</div>`);
+  articleHtml = articleHtml.replace('<div id="root"></div>', `<div id="root">${wrapSeoContent(semanticArticleContent)}</div>`);
 
   fs.writeFileSync(path.join(articleDir, 'index.html'), articleHtml, 'utf-8');
   count++;

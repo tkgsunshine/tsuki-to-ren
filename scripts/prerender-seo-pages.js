@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { wrapSeoContent } from './lib/seo-wrap.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,7 +54,7 @@ function writePage(subDir, title, description, keywords, canonicalUrl, noscriptC
     pageHtml = pageHtml.replace('</head>', `${schemaTags}\n</head>`);
   }
 
-  pageHtml = pageHtml.replace('<div id="root"></div>', `<div id="root">${noscriptContent}</div>`);
+  pageHtml = pageHtml.replace('<div id="root"></div>', `<div id="root">${wrapSeoContent(noscriptContent)}</div>`);
 
   fs.writeFileSync(path.join(targetDir, 'index.html'), pageHtml, 'utf-8');
 }
@@ -537,6 +538,6 @@ const homeSemanticHtml = `
 `;
 
 // Insert into dist/index.html
-const updatedIndexHtml = baseHtml.replace('<div id="root"></div>', `<div id="root">${homeSemanticHtml}</div>`);
+const updatedIndexHtml = baseHtml.replace('<div id="root"></div>', `<div id="root">${wrapSeoContent(homeSemanticHtml)}</div>`);
 fs.writeFileSync(indexHtmlPath, updatedIndexHtml, 'utf-8');
 console.log('✅ Pre-rendered root homepage: dist/index.html');
