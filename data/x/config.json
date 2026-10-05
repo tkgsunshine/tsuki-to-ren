@@ -4,11 +4,13 @@
   "dailySlots": [
     "morning",
     "noon",
+    "evening",
     "night"
   ],
   "slots": {
     "morning": "08:15",
     "noon": "12:15",
+    "evening": "18:15",
     "night": "20:15"
   },
   "minIntervalMinutes": 20,
