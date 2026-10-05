@@ -48,7 +48,7 @@ const idealPairs = {
     'ISFJ': 'ESFP', 'ESFP': 'ISFJ',
     'ISTJ': 'ESFP' // etc
 };
-function getMBTICompatibilityScore(mbtiA, mbtiB) {
+export function getMBTICompatibilityScore(mbtiA, mbtiB) {
     if (!mbtiA || !mbtiB || mbtiA === 'UNKNOWN' || mbtiB === 'UNKNOWN') {
         return 20; // 相手情報がない場合は基準値20点
     }

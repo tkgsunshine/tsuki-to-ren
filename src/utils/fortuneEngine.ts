@@ -54,7 +54,7 @@ const idealPairs: Record<string, string> = {
   'ISTJ': 'ESFP' // etc
 };
 
-function getMBTICompatibilityScore(mbtiA: string, mbtiB: string): number {
+export function getMBTICompatibilityScore(mbtiA: string, mbtiB: string): number {
   if (!mbtiA || !mbtiB || mbtiA === 'UNKNOWN' || mbtiB === 'UNKNOWN') {
     return 20; // 相手情報がない場合は基準値20点
   }
