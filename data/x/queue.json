@@ -375,7 +375,7 @@
     "format": "name_self",
     "system": "quiz",
     "purpose": "follow",
-    "status": "scheduled",
+    "status": "skipped",
     "createdAt": "2026-10-05T17:53:28.912Z"
   },
   {
@@ -518,7 +518,7 @@
     "format": "name_self",
     "system": "quiz",
     "purpose": "follow",
-    "status": "scheduled",
+    "status": "skipped",
     "createdAt": "2026-10-05T17:53:29.164Z"
   },
   {
@@ -809,7 +809,7 @@
     "format": "pair_story",
     "system": "pair",
     "purpose": "follow",
-    "status": "scheduled",
+    "status": "skipped",
     "createdAt": "2026-10-05T17:53:29.403Z"
   },
   {
@@ -833,7 +833,7 @@
     "format": "name_self",
     "system": "quiz",
     "purpose": "follow",
-    "status": "scheduled",
+    "status": "skipped",
     "createdAt": "2026-10-05T17:53:29.403Z"
   }
 ]
