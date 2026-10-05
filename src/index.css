@@ -1166,3 +1166,20 @@ body {
   .chat-typing-text { animation-duration: 2.4s; }
   .chat-typing-dots span { animation: none; opacity: 0.8; }
 }
+
+/* 守護獣の称号バッジ（例: 要塞の守護者 × 猿） */
+.astro-title-badge {
+  display: inline-block;
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(48, 36, 12, 0.92) 0%, rgba(18, 14, 30, 0.92) 100%);
+  border: 1.5px solid rgba(226, 192, 116, 0.75);
+  box-shadow: 0 0 14px rgba(226, 192, 116, 0.28), inset 0 0 10px rgba(226, 192, 116, 0.12);
+  color: #fde68a;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(254, 240, 138, 0.45), 0 1px 3px rgba(0, 0, 0, 0.9);
+}

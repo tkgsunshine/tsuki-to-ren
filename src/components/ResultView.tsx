@@ -1114,8 +1114,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.88rem', color: '#f1f5f9', lineHeight: '1.4', fontWeight: '600', minHeight: '24px', textShadow: '0 1px 3px rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1, marginBottom: '0.75rem' }}>
-                {activeResult.myAstrologyTheme}
+              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
+                <span className="astro-title-badge font-serif">
+                  {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
+                </span>
               </div>
 
               {/* Dynamic Attributes Grid */}
@@ -1408,8 +1411,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.88rem', color: '#f1f5f9', lineHeight: '1.4', fontWeight: '600', minHeight: '24px', textShadow: '0 1px 3px rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1, marginBottom: '0.75rem' }}>
-                {activeResult.opponentAstrologyTheme}
+              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
+                <span className="astro-title-badge font-serif">
+                  {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
+                </span>
               </div>
 
               {/* Dynamic Attributes Grid */}
