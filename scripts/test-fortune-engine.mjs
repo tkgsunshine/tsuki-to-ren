@@ -174,3 +174,19 @@ test('日の九星と本命星の関係: 日の星が生む+4／同じ+2／日�
   assert.equal(getDayStarPoints(2025, 12, 21, '火'), -4 * DAY_STAR_WEIGHT);
   assert.equal(getDayStarPoints(2025, 12, 21, '水'), 2 * DAY_STAR_WEIGHT);
 });
+
+test('レーダーチャート: 干合の2人は恋愛度が高く、相剋の2人は低い（旧名との比較で、一度も働いていなかった不具合）', () => {
+  const find = (stem) => {
+    const d = new Date(1990, 0, 1);
+    for (let i = 0; i < 400; i++, d.setDate(d.getDate() + 1)) if (calculateDayPillar(d).stem === stem) return iso(d);
+  };
+  const radar = (a, b) =>
+    withNow('2026-10-06', () =>
+      generateFortuneResult({ myName: 'a', myBirth: a, myMbti: 'ENFP', myGender: 'female', opponentName: 'b', opponentBirth: b, opponentMbti: 'INFJ', opponentGender: 'male', relationship: 'partner' }, 'tsuki'),
+    ).radarScores;
+  const kango = radar(find('甲'), find('己')); // 甲己合
+  const kokku = radar(find('甲'), find('戊')); // 木と土の相剋
+  assert.ok(kango.romance >= 90, `干合の恋愛度: ${kango.romance}`);
+  assert.ok(kokku.romance <= 70, `相剋の恋愛度: ${kokku.romance}`);
+  assert.ok(kango.romance > kokku.romance);
+});

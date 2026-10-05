@@ -2849,18 +2849,26 @@ export function generateFortuneResult(input, character) {
         bestContactHour: dailyContactAdvice.bestContactHour,
         dailyActionAdvice: dailyContactAdvice.dailyActionAdvice,
         radarScores: (() => {
+            // 相性の判定関数は、ユーザー向けの平易な名前（例:「運命の絆」）を返す。レーダーの点数は、四柱推命・九星気学の関係（干合・相生…）で決めるため、元の関係に戻して比べる。
+            // 旧版は、平易な名前に改名された後も、旧名（'干合' など）と比べていたため、これらの分岐が一度も働かず、既定値だけだった。
+            const STEM_KIND = { '運命の絆': '干合', '支え合い': '相生', '愛され運': '相生', '自然体': '比和', '刺激的': '相剋' };
+            const BRANCH_KIND = { '最高のフィーリング': '支合', 'ベストパートナー': '三合', '磁石のような魅力': '六沖' };
+            const STAR_KIND = { '運気アップ': '相生', '息ぴったり': '比和', '新しい刺激': '相剋' };
+            const stemKind = stemComp ? STEM_KIND[stemComp.type] : undefined;
+            const branchKind = branchComp ? BRANCH_KIND[branchComp.type] : undefined;
+            const starKind = starComp ? STAR_KIND[starComp.type] : undefined;
             // 命式・九星・MBTIの本格パラメータに基づく6項目算出
             const myNorm = (input.myMbti || 'ENFP').toUpperCase();
             const oppNorm = (input.opponentMbti || 'INFJ').toUpperCase();
             // 1. 恋愛度 (Romance): 日干相性 (干合=96+, 相生=86+, 比和=78+, 相剋=68+)
             let romanceBase = 72;
-            if (stemComp?.type === '干合')
+            if (stemKind === '干合')
                 romanceBase = 96;
-            else if (stemComp?.type === '相生')
+            else if (stemKind === '相生')
                 romanceBase = 87;
-            else if (stemComp?.type === '比和')
+            else if (stemKind === '比和')
                 romanceBase = 80;
-            else if (stemComp?.type === '相剋')
+            else if (stemKind === '相剋')
                 romanceBase = 66;
             // 2. 対話度 (Conversation): MBTI 認知機能ダイナミクス (F/T共鳴, E/Iバランス)
             const myT = myNorm.includes('T');
@@ -2878,11 +2886,11 @@ export function generateFortuneResult(input, character) {
                 convBase += 4;
             // 3. 肉体・本能相性 (Sensual): 地支の親和性 (支合=98, 三合=92, 調和=78, 六沖=84[強烈な反発と引力])
             let sensualBase = 75;
-            if (branchComp?.type === '支合')
+            if (branchKind === '支合')
                 sensualBase = 98;
-            else if (branchComp?.type === '三合')
+            else if (branchKind === '三合')
                 sensualBase = 92;
-            else if (branchComp?.type === '六沖')
+            else if (branchKind === '六沖')
                 sensualBase = 86; // 磁石の反発と強い肉体的引力
             else
                 sensualBase = 76;
@@ -2892,29 +2900,29 @@ export function generateFortuneResult(input, character) {
             const myJ = myNorm.includes('J');
             const oppJ = oppNorm.includes('J');
             let marriageBase = 70;
-            if (branchComp?.type === '三合' || branchComp?.type === '支合')
+            if (branchKind === '三合' || branchKind === '支合')
                 marriageBase += 14;
             if (myJ && oppJ)
                 marriageBase += 10; // 計画的堅実パートナー
             else if (myJ !== oppJ)
                 marriageBase += 6; // 役割分担
-            if (starComp?.type === '相生' || starComp?.type === '比和')
+            if (starKind === '相生' || starKind === '比和')
                 marriageBase += 6;
             // 5. 執着・引き寄せ度 (Obsession): 陰陽の極性・魁罡・干合・六沖
             let obsessionBase = 70;
             if (isKaigo || opponentIsKaigo)
                 obsessionBase += 18;
-            if (stemComp?.type === '干合')
+            if (stemKind === '干合')
                 obsessionBase += 14;
-            if (branchComp?.type === '六沖')
+            if (branchKind === '六沖')
                 obsessionBase += 12; // 離れたくても離れられない執着
-            if (myNorm !== oppNorm && !isKaigo && stemComp?.type !== '干合')
+            if (myNorm !== oppNorm && !isKaigo && stemKind !== '干合')
                 obsessionBase += 6;
             // 6. 信頼度 (Trust): 九星気学本命星の相生・比和 & J気質
             let trustBase = 72;
-            if (starComp?.type === '相生')
+            if (starKind === '相生')
                 trustBase = 94;
-            else if (starComp?.type === '比和')
+            else if (starKind === '比和')
                 trustBase = 88;
             else
                 trustBase = 68;
