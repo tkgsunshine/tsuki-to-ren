@@ -38,13 +38,22 @@ export function buildDailyContent(sub) {
 
 export const subjectFor = (date) => `🌙【月と蓮】本日の運勢＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
 
-// Luxury Dark & Gold HTML email template
+// Luxury Dark & Gold HTML email template.
+// Images are referenced by absolute production URL (email clients cannot load relative paths).
+// JPEG only: webp is not displayed by several mail clients.
+const SITE = 'https://www.tsuki-to-ren.com';
+const GOLD = '#e2c074';
+
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
   const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
   const { score, hourMain, hourNote, advice } = content;
-  const scoreLabel = '本日の運勢スコア';
   const hourTitle = content.hasOpponent ? '本日のLINE吉時間' : '本日の開運黄金時間';
+  const isRen = sub.character === 'ren';
+  const charName = isRen ? '蓮' : '月';
+  const charImg = `${SITE}/assets/${isRen ? 'ren' : 'tsuki'}.jpg`;
+  const accent = isRen ? '#7dd3fc' : '#c4a1ff';
+  const pct = Math.max(4, Math.min(100, Number(score) || 0));
 
   return `
 <!DOCTYPE html>
@@ -52,102 +61,118 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
   <title>本日の運勢・吉時間 | 月と蓮</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #090714; font-family: 'Helvetica Neue', Arial, sans-serif; color: #f3f4f6;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #090714; padding: 20px 10px;">
+<body style="margin: 0; padding: 0; background-color: #090714; font-family: 'Hiragino Sans', 'Yu Gothic', 'Helvetica Neue', Arial, sans-serif; color: #f3f4f6;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#090714" style="background-color: #090714; padding: 20px 10px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" style="max-width: 540px; background: linear-gradient(180deg, #141026 0%, #0a0718 100%); border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
-          
-          <!-- Header Banner -->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#120e24" style="max-width: 540px; background-color: #120e24; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 20px; overflow: hidden;">
+
+          <!-- Hero: starry sky + lotus emblem + title -->
           <tr>
-            <td style="padding: 25px 20px 15px; text-align: center; border-bottom: 1px solid rgba(226, 192, 116, 0.2);">
-              <div style="font-size: 22px; font-weight: bold; color: #fef08a; letter-spacing: 0.1em;">
-                🌙 月と蓮 🪷
-              </div>
-              <div style="font-size: 11px; color: #e2c074; margin-top: 4px; letter-spacing: 0.05em;">
-                生年月日 × 16タイプの恋愛相性占い
-              </div>
+            <td align="center" background="${SITE}/assets/bg-stars.jpg" bgcolor="#140f2b" style="padding: 28px 20px 22px; text-align: center; background-color: #140f2b; background-image: url('${SITE}/assets/bg-stars.jpg'); background-size: cover; background-position: center;">
+              <img src="${SITE}/assets/lotus-emblem.jpg" width="76" height="76" alt="" style="display: block; margin: 0 auto 10px; width: 76px; height: 76px; border-radius: 38px; border: 1px solid rgba(226, 192, 116, 0.6);">
+              <div style="font-size: 24px; font-weight: bold; color: #fef08a; letter-spacing: 0.18em;">月と蓮</div>
+              <div style="font-size: 11px; color: ${GOLD}; margin-top: 6px; letter-spacing: 0.08em;">生年月日 × 16タイプの恋愛相性占い</div>
             </td>
           </tr>
 
-          <!-- Date Badge -->
+          <!-- Date -->
           <tr>
-            <td style="padding: 20px 25px 5px; text-align: center;">
-              <span style="display: inline-block; padding: 4px 14px; background: rgba(226, 192, 116, 0.12); border: 1px solid rgba(226, 192, 116, 0.3); border-radius: 15px; color: #e2c074; font-size: 12px; font-weight: bold;">
-                📅 ${date.year}年${date.month}月${date.day}日（本日）の運勢
+            <td align="center" style="padding: 20px 25px 4px; text-align: center;">
+              <span style="display: inline-block; padding: 5px 16px; background-color: #201a36; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 15px; color: ${GOLD}; font-size: 12px; font-weight: bold; letter-spacing: 0.04em;">
+                ${date.year}年${date.month}月${date.day}日（本日）の運勢
               </span>
             </td>
           </tr>
 
-          <!-- Greeting -->
+          <!-- Character + greeting -->
           <tr>
-            <td style="padding: 15px 25px; font-size: 14px; line-height: 1.6; color: #e2e8f0;">
-              ${esc(name)} 様${oppLabel}<br>
-              おはようございます。本日も素敵な一日をお過ごしいただけますよう、『月と蓮』守護エンジンより本日の個別バイオリズムをお届けします。
-            </td>
-          </tr>
-
-          <!-- Daily Luck Card -->
-          <tr>
-            <td style="padding: 0 25px 15px;">
-              <table role="presentation" width="100%" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px; text-align: center;">
+            <td style="padding: 18px 25px 6px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td>
-                    <div style="font-size: 12px; color: #cbd5e1; margin-bottom: 6px;">${scoreLabel}</div>
-                    <div style="font-size: 38px; font-weight: bold; color: #fef08a; text-shadow: 0 0 10px rgba(254,240,138,0.5);">
-                      ${esc(score)}<span style="font-size: 20px;"> 点</span>
-                    </div>
+                  <td width="92" valign="top" style="width: 92px; padding-right: 14px;">
+                    <img src="${charImg}" width="86" height="86" alt="${charName}" style="display: block; width: 86px; height: 86px; border-radius: 43px; border: 2px solid ${accent}; object-fit: cover; object-position: top;">
+                  </td>
+                  <td valign="top" style="font-size: 14px; line-height: 1.7; color: #e2e8f0;">
+                    <div style="font-size: 11px; font-weight: bold; color: ${accent}; letter-spacing: 0.1em; margin-bottom: 2px;">${charName}より</div>
+                    ${esc(name)} 様${oppLabel}<br>
+                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、『月と蓮』守護エンジンより本日の個別バイオリズムをお届けします。
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Best LINE Hour Card -->
+          <!-- Score -->
           <tr>
-            <td style="padding: 0 25px 20px;">
-              <table role="presentation" width="100%" style="background: linear-gradient(135deg, rgba(226,192,116,0.1) 0%, rgba(168,85,247,0.1) 100%); border: 1px solid rgba(226,192,116,0.3); border-radius: 14px; padding: 18px; text-align: center;">
+            <td style="padding: 14px 25px 12px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
                 <tr>
-                  <td>
-                    <div style="font-size: 12px; color: #e2c074; font-weight: bold; margin-bottom: 4px;">
-                      💬 ${hourTitle}
+                  <td align="center" style="padding: 20px 18px 18px; text-align: center;">
+                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.1em;">本日の運勢スコア</div>
+                    <div style="font-size: 52px; line-height: 1.15; font-weight: bold; color: #fef08a; margin: 6px 0 12px;">
+                      ${esc(score)}<span style="font-size: 20px; color: ${GOLD};"> 点</span>
                     </div>
-                    <div style="font-size: 26px; font-weight: bold; color: #ffffff; margin: 4px 0;">
-                      ⏰ ${esc(hourMain)}
-                    </div>
-                    <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">
-                      ${esc(hourNote)}
-                    </div>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #2a2342; border-radius: 5px;">
+                      <tr>
+                        <td width="${pct}%" height="8" bgcolor="#e2c074" style="width: ${pct}%; height: 8px; line-height: 8px; font-size: 0; background-color: #e2c074; background-image: linear-gradient(90deg, #c4a1ff, #fef08a); border-radius: 5px;">&nbsp;</td>
+                        <td height="8" style="font-size: 0; line-height: 8px;">&nbsp;</td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Advice Message (same text as the result screen) -->
+          <!-- LINE golden hour -->
           <tr>
-            <td style="padding: 0 25px 20px; font-size: 13px; line-height: 1.6; color: #cbd5e1;">
-              <strong style="color: #fef08a;">💡 本日のアプローチ助言</strong><br>
-              ${esc(advice)}
+            <td style="padding: 0 25px 14px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1d1733" style="background-color: #1d1733; border: 1px solid rgba(196, 161, 255, 0.4); border-radius: 16px;">
+                <tr>
+                  <td align="center" style="padding: 18px; text-align: center;">
+                    <div style="font-size: 12px; color: ${GOLD}; font-weight: bold; letter-spacing: 0.1em;">${hourTitle}</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #ffffff; margin: 8px 0 6px; letter-spacing: 0.02em;">${esc(hourMain)}</div>
+                    <div style="font-size: 12px; color: #a8a3bd; line-height: 1.5;">${esc(hourNote)}</div>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
-          <!-- CTA Button -->
+          <!-- Advice (same text as the result screen) -->
           <tr>
-            <td style="padding: 10px 25px 25px; text-align: center;">
-              <a href="https://www.tsuki-to-ren.com/result" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%); color: #000000; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 25px; box-shadow: 0 5px 20px rgba(234, 179, 8, 0.4);">
-                ✨ 本日の詳細鑑定を見る（アプリを開く） ➔
+            <td style="padding: 0 25px 8px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td width="3" bgcolor="#e2c074" style="width: 3px; background-color: #e2c074; border-radius: 2px;">&nbsp;</td>
+                  <td style="padding: 4px 0 4px 14px; font-size: 13px; line-height: 1.8; color: #cbd5e1;">
+                    <strong style="color: #fef08a; letter-spacing: 0.06em;">本日のアプローチ助言</strong><br>
+                    ${esc(advice)}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding: 22px 25px 28px; text-align: center;">
+              <a href="${SITE}/result" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; background-image: linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%); color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
+                本日の詳細鑑定を見る &#10132;
               </a>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="padding: 15px 20px 25px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 10px; color: #6b7280; line-height: 1.5;">
+            <td align="center" style="padding: 16px 20px 24px; text-align: center; border-top: 1px solid #2a2342; font-size: 10px; color: #8b8aa0; line-height: 1.6;">
               本メールは『月と蓮』にて毎朝の運勢通知を有効化された方へお送りしています。<br>
-              運営会社: Ill株式会社 | <a href="${esc(stopUrl)}" style="color: #9ca3af;">通知の停止はこちら</a>
+              運営会社: Ill株式会社 | <a href="${esc(stopUrl)}" style="color: #b4b3c8;">通知の停止はこちら</a>
             </td>
           </tr>
 
