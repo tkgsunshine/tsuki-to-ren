@@ -1,7 +1,12 @@
 // node --experimental-strip-types --test scripts/x/test-formats.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FORMATS, ANSWER_FORMAT, pickFormats, buildFacts, SYSTEMS, PURPOSES } from './lib/formats.mjs';
+import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES } from './lib/formats.mjs';
+import http from 'node:http';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
 import { computeAll } from './lib/characters.mjs';
 import { lintPost } from './lib/lint.mjs';
 import { getMBTICompatibilityScore } from '../../src/utils/fortuneEngine.ts';
@@ -30,15 +35,6 @@ test('毎日2本: 日ごとに型が変わり、1日にアプリ誘導は最大1
   assert.equal(seen.size, FORMATS.length, '全ての型が一巡する');
 });
 
-test('問いかけ型の翌日の昼は、答え合わせになる', () => {
-  const poll = FORMATS.find((f) => f.poll);
-  const history = [{ id: 'x', date: '2026-10-06', format: poll.id, status: 'scheduled', text: '問い' }];
-  const { noon, evening } = pickFormats('2026-10-07', history);
-  assert.equal(noon.id, ANSWER_FORMAT.id);
-  assert.equal(noon.answerTo.text, '問い');
-  assert.ok(!evening.poll, '同じ日に、問いかけを重ねない');
-});
-
 test('事実はアプリの鑑定ロジックから出る（相性点・ランキング・生まれ年の本命星）', () => {
   const all = computeAll('2026-10-07');
   const ctx = { date: '2026-10-07', all };
@@ -60,4 +56,52 @@ test('夕方（evening）の枠で投稿できる。promoは「近日公開」�
   assert.deepEqual(lintPost(ok, [], OPTS), []);
   assert.ok(lintPost({ ...ok, kind: 'promo' }, [], OPTS).some((p) => p.includes('近日公開')));
   assert.deepEqual(lintPost({ ...ok, kind: 'promo', text: '近日公開です\n-月-' }, [], OPTS), []);
+});
+
+// ───────── 答え合わせの返信（スレッド）─────────
+async function runPost(items, { now = new Date(), cfg = {} } = {}) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xq-'));
+  const qp = path.join(dir, 'queue.json');
+  const cp = path.join(dir, 'config.json');
+  fs.writeFileSync(qp, JSON.stringify(items));
+  fs.writeFileSync(cp, JSON.stringify({ mode: 'approval', allowLinks: false, minIntervalMinutes: 20, expireAfterMinutes: 240, replyDelayMinutes: 60, slots: { morning: '08:15', noon: '12:15', evening: '18:15', night: '20:15' }, ...cfg }));
+  const bodies = [];
+  const server = http.createServer((req, res) => {
+    let b = '';
+    req.on('data', (c) => (b += c));
+    req.on('end', () => {
+      bodies.push(JSON.parse(b));
+      res.writeHead(201, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ data: { id: `tw${bodies.length}`, text: 'x' } }));
+    });
+  });
+  await new Promise((r) => server.listen(0, r));
+  const env = {
+    ...process.env, X_QUEUE_PATH: qp, X_CONFIG_PATH: cp, X_TWEET_URL: `http://localhost:${server.address().port}/2/tweets`,
+    X_API_KEY: 'k', X_API_SECRET: 's', X_ACCESS_TOKEN: '1-t', X_ACCESS_TOKEN_SECRET: 'ts', X_FAKE_NOW: now.toISOString(),
+  };
+  await new Promise((r) => spawn(process.execPath, ['--experimental-strip-types', path.join(import.meta.dirname, 'post.mjs')], { env, stdio: 'ignore' }).on('close', r));
+  server.close();
+  return { bodies, queue: JSON.parse(fs.readFileSync(qp, 'utf-8')) };
+}
+
+test('返信: 親が投稿された後に、親へのスレッド返信（in_reply_to_tweet_id）として投稿される', async () => {
+  const t0 = new Date('2026-10-06T09:15:00Z'); // 18:15 JST
+  const parent = { id: 'p', date: '2026-10-06', slot: 'evening', kind: 'value', text: '問い\n-蓮-', status: 'posted', postedAt: new Date(t0.getTime() - 90 * 60000).toISOString(), tweetId: 'parent123' };
+  const reply = { id: 'p-reply', date: '2026-10-06', slot: 'evening', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'p' };
+  const { bodies, queue } = await runPost([parent, reply], { now: t0 });
+  assert.equal(bodies.length, 1);
+  assert.deepEqual(bodies[0].reply, { in_reply_to_tweet_id: 'parent123' });
+  assert.equal(queue.find((x) => x.id === 'p-reply').status, 'posted');
+});
+
+test('返信: 親の投稿から replyDelayMinutes（60分）が経つまでは出さない。親が出なかったら見送る', async () => {
+  const t0 = new Date('2026-10-06T09:15:00Z');
+  const base = { id: 'p', date: '2026-10-06', slot: 'evening', kind: 'value', text: '問い\n-蓮-', tweetId: 'parent123' };
+  const reply = { id: 'p-reply', date: '2026-10-06', slot: 'evening', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'p' };
+  let r = await runPost([{ ...base, status: 'posted', postedAt: new Date(t0.getTime() - 30 * 60000).toISOString() }, reply], { now: t0 });
+  assert.equal(r.bodies.length, 0, '30分後ではまだ出さない');
+  r = await runPost([{ ...base, status: 'failed' }, reply], { now: t0 });
+  assert.equal(r.bodies.length, 0);
+  assert.equal(r.queue.find((x) => x.id === 'p-reply').status, 'skipped');
 });

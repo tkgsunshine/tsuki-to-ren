@@ -3,8 +3,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
-export const QUEUE_PATH = path.join(ROOT, 'data/x/queue.json');
-export const CONFIG_PATH = path.join(ROOT, 'data/x/config.json');
+export const QUEUE_PATH = process.env.X_QUEUE_PATH || path.join(ROOT, 'data/x/queue.json'); // X_QUEUE_PATH / X_CONFIG_PATH はテスト用
+export const CONFIG_PATH = process.env.X_CONFIG_PATH || path.join(ROOT, 'data/x/config.json');
 export const BRIEF_DIR = path.join(ROOT, 'data/x/briefs');
 
 export function readJson(file, fallback) {
