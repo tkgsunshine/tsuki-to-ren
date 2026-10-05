@@ -1,7 +1,9 @@
 // 毎日2本（昼・夕）の「バズ検証用」投稿の型。8系統 × 3つの目的（バズ用／フォロー用／アプリ誘導用）。
 // 数字・ランキング・相性は、アプリの鑑定ロジック（fortuneEngine.ts）で算出した事実だけを使う（facts）。AIは言い回しだけを担当する。
 // 投稿には format / system / purpose を付け、あとで「どの型が反応を取れたか」を比べられるようにする。
-import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getMBTICompatibilityScore } from '../../../src/utils/fortuneEngine.ts';
+import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getPillarPairScore } from '../../../src/utils/fortuneEngine.ts';
+import { STEM_YOMI, ANIMAL_YOMI } from './characters.mjs';
+import { weightedLength } from './lint.mjs';
 import { dayPillar, MBTI_TYPES as MBTI_OBJS } from './signals.mjs';
 
 const MBTI_TYPES = MBTI_OBJS.map((t) => t.code);
@@ -49,6 +51,56 @@ function stemTypes(all) {
 // 16タイプの組み合わせの相性（アプリの採点: 40点満点）
 const pairLabel = (score) =>
   score >= 40 ? '最高の組み合わせ' : score >= 34 ? '正反対だから惹かれ合う' : score >= 28 ? '似た者どうし' : score >= 15 ? 'ふつう（歩み寄りが大事）' : 'ぶつかりやすい（話し合いが大事）';
+
+
+// ───────── 守護獣（60タイプ）の相性ランキング（アプリの鑑定ロジックで算出。AIは使わない）─────────
+// その日の「主役」の守護獣を1つ選び、相性がいい守護獣のTOP12と、ワースト10を出す（60日で、全タイプが主役になる）。
+// 点数は、2人の日柱の相性（天干・地支・十二運。engine の getPillarPairScore）を、100点満点にしたもの。
+const BRANCH_ANIMAL = { 子: '鼠', 丑: '牛', 寅: '虎', 卯: '兎', 辰: '龍', 巳: '蛇', 午: '馬', 未: '羊', 申: '猿', 酉: '鳥', 戌: '犬', 亥: '猪' };
+const STEM_LIST = [...'甲乙丙丁戊己庚辛壬癸'];
+const BRANCH_LIST = [...'子丑寅卯辰巳午未申酉戌亥'];
+export function beastList() {
+  return Array.from({ length: 60 }, (_, i) => {
+    const stem = STEM_LIST[i % 10];
+    const branch = BRANCH_LIST[i % 12];
+    return { index: i, stem, branch, name: `${stem}${BRANCH_ANIMAL[branch]}`, full: `${stem}${BRANCH_ANIMAL[branch]}（${STEM_YOMI[stem]}・${ANIMAL_YOMI[BRANCH_ANIMAL[branch]]}）` };
+  });
+}
+/** 順位つきの並び（同点は同順位）。list は、点数の降順 */
+const withRanks = (list) => {
+  let prev = null;
+  let rank = 0;
+  return list.map((x, i) => {
+    if (x.score !== prev) rank = i + 1;
+    prev = x.score;
+    return { ...x, rank };
+  });
+};
+export function buildBeastPairRanking(date, topN = 12, worstN = 10) {
+  const beasts = beastList();
+  const anchor = beasts[Math.floor(dayPillar(date).days / 9) % 60];
+  const others = beasts
+    .filter((b) => b.index !== anchor.index)
+    .map((b) => ({ name: b.name, score: getPillarPairScore(anchor.stem, anchor.branch, b.stem, b.branch) }));
+  const desc = [...others].sort((x, y) => y.score - x.score || x.name.localeCompare(y.name, 'ja'));
+  const ranked = withRanks(desc);
+  // X の文字数（重み280）に収まる最大の件数（最大 topN）で、上位を載せる
+  const compose = (n) => {
+    const top = ranked.slice(0, n);
+    const lines = [`❤️ ${anchor.full}の相性TOP${n}（100点満点）`, ''];
+    for (const t of top) lines.push(`${t.rank}位 ${t.name} ${t.score}点`);
+    lines.push('', 'あなたの守護獣は何位？ワースト10はリプ欄に🌙', '-月-');
+    return { top, text: lines.join('\n') };
+  };
+  let n = topN;
+  let main = compose(n);
+  while (weightedLength(main.text) > 280 && n > 3) main = compose(--n);
+  const worst = withRanks([...desc].reverse()).slice(0, worstN);
+  const reply = [`【${anchor.name}と相性がぶつかりやすい守護獣 ワースト${worst.length}】`, '（点数が低い順）', ''];
+  for (const w of worst) reply.push(`${w.rank}位 ${w.name} ${w.score}点`);
+  reply.push('', '点数が低くても、お互いを知るほど深まる関係もあります🌙', '-蓮-');
+  return { text: main.text, replyText: reply.join('\n'), anchor: anchor.name, top: main.top, worst };
+}
 
 const FACTS = {
   year_star: ({ date }) => {
@@ -101,23 +153,6 @@ const FACTS = {
       }),
     };
   },
-  pair_score: ({ date }) => {
-    const pairs = [];
-    const seen = new Set();
-    let h = hashOf(`${date}:pair`);
-    while (pairs.length < 3) {
-      const a = MBTI_TYPES[h % 16];
-      const b = MBTI_TYPES[Math.floor(h / 16) % 16];
-      h = (h * 1103515245 + 12345) >>> 0;
-      const k = [a, b].sort().join('');
-      const score0 = getMBTICompatibilityScore(a, b);
-      if (a === b || seen.has(k) || score0 === 0) continue; // 0点の組み合わせは、投稿では取り上げない（傷つけやすいため）
-      seen.add(k);
-      const score = getMBTICompatibilityScore(a, b);
-      pairs.push({ a, b, score40: score, label: pairLabel(score) });
-    }
-    return { note: '16タイプどうしの相性（アプリの採点・40点満点）。「％」には換算しない。「点」で書く', pairs };
-  },
   mbti_types: ({ date }) => ({ note: '取り上げる16タイプ（この4つ）', types: pickN(MBTI_TYPES, 4, `${date}:types`) }),
 };
 
@@ -141,8 +176,8 @@ export const FORMATS = [
     guide: '「【九星気学で見る相性】自分と同じタイプがいいとは限らない」。事実の本命星の組み合わせ2〜3組と、その相性（result）を一言ずつ。最後に「あなたと気になる人は？」' },
   { id: 'mbti_birth', system: 'mbti_birth', purpose: 'app', kind: 'promo', facts: 'mbti_birth',
     guide: '「同じ16タイプでも、生まれた日で恋愛のクセは変わる」。事実の16タイプ1つと、生まれた日のタイプ2つを並べて、「同じ○○でも、△△タイプは〜／□□タイプは〜」と書く。最後に「16タイプ×生年月日で見る恋愛占いは、近日公開」（「近日公開」を必ず入れる）' },
-  { id: 'pair_score', system: 'pair', purpose: 'buzz', facts: 'pair_score',
-    guide: '「❤️ 2人の恋愛相性（16タイプ）」。事実の3組を「A × B：〇〇点（40点満点）」＋一言。最後に「あなたと好きな人は？」。％にはしない' },
+  { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true,
+    guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
   { id: 'pair_teaser', system: 'pair', purpose: 'app', kind: 'promo',
     guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
   { id: 'psych_poll', system: 'psychology', purpose: 'buzz', poll: true,

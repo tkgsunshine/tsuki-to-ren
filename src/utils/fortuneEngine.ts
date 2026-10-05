@@ -131,13 +131,13 @@ export function getJuniUn(stem: string, branch: string): string {
 const JUNIUN_POINTS: Record<string, number> = {
   '長生': 5, '沐浴': 1, '冠帯': 6, '建禄': 8, '帝旺': 8, '衰': -2, '病': -5, '死': -7, '墓': -4, '絶': -6, '胎': 0, '養': 2
 };
-const juniUnPoints = (stem: string, branch: string): number => JUNIUN_POINTS[getJuniUn(stem, branch)] ?? 0;
+export const juniUnPoints = (stem: string, branch: string): number => JUNIUN_POINTS[getJuniUn(stem, branch)] ?? 0;
 
 // 単身の基本点の定数（旧版の基本点の平均 約82.8 に、新しい式の平均が合うように決めた値）
 const SOLO_BASE_CONSTANT = 80;
 
 // 地支の相性・生剋影響度算出 (支合・三合・六沖・五行生剋)
-const getBranchImpact = (branchA: string, branchB: string): number => {
+export const getBranchImpact = (branchA: string, branchB: string): number => {
   if (!branchA || !branchB) return 0;
   // 支合 (Six Harmonies: 子丑, 寅亥, 卯戌, 辰酉, 巳申, 午未) -> +10
   const sixHarmonies: Record<string, string> = {
@@ -357,6 +357,34 @@ export function getDayStarPoints(year: number, month: number, day: number, honme
   const diff = (order.indexOf(honmeiElement) - order.indexOf(dayElement) + 5) % 5; // 日の星から見た本命星
   const points = [2, 4, -4, 0, -1][diff]; // 0=同じ／1=日の星が生む／2=日の星が剋す／3=本命星が剋す／4=本命星が生む
   return DAY_STAR_WEIGHT * points;
+}
+
+// ───────── 守護獣（日柱）どうしの相性 ─────────
+// 2人の日柱（天干・地支）から、相性を 0〜100 点で出す。今日の運勢に使っている3つの見方を、2人の間に当てはめたもの（いずれも四柱推命の考え方）。
+//  ・天干: 干合・通変星（getDailyStemImpact）を、お互いの向きで平均
+//  ・地支: 支合・三合・六沖・五行の生剋（getBranchImpact）
+//  ・十二運: 相手の日支が、自分の日主にとって、どの運の段階か（juniUnPoints）を、お互いの向きで平均
+// 点数への換算の重みは、アプリが決めた値。0〜100への換算は、全60×60の組み合わせの最小・最大で固定する。
+const pillarPairRaw = (stemA: string, branchA: string, stemB: string, branchB: string): number =>
+  (getDailyStemImpact(stemA, stemB) + getDailyStemImpact(stemB, stemA)) / 2 +
+  (getBranchImpact(branchA, branchB) + getBranchImpact(branchB, branchA)) / 2 +
+  (juniUnPoints(stemA, branchB) + juniUnPoints(stemB, branchA)) / 2;
+let pillarPairRange: [number, number] | null = null;
+export function getPillarPairScore(stemA: string, branchA: string, stemB: string, branchB: string): number {
+  if (!pillarPairRange) {
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (let i = 0; i < 60; i++) {
+      for (let j = i + 1; j < 60; j++) {
+        const v = pillarPairRaw(stems[i % 10], branches[i % 12], stems[j % 10], branches[j % 12]);
+        lo = Math.min(lo, v);
+        hi = Math.max(hi, v);
+      }
+    }
+    pillarPairRange = [lo, hi];
+  }
+  const [lo, hi] = pillarPairRange;
+  return Math.round(((pillarPairRaw(stemA, branchA, stemB, branchB) - lo) / (hi - lo)) * 100);
 }
 
 /** 時刻 ms の月支（0=子 … 11=亥）と、立春で区切った年（四柱推命の年）を返す */

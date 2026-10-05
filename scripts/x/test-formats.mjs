@@ -1,7 +1,8 @@
 // node --experimental-strip-types --test scripts/x/test-formats.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES } from './lib/formats.mjs';
+import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES, buildBeastPairRanking, beastList } from './lib/formats.mjs';
+import { weightedLength } from './lib/lint.mjs';
 import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -9,7 +10,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { computeAll } from './lib/characters.mjs';
 import { lintPost } from './lib/lint.mjs';
-import { getMBTICompatibilityScore } from '../../src/utils/fortuneEngine.ts';
+import { getPillarPairScore } from '../../src/utils/fortuneEngine.ts';
 
 const OPTS = { allowLinks: false };
 
@@ -39,11 +40,6 @@ test('事実はアプリの鑑定ロジックから出る（相性点・ラン�
   const all = computeAll('2026-10-07');
   const ctx = { date: '2026-10-07', all };
   for (const f of FORMATS.filter((x) => x.facts)) assert.ok(buildFacts(f, ctx), f.id);
-  const pair = buildFacts(FORMATS.find((f) => f.id === 'pair_score'), ctx);
-  for (const p of pair.pairs) {
-    assert.equal(p.score40, getMBTICompatibilityScore(p.a, p.b));
-    assert.ok(p.score40 > 0, '0点の組み合わせは取り上げない');
-  }
   const rank = buildFacts(FORMATS.find((f) => f.id === 'star_rank'), ctx).ranking;
   assert.equal(rank.length, 9);
   for (let i = 1; i < rank.length; i++) assert.ok(rank[i - 1].avgScore >= rank[i].avgScore);
@@ -104,4 +100,56 @@ test('返信: 親の投稿から replyDelayMinutes（60分）が経つまでは�
   r = await runPost([{ ...base, status: 'failed' }, reply], { now: t0 });
   assert.equal(r.bodies.length, 0);
   assert.equal(r.queue.find((x) => x.id === 'p-reply').status, 'skipped');
+});
+
+
+test('守護獣の相性ランキング: 主役を1つ選び、TOP12とワースト10。点数は、アプリの鑑定ロジック（0〜100点）', () => {
+  const r = buildBeastPairRanking('2026-10-07');
+  assert.ok(r.top.length >= 8 && r.top.length <= 12, `TOP${r.top.length}`);
+  assert.equal(r.worst.length, 10);
+  const all = beastList();
+  const a = all.find((b) => b.name === r.anchor);
+  for (const t of [...r.top, ...r.worst]) {
+    const b = all.find((x) => x.name === t.name);
+    assert.equal(t.score, getPillarPairScore(a.stem, a.branch, b.stem, b.branch));
+    assert.ok(t.score >= 0 && t.score <= 100);
+    assert.notEqual(t.name, r.anchor, '主役自身は載せない');
+  }
+  assert.ok(r.top[0].score >= r.top.at(-1).score && r.worst[0].score <= r.worst[9].score);
+  assert.ok(r.top.at(-1).score > r.worst[0].score);
+  // 入れ替えても同じ点数（2人の間の相性）
+  const b = all[7];
+  assert.equal(getPillarPairScore(a.stem, a.branch, b.stem, b.branch), getPillarPairScore(b.stem, b.branch, a.stem, a.branch));
+});
+
+test('守護獣の相性ランキング: 本文と返信が自動チェックを通り、主役が日替わりで、60日で全タイプ。同じ本文は出ない', () => {
+  const seen = new Set();
+  const anchors = new Set();
+  for (let i = 0; i < 60; i++) {
+    const d = new Date(Date.UTC(2026, 9, 1 + i * 9)).toISOString().slice(0, 10); // この型は、9日おきに出る
+    const r = buildBeastPairRanking(d);
+    anchors.add(r.anchor);
+    seen.add(r.text);
+    for (const text of [r.text, r.replyText]) {
+      assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), [], `${d}`);
+      assert.ok(weightedLength(text) <= 280, `${d} ${weightedLength(text)}`);
+      assert.ok(!text.includes('％') && !text.includes('%'));
+    }
+  }
+  assert.equal(anchors.size, 60);
+  assert.equal(seen.size, 60);
+});
+
+test('MBTI相性データベース: 16×16・0〜100点・19段階以上・男女を入れ替えても同じ・理想の組は上位の帯', async () => {
+  const { buildTable, IDEAL, TYPES } = await import('../build-mbti-compat.mjs');
+  const t = buildTable();
+  const all = TYPES.flatMap((m) => TYPES.map((f) => t[m][f]));
+  assert.equal(all.length, 256);
+  assert.ok(all.every((x) => x >= 0 && x <= 100));
+  assert.ok(new Set(all).size >= 19, `段階: ${new Set(all).size}`);
+  for (const m of TYPES) for (const f of TYPES) assert.equal(t[m][f], t[f][m]);
+  for (const [a, b] of IDEAL) { assert.ok(t[a][b] >= 70, `${a}×${b}`); assert.equal(t[a][b], t[b][a]); }
+  // 保存済みの表が、生成結果と一致する
+  const saved = JSON.parse((await import('node:fs')).readFileSync(new URL('../../src/data/mbti-compat.json', import.meta.url), 'utf-8'));
+  assert.deepEqual(saved.males, t);
 });

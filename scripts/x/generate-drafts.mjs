@@ -55,10 +55,14 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 - アプリへの誘導・「近日公開」の予告（kind=promo）は、「近日公開」を必ず入れる。それ以外の型では、サービスの宣伝を入れない
 
 # 出力
-指定された2本（noon・evening）を、JSONの配列のみで出力する（前後に説明やコードフェンスを付けない）。
+指定された本数（ユーザーメッセージの「今日の本数」にあるスロット）を、JSONの配列のみで出力する（前後に説明やコードフェンスを付けない）。
 [{"slot":"noon","text":"...","replyText":"（問いかけ型のときだけ）"},{"slot":"evening","text":"..."}]`;
 
 const { noon: noonFormat, evening: eveningFormat } = pickFormats(date);
+const planned = { noon: noonFormat, evening: eveningFormat };
+// build() を持つ型は、アプリの鑑定ロジックだけで本文を作る（AIは使わない）。それ以外はAIが言い回しを書く
+const detSlots = Object.keys(planned).filter((k) => planned[k].build);
+const llmSlots = Object.keys(planned).filter((k) => !planned[k].build);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
@@ -69,10 +73,8 @@ const userBase = `# 対象日: ${date}
 # ブリーフ（今日の空気。参考）
 ${JSON.stringify({ moon: brief.moon, mood: brief.todayMood }, null, 2)}
 
-# 今日の2本
-${describe('noon', noonFormat)}
-
-${describe('evening', eveningFormat)}
+# 今日の本数
+${llmSlots.map((k) => describe(k, planned[k])).join('\n\n')}
 
 # 直近の投稿（これらと被らないようにする）
 ${recentTexts}`;
@@ -84,11 +86,10 @@ function extractJson(text) {
   return JSON.parse(text.slice(s, e + 1));
 }
 
-const planned = { noon: noonFormat, evening: eveningFormat };
 function validate(posts) {
-  if (!Array.isArray(posts) || posts.length !== 2) return ['noon と evening の2本の配列にする'];
+  if (!Array.isArray(posts) || posts.length !== llmSlots.length) return [`${llmSlots.join(' と ')} の${llmSlots.length}本の配列にする`];
   const problems = [];
-  for (const slot of ['noon', 'evening']) {
+  for (const slot of llmSlots) {
     const p = posts.find((x) => x.slot === slot);
     if (!p) {
       problems.push(`${slot} がありません`);
@@ -106,45 +107,64 @@ function validate(posts) {
   return problems;
 }
 
-const apiKey = process.env.ANTHROPIC_API_KEY;
-if (!apiKey) {
-  console.error('ANTHROPIC_API_KEY が未設定です。手動で書く場合は docs/X_ACCOUNT_OPERATION.md を参照してください。');
-  process.exit(1);
-}
-const client = new Anthropic({ apiKey });
-const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
-
-let feedback = '';
-let posts = null;
-for (let attempt = 1; attempt <= 3; attempt++) {
-  const res = await client.messages.create({
-    model,
-    max_tokens: 2000,
-    system,
-    messages: [{ role: 'user', content: userBase + feedback }],
-  });
-  const text = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
-  let candidate;
-  try {
-    candidate = extractJson(text);
-  } catch (e) {
-    feedback = `\n\n# 前回の出力は不正でした: ${e.message}。JSON配列のみを出力してください。`;
-    console.warn(`attempt ${attempt}: ${e.message}`);
-    continue;
+// アプリの鑑定ロジックだけで作る本文（ランキングなど）を、先にチェックする
+const detPosts = detSlots.map((slot) => {
+  const f = planned[slot];
+  const out = f.build({ date });
+  const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
+  if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks }).map((x) => `返信: ${x}`));
+  if (problems.length) {
+    console.error(`${slot}（${f.id}）の本文がチェック不合格:\n - ${problems.join('\n - ')}`);
+    process.exit(1);
   }
-  const problems = validate(candidate);
-  if (!problems.length) {
-    posts = candidate;
-    break;
-  }
-  console.warn(`attempt ${attempt}: 検査に不合格\n - ${problems.join('\n - ')}`);
-  feedback = `\n\n# 前回の出力は次の理由で不合格でした。直して再出力してください:\n- ${problems.join('\n- ')}`;
-}
+  return { slot, text: out.text, replyText: out.replyText };
+});
 
-if (!posts) {
-  console.error('3回試しましたが検査を通る昼・夕の下書きを作れませんでした。キューは変更しません。');
-  process.exit(1);
+let posts = [];
+if (llmSlots.length) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.error('ANTHROPIC_API_KEY が未設定です。手動で書く場合は docs/X_ACCOUNT_OPERATION.md を参照してください。');
+    process.exit(1);
+  }
+  const client = new Anthropic({ apiKey });
+  const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
+
+  let feedback = '';
+  let llmPosts = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const res = await client.messages.create({
+      model,
+      max_tokens: 2000,
+      system,
+      messages: [{ role: 'user', content: userBase + feedback }],
+    });
+    const text = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+    let candidate;
+    try {
+      candidate = extractJson(text);
+    } catch (e) {
+      feedback = `\n\n# 前回の出力は不正でした: ${e.message}。JSON配列のみを出力してください。`;
+      console.warn(`attempt ${attempt}: ${e.message}`);
+      continue;
+    }
+    const problems = validate(candidate);
+    if (!problems.length) {
+      llmPosts = candidate;
+      break;
+    }
+    console.warn(`attempt ${attempt}: 検査に不合格\n - ${problems.join('\n - ')}`);
+    feedback = `\n\n# 前回の出力は次の理由で不合格でした。直して再出力してください:\n- ${problems.join('\n- ')}`;
+  }
+
+  if (!llmPosts) {
+    console.error('3回試しましたが検査を通る昼・夕の下書きを作れませんでした。キューは変更しません。');
+    process.exit(1);
+  }
+
+  posts = llmPosts;
 }
+posts = [...detPosts, ...posts];
 
 // 守護獣の4本（朝2・夜2）。署名は「-月-」「-蓮-」を交互に
 const beastItems = buildBeastItems(all, date, history, { allowLinks });
@@ -162,7 +182,7 @@ const buzzItem = (slot, time) => {
 const replyOf = (slot) => {
   const f = planned[slot];
   const p = posts.find((x) => x.slot === slot);
-  if (!f.poll || !p.replyText) return [];
+  if (!(f.poll || f.reply) || !p.replyText) return [];
   return [{
     id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: p.replyText.trim(), replyTo: `${date}-${slot}`,
     format: `${f.id}_reply`, system: f.system, purpose: f.purpose,
