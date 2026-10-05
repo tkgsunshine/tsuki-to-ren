@@ -78,7 +78,7 @@ const withRanks = (list) => {
 };
 export function buildBeastPairRanking(date, topN = 12, worstN = 10) {
   const beasts = beastList();
-  const anchor = beasts[Math.floor(dayPillar(date).days / 9) % 60];
+  const anchor = beasts[Math.floor(dayPillar(date).days / 2) % 60]; // 2日に1回出る型。60回で全タイプが主役
   const others = beasts
     .filter((b) => b.index !== anchor.index)
     .map((b) => ({ name: b.name, score: getPillarPairScore(anchor.stem, anchor.branch, b.stem, b.branch) }));
@@ -151,20 +151,37 @@ export const FORMATS = [
     guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
 ];
 
-/** 毎日2本（昼・夕）の並び。10日で一巡（A〜Fを、バランスよく混ぜる）。2026-10-08 が先頭 */
-const PLAN = ['gap_rank', 'pair_story', 'voice', 'save_list', 'name_self', 'psych_poll', 'gap_rank', 'beast_pair_rank', 'voice', 'pair_story',
-  'comeback', 'save_list', 'name_self', 'gap_rank', 'voice', 'pair_teaser', 'gap_rank', 'quiz_ab', 'name_self', 'save_list'];
+/** バズ検証の投稿枠（1日6本）。am=10:15 / noon=12:15 / pm=15:15 / evening=18:15 / night=20:15 / late=22:15（時刻は config.slots） */
+export const BUZZ_SLOTS = ['am', 'noon', 'pm', 'evening', 'night', 'late'];
+
+/** 10日で一巡する、1日6本の型の並び（BUZZ_SLOTS の順）。A〜Fを、バランスよく混ぜる。2026-10-08 が先頭 */
+const PLAN_DAYS = [
+  ['gap_rank', 'voice', 'psych_poll', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'quiz_ab', 'beast_pair_rank', 'save_list', 'voice'],
+  ['name_self', 'voice', 'comeback', 'pair_story', 'save_list', 'gap_rank'],
+  ['gap_rank', 'voice', 'psych_poll', 'beast_pair_rank', 'save_list', 'pair_teaser'],
+  ['gap_rank', 'voice', 'quiz_ab', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'comeback', 'beast_pair_rank', 'save_list', 'voice'],
+  ['name_self', 'voice', 'psych_poll', 'pair_story', 'save_list', 'gap_rank'],
+  ['gap_rank', 'voice', 'quiz_ab', 'beast_pair_rank', 'save_list', 'pair_teaser'],
+  ['gap_rank', 'voice', 'comeback', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'psych_poll', 'beast_pair_rank', 'save_list', 'gap_rank'],
+];
 const PLAN_START_DAYS = dayPillar('2026-10-08').days;
 
-/** その日の2本の型を決める（PLAN を、日ごとに2つ進む。1日にアプリ誘導は最大1本） */
+/** その日の6本の型を決める（{ am, noon, pm, evening, night, late }）。1日にアプリ誘導は最大1本 */
 export function pickFormats(date) {
-  const n = PLAN.length;
-  const base = ((((dayPillar(date).days - PLAN_START_DAYS) * 2) % n) + n) % n;
+  const n = PLAN_DAYS.length;
+  const day = (((dayPillar(date).days - PLAN_START_DAYS) % n) + n) % n;
   const byId = (id) => FORMATS.find((f) => f.id === id);
-  const noon = byId(PLAN[base]);
-  let evening = byId(PLAN[(base + 1) % n]);
-  if (noon.purpose === 'app' && evening.purpose === 'app') evening = byId('voice');
-  return { noon, evening };
+  const out = {};
+  let apps = 0;
+  BUZZ_SLOTS.forEach((slot, i) => {
+    let f = byId(PLAN_DAYS[day][i]);
+    if (f.purpose === 'app' && ++apps > 1) f = byId('voice');
+    out[slot] = f;
+  });
+  return out;
 }
 
 /** 問いかけ型（poll）の、答え合わせ・解説の返信の書き方。親の投稿へのスレッド返信として、あとから出す */

@@ -1,7 +1,7 @@
 // node --experimental-strip-types --test scripts/x/test-formats.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES, buildBeastPairRanking, beastList } from './lib/formats.mjs';
+import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES, buildBeastPairRanking, beastList, BUZZ_SLOTS } from './lib/formats.mjs';
 import { weightedLength } from './lib/lint.mjs';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -23,17 +23,17 @@ test('型の一覧（A〜F）: 3つの目的（バズ・フォロー・アプリ
   }
 });
 
-test('毎日2本: 日ごとに型が変わり、1日にアプリ誘導は最大1本', () => {
+test('毎日6本: 6つの枠すべてに型が入り、1日にアプリ誘導は最大1本。10日で全ての型が出る', () => {
   const seen = new Set();
-  for (let i = 0; i < 40; i++) {
-    const d = new Date(Date.UTC(2026, 9, 5 + i)).toISOString().slice(0, 10);
-    const { noon, evening } = pickFormats(d);
-    assert.notEqual(noon.id, evening.id);
-    assert.ok(!(noon.purpose === 'app' && evening.purpose === 'app'), d);
-    seen.add(noon.id);
-    seen.add(evening.id);
+  for (let i = 0; i < 20; i++) {
+    const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
+    const day = pickFormats(d);
+    assert.deepEqual(Object.keys(day), BUZZ_SLOTS);
+    assert.equal(Object.values(day).filter((f) => f.purpose === 'app').length <= 1, true, d);
+    for (const f of Object.values(day)) seen.add(f.id);
   }
   assert.equal(seen.size, FORMATS.length, '全ての型が一巡する');
+  assert.equal(BUZZ_SLOTS.length, 6);
 });
 
 test('事実はアプリの鑑定ロジックから出る（生まれ年の本命星・2人の16タイプ）', () => {
@@ -123,7 +123,7 @@ test('守護獣の相性ランキング: 本文と返信が自動チェックを
   const seen = new Set();
   const anchors = new Set();
   for (let i = 0; i < 60; i++) {
-    const d = new Date(Date.UTC(2026, 9, 1 + i * 9)).toISOString().slice(0, 10); // この型は、9日おきに出る
+    const d = new Date(Date.UTC(2026, 9, 1 + i * 2)).toISOString().slice(0, 10); // この型は、2日に1回出る
     const r = buildBeastPairRanking(d);
     anchors.add(r.anchor);
     seen.add(r.text);
