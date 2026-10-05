@@ -2160,13 +2160,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>【自然にデートに誘う例文】</strong></div>
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                  {(activeResult.opponentTorisetsu.lineTemplateInvite || '「〇〇さんが前言ってたあのお店、サクッと行かない？」').replace(/〇〇/g, oppNickname || 'お相手')}
+                  {(activeResult.opponentTorisetsu.lineTemplateInvite || '「前に言ってたお店、今度サクッと行かない？」').replace(/〇〇/g, oppNickname || 'お相手')}
                 </div>
                 <div style={{ position: 'relative' }}>
                   <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}>
                     <div style={{ marginTop: '0.2rem' }}><strong>【距離を縮める質問テンプレ】</strong></div>
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                      {(activeResult.opponentTorisetsu.lineTemplateTopic || '「〇〇さんって休みの日は何に没頭してる時が一番癒される？」').replace(/〇〇/g, oppNickname || 'お相手')}
+                      {(activeResult.opponentTorisetsu.lineTemplateTopic || '「休みの日って何してる時がいちばん癒される？」').replace(/〇〇/g, oppNickname || 'お相手')}
                     </div>
                   </div>
                   {!isSubscribed && (
