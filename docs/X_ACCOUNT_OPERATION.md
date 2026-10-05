@@ -11,7 +11,7 @@
 
 ## 仕組み
 ```
-毎晩21:07 JST  x_draft.yml  → scripts/x/generate-drafts.mjs が翌日5本を生成（守護獣4本はアプリの鑑定ロジックで算出、昼の16タイプ1本は Claude API）
+毎晩21:07 JST  x_draft.yml  → scripts/x/generate-drafts.mjs が翌日7本を生成（守護獣1本はアプリの鑑定ロジックで算出、バズ検証6本（10:15〜22:15）は型A〜Fから Claude API／一部は算出。返信が必要な型は親の60分後以降に返信）
                               ├ mode=approval: 下書きPRを作成 → マージ＝承認
                               └ mode=auto    : そのままmainへコミット
 当日 8:15・8:45・12:15・20:15・20:45 JST  x_post.yml → scripts/x/post.mjs が1件ずつ投稿（cronは :15 と :45。最小間隔20分）
