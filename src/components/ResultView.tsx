@@ -2374,7 +2374,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </div>
       )}
 
-        {/* 6-Axis Compatibility Radar Chart with Monetization Lock */}
+        {/* 6-Axis Compatibility Radar Chart with Monetization Lock (二人の相性なので、お相手ありの鑑定だけ) */}
+      {hasOpponent && (
       <CompatibilityRadarChart
         scores={activeResult.radarScores || {
           romance: activeResult.baseScore || 85,
@@ -2389,6 +2390,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         onOpenPremiumLP={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
         character={selectedChar}
       />
+      )}
 
         {/* 10. Future Timeline Schedule Preview */}
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
