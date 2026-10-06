@@ -160,7 +160,7 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   const advice = st.advice?.[tone];
   const flavor = STEM_FLAVOR[tone][c.stem];
   const lines = [
-    `🌙${mm}月${dd}日の恋愛運🪷`,
+    `❤️🔮${mm}月${dd}日の恋愛運🔮❤️`,
     '',
     `【守護獣】：${c.name}（${c.theme}×${c.animalYomi}）`,
     `【本命星】：${st.name}`,
@@ -181,14 +181,29 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   return { text: lines.join('\n').trim(), replyText, replyText2, star: st };
 }
 
-/** 朝1本（08:15）の守護獣の投稿（queue 用の項目）。署名は日替わりで「-月-」「-蓮-」。lint 不合格なら例外 */
+/** 1日4本の守護獣（朝・昼・夕・夜）。1本目は日柱どおり、2〜4本目は、15・30・45日ずらした守護獣（同じ日に重ならず、各枠で60日かけて全タイプが一巡する） */
+export const BEAST_SLOTS = [
+  { slot: 'morning', time: '08:15' },
+  { slot: 'beast2', time: '13:15' },
+  { slot: 'beast3', time: '17:15' },
+  { slot: 'beast4', time: '21:15' },
+];
+export function pickBeasts(all, dateStr) {
+  const i = dayPillar(dateStr).index;
+  return BEAST_SLOTS.map((_, k) => all[(i + 15 * k) % all.length]);
+}
+
+/** 1日4本の守護獣の投稿（queue 用の項目）。署名は、投稿ごとに「-月-」「-蓮-」を交代。lint 不合格なら例外。各投稿に、リプ欄の解説2通が付く */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
-  return pickMany(all, dateStr, 1).flatMap((c) => {
-    const { text, replyText, replyText2 } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-', '08:15');
+  const beasts = pickBeasts(all, dateStr);
+  return BEAST_SLOTS.flatMap(({ slot, time }, k) => {
+    const c = beasts[k];
+    const sign = (dayPillar(dateStr).index + k) % 2 === 0 ? '-月-' : '-蓮-';
+    const { text, replyText, replyText2 } = buildPostText(c, dateStr, sign, time);
     const item = {
-      id: `${dateStr}-chara-1`,
+      id: `${dateStr}-chara-${k + 1}`,
       date: dateStr,
-      slot: 'morning',
+      slot,
       kind: 'value',
       text,
       image: c.imageF, // 女性版の1枚
@@ -198,8 +213,8 @@ export function buildBeastItems(all, dateStr, history = [], opts = {}) {
     const problems = lintPost(item, history, opts);
     if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
     if (!replyText) return [item];
-    // 【今日の空気】のくわしい解説は、リプ欄に（親の60分後以降の定期実行で出る）。2通目（開運アクション＋診断の案内）は、1通目の60分後以降
-    const mk = (id, text, replyTo, format) => ({ id, date: dateStr, slot: item.slot, kind: 'value', text, replyTo, format, status: 'scheduled', createdAt: item.createdAt });
+    // 【今日の空気】のくわしい解説は、リプ欄に（親の投稿と同じ実行で続けて出る）。2通目（開運アクション＋診断の案内）は、1通目へのスレッド返信
+    const mk = (id, text, replyTo, format) => ({ id, date: dateStr, slot, kind: 'value', text, replyTo, format, status: 'scheduled', createdAt: item.createdAt });
     const replies = [mk(`${item.id}-reply`, replyText, item.id, 'beast_daily_reply')];
     if (replyText2) replies.push(mk(`${item.id}-reply2`, replyText2, replies[0].id, 'beast_daily_reply2'));
     for (const r of replies) {
