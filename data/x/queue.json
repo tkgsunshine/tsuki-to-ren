@@ -185,7 +185,7 @@
     "kind": "value",
     "text": "【今日（10月6日）の辛蛇（かのと・へび）× 九紫火星の恋愛運】\n＝宝石貴族×へびの守護獣\n今日の点数：86点\n魅力と自信が溢れ、幸運が味方する最高日\nLINEのおすすめ時間：20:00〜22:00\n\n守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開\n-蓮-",
     "image": "public/assets/astrology_snake_sample.jpg",
-    "status": "scheduled",
+    "status": "expired",
     "createdAt": "2026-10-05T02:52:44.235Z"
   },
   {
@@ -244,7 +244,7 @@
     "format": "pair_teaser",
     "system": "pair",
     "purpose": "app",
-    "status": "scheduled",
+    "status": "expired",
     "createdAt": "2026-10-05T02:55:23.221Z"
   },
   {
