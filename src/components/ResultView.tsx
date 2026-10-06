@@ -117,6 +117,50 @@ export const formatAppraisalText = (text: string | undefined | null): string => 
   return formatted.replace(/\n{2,}/g, '\n').trim();
 };
 
+// 「🌙 月から〜」「🔮 蓮から〜」の見出しの絵文字を、キャラの小さな丸アイコンに置き換える
+const CHAR_HEADING_RE = /^(🌙|🔮)\s*((月|蓮)から.*)$/u;
+
+const CharHeadingIcon: React.FC<{ char: '月' | '蓮'; size?: number }> = ({ char, size = 20 }) => (
+  <img
+    src={char === '蓮' ? '/assets/ren.webp' : '/assets/tsuki.webp'}
+    alt={char}
+    width={size}
+    height={size}
+    style={{
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: '50%',
+      objectFit: 'cover',
+      verticalAlign: 'middle',
+      marginRight: '0.35em',
+      border: `1px solid ${char === '蓮' ? 'rgba(147, 197, 253, 0.7)' : 'rgba(216, 180, 254, 0.7)'}`,
+      flexShrink: 0
+    }}
+  />
+);
+
+const renderCharHeading = (line: string, size?: number): React.ReactNode => {
+  const m = line.match(CHAR_HEADING_RE);
+  if (!m) return line;
+  return (
+    <>
+      <CharHeadingIcon char={m[3] as '月' | '蓮'} size={size} />
+      {m[2]}
+    </>
+  );
+};
+
+// 整形済みテキストのうち、キャラ見出しの行だけアイコン付きにする
+const renderTextWithCharHeadings = (text: string): React.ReactNode => {
+  const lines = text.split('\n');
+  return lines.map((line, i) => (
+    <React.Fragment key={i}>
+      {renderCharHeading(line, 18)}
+      {i < lines.length - 1 ? '\n' : null}
+    </React.Fragment>
+  ));
+};
+
 const getMbtiColor = (mbtiCode: string) => {
   const code = (mbtiCode || '').toUpperCase();
   if (code.includes('N') && code.includes('F')) return '#34d399'; // Emerald Green
@@ -618,6 +662,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
           <button
             type="button"
+            className="tap-target"
             aria-label="閉じる"
             onClick={() => setShowWelcomePremium(false)}
             style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'transparent', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.25rem', display: 'inline-flex' }}
@@ -935,7 +980,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {hasOpponent ? '基本相性サマリー' : '基本運勢サマリー'}
         </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', whiteSpace: 'pre-wrap', margin: 0 }}>
-          {formatAppraisalText(activeResult.summary)}
+          {renderTextWithCharHeadings(formatAppraisalText(activeResult.summary))}
         </p>
       </div>
 
@@ -943,8 +988,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {activeResult.topics.map((topic) => (
             <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
-              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#93c5fd' : '#d8b4fe', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold' }}>
-                {topic.title}
+              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#93c5fd' : '#d8b4fe', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                {renderCharHeading(topic.title, 22)}
               </h3>
               <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {formatAppraisalText(topic.text)}
@@ -2769,6 +2814,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
             >
               {/* Close Button */}
               <button 
+                className="tap-target"
+                aria-label="閉じる"
                 onClick={() => setZoomedImg(null)}
                 style={{
                   position: 'absolute',
@@ -3074,6 +3121,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </span>
               <button
                 type="button"
+                className="tap-target"
                 onClick={handleDismissA2hsBanner}
                 aria-label="閉じる"
                 style={{

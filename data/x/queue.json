@@ -1269,8 +1269,9 @@
     "format": "save_list",
     "system": "psychology",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.286Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.286Z",
+    "skipReason": "ユーザーが画面で取りやめ"
   },
   {
     "id": "2026-10-11-late",
@@ -1281,8 +1282,9 @@
     "format": "pair_teaser",
     "system": "pair",
     "purpose": "app",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.286Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.286Z",
+    "skipReason": "ユーザーが画面で取りやめ"
   },
   {
     "id": "2026-10-12-chara-1",
@@ -1446,8 +1448,9 @@
     "format": "voice",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.403Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.403Z",
+    "skipReason": "ユーザーが画面で取りやめ"
   },
   {
     "id": "2026-10-12-pm",
@@ -1495,8 +1498,9 @@
     "format": "save_list",
     "system": "psychology",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.403Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.403Z",
+    "skipReason": "ユーザーが画面で取りやめ"
   },
   {
     "id": "2026-10-12-late",

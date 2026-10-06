@@ -431,6 +431,30 @@ export const saveEmailSubscriptionData = async (data: EmailSubscriptionData): Pr
 };
 
 /**
+ * Copies an edited profile (name, birth date, type, gender) into the signed-in user's subscription,
+ * so the daily email follows profile edits. Partner fields are left as they are.
+ */
+export const updateEmailSubscriptionProfile = async (
+  profile: { myName: string; myBirth: string; myGender: 'male' | 'female'; myMbti: string }
+): Promise<boolean> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) return false;
+  try {
+    await updateDoc(doc(db, 'subscriptions', user.uid), {
+      myName: (profile.myName || 'あなた').slice(0, 40),
+      myBirth: profile.myBirth,
+      myGender: profile.myGender,
+      myMbti: profile.myMbti || 'UNKNOWN',
+      updatedAt: serverTimestamp()
+    });
+    return true;
+  } catch (err) {
+    console.warn('⚠️ Could not update the email subscription profile:', err);
+    return false;
+  }
+};
+
+/**
  * Turns off the signed-in user's daily fortune email notification
  */
 export const unsubscribeEmailSubscription = async (): Promise<boolean> => {
@@ -443,6 +467,8 @@ export const unsubscribeEmailSubscription = async (): Promise<boolean> => {
     });
     return true;
   } catch (err) {
+    // 登録データがまだ無い＝送信対象になっていないので、OFFは成功扱いにする
+    if ((err as { code?: string })?.code === 'not-found') return true;
     console.warn('⚠️ Could not unsubscribe email in Firestore:', err);
     return false;
   }

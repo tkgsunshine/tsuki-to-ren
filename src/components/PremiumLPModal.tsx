@@ -114,6 +114,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           </div>
           <button
             type="button"
+            className="tap-target"
+            aria-label="閉じる"
             onClick={onClose}
             style={{
               background: 'rgba(255, 255, 255, 0.1)',
