@@ -300,8 +300,10 @@
     "format": "psych_poll",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T02:55:23.221Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T02:55:23.221Z",
+    "postedAt": "2026-10-06T10:21:30.730Z",
+    "tweetId": "2107415951071162536"
   },
   {
     "id": "2026-10-06-evening-reply",
