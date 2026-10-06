@@ -129,39 +129,28 @@ export function pickMany(all, dateStr, n = 4) {
   return Array.from({ length: n }, (_, k) => all[(base + k) % all.length]);
 }
 
-// おすすめ時間の窓（例 "18:00〜20:00"）が、投稿時刻（"HH:MM"）より前に終わっているときは、行ごと省く
-function hoursLine(hours, postTime) {
-  if (!hours) return '';
-  const m = hours.match(/(\d{1,2}):(\d{2})〜(\d{1,2}):(\d{2})/);
-  if (m && postTime) {
-    const end = Number(m[3]) * 60 + Number(m[4]);
-    const [ph, pm] = postTime.split(':').map(Number);
-    if (end <= ph * 60 + pm) return '';
-  }
-  return `LINEのおすすめ時間：${hours}`;
-}
-
-/** 投稿文を組み立てる。sign は「-月-」「-蓮-」。postTime（"HH:MM"）を渡すと、すでに過ぎた時間帯のおすすめは省く */
-export function buildPostText(c, dateStr, sign, postTime = '') {
+/** 投稿文を組み立てる。sign は「-月-」「-蓮-」。 */
+export function buildPostText(c, dateStr, sign) {
   const st = pickStar(c, dateStr); // 本命星を投稿ごとに1つ選び、その星の人に実際に出る点数を出す
   const [, mm, dd] = dateStr.split('-').map(Number);
   const lines = [
-    `【今日（${mm}月${dd}日）の${c.name}（${c.stemYomi}・${c.animalYomi}）× ${st.name}の恋愛運】`,
-    `＝${c.theme}×${c.animalYomi}の守護獣`,
-    `今日の点数：${st.score}点`,
-    st.oneLine,
-    hoursLine(st.hours, postTime),
+    `🌙${mm}月${dd}日の恋愛運🪷`,
     '',
-    '守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開',
+    `【守護獣】：${c.name}（${c.theme}×${c.animalYomi}）`,
+    `【本命星】：${st.name}`,
+    `【今日の点数】：${st.score}点`,
+    `【今日の空気】${st.oneLine}`,
+    '',
+    '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開',
     sign,
   ];
-  return { text: lines.filter((l, i) => l !== '' || (lines[i - 1] !== '' && i !== 0)).join('\n'), star: st };
+  return { text: lines.join('\n'), star: st };
 }
 
 /** 朝1本（08:15）の守護獣の投稿（queue 用の項目）。署名は日替わりで「-月-」「-蓮-」。lint 不合格なら例外 */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
   return pickMany(all, dateStr, 1).map((c) => {
-    const { text } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-', '08:15');
+    const { text } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-');
     const item = {
       id: `${dateStr}-chara-1`,
       date: dateStr,
