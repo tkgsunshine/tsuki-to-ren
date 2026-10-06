@@ -81,17 +81,17 @@ async function runPost(items, { now = new Date(), cfg = {} } = {}) {
 test('返信: 親が投稿された後に、親へのスレッド返信（in_reply_to_tweet_id）として投稿される', async () => {
   const t0 = new Date('2026-10-06T09:15:00Z'); // 18:15 JST
   const parent = { id: 'p', date: '2026-10-06', slot: 'evening', kind: 'value', text: '問い\n-蓮-', status: 'posted', postedAt: new Date(t0.getTime() - 90 * 60000).toISOString(), tweetId: 'parent123' };
-  const reply = { id: 'p-reply', date: '2026-10-06', slot: 'evening', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'p' };
+  const reply = { id: 'p-reply', date: '2026-10-06', slot: 'evening', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'p', format: 'psych_poll_reply' };
   const { bodies, queue } = await runPost([parent, reply], { now: t0 });
   assert.equal(bodies.length, 1);
   assert.deepEqual(bodies[0].reply, { in_reply_to_tweet_id: 'parent123' });
   assert.equal(queue.find((x) => x.id === 'p-reply').status, 'posted');
 });
 
-test('返信: 親の投稿から replyDelayMinutes（60分）が経つまでは出さない。親が出なかったら見送る', async () => {
+test('返信: 問いかけの答え合わせは、親の投稿から replyDelayMinutes（60分）が経つまでは出さない。親が出なかったら見送る', async () => {
   const t0 = new Date('2026-10-06T09:15:00Z');
   const base = { id: 'p', date: '2026-10-06', slot: 'evening', kind: 'value', text: '問い\n-蓮-', tweetId: 'parent123' };
-  const reply = { id: 'p-reply', date: '2026-10-06', slot: 'evening', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'p' };
+  const reply = { id: 'p-reply', date: '2026-10-06', slot: 'evening', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'p', format: 'psych_poll_reply' };
   let r = await runPost([{ ...base, status: 'posted', postedAt: new Date(t0.getTime() - 30 * 60000).toISOString() }, reply], { now: t0 });
   assert.equal(r.bodies.length, 0, '30分後ではまだ出さない');
   r = await runPost([{ ...base, status: 'failed' }, reply], { now: t0 });
@@ -99,6 +99,28 @@ test('返信: 親の投稿から replyDelayMinutes（60分）が経つまでは�
   assert.equal(r.queue.find((x) => x.id === 'p-reply').status, 'skipped');
 });
 
+
+test('返信: 解説・続きなど（答え合わせ以外）は、親の投稿と同じ実行で、続けて出る。返信への返信も順に。答え合わせは待つ', async () => {
+  const t0 = new Date('2026-10-06T23:15:00Z'); // 08:15 JST（翌日）
+  const now = new Date('2026-10-06T23:15:00Z');
+  const date = '2026-10-07';
+  const parent = { id: 'c', date, slot: 'morning', kind: 'value', text: '守護獣\n-月-', status: 'scheduled' };
+  const r1 = { id: 'c-reply', date, slot: 'morning', kind: 'value', text: '解説\n-月-', status: 'scheduled', replyTo: 'c', format: 'beast_daily_reply' };
+  const r2 = { id: 'c-reply2', date, slot: 'morning', kind: 'value', text: '開運\n-月-', status: 'scheduled', replyTo: 'c-reply', format: 'beast_daily_reply2' };
+  const poll = { id: 'q', date, slot: 'morning', kind: 'value', text: '問い\n-蓮-', status: 'scheduled', format: 'psych_poll' };
+  const pollReply = { id: 'q-reply', date, slot: 'morning', kind: 'value', text: '答え合わせ\n-蓮-', status: 'scheduled', replyTo: 'q', format: 'psych_poll_reply' };
+  // 1回の実行: 親 → 解説 → 開運アクション（スレッドでつながる）。問いかけ（poll）は同じ実行では出さない
+  let r = await runPost([parent, r1, r2], { now: t0 });
+  assert.equal(r.bodies.length, 3);
+  assert.equal(r.bodies[0].reply, undefined);
+  assert.deepEqual(r.bodies[1].reply, { in_reply_to_tweet_id: 'tw1' });
+  assert.deepEqual(r.bodies[2].reply, { in_reply_to_tweet_id: 'tw2' });
+  assert.ok(r.queue.every((x) => x.status === 'posted'));
+  // 答え合わせは、同じ実行では出ない
+  r = await runPost([poll, pollReply], { now });
+  assert.equal(r.bodies.length, 1);
+  assert.equal(r.queue.find((x) => x.id === 'q-reply').status, 'scheduled');
+});
 
 test('守護獣の相性ランキング: 主役を1つ選び、TOP12とワースト10。点数は、アプリの鑑定ロジック（0〜100点）', () => {
   const r = buildBeastPairRanking('2026-10-07');
