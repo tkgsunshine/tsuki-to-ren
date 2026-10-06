@@ -27,13 +27,22 @@ import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
-import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, unsubscribeEmailSubscription, type UserProfile as FirebaseUser } from './services/firebase';
+import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
   if (digits.length <= 4) return digits;
   if (digits.length <= 6) return `${digits.slice(0, 4)}/${digits.slice(4)}`;
   return `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
+};
+
+// A complete, real calendar date (YYYY-MM-DD). The daily email cannot compute a fortune without one.
+const isValidBirthDate = (val: string): boolean => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(val || '');
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const date = new Date(y, mo - 1, d);
+  return y >= 1900 && date.getFullYear() === y && date.getMonth() === mo - 1 && date.getDate() === d && date <= new Date();
 };
 
 interface InitialRoute {
@@ -1482,7 +1491,7 @@ function App() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>生年月日</label>
+                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>生年月日 <span style={{ color: '#ef4444' }}>(必須)</span></label>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                     <input
                       type="text"
@@ -1571,7 +1580,11 @@ function App() {
                 <button
                   type="button"
                   className="consult-btn"
-                  onClick={() => {
+                  onClick={async () => {
+                    if (!isValidBirthDate(myBirth)) {
+                      alert('生年月日を「19950401」のように8桁で正しく入力してください。');
+                      return;
+                    }
                     try {
                       localStorage.setItem('hasu_user_profile', JSON.stringify({
                         name: myName || 'あなた',
@@ -1580,6 +1593,15 @@ function App() {
                         gender: myGender
                       }));
                     } catch (e) {}
+                    // Keep the daily email in step with the edited profile
+                    if (notifyDailyLuck && currentUser) {
+                      const synced = await updateEmailSubscriptionProfile({ myName: myName || 'あなた', myBirth, myGender, myMbti });
+                      if (!synced) {
+                        alert('プロフィールは保存しましたが、毎朝のメールへの反映に失敗しました。ログインし直してから、もう一度保存してください。');
+                        setSettingsSubView('main');
+                        return;
+                      }
+                    }
                     alert('プロフィール変更を保存しました！');
                     setSettingsSubView('main');
                   }}
@@ -2444,6 +2466,10 @@ function App() {
               onClick={async () => {
                 if (!notifyEmailInput || !notifyEmailInput.includes('@')) {
                   alert('有効なメールアドレスを入力してください。');
+                  return;
+                }
+                if (!isValidBirthDate(myBirth)) {
+                  alert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
                   return;
                 }
                 const cleanEmail = notifyEmailInput.trim().toLowerCase();
