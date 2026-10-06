@@ -58,7 +58,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   const table = buildTable();
   const out = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src/data/mbti-compat.json');
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, JSON.stringify({ _note: '16タイプ相性（男性のタイプ→女性のタイプ→0〜100点）。scripts/build-mbti-compat.mjs で生成。アプリの採点には、まだ接続していない', males: table }, null, 1) + '\n');
+  fs.writeFileSync(out, JSON.stringify({ _note: '16タイプ相性（男性のタイプ→女性のタイプ→0〜100点）。scripts/build-mbti-compat.mjs で生成。アプリの採点（getMBTICompatibilityScore）に接続済み。値を変えたら src/utils/fortuneEngine.ts の MBTI_COMPAT_100 も同じ値にする（test:engine で一致確認）', males: table }, null, 1) + '\n');
   const all = TYPES.flatMap((m) => TYPES.map((f) => table[m][f]));
   console.log('異なる点数', new Set(all).size, '段階。最大の同点', Math.max(...Object.values(all.reduce((c, x) => ((c[x] = (c[x] || 0) + 1), c), {}))), '組（256組中）');
 }
