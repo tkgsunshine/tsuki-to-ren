@@ -203,4 +203,4 @@ if (dryRun) {
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);
-console.log(`${date} の${items.filter((x) => !x.replyTo).length}本（守護獣1・バズ検証6: ${BUZZ_SLOTS.map((k) => planned[k].id).join(' / ')}）と、答え合わせの返信${items.filter((x) => x.replyTo).length}本をキューに追記しました。`);
+console.log(`${date} の${items.filter((x) => !x.replyTo).length}本（守護獣4・バズ検証6: ${BUZZ_SLOTS.map((k) => planned[k].id).join(' / ')}）と、答え合わせの返信${items.filter((x) => x.replyTo).length}本をキューに追記しました。`);

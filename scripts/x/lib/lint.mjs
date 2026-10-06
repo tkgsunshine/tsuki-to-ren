@@ -36,7 +36,7 @@ const STEALTH = [
 // サイト公開前に使わない言い回し（誘導・無料・公開中と誤解される表現）
 const PRELAUNCH_NG = ['リンク', 'こちら', '無料', '今すぐ', '公開中', 'ダウンロード', 'アプリ'];
 
-const SLOTS = ['morning', 'am', 'noon', 'pm', 'evening', 'night', 'late'];
+const SLOTS = ['morning', 'am', 'noon', 'pm', 'evening', 'night', 'late', 'beast2', 'beast3', 'beast4'];
 const KINDS = ['value', 'promo'];
 
 /** 投稿1件を検査。問題の配列（空なら合格） */

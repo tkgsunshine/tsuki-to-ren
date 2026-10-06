@@ -66,12 +66,15 @@ function describeCreds() {
 
 let changed = false;
 
-// 返信（replyTo: 親の投稿ID）: 親が投稿された replyDelayMinutes 分後から投稿できる。親が投稿されなかったら、返信も出さない
+// 返信（replyTo: 親の投稿ID）。親が投稿されなかったら、返信も出さない。
+//  ・問いかけの答え合わせ（delayedReplyFormats）: 親が投稿された replyDelayMinutes 分後から（みんなが答える時間をとる）
+//  ・それ以外（解説・続き・ワーストなど）: 親の投稿と同じ実行で、すぐに続けて出す（返信への返信も、順に）
 const byId = new Map(queue.map((p) => [p.id, p]));
-const replyDelayMs = (config.replyDelayMinutes ?? 60) * 60000;
+const DELAYED_REPLY_FORMATS = config.delayedReplyFormats ?? ['psych_poll_reply', 'comeback_reply', 'quiz_ab_reply'];
+const replyDelayMsOf = (p) => (DELAYED_REPLY_FORMATS.includes(p.format) ? (config.replyDelayMinutes ?? 60) * 60000 : 0);
 const replyReadyAt = (p) => {
   const parent = byId.get(p.replyTo);
-  return parent && parent.status === 'posted' && parent.tweetId && parent.postedAt ? new Date(parent.postedAt).getTime() + replyDelayMs : null;
+  return parent && parent.status === 'posted' && parent.tweetId && parent.postedAt ? new Date(parent.postedAt).getTime() + replyDelayMsOf(p) : null;
 };
 
 // 1) 期限切れ（日付が過去、または枠から expireAfterMinutes 超過）を expired にする
@@ -100,19 +103,15 @@ for (const p of queue) {
   }
 }
 
-// 2) 投稿対象を選ぶ
-const history = postedHistory(queue);
-const last = history[history.length - 1];
-const minutesSinceLast = last ? (now.getTime() - new Date(last.postedAt).getTime()) / 60000 : Infinity;
-
-const due = queue
-  .filter((p) =>
-    forceId
-      ? p.id === forceId && ['scheduled', 'expired', 'failed'].includes(p.status)
-      : p.status === 'scheduled' && (p.replyTo ? (replyReadyAt(p) ?? Infinity) <= now.getTime() : p.date === today && slotMinutes(p) <= jstMinutes),
-  )
-  .sort((a, b) => (a.replyTo ? 1 : 0) - (b.replyTo ? 1 : 0) || slotMinutes(a) - slotMinutes(b)); // 通常の投稿を先に、返信はあと
-
+// 2) 投稿対象を選ぶ（1回の実行で、通常の投稿は1本まで。その親にぶら下がる、すぐ出す返信は、続けて出す）
+const computeDue = () =>
+  queue
+    .filter((p) =>
+      forceId
+        ? p.id === forceId && ['scheduled', 'expired', 'failed'].includes(p.status)
+        : p.status === 'scheduled' && (p.replyTo ? (replyReadyAt(p) ?? Infinity) <= now.getTime() : p.date === today && slotMinutes(p) <= jstMinutes),
+    )
+    .sort((a, b) => (a.replyTo ? 1 : 0) - (b.replyTo ? 1 : 0) || slotMinutes(a) - slotMinutes(b)); // 通常の投稿を先に、返信はあと
 
 // 画像（キューの image: リポジトリ内の相対パス）をアップロードして media_id を返す。v2 → 失敗したら v1.1
 async function uploadMedia(imagePath) {
@@ -141,14 +140,19 @@ async function uploadMedia(imagePath) {
   throw new Error('画像のアップロードに失敗\n' + errors.join('\n'));
 }
 
-async function main() {
+/** 1本投稿する。投稿できたら true。onlyReply=true のときは、返信だけを対象にする（親と同じ実行での続きの返信） */
+async function postOne({ onlyReply = false } = {}) {
+  const history = postedHistory(queue);
+  const last = history[history.length - 1];
+  const minutesSinceLast = last ? (now.getTime() - new Date(last.postedAt).getTime()) / 60000 : Infinity;
+  const due = computeDue().filter((p) => !onlyReply || p.replyTo);
   if (!due.length) {
-    console.log('今投稿するものはありません。');
-    return;
+    if (!onlyReply) console.log('今投稿するものはありません。');
+    return false;
   }
   if (!forceId && !due[0].replyTo && minutesSinceLast < config.minIntervalMinutes) {
     console.log(`直近の投稿から${Math.floor(minutesSinceLast)}分。最小間隔${config.minIntervalMinutes}分のため見送ります。`);
-    return;
+    return false;
   }
 
   const post = due[0];
@@ -159,12 +163,12 @@ async function main() {
     post.skipReason = problems.join(' / ');
     changed = true;
     console.error(`チェック不合格のため投稿しません: ${post.id}\n - ${problems.join('\n - ')}`);
-    return;
+    return false;
   }
 
   if (dryRun) {
     console.log(`[dry-run] 投稿予定 ${post.id} (${post.kind})${post.replyTo ? ' ↳返信先: ' + post.replyTo : ''}${post.images ? ' 画像: ' + post.images.join(', ') : post.image ? ' 画像: ' + post.image : ''}\n${post.text}`);
-    return;
+    return false;
   }
 
   const payload = { text: post.text };
@@ -183,7 +187,7 @@ async function main() {
       changed = true;
       console.error(`画像のアップロードに失敗: ${post.id}\n${e.message}`);
       process.exitCode = 1;
-      return;
+      return false;
     }
   }
   const oauth = signOAuth1({ method: 'POST', url: TWEET_URL, creds });
@@ -202,7 +206,7 @@ async function main() {
     delete post.skipReason;
     changed = true;
     console.log(`投稿しました: ${post.id} → tweet ${id}`);
-    return;
+    return true;
   }
   // 重複投稿(403)などは再試行しても通らないので failed にする。それ以外は次回再試行
   post.lastError = `${res.status} ${body.slice(0, 300)}`;
@@ -211,6 +215,14 @@ async function main() {
   if (res.status === 403) post.status = 'failed';
   console.error(`投稿に失敗: ${post.id} ${post.lastError}`);
   process.exitCode = 1;
+  return false;
+}
+
+async function main() {
+  const posted = await postOne();
+  if (!posted || forceId) return;
+  // 親の投稿と同じ実行で、すぐ出す返信（解説・続き・ワーストなど。返信への返信も）を、順に続けて出す
+  for (let i = 0; i < 6 && (await postOne({ onlyReply: true })); i++);
 }
 
 try {

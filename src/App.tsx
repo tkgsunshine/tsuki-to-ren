@@ -1287,12 +1287,19 @@ function App() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (!isRegistered) {
-                        setShowAuthModal(true);
-                      } else if (notifyDailyLuck) {
+                    onClick={async () => {
+                      if (notifyDailyLuck) {
+                        // OFFはログイン状態に関係なく、この画面のまま止める
                         setNotifyDailyLuck(false);
-                        unsubscribeEmailSubscription();
+                        const ok = await unsubscribeEmailSubscription();
+                        if (ok) {
+                          alert('🔕 毎朝8時の運勢通知をOFFにしました。');
+                        } else {
+                          setNotifyDailyLuck(true);
+                          alert('通知をOFFにできませんでした。通信状態を確認するか、ログインし直してからもう一度お試しください。');
+                        }
+                      } else if (!isRegistered && !currentUser) {
+                        setShowAuthModal(true);
                       } else {
                         setNotifyEmailInput(notifyEmail || currentUser?.email || '');
                         setShowNotifyEmailModal(true);
@@ -2316,6 +2323,7 @@ function App() {
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={(user) => {
             setCurrentUser(user);
+            setIsRegistered(true);
             setShowAuthModal(false);
           }}
         />
