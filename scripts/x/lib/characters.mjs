@@ -3,6 +3,7 @@
 import { generateFortuneResult, calculateDayPillar, calculateHonmeiStar } from '../../../src/utils/fortuneEngine.ts';
 import { dayPillar } from './signals.mjs';
 import { lintPost } from './lint.mjs';
+import { bandOf, STEM_FLAVOR, BAND_ACTION, ANIMAL_ACTION } from './beast-texts.mjs';
 
 // 十干の読み（名前のふりがな用）と、動物の読み
 export const STEM_YOMI = {
@@ -62,25 +63,29 @@ export function computeAll(dateStr) {
         'tsuki',
       );
       if (r.isKaigo || r.isRare) continue; // レア属性の演出は対象外（別の日付で再挑戦）
-      m.set(star, { star, score: r.dailyScore, r });
+      // 蓮の署名の日は、蓮のトーンの解説を使う（同じ入力・同じ点数で、文面だけ違う）
+      const rRen = generateFortuneResult(
+        { myName: 'あなた', myBirth: isoOf(d), myMbti: 'UNKNOWN', myGender: 'female', relationship: 'single' },
+        'ren',
+      );
+      m.set(star, { star, score: r.dailyScore, r, rRen });
     }
     const out = [];
     for (const [key, m] of byKey) {
       const list = [...m.values()];
       if (list.length < 9) throw new Error(`${key}: 本命星が9種そろいませんでした（${list.length}）`);
       const scores = list.map((x) => x.score);
-      const textOf = (r) => {
+      const textOf = (r, rRen) => {
         const lines = String(r.dailyLuckTitle || '').split('\n').map((s) => s.trim()).filter(Boolean);
         return {
           oneLine: (lines[1] || lines[0] || '').replace(/【.*?】/g, '').trim(),
           hours: String(r.bestContactHour || '').split('（')[0].replace(/\s+/g, ''),
-          advice: cleanAdvice(r.dailyActionAdvice),
-          action: cleanAdvice(((r.detailedTopics || []).find((t) => /開運アクション/.test(t.title || '')) || {}).detail),
+          advice: { tsuki: cleanAdvice(r.dailyActionAdvice), ren: cleanAdvice(rRen.dailyActionAdvice) },
         };
       };
       // 本命星ごとの結果（九星気学の本命星 1〜9）。投稿では、このうち1つを選んで、そのままの点数を出す
       const stars = list
-        .map((x) => ({ num: x.star, name: String(x.r.myStar).replace(/\s*\(.*?\)\s*$/, ''), score: x.score, ...textOf(x.r) }))
+        .map((x) => ({ num: x.star, name: String(x.r.myStar).replace(/\s*\(.*?\)\s*$/, ''), score: x.score, ...textOf(x.r, x.rRen) }))
         .sort((a, b) => a.num - b.num);
       const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
       const rep = list.reduce((best, x) => (Math.abs(x.score - avg) < Math.abs(best.score - avg) ? x : best)).r;
@@ -151,6 +156,9 @@ function hoursLine(hours, postTime) {
 export function buildPostText(c, dateStr, sign, postTime = '') {
   const st = pickStar(c, dateStr); // 本命星を投稿ごとに1つ選び、その星の人に実際に出る点数を出す
   const [, mm, dd] = dateStr.split('-').map(Number);
+  const tone = sign.includes('蓮') ? 'ren' : 'tsuki';
+  const advice = st.advice?.[tone];
+  const flavor = STEM_FLAVOR[tone][c.stem];
   const lines = [
     `🌙${mm}月${dd}日の恋愛運🪷`,
     '',
@@ -160,12 +168,15 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
     `【今日の空気】${st.oneLine}`,
     hoursLine(st.hours, postTime),
     '',
-    st.advice ? '（詳細な解説はリプ欄へ）' : '',
+    advice && flavor ? '（詳細な解説はリプ欄へ）' : '',
   ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined));
-  // リプ欄は2通。1通目=【今日の空気】のくわしい解説、2通目=今日の開運アクション＋診断の案内（Xの280字の制限のため、分ける）
-  const replyText = st.advice ? ['【今日の空気】くわしく', '', st.advice, sign].join('\n') : '';
-  const replyText2 = st.action
-    ? ['【開運アクション】', '', st.action, '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開', sign].join('\n')
+  // リプ欄は2通（Xの280字の制限のため、分ける）。
+  // 1通目=【今日の空気】のくわしい解説（アプリの鑑定の解説＋守護獣の十干のひとこと。署名の人格のトーン）
+  // 2通目=【開運アクション】（点数の帯の過ごし方＋守護獣の十二支のアクション）＋診断の案内
+  const action = BAND_ACTION[bandOf(st.score)] + (ANIMAL_ACTION[c.animal] || '');
+  const replyText = advice && flavor ? ['【今日の空気】くわしく', '', advice + flavor, sign].join('\n') : '';
+  const replyText2 = replyText
+    ? ['【開運アクション】', '', action, '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開', sign].join('\n')
     : '';
   return { text: lines.join('\n').trim(), replyText, replyText2, star: st };
 }
