@@ -443,6 +443,8 @@ export const unsubscribeEmailSubscription = async (): Promise<boolean> => {
     });
     return true;
   } catch (err) {
+    // 登録データがまだ無い＝送信対象になっていないので、OFFは成功扱いにする
+    if ((err as { code?: string })?.code === 'not-found') return true;
     console.warn('⚠️ Could not unsubscribe email in Firestore:', err);
     return false;
   }

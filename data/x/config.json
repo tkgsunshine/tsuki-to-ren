@@ -8,7 +8,10 @@
     "pm",
     "evening",
     "night",
-    "late"
+    "late",
+    "beast2",
+    "beast3",
+    "beast4"
   ],
   "slots": {
     "morning": "08:15",
@@ -17,7 +20,10 @@
     "pm": "15:15",
     "evening": "18:15",
     "night": "20:15",
-    "late": "22:15"
+    "late": "22:15",
+    "beast2": "13:15",
+    "beast3": "17:15",
+    "beast4": "21:15"
   },
   "minIntervalMinutes": 20,
   "expireAfterMinutes": 240,
@@ -26,5 +32,6 @@
   "_allowLinksNote": "false=サイト公開前。投稿にURL・リンク誘導・「無料」を入れず、promo枠は「近日公開」の予告にする。公開後に true にする",
   "_minIntervalNote": "同じ枠で2本（例: 08:15 と 08:45）出すため20分。通常の定期実行にだけ適用（臨時投稿は無視）",
   "replyDelayMinutes": 60,
-  "_replyNote": "replyTo付きの投稿（答え合わせの返信）は、親の投稿から何分後に出すか。実際の投稿は、その後の最初の定期実行（:15/:45）"
+  "delayedReplyFormats": ["psych_poll_reply", "comeback_reply", "quiz_ab_reply"],
+  "_replyNote": "replyTo付きの投稿（返信）のうち、delayedReplyFormats（問いかけの答え合わせ）だけは、親の投稿から replyDelayMinutes 分後以降の最初の定期実行で出す。それ以外（解説・続き・ワースト10など）は、親の投稿と同じ実行で、すぐに続けて出す"
 }
