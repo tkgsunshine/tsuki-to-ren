@@ -42,6 +42,7 @@ test('守護獣の投稿: LINEのおすすめ時間を本文に、【今日の�
   for (const c of all) for (const st of c.stars) {
     const r = buildPostText({ ...c, stars: [st] }, '2026-10-08', '-月-', '08:15');
     assert.ok(r.text.includes('【お相手へのLINEのおすすめ時間】'), `${c.key}/${st.name}: 時間の行`);
+    assert.ok(r.text.includes('（詳細な解説はリプ欄へ）'), `${c.key}/${st.name}: 詳細な解説がリプ欄にあると書く`);
     assert.ok(weightedLength(r.text) <= 280, `${c.key}/${st.name}: ${weightedLength(r.text)}`);
     assert.ok(r.replyText.startsWith('【今日の空気】くわしく') && !/UNKNOWN/.test(r.replyText), `${c.key}/${st.name}: 解説`);
     assert.deepEqual(lintPost({ slot: 'morning', kind: 'value', text: r.replyText }, [], { allowLinks: false }), []);

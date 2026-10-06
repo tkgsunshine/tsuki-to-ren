@@ -156,10 +156,10 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
     `【守護獣】：${c.name}（${c.theme}×${c.animalYomi}）`,
     `【本命星】：${st.name}`,
     `【今日の点数】：${st.score}点`,
-    `【今日の空気】${st.oneLine}`,
+    `【今日の空気】${st.oneLine}${st.advice ? '（詳細な解説はリプ欄へ）' : ''}`,
     hoursLine(st.hours, postTime),
     '',
-    '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開',
+    '守護獣と本命星がわかる診断は近日公開',
     sign,
   ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined));
   const replyText = st.advice ? ['【今日の空気】くわしく', '', st.advice, sign].join('\n') : '';
