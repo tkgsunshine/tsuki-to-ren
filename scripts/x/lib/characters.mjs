@@ -157,17 +157,17 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
     `【守護獣】：${c.name}（${c.theme}×${c.animalYomi}）`,
     `【本命星】：${st.name}`,
     `【今日の点数】：${st.score}点`,
-    `【今日の空気】${st.oneLine}${st.advice ? '（詳細な解説はリプ欄へ）' : ''}`,
+    `【今日の空気】${st.oneLine}`,
     hoursLine(st.hours, postTime),
     '',
-    sign,
+    st.advice ? '（詳細な解説はリプ欄へ）' : '',
   ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined));
   // リプ欄は2通。1通目=【今日の空気】のくわしい解説、2通目=今日の開運アクション＋診断の案内（Xの280字の制限のため、分ける）
   const replyText = st.advice ? ['【今日の空気】くわしく', '', st.advice, sign].join('\n') : '';
   const replyText2 = st.action
     ? ['【開運アクション】', '', st.action, '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開', sign].join('\n')
     : '';
-  return { text: lines.join('\n'), replyText, replyText2, star: st };
+  return { text: lines.join('\n').trim(), replyText, replyText2, star: st };
 }
 
 /** 朝1本（08:15）の守護獣の投稿（queue 用の項目）。署名は日替わりで「-月-」「-蓮-」。lint 不合格なら例外 */

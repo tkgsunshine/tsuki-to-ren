@@ -44,7 +44,8 @@ test('守護獣の投稿: LINEのおすすめ時間と「詳細な解説はリ�
     const r = buildPostText({ ...c, stars: [st] }, '2026-10-08', '-月-', '08:15');
     const tag = `${c.key}/${st.name}`;
     assert.ok(r.text.includes('【お相手へのLINEのおすすめ時間】'), `${tag}: 時間の行`);
-    assert.ok(r.text.includes('（詳細な解説はリプ欄へ）'), `${tag}: 詳細な解説がリプ欄にあると書く`);
+    assert.ok(r.text.endsWith('\n\n（詳細な解説はリプ欄へ）'), `${tag}: 本文の一番下に、詳細な解説がリプ欄にあると書く`);
+    assert.ok(!r.text.includes('-月-'), `${tag}: 本文に署名は置かない`);
     assert.ok(!r.text.includes('近日公開'), `${tag}: 本文に案内は置かない`);
     assert.ok(r.replyText.startsWith('【今日の空気】くわしく') && !/UNKNOWN/.test(r.replyText), `${tag}: 解説`);
     assert.ok(r.replyText2.startsWith('【開運アクション】') && r.replyText2.includes(cta) && r.replyText2.endsWith('-月-'), `${tag}: 2通目`);
