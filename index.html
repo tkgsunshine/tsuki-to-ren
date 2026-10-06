@@ -136,8 +136,29 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Apple ID Official Sign-In SDK (Deferred) -->
     <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleauth/1/en_US/appleid.auth.js" defer></script>
+    <!-- 起動スプラッシュ: JSの読み込み中、#root に入っているSEO用の事前レンダリング文字が見えないよう覆う。src/main.tsx がアプリ描画後に消す -->
+    <style>
+      #boot-splash{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;background:radial-gradient(ellipse at 50% 38%,#2a1d52 0%,#140e2b 45%,#090714 80%);color:#e2c074;transition:opacity .35s ease,visibility .35s ease;animation:boot-splash-giveup 0s linear 10s forwards}
+      #boot-splash.is-hidden{opacity:0;visibility:hidden}
+      #boot-splash .boot-moon{width:44px;height:44px;border-radius:50%;box-shadow:9px -5px 0 0 #e2c074;transform:translateX(-5px);filter:drop-shadow(0 0 10px rgba(226,192,116,.45))}
+      #boot-splash .boot-title{margin:0;font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;font-size:2rem;font-weight:700;letter-spacing:.35em;padding-left:.35em;background:linear-gradient(180deg,#fef08a 0%,#e2c074 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+      #boot-splash .boot-dots{display:flex;gap:.45rem}
+      #boot-splash .boot-dots span{width:6px;height:6px;border-radius:50%;background:#e2c074;opacity:.25;animation:boot-splash-dot 1.2s ease-in-out infinite}
+      #boot-splash .boot-dots span:nth-child(2){animation-delay:.2s}
+      #boot-splash .boot-dots span:nth-child(3){animation-delay:.4s}
+      @keyframes boot-splash-dot{0%,100%{opacity:.25}50%{opacity:1}}
+      /* JSが読み込めないまま10秒経ったら、事前レンダリングの内容を読めるように外す */
+      @keyframes boot-splash-giveup{to{opacity:0;visibility:hidden}}
+      @media (prefers-reduced-motion:reduce){#boot-splash .boot-dots span{animation:none;opacity:.6}}
+    </style>
+    <noscript><style>#boot-splash{display:none}</style></noscript>
   </head>
   <body class="bg-black text-white antialiased overflow-hidden">
+    <div id="boot-splash" aria-hidden="true">
+      <div class="boot-moon"></div>
+      <p class="boot-title">月と蓮</p>
+      <div class="boot-dots"><span></span><span></span><span></span></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
