@@ -51,6 +51,11 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
   const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
   const { score, hourMain, hourNote, advice, mbtiCode, mbtiName } = content;
   const hourTitle = content.hasOpponent ? '本日のLINE吉時間' : '本日の開運黄金時間';
+  // LINE brand green for the LINE golden hour; the single-mode card keeps the gold/purple look.
+  const hourBg = content.hasOpponent ? '#06C755' : '#1d1733';
+  const hourBorder = content.hasOpponent ? '#06C755' : 'rgba(196, 161, 255, 0.4)';
+  const hourLabel = content.hasOpponent ? '#ffffff' : GOLD;
+  const hourNoteColor = content.hasOpponent ? '#eafff1' : '#a8a3bd';
   const isRen = sub.character === 'ren';
   const charName = isRen ? '蓮' : '月';
   const charImg = `${SITE}/assets/${isRen ? 'ren' : 'tsuki'}.jpg`;
@@ -63,8 +68,6 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="dark">
-  <meta name="supported-color-schemes" content="dark">
   <title>本日の運勢・吉時間 | 月と蓮</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #090714; font-family: 'Hiragino Sans', 'Yu Gothic', 'Helvetica Neue', Arial, sans-serif; color: #f3f4f6;">
@@ -73,12 +76,10 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
       <td align="center">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#120e24" style="max-width: 540px; background-color: #120e24; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 20px; overflow: hidden;">
 
-          <!-- Hero: starry sky + lotus emblem + title -->
+          <!-- Hero: title text is baked into the image so mail-client dark-mode color shifts cannot make it unreadable -->
           <tr>
-            <td align="center" background="${SITE}/assets/bg-stars.jpg" bgcolor="#140f2b" style="padding: 28px 20px 22px; text-align: center; background-color: #140f2b; background-image: url('${SITE}/assets/bg-stars.jpg'); background-size: cover; background-position: center;">
-              <img src="${SITE}/assets/lotus-emblem.jpg" width="76" height="76" alt="" style="display: block; margin: 0 auto 10px; width: 76px; height: 76px; border-radius: 38px; border: 1px solid rgba(226, 192, 116, 0.6);">
-              <div style="font-size: 24px; font-weight: bold; color: #fef08a; letter-spacing: 0.18em;">月と蓮</div>
-              <div style="font-size: 11px; color: ${GOLD}; margin-top: 6px; letter-spacing: 0.08em;">生年月日 × 16タイプの恋愛相性占い</div>
+            <td align="center" bgcolor="#140f2b" style="background-color: #140f2b; line-height: 0; font-size: 0;">
+              <img src="${SITE}/assets/mail-hero.jpg" width="540" alt="月と蓮 ｜ 生年月日 × 16タイプの恋愛相性占い" style="display: block; width: 100%; max-width: 540px; height: auto; border: 0; color: #fef08a; font-size: 24px; line-height: 1.5;">
             </td>
           </tr>
 
@@ -132,15 +133,15 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
             </td>
           </tr>
 
-          <!-- LINE golden hour -->
+          <!-- LINE golden hour (LINE green when it is the LINE time; gold card in single mode) -->
           <tr>
             <td style="padding: 0 25px 14px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1d1733" style="background-color: #1d1733; border: 1px solid rgba(196, 161, 255, 0.4); border-radius: 16px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="${hourBg}" style="background-color: ${hourBg}; border: 1px solid ${hourBorder}; border-radius: 16px;">
                 <tr>
                   <td align="center" style="padding: 18px; text-align: center;">
-                    <div style="font-size: 12px; color: ${GOLD}; font-weight: bold; letter-spacing: 0.1em;">${hourTitle}</div>
+                    <div style="font-size: 12px; color: ${hourLabel}; font-weight: bold; letter-spacing: 0.1em;">${hourTitle}</div>
                     <div style="font-size: 28px; font-weight: bold; color: #ffffff; margin: 8px 0 6px; letter-spacing: 0.02em;">${esc(hourMain)}</div>
-                    <div style="font-size: 12px; color: #a8a3bd; line-height: 1.5;">${esc(hourNote)}</div>
+                    <div style="font-size: 12px; color: ${hourNoteColor}; line-height: 1.5;">${esc(hourNote)}</div>
                   </td>
                 </tr>
               </table>
