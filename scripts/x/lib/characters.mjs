@@ -161,9 +161,11 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   const flavor = STEM_FLAVOR[tone][c.stem];
   const lines = [
     `❤️🔮${mm}月${dd}日の恋愛運🔮❤️`,
-    '',
+    '-対象-',
     `【守護獣】：${c.name}（${c.theme}×${c.animalYomi}）`,
     `【本命星】：${st.name}`,
+    '',
+    '-結果-',
     `【今日の点数】：${st.score}点`,
     `【今日の空気】${st.oneLine}`,
     hoursLine(st.hours, postTime),
