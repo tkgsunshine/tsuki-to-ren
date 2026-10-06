@@ -75,6 +75,7 @@ export function computeAll(dateStr) {
           oneLine: (lines[1] || lines[0] || '').replace(/【.*?】/g, '').trim(),
           hours: String(r.bestContactHour || '').split('（')[0].replace(/\s+/g, ''),
           advice: cleanAdvice(r.dailyActionAdvice),
+          action: cleanAdvice(((r.detailedTopics || []).find((t) => /開運アクション/.test(t.title || '')) || {}).detail),
         };
       };
       // 本命星ごとの結果（九星気学の本命星 1〜9）。投稿では、このうち1つを選んで、そのままの点数を出す
@@ -161,14 +162,18 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
     '',
     sign,
   ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined));
-  const replyText = st.advice ? ['【今日の空気】くわしく', '', st.advice, '', '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開', sign].join('\n') : '';
-  return { text: lines.join('\n'), replyText, star: st };
+  // リプ欄は2通。1通目=【今日の空気】のくわしい解説、2通目=今日の開運アクション＋診断の案内（Xの280字の制限のため、分ける）
+  const replyText = st.advice ? ['【今日の空気】くわしく', '', st.advice, sign].join('\n') : '';
+  const replyText2 = st.action
+    ? ['【開運アクション】', '', st.action, '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開', sign].join('\n')
+    : '';
+  return { text: lines.join('\n'), replyText, replyText2, star: st };
 }
 
 /** 朝1本（08:15）の守護獣の投稿（queue 用の項目）。署名は日替わりで「-月-」「-蓮-」。lint 不合格なら例外 */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
   return pickMany(all, dateStr, 1).flatMap((c) => {
-    const { text, replyText } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-', '08:15');
+    const { text, replyText, replyText2 } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-', '08:15');
     const item = {
       id: `${dateStr}-chara-1`,
       date: dateStr,
@@ -182,13 +187,14 @@ export function buildBeastItems(all, dateStr, history = [], opts = {}) {
     const problems = lintPost(item, history, opts);
     if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
     if (!replyText) return [item];
-    // 【今日の空気】のくわしい解説は、リプ欄に（親の60分後以降の定期実行で出る）
-    const reply = {
-      id: `${item.id}-reply`, date: dateStr, slot: item.slot, kind: 'value', text: replyText, replyTo: item.id,
-      format: 'beast_daily_reply', status: 'scheduled', createdAt: item.createdAt,
-    };
-    const rp = lintPost(reply, history, opts);
-    if (rp.length) throw new Error(`守護獣の返信が lint 不合格（${c.name}）:\n - ${rp.join('\n - ')}`);
-    return [item, reply];
+    // 【今日の空気】のくわしい解説は、リプ欄に（親の60分後以降の定期実行で出る）。2通目（開運アクション＋診断の案内）は、1通目の60分後以降
+    const mk = (id, text, replyTo, format) => ({ id, date: dateStr, slot: item.slot, kind: 'value', text, replyTo, format, status: 'scheduled', createdAt: item.createdAt });
+    const replies = [mk(`${item.id}-reply`, replyText, item.id, 'beast_daily_reply')];
+    if (replyText2) replies.push(mk(`${item.id}-reply2`, replyText2, replies[0].id, 'beast_daily_reply2'));
+    for (const r of replies) {
+      const rp = lintPost(r, history, opts);
+      if (rp.length) throw new Error(`守護獣の返信が lint 不合格（${c.name}）:\n - ${rp.join('\n - ')}`);
+    }
+    return [item, ...replies];
   });
 }
