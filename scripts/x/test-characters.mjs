@@ -45,6 +45,8 @@ test('守護獣の投稿: LINEのおすすめ時間を本文に、【今日の�
     assert.ok(r.text.includes('（詳細な解説はリプ欄へ）'), `${c.key}/${st.name}: 詳細な解説がリプ欄にあると書く`);
     assert.ok(weightedLength(r.text) <= 280, `${c.key}/${st.name}: ${weightedLength(r.text)}`);
     assert.ok(r.replyText.startsWith('【今日の空気】くわしく') && !/UNKNOWN/.test(r.replyText), `${c.key}/${st.name}: 解説`);
+    assert.ok(r.replyText.includes('守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開') && r.replyText.endsWith('-月-'), `${c.key}/${st.name}: 返信の最後に診断の案内と署名`);
+    assert.ok(!r.text.includes('近日公開'), `${c.key}/${st.name}: 本文に案内は置かない`);
     assert.deepEqual(lintPost({ slot: 'morning', kind: 'value', text: r.replyText }, [], { allowLinks: false }), []);
   }
   // 過ぎた時間帯のおすすめは省く
