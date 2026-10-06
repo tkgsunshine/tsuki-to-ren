@@ -14,6 +14,9 @@ export const ANIMAL_YOMI = {
   馬: 'うま', 羊: 'ひつじ', 猿: 'さる', 鳥: 'とり', 犬: 'いぬ', 猪: 'いのしし',
 };
 
+/** 鑑定の「今日の行動アドバイス」から、16タイプ未選択の表記（UNKNOWN）を除く */
+export const cleanAdvice = (t) => String(t || '').replace(/16タイプ（UNKNOWN）/g, '自分').trim();
+
 const pad = (n) => String(n).padStart(2, '0');
 const isoOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
@@ -71,6 +74,7 @@ export function computeAll(dateStr) {
         return {
           oneLine: (lines[1] || lines[0] || '').replace(/【.*?】/g, '').trim(),
           hours: String(r.bestContactHour || '').split('（')[0].replace(/\s+/g, ''),
+          advice: cleanAdvice(r.dailyActionAdvice),
         };
       };
       // 本命星ごとの結果（九星気学の本命星 1〜9）。投稿では、このうち1つを選んで、そのままの点数を出す
@@ -129,8 +133,21 @@ export function pickMany(all, dateStr, n = 4) {
   return Array.from({ length: n }, (_, k) => all[(base + k) % all.length]);
 }
 
-/** 投稿文を組み立てる。sign は「-月-」「-蓮-」。 */
-export function buildPostText(c, dateStr, sign) {
+// おすすめ時間の窓（例 "18:00〜20:00"）が、投稿時刻（"HH:MM"）より前に終わっているときは、行ごと省く
+function hoursLine(hours, postTime) {
+  if (!hours) return '';
+  const m = hours.match(/(\d{1,2}):(\d{2})〜(\d{1,2}):(\d{2})/);
+  if (m && postTime) {
+    const end = Number(m[3]) * 60 + Number(m[4]);
+    const [ph, pm] = postTime.split(':').map(Number);
+    if (end <= ph * 60 + pm) return '';
+  }
+  return `【お相手へのLINEのおすすめ時間】${hours}`;
+}
+
+/** 投稿文を組み立てる。sign は「-月-」「-蓮-」。postTime（"HH:MM"）を渡すと、すでに過ぎた時間帯のおすすめは省く。
+ *  replyText は、【今日の空気】のくわしい解説（リプ欄に、親の60分後以降に出す） */
+export function buildPostText(c, dateStr, sign, postTime = '') {
   const st = pickStar(c, dateStr); // 本命星を投稿ごとに1つ選び、その星の人に実際に出る点数を出す
   const [, mm, dd] = dateStr.split('-').map(Number);
   const lines = [
@@ -140,17 +157,19 @@ export function buildPostText(c, dateStr, sign) {
     `【本命星】：${st.name}`,
     `【今日の点数】：${st.score}点`,
     `【今日の空気】${st.oneLine}`,
+    hoursLine(st.hours, postTime),
     '',
     '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開',
     sign,
-  ];
-  return { text: lines.join('\n'), star: st };
+  ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined));
+  const replyText = st.advice ? ['【今日の空気】くわしく', '', st.advice, sign].join('\n') : '';
+  return { text: lines.join('\n'), replyText, star: st };
 }
 
 /** 朝1本（08:15）の守護獣の投稿（queue 用の項目）。署名は日替わりで「-月-」「-蓮-」。lint 不合格なら例外 */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
-  return pickMany(all, dateStr, 1).map((c) => {
-    const { text } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-');
+  return pickMany(all, dateStr, 1).flatMap((c) => {
+    const { text, replyText } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-', '08:15');
     const item = {
       id: `${dateStr}-chara-1`,
       date: dateStr,
@@ -163,6 +182,14 @@ export function buildBeastItems(all, dateStr, history = [], opts = {}) {
     };
     const problems = lintPost(item, history, opts);
     if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
-    return item;
+    if (!replyText) return [item];
+    // 【今日の空気】のくわしい解説は、リプ欄に（親の60分後以降の定期実行で出る）
+    const reply = {
+      id: `${item.id}-reply`, date: dateStr, slot: item.slot, kind: 'value', text: replyText, replyTo: item.id,
+      format: 'beast_daily_reply', status: 'scheduled', createdAt: item.createdAt,
+    };
+    const rp = lintPost(reply, history, opts);
+    if (rp.length) throw new Error(`守護獣の返信が lint 不合格（${c.name}）:\n - ${rp.join('\n - ')}`);
+    return [item, reply];
   });
 }

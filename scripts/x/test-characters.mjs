@@ -34,3 +34,21 @@ test('withFixedNow は new Date() だけを固定し、終わったら元に戻�
   assert.equal(inside[1], 2020);
   assert.equal(Date, real);
 });
+
+test('守護獣の投稿: LINEのおすすめ時間を本文に、【今日の空気】のくわしい解説をリプ欄に。540通りすべて280以内', async () => {
+  const { buildPostText, buildBeastItems, computeAll } = await import('./lib/characters.mjs');
+  const { weightedLength, lintPost } = await import('./lib/lint.mjs');
+  const all = computeAll('2026-10-08');
+  for (const c of all) for (const st of c.stars) {
+    const r = buildPostText({ ...c, stars: [st] }, '2026-10-08', '-月-', '08:15');
+    assert.ok(r.text.includes('【お相手へのLINEのおすすめ時間】'), `${c.key}/${st.name}: 時間の行`);
+    assert.ok(weightedLength(r.text) <= 280, `${c.key}/${st.name}: ${weightedLength(r.text)}`);
+    assert.ok(r.replyText.startsWith('【今日の空気】くわしく') && !/UNKNOWN/.test(r.replyText), `${c.key}/${st.name}: 解説`);
+    assert.deepEqual(lintPost({ slot: 'morning', kind: 'value', text: r.replyText }, [], { allowLinks: false }), []);
+  }
+  // 過ぎた時間帯のおすすめは省く
+  assert.ok(!buildPostText(all[0], '2026-10-08', '-月-', '23:00').text.includes('おすすめ時間'));
+  const items = buildBeastItems(all, '2026-10-08', [], { allowLinks: false });
+  assert.equal(items.length, 2);
+  assert.equal(items[1].replyTo, items[0].id);
+});
