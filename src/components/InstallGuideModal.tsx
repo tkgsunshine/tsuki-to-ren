@@ -60,6 +60,8 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
       >
         {/* Close Button */}
         <button
+          className="tap-target"
+          aria-label="閉じる"
           onClick={onClose}
           style={{
             position: 'absolute',

@@ -494,7 +494,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               </span>
             </div>
           </div>
-          <button className="chat-close-btn" onClick={onClose}>
+          <button className="chat-close-btn tap-target" aria-label="閉じる" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
