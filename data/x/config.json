@@ -8,7 +8,10 @@
     "pm",
     "evening",
     "night",
-    "late"
+    "late",
+    "beast2",
+    "beast3",
+    "beast4"
   ],
   "slots": {
     "morning": "08:15",
@@ -17,7 +20,10 @@
     "pm": "15:15",
     "evening": "18:15",
     "night": "20:15",
-    "late": "22:15"
+    "late": "22:15",
+    "beast2": "13:15",
+    "beast3": "17:15",
+    "beast4": "21:15"
   },
   "minIntervalMinutes": 20,
   "expireAfterMinutes": 240,
