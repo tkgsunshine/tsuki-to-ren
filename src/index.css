@@ -1183,3 +1183,20 @@ body {
   text-align: center;
   text-shadow: 0 0 8px rgba(254, 240, 138, 0.45), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
+
+/* ×などの小さなボタン: 見た目はそのまま、タップできる範囲を44×44px以上に広げる。
+   z-index は、後ろに続く .gold-text（filterで重なり順が上がる）に下半分を覆われないようにするため */
+.tap-target {
+  position: relative;
+  z-index: 2;
+}
+
+.tap-target::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}

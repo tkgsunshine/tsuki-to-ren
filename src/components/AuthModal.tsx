@@ -128,6 +128,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
       }}>
         {/* Close Button */}
         <button
+          className="tap-target"
+          aria-label="閉じる"
           onClick={onClose}
           style={{
             position: 'absolute',

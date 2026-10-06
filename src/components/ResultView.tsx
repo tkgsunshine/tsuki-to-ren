@@ -618,6 +618,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
           <button
             type="button"
+            className="tap-target"
             aria-label="閉じる"
             onClick={() => setShowWelcomePremium(false)}
             style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'transparent', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.25rem', display: 'inline-flex' }}
@@ -2769,6 +2770,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
             >
               {/* Close Button */}
               <button 
+                className="tap-target"
+                aria-label="閉じる"
                 onClick={() => setZoomedImg(null)}
                 style={{
                   position: 'absolute',
@@ -3074,6 +3077,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </span>
               <button
                 type="button"
+                className="tap-target"
                 onClick={handleDismissA2hsBanner}
                 aria-label="閉じる"
                 style={{

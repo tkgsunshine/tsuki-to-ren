@@ -525,7 +525,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           <span className="font-serif gold-text" style={{ fontSize: '1.05rem', fontWeight: '600', letterSpacing: '0.04em' }}>
             {showOpponent ? '相性鑑定シェアカード' : '恋愛運シェアカード'}
           </span>
-          <button onClick={onClose} style={{
+          <button className="tap-target" aria-label="閉じる" onClick={onClose} style={{
             position: 'absolute',
             right: 0,
             background: 'rgba(255, 255, 255, 0.08)',
