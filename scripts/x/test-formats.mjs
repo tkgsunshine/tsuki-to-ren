@@ -122,6 +122,18 @@ test('返信: 解説・続きなど（答え合わせ以外）は、親の投稿
   assert.equal(r.queue.find((x) => x.id === 'q-reply').status, 'scheduled');
 });
 
+test('アプリの予告: 返信の最後（署名の直前）に入る。守護獣の話題は守護獣の予告、MBTIの話題はMBTIの予告', async () => {
+  const { withTeaser, MBTI_TEASER, BEAST_TEASER, FORMAT_TEASER } = await import('./lib/teasers.mjs');
+  const t = withTeaser('続きです\n9位 ISTJ\n-月-', MBTI_TEASER);
+  assert.equal(t, `続きです\n9位 ISTJ\n${MBTI_TEASER}\n-月-`);
+  assert.equal(withTeaser(t, MBTI_TEASER), t, '二重に入れない');
+  assert.equal(FORMAT_TEASER.gap_rank, MBTI_TEASER);
+  assert.equal(FORMAT_TEASER.mbti_love, MBTI_TEASER);
+  const r = buildBeastPairRanking('2026-10-07');
+  assert.ok(r.replyText.includes(BEAST_TEASER) && r.replyText.trimEnd().endsWith('-蓮-'));
+  for (const text of [t, r.replyText]) assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), []);
+});
+
 test('守護獣の相性ランキング: 主役を1つ選び、TOP12とワースト10。点数は、アプリの鑑定ロジック（0〜100点）', () => {
   const r = buildBeastPairRanking('2026-10-07');
   assert.ok(r.top.length >= 8 && r.top.length <= 12, `TOP${r.top.length}`);

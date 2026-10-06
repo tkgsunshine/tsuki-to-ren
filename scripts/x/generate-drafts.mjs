@@ -8,6 +8,7 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
+import { FORMAT_TEASER, withTeaser } from './lib/teasers.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 
@@ -63,6 +64,8 @@ const planned = pickFormats(date); // { am, noon, pm, evening, night, late }
 const detSlots = Object.keys(planned).filter((k) => planned[k].build);
 const llmSlots = Object.keys(planned).filter((k) => !planned[k].build);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
+// 守護獣・MBTIの話題の返信には、アプリの予告の行（署名の直前）を自動で入れる
+const finalReply = (f, text) => (FORMAT_TEASER[f.id] ? withTeaser(String(text).trim(), FORMAT_TEASER[f.id]) : String(text).trim());
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
   const reply = f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : '';
@@ -104,13 +107,13 @@ function validate(posts) {
     } else if (f.rank16) {
       if (!p.replyText) problems.push(`${slot}: 続き（9位〜16位）の replyText も書く`);
       else {
-        for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
+        for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
         const joined = `${p.text}\n${p.replyText}`;
         for (const c of MBTI_TYPES.map((t) => t.code)) if ((joined.match(new RegExp(c, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、投稿と返信で1回ずつになっていない（16タイプ全員を重複なく）`);
       }
     } else if (f.replyGuide) {
       if (!p.replyText) problems.push(`${slot}: 続きの replyText（リプ欄の解説）も書く`);
-      else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
+      else for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
     } else if (p.replyText) problems.push(`${slot}: 問いかけ型ではないので replyText は不要`);
   }
   return problems;
@@ -193,7 +196,7 @@ const replyOf = (slot) => {
   const p = posts.find((x) => x.slot === slot);
   if (!(f.poll || f.reply) || !p.replyText) return [];
   return [{
-    id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: p.replyText.trim(), replyTo: `${date}-${slot}`,
+    id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: finalReply(f, p.replyText), replyTo: `${date}-${slot}`,
     format: `${f.id}_reply`, system: f.system, purpose: f.purpose,
     status: 'scheduled', createdAt: new Date().toISOString(),
   }];

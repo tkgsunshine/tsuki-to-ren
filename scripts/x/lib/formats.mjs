@@ -5,6 +5,7 @@ import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getPillarPair
 import { STEM_YOMI, ANIMAL_YOMI } from './characters.mjs';
 import { weightedLength } from './lint.mjs';
 import { dayPillar, MBTI_TYPES as MBTI_OBJS } from './signals.mjs';
+import { BEAST_TEASER } from './teasers.mjs';
 
 const MBTI_TYPES = MBTI_OBJS.map((t) => t.code);
 
@@ -98,7 +99,7 @@ export function buildBeastPairRanking(date, topN = 12, worstN = 10) {
   const worst = withRanks([...desc].reverse()).slice(0, worstN);
   const reply = [`【${anchor.name}と相性がぶつかりやすい守護獣 ワースト${worst.length}】`, '（点数が低い順）', ''];
   for (const w of worst) reply.push(`${w.rank}位 ${w.name} ${w.score}点`);
-  reply.push('', '点数が低くても、お互いを知るほど深まる関係もあります🌙', '-蓮-');
+  reply.push('', BEAST_TEASER, '-蓮-');
   return { text: main.text, replyText: reply.join('\n'), anchor: anchor.name, top: main.top, worst };
 }
 
@@ -125,7 +126,7 @@ const FACTS = {
 export const FORMATS = [
   // A: ギャップ・キャラ化（「見た目は〇〇、恋愛は△△」。名乗り・引用をねらう）
   { id: 'gap_rank', system: 'mbti_love', purpose: 'buzz', reply: true, rank16: true,
-    replyGuide: '9位〜16位を、1行ずつ（「9位 〇〇」の形。タイプ名のみ）。最初に「続きの9位〜16位です」と一言添える（「こちら」は使えない）。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。最後は「あなたは何位だった？」のような問い',
+    replyGuide: '9位〜16位を、1行ずつ（「9位 〇〇」の形。タイプ名のみ）。最初に「続きの9位〜16位です」と一言添える（「こちら」は使えない）。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。アプリの予告の行は、署名の前に自動で入る（書かない）。最後は「あなたは何位だった？」のような問い',
     guide: '「見た目は〇〇、恋愛は△△な16タイプ（月と蓮の見立て）」の形のランキング。16タイプ全員を順位づけし、この投稿には1位〜8位を、1行ずつ（タイプ名のみ。理由は書かない）。9位〜16位は replyText（リプ欄）に出す。テーマは毎回変える（例: 見た目はおだやか、恋愛はいちばん重い／連絡はマメそうで、返信がいちばん遅い／好きになると、急に行動力が出る／好きでも、素直に言えない／別れたあと、いちばん引きずる／嫉妬を隠すのがうまい）。必ず「（月と蓮の見立て）」と書き、統計・調査ではないことが分かるようにする。最後は「続きの9位〜16位は、リプ欄に。あなたは何位？」のような、リプ欄を見たくなる問い' },
   // B: 一言代弁（共感。返信・保存をねらう）
   { id: 'voice', system: 'psychology', purpose: 'buzz',
@@ -142,7 +143,7 @@ export const FORMATS = [
     guide: '「恋愛するならどっち？」のA/B。例: 毎日LINEする／会うときだけ濃く話す。最後に「あなたはどっち？」' },
   // E: 16タイプ1つの恋愛の解説（保存・フォロー・名乗りをねらう。2人の相性は、対象が少ないので扱わない）
   { id: 'mbti_love', system: 'mbti_love', purpose: 'follow', facts: 'mbti_one', reply: true,
-    replyGuide: '1通目の続きとして、同じタイプの恋愛をくわしく解説する（100〜120文字・ひとつながりの文章）。「好意を見せ方（言葉／行動）」「関係が深まる関わり方」「つまずきやすい場面と、その乗り越え方」を、やさしく。最初の行は「【〇〇の恋愛】くわしく」（〇〇は事実のタイプ名）。統計・調査・「〇〇%」は書かない。「こちら」は使わない。署名は親の投稿と同じ。傾向であって、人それぞれ、というニュアンスを、さりげなく入れてよい',
+    replyGuide: '1通目の続きとして、同じタイプの恋愛を詳しく解説する（70〜85文字・ひとつながりの文章。あとで、アプリの予告の行が自動で入るので、長くしない）。「好意の見せ方（言葉／行動）」「関係が深まる関わり方」「つまずきやすい場面と、その乗り越え方」を、やさしく。最初の行は「【〇〇の恋愛】詳細」（〇〇は事実のタイプ名）。統計・調査・「〇〇%」は書かない。「こちら」は使わない。署名は親の投稿と同じ。傾向であって、人それぞれ、というニュアンスを、さりげなく入れてよい',
     guide: '事実の16タイプ1つの「恋愛」を解説する投稿。1行目は「【〇〇の恋愛】（月と蓮の見立て）」（〇〇は事実のタイプ名）。そのあと、5項目を1行ずつ、短く（各20文字前後）: 「好きになると：」「愛情表現：」「惹かれる人：」「つまずき：」「コツ：」。最後は「あなたのまわりの〇〇は、当てはまる？」。傾向であって断定しない。統計・調査・「〇〇%」は書かない。ほかのタイプの名前は出さない（相性の話はしない）' },
   { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true,
     guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
