@@ -108,6 +108,9 @@ function validate(posts) {
         const joined = `${p.text}\n${p.replyText}`;
         for (const c of MBTI_TYPES.map((t) => t.code)) if ((joined.match(new RegExp(c, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、投稿と返信で1回ずつになっていない（16タイプ全員を重複なく）`);
       }
+    } else if (f.replyGuide) {
+      if (!p.replyText) problems.push(`${slot}: 続きの replyText（リプ欄の解説）も書く`);
+      else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
     } else if (p.replyText) problems.push(`${slot}: 問いかけ型ではないので replyText は不要`);
   }
   return problems;

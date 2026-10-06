@@ -520,15 +520,28 @@
   },
   {
     "id": "2026-10-08-evening",
-    "text": "ENFPとINTJの相性。\n惹かれ合うのに、すれ違う場所は決まっている。\n\nENFPは、気持ちを「言葉」で聞きたい。\nINTJは、気持ちは「行動」で見せているつもり。\n\n同じ愛情なのに、表し方が違うだけ。\nあなたの好きな人は、どっち寄り？\n-蓮-",
+    "text": "【ESTJの恋愛】（月と蓮の見立て）\n\n好きになると：段取りよく、まっすぐ動く\n愛情表現：約束を守る、頼れる行動\n惹かれる人：誠実で、約束を大切にする人\nつまずき：正論が先に出てしまう\nコツ：結論の前に、気持ちをひとこと聞く\n\nあなたのまわりのESTJは、当てはまる？\n-蓮-",
     "date": "2026-10-08",
     "slot": "evening",
     "kind": "value",
-    "format": "pair_story",
-    "system": "pair",
+    "format": "mbti_love",
+    "system": "mbti_love",
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-05T17:53:28.912Z"
+  },
+  {
+    "id": "2026-10-08-evening-reply",
+    "date": "2026-10-08",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ESTJの恋愛】くわしく\n\nESTJは、好意を言葉より行動で見せがち。予定を決める、約束を守る、困ったときに頼れる。それが愛情表現です。一方で、相手が気持ちを話したいときに、解決策を先に出すことも。まず聞く時間をつくると、安心感が深まります。\n-蓮-",
+    "replyTo": "2026-10-08-evening",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-06T15:19:52.433Z"
   },
   {
     "id": "2026-10-08-night",
@@ -972,15 +985,28 @@
   },
   {
     "id": "2026-10-10-evening",
-    "text": "INFJとESTJの相性。\n同じ「誠実」でも、見ているものが違う。\n\nINFJは、言葉の奥の気持ちを読む。\nESTJは、約束を守ることで気持ちを示す。\n\nどちらも本気。だから、伝え方だけ、少し合わせると近づく。\nあなたの好きな人は、どっち寄り？\n-月-",
+    "text": "【INFJの恋愛】（月と蓮の見立て）\n\n好きになると：深く、静かに想いを育てる\n愛情表現：気持ちを察して、そっと支える\n惹かれる人：本音で語り合える、誠実な人\nつまずき：本音をのみ込んで、抱え込む\nコツ：小さな本音を、少しずつ言葉にする\n\nあなたのまわりのINFJは、当てはまる？\n-月-",
     "date": "2026-10-10",
     "slot": "evening",
     "kind": "value",
-    "format": "pair_story",
-    "system": "pair",
+    "format": "mbti_love",
+    "system": "mbti_love",
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-05T17:53:29.164Z"
+  },
+  {
+    "id": "2026-10-10-evening-reply",
+    "date": "2026-10-10",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【INFJの恋愛】くわしく\n\nINFJは、相手の表情や言葉の裏を読み取り、先回りして気づかうタイプ。そのぶん、自分の本音は後回しにしがちです。「実は少し寂しかった」を小さく伝える練習が、関係を深めます。人それぞれ、ではありますが、よかったら試してみてね。\n-月-",
+    "replyTo": "2026-10-10-evening",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-06T15:19:52.441Z"
   },
   {
     "id": "2026-10-10-night",

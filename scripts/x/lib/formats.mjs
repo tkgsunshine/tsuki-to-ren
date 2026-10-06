@@ -113,9 +113,10 @@ const FACTS = {
       }),
     };
   },
-  pair_types: ({ date }) => {
-    const [a, b] = pickN(MBTI_TYPES, 2, `${date}:pairtypes`);
-    return { note: '今日取り上げる16タイプの2人（点数・％は書かない。2人の気持ちのすれ違いと、歩み寄りのヒントを、ストーリーで）', types: [a, b] };
+  // その日に解説する16タイプ（日替わり）。同じ型が続けて同じタイプにならないよう、日数で回す
+  mbti_one: ({ date }) => {
+    const t = MBTI_OBJS[((dayPillar(date).days % 16) + 16) % 16];
+    return { note: '今日、恋愛を解説する16タイプ（この1つだけ。ほかのタイプは書かない）', type: { code: t.code, nick: t.nick, trait: t.trait } };
   },
   mbti_types: ({ date }) => ({ note: '取り上げる16タイプ（この4つ）', types: pickN(MBTI_TYPES, 4, `${date}:types`) }),
 };
@@ -139,9 +140,10 @@ export const FORMATS = [
     guide: '復縁の問い。「元恋人から連絡が来た。復縁の可能性は？」をA/B/Cで問い、「大事なのは、連絡が来たかより、なぜ今連絡してきたか」という視点を、返信の解説に入れる。復縁の強要や、相手を操作する方法は書かない' },
   { id: 'quiz_ab', system: 'quiz', purpose: 'buzz', poll: true,
     guide: '「恋愛するならどっち？」のA/B。例: 毎日LINEする／会うときだけ濃く話す。最後に「あなたはどっち？」' },
-  // E: 相性
-  { id: 'pair_story', system: 'pair', purpose: 'follow', facts: 'pair_types',
-    guide: '16タイプの2人（事実）の相性を、短いストーリーで。「惹かれ合うのに、すれ違う場所は決まっている」の形で、2人それぞれの「愛情の表し方」の違いと、歩み寄りのヒントを書く。点数・％は書かない。最後は「あなたの好きな人は、どっち寄り？」' },
+  // E: 16タイプ1つの恋愛の解説（保存・フォロー・名乗りをねらう。2人の相性は、対象が少ないので扱わない）
+  { id: 'mbti_love', system: 'mbti_love', purpose: 'follow', facts: 'mbti_one', reply: true,
+    replyGuide: '1通目の続きとして、同じタイプの恋愛をくわしく解説する（100〜120文字・ひとつながりの文章）。「好意を見せ方（言葉／行動）」「関係が深まる関わり方」「つまずきやすい場面と、その乗り越え方」を、やさしく。最初の行は「【〇〇の恋愛】くわしく」（〇〇は事実のタイプ名）。統計・調査・「〇〇%」は書かない。「こちら」は使わない。署名は親の投稿と同じ。傾向であって、人それぞれ、というニュアンスを、さりげなく入れてよい',
+    guide: '事実の16タイプ1つの「恋愛」を解説する投稿。1行目は「【〇〇の恋愛】（月と蓮の見立て）」（〇〇は事実のタイプ名）。そのあと、5項目を1行ずつ、短く（各20文字前後）: 「好きになると：」「愛情表現：」「惹かれる人：」「つまずき：」「コツ：」。最後は「あなたのまわりの〇〇は、当てはまる？」。傾向であって断定しない。統計・調査・「〇〇%」は書かない。ほかのタイプの名前は出さない（相性の話はしない）' },
   { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true,
     guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
   // F: 保存型リスト（保存・フォローをねらう）
@@ -157,15 +159,15 @@ export const BUZZ_SLOTS = ['am', 'noon', 'pm', 'evening', 'night', 'late'];
 
 /** 10日で一巡する、1日6本の型の並び（BUZZ_SLOTS の順）。A〜Fを、バランスよく混ぜる。2026-10-08 が先頭 */
 const PLAN_DAYS = [
-  ['gap_rank', 'voice', 'psych_poll', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'psych_poll', 'mbti_love', 'save_list', 'name_self'],
   ['gap_rank', 'voice', 'quiz_ab', 'beast_pair_rank', 'save_list', 'voice'],
-  ['name_self', 'voice', 'comeback', 'pair_story', 'save_list', 'gap_rank'],
+  ['name_self', 'voice', 'comeback', 'mbti_love', 'save_list', 'gap_rank'],
   ['gap_rank', 'voice', 'psych_poll', 'beast_pair_rank', 'save_list', 'pair_teaser'],
-  ['gap_rank', 'voice', 'quiz_ab', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'quiz_ab', 'mbti_love', 'save_list', 'name_self'],
   ['gap_rank', 'voice', 'comeback', 'beast_pair_rank', 'save_list', 'voice'],
-  ['name_self', 'voice', 'psych_poll', 'pair_story', 'save_list', 'gap_rank'],
+  ['name_self', 'voice', 'psych_poll', 'mbti_love', 'save_list', 'gap_rank'],
   ['gap_rank', 'voice', 'quiz_ab', 'beast_pair_rank', 'save_list', 'pair_teaser'],
-  ['gap_rank', 'voice', 'comeback', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'comeback', 'mbti_love', 'save_list', 'name_self'],
   ['gap_rank', 'voice', 'psych_poll', 'beast_pair_rank', 'save_list', 'gap_rank'],
 ];
 const PLAN_START_DAYS = dayPillar('2026-10-08').days;

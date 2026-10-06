@@ -15,7 +15,7 @@ import { getPillarPairScore } from '../../src/utils/fortuneEngine.ts';
 const OPTS = { allowLinks: false };
 
 test('型の一覧（A〜F）: 3つの目的（バズ・フォロー・アプリ誘導）がそろう。アプリ誘導はpromo', () => {
-  for (const id of ['gap_rank', 'voice', 'name_self', 'psych_poll', 'pair_story', 'save_list']) assert.ok(FORMATS.some((f) => f.id === id), id);
+  for (const id of ['gap_rank', 'voice', 'name_self', 'psych_poll', 'mbti_love', 'save_list']) assert.ok(FORMATS.some((f) => f.id === id), id);
   for (const p of Object.keys(PURPOSES)) assert.ok(FORMATS.some((f) => f.purpose === p), p);
   for (const f of FORMATS) {
     assert.ok(SYSTEMS[f.system] && PURPOSES[f.purpose], f.id);
