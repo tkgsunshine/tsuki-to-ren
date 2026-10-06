@@ -40,39 +40,41 @@ export const stars = [
   { num: 9, name: '九紫火星', element: '火' }
 ];
 
-// 16タイプの相性スコア (0: 挑戦的 15点, 1: 普通 25点, 2: 良好 35点, 3: 最高 40点)
-// 性格の次元（E/I, S/N, T/F, J/P）に基づき簡易計算するか、またはマトリクスで判定
-// 「理想の組み合わせ」（40点）。順序（あなた×相手）を入れ替えても同じ点数になるよう、組（無順序）で持つ。
-// 旧版は、一方向にしか書かれていない表（例: 'ENFP':'INFJ' はあるが 'INFJ':'ENFP' がない）で、
-// ENFP×INFJ・ENFP×INTJ・ESFP×ISTJ は、「あなた」と「相手」を入れ替えると、点数が変わっていた。
-const IDEAL_MBTI_PAIRS: [string, string][] = [
-  ['INFP', 'ENFJ'], ['INFJ', 'ENTP'], ['ENFP', 'INFJ'], ['ENFP', 'INTJ'], ['INTP', 'ENTJ'],
-  ['ISFP', 'ESFJ'], ['ISTP', 'ESTJ'], ['ISFJ', 'ESFP'], ['ISTJ', 'ESFP']
+// 16タイプの相性（0〜100点の表。性別を入れ替えても同じ点数＝対称）。
+// 心の使い方（認知機能の並び）の一致・補い合いと、従来の「理想の組み合わせ」から定義した表（docs/design/mbti-compat-table.md）。
+// 点数への換算の重みは、アプリが決めた値（オリジナル）。ペア鑑定の基本点（最大40点）には、×0.4 して四捨五入して使う。
+// 元データ: src/data/mbti-compat.json（scripts/build-mbti-compat.mjs で生成）。このファイルは import を持てないため、同じ値をここに置く（test:engine で一致を確認）。
+export const MBTI_COMPAT_TYPES = ['INFP', 'ENFP', 'INFJ', 'ENFJ', 'INTJ', 'ENTJ', 'INTP', 'ENTP', 'ISFP', 'ESFP', 'ISTP', 'ESTP', 'ISFJ', 'ESFJ', 'ISTJ', 'ESTJ'];
+export const MBTI_COMPAT_100: number[][] = [
+  [38, 41, 0, 77, 42, 55, 46, 54, 25, 31, 32, 44, 19, 32, 61, 70], // INFP
+  [41, 38, 77, 0, 94, 42, 54, 48, 31, 22, 44, 32, 32, 19, 70, 61], // ENFP
+  [0, 77, 38, 41, 48, 54, 42, 94, 19, 32, 61, 70, 22, 31, 32, 44], // INFJ
+  [77, 0, 41, 38, 54, 46, 55, 42, 32, 19, 70, 61, 31, 25, 44, 32], // ENFJ
+  [42, 94, 48, 54, 38, 41, 0, 17, 61, 70, 19, 32, 32, 44, 22, 31], // INTJ
+  [55, 42, 54, 46, 41, 38, 77, 0, 70, 61, 32, 19, 44, 32, 31, 25], // ENTJ
+  [46, 54, 42, 55, 0, 77, 38, 41, 32, 44, 25, 31, 61, 70, 19, 32], // INTP
+  [54, 48, 94, 42, 17, 0, 41, 38, 44, 32, 31, 22, 70, 61, 32, 19], // ENTP
+  [25, 31, 19, 32, 61, 70, 32, 44, 38, 41, 46, 54, 0, 77, 42, 55], // ISFP
+  [31, 22, 32, 19, 70, 61, 44, 32, 41, 38, 54, 48, 77, 0, 94, 42], // ESFP
+  [32, 44, 61, 70, 19, 32, 25, 31, 46, 54, 38, 41, 42, 55, 0, 77], // ISTP
+  [44, 32, 70, 61, 32, 19, 31, 22, 54, 48, 41, 38, 55, 42, 17, 0], // ESTP
+  [19, 32, 22, 31, 32, 44, 61, 70, 0, 77, 42, 55, 38, 41, 48, 54], // ISFJ
+  [32, 19, 31, 25, 44, 32, 70, 61, 77, 0, 55, 42, 41, 38, 54, 46], // ESFJ
+  [61, 70, 32, 44, 22, 31, 19, 32, 42, 94, 0, 17, 48, 54, 38, 41], // ISTJ
+  [70, 61, 44, 32, 31, 25, 32, 19, 55, 42, 77, 0, 54, 46, 41, 38], // ESTJ
 ];
-const isIdealMbtiPair = (a: string, b: string): boolean =>
-  IDEAL_MBTI_PAIRS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+
+/** 16タイプ相性（0〜100点）。タイプが不明なら null */
+export function getMBTICompatibility100(mbtiA: string, mbtiB: string): number | null {
+  const i = MBTI_COMPAT_TYPES.indexOf((mbtiA || '').toUpperCase());
+  const j = MBTI_COMPAT_TYPES.indexOf((mbtiB || '').toUpperCase());
+  return i < 0 || j < 0 ? null : MBTI_COMPAT_100[i][j];
+}
 
 export function getMBTICompatibilityScore(mbtiA: string, mbtiB: string): number {
-  if (!mbtiA || !mbtiB || mbtiA === 'UNKNOWN' || mbtiB === 'UNKNOWN') {
-    return 20; // 相手情報がない場合は基準値20点
-  }
-  
-  const normA = mbtiA.toUpperCase();
-  const normB = mbtiB.toUpperCase();
-
-  if (isIdealMbtiPair(normA, normB)) return 40;
-  
-  // 文字の反転度合いで相性を簡易判定
-  let matchCount = 0;
-  for (let i = 0; i < 4; i++) {
-    if (normA[i] === normB[i]) matchCount++;
-  }
-  
-  if (matchCount === 4) return 28; // 同じタイプ
-  if (matchCount === 0) return 34; // 完全に異なるが惹かれ合う関係
-  if (matchCount === 2) return 15; // 中間
-  if (matchCount === 1) return 0;  // 相性がぶつかりやすい
-  return 10;
+  const v = getMBTICompatibility100(mbtiA, mbtiB);
+  if (v === null) return 20; // 相手情報がない場合は基準値20点
+  return Math.round(v * 0.4); // 0〜100点 → 基本点（最大40点）
 }
 
 // 生年月日から日柱（十干・十二支）を算出する

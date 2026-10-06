@@ -195,7 +195,7 @@ const replyOf = (slot) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   }];
 };
-const items = [...beastItems.slice(0, 1), ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
+const items = [...beastItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
 
 if (dryRun) {
   console.log(JSON.stringify(items, null, 2));

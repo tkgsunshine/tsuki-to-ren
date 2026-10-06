@@ -3,6 +3,7 @@
 import { generateFortuneResult, calculateDayPillar, calculateHonmeiStar } from '../../../src/utils/fortuneEngine.ts';
 import { dayPillar } from './signals.mjs';
 import { lintPost } from './lint.mjs';
+import { bandOf, STEM_FLAVOR, BAND_ACTION, ANIMAL_ACTION } from './beast-texts.mjs';
 
 // 十干の読み（名前のふりがな用）と、動物の読み
 export const STEM_YOMI = {
@@ -13,6 +14,9 @@ export const ANIMAL_YOMI = {
   鼠: 'ねずみ', 牛: 'うし', 虎: 'とら', 兎: 'うさぎ', 龍: 'たつ', 蛇: 'へび',
   馬: 'うま', 羊: 'ひつじ', 猿: 'さる', 鳥: 'とり', 犬: 'いぬ', 猪: 'いのしし',
 };
+
+/** 鑑定の「今日の行動アドバイス」から、16タイプ未選択の表記（UNKNOWN）を除く */
+export const cleanAdvice = (t) => String(t || '').replace(/16タイプ（UNKNOWN）/g, '自分').trim();
 
 const pad = (n) => String(n).padStart(2, '0');
 const isoOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -59,23 +63,29 @@ export function computeAll(dateStr) {
         'tsuki',
       );
       if (r.isKaigo || r.isRare) continue; // レア属性の演出は対象外（別の日付で再挑戦）
-      m.set(star, { star, score: r.dailyScore, r });
+      // 蓮の署名の日は、蓮のトーンの解説を使う（同じ入力・同じ点数で、文面だけ違う）
+      const rRen = generateFortuneResult(
+        { myName: 'あなた', myBirth: isoOf(d), myMbti: 'UNKNOWN', myGender: 'female', relationship: 'single' },
+        'ren',
+      );
+      m.set(star, { star, score: r.dailyScore, r, rRen });
     }
     const out = [];
     for (const [key, m] of byKey) {
       const list = [...m.values()];
       if (list.length < 9) throw new Error(`${key}: 本命星が9種そろいませんでした（${list.length}）`);
       const scores = list.map((x) => x.score);
-      const textOf = (r) => {
+      const textOf = (r, rRen) => {
         const lines = String(r.dailyLuckTitle || '').split('\n').map((s) => s.trim()).filter(Boolean);
         return {
           oneLine: (lines[1] || lines[0] || '').replace(/【.*?】/g, '').trim(),
           hours: String(r.bestContactHour || '').split('（')[0].replace(/\s+/g, ''),
+          advice: { tsuki: cleanAdvice(r.dailyActionAdvice), ren: cleanAdvice(rRen.dailyActionAdvice) },
         };
       };
       // 本命星ごとの結果（九星気学の本命星 1〜9）。投稿では、このうち1つを選んで、そのままの点数を出す
       const stars = list
-        .map((x) => ({ num: x.star, name: String(x.r.myStar).replace(/\s*\(.*?\)\s*$/, ''), score: x.score, ...textOf(x.r) }))
+        .map((x) => ({ num: x.star, name: String(x.r.myStar).replace(/\s*\(.*?\)\s*$/, ''), score: x.score, ...textOf(x.r, x.rRen) }))
         .sort((a, b) => a.num - b.num);
       const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
       const rep = list.reduce((best, x) => (Math.abs(x.score - avg) < Math.abs(best.score - avg) ? x : best)).r;
@@ -138,30 +148,43 @@ function hoursLine(hours, postTime) {
     const [ph, pm] = postTime.split(':').map(Number);
     if (end <= ph * 60 + pm) return '';
   }
-  return `LINEのおすすめ時間：${hours}`;
+  return `【お相手へのLINEのおすすめ時間】${hours}`;
 }
 
-/** 投稿文を組み立てる。sign は「-月-」「-蓮-」。postTime（"HH:MM"）を渡すと、すでに過ぎた時間帯のおすすめは省く */
+/** 投稿文を組み立てる。sign は「-月-」「-蓮-」。postTime（"HH:MM"）を渡すと、すでに過ぎた時間帯のおすすめは省く。
+ *  replyText は、【今日の空気】のくわしい解説（リプ欄に、親の60分後以降に出す） */
 export function buildPostText(c, dateStr, sign, postTime = '') {
   const st = pickStar(c, dateStr); // 本命星を投稿ごとに1つ選び、その星の人に実際に出る点数を出す
   const [, mm, dd] = dateStr.split('-').map(Number);
+  const tone = sign.includes('蓮') ? 'ren' : 'tsuki';
+  const advice = st.advice?.[tone];
+  const flavor = STEM_FLAVOR[tone][c.stem];
   const lines = [
-    `【今日（${mm}月${dd}日）の${c.name}（${c.stemYomi}・${c.animalYomi}）× ${st.name}の恋愛運】`,
-    `＝${c.theme}×${c.animalYomi}の守護獣`,
-    `今日の点数：${st.score}点`,
-    st.oneLine,
+    `🌙${mm}月${dd}日の恋愛運🪷`,
+    '',
+    `【守護獣】：${c.name}（${c.theme}×${c.animalYomi}）`,
+    `【本命星】：${st.name}`,
+    `【今日の点数】：${st.score}点`,
+    `【今日の空気】${st.oneLine}`,
     hoursLine(st.hours, postTime),
     '',
-    '守護獣は全60タイプ。あなたの守護獣がわかる診断は近日公開',
-    sign,
-  ];
-  return { text: lines.filter((l, i) => l !== '' || (lines[i - 1] !== '' && i !== 0)).join('\n'), star: st };
+    advice && flavor ? '（詳細な解説はリプ欄へ）' : '',
+  ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined));
+  // リプ欄は2通（Xの280字の制限のため、分ける）。
+  // 1通目=【今日の空気】のくわしい解説（アプリの鑑定の解説＋守護獣の十干のひとこと。署名の人格のトーン）
+  // 2通目=【開運アクション】（点数の帯の過ごし方＋守護獣の十二支のアクション）＋診断の案内
+  const action = BAND_ACTION[bandOf(st.score)] + (ANIMAL_ACTION[c.animal] || '');
+  const replyText = advice && flavor ? ['【今日の空気】くわしく', '', advice + flavor, sign].join('\n') : '';
+  const replyText2 = replyText
+    ? ['【開運アクション】', '', action, '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開', sign].join('\n')
+    : '';
+  return { text: lines.join('\n').trim(), replyText, replyText2, star: st };
 }
 
 /** 朝1本（08:15）の守護獣の投稿（queue 用の項目）。署名は日替わりで「-月-」「-蓮-」。lint 不合格なら例外 */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
-  return pickMany(all, dateStr, 1).map((c) => {
-    const { text } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-', '08:15');
+  return pickMany(all, dateStr, 1).flatMap((c) => {
+    const { text, replyText, replyText2 } = buildPostText(c, dateStr, dayPillar(dateStr).index % 2 === 0 ? '-月-' : '-蓮-', '08:15');
     const item = {
       id: `${dateStr}-chara-1`,
       date: dateStr,
@@ -174,6 +197,15 @@ export function buildBeastItems(all, dateStr, history = [], opts = {}) {
     };
     const problems = lintPost(item, history, opts);
     if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
-    return item;
+    if (!replyText) return [item];
+    // 【今日の空気】のくわしい解説は、リプ欄に（親の60分後以降の定期実行で出る）。2通目（開運アクション＋診断の案内）は、1通目の60分後以降
+    const mk = (id, text, replyTo, format) => ({ id, date: dateStr, slot: item.slot, kind: 'value', text, replyTo, format, status: 'scheduled', createdAt: item.createdAt });
+    const replies = [mk(`${item.id}-reply`, replyText, item.id, 'beast_daily_reply')];
+    if (replyText2) replies.push(mk(`${item.id}-reply2`, replyText2, replies[0].id, 'beast_daily_reply2'));
+    for (const r of replies) {
+      const rp = lintPost(r, history, opts);
+      if (rp.length) throw new Error(`守護獣の返信が lint 不合格（${c.name}）:\n - ${rp.join('\n - ')}`);
+    }
+    return [item, ...replies];
   });
 }

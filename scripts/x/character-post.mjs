@@ -35,10 +35,7 @@ if (!c) throw new Error(`守護獣が見つかりません: ${pick}`);
 
 // 署名は、日替わりで「-月-」「-蓮-」を交代
 const sign = dayPillar(date).index % 2 === 0 ? '-月-' : '-蓮-';
-// いまの時刻（JST）より前に終わったおすすめ時間は省く
-const nowJst = new Date(Date.now() + 9 * 3600 * 1000);
-const nowHm = `${String(nowJst.getUTCHours()).padStart(2, '0')}:${String(nowJst.getUTCMinutes()).padStart(2, '0')}`;
-const { text, star: st } = buildPostText(c, date, sign, date === jstDateString() ? nowHm : '');
+const { text, star: st } = buildPostText(c, date, sign);
 
 const id = arg('id', `chara-${date}-${c.name}`);
 const item = {

@@ -191,13 +191,23 @@ test('レーダーチャート: 干合の2人は恋愛度が高く、相剋の2�
   assert.ok(kango.romance > kokku.romance);
 });
 
-test('16タイプの相性（理想の組）: 「あなた×相手」を入れ替えても、同じ点数（全256組）', async () => {
-  const { getMBTICompatibilityScore } = await import('../src/utils/fortuneEngine.ts');
-  const T = ['INFJ', 'INFP', 'ENFJ', 'ENFP', 'INTJ', 'INTP', 'ENTJ', 'ENTP', 'ISFJ', 'ISFP', 'ESFJ', 'ESFP', 'ISTJ', 'ISTP', 'ESTJ', 'ESTP'];
-  for (const a of T) for (const b of T) assert.equal(getMBTICompatibilityScore(a, b), getMBTICompatibilityScore(b, a), `${a}×${b}`);
-  // 旧版で、一方向だけ40点だった3組が、どちらの順でも40点
-  for (const [a, b] of [['ENFP', 'INFJ'], ['ENFP', 'INTJ'], ['ESFP', 'ISTJ']]) {
-    assert.equal(getMBTICompatibilityScore(a, b), 40);
-    assert.equal(getMBTICompatibilityScore(b, a), 40);
+test('16タイプの相性: 表（src/data/mbti-compat.json）と一致し、順序を入れ替えても同じ点数（全256組）', async () => {
+  const { getMBTICompatibilityScore, getMBTICompatibility100, MBTI_COMPAT_TYPES } = await import('../src/utils/fortuneEngine.ts');
+  const { default: json } = await import('../src/data/mbti-compat.json', { with: { type: 'json' } });
+  assert.equal(MBTI_COMPAT_TYPES.length, 16);
+  const seen = new Set();
+  for (const a of MBTI_COMPAT_TYPES) for (const b of MBTI_COMPAT_TYPES) {
+    assert.equal(getMBTICompatibility100(a, b), json.males[a][b], `${a}×${b}: JSONとエンジンの表が一致`);
+    assert.equal(getMBTICompatibility100(a, b), getMBTICompatibility100(b, a), `${a}×${b}: 対称`);
+    const v = getMBTICompatibilityScore(a, b);
+    assert.ok(v >= 0 && v <= 40, `${a}×${b}: 基本点は0〜40`);
+    seen.add(v);
   }
+  assert.ok(seen.size >= 15, `基本点の段階: ${seen.size}`);
+  // 旧版で、一方向だけ40点だった3組は、どちらの順でも同じ点数（理想の組＝上位の帯）
+  for (const [a, b] of [['ENFP', 'INFJ'], ['ENFP', 'INTJ'], ['ESFP', 'ISTJ']]) {
+    assert.equal(getMBTICompatibilityScore(a, b), getMBTICompatibilityScore(b, a));
+    assert.ok(getMBTICompatibilityScore(a, b) >= 28);
+  }
+  assert.equal(getMBTICompatibilityScore('ENFP', 'UNKNOWN'), 20);
 });
