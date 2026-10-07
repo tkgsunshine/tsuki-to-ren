@@ -7,7 +7,7 @@ export const SeoFooterSection: React.FC = () => {
   const seoFaqs = [
     {
       q: '『月と蓮』の恋愛占い・相性診断とはどのようなサービスですか？',
-      a: '『月と蓮』は、東洋の最高峰占術である「四柱推命（命式・本質）」と「九星気学（運気バイオリズム）」、そして現代の心理統計学「16タイプ性格診断（コミュニケーションの癖）」を組み合わせたハイブリッド型恋愛相性診断です。約7,465万通りの算術マトリクスから、気になるお相手との相性スコアやLINE送信推奨時刻（吉時間）、お相手の取扱説明書（トリセツ）を即座に鑑定制成します。'
+      a: '『月と蓮』は、東洋の最高峰占術である「四柱推命（命式・本質）」と「九星気学（運気バイオリズム）」、そして現代の心理統計学「16タイプ性格診断（コミュニケーションの癖）」を組み合わせたハイブリッド型恋愛相性診断です。約7,465万通りの算術マトリクスから、気になるお相手との相性スコアやLINE送信推奨時刻（吉時間）、お相手の取扱説明書（トリセツ）を即座に鑑定します。'
     },
     {
       q: '『月と蓮』の鑑定パターン数は何通りありますか？',
@@ -15,7 +15,7 @@ export const SeoFooterSection: React.FC = () => {
     },
     {
       q: '四柱推命の「魁罡（かいごう）」とは何ですか？',
-      a: '魁罡（かいごう）とは、四柱推命の日干支（戊戌・庚戌・壬辰・庚辰の4種）に現れるわずか3.3%のレア属性です。凄まじい決断力・カリスマ性・逆境を覆す勝負運を秘めており、『月と蓮』では魁罡をお持ちの方専用のオーラ演出と個別の運命解説を提供しています。'
+      a: '魁罡（かいごう）とは、四柱推命で並外れた決断力・カリスマ性・逆境を覆す勝負運を表すとされる特別な星です。『月と蓮』では生年月日をもとに約3.3%の方に魁罡が現れ、その方専用のオーラ演出と個別の運命解説をお届けします。'
     },
     {
       q: '相性診断で相手のMBTI（16タイプ）がわからない場合はどうすればいいですか？',
@@ -68,22 +68,6 @@ export const SeoFooterSection: React.FC = () => {
           </p>
         </div>
 
-        {/* E-E-A-T Academic & Calculation Logic Box */}
-        <div style={{
-          padding: '1.15rem',
-          background: 'rgba(226, 192, 116, 0.03)',
-          border: '1px solid rgba(226, 192, 116, 0.2)',
-          borderRadius: '16px',
-          textAlign: 'center'
-        }}>
-          <h3 className="font-serif gold-text" style={{ fontSize: '0.88rem', fontWeight: 'bold', margin: '0 0 0.45rem 0' }}>
-            鑑定精度と算出ロジックについて（E-E-A-T）
-          </h3>
-          <p style={{ fontSize: '0.71rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
-            『月と蓮』の鑑定アルゴリズムは、伝統的な東洋占星術（萬年暦における蔵干・天干地支五行説）と、気学における九星周行モデル、および心理統計学（16要素行動特性マトリクス）の文献・データを精査し、約7,465万通りの算術プログラムによって高精度算出されています。
-          </p>
-        </div>
-
         {/* SEO FAQ Section */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: '#e2c074', fontWeight: 'bold', fontSize: '0.88rem', marginBottom: '0.85rem' }}>
@@ -129,18 +113,17 @@ export const SeoFooterSection: React.FC = () => {
                     }}
                   />
                 </button>
-                {activeFaq === idx && (
-                  <div style={{
-                    padding: '0 0.9rem 0.75rem',
-                    fontSize: '0.71rem',
-                    color: '#94a3b8',
-                    lineHeight: '1.55',
-                    borderTop: '1px dashed rgba(255, 255, 255, 0.05)',
-                    paddingTop: '0.55rem'
-                  }}>
-                    {faq.a}
-                  </div>
-                )}
+                {/* 答えは閉じていてもHTMLに残す（検索エンジンが読めるように） */}
+                <div hidden={activeFaq !== idx} style={{
+                  padding: '0 0.9rem 0.75rem',
+                  fontSize: '0.71rem',
+                  color: '#94a3b8',
+                  lineHeight: '1.55',
+                  borderTop: '1px dashed rgba(255, 255, 255, 0.05)',
+                  paddingTop: '0.55rem'
+                }}>
+                  {faq.a}
+                </div>
               </div>
             ))}
           </div>
