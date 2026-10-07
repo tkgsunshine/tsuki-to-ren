@@ -1660,8 +1660,9 @@
     "text": "【開運アクション】\n\n最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。好きなことに、まっすぐ向き合う時間を。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-蓮-",
     "replyTo": "2026-10-07-chara-4-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.674Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.674Z",
+    "skipReason": "親の投稿が出なかったため"
   },
   {
     "id": "2026-10-07-am",
@@ -1787,8 +1788,10 @@
     "format": "gap_rank",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T20:42:14.229Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T20:42:14.229Z",
+    "postedAt": "2026-10-07T13:29:08.571Z",
+    "tweetId": "2107825556423385462"
   },
   {
     "id": "2026-10-07-late-reply",
@@ -1800,8 +1803,10 @@
     "format": "gap_rank_reply",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T20:42:14.229Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T20:42:14.229Z",
+    "postedAt": "2026-10-07T13:29:08.571Z",
+    "tweetId": "2107825557346115910"
   },
   {
     "id": "2026-10-07-night-reply",
