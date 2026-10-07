@@ -8,6 +8,7 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
+import { FORMAT_TEASER, withTeaser } from './lib/teasers.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 
@@ -42,7 +43,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 - 恋愛以外（仕事・お金・健康）の話題は書かない。相手の気持ちや関係の結末を断定しない。浮気・不倫・復縁の強要など、人を傷つける行動をすすめない。性的な表現は使わない
 - 占いは傾向・ヒントとして書く。「必ず」「絶対」「確実に」「〜が決まる」などの断定・保証はしない。医療・健康・金銭の助言はしない
 - 日本語は約140字（X の重み付き280）以内。改行はOK。ハッシュタグは最大2個
-- 口調は月（優しく包み込む温かなお姉さん）と蓮（落ち着いて背中をそっと押す兄貴分）。投稿ごとにどちらかの声で書き、末尾に、改行して「-月-」または「-蓮-」（半角ハイフンで挟む）を付ける
+- 口調は、月＝寄り添うタイプ（共感を先に置き、「〜だよ」「〜してね」とやさしく包む温かなお姉さん）、蓮＝少しストレートで論理的なタイプ（結論→理由の順で、「〜が目安」「〜は避けたい」と言い切る落ち着いた兄貴分。冷たくはしない）。投稿ごとにどちらかの声で書き、末尾に、改行して「-月-」または「-蓮-」（半角ハイフンで挟む）を付ける
 - 「16タイプ」は、各投稿で最初に出すときだけ「16タイプ（MBTI）」と書いてよい（検索されやすくするため）。「MBTI診断」「公式MBTI」とは書かない（独自の診断のため）
 - 1行目は、読み手が自分ごとと感じる引きのある一文にする（例:「返事を待ちすぎている人へ」）。挨拶だけで始めない
 - 夜の投稿は、「あなたはどう？」のような、気軽に答えたくなる問いかけで終えてよい（リプライをもらうため）
@@ -63,6 +64,8 @@ const planned = pickFormats(date); // { am, noon, pm, evening, night, late }
 const detSlots = Object.keys(planned).filter((k) => planned[k].build);
 const llmSlots = Object.keys(planned).filter((k) => !planned[k].build);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
+// 守護獣・MBTIの話題の返信には、アプリの予告の行（署名の直前）を自動で入れる
+const finalReply = (f, text) => (FORMAT_TEASER[f.id] ? withTeaser(String(text).trim(), FORMAT_TEASER[f.id]) : String(text).trim());
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
   const reply = f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : '';
@@ -104,10 +107,13 @@ function validate(posts) {
     } else if (f.rank16) {
       if (!p.replyText) problems.push(`${slot}: 続き（9位〜16位）の replyText も書く`);
       else {
-        for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
+        for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
         const joined = `${p.text}\n${p.replyText}`;
         for (const c of MBTI_TYPES.map((t) => t.code)) if ((joined.match(new RegExp(c, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、投稿と返信で1回ずつになっていない（16タイプ全員を重複なく）`);
       }
+    } else if (f.replyGuide) {
+      if (!p.replyText) problems.push(`${slot}: 続きの replyText（リプ欄の解説）も書く`);
+      else for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
     } else if (p.replyText) problems.push(`${slot}: 問いかけ型ではないので replyText は不要`);
   }
   return problems;
@@ -190,7 +196,7 @@ const replyOf = (slot) => {
   const p = posts.find((x) => x.slot === slot);
   if (!(f.poll || f.reply) || !p.replyText) return [];
   return [{
-    id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: p.replyText.trim(), replyTo: `${date}-${slot}`,
+    id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: finalReply(f, p.replyText), replyTo: `${date}-${slot}`,
     format: `${f.id}_reply`, system: f.system, purpose: f.purpose,
     status: 'scheduled', createdAt: new Date().toISOString(),
   }];

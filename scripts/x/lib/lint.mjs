@@ -34,7 +34,7 @@ const STEALTH = [
 ];
 
 // サイト公開前に使わない言い回し（誘導・無料・公開中と誤解される表現）
-const PRELAUNCH_NG = ['リンク', 'こちら', '無料', '今すぐ', '公開中', 'ダウンロード', 'アプリ'];
+const PRELAUNCH_NG = ['リンク', 'こちら', '無料', '今すぐ', '公開中', 'ダウンロード'];
 
 const SLOTS = ['morning', 'am', 'noon', 'pm', 'evening', 'night', 'late', 'beast2', 'beast3', 'beast4'];
 const KINDS = ['value', 'promo'];
@@ -68,6 +68,7 @@ export function lintPost(post, history = [], opts = {}) {
     if (urls.length) problems.push('サイト公開前のためURLは入れない');
     for (const w of PRELAUNCH_NG) if (text.includes(w)) problems.push(`サイト公開前のため「${w}」は使わない`);
     if (post.kind === 'promo' && !text.includes('近日公開')) problems.push('promoは「近日公開」の予告にする');
+    if (text.includes('アプリ') && !text.includes('近日')) problems.push('サイト公開前のため「アプリ」は「近日」の予告のときだけ使う');
   }
   const hashtags = (text.match(/[#＃]\S+/g) || []).length;
   if (hashtags > 2) problems.push('ハッシュタグは2個まで');

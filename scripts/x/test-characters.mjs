@@ -39,7 +39,7 @@ test('守護獣の投稿: LINEのおすすめ時間と「詳細な解説はリ�
   const { buildPostText, buildBeastItems, computeAll, pickBeasts } = await import('./lib/characters.mjs');
   const { weightedLength, lintPost } = await import('./lib/lint.mjs');
   const all = computeAll('2026-10-08');
-  const cta = '守護獣は全60タイプ。あなたの守護獣と本命星がわかる診断は近日公開';
+  const cta = '近日、あなたの守護獣を鑑定するアプリを公開します';
   const seen = new Set();
   for (const c of all) for (const st of c.stars) for (const sign of ['-月-', '-蓮-']) {
     const r = buildPostText({ ...c, stars: [st] }, '2026-10-08', sign, '08:15');
@@ -49,7 +49,7 @@ test('守護獣の投稿: LINEのおすすめ時間と「詳細な解説はリ�
     assert.ok(r.text.endsWith('\n\n（詳細な解説はリプ欄へ）'), `${tag}: 本文の一番下に、詳細な解説がリプ欄にあると書く`);
     assert.ok(!r.text.includes('-月-') && !r.text.includes('-蓮-'), `${tag}: 本文に署名は置かない`);
     assert.ok(!r.text.includes('近日公開'), `${tag}: 本文に案内は置かない`);
-    assert.ok(r.replyText.startsWith('【今日の空気】くわしく') && !/UNKNOWN/.test(r.replyText), `${tag}: 解説`);
+    assert.ok(r.replyText.startsWith('【今日の空気】詳細') && !/UNKNOWN/.test(r.replyText), `${tag}: 解説`);
     assert.ok(r.replyText2.startsWith('【開運アクション】') && r.replyText2.includes(cta) && r.replyText2.endsWith(sign) && r.replyText.endsWith(sign), `${tag}: 2通目`);
     for (const t of [r.text, r.replyText, r.replyText2]) {
       assert.ok(weightedLength(t) <= 280, `${tag}: ${weightedLength(t)}`);

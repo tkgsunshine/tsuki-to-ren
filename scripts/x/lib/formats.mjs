@@ -5,6 +5,7 @@ import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getPillarPair
 import { STEM_YOMI, ANIMAL_YOMI } from './characters.mjs';
 import { weightedLength } from './lint.mjs';
 import { dayPillar, MBTI_TYPES as MBTI_OBJS } from './signals.mjs';
+import { BEAST_TEASER } from './teasers.mjs';
 
 const MBTI_TYPES = MBTI_OBJS.map((t) => t.code);
 
@@ -98,7 +99,7 @@ export function buildBeastPairRanking(date, topN = 12, worstN = 10) {
   const worst = withRanks([...desc].reverse()).slice(0, worstN);
   const reply = [`【${anchor.name}と相性がぶつかりやすい守護獣 ワースト${worst.length}】`, '（点数が低い順）', ''];
   for (const w of worst) reply.push(`${w.rank}位 ${w.name} ${w.score}点`);
-  reply.push('', '点数が低くても、お互いを知るほど深まる関係もあります🌙', '-蓮-');
+  reply.push('', BEAST_TEASER, '-蓮-');
   return { text: main.text, replyText: reply.join('\n'), anchor: anchor.name, top: main.top, worst };
 }
 
@@ -113,9 +114,10 @@ const FACTS = {
       }),
     };
   },
-  pair_types: ({ date }) => {
-    const [a, b] = pickN(MBTI_TYPES, 2, `${date}:pairtypes`);
-    return { note: '今日取り上げる16タイプの2人（点数・％は書かない。2人の気持ちのすれ違いと、歩み寄りのヒントを、ストーリーで）', types: [a, b] };
+  // その日に解説する16タイプ（日替わり）。同じ型が続けて同じタイプにならないよう、日数で回す
+  mbti_one: ({ date }) => {
+    const t = MBTI_OBJS[((dayPillar(date).days % 16) + 16) % 16];
+    return { note: '今日、恋愛を解説する16タイプ（この1つだけ。ほかのタイプは書かない）', type: { code: t.code, nick: t.nick, trait: t.trait } };
   },
   mbti_types: ({ date }) => ({ note: '取り上げる16タイプ（この4つ）', types: pickN(MBTI_TYPES, 4, `${date}:types`) }),
 };
@@ -124,7 +126,7 @@ const FACTS = {
 export const FORMATS = [
   // A: ギャップ・キャラ化（「見た目は〇〇、恋愛は△△」。名乗り・引用をねらう）
   { id: 'gap_rank', system: 'mbti_love', purpose: 'buzz', reply: true, rank16: true,
-    replyGuide: '9位〜16位を、1行ずつ（「9位 〇〇」の形。タイプ名のみ）。最初に「続きの9位〜16位です」と一言添える（「こちら」は使えない）。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。最後は「あなたは何位だった？」のような問い',
+    replyGuide: '9位〜16位を、1行ずつ（「9位 〇〇」の形。タイプ名のみ）。最初に「続きの9位〜16位です」と一言添える（「こちら」は使えない）。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。アプリの予告の行は、署名の前に自動で入る（書かない）。最後は「あなたは何位だった？」のような問い',
     guide: '「見た目は〇〇、恋愛は△△な16タイプ（月と蓮の見立て）」の形のランキング。16タイプ全員を順位づけし、この投稿には1位〜8位を、1行ずつ（タイプ名のみ。理由は書かない）。9位〜16位は replyText（リプ欄）に出す。テーマは毎回変える（例: 見た目はおだやか、恋愛はいちばん重い／連絡はマメそうで、返信がいちばん遅い／好きになると、急に行動力が出る／好きでも、素直に言えない／別れたあと、いちばん引きずる／嫉妬を隠すのがうまい）。必ず「（月と蓮の見立て）」と書き、統計・調査ではないことが分かるようにする。最後は「続きの9位〜16位は、リプ欄に。あなたは何位？」のような、リプ欄を見たくなる問い' },
   // B: 一言代弁（共感。返信・保存をねらう）
   { id: 'voice', system: 'psychology', purpose: 'buzz',
@@ -139,14 +141,16 @@ export const FORMATS = [
     guide: '復縁の問い。「元恋人から連絡が来た。復縁の可能性は？」をA/B/Cで問い、「大事なのは、連絡が来たかより、なぜ今連絡してきたか」という視点を、返信の解説に入れる。復縁の強要や、相手を操作する方法は書かない' },
   { id: 'quiz_ab', system: 'quiz', purpose: 'buzz', poll: true,
     guide: '「恋愛するならどっち？」のA/B。例: 毎日LINEする／会うときだけ濃く話す。最後に「あなたはどっち？」' },
-  // E: 相性
-  { id: 'pair_story', system: 'pair', purpose: 'follow', facts: 'pair_types',
-    guide: '16タイプの2人（事実）の相性を、短いストーリーで。「惹かれ合うのに、すれ違う場所は決まっている」の形で、2人それぞれの「愛情の表し方」の違いと、歩み寄りのヒントを書く。点数・％は書かない。最後は「あなたの好きな人は、どっち寄り？」' },
+  // E: 16タイプ1つの恋愛の解説（保存・フォロー・名乗りをねらう。2人の相性は、対象が少ないので扱わない）
+  { id: 'mbti_love', system: 'mbti_love', purpose: 'follow', facts: 'mbti_one', reply: true,
+    replyGuide: '1通目の続きとして、同じタイプの恋愛を詳しく解説する（70〜85文字・ひとつながりの文章。あとで、アプリの予告の行が自動で入るので、長くしない）。「好意の見せ方（言葉／行動）」「関係が深まる関わり方」「つまずきやすい場面と、その乗り越え方」を、やさしく。最初の行は「【〇〇の恋愛】詳細」（〇〇は事実のタイプ名）。統計・調査・「〇〇%」は書かない。「こちら」は使わない。署名は親の投稿と同じ。傾向であって、人それぞれ、というニュアンスを、さりげなく入れてよい',
+    guide: '事実の16タイプ1つの「恋愛」を解説する投稿。1行目は「【〇〇の恋愛】（月と蓮の見立て）」（〇〇は事実のタイプ名）。そのあと、5項目を1行ずつ、短く（各20文字前後）: 「好きになると：」「愛情表現：」「惹かれる人：」「つまずき：」「コツ：」。最後は「あなたのまわりの〇〇は、当てはまる？」。傾向であって断定しない。統計・調査・「〇〇%」は書かない。ほかのタイプの名前は出さない（相性の話はしない）' },
   { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true,
     guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
   // F: 保存型リスト（保存・フォローをねらう）
-  { id: 'save_list', system: 'psychology', purpose: 'follow',
-    guide: '「好きな人に〇〇するときの、3つのコツ」の、保存したくなる短いリスト（① ② ③）。具体的で、すぐ使える内容（例: LINEの送り方／デートの別れ際／告白の前に確認すること）。最後は「あとで見返せるように、保存しておいてね」。テーマは毎回変える。相手を操作するコツは書かない' },
+  { id: 'save_list', system: 'psychology', purpose: 'follow', reply: true,
+    replyGuide: '1通目の続きとして、3つの理由と、そのまま使える例文を書く（日本語でおよそ125〜135文字・重み付き280に近づける。短すぎない）。最初の行は「【〇〇】詳細」（〇〇は「例文」「誘い文の例」など内容に合う語）。例文は「」で、実際に送れる自然な言葉にする。各コツの理由を、1〜2文で。署名は親の投稿と同じ。相手を操作する内容は書かない',
+    guide: '「好きな人に〇〇するときの、3つのコツ」の、保存したくなるリスト。テーマは毎回変える（LINEの送り方／デートの別れ際／告白の前に確認すること／初めて誘うとき など）。1行目はタイトル。次に ① ② ③ を1行ずつ、各項目に、短い理由を（　）で添える。最後は「そのまま使える例文は、リプ欄に。保存してね」のように、リプ欄を見たくなる一文。日本語でおよそ120〜135文字（重み付き280）まで使い切る。具体的で、すぐ使える内容。相手を操作するコツは書かない。声は、月なら寄り添ってやさしく、蓮ならストレートに論理的に（結論→理由）' },
   // アプリ誘導（予告。1日に最大1本）
   { id: 'pair_teaser', system: 'pair', purpose: 'app', kind: 'promo',
     guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
@@ -157,15 +161,15 @@ export const BUZZ_SLOTS = ['am', 'noon', 'pm', 'evening', 'night', 'late'];
 
 /** 10日で一巡する、1日6本の型の並び（BUZZ_SLOTS の順）。A〜Fを、バランスよく混ぜる。2026-10-08 が先頭 */
 const PLAN_DAYS = [
-  ['gap_rank', 'voice', 'psych_poll', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'psych_poll', 'mbti_love', 'save_list', 'name_self'],
   ['gap_rank', 'voice', 'quiz_ab', 'beast_pair_rank', 'save_list', 'voice'],
-  ['name_self', 'voice', 'comeback', 'pair_story', 'save_list', 'gap_rank'],
+  ['name_self', 'voice', 'comeback', 'mbti_love', 'save_list', 'gap_rank'],
   ['gap_rank', 'voice', 'psych_poll', 'beast_pair_rank', 'save_list', 'pair_teaser'],
-  ['gap_rank', 'voice', 'quiz_ab', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'quiz_ab', 'mbti_love', 'save_list', 'name_self'],
   ['gap_rank', 'voice', 'comeback', 'beast_pair_rank', 'save_list', 'voice'],
-  ['name_self', 'voice', 'psych_poll', 'pair_story', 'save_list', 'gap_rank'],
+  ['name_self', 'voice', 'psych_poll', 'mbti_love', 'save_list', 'gap_rank'],
   ['gap_rank', 'voice', 'quiz_ab', 'beast_pair_rank', 'save_list', 'pair_teaser'],
-  ['gap_rank', 'voice', 'comeback', 'pair_story', 'save_list', 'name_self'],
+  ['gap_rank', 'voice', 'comeback', 'mbti_love', 'save_list', 'name_self'],
   ['gap_rank', 'voice', 'psych_poll', 'beast_pair_rank', 'save_list', 'gap_rank'],
 ];
 const PLAN_START_DAYS = dayPillar('2026-10-08').days;
