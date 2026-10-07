@@ -1686,8 +1686,10 @@
     "format": "voice",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T20:42:14.229Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T20:42:14.229Z",
+    "postedAt": "2026-10-07T04:08:56.245Z",
+    "tweetId": "2107684575887376438"
   },
   {
     "id": "2026-10-07-pm",
