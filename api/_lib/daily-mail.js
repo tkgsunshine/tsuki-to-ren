@@ -34,7 +34,15 @@ export function buildDailyContent(sub) {
     mbtiName: result.myMbtiName && result.myMbtiName !== '未選択' ? result.myMbtiName : '',
     hourMain: hour.split(/[（(]/)[0].trim(),
     hourNote: note ? note[1] : '',
-    advice: result.dailyActionAdvice || ''
+    advice: result.dailyActionAdvice || '',
+    // The user's own profile card from the result screen (never the partner's: the mail stays about "you").
+    profile: {
+      title: (result.myAstrologyTheme || '').replace(/[【】]/g, ''),
+      beast: result.myAstrologyName || '',
+      img: /^\/assets\/[\w-]+\.jpg$/.test(result.myAvatarUrl || '') ? result.myAvatarUrl : '',
+      star: (result.myStar || '').split(' ')[0],
+      color: result.myAstrologyColor || ''
+    }
   };
 }
 
@@ -49,7 +57,12 @@ const GOLD = '#e2c074';
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
   const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
-  const { score, hourMain, hourNote, advice, mbtiCode, mbtiName } = content;
+  const { score, hourMain, hourNote, advice, mbtiCode, mbtiName, profile = {} } = content;
+  const facts = [
+    profile.star && ['本命星', esc(profile.star)],
+    profile.color && ['守護カラー', esc(profile.color)],
+    mbtiCode && ['16タイプ', `${esc(mbtiCode)}${mbtiName ? `<span style="color: #a8a3bd; font-weight: normal;">（${esc(mbtiName)}）</span>` : ''}`]
+  ].filter(Boolean);
   const hourTitle = content.hasOpponent ? '本日のLINE吉時間' : '本日の開運黄金時間';
   // LINE brand green for the LINE golden hour; the single-mode card keeps the gold/purple look.
   const hourBg = content.hasOpponent ? '#06C755' : '#1d1733';
@@ -89,7 +102,6 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
               <span style="display: inline-block; padding: 5px 16px; background-color: #201a36; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 15px; color: ${GOLD}; font-size: 12px; font-weight: bold; letter-spacing: 0.04em;">
                 ${date.year}年${date.month}月${date.day}日（本日）の運勢
               </span>
-              ${mbtiCode ? `<div style="margin-top: 10px; font-size: 12px; color: #cbd5e1; letter-spacing: 0.04em;">あなたのタイプ（16タイプ診断）： <strong style="color: #fef08a;">${esc(mbtiCode)}</strong>${mbtiName ? `（${esc(mbtiName)}）` : ''}</div>` : ''}
             </td>
           </tr>
 
@@ -162,6 +174,37 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
               </table>
             </td>
           </tr>
+
+          <!-- The user's own profile (same as the result screen's guardian-beast card) -->
+          ${profile.beast || facts.length ? `
+          <tr>
+            <td style="padding: 16px 25px 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
+                <tr>
+                  <td style="padding: 16px 18px;">
+                    <div style="font-size: 11px; font-weight: bold; color: ${GOLD}; letter-spacing: 0.1em; margin-bottom: 10px;">あなたの守護獣と星</div>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                      <tr>
+                        ${profile.img ? `<td width="76" valign="middle" style="width: 76px; padding-right: 12px;">
+                          <img src="${SITE}${profile.img}" width="64" height="64" alt="${esc(profile.beast)}" style="display: block; width: 64px; height: 64px; border-radius: 12px; border: 1px solid rgba(226, 192, 116, 0.5); object-fit: cover; object-position: top;">
+                        </td>` : ''}
+                        <td valign="middle" style="font-size: 13px; line-height: 1.6; color: #e2e8f0;">
+                          ${profile.title ? `<div style="font-size: 14px; font-weight: bold; color: #fef08a;">${esc(profile.title)}</div>` : ''}
+                          ${profile.beast ? `<div style="color: #cbd5e1;">${esc(profile.beast)}</div>` : ''}
+                        </td>
+                      </tr>
+                    </table>
+                    ${facts.length ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top: 12px; border-top: 1px solid #2a2342;">
+                      ${facts.map(([k, v]) => `<tr>
+                        <td width="84" style="width: 84px; padding: 7px 0 0; font-size: 11px; color: #a8a3bd; white-space: nowrap;">${k}</td>
+                        <td style="padding: 7px 0 0; font-size: 13px; font-weight: bold; color: #f3f4f6;">${v}</td>
+                      </tr>`).join('')}
+                    </table>` : ''}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>` : ''}
 
           <!-- CTA -->
           <tr>
