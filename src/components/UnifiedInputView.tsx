@@ -688,7 +688,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
             <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3f4f6' }}>① 東洋占術の極み「四柱推命」で本質・本音を見抜く</span>
-            <span style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: '1.45' }}>あなたの生年月日（十干・十二支）から導き出される本質的な「命式」を多角的に分析。相手が言葉にしない本音、建前、そして既読スルーや沈黙の裏に隠された本当の理由を、確かな占術理論に基づいて論理的かつ具体的に解明します。深層心理レベルでのズレを見落としません。</span>
+            <span style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: '1.45' }}>あなたの生年月日から導き出される本質的な「命式」を多角的に分析。相手が言葉にしない本音、建前、そして既読スルーや沈黙の裏に隠された本当の理由を、確かな占術理論に基づいて論理的かつ具体的に解明します。深層心理レベルでのズレを見落としません。</span>
           </div>
         </div>
 
