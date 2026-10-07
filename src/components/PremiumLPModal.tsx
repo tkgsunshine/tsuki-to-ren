@@ -48,39 +48,47 @@ const sectionTitleStyle: React.CSSProperties = {
   margin: '0 0 0.75rem 0'
 };
 
-/** 月のセリフ（アイコン付きの吹き出し） */
-const TsukiBubble: React.FC<{ children: React.ReactNode; small?: boolean }> = ({ children, small = false }) => (
-  <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left' }}>
-    <img
-      src="/assets/tsuki.webp"
-      alt="月"
-      style={{
-        width: small ? '40px' : '46px',
-        height: small ? '40px' : '46px',
-        borderRadius: '50%',
-        objectFit: 'cover',
-        objectPosition: '50% 12%',
-        border: '1.5px solid rgba(244, 114, 182, 0.6)',
-        flexShrink: 0
-      }}
-    />
-    <div style={{
-      flex: 1,
-      padding: small ? '0.7rem 0.9rem' : '0.85rem 1rem',
-      background: 'rgba(244, 114, 182, 0.08)',
-      border: '1px solid rgba(244, 114, 182, 0.3)',
-      borderRadius: '4px 16px 16px 16px',
-      fontSize: small ? '0.76rem' : '0.8rem',
-      color: '#f3e8ff',
-      lineHeight: '1.75'
-    }}>
-      <div style={{ fontSize: '0.68rem', color: '#f9a8d4', fontWeight: 'bold', marginBottom: '0.2rem' }}>
-        月
+const speakers = {
+  tsuki: { name: '月', img: '/assets/tsuki.webp', accent: '244, 114, 182', label: '#f9a8d4' },
+  ren: { name: '蓮', img: '/assets/ren.webp', accent: '96, 165, 250', label: '#93c5fd' }
+};
+
+/** 月・蓮のセリフ（アイコン付きの吹き出し） */
+const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speakers; small?: boolean }> = ({ children, who = 'tsuki', small = false }) => {
+  const sp = speakers[who];
+  return (
+    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left' }}>
+      <img
+        src={sp.img}
+        alt={sp.name}
+        style={{
+          width: small ? '40px' : '46px',
+          height: small ? '40px' : '46px',
+          borderRadius: '50%',
+          objectFit: 'cover',
+          objectPosition: '50% 12%',
+          border: `1.5px solid rgba(${sp.accent}, 0.6)`,
+          flexShrink: 0
+        }}
+      />
+      <div style={{
+        flex: 1,
+        padding: small ? '0.7rem 0.9rem' : '0.85rem 1rem',
+        background: `rgba(${sp.accent}, 0.08)`,
+        border: `1px solid rgba(${sp.accent}, 0.3)`,
+        borderRadius: '4px 16px 16px 16px',
+        fontSize: small ? '0.76rem' : '0.8rem',
+        color: '#f3e8ff',
+        lineHeight: '1.75'
+      }}>
+        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem' }}>
+          {sp.name}
+        </div>
+        {children}
       </div>
-      {children}
     </div>
-  </div>
-);
+  );
+};
 
 interface PremiumLPModalProps {
   isOpen: boolean;
@@ -256,11 +264,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           </div>
           <div style={{ padding: '0.9rem 1.15rem 1.35rem' }}>
-            <TsukiBubble>
+            <CharBubble>
               ここまで見てくれて、ありがとう。<br />
               あの人のこと、きっとたくさん考えてきたんですよね。<br />
               ここから先は、あの人の気持ちやこれからの流れを、私ともう少し深く一緒に見ていきませんか？
-            </TsukiBubble>
+            </CharBubble>
           </div>
 
           {/* こんなときに */}
@@ -288,10 +296,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               ))}
             </div>
             <div style={{ marginTop: '0.8rem' }}>
-              <TsukiBubble small>
-                そんなとき、ひとりで抱えこまなくていいように。<br />
-                プレミアムでは、私と蓮がもっと近くにいられるようにしました。私から、ひとつずつご案内しますね。
-              </TsukiBubble>
+              <CharBubble who="ren" small>
+                そういうときこそ、気持ちだけで動かずに、相手の流れを知っておくのが近道です。<br />
+                プレミアムでできることを、順番に整理してお伝えしますね。
+              </CharBubble>
             </div>
           </div>
 
@@ -358,10 +366,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
             </div>
             <div style={{ marginTop: '0.8rem' }}>
-              <TsukiBubble small>
-                毎朝のおまもりみたいに、気軽に使ってくださいね。<br />
-                合わないなと思ったら、いつでもやめられますよ。
-              </TsukiBubble>
+              <CharBubble who="ren" small>
+                毎朝のおまもりとして、気軽に使ってみてください。<br />
+                合わないと感じたら、マイページからいつでも解約できますよ。
+              </CharBubble>
             </div>
           </div>
 
@@ -428,10 +436,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
           {/* 月からのひとこと */}
           <div style={{ padding: '0.25rem 1.15rem 0.75rem' }}>
-            <TsukiBubble small>
+            <CharBubble small>
               無理に決めなくて大丈夫ですよ。<br />
               「もう少しそばにいてほしいな」と思ったときに、いつでも呼んでくださいね。
-            </TsukiBubble>
+            </CharBubble>
           </div>
 
           {/* Inline Guarantee Badges */}
