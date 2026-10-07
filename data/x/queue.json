@@ -1706,8 +1706,10 @@
     "format": "psych_poll",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T20:42:14.229Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T20:42:14.229Z",
+    "postedAt": "2026-10-07T07:08:53.127Z",
+    "tweetId": "2107729862337470520"
   },
   {
     "id": "2026-10-07-pm-reply",
