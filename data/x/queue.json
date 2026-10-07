@@ -1741,8 +1741,10 @@
     "format": "beast_pair_rank",
     "system": "pair",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T20:42:14.229Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T20:42:14.229Z",
+    "postedAt": "2026-10-07T10:09:26.801Z",
+    "tweetId": "2107775302080278619"
   },
   {
     "id": "2026-10-07-evening-reply",
@@ -1754,8 +1756,10 @@
     "format": "beast_pair_rank_reply",
     "system": "pair",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T20:42:14.229Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T20:42:14.229Z",
+    "postedAt": "2026-10-07T10:09:26.801Z",
+    "tweetId": "2107775303418290251"
   },
   {
     "id": "2026-10-07-night",
