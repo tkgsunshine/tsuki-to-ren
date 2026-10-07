@@ -955,7 +955,7 @@ function App() {
                   <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#93c5fd', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     蓮の書斎 (🔮) {!isRegistered && <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', border: '1px solid rgba(226,192,116,0.3)', padding: '1px 4px', borderRadius: '4px', background: 'rgba(226,192,116,0.05)' }}>要登録</span>}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>男性心理に基づき理性的・分析的なアドバイスを授けます</div>
+                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
                 </div>
                 {isRegistered ? (
                   <span style={{ fontSize: '0.7rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -1008,7 +1008,7 @@ function App() {
                   <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#d8b4fe', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     月の温室 (🌙) {!isRegistered && <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', border: '1px solid rgba(226,192,116,0.3)', padding: '1px 4px', borderRadius: '4px', background: 'rgba(226,192,116,0.05)' }}>要登録</span>}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>あなたの不安に共感し、優しく包み込む言葉で寄り添います</div>
+                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>「不安な気持ち、そのまま話してくださいね。ちゃんと受けとめますよ。」</div>
                 </div>
                 {isRegistered ? (
                   <span style={{ fontSize: '0.7rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>

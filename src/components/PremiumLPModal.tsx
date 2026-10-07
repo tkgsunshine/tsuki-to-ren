@@ -1,6 +1,94 @@
 import React, { useState } from 'react';
-import { Sparkles, Crown, ShieldCheck, Heart, Bell, MessageCircle, Calendar, BookOpen, ChevronDown, Zap, ArrowRight, X } from 'lucide-react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
+
+const worries = [
+  '既読のまま返事がこなくて、なかなか眠れない夜',
+  '次になんて送ればいいか、何度も書き直してしまうとき',
+  'この恋がこの先どうなるのか、ふと不安になるとき'
+];
+
+const benefits = [
+  {
+    Icon: Calendar,
+    color: '#60a5fa',
+    title: 'これからの7日間と、10年先までの流れ',
+    body: '明日から7日間の二人の相性の波と、この先10年の「結婚・同棲・運気が大きく開く時期」まで、鍵のかかっていたところをぜんぶ読めるようになりますよ。'
+  },
+  {
+    Icon: BookOpen,
+    color: '#f472b6',
+    title: 'あの人のトリセツと、6つの相性グラフ',
+    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、ぜんぶ見られます。'
+  },
+  {
+    Icon: Bell,
+    color: '#fbbf24',
+    title: '毎朝届く、あなたのための運勢メール',
+    body: 'その日の運勢と吉方位、二人にとって大事な転機の日を毎朝お届けします。チャンスの日も、少し気をつけたい日も、先に知っておけますよ。'
+  },
+  {
+    Icon: Heart,
+    color: '#34d399',
+    title: '気になる人を10人まで保存',
+    body: '本命の人も、まだ気になっているだけの人も、10人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。'
+  },
+  {
+    Icon: MessageCircle,
+    color: '#c084fc',
+    title: '私と蓮に、いつでも相談',
+    body: '返信の文面を一緒に考えたり、あの人の本音を一緒に読み解いたり。24時間、回数を気にせず話しかけてくださいね。寄り添う私と、冷静に整理してくれる蓮がいます。'
+  }
+];
+
+const sectionTitleStyle: React.CSSProperties = {
+  fontSize: '1rem',
+  fontWeight: 'bold',
+  textAlign: 'center',
+  margin: '0 0 0.75rem 0'
+};
+
+const speakers = {
+  tsuki: { name: '月', img: '/assets/tsuki.webp', accent: '244, 114, 182', label: '#f9a8d4' },
+  ren: { name: '蓮', img: '/assets/ren.webp', accent: '96, 165, 250', label: '#93c5fd' }
+};
+
+/** 月・蓮のセリフ（アイコン付きの吹き出し） */
+const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speakers; small?: boolean }> = ({ children, who = 'tsuki', small = false }) => {
+  const sp = speakers[who];
+  return (
+    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left' }}>
+      <img
+        src={sp.img}
+        alt={sp.name}
+        style={{
+          width: small ? '40px' : '46px',
+          height: small ? '40px' : '46px',
+          borderRadius: '50%',
+          objectFit: 'cover',
+          objectPosition: '50% 12%',
+          border: `1.5px solid rgba(${sp.accent}, 0.6)`,
+          flexShrink: 0
+        }}
+      />
+      <div style={{
+        flex: 1,
+        padding: small ? '0.7rem 0.9rem' : '0.85rem 1rem',
+        background: `rgba(${sp.accent}, 0.08)`,
+        border: `1px solid rgba(${sp.accent}, 0.3)`,
+        borderRadius: '4px 16px 16px 16px',
+        fontSize: small ? '0.76rem' : '0.8rem',
+        color: '#f3e8ff',
+        lineHeight: '1.75'
+      }}>
+        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem' }}>
+          {sp.name}
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+};
 
 interface PremiumLPModalProps {
   isOpen: boolean;
@@ -32,7 +120,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   const handleSubscribeAction = () => {
     if (!isRegistered) {
-      if (confirm('プレミアム会員の登録には無料アカウント作成（Google/X連携）が必要です。\n無料登録画面へ移動しますか？')) {
+      if (confirm('プレミアムに登録するには、先に無料アカウント（Google / X連携）を作ってくださいね。\n無料登録の画面へ移動しますか？')) {
         onClose();
         onRegisterFirst();
       }
@@ -46,7 +134,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       onSubscribe();
       // 鑑定結果の表示中は、ResultView が結果の先頭へ戻して完了のお知らせを出す
       if (!isResultVisible) {
-        alert('🎉 プレミアム会員へのご登録ありがとうございます！\n全機能が解放されました。');
+        alert('🌙 プレミアムへようこそ。\nすべての機能が使えるようになりました。これから毎日、そばで見守らせてくださいね。');
       }
     }, 1200);
   };
@@ -54,15 +142,15 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const faqs = [
     {
       q: 'いつでも解約できますか？',
-      a: 'はい、いつでもマイページからワンタップで解約手続きが可能です。解約後も有効期間終了までプレミアム機能をご利用いただけます。'
+      a: 'はい、いつでもマイページからワンタップで解約できます。解約したあとも、有効期間が終わるまではプレミアムの機能をそのまま使えますよ。'
     },
     {
-      q: 'どのような支払い方法に対応していますか？',
-      a: 'クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Payに対応しています。'
+      q: 'どんな支払い方法が使えますか？',
+      a: 'クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Payが使えます。'
     },
     {
-      q: '登録後すぐにすべての機能が使えますか？',
-      a: 'はい、お支払いが完了した瞬間から、全解放された鑑定結果やAIチャット、すべてのプレミアム機能が即時にお使いいただけます。'
+      q: '登録したら、すぐに使えますか？',
+      a: 'はい、お支払いが終わったその瞬間から、鑑定結果のすべてと、月・蓮とのチャットなど、プレミアムの機能がすぐに使えます。'
     }
   ];
 
@@ -141,251 +229,147 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           WebkitOverflowScrolling: 'touch',
           paddingBottom: '1.5rem'
         }}>
-          {/* Hero Banner Section */}
-          <div style={{
-            padding: '1.5rem 1.25rem 1.25rem',
-            textAlign: 'center',
-            background: 'radial-gradient(circle at top, rgba(236, 72, 153, 0.15) 0%, rgba(168, 85, 247, 0.1) 40%, transparent 80%)',
-            position: 'relative'
-          }}>
+          {/* Hero: 月の立ち姿と、月からの語りかけ */}
+          <div style={{ position: 'relative' }}>
+            <img
+              src="/assets/tsuki.webp"
+              alt="プレミアムを案内する月"
+              style={{
+                display: 'block',
+                width: '100%',
+                height: '300px',
+                objectFit: 'cover',
+                objectPosition: '50% 18%'
+              }}
+            />
             <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '4px 14px',
-              borderRadius: '20px',
-              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%)',
-              border: '1px solid rgba(226, 192, 116, 0.5)',
-              marginBottom: '0.85rem'
-            }}>
-              <Sparkles size={14} style={{ color: '#fef08a' }} />
-              <span style={{ fontSize: '0.72rem', color: '#fef08a', fontWeight: 'bold', letterSpacing: '0.05em' }}>
-                プレミアム会員限定 全機能解放
-              </span>
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(19, 13, 42, 0) 45%, rgba(19, 13, 42, 0.85) 80%, #130d2a 100%)'
+            }} />
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>
+              <div style={{ fontSize: '0.72rem', color: '#f9a8d4', fontWeight: 'bold', letterSpacing: '0.12em', marginBottom: '0.35rem' }}>
+                月からのご案内
+              </div>
+              <h1 className="font-serif gold-text" style={{
+                fontSize: '1.32rem',
+                fontWeight: 'bold',
+                lineHeight: '1.45',
+                margin: 0,
+                letterSpacing: '0.02em'
+              }}>
+                あなたの恋を、<br />
+                毎日そばで見守らせてね
+              </h1>
             </div>
+          </div>
+          <div style={{ padding: '0.9rem 1.15rem 1.35rem' }}>
+            <CharBubble>
+              ここまで見てくれて、ありがとう。<br />
+              あの人のこと、きっとたくさん考えてきたんですよね。<br />
+              ここから先は、あの人の気持ちやこれからの流れを、私ともう少し深く一緒に見ていきませんか？
+            </CharBubble>
+          </div>
 
-            <h1 className="font-serif gold-text" style={{
-              fontSize: '1.4rem',
-              fontWeight: 'bold',
-              lineHeight: '1.35',
-              margin: '0 0 0.65rem 0',
-              letterSpacing: '0.02em'
-            }}>
-              恋の成就率を最大化する<br />
-              最高峰の占術サポート
-            </h1>
+          {/* こんなときに */}
+          <div style={{ padding: '0 1.15rem 1.35rem' }}>
+            <h2 className="font-serif gold-text" style={sectionTitleStyle}>
+              こんな夜はありませんか？
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+              {worries.map((w) => (
+                <div key={w} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.55rem',
+                  padding: '0.6rem 0.85rem',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.07)',
+                  borderRadius: '12px',
+                  fontSize: '0.78rem',
+                  color: '#e5e7eb',
+                  lineHeight: '1.5'
+                }}>
+                  <Moon size={14} style={{ color: '#f9a8d4', flexShrink: 0 }} />
+                  <span>{w}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: '0.8rem' }}>
+              <CharBubble who="ren" small>
+                そういうときこそ、気持ちだけで動かずに、相手の流れを知っておくのが近道です。<br />
+                プレミアムでできることを、順番に整理してお伝えしますね。
+              </CharBubble>
+            </div>
+          </div>
 
-            <p style={{
-              fontSize: '0.78rem',
-              color: '#cbd5e1',
-              lineHeight: '1.6',
-              margin: '0 0 1.25rem 0'
-            }}>
-              気になるあの人の深層本心・絶対厳禁の地雷行動・10年後までの運命バイオリズムを完全解禁。二人の絆を確かなものにするプレミアムプラン。
-            </p>
+          {/* できること */}
+          <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+            <h2 className="font-serif gold-text" style={sectionTitleStyle}>
+              プレミアムでできること
+            </h2>
+            {benefits.map(({ Icon, color, title, body }) => (
+              <div key={title} className="glass-panel" style={{
+                padding: '0.9rem 1rem',
+                display: 'flex',
+                gap: '0.8rem',
+                alignItems: 'flex-start',
+                border: `1px solid ${color}4d`,
+                background: `${color}0a`
+              }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  background: `${color}26`,
+                  border: `1px solid ${color}80`,
+                  borderRadius: '50%',
+                  color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Icon size={17} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f3f4f6' }}>
+                    {title}
+                  </span>
+                  <p style={{ fontSize: '0.73rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
+                    {body}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
 
-            {/* Pricing Highlight Card */}
+          {/* 料金 */}
+          <div style={{ padding: '0 1.15rem 1.35rem' }}>
             <div style={{
-              background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.12) 0%, rgba(217, 119, 6, 0.15) 100%)',
-              border: '1.5px solid rgba(250, 204, 21, 0.4)',
+              background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.1) 0%, rgba(217, 119, 6, 0.12) 100%)',
+              border: '1.5px solid rgba(250, 204, 21, 0.35)',
               borderRadius: '20px',
-              padding: '1.15rem 1rem',
-              boxShadow: '0 8px 25px rgba(217, 119, 6, 0.2)'
+              padding: '1.1rem 1rem',
+              textAlign: 'center'
             }}>
               <div style={{ fontSize: '0.75rem', color: '#fef08a', fontWeight: 'bold', marginBottom: '0.2rem' }}>
-                月額定額使い放題
+                プレミアム（月額）
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.25rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '2.3rem', fontWeight: 'bold' }}>
+                <span className="font-serif gold-text" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>
                   ¥500
                 </span>
                 <span style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>/ 月（税込）</span>
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '0.25rem' }}>
-                1日あたりわずか <strong style={{ color: '#4ade80' }}>約16円</strong> で全ての制限が全解除
+              <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '0.25rem' }}>
+                1日あたり約16円
               </div>
             </div>
-          </div>
-
-          {/* 5 Premium Benefits Section */}
-          <div style={{ padding: '0 1.15rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            <h2 className="font-serif gold-text" style={{
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              textAlign: 'center',
-              margin: '0 0 0.35rem 0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem'
-            }}>
-              <Crown size={18} style={{ color: '#fef08a' }} />
-              プレミアム会員 5大解放特典
-            </h2>
-
-            {/* Benefit 1: 7-Day Biorhythm & 10-Year Destiny Timeline Fully Unlocked */}
-            <div className="glass-panel" style={{
-              padding: '1rem',
-              display: 'flex',
-              gap: '0.85rem',
-              alignItems: 'center',
-              border: '1px solid rgba(96, 165, 250, 0.3)',
-              background: 'rgba(96, 165, 250, 0.04)'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #60a5fa 0%, #1d4ed8 100%)',
-                borderRadius: '12px',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(96, 165, 250, 0.4)'
-              }}>
-                <Calendar size={18} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#93c5fd' }}>
-                  ① 今後7日間の相性バイオリズム ＆ 10年後までの運命年表全解放
-                </span>
-                <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  明日〜7日後までの「相性バイオリズム詳細」や、今後10年間（月次・年次）の「結婚・同棲・大開運の黄金期」の鍵付き運勢テキストをすべて閲覧できます。
-                </p>
-              </div>
-            </div>
-
-            {/* Benefit 2: Instruction Manual (Torisetsu) Full Unlock */}
-            <div className="glass-panel" style={{
-              padding: '1rem',
-              display: 'flex',
-              gap: '0.85rem',
-              alignItems: 'center',
-              border: '1px solid rgba(244, 114, 182, 0.3)',
-              background: 'rgba(244, 114, 182, 0.04)'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #f472b6 0%, #be185d 100%)',
-                borderRadius: '12px',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(244, 114, 182, 0.4)'
-              }}>
-                <BookOpen size={18} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fbcfe8' }}>
-                  ② お相手の「取扱説明書（トリセツ）」＆「6軸レーダーチャート」全解放
-                </span>
-                <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  脈ありサイン（Lv.2/Lv.3）・逆転挽回策・刺さる言葉・絶対NG行動・6軸詳細相性分析（恋愛・価値観・身体・結婚・執着・信頼）などを無制限で閲覧できます。
-                </p>
-              </div>
-            </div>
-
-            {/* Benefit 3: Daily Email Notification */}
-            <div className="glass-panel" style={{
-              padding: '1rem',
-              display: 'flex',
-              gap: '0.85rem',
-              alignItems: 'center',
-              border: '1px solid rgba(251, 191, 36, 0.3)',
-              background: 'rgba(251, 191, 36, 0.04)'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
-                borderRadius: '12px',
-                color: '#000',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(251, 191, 36, 0.4)'
-              }}>
-                <Bell size={18} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fef08a' }}>
-                  ③ 毎朝届く「デイリー鑑定メール ＆ 本日の吉方位」通知
-                </span>
-                <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  毎朝の運勢や二人の重要な転機日・運気の波をメールでお届け。幸運のチャンスや注意すべきタイミングを逃さず把握できます。
-                </p>
-              </div>
-            </div>
-
-            {/* Benefit 4: Saved Partners Extended to 10 */}
-            <div className="glass-panel" style={{
-              padding: '1rem',
-              display: 'flex',
-              gap: '0.85rem',
-              alignItems: 'center',
-              border: '1px solid rgba(52, 211, 153, 0.3)',
-              background: 'rgba(52, 211, 153, 0.04)'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #34d399 0%, #059669 100%)',
-                borderRadius: '12px',
-                color: '#000',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(52, 211, 153, 0.4)'
-              }}>
-                <Heart size={18} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#6ee7b7' }}>
-                  ④ お相手の保存枠が最大10人に拡大
-                </span>
-                <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  気になるお相手、本命、元カレ、気になる異性など最大10人までデータをクラウド保存可能。ワンタップで瞬時に相性を比較・鑑定できます。
-                </p>
-              </div>
-            </div>
-
-            {/* Benefit 5: Unlimited AI Guardian Character Chat */}
-            <div className="glass-panel" style={{
-              padding: '1rem',
-              display: 'flex',
-              gap: '0.85rem',
-              alignItems: 'center',
-              border: '1px solid rgba(168, 85, 247, 0.3)',
-              background: 'rgba(168, 85, 247, 0.04)'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #c084fc 0%, #7e22ce 100%)',
-                borderRadius: '12px',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(168, 85, 247, 0.4)'
-              }}>
-                <MessageCircle size={18} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#e9d5ff' }}>
-                  ⑤ AI守護キャラクター「月・蓮」と無制限相談
-                </span>
-                <p style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.45', margin: 0 }}>
-                  24時間いつでも「返信文案の添削」や「相手の本音相談」が可能。共感の月と論理の蓮があなたの専属占い師になります。
-                </p>
-              </div>
+            <div style={{ marginTop: '0.8rem' }}>
+              <CharBubble who="ren" small>
+                毎朝のおまもりとして、気軽に使ってみてください。<br />
+                合わないと感じたら、マイページからいつでも解約できますよ。
+              </CharBubble>
             </div>
           </div>
 
@@ -450,6 +434,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           </div>
 
+          {/* 月からのひとこと */}
+          <div style={{ padding: '0.25rem 1.15rem 0.75rem' }}>
+            <CharBubble small>
+              無理に決めなくて大丈夫ですよ。<br />
+              「もう少しそばにいてほしいな」と思ったときに、いつでも呼んでくださいね。
+            </CharBubble>
+          </div>
+
           {/* Inline Guarantee Badges */}
           <div style={{
             display: 'flex',
@@ -461,7 +453,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             padding: '0.5rem 0 1rem 0'
           }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-              <ShieldCheck size={12} style={{ color: '#4ade80' }} /> いつでも解約可能
+              <ShieldCheck size={12} style={{ color: '#4ade80' }} /> いつでも解約できます
             </span>
             <span>•</span>
             <span>カード / Apple Pay / Google Pay</span>
@@ -545,8 +537,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 <span>登録処理中...</span>
               ) : (
                 <>
-                  <Zap size={18} style={{ fill: 'currentColor' }} />
-                  <span>月額500円でプレミアム登録する</span>
+                  <Moon size={18} style={{ fill: 'currentColor' }} />
+                  <span>月額500円ではじめる</span>
                   <ArrowRight size={18} />
                 </>
               )}
