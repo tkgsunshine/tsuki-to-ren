@@ -177,9 +177,9 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   // 1通目=【今日の空気】のくわしい解説（アプリの鑑定の解説＋守護獣の十干のひとこと。署名の人格のトーン）
   // 2通目=【開運アクション】（点数の帯の過ごし方＋守護獣の十二支のアクション）＋診断の案内
   const action = BAND_ACTION[bandOf(st.score)] + (ANIMAL_ACTION[c.animal] || '');
-  const replyText = advice && flavor ? ['【今日の空気】詳細', '', advice + flavor, sign].join('\n') : '';
+  const replyText = advice && flavor ? ['【今日の空気】詳細', '', `【${c.name}】${advice}${flavor}`, sign].join('\n') : '';
   const replyText2 = replyText
-    ? ['【開運アクション】', '', action, BEAST_TEASER, sign].join('\n')
+    ? ['【開運アクション】', '', `【${c.name}】${action}`, BEAST_TEASER, sign].join('\n')
     : '';
   return { text: lines.join('\n').trim(), replyText, replyText2, star: st };
 }
@@ -199,6 +199,7 @@ export function pickBeasts(all, dateStr) {
 /** 1日4本の守護獣の投稿（queue 用の項目）。署名は、投稿ごとに「-月-」「-蓮-」を交代。lint 不合格なら例外。各投稿に、リプ欄の解説2通が付く */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
   const beasts = pickBeasts(all, dateStr);
+  const made = []; // 同じ日にすでに作った本文・返信（同一文の重複で、投稿時に飛ばされないよう、lint の履歴に加える）
   return BEAST_SLOTS.flatMap(({ slot, time }, k) => {
     const c = beasts[k];
     const sign = (dayPillar(dateStr).index + k) % 2 === 0 ? '-月-' : '-蓮-';
@@ -213,17 +214,21 @@ export function buildBeastItems(all, dateStr, history = [], opts = {}) {
       status: 'scheduled',
       createdAt: new Date().toISOString(),
     };
-    const problems = lintPost(item, history, opts);
+    const problems = lintPost(item, [...history, ...made], opts);
     if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
-    if (!replyText) return [item];
+    if (!replyText) {
+      made.push(item);
+      return [item];
+    }
     // 【今日の空気】のくわしい解説は、リプ欄に（親の投稿と同じ実行で続けて出る）。2通目（開運アクション＋診断の案内）は、1通目へのスレッド返信
     const mk = (id, text, replyTo, format) => ({ id, date: dateStr, slot, kind: 'value', text, replyTo, format, status: 'scheduled', createdAt: item.createdAt });
     const replies = [mk(`${item.id}-reply`, replyText, item.id, 'beast_daily_reply')];
     if (replyText2) replies.push(mk(`${item.id}-reply2`, replyText2, replies[0].id, 'beast_daily_reply2'));
     for (const r of replies) {
-      const rp = lintPost(r, history, opts);
+      const rp = lintPost(r, [...history, ...made], opts);
       if (rp.length) throw new Error(`守護獣の返信が lint 不合格（${c.name}）:\n - ${rp.join('\n - ')}`);
     }
+    made.push(item, ...replies);
     return [item, ...replies];
   });
 }
