@@ -34,11 +34,19 @@ export function buildDailyContent(sub) {
     mbtiName: result.myMbtiName && result.myMbtiName !== '未選択' ? result.myMbtiName : '',
     hourMain: hour.split(/[（(]/)[0].trim(),
     hourNote: note ? note[1] : '',
-    advice: result.dailyActionAdvice || ''
+    advice: result.dailyActionAdvice || '',
+    // The user's own profile card from the result screen (never the partner's: the mail stays about "you").
+    profile: {
+      title: (result.myAstrologyTheme || '').replace(/[【】]/g, ''),
+      beast: result.myAstrologyName || '',
+      img: /^\/assets\/[\w-]+\.jpg$/.test(result.myAvatarUrl || '') ? result.myAvatarUrl : '',
+      star: (result.myStar || '').split(' ')[0],
+      color: result.myAstrologyColor || ''
+    }
   };
 }
 
-export const subjectFor = (date) => `🌙【月と蓮】本日の運勢＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
+export const subjectFor = (date) => `🌙【月と蓮】本日の恋愛運＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
 
 // Luxury Dark & Gold HTML email template.
 // Images are referenced by absolute production URL (email clients cannot load relative paths).
@@ -49,8 +57,13 @@ const GOLD = '#e2c074';
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
   const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
-  const { score, hourMain, hourNote, advice, mbtiCode, mbtiName } = content;
-  const hourTitle = content.hasOpponent ? '本日のLINE吉時間' : '本日の開運黄金時間';
+  const { score, hourMain, hourNote, advice, mbtiCode, mbtiName, profile = {} } = content;
+  const facts = [
+    profile.star && ['本命星', esc(profile.star)],
+    profile.color && ['守護カラー', esc(profile.color)],
+    mbtiCode && ['16タイプ', `${esc(mbtiCode)}${mbtiName ? `<span style="color: #a8a3bd; font-weight: normal;">（${esc(mbtiName)}）</span>` : ''}`]
+  ].filter(Boolean);
+  const hourTitle = content.hasOpponent ? '本日のLINE吉時間' : '本日の恋の開運時間';
   // LINE brand green for the LINE golden hour; the single-mode card keeps the gold/purple look.
   const hourBg = content.hasOpponent ? '#06C755' : '#1d1733';
   const hourBorder = content.hasOpponent ? '#06C755' : 'rgba(196, 161, 255, 0.4)';
@@ -68,7 +81,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>本日の運勢・吉時間 | 月と蓮</title>
+  <title>本日の恋愛運・吉時間 | 月と蓮</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #090714; font-family: 'Hiragino Sans', 'Yu Gothic', 'Helvetica Neue', Arial, sans-serif; color: #f3f4f6;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#090714" style="background-color: #090714; padding: 20px 10px;">
@@ -87,9 +100,8 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <tr>
             <td align="center" style="padding: 20px 25px 4px; text-align: center;">
               <span style="display: inline-block; padding: 5px 16px; background-color: #201a36; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 15px; color: ${GOLD}; font-size: 12px; font-weight: bold; letter-spacing: 0.04em;">
-                ${date.year}年${date.month}月${date.day}日（本日）の運勢
+                ${date.year}年${date.month}月${date.day}日（本日）の恋愛運
               </span>
-              ${mbtiCode ? `<div style="margin-top: 10px; font-size: 12px; color: #cbd5e1; letter-spacing: 0.04em;">あなたのタイプ（16タイプ診断）： <strong style="color: #fef08a;">${esc(mbtiCode)}</strong>${mbtiName ? `（${esc(mbtiName)}）` : ''}</div>` : ''}
             </td>
           </tr>
 
@@ -104,7 +116,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   <td valign="top" style="font-size: 14px; line-height: 1.7; color: #e2e8f0;">
                     <div style="font-size: 11px; font-weight: bold; color: ${accent}; letter-spacing: 0.1em; margin-bottom: 2px;">${charName}より</div>
                     ${esc(name)} 様${oppLabel}<br>
-                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、『月と蓮』守護エンジンより本日の個別バイオリズムをお届けします。
+                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、『月と蓮』守護エンジンより本日のあなたの恋愛運をお届けします。
                   </td>
                 </tr>
               </table>
@@ -117,7 +129,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
                 <tr>
                   <td align="center" style="padding: 20px 18px 18px; text-align: center;">
-                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.1em;">本日の運勢スコア</div>
+                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.1em;">本日の恋愛運スコア</div>
                     <div style="font-size: 52px; line-height: 1.15; font-weight: bold; color: #fef08a; margin: 6px 0 12px;">
                       ${esc(score)}<span style="font-size: 20px; color: ${GOLD};"> 点</span>
                     </div>
@@ -163,6 +175,37 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
             </td>
           </tr>
 
+          <!-- The user's own profile (same as the result screen's guardian-beast card) -->
+          ${profile.beast || facts.length ? `
+          <tr>
+            <td style="padding: 16px 25px 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
+                <tr>
+                  <td style="padding: 16px 18px;">
+                    <div style="font-size: 11px; font-weight: bold; color: ${GOLD}; letter-spacing: 0.1em; margin-bottom: 10px;">あなたの守護獣と星</div>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                      <tr>
+                        ${profile.img ? `<td width="76" valign="middle" style="width: 76px; padding-right: 12px;">
+                          <img src="${SITE}${profile.img}" width="64" height="64" alt="${esc(profile.beast)}" style="display: block; width: 64px; height: 64px; border-radius: 12px; border: 1px solid rgba(226, 192, 116, 0.5); object-fit: cover; object-position: top;">
+                        </td>` : ''}
+                        <td valign="middle" style="font-size: 13px; line-height: 1.6; color: #e2e8f0;">
+                          ${profile.title ? `<div style="font-size: 14px; font-weight: bold; color: #fef08a;">${esc(profile.title)}</div>` : ''}
+                          ${profile.beast ? `<div style="color: #cbd5e1;">${esc(profile.beast)}</div>` : ''}
+                        </td>
+                      </tr>
+                    </table>
+                    ${facts.length ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top: 12px; border-top: 1px solid #2a2342;">
+                      ${facts.map(([k, v]) => `<tr>
+                        <td width="84" style="width: 84px; padding: 7px 0 0; font-size: 11px; color: #a8a3bd; white-space: nowrap;">${k}</td>
+                        <td style="padding: 7px 0 0; font-size: 13px; font-weight: bold; color: #f3f4f6;">${v}</td>
+                      </tr>`).join('')}
+                    </table>` : ''}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>` : ''}
+
           <!-- CTA -->
           <tr>
             <td align="center" style="padding: 22px 25px 28px; text-align: center;">
@@ -175,7 +218,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding: 16px 20px 24px; text-align: center; border-top: 1px solid #2a2342; font-size: 10px; color: #8b8aa0; line-height: 1.6;">
-              本メールは『月と蓮』にて毎朝の運勢通知を有効化された方へお送りしています。<br>
+              本メールは『月と蓮』にて毎朝の恋愛運通知を有効化された方へお送りしています。<br>
               運営会社: Ill株式会社 | <a href="${esc(stopUrl)}" style="color: #b4b3c8;">通知の停止はこちら</a>
             </td>
           </tr>
