@@ -97,6 +97,13 @@
 - 手動実行: Actions の "X Metrics" → Run workflow
 - AI社員ホームの「X」タブの「反応レポート」は、`node scripts/x/home-report.mjs <出力先>` が作るJSONを、AI社員（毎時の定期実行）が ArtifactData の `x_report/latest` に転記して表示する。`data/x/report.md` が更新されたときだけ転記する
 
+## 画像つき一言カード（型 card_voice）
+- 反応が出やすいと見えた「1つの短い言葉で完結する画像つき投稿」の検証（2026-10-08）。10日のうち5本（昼・夜）がこの型で、文字だけの一言 `voice`（2本）と反応を比べる。**ただし、アカウントが「人間確認」の制限を受けている間は、表示回数が低く出る可能性があり、比較は制限が外れてから**
+- 下書き生成（`generate-drafts.mjs`）が、Claude に `card`（画像に載せる言葉）と `text`（投稿の本文）を書かせる。`card` は2〜3行（1行14字以内・最大4行）、行は「|」で区切り、強調する短い語だけ `[ ]` で囲む。相手の気持ちの断定は書かない
+- 画像は `scripts/x/lib/card.mjs` が作る（1080×1350のPNG。ブラウザ不要の satori＋resvg-wasm。フォントは `scripts/x/assets/ShipporiMincho-Bold.ttf`＝SIL OFL、ロゴは月と蓮のエンブレム `scripts/x/assets/emblem.png`）。`data/x/cards/<日付>-<枠>.png` に置き、キューの項目の `image` と `card`（文面・署名）に記録する。投稿時に `post.mjs` がアップロードする
+- ホームの承認画面で画像を確認できるよう、縮小版は `node scripts/x/card-thumb.mjs <投稿ID>`（data URIを出力）で作り、`x_posts` の `thumb` に入れる
+- 作り直し: キューの `card` を直して、`renderCard` で同じパスに書き直す
+
 ## 動作確認コマンド
 ```bash
 node --test scripts/x/test.mjs                              # 単体テスト

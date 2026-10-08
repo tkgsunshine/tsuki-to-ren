@@ -131,6 +131,9 @@ export const FORMATS = [
   // B: 一言代弁（共感。返信・保存をねらう）
   { id: 'voice', system: 'psychology', purpose: 'buzz',
     guide: '好きな人にまつわる「あるある」な心の動きを、具体的な場面で、そっと代弁する。例:「LINEを送ったあと、スマホを裏返して置いたのに、3分後にもう見てる人へ」。3〜5行。説教せず、最後は、そっと肯定する一言（例:「それ、ちゃんと恋してる証拠だよ」）。場面は毎回オリジナル' },
+  // B2: 画像つきの一言カード（反応が出やすい「1つの短い言葉で完結する画像つき投稿」の検証。画像は lib/card.mjs が作る）
+  { id: 'card_voice', system: 'psychology', purpose: 'buzz', card: true,
+    guide: '画像つきの一言カード。画像に載せる言葉を card に、投稿の本文を text に書く（JSONの card と text）。card: 好きな人を想う読み手の気持ちを、代弁・肯定する一言を、2〜3行（1行は14字以内、最大4行）。行は「|」で区切り、強調する短い語だけ [ ] で囲む（1か所）。例:「連絡が来ない日は、|[あなたが悪い]|わけじゃない。」。相手の気持ちは断定しない（「相手はあなたに夢中」などは書かない）。「必ず」などの断定・保証、専門用語、URL、「アプリ」は使わない。text: 画像を引き立てる1〜2行（card の言葉を繰り返さず、保存・見返したくなる一言。例:「保存して、つらい日に見返してね」）。末尾に署名。ハッシュタグは最大2個（例: #恋愛 #片思い）' },
   // C: 名乗りセット（16タイプ×生まれ年の本命星。自己申告のコメントをねらう）
   { id: 'name_self', system: 'quiz', purpose: 'follow', facts: 'year_star',
     guide: '「あなたの16タイプと、生まれ年の本命星を、コメントで教えて」という、名乗りの募集。事実の3つの生まれ年と本命星を、早見として載せる（例:「1995年生まれ＝三碧木星」）。「1〜2月（立春前）生まれは、前の年の星」と、注記する。最後は「同じ組み合わせの人が、何人いるか数えてみよう」。返信は約束しない（運営がすべてに返せるとは限らないため）' },
@@ -160,16 +163,16 @@ export const FORMATS = [
 export const BUZZ_SLOTS = ['noon', 'evening', 'night'];
 
 /** 10日で一巡する、1日3本の型の並び（BUZZ_SLOTS の順）。A〜Fを、バランスよく混ぜる。2026-10-08 が先頭。
- *  昼=返信・名乗りを集めやすい型／夕=ランキング・解説／夜=保存・共感。30本で全10型が出る */
+ *  昼=返信・名乗りを集めやすい型／夕=ランキング・解説／夜=保存・共感。30本で全11型が出る。画像つき一言（card_voice）は10日に5本、文字だけの一言（voice）は2本（比べるため） */
 const PLAN_DAYS = [
-  ['voice', 'gap_rank', 'save_list'],
-  ['psych_poll', 'mbti_love', 'voice'],
+  ['card_voice', 'gap_rank', 'save_list'],
+  ['psych_poll', 'mbti_love', 'card_voice'],
   ['quiz_ab', 'beast_pair_rank', 'save_list'],
   ['name_self', 'gap_rank', 'voice'],
-  ['voice', 'mbti_love', 'save_list'],
-  ['comeback', 'beast_pair_rank', 'voice'],
+  ['card_voice', 'mbti_love', 'save_list'],
+  ['comeback', 'beast_pair_rank', 'card_voice'],
   ['psych_poll', 'gap_rank', 'save_list'],
-  ['voice', 'mbti_love', 'pair_teaser'],
+  ['card_voice', 'mbti_love', 'pair_teaser'],
   ['quiz_ab', 'beast_pair_rank', 'save_list'],
   ['comeback', 'gap_rank', 'voice'],
 ];
