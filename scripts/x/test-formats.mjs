@@ -198,3 +198,12 @@ test('16タイプのランキングの行に、二つ名が足される（二重
   const reply = addMbtiNicks(`続きの9位〜16位です\n\n${lines}\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-`);
   assert.ok(weightedLength(reply) <= 280, `返信の長さ ${weightedLength(reply)}`);
 });
+
+test('手動投稿モード（apiPosting=false）: APIでは何も投稿せず、期限切れの処理もしない', async () => {
+  const t0 = new Date('2026-10-09T03:30:00Z'); // 12:30 JST
+  const due = { id: 'n', date: '2026-10-09', slot: 'noon', kind: 'value', text: '昼の投稿\n-月-', status: 'scheduled' };
+  const old = { id: 'o', date: '2026-10-01', slot: 'noon', kind: 'value', text: '古い投稿\n-月-', status: 'scheduled' };
+  const r = await runPost([due, old], { now: t0, cfg: { apiPosting: false } });
+  assert.equal(r.bodies.length, 0);
+  assert.deepEqual(r.queue.map((x) => x.status), ['scheduled', 'scheduled'], '期限切れにもしない');
+});

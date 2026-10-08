@@ -1,5 +1,7 @@
 {
-  "mode": "approval",
+  "mode": "auto",
+  "apiPosting": false,
+  "_apiPostingNote": "false=手動投稿モード（2026-10-08〜）。APIでは投稿せず、運営がホームの「今日の投稿」からコピーして手で投稿する。投稿済みかどうかは、毎朝の x_metrics が自分のタイムラインと本文で照合して反映する。自動投稿に戻すときは true にし、mode を approval に戻す",
   "_modeNote": "approval=承認済み(PRマージ済み)の投稿のみ投稿 / auto=下書き生成後そのまま投稿。切り替えはこの値だけ",
   "dailySlots": [
     "morning",

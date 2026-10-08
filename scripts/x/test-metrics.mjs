@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
-import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf } from './metrics.mjs';
+import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText } from './metrics.mjs';
 
 const now = new Date('2026-10-10T00:00:00Z');
 const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
@@ -60,23 +60,29 @@ test('実行: 疑似APIサーバーに対して、署名つきで取得し、que
   const server = http.createServer((req, res) => {
     requests.push({ url: req.url, auth: req.headers.authorization });
     res.setHeader('content-type', 'application/json');
-    if (req.url.startsWith('/2/tweets')) {
+    if (/^\/2\/users\/42\/tweets/.test(req.url)) {
+      res.end(JSON.stringify({ data: [{ id: '900', text: '手で投稿した本文 &amp; テスト\n2行目 ', created_at: '2026-10-09T01:00:00.000Z', public_metrics: { impression_count: 5, like_count: 1, reply_count: 0, retweet_count: 0, quote_count: 0, bookmark_count: 0 } }] }));
+    } else if (req.url.startsWith('/2/tweets')) {
       const ids = new URL(req.url, 'http://x').searchParams.get('ids').split(',');
       res.end(JSON.stringify({ data: ids.map((id) => ({ id, public_metrics: { impression_count: 77, like_count: 5, reply_count: 0, retweet_count: 0, quote_count: 0, bookmark_count: 1 } })) }));
     } else {
-      res.end(JSON.stringify({ data: { public_metrics: { followers_count: 21, tweet_count: 99 } } }));
+      res.end(JSON.stringify({ data: { id: '42', public_metrics: { followers_count: 21, tweet_count: 99 } } }));
     }
   });
   await new Promise((r) => server.listen(0, r));
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xm-'));
   const qp = path.join(dir, 'queue.json');
   const old = new Date(Date.now() - 30 * 3600000).toISOString();
-  fs.writeFileSync(qp, JSON.stringify([{ id: 'p1', date: '2026-10-09', slot: 'noon', kind: 'value', format: 'voice', status: 'posted', tweetId: '111', postedAt: old, text: 'x' }]));
+  fs.writeFileSync(qp, JSON.stringify([
+    { id: 'p1', date: '2026-10-09', slot: 'noon', kind: 'value', format: 'voice', status: 'posted', tweetId: '111', postedAt: old, text: 'x' },
+    { id: 'p2', date: '2026-10-09', slot: 'night', kind: 'value', format: 'save_list', status: 'scheduled', text: '手で投稿した本文 & テスト\n2行目' },
+  ]));
+  fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify({ apiPosting: false }));
   const env = {
     ...process.env,
     X_API_KEY: 'k', X_API_SECRET: 's', X_ACCESS_TOKEN: '1-t', X_ACCESS_TOKEN_SECRET: 'ts',
     X_API_BASE: `http://127.0.0.1:${server.address().port}`,
-    X_QUEUE_PATH: qp, X_FOLLOWERS_PATH: path.join(dir, 'followers.json'), X_REPORT_PATH: path.join(dir, 'report.md'),
+    X_QUEUE_PATH: qp, X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'followers.json'), X_REPORT_PATH: path.join(dir, 'report.md'),
   };
   const r = await new Promise((resolve) => {
     const c = spawn('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'metrics.mjs')], { env });
@@ -89,17 +95,20 @@ test('実行: 疑似APIサーバーに対して、署名つきで取得し、que
   assert.equal(r.code, 0, r.out);
   const q = JSON.parse(fs.readFileSync(qp, 'utf-8'));
   assert.equal(q[0].metrics24.impressions, 77);
+  assert.equal(q[1].status, 'posted', '手動投稿として照合される');
+  assert.equal(q[1].tweetId, '900');
+  assert.equal(q[1].manual, true);
   assert.equal(JSON.parse(fs.readFileSync(path.join(dir, 'followers.json'), 'utf-8'))[0].followers, 21);
   assert.match(fs.readFileSync(path.join(dir, 'report.md'), 'utf-8'), /\| voice \| 1 \| 77 \|/);
   assert.ok(requests.every((x) => /^OAuth /.test(x.auth || '')), '全リクエストが署名つき');
-  assert.ok(requests[0].url.includes('tweet.fields=public_metrics'));
+  assert.ok(requests.some((x) => x.url.includes('tweet.fields=') && x.url.includes('public_metrics')));
 });
 
 test('認証情報が無ければ何も書かずに終わる', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xm-'));
   const qp = path.join(dir, 'queue.json');
   fs.writeFileSync(qp, '[]');
-  const env = { ...process.env, X_QUEUE_PATH: qp, X_FOLLOWERS_PATH: path.join(dir, 'f.json'), X_REPORT_PATH: path.join(dir, 'r.md') };
+  const env = { ...process.env, X_QUEUE_PATH: qp, X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'f.json'), X_REPORT_PATH: path.join(dir, 'r.md') };
   for (const k of ['X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET']) delete env[k];
   const r = spawnSync('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'metrics.mjs')], { env, encoding: 'utf-8' });
   assert.equal(r.status, 0);
@@ -115,7 +124,7 @@ test('ホーム用レポート: home-report.mjs が、集計をJSONで出す', (
     { id: 'b', slot: 'night', kind: 'value', format: 'save_list', status: 'posted', text: '3行目', metrics24: m(30), metrics: m(30) },
   ]));
   fs.writeFileSync(path.join(dir, 'f.json'), JSON.stringify([{ date: '2026-10-09', followers: 20, tweets: 5 }]));
-  const env = { ...process.env, X_QUEUE_PATH: qp, X_FOLLOWERS_PATH: path.join(dir, 'f.json') };
+  const env = { ...process.env, X_QUEUE_PATH: qp, X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'f.json') };
   const r = spawnSync('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'home-report.mjs')], { env, encoding: 'utf-8' });
   assert.equal(r.status, 0, r.stderr);
   const j = JSON.parse(r.stdout);
@@ -126,4 +135,23 @@ test('ホーム用レポート: home-report.mjs が、集計をJSONで出す', (
   assert.equal(j.followers[0].followers, 20);
   assert.equal(j.updatedAt, '2026-10-09 10:00');
   assert.match(j.note, /まだ判定できません/);
+});
+
+test('手動投稿の照合: 本文が一致する未投稿の項目だけを、投稿済み(manual)にする', () => {
+  assert.equal(normText('a &amp; b &lt;c&gt; \r\nd  '), 'a & b <c>\nd');
+  const q = [
+    { id: 'a', status: 'scheduled', text: 'こんにちは\n-月-' },
+    { id: 'b', status: 'scheduled', text: '別の本文' },
+    { id: 'c', status: 'posted', tweetId: '1', text: 'こんにちは\n-月-' },
+    { id: 'd', status: 'skipped', text: '見送りの本文' },
+  ];
+  const tweets = [
+    { id: '1', text: 'こんにちは\n-月-', created_at: '2026-10-09T00:00:00Z' },
+    { id: '2', text: 'こんにちは\n-月-', created_at: '2026-10-09T05:00:00Z' },
+    { id: '3', text: '見送りの本文', created_at: '2026-10-09T06:00:00Z' },
+  ];
+  assert.equal(reconcileTimeline(q, tweets), 1);
+  assert.deepEqual([q[0].status, q[0].tweetId, q[0].manual], ['posted', '2', true]); // 取り済みの '1' は使わず、次の '2' に照合
+  assert.equal(q[1].status, 'scheduled');
+  assert.equal(q[3].status, 'skipped');
 });
