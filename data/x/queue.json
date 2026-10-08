@@ -471,8 +471,10 @@
     "format": "gap_rank",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:28.912Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T17:53:28.912Z",
+    "postedAt": "2026-10-08T01:49:41.842Z",
+    "tweetId": "2108011923916890553"
   },
   {
     "id": "2026-10-08-am-reply",
@@ -484,8 +486,10 @@
     "format": "gap_rank_reply",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:57:56.530Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T17:57:56.530Z",
+    "postedAt": "2026-10-08T01:49:41.842Z",
+    "tweetId": "2108011925007384602"
   },
   {
     "id": "2026-10-08-noon",
