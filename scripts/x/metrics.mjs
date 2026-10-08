@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { jstDateString } from './lib/signals.mjs';
-import { readQueue, writeQueue, readJson, writeJson } from './lib/queue.mjs';
+import { readQueue, writeQueue, readConfig, readJson, writeJson } from './lib/queue.mjs';
 import { signOAuth1, authHeader } from './lib/oauth1.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -26,6 +26,38 @@ export function pickTargets(queue, now = new Date()) {
     const ageH = (now.getTime() - new Date(p.postedAt).getTime()) / HOUR;
     return ageH >= MIN_AGE_H && (!p.metrics24 || ageH < REFRESH_UNTIL_H);
   });
+}
+
+/** 本文の照合用に整える（APIの &amp; 等の置換・改行・行末の空白をそろえる） */
+export const normText = (t) =>
+  String(t || '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .replace(/\r\n/g, '\n').split('\n').map((l) => l.trimEnd()).join('\n').trim();
+
+/** 手動投稿モード: 自分のタイムラインの投稿を、キューの未投稿の項目と本文で照合し、投稿済み（manual）にする。照合できた件数を返す */
+export function reconcileTimeline(queue, tweets) {
+  const byText = new Map();
+  for (const t of [...tweets].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))) {
+    const k = normText(t.text);
+    if (!byText.has(k)) byText.set(k, []);
+    byText.get(k).push(t);
+  }
+  const taken = new Set(queue.filter((p) => p.tweetId).map((p) => p.tweetId));
+  let n = 0;
+  for (const p of queue) {
+    if (!['scheduled', 'expired', 'failed'].includes(p.status) || p.tweetId) continue;
+    const t = (byText.get(normText(p.text)) || []).find((x) => !taken.has(x.id));
+    if (!t) continue;
+    taken.add(t.id);
+    p.status = 'posted';
+    p.postedAt = t.created_at;
+    p.tweetId = t.id;
+    p.manual = true;
+    delete p.skipReason;
+    delete p.lastError;
+    n++;
+  }
+  return n;
 }
 
 /** API の public_metrics を、保存用の形にする */
@@ -137,27 +169,15 @@ async function main() {
   const dryRun = process.argv.includes('--dry-run');
   const now = new Date();
   const queue = readQueue();
-  const targets = pickTargets(queue, now);
-  const byId = new Map();
   const errors = [];
+  const byId = new Map();
 
-  for (let i = 0; i < targets.length; i += 100) {
-    const ids = targets.slice(i, i + 100).map((p) => p.tweetId);
-    try {
-      const json = await apiGet(creds, '/2/tweets', { ids: ids.join(','), 'tweet.fields': 'public_metrics' });
-      for (const t of json.data || []) byId.set(t.id, t.public_metrics);
-      for (const e of json.errors || []) errors.push(`tweet ${e.resource_id || ''}: ${e.title || e.detail}`);
-    } catch (e) {
-      errors.push(e.message);
-    }
-  }
-  const updated = applyMetrics(queue, byId, now);
-  console.log(`対象${targets.length}件 → 反応を更新${updated}件`);
-
+  // 自分のアカウントの情報（フォロワー数・ID）。手動投稿モードでは、タイムラインの取得にIDを使う
   let followers = readJson(FOLLOWERS_PATH, []);
+  let me = null;
   try {
-    const me = await apiGet(creds, '/2/users/me', { 'user.fields': 'public_metrics' });
-    const m = me.data?.public_metrics;
+    me = (await apiGet(creds, '/2/users/me', { 'user.fields': 'public_metrics' })).data;
+    const m = me?.public_metrics;
     if (m) {
       const date = jstDateString(now);
       followers = followers.filter((r) => r.date !== date).concat({ date, followers: m.followers_count, tweets: m.tweet_count });
@@ -167,12 +187,41 @@ async function main() {
     errors.push(e.message);
   }
 
+  // 手動投稿モード: タイムラインから、手で投稿した分をキューに反映（投稿済み・tweetId）。反応の数字もここで取れる
+  let reconciled = 0;
+  if (readConfig().apiPosting === false && me?.id) {
+    try {
+      const tl = await apiGet(creds, `/2/users/${me.id}/tweets`, { max_results: '100', 'tweet.fields': 'created_at,public_metrics' });
+      reconciled = reconcileTimeline(queue, tl.data || []);
+      for (const t of tl.data || []) byId.set(t.id, t.public_metrics);
+      console.log(`タイムライン${(tl.data || []).length}件 → 手動投稿として反映${reconciled}件`);
+    } catch (e) {
+      errors.push(e.message);
+    }
+  }
+
+  const targets = pickTargets(queue, now);
+  const missing = targets.filter((p) => !byId.has(p.tweetId));
+  for (let i = 0; i < missing.length; i += 100) {
+    const ids = missing.slice(i, i + 100).map((p) => p.tweetId);
+    try {
+      const json = await apiGet(creds, '/2/tweets', { ids: ids.join(','), 'tweet.fields': 'public_metrics' });
+      for (const t of json.data || []) byId.set(t.id, t.public_metrics);
+      for (const e of json.errors || []) errors.push(`tweet ${e.resource_id || ''}: ${e.title || e.detail}`);
+    } catch (e) {
+      errors.push(e.message);
+    }
+  }
+  const applyTo = new Map(targets.map((p) => [p.tweetId, byId.get(p.tweetId)]).filter(([, v]) => v));
+  const updated = applyMetrics(queue, applyTo, now);
+  console.log(`対象${targets.length}件 → 反応を更新${updated}件`);
+
   if (errors.length) console.warn(`::warning::X API の取得で問題があります（プラン・残高・権限を確認）\n${errors.join('\n')}`);
   if (dryRun) {
     console.log(buildReport(queue, followers, now));
     return;
   }
-  if (updated) writeQueue(queue);
+  if (updated || reconciled) writeQueue(queue);
   writeJson(FOLLOWERS_PATH, followers);
   fs.writeFileSync(REPORT_PATH, buildReport(queue, followers, now), 'utf-8');
 }

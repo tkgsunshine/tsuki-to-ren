@@ -43,6 +43,12 @@ if (!hasCreds && !process.argv.includes('--dry-run')) {
 
 const forceId = (process.argv.find((a) => a.startsWith('--id=')) || '').slice(5) || process.env.X_FORCE_ID || '';
 
+// 手動投稿モード（config.apiPosting=false）: APIでは何も投稿せず、期限切れの処理もしない（--id の明示指定だけは通す）
+if (config.apiPosting === false && !forceId) {
+  console.log('手動投稿モード（config.apiPosting=false）のため、APIでは投稿しません。');
+  process.exit(0);
+}
+
 // 401（認証エラー）の切り分け用。値そのものは出さず、長さと形式だけを表示する
 function describeCreds() {
   const info = (name, v, hint) => {
