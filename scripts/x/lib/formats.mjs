@@ -156,25 +156,26 @@ export const FORMATS = [
     guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
 ];
 
-/** バズ検証の投稿枠（1日6本）。am=10:15 / noon=12:15 / pm=15:15 / evening=18:15 / night=20:15 / late=22:15（時刻は config.slots） */
-export const BUZZ_SLOTS = ['am', 'noon', 'pm', 'evening', 'night', 'late'];
+/** バズ検証の投稿枠（1日3本）。noon=12:15 / evening=18:15 / night=20:15（時刻は config.slots）。2026-10-09 から6本→3本に減らした（朝の守護獣1本と合わせて1日4本） */
+export const BUZZ_SLOTS = ['noon', 'evening', 'night'];
 
-/** 10日で一巡する、1日6本の型の並び（BUZZ_SLOTS の順）。A〜Fを、バランスよく混ぜる。2026-10-08 が先頭 */
+/** 10日で一巡する、1日3本の型の並び（BUZZ_SLOTS の順）。A〜Fを、バランスよく混ぜる。2026-10-08 が先頭。
+ *  昼=返信・名乗りを集めやすい型／夕=ランキング・解説／夜=保存・共感。30本で全10型が出る */
 const PLAN_DAYS = [
-  ['gap_rank', 'voice', 'psych_poll', 'mbti_love', 'save_list', 'name_self'],
-  ['gap_rank', 'voice', 'quiz_ab', 'beast_pair_rank', 'save_list', 'voice'],
-  ['name_self', 'voice', 'comeback', 'mbti_love', 'save_list', 'gap_rank'],
-  ['gap_rank', 'voice', 'psych_poll', 'beast_pair_rank', 'save_list', 'pair_teaser'],
-  ['gap_rank', 'voice', 'quiz_ab', 'mbti_love', 'save_list', 'name_self'],
-  ['gap_rank', 'voice', 'comeback', 'beast_pair_rank', 'save_list', 'voice'],
-  ['name_self', 'voice', 'psych_poll', 'mbti_love', 'save_list', 'gap_rank'],
-  ['gap_rank', 'voice', 'quiz_ab', 'beast_pair_rank', 'save_list', 'pair_teaser'],
-  ['gap_rank', 'voice', 'comeback', 'mbti_love', 'save_list', 'name_self'],
-  ['gap_rank', 'voice', 'psych_poll', 'beast_pair_rank', 'save_list', 'gap_rank'],
+  ['voice', 'gap_rank', 'save_list'],
+  ['psych_poll', 'mbti_love', 'voice'],
+  ['quiz_ab', 'beast_pair_rank', 'save_list'],
+  ['name_self', 'gap_rank', 'voice'],
+  ['voice', 'mbti_love', 'save_list'],
+  ['comeback', 'beast_pair_rank', 'voice'],
+  ['psych_poll', 'gap_rank', 'save_list'],
+  ['voice', 'mbti_love', 'pair_teaser'],
+  ['quiz_ab', 'beast_pair_rank', 'save_list'],
+  ['comeback', 'gap_rank', 'voice'],
 ];
 const PLAN_START_DAYS = dayPillar('2026-10-08').days;
 
-/** その日の6本の型を決める（{ am, noon, pm, evening, night, late }）。1日にアプリ誘導は最大1本 */
+/** その日の3本の型を決める（{ noon, evening, night }）。1日にアプリ誘導は最大1本 */
 export function pickFormats(date) {
   const n = PLAN_DAYS.length;
   const day = (((dayPillar(date).days - PLAN_START_DAYS) % n) + n) % n;

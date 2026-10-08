@@ -23,7 +23,7 @@ test('型の一覧（A〜F）: 3つの目的（バズ・フォロー・アプリ
   }
 });
 
-test('毎日6本: 6つの枠すべてに型が入り、1日にアプリ誘導は最大1本。10日で全ての型が出る', () => {
+test('毎日3本: 3つの枠すべてに型が入り、1日にアプリ誘導は最大1本。10日で全ての型が出る', () => {
   const seen = new Set();
   for (let i = 0; i < 20; i++) {
     const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
@@ -33,7 +33,7 @@ test('毎日6本: 6つの枠すべてに型が入り、1日にアプリ誘導は
     for (const f of Object.values(day)) seen.add(f.id);
   }
   assert.equal(seen.size, FORMATS.length, '全ての型が一巡する');
-  assert.equal(BUZZ_SLOTS.length, 6);
+  assert.deepEqual(BUZZ_SLOTS, ['noon', 'evening', 'night']);
 });
 
 test('事実はアプリの鑑定ロジックから出る（生まれ年の本命星・2人の16タイプ）', () => {

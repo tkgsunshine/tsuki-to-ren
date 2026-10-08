@@ -1,6 +1,6 @@
 // 指定日（既定: 明日JST）の投稿を作り、data/x/queue.json に status:"scheduled" で追記する。
 //   朝1本（08:15）: 守護獣（60タイプ）の今日の恋愛運（アプリの鑑定ロジックで算出。AI不要）。日ごとに1タイプ進み、60日で全タイプが一巡
-//   バズ検証6本（10:15 / 12:15 / 15:15 / 18:15 / 20:15 / 22:15）: バズ検証用の投稿（8系統×バズ/フォロー/アプリ誘導の型。lib/formats.mjs）。数字・ランキング・相性はアプリの鑑定ロジックで算出し、Claude は言い回しだけを書く
+//   バズ検証3本（12:15 / 18:15 / 20:15）: バズ検証用の投稿（8系統×バズ/フォロー/アプリ誘導の型。lib/formats.mjs）。数字・ランキング・相性はアプリの鑑定ロジックで算出し、Claude は言い回しだけを書く
 // 使い方: node --experimental-strip-types scripts/x/generate-drafts.mjs [YYYY-MM-DD] [--dry-run]
 // 必要な環境変数: ANTHROPIC_API_KEY（任意: ANTHROPIC_MODEL。既定 claude-opus-5-5）
 import Anthropic from '@anthropic-ai/sdk';
@@ -60,7 +60,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 指定された本数（ユーザーメッセージの「今日の本数」にあるスロット）を、JSONの配列のみで出力する（前後に説明やコードフェンスを付けない）。
 [{"slot":"am","text":"..."},{"slot":"pm","text":"...","replyText":"（問いかけ型のときだけ）"}]`;
 
-const planned = pickFormats(date); // { am, noon, pm, evening, night, late }
+const planned = pickFormats(date); // { noon, evening, night }
 // build() を持つ型は、アプリの鑑定ロジックだけで本文を作る（AIは使わない）。それ以外はAIが言い回しを書く
 const detSlots = Object.keys(planned).filter((k) => planned[k].build);
 const llmSlots = Object.keys(planned).filter((k) => !planned[k].build);
@@ -217,4 +217,4 @@ if (dryRun) {
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);
-console.log(`${date} の${items.filter((x) => !x.replyTo).length}本（守護獣4・バズ検証6: ${BUZZ_SLOTS.map((k) => planned[k].id).join(' / ')}）と、答え合わせの返信${items.filter((x) => x.replyTo).length}本をキューに追記しました。`);
+console.log(`${date} の${items.filter((x) => !x.replyTo).length}本（守護獣1・バズ検証3: ${BUZZ_SLOTS.map((k) => planned[k].id).join(' / ')}）と、答え合わせの返信${items.filter((x) => x.replyTo).length}本をキューに追記しました。`);

@@ -1,0 +1,47 @@
+name: X Metrics (Hasu-to-Tsuki)
+
+# 毎朝5:40 JSTに、投稿済みの反応（表示回数・いいね・返信・リポスト・ブックマーク）とフォロワー数を取り、
+# data/x/queue.json（各投稿の metrics / metrics24）・data/x/followers.json・data/x/report.md を更新する。
+# X API の読み取りが使えない場合は警告を出して終わる（投稿の仕組みには影響しない）
+on:
+  schedule:
+    - cron: '40 20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: x-queue
+  cancel-in-progress: false
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch metrics
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: node scripts/x/metrics.mjs
+
+      - name: Commit
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/x/queue.json data/x/followers.json data/x/report.md
+          if git diff --staged --quiet; then
+            echo "No metrics changes."
+          else
+            git commit -m "chore(x): update X metrics"
+            git pull --rebase origin main
+            git push origin main
+          fi

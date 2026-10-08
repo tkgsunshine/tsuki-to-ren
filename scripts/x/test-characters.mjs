@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { computeAll, pickByDay, withFixedNow } from './lib/characters.mjs';
+import { computeAll, pickByDay, withFixedNow, BEAST_SLOTS } from './lib/characters.mjs';
 
 test('60パターンがそろい、点数・文面・画像が妥当', () => {
   const all = computeAll('2026-10-04');
@@ -59,13 +59,12 @@ test('守護獣の投稿: LINEのおすすめ時間と「詳細な解説はリ�
   assert.ok(seen.size >= 50, `解説のパターン数: ${seen.size}`);
   // 過ぎた時間帯のおすすめは省く
   assert.ok(!buildPostText(all[0], '2026-10-08', '-月-', '23:00').text.includes('おすすめ時間'));
-  // 1日4本（朝・昼・夕・夜）。同じ日に同じ守護獣は出ず、各投稿に解説2通がスレッドで付く
+  // 1日1本（朝）。各投稿に解説2通がスレッドで付く
   const items = buildBeastItems(all, '2026-10-08', [], { allowLinks: false });
   const parents = items.filter((x) => !x.replyTo);
-  assert.equal(parents.length, 4);
-  assert.deepEqual(parents.map((x) => x.slot), ['morning', 'beast2', 'beast3', 'beast4']);
-  assert.equal(new Set(parents.map((x) => x.image)).size, 4);
-  assert.equal(items.length, 12);
+  assert.equal(parents.length, 1);
+  assert.deepEqual(parents.map((x) => x.slot), ['morning']);
+  assert.equal(items.length, 3);
   for (const p of parents) {
     const r1 = items.find((x) => x.replyTo === p.id);
     const r2 = items.find((x) => x.replyTo === r1.id); // 2通目は、1通目へのスレッド返信
@@ -84,7 +83,7 @@ test('守護獣の投稿: LINEのおすすめ時間と「詳細な解説はリ�
     }
   }
   // 60日で、各枠が全60タイプを一巡する
-  for (let k = 0; k < 4; k++) {
+  for (let k = 0; k < BEAST_SLOTS.length; k++) {
     const seen = new Set();
     const d = new Date(Date.UTC(2026, 9, 1));
     for (let i = 0; i < 60; i++, d.setUTCDate(d.getUTCDate() + 1)) seen.add(pickBeasts(all, d.toISOString().slice(0, 10))[k].key);

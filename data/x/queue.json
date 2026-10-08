@@ -634,8 +634,9 @@
     "kind": "value",
     "text": "❤️🔮10月9日の恋愛運🔮❤️\n-対象-\n【守護獣】：辛羊（宝石貴族×ひつじ）\n【本命星】：四緑木星\n\n-結果-\n【今日の点数】：86点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【お相手へのLINEのおすすめ時間】20:00〜22:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_sheep_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-chara-2-reply",
@@ -645,8 +646,9 @@
     "text": "【今日の空気】詳細\n\n【辛羊】あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。自分の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。宝石の守護獣らしく、自分の輝きを信じてね。\n-月-",
     "replyTo": "2026-10-09-chara-2",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-chara-2-reply2",
@@ -656,8 +658,9 @@
     "text": "【開運アクション】\n\n【辛羊】最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。温かい飲み物で、ひと息ついて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-09-chara-2-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-chara-3",
@@ -666,8 +669,9 @@
     "kind": "value",
     "text": "❤️🔮10月9日の恋愛運🔮❤️\n-対象-\n【守護獣】：丙犬（太陽の英雄×いぬ）\n【本命星】：五黄土星\n\n-結果-\n【今日の点数】：82点\n【今日の空気】新しい挑戦や積極的発信で評価が高まる日\n【お相手へのLINEのおすすめ時間】18:00〜20:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_dog_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-chara-3-reply",
@@ -677,8 +681,9 @@
     "text": "【今日の空気】詳細\n\n【丙犬】内面からのエネルギーが満ちています。興味のある分野のインプットや、会いたい人に軽い連絡を入れてみることで、今後の人間関係を好転させる素晴らしい種が蒔かれます。太陽の守護獣らしく、あなたらしさをまっすぐ大切にしてね。\n-月-",
     "replyTo": "2026-10-09-chara-3",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-chara-3-reply2",
@@ -688,8 +693,9 @@
     "text": "【開運アクション】\n\n【丙犬】好調の日。軽い連絡や、気になる場所への外出が、よいご縁につながりやすい日です。ありがとうを、ひとつ丁寧に伝えて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-09-chara-3-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-chara-4",
@@ -698,8 +704,9 @@
     "kind": "value",
     "text": "❤️🔮10月9日の恋愛運🔮❤️\n-対象-\n【守護獣】：辛牛（宝石貴族×うし）\n【本命星】：五黄土星\n\n-結果-\n【今日の点数】：100点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【お相手へのLINEのおすすめ時間】20:00〜22:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_ox_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-chara-4-reply",
@@ -709,8 +716,9 @@
     "text": "【今日の空気】詳細\n\n【辛牛】あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。自分の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。宝石の守護獣らしく、自分の輝きを信じてね。\n-月-",
     "replyTo": "2026-10-09-chara-4",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-chara-4-reply2",
@@ -720,8 +728,9 @@
     "text": "【開運アクション】\n\n【辛牛】最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。続けていることを、5分だけ進めてみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-09-chara-4-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:02.899Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:02.899Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-am",
@@ -732,8 +741,9 @@
     "format": "gap_rank",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.014Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.014Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-am-reply",
@@ -745,8 +755,9 @@
     "format": "gap_rank_reply",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:57:56.531Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:57:56.531Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-noon",
@@ -769,8 +780,9 @@
     "format": "quiz_ab",
     "system": "quiz",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.014Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.014Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-pm-reply",
@@ -782,8 +794,9 @@
     "format": "quiz_ab_reply",
     "system": "quiz",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.014Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.014Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-09-evening",
@@ -831,8 +844,9 @@
     "format": "voice",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.030Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.030Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-1",
@@ -873,8 +887,9 @@
     "kind": "value",
     "text": "❤️🔮10月10日の恋愛運🔮❤️\n-対象-\n【守護獣】：壬猿（海王、嵐使い×さる）\n【本命星】：三碧木星\n\n-結果-\n【今日の点数】：100点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【お相手へのLINEのおすすめ時間】20:00〜22:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_monkey_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-2-reply",
@@ -884,8 +899,9 @@
     "text": "【今日の空気】詳細\n\n【壬猿】あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。自分の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。海の守護獣らしく、流れに身をまかせる余裕を持ってね。\n-月-",
     "replyTo": "2026-10-10-chara-2",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-2-reply2",
@@ -895,8 +911,9 @@
     "text": "【開運アクション】\n\n【壬猿】最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。おもしろいと思ったことを、誰かに話してみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-10-chara-2-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-3",
@@ -905,8 +922,9 @@
     "kind": "value",
     "text": "❤️🔮10月10日の恋愛運🔮❤️\n-対象-\n【守護獣】：丁猪（灯火の魔術師×いのしし）\n【本命星】：四緑木星\n\n-結果-\n【今日の点数】：88点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【お相手へのLINEのおすすめ時間】20:00〜22:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_boar_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-3-reply",
@@ -916,8 +934,9 @@
     "text": "【今日の空気】詳細\n\n【丁猪】あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。自分の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。灯火の守護獣らしく、小さな光を絶やさないでね。\n-月-",
     "replyTo": "2026-10-10-chara-3",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-3-reply2",
@@ -927,8 +946,9 @@
     "text": "【開運アクション】\n\n【丁猪】最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。好きなことに、まっすぐ向き合う時間を。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-10-chara-3-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-4",
@@ -937,8 +957,9 @@
     "kind": "value",
     "text": "❤️🔮10月10日の恋愛運🔮❤️\n-対象-\n【守護獣】：壬虎（海王、嵐使い×とら）\n【本命星】：九紫火星\n\n-結果-\n【今日の点数】：89点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【お相手へのLINEのおすすめ時間】20:00〜22:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_tiger_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-4-reply",
@@ -948,8 +969,9 @@
     "text": "【今日の空気】詳細\n\n【壬虎】あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。自分の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。海の守護獣らしく、流れに身をまかせる余裕を持ってね。\n-月-",
     "replyTo": "2026-10-10-chara-4",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-chara-4-reply2",
@@ -959,8 +981,9 @@
     "text": "【開運アクション】\n\n【壬虎】最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。気になっていたことへ、小さな一歩を。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-10-chara-4-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.018Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.018Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-am",
@@ -995,8 +1018,9 @@
     "format": "comeback",
     "system": "psychology",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.164Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.164Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-pm-reply",
@@ -1008,8 +1032,9 @@
     "format": "comeback_reply",
     "system": "psychology",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.164Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.164Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-evening",
@@ -1057,8 +1082,9 @@
     "format": "gap_rank",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.164Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.164Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-10-late-reply",
@@ -1070,8 +1096,9 @@
     "format": "gap_rank_reply",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:57:56.531Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:57:56.531Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-1",
@@ -1112,8 +1139,9 @@
     "kind": "value",
     "text": "❤️🔮10月11日の恋愛運🔮❤️\n-対象-\n【守護獣】：癸鳥（深海の術師×とり）\n【本命星】：一白水星\n\n-結果-\n【今日の点数】：80点\n【今日の空気】新しい挑戦や積極的発信で評価が高まる日\n【お相手へのLINEのおすすめ時間】18:00〜20:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_bird_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-2-reply",
@@ -1123,8 +1151,9 @@
     "text": "【今日の空気】詳細\n\n【癸鳥】内面からのエネルギーが満ちています。興味のある分野のインプットや、会いたい人に軽い連絡を入れてみることで、今後の人間関係を好転させる素晴らしい種が蒔かれます。雨露の守護獣らしく、静かな直感を大切にしてね。\n-月-",
     "replyTo": "2026-10-11-chara-2",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-2-reply2",
@@ -1134,8 +1163,9 @@
     "text": "【開運アクション】\n\n【癸鳥】好調の日。軽い連絡や、気になる場所への外出が、よいご縁につながりやすい日です。身のまわりを、少し整えてみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-11-chara-2-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-3",
@@ -1144,8 +1174,9 @@
     "kind": "value",
     "text": "❤️🔮10月11日の恋愛運🔮❤️\n-対象-\n【守護獣】：戊鼠（要塞の守護者×ねずみ）\n【本命星】：四緑木星\n\n-結果-\n【今日の点数】：74点\n【今日の空気】新しい挑戦や積極的発信で評価が高まる日\n【お相手へのLINEのおすすめ時間】18:00〜20:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_rat_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-3-reply",
@@ -1155,8 +1186,9 @@
     "text": "【今日の空気】詳細\n\n【戊鼠】内面からのエネルギーが満ちています。興味のある分野のインプットや、会いたい人に軽い連絡を入れてみることで、今後の人間関係を好転させる素晴らしい種が蒔かれます。山の守護獣らしく、焦らず、どっしり構えていこうね。\n-月-",
     "replyTo": "2026-10-11-chara-3",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-3-reply2",
@@ -1166,8 +1198,9 @@
     "text": "【開運アクション】\n\n【戊鼠】好調の日。軽い連絡や、気になる場所への外出が、よいご縁につながりやすい日です。ひらめいたことを、メモに残してみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-11-chara-3-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-4",
@@ -1176,8 +1209,9 @@
     "kind": "value",
     "text": "❤️🔮10月11日の恋愛運🔮❤️\n-対象-\n【守護獣】：癸兎（深海の術師×うさぎ）\n【本命星】：七赤金星\n\n-結果-\n【今日の点数】：100点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【お相手へのLINEのおすすめ時間】20:00〜22:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-4-reply",
@@ -1187,8 +1221,9 @@
     "text": "【今日の空気】詳細\n\n【癸兎】あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。自分の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。雨露の守護獣らしく、静かな直感を大切にしてね。\n-月-",
     "replyTo": "2026-10-11-chara-4",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-chara-4-reply2",
@@ -1198,8 +1233,9 @@
     "text": "【開運アクション】\n\n【癸兎】最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。身近な人へ、やさしいひとことを。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-11-chara-4-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.123Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.123Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-am",
@@ -1210,8 +1246,9 @@
     "format": "gap_rank",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.285Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.285Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-am-reply",
@@ -1223,8 +1260,9 @@
     "format": "gap_rank_reply",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:57:56.531Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:57:56.531Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-noon",
@@ -1247,8 +1285,9 @@
     "format": "psych_poll",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.285Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.285Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-pm-reply",
@@ -1260,8 +1299,9 @@
     "format": "psych_poll_reply",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.285Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.285Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-11-evening",
@@ -1353,8 +1393,9 @@
     "kind": "value",
     "text": "❤️🔮10月12日の恋愛運🔮❤️\n-対象-\n【守護獣】：甲犬（巨木の王、開拓者×いぬ）\n【本命星】：六白金星\n\n-結果-\n【今日の点数】：94点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【お相手へのLINEのおすすめ時間】20:00〜22:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_dog_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-chara-2-reply",
@@ -1364,8 +1405,9 @@
     "text": "【今日の空気】詳細\n\n【甲犬】あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。自分の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。大樹の守護獣らしく、どっしり構えて、自分の軸を大切にしてね。\n-月-",
     "replyTo": "2026-10-12-chara-2",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-chara-2-reply2",
@@ -1375,8 +1417,9 @@
     "text": "【開運アクション】\n\n【甲犬】最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。ありがとうを、ひとつ丁寧に伝えて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-12-chara-2-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-chara-3",
@@ -1385,8 +1428,9 @@
     "kind": "value",
     "text": "❤️🔮10月12日の恋愛運🔮❤️\n-対象-\n【守護獣】：己牛（巫女、治癒者×うし）\n【本命星】：五黄土星\n\n-結果-\n【今日の点数】：78点\n【今日の空気】新しい挑戦や積極的発信で評価が高まる日\n【お相手へのLINEのおすすめ時間】18:00〜20:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_ox_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-chara-3-reply",
@@ -1396,8 +1440,9 @@
     "text": "【今日の空気】詳細\n\n【己牛】内面からのエネルギーが満ちています。興味のある分野のインプットや、会いたい人に軽い連絡を入れてみることで、今後の人間関係を好転させる素晴らしい種が蒔かれます。大地の守護獣らしく、自分にもやさしさを分けてあげてね。\n-月-",
     "replyTo": "2026-10-12-chara-3",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-chara-3-reply2",
@@ -1407,8 +1452,9 @@
     "text": "【開運アクション】\n\n【己牛】好調の日。軽い連絡や、気になる場所への外出が、よいご縁につながりやすい日です。続けていることを、5分だけ進めてみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-12-chara-3-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-chara-4",
@@ -1417,8 +1463,9 @@
     "kind": "value",
     "text": "❤️🔮10月12日の恋愛運🔮❤️\n-対象-\n【守護獣】：甲龍（巨木の王、開拓者×たつ）\n【本命星】：八白土星\n\n-結果-\n【今日の点数】：88点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【お相手へのLINEのおすすめ時間】20:00〜22:00\n\n（詳細な解説はリプ欄へ）",
     "image": "public/assets/astrology_dragon_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-chara-4-reply",
@@ -1428,8 +1475,9 @@
     "text": "【今日の空気】詳細\n\n【甲龍】あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。自分の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。大樹の守護獣らしく、どっしり構えて、自分の軸を大切にしてね。\n-月-",
     "replyTo": "2026-10-12-chara-4",
     "format": "beast_daily_reply",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-chara-4-reply2",
@@ -1439,8 +1487,9 @@
     "text": "【開運アクション】\n\n【甲龍】最高の運気の日。気になる人へ素直な気持ちを届けたり、会いたい人に連絡するのにぴったりです。なりたい自分を、心の中で言葉にしてみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
     "replyTo": "2026-10-12-chara-4-reply",
     "format": "beast_daily_reply2",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:14:03.250Z"
+    "status": "skipped",
+    "createdAt": "2026-10-06T15:14:03.250Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-am",
@@ -1451,8 +1500,9 @@
     "format": "gap_rank",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.403Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.403Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-am-reply",
@@ -1464,8 +1514,9 @@
     "format": "gap_rank_reply",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:57:56.531Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:57:56.531Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-noon",
@@ -1489,8 +1540,9 @@
     "format": "quiz_ab",
     "system": "quiz",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.403Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.403Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-pm-reply",
@@ -1502,8 +1554,9 @@
     "format": "quiz_ab_reply",
     "system": "quiz",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.403Z"
+    "status": "skipped",
+    "createdAt": "2026-10-05T17:53:29.403Z",
+    "skipReason": "本数削減（2026-10-09から1日4本）"
   },
   {
     "id": "2026-10-12-evening",
