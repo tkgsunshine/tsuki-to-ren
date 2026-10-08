@@ -9,6 +9,10 @@ on:
     - cron: '20 3 * * *'
     - cron: '20 11 * * *'
   workflow_dispatch:
+    inputs:
+      probe_query:
+        description: '検索クエリの動作確認（例: 恋愛 min_faves:100 -has:links）。入れると、そのクエリを1回だけ検索して結果をログに出す（候補の保存・返信案の作成はしない）'
+        required: false
 
 permissions:
   contents: write
@@ -27,7 +31,18 @@ jobs:
           node-version: '22'
       - run: npm ci || npm install
 
+      - name: Probe a search query
+        if: ${{ github.event.inputs.probe_query != '' }}
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          PROBE_QUERY: ${{ github.event.inputs.probe_query }}
+        run: node --experimental-strip-types scripts/x/find-replies.mjs --probe="$PROBE_QUERY"
+
       - name: Find reply candidates
+        if: ${{ github.event.inputs.probe_query == '' }}
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
@@ -38,7 +53,7 @@ jobs:
         run: node --experimental-strip-types scripts/x/find-replies.mjs
 
       - name: Commit
-        if: always()
+        if: ${{ always() && github.event.inputs.probe_query == '' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
