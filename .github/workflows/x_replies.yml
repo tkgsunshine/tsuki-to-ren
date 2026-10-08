@@ -1,0 +1,52 @@
+name: X Reply Research (Hasu-to-Tsuki)
+
+# 1日3回（JST 8:20 / 12:20 / 20:20）、恋愛・占い系で「いま伸びている投稿」を X API の検索で探し、返信文の案（月・蓮）まで作って
+# data/x/reply-candidates.json に書く。運営がホームの「返信候補」から、投稿を開いて、案をコピーして貼る（自動返信はしない）。
+# 検索は読み取り量に応じて料金がかかる。回数・件数は data/x/reply-targets.json と、この cron で調整する
+on:
+  schedule:
+    - cron: '20 23 * * *'
+    - cron: '20 3 * * *'
+    - cron: '20 11 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: x-queue
+  cancel-in-progress: false
+
+jobs:
+  replies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci || npm install
+
+      - name: Find reply candidates
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+        run: node --experimental-strip-types scripts/x/find-replies.mjs
+
+      - name: Commit
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/x/reply-candidates.json
+          if git diff --staged --quiet; then
+            echo "No new candidates."
+          else
+            git commit -m "chore(x): update reply candidates"
+            git pull --rebase origin main
+            git push origin main
+          fi
