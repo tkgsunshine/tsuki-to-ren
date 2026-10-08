@@ -46,7 +46,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 - 恋愛以外（仕事・お金・健康）の話題は書かない。相手の気持ちや関係の結末を断定しない。浮気・不倫・復縁の強要など、人を傷つける行動をすすめない。性的な表現は使わない
 - 占いは傾向・ヒントとして書く。「必ず」「絶対」「確実に」「〜が決まる」などの断定・保証はしない。医療・健康・金銭の助言はしない
 - 日本語は約140字（X の重み付き280）以内。改行はOK。ハッシュタグは最大2個
-- 口調は、月＝寄り添うタイプ（共感を先に置き、「〜だよ」「〜してね」とやさしく包む温かなお姉さん）、蓮＝少しストレートで論理的なタイプ（結論→理由の順で、「〜が目安」「〜は避けたい」と言い切る落ち着いた兄貴分。冷たくはしない）。投稿ごとにどちらかの声で書き、末尾に、改行して「-月-」または「-蓮-」（半角ハイフンで挟む）を付ける
+- 口調は、月（寄り添うタイプ。共感を先に置き、「〜だよ」「〜してね」とやさしく包む、温かなお姉さん）に統一する。**X もアプリも、すべて月が話している世界観**なので、投稿は常に月の一人称の語りかけ（「月だよ」のように名乗る必要はない）。蓮の声は使わない。末尾に、改行して「-月-」（半角ハイフンで挟む）を付ける
 - 「16タイプ」は、各投稿で最初に出すときだけ「16タイプ（MBTI）」と書いてよい（検索されやすくするため）。「MBTI診断」「公式MBTI」とは書かない（独自の診断のため）
 - 1行目は、読み手が自分ごとと感じる引きのある一文にする（例:「返事を待ちすぎている人へ」）。挨拶だけで始めない
 - 夜の投稿は、「あなたはどう？」のような、気軽に答えたくなる問いかけで終えてよい（リプライをもらうため）
@@ -103,7 +103,7 @@ function validate(posts) {
     const f = planned[slot];
     const candidate = { ...p, slot, kind: f.kind || 'value' };
     for (const pr of lintPost(candidate, history, { allowLinks })) problems.push(`${slot}: ${pr}`);
-    if (!/-(月|蓮)-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」か「-蓮-」の署名を付ける`);
+    if (!/-月-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」の署名を付ける（話し手は月だけ）`);
     if (f.card) {
       if (!p.card) problems.push(`${slot}: 画像つきの型は card（画像に載せる言葉）も書く`);
       else {
@@ -196,7 +196,7 @@ if (llmSlots.length) {
 }
 posts = [...detPosts, ...posts];
 
-// 守護獣の1本（朝 08:15）。署名は「-月-」「-蓮-」を日替わりで
+// 守護獣の1本（朝 08:15）。署名は常に「-月-」（話し手は月だけ）
 const beastItems = buildBeastItems(all, date, history, { allowLinks });
 
 const buzzItem = (slot, time) => {
@@ -208,7 +208,7 @@ const buzzItem = (slot, time) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   };
   if (f.card && p.card) {
-    item.card = { text: String(p.card).trim(), who: /-蓮-\s*$/.test(item.text) ? '蓮' : '月' }; // 画像の元（作り直し・ホームの縮小画像用）
+    item.card = { text: String(p.card).trim(), who: '月', style: 'portrait' }; // 画像の元（作り直し・ホームの縮小画像用）
     item.image = `data/x/cards/${date}-${slot}.png`;
   }
   return item;

@@ -23,3 +23,11 @@ test('カード画像: 1080×1350のPNGができ、縮小もできる。長す�
   assert.ok(small.length < 150000, `縮小版は軽い: ${small.length}`);
   await assert.rejects(renderCard({ text: 'あ'.repeat(30) }), /長すぎる/);
 });
+
+test('月が語りかけるカード（portrait）: 1080×1350のPNGができる。長すぎる文面は拒否する', async () => {
+  const png = await renderCard({ text: 'あなたの|[守護獣]、|調べるよ。', style: 'portrait' });
+  assert.equal(png.subarray(1, 4).toString(), 'PNG');
+  assert.equal(png.readUInt32BE(16), 1080);
+  assert.equal(png.readUInt32BE(20), 1350);
+  await assert.rejects(renderCard({ text: 'あ'.repeat(30), style: 'portrait' }), /長すぎる/);
+});

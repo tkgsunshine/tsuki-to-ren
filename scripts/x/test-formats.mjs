@@ -130,7 +130,7 @@ test('アプリの予告: 返信の最後（署名の直前）に入る。守護
   assert.equal(FORMAT_TEASER.gap_rank, MBTI_TEASER);
   assert.equal(FORMAT_TEASER.mbti_love, MBTI_TEASER);
   const r = buildBeastPairRanking('2026-10-07');
-  assert.ok(r.replyText.includes(BEAST_TEASER) && r.replyText.trimEnd().endsWith('-蓮-'));
+  assert.ok(r.replyText.includes(BEAST_TEASER) && r.replyText.trimEnd().endsWith('-月-'));
   for (const text of [t, r.replyText]) assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), []);
 });
 
