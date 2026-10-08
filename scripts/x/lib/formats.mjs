@@ -77,7 +77,24 @@ const withRanks = (list) => {
     return { ...x, rank };
   });
 };
-export function buildBeastPairRanking(date, topN = 12, worstN = 10) {
+/** 点数の帯ごとの一言（組み合わせごとの解説ではなく、点数の見方の目安。AIには書かせない）。同じ投稿で同じ文が続かないよう、帯ごとに数通りを順に使う */
+const PAIR_NOTES = [
+  [80, ['気持ちが通じ合いやすい、特別な相性', '言葉にしなくても、伝わりやすい相性', '出会えたら、大切にしたい相性']],
+  [70, ['いっしょにいて、素でいられる相性', '安心して、本音を話せる相性', '自然体で、長く続きやすい相性']],
+  [60, ['お互いを高め合える、頼もしい相性', '支え合うほど、よさが出る相性', '力を合わせると、強い相性']],
+  [50, ['ゆっくり距離が縮まっていく相性', '時間をかけて、深まる相性', '少しずつ、わかり合える相性']],
+  [30, ['違いが多い分、話すほど深まる相性', '刺激があって、学びの多い相性', 'ちがいを楽しめると、伸びる相性']],
+  [15, ['ぶつかりやすい分、言葉にして伝えて', '誤解が出やすいので、ていねいに', '気持ちを確かめ合うことが大切']],
+  [0, ['正反対だからこそ、歩み寄りが大切', '真逆の魅力に、惹かれ合うことも', 'ゆずり合えば、ぐっと近づく相性']],
+];
+const pairNote = (score, i = 0) => {
+  const notes = PAIR_NOTES.find(([min]) => score >= min)[1];
+  return notes[i % notes.length];
+};
+const MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉' };
+/** 順位の1件（メダル＋順位＋守護獣＋点数、次の行に一言）。1件ずつ空行を入れると見やすい。medal=false は、ワースト用（メダルなし） */
+const rankBlock = (t, i, medal = true) => `${medal ? MEDAL[t.rank] || '' : ''}${t.rank}位 ${t.name} ${t.score}点\n${pairNote(t.score, i)}`;
+export function buildBeastPairRanking(date) {
   const beasts = beastList();
   const anchor = beasts[Math.floor(dayPillar(date).days / 2) % 60]; // 2日に1回出る型。60回で全タイプが主役
   const others = beasts
@@ -85,22 +102,25 @@ export function buildBeastPairRanking(date, topN = 12, worstN = 10) {
     .map((b) => ({ name: b.name, score: getPillarPairScore(anchor.stem, anchor.branch, b.stem, b.branch) }));
   const desc = [...others].sort((x, y) => y.score - x.score || x.name.localeCompare(y.name, 'ja'));
   const ranked = withRanks(desc);
-  // X の文字数（重み280）に収まる最大の件数（最大 topN）で、上位を載せる
-  const compose = (n) => {
-    const top = ranked.slice(0, n);
-    const lines = [`❤️ ${anchor.full}の相性TOP${n}（100点満点）`, ''];
-    for (const t of top) lines.push(`${t.rank}位 ${t.name} ${t.score}点`);
-    lines.push('', 'あなたの守護獣は何位？ワースト10はリプ欄に🌙', '-月-');
-    return { top, text: lines.join('\n') };
+  const fits = (text) => weightedLength(text) <= 280;
+  // 本文: 上位3（メダル＋一言）
+  const top = ranked.slice(0, 3);
+  const text = [`❤️ ${anchor.full}の相性TOP3（100点満点）`, '', top.map((t, i) => rankBlock(t, i)).join('\n\n'), '', 'あなたの守護獣は何位？4位以降は、リプ欄に🌙', '-月-'].join('\n');
+  // 返信1: 4位から、280に収まる件数（最大5）
+  let k = 5;
+  const mk1 = (n) => ({ mid: ranked.slice(3, 3 + n), get text() { return [`【4位〜${3 + n}位】`, '', this.mid.map((t, i) => rankBlock(t, i + 3)).join('\n\n'), '', 'つづきは、さらにリプ欄に🌙', '-月-'].join('\n'); } });
+  let r1 = mk1(k);
+  while (!fits(r1.text) && k > 2) r1 = mk1(--k);
+  // 返信2: ワースト（低い順）。280に収まる件数（最大5）。アプリの予告の行を、署名の直前に入れる
+  const worstAll = withRanks([...desc].reverse());
+  let w = 5;
+  const mk2 = (n) => {
+    const worst = worstAll.slice(0, n);
+    return { worst, text: [`【${anchor.name}と、ぶつかりやすい守護獣 ワースト${n}】`, '（点数が低い順）', '', worst.map((t, i) => rankBlock(t, i, false)).join('\n\n'), '', BEAST_TEASER, '-月-'].join('\n') };
   };
-  let n = topN;
-  let main = compose(n);
-  while (weightedLength(main.text) > 280 && n > 3) main = compose(--n);
-  const worst = withRanks([...desc].reverse()).slice(0, worstN);
-  const reply = [`【${anchor.name}と相性がぶつかりやすい守護獣 ワースト${worst.length}】`, '（点数が低い順）', ''];
-  for (const w of worst) reply.push(`${w.rank}位 ${w.name} ${w.score}点`);
-  reply.push('', BEAST_TEASER, '-月-');
-  return { text: main.text, replyText: reply.join('\n'), anchor: anchor.name, top: main.top, worst };
+  let r2 = mk2(w);
+  while (!fits(r2.text) && w > 2) r2 = mk2(--w);
+  return { text, replyText: r1.text, replyText2: r2.text, anchor: anchor.name, top, mid: r1.mid, worst: r2.worst };
 }
 
 const FACTS = {
