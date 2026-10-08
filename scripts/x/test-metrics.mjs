@@ -105,3 +105,25 @@ test('認証情報が無ければ何も書かずに終わる', () => {
   assert.equal(r.status, 0);
   assert.ok(!fs.existsSync(path.join(dir, 'r.md')));
 });
+
+test('ホーム用レポート: home-report.mjs が、集計をJSONで出す', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xh-'));
+  const qp = path.join(dir, 'queue.json');
+  const m = (impressions) => ({ at: '2026-10-09T01:00:00Z', impressions, likes: 1, replies: 0, reposts: 0, quotes: 0, bookmarks: 0 });
+  fs.writeFileSync(qp, JSON.stringify([
+    { id: 'a', slot: 'noon', kind: 'value', format: 'voice', status: 'posted', text: '1行目\n2行目', metrics24: m(10), metrics: m(10) },
+    { id: 'b', slot: 'night', kind: 'value', format: 'save_list', status: 'posted', text: '3行目', metrics24: m(30), metrics: m(30) },
+  ]));
+  fs.writeFileSync(path.join(dir, 'f.json'), JSON.stringify([{ date: '2026-10-09', followers: 20, tweets: 5 }]));
+  const env = { ...process.env, X_QUEUE_PATH: qp, X_FOLLOWERS_PATH: path.join(dir, 'f.json') };
+  const r = spawnSync('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'home-report.mjs')], { env, encoding: 'utf-8' });
+  assert.equal(r.status, 0, r.stderr);
+  const j = JSON.parse(r.stdout);
+  assert.equal(j.measuredPosts, 2);
+  assert.equal(j.avgImpressions, 20);
+  assert.equal(j.byFormat[0].key, 'save_list');
+  assert.equal(j.top[0].text, '3行目');
+  assert.equal(j.followers[0].followers, 20);
+  assert.equal(j.updatedAt, '2026-10-09 10:00');
+  assert.match(j.note, /まだ判定できません/);
+});
