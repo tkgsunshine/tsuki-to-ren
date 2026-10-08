@@ -2540,5 +2540,23 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-06T16:30:58.188Z"
+  },
+  {
+    "id": "2026-10-09-noon-card",
+    "text": "保存して、返事が来ない夜に見返してね🌙\n#恋愛 #片思い\n-月-",
+    "date": "2026-10-09",
+    "slot": "noon",
+    "kind": "value",
+    "format": "card_voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "card": {
+      "text": "返事を待つ夜も、|[ちゃんと恋]してる|証拠だよ。",
+      "who": "月",
+      "style": "portrait"
+    },
+    "image": "data/x/cards/2026-10-09-noon.png",
+    "status": "scheduled",
+    "createdAt": "2026-10-08T13:09:13.628Z"
   }
 ]
