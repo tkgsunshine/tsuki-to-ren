@@ -9,6 +9,7 @@ import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
 import { FORMAT_TEASER, withTeaser } from './lib/teasers.mjs';
+import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 
@@ -155,6 +156,13 @@ if (llmSlots.length) {
     let candidate;
     try {
       candidate = extractJson(text);
+      // 16タイプのランキングの行に、二つ名（冒険家など）を足す（アプリと同じ一覧から。AIには書かせない）
+      for (const c of candidate) {
+        if (c && planned[c.slot]?.rank16) {
+          c.text = addMbtiNicks(c.text);
+          if (c.replyText) c.replyText = addMbtiNicks(c.replyText);
+        }
+      }
     } catch (e) {
       feedback = `\n\n# 前回の出力は不正でした: ${e.message}。JSON配列のみを出力してください。`;
       console.warn(`attempt ${attempt}: ${e.message}`);

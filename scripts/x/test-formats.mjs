@@ -184,3 +184,17 @@ test('MBTI相性データベース: 16×16・0〜100点・19段階以上・男�
   const saved = JSON.parse((await import('node:fs')).readFileSync(new URL('../../src/data/mbti-compat.json', import.meta.url), 'utf-8'));
   assert.deepEqual(saved.males, t);
 });
+
+test('16タイプのランキングの行に、二つ名が足される（二重に足さない・ほかの行は変えない・最悪でも280以内）', async () => {
+  const { addMbtiNicks } = await import('./lib/mbti-nick.mjs');
+  const { MBTI_TYPES } = await import('./lib/signals.mjs');
+  const { weightedLength } = await import('./lib/lint.mjs');
+  const once = addMbtiNicks('見出し\n\n1位 ISFP\n2位 ESTP\n\nあなたは何位？\n-月-');
+  assert.equal(once, '見出し\n\n1位 ISFP 冒険家\n2位 ESTP 起業家\n\nあなたは何位？\n-月-');
+  assert.equal(addMbtiNicks(once), once);
+  // 二つ名が長い8タイプでも、返信（9〜16位）が280に収まる
+  const longest = [...MBTI_TYPES].sort((a, b) => b.nick.length - a.nick.length).slice(0, 8);
+  const lines = longest.map((t, i) => `${i + 9}位 ${t.code}`).join('\n');
+  const reply = addMbtiNicks(`続きの9位〜16位です\n\n${lines}\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-`);
+  assert.ok(weightedLength(reply) <= 280, `返信の長さ ${weightedLength(reply)}`);
+});

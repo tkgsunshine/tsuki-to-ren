@@ -72,6 +72,17 @@ test('守護獣の投稿: LINEのおすすめ時間と「詳細な解説はリ�
     assert.ok(r1 && r2);
     assert.ok(p.text.startsWith('❤️🔮10月8日の恋愛運🔮❤️'));
   }
+  // 同じ日の本文・返信が、すべて別の文面（同一文は投稿時に飛ばされるため）。長さも280以内
+  {
+    const { weightedLength } = await import('./lib/lint.mjs');
+    const d = new Date(Date.UTC(2026, 9, 1));
+    for (let i = 0; i < 60; i++, d.setUTCDate(d.getUTCDate() + 1)) {
+      const ds = d.toISOString().slice(0, 10);
+      const day = buildBeastItems(all, ds, [], { allowLinks: false });
+      assert.equal(new Set(day.map((x) => x.text)).size, day.length, `${ds}: 同日に同一文`);
+      for (const x of day) assert.ok(weightedLength(x.text) <= 280, `${ds} ${x.id}: 長さ`);
+    }
+  }
   // 60日で、各枠が全60タイプを一巡する
   for (let k = 0; k < 4; k++) {
     const seen = new Set();
