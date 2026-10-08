@@ -18,7 +18,7 @@ test('カード画像: 1080×1350のPNGができ、縮小もできる。長す�
   assert.equal(png.subarray(1, 4).toString(), 'PNG');
   assert.equal(png.readUInt32BE(16), 1080);
   assert.equal(png.readUInt32BE(20), 1350);
-  const small = await renderCard({ text: '好きな人の前で緊張するのは、|[大切に思っている]|から。', who: '月', width: 360 });
+  const small = await renderCard({ text: '好きな人の前で緊張するのは、|[大切に思っているから]。', who: '月', width: 360 });
   assert.equal(small.readUInt32BE(16), 360);
   assert.ok(small.length < 150000, `縮小版は軽い: ${small.length}`);
   await assert.rejects(renderCard({ text: 'あ'.repeat(30) }), /長すぎる/);
@@ -30,4 +30,10 @@ test('月が語りかけるカード（portrait）: 1080×1350のPNGができる
   assert.equal(png.readUInt32BE(16), 1080);
   assert.equal(png.readUInt32BE(20), 1350);
   await assert.rejects(renderCard({ text: 'あ'.repeat(30), style: 'portrait' }), /長すぎる/);
+});
+
+test('カード文面: 行の長さの差が大きいと不合格（見た目のバランス）', () => {
+  assert.ok(parseCardText('あなたの今日の恋愛運、|かんたん鑑定|するよ。').problems.some((p) => p.includes('そろっていない')));
+  assert.deepEqual(parseCardText('あなたの[今日の恋愛運]を、|かんたん鑑定するよ。').problems, []);
+  assert.deepEqual(parseCardText('連絡が来ない日は、|[あなたが悪い]|わけじゃないよ。').problems, []);
 });
