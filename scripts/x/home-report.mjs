@@ -3,7 +3,7 @@
 // 取り込みは AI社員（毎時の定期実行）が ArtifactData の set で行う。data/x/report.md の更新（metrics の実行）があったときだけ行えばよい
 import fs from 'node:fs';
 import { readQueue, readJson } from './lib/queue.mjs';
-import { summarize, labelOf, FOLLOWERS_PATH } from './metrics.mjs';
+import { summarize, labelOf, FOLLOWERS_PATH, REPLIES_LOG_PATH } from './metrics.mjs';
 
 const queue = readQueue();
 const withM = queue.filter((p) => p.metrics24 && !p.replyTo);
@@ -11,12 +11,15 @@ const round = (r) => ({ ...r, impressions: Math.round(r.impressions * 10) / 10, 
 const followers = readJson(FOLLOWERS_PATH, []).slice(-30);
 const latestAt = withM.map((p) => p.metrics?.at || p.metrics24.at).sort().pop() || '';
 const jst = latestAt ? new Date(new Date(latestAt).getTime() + 9 * 3600000).toISOString().slice(0, 16).replace('T', ' ') : '';
+const repliesLog = readJson(REPLIES_LOG_PATH, []);
+const rsum = (a) => a.reduce((x, r) => x + (r.impressions ?? 0), 0);
 const minN = Math.min(...summarize(queue).map((r) => r.n));
 const out = {
   updatedAt: jst,
   measuredPosts: withM.length,
   avgImpressions: withM.length ? Math.round((withM.reduce((a, p) => a + (p.metrics24.impressions ?? 0), 0) / withM.length) * 10) / 10 : 0,
   followers,
+  myReplies: { count: repliesLog.length, totalImpressions: rsum(repliesLog), avgImpressions: repliesLog.length ? Math.round((rsum(repliesLog) / repliesLog.length) * 10) / 10 : 0, items: repliesLog.slice(0, 10).map((r) => ({ id: r.id, to: r.to, text: String(r.text || '').split('\n')[0].slice(0, 60), impressions: r.impressions, likes: r.likes, createdAt: r.createdAt })) },
   byFormat: summarize(queue).map(round),
   bySlot: summarize(queue, (p) => p.slot).map(round),
   top: [...withM].sort((a, b) => (b.metrics24.impressions ?? 0) - (a.metrics24.impressions ?? 0)).slice(0, 5).map((p) => ({ impressions: p.metrics24.impressions ?? 0, label: labelOf(p), id: p.id, text: p.text.split('\n')[0] })),
