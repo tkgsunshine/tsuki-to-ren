@@ -16,6 +16,7 @@ const W = 1080;
 const H = 1350;
 export const MAX_LINES = 4;
 export const MAX_CHARS_PER_LINE = 14;
+export const MAX_LINE_GAP = 6; // 最長の行と最短の行の字数の差（吹き出し・カードの見た目のバランス）
 const COLORS = {
   月: { accent: '#c084fc', glow1: 'rgba(168,85,247,0.40)', glow2: 'rgba(59,130,246,0.16)' },
   蓮: { accent: '#7db4ff', glow1: 'rgba(59,130,246,0.36)', glow2: 'rgba(168,85,247,0.16)' },
@@ -43,6 +44,8 @@ export function parseCardText(text) {
     const n = [...segs.map((s) => s.t).join('')].length;
     if (n > MAX_CHARS_PER_LINE) problems.push(`カードの1行が長すぎる（${n}字 / 最大${MAX_CHARS_PER_LINE}字）`);
   }
+  const lens = parsed.map((segs) => [...segs.map((s) => s.t).join('')].length);
+  if (lens.length > 1 && Math.max(...lens) - Math.min(...lens) > MAX_LINE_GAP) problems.push(`カードの行の長さがそろっていない（${lens.join('/')}字。最長と最短の差は${MAX_LINE_GAP}字まで）`);
   return { lines: parsed, problems };
 }
 
