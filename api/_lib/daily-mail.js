@@ -69,6 +69,9 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
   const hourBorder = content.hasOpponent ? '#06C755' : 'rgba(196, 161, 255, 0.4)';
   const hourLabel = content.hasOpponent ? '#ffffff' : GOLD;
   const hourNoteColor = content.hasOpponent ? '#eafff1' : '#a8a3bd';
+  // Gmail's dark mode (iOS app) darkens background-color but leaves background-image alone,
+  // so the green is also painted as a flat gradient: it stays bright green and the text Gmail darkens stays readable.
+  const hourBgImage = content.hasOpponent ? ` background-image: linear-gradient(${hourBg}, ${hourBg});` : '';
   const isRen = sub.character === 'ren';
   const charName = isRen ? '蓮' : '月';
   const charImg = `${SITE}/assets/${isRen ? 'ren' : 'tsuki'}.jpg`;
@@ -148,7 +151,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- LINE golden hour (LINE green when it is the LINE time; gold card in single mode) -->
           <tr>
             <td style="padding: 0 25px 14px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="${hourBg}" style="background-color: ${hourBg}; border: 1px solid ${hourBorder}; border-radius: 16px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="${hourBg}" style="background-color: ${hourBg};${hourBgImage} border: 1px solid ${hourBorder}; border-radius: 16px;">
                 <tr>
                   <td align="center" style="padding: 18px; text-align: center;">
                     <div style="font-size: 12px; color: ${hourLabel}; font-weight: bold; letter-spacing: 0.1em;">${hourTitle}</div>
