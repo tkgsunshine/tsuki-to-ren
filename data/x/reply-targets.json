@@ -1,0 +1,16 @@
+{
+  "_note": "返信候補の調査（scripts/x/find-replies.mjs）の設定。queries は X API の検索クエリ（512字以内）。accounts に @なしのユーザー名を足すと、そのアカウントの最近の投稿も候補にする。読み取り量=料金に直結するので、maxResultsPerQuery と実行回数（x_replies.yml）を増やすときは、X開発者ポータルの利用状況を確認する",
+  "queries": [
+    "(恋愛 OR 片思い OR 脈あり OR 両思い OR 既読無視 OR 恋愛mbti OR 恋愛MBTI) lang:ja -is:retweet -is:reply -is:quote",
+    "(四柱推命 OR 恋愛占い OR 引き寄せ OR タロット OR 星座占い OR 今日の運勢) lang:ja -is:retweet -is:reply -is:quote"
+  ],
+  "accounts": [],
+  "maxResultsPerQuery": 30,
+  "maxAgeMinutes": 240,
+  "minLikes": 20,
+  "minFollowers": 800,
+  "maxFollowers": 150000,
+  "maxCandidates": 8,
+  "excludeWords": ["Fセク", "セフレ", "不倫", "浮気相手", "エロ", "セックス", "ワンナイト", "出会い系", "パパ活", "副業", "LINE登録", "公式LINE", "鑑定受付", "ココナラ", "DMください", "プレゼント企画", "フォロー&RT", "RT&フォロー", "拡散希望"],
+  "excludeUsers": ["tsukitoren"]
+}
