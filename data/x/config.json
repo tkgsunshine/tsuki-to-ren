@@ -3,16 +3,11 @@
   "_modeNote": "approval=承認済み(PRマージ済み)の投稿のみ投稿 / auto=下書き生成後そのまま投稿。切り替えはこの値だけ",
   "dailySlots": [
     "morning",
-    "am",
     "noon",
-    "pm",
     "evening",
-    "night",
-    "late",
-    "beast2",
-    "beast3",
-    "beast4"
+    "night"
   ],
+  "_dailySlotsNote": "2026-10-09 から1日4本（朝8:15 守護獣／昼12:15・夕18:15・夜20:15 バズ検証）。slots には、過去の項目のために旧枠の時刻も残している",
   "slots": {
     "morning": "08:15",
     "am": "10:15",

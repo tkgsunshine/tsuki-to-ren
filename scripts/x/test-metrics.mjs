@@ -1,0 +1,107 @@
+// node --test scripts/x/test-metrics.mjs
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import http from 'node:http';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync, spawn } from 'node:child_process';
+import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf } from './metrics.mjs';
+
+const now = new Date('2026-10-10T00:00:00Z');
+const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
+const post = (id, h, extra = {}) => ({ id, slot: 'noon', kind: 'value', format: 'voice', status: 'posted', tweetId: `t-${id}`, postedAt: hoursAgo(h), text: `本文${id}\n2行目`, ...extra });
+
+test('対象: 20時間未満・tweetIdなし・未投稿は除く。基準値ありは72時間まで', () => {
+  const q = [
+    post('young', 10),
+    post('fresh', 25),
+    post('has24-young', 40, { metrics24: { impressions: 1 } }),
+    post('has24-old', 100, { metrics24: { impressions: 1 } }),
+    post('no-id', 30, { tweetId: undefined }),
+    post('sched', 30, { status: 'scheduled' }),
+  ];
+  assert.deepEqual(pickTargets(q, now).map((p) => p.id), ['fresh', 'has24-young']);
+});
+
+test('反映: 初回は metrics24 にも入り、2回目は metrics だけ更新する', () => {
+  const q = [post('a', 25)];
+  const pm = { impression_count: 120, like_count: 3, reply_count: 1, retweet_count: 2, quote_count: 1, bookmark_count: 4 };
+  assert.equal(applyMetrics(q, new Map([['t-a', pm]]), now), 1);
+  assert.equal(q[0].metrics24.impressions, 120);
+  assert.deepEqual({ ...q[0].metrics24 }, { ...q[0].metrics });
+  applyMetrics(q, new Map([['t-a', { ...pm, impression_count: 300 }]]), new Date(now.getTime() + 86400000));
+  assert.equal(q[0].metrics.impressions, 300);
+  assert.equal(q[0].metrics24.impressions, 120);
+  assert.equal(toMetrics({}).impressions, null);
+});
+
+test('集計: 返信は含めず、型ごとの平均を出す。守護獣は beast', () => {
+  const m = (impressions, likes) => ({ metrics24: { impressions, likes, replies: 0, reposts: 1, quotes: 1, bookmarks: 2 } });
+  const q = [
+    post('a', 30, m(100, 2)),
+    post('b', 30, m(300, 4)),
+    post('2026-10-09-chara-1', 30, { format: undefined, slot: 'morning', ...m(50, 0) }),
+    post('a-reply', 30, { replyTo: 'a', ...m(9999, 99) }),
+  ];
+  assert.equal(labelOf(q[2]), 'beast');
+  const s = summarize(q);
+  assert.deepEqual(s.map((r) => [r.key, r.n, r.impressions, r.likes, r.reposts]), [['voice', 2, 200, 3, 2], ['beast', 1, 50, 0, 2]]);
+  const md = buildReport(q, [{ date: '2026-10-09', followers: 12, tweets: 40 }], now);
+  assert.match(md, /\| voice \| 2 \| 200 \|/);
+  assert.match(md, /1\. 300回 ／ voice ／ b ／ 本文b/);
+  assert.match(md, /\| 2026-10-09 \| 12 \| 40 \|/);
+  assert.ok(!md.includes('9999'));
+  assert.match(buildReport([], [], now), /まだデータがありません/);
+});
+
+test('実行: 疑似APIサーバーに対して、署名つきで取得し、queue・followers・report を書く', async () => {
+  const requests = [];
+  const server = http.createServer((req, res) => {
+    requests.push({ url: req.url, auth: req.headers.authorization });
+    res.setHeader('content-type', 'application/json');
+    if (req.url.startsWith('/2/tweets')) {
+      const ids = new URL(req.url, 'http://x').searchParams.get('ids').split(',');
+      res.end(JSON.stringify({ data: ids.map((id) => ({ id, public_metrics: { impression_count: 77, like_count: 5, reply_count: 0, retweet_count: 0, quote_count: 0, bookmark_count: 1 } })) }));
+    } else {
+      res.end(JSON.stringify({ data: { public_metrics: { followers_count: 21, tweet_count: 99 } } }));
+    }
+  });
+  await new Promise((r) => server.listen(0, r));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xm-'));
+  const qp = path.join(dir, 'queue.json');
+  const old = new Date(Date.now() - 30 * 3600000).toISOString();
+  fs.writeFileSync(qp, JSON.stringify([{ id: 'p1', date: '2026-10-09', slot: 'noon', kind: 'value', format: 'voice', status: 'posted', tweetId: '111', postedAt: old, text: 'x' }]));
+  const env = {
+    ...process.env,
+    X_API_KEY: 'k', X_API_SECRET: 's', X_ACCESS_TOKEN: '1-t', X_ACCESS_TOKEN_SECRET: 'ts',
+    X_API_BASE: `http://127.0.0.1:${server.address().port}`,
+    X_QUEUE_PATH: qp, X_FOLLOWERS_PATH: path.join(dir, 'followers.json'), X_REPORT_PATH: path.join(dir, 'report.md'),
+  };
+  const r = await new Promise((resolve) => {
+    const c = spawn('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'metrics.mjs')], { env });
+    let out = '';
+    c.stdout.on('data', (d) => (out += d));
+    c.stderr.on('data', (d) => (out += d));
+    c.on('close', (code) => resolve({ code, out }));
+  });
+  server.close();
+  assert.equal(r.code, 0, r.out);
+  const q = JSON.parse(fs.readFileSync(qp, 'utf-8'));
+  assert.equal(q[0].metrics24.impressions, 77);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dir, 'followers.json'), 'utf-8'))[0].followers, 21);
+  assert.match(fs.readFileSync(path.join(dir, 'report.md'), 'utf-8'), /\| voice \| 1 \| 77 \|/);
+  assert.ok(requests.every((x) => /^OAuth /.test(x.auth || '')), '全リクエストが署名つき');
+  assert.ok(requests[0].url.includes('tweet.fields=public_metrics'));
+});
+
+test('認証情報が無ければ何も書かずに終わる', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xm-'));
+  const qp = path.join(dir, 'queue.json');
+  fs.writeFileSync(qp, '[]');
+  const env = { ...process.env, X_QUEUE_PATH: qp, X_FOLLOWERS_PATH: path.join(dir, 'f.json'), X_REPORT_PATH: path.join(dir, 'r.md') };
+  for (const k of ['X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET']) delete env[k];
+  const r = spawnSync('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'metrics.mjs')], { env, encoding: 'utf-8' });
+  assert.equal(r.status, 0);
+  assert.ok(!fs.existsSync(path.join(dir, 'r.md')));
+});

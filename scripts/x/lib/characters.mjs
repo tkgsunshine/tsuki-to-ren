@@ -184,19 +184,15 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   return { text: lines.join('\n').trim(), replyText, replyText2, star: st };
 }
 
-/** 1日4本の守護獣（朝・昼・夕・夜）。1本目は日柱どおり、2〜4本目は、15・30・45日ずらした守護獣（同じ日に重ならず、各枠で60日かけて全タイプが一巡する） */
-export const BEAST_SLOTS = [
-  { slot: 'morning', time: '08:15' },
-  { slot: 'beast2', time: '13:15' },
-  { slot: 'beast3', time: '17:15' },
-  { slot: 'beast4', time: '21:15' },
-];
+/** 守護獣の投稿は、毎朝1本（日柱の守護獣。60日で全タイプが一巡する）。2026-10-09 から4本→1本に減らした（反応の数字が出るまで、本数より型の検証を優先）。
+ *  昼・夕・夜の枠（beast2〜4）を復活させたいときは、ここに { slot: 'beast2', time: '13:15' } などを足す。2本目以降は 15・30・45日ずらした守護獣になる */
+export const BEAST_SLOTS = [{ slot: 'morning', time: '08:15' }];
 export function pickBeasts(all, dateStr) {
   const i = dayPillar(dateStr).index;
   return BEAST_SLOTS.map((_, k) => all[(i + 15 * k) % all.length]);
 }
 
-/** 1日4本の守護獣の投稿（queue 用の項目）。署名は、投稿ごとに「-月-」「-蓮-」を交代。lint 不合格なら例外。各投稿に、リプ欄の解説2通が付く */
+/** 守護獣の投稿（BEAST_SLOTS の本数。queue 用の項目）。署名は、投稿ごとに「-月-」「-蓮-」を交代。lint 不合格なら例外。各投稿に、リプ欄の解説2通が付く */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
   const beasts = pickBeasts(all, dateStr);
   const made = []; // 同じ日にすでに作った本文・返信（同一文の重複で、投稿時に飛ばされないよう、lint の履歴に加える）
