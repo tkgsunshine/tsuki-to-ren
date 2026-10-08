@@ -37,7 +37,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/x/queue.json data/x/followers.json data/x/report.md
+          git add data/x/queue.json data/x/followers.json data/x/report.md data/x/replies-log.json
           if git diff --staged --quiet; then
             echo "No metrics changes."
           else

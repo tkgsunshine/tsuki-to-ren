@@ -14,6 +14,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const API_BASE = process.env.X_API_BASE || 'https://api.x.com'; // テスト用に上書き可
 export const FOLLOWERS_PATH = process.env.X_FOLLOWERS_PATH || path.join(ROOT, 'data/x/followers.json');
 export const REPORT_PATH = process.env.X_REPORT_PATH || path.join(ROOT, 'data/x/report.md');
+export const REPLIES_LOG_PATH = process.env.X_REPLIES_LOG_PATH || path.join(ROOT, 'data/x/replies-log.json');
 
 const HOUR = 3600 * 1000;
 export const MIN_AGE_H = 20; // これ以上たった投稿から取る（基準値 metrics24 になる）
@@ -58,6 +59,21 @@ export function reconcileTimeline(queue, tweets) {
     n++;
   }
   return n;
+}
+
+/** 自分のタイムラインのうち、他のアカウントへの返信（運営が手で行った返信）を、記録に反映する。記録の件数を返す */
+export function mergeRepliesLog(log, tweets, myId, users = []) {
+  const handle = new Map(users.map((u) => [u.id, u.username]));
+  const byId = new Map(log.map((r) => [r.id, r]));
+  for (const t of tweets) {
+    if (!t.in_reply_to_user_id || t.in_reply_to_user_id === myId) continue; // 自分のスレッド返信は除く
+    const pm = t.public_metrics || {};
+    byId.set(t.id, {
+      id: t.id, createdAt: t.created_at, to: handle.get(t.in_reply_to_user_id) || '', text: String(t.text || '').slice(0, 140),
+      impressions: pm.impression_count ?? null, likes: pm.like_count ?? 0, replies: pm.reply_count ?? 0, reposts: pm.retweet_count ?? 0, bookmarks: pm.bookmark_count ?? 0,
+    });
+  }
+  return [...byId.values()].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).slice(0, 300);
 }
 
 /** API の public_metrics を、保存用の形にする */
@@ -189,10 +205,12 @@ async function main() {
 
   // 手動投稿モード: タイムラインから、手で投稿した分をキューに反映（投稿済み・tweetId）。反応の数字もここで取れる
   let reconciled = 0;
+  let repliesLog = readJson(REPLIES_LOG_PATH, []);
   if (readConfig().apiPosting === false && me?.id) {
     try {
-      const tl = await apiGet(creds, `/2/users/${me.id}/tweets`, { max_results: '100', 'tweet.fields': 'created_at,public_metrics' });
+      const tl = await apiGet(creds, `/2/users/${me.id}/tweets`, { max_results: '100', 'tweet.fields': 'created_at,public_metrics,in_reply_to_user_id', expansions: 'in_reply_to_user_id', 'user.fields': 'username' });
       reconciled = reconcileTimeline(queue, tl.data || []);
+      repliesLog = mergeRepliesLog(repliesLog, tl.data || [], me.id, tl.includes?.users || []);
       for (const t of tl.data || []) byId.set(t.id, t.public_metrics);
       console.log(`タイムライン${(tl.data || []).length}件 → 手動投稿として反映${reconciled}件`);
     } catch (e) {
@@ -223,6 +241,7 @@ async function main() {
   }
   if (updated || reconciled) writeQueue(queue);
   writeJson(FOLLOWERS_PATH, followers);
+  writeJson(REPLIES_LOG_PATH, repliesLog);
   fs.writeFileSync(REPORT_PATH, buildReport(queue, followers, now), 'utf-8');
 }
 

@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
-import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText } from './metrics.mjs';
+import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog } from './metrics.mjs';
 
 const now = new Date('2026-10-10T00:00:00Z');
 const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
@@ -61,7 +61,9 @@ test('実行: 疑似APIサーバーに対して、署名つきで取得し、que
     requests.push({ url: req.url, auth: req.headers.authorization });
     res.setHeader('content-type', 'application/json');
     if (/^\/2\/users\/42\/tweets/.test(req.url)) {
-      res.end(JSON.stringify({ data: [{ id: '900', text: '手で投稿した本文 &amp; テスト\n2行目 ', created_at: '2026-10-09T01:00:00.000Z', public_metrics: { impression_count: 5, like_count: 1, reply_count: 0, retweet_count: 0, quote_count: 0, bookmark_count: 0 } }] }));
+      res.end(JSON.stringify({ data: [{ id: '900', text: '手で投稿した本文 &amp; テスト\n2行目 ', created_at: '2026-10-09T01:00:00.000Z', public_metrics: { impression_count: 5, like_count: 1, reply_count: 0, retweet_count: 0, quote_count: 0, bookmark_count: 0 } },
+        { id: '901', text: '他のアカウントへの返信です', in_reply_to_user_id: 'u9', created_at: '2026-10-09T02:00:00.000Z', public_metrics: { impression_count: 120, like_count: 3, reply_count: 0, retweet_count: 0, quote_count: 0, bookmark_count: 0 } },
+        { id: '902', text: '自分のスレッドへの返信', in_reply_to_user_id: '42', created_at: '2026-10-09T03:00:00.000Z', public_metrics: { impression_count: 7 } }], includes: { users: [{ id: 'u9', username: 'bigaccount' }] } }));
     } else if (req.url.startsWith('/2/tweets')) {
       const ids = new URL(req.url, 'http://x').searchParams.get('ids').split(',');
       res.end(JSON.stringify({ data: ids.map((id) => ({ id, public_metrics: { impression_count: 77, like_count: 5, reply_count: 0, retweet_count: 0, quote_count: 0, bookmark_count: 1 } })) }));
@@ -82,7 +84,7 @@ test('実行: 疑似APIサーバーに対して、署名つきで取得し、que
     ...process.env,
     X_API_KEY: 'k', X_API_SECRET: 's', X_ACCESS_TOKEN: '1-t', X_ACCESS_TOKEN_SECRET: 'ts',
     X_API_BASE: `http://127.0.0.1:${server.address().port}`,
-    X_QUEUE_PATH: qp, X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'followers.json'), X_REPORT_PATH: path.join(dir, 'report.md'),
+    X_QUEUE_PATH: qp, X_REPLIES_LOG_PATH: path.join(dir, 'replies-log.json'), X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'followers.json'), X_REPORT_PATH: path.join(dir, 'report.md'),
   };
   const r = await new Promise((resolve) => {
     const c = spawn('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'metrics.mjs')], { env });
@@ -98,6 +100,8 @@ test('実行: 疑似APIサーバーに対して、署名つきで取得し、que
   assert.equal(q[1].status, 'posted', '手動投稿として照合される');
   assert.equal(q[1].tweetId, '900');
   assert.equal(q[1].manual, true);
+  const rl = JSON.parse(fs.readFileSync(path.join(dir, 'replies-log.json'), 'utf-8'));
+  assert.deepEqual(rl.map((r) => [r.id, r.to, r.impressions]), [['901', 'bigaccount', 120]], '他のアカウントへの返信だけを記録する');
   assert.equal(JSON.parse(fs.readFileSync(path.join(dir, 'followers.json'), 'utf-8'))[0].followers, 21);
   assert.match(fs.readFileSync(path.join(dir, 'report.md'), 'utf-8'), /\| voice \| 1 \| 77 \|/);
   assert.ok(requests.every((x) => /^OAuth /.test(x.auth || '')), '全リクエストが署名つき');
@@ -108,7 +112,7 @@ test('認証情報が無ければ何も書かずに終わる', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xm-'));
   const qp = path.join(dir, 'queue.json');
   fs.writeFileSync(qp, '[]');
-  const env = { ...process.env, X_QUEUE_PATH: qp, X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'f.json'), X_REPORT_PATH: path.join(dir, 'r.md') };
+  const env = { ...process.env, X_QUEUE_PATH: qp, X_REPLIES_LOG_PATH: path.join(dir, 'replies-log.json'), X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'f.json'), X_REPORT_PATH: path.join(dir, 'r.md') };
   for (const k of ['X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET']) delete env[k];
   const r = spawnSync('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'metrics.mjs')], { env, encoding: 'utf-8' });
   assert.equal(r.status, 0);
@@ -124,7 +128,7 @@ test('ホーム用レポート: home-report.mjs が、集計をJSONで出す', (
     { id: 'b', slot: 'night', kind: 'value', format: 'save_list', status: 'posted', text: '3行目', metrics24: m(30), metrics: m(30) },
   ]));
   fs.writeFileSync(path.join(dir, 'f.json'), JSON.stringify([{ date: '2026-10-09', followers: 20, tweets: 5 }]));
-  const env = { ...process.env, X_QUEUE_PATH: qp, X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'f.json') };
+  const env = { ...process.env, X_QUEUE_PATH: qp, X_REPLIES_LOG_PATH: path.join(dir, 'replies-log.json'), X_CONFIG_PATH: path.join(dir, 'config.json'), X_FOLLOWERS_PATH: path.join(dir, 'f.json') };
   const r = spawnSync('node', [path.join(path.dirname(new URL(import.meta.url).pathname), 'home-report.mjs')], { env, encoding: 'utf-8' });
   assert.equal(r.status, 0, r.stderr);
   const j = JSON.parse(r.stdout);
@@ -154,4 +158,15 @@ test('手動投稿の照合: 本文が一致する未投稿の項目だけを、
   assert.deepEqual([q[0].status, q[0].tweetId, q[0].manual], ['posted', '2', true]); // 取り済みの '1' は使わず、次の '2' に照合
   assert.equal(q[1].status, 'scheduled');
   assert.equal(q[3].status, 'skipped');
+});
+
+test('返信の記録: 他のアカウントへの返信だけを残し、既存の記録は表示回数を更新する', () => {
+  const log = [{ id: '1', createdAt: '2026-10-01T00:00:00Z', to: 'a', text: 'x', impressions: 1, likes: 0 }];
+  const tweets = [
+    { id: '1', text: 'x', in_reply_to_user_id: 'ua', created_at: '2026-10-01T00:00:00Z', public_metrics: { impression_count: 50, like_count: 2 } },
+    { id: '2', text: '自分へ', in_reply_to_user_id: 'me', created_at: '2026-10-02T00:00:00Z', public_metrics: {} },
+    { id: '3', text: '投稿', created_at: '2026-10-03T00:00:00Z', public_metrics: {} },
+  ];
+  const out = mergeRepliesLog(log, tweets, 'me', [{ id: 'ua', username: 'a' }]);
+  assert.deepEqual(out.map((r) => [r.id, r.impressions, r.to]), [['1', 50, 'a']]);
 });
