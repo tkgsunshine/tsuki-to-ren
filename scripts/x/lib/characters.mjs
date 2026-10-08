@@ -192,13 +192,13 @@ export function pickBeasts(all, dateStr) {
   return BEAST_SLOTS.map((_, k) => all[(i + 15 * k) % all.length]);
 }
 
-/** 守護獣の投稿（BEAST_SLOTS の本数。queue 用の項目）。署名は、投稿ごとに「-月-」「-蓮-」を交代。lint 不合格なら例外。各投稿に、リプ欄の解説2通が付く */
+/** 守護獣の投稿（BEAST_SLOTS の本数。queue 用の項目）。署名は常に「-月-」。lint 不合格なら例外。各投稿に、リプ欄の解説2通が付く */
 export function buildBeastItems(all, dateStr, history = [], opts = {}) {
   const beasts = pickBeasts(all, dateStr);
   const made = []; // 同じ日にすでに作った本文・返信（同一文の重複で、投稿時に飛ばされないよう、lint の履歴に加える）
   return BEAST_SLOTS.flatMap(({ slot, time }, k) => {
     const c = beasts[k];
-    const sign = (dayPillar(dateStr).index + k) % 2 === 0 ? '-月-' : '-蓮-';
+    const sign = '-月-'; // 2026-10-08〜: X もアプリも、話し手は月だけ
     const { text, replyText, replyText2 } = buildPostText(c, dateStr, sign, time);
     const item = {
       id: `${dateStr}-chara-${k + 1}`,

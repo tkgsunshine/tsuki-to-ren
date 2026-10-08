@@ -1,4 +1,4 @@
-// 返信候補の調査: 恋愛・占い系で、いま伸びている投稿を X API で探し、返信文の案（月・蓮）まで作って data/x/reply-candidates.json に書く。
+// 返信候補の調査: 恋愛・占い系で、いま伸びている投稿を X API で探し、返信文の案（月の声で2案）まで作って data/x/reply-candidates.json に書く。
 // 運営がやるのは、ホーム「X」タブの「返信候補」で、投稿のURLを開き、案をコピーして貼るだけ（自動返信はしない）。
 // 使い方: node --experimental-strip-types scripts/x/find-replies.mjs [--dry-run]
 // 必要な環境変数: X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_TOKEN_SECRET、ANTHROPIC_API_KEY（任意: ANTHROPIC_MODEL）
@@ -80,13 +80,13 @@ async function accountTweets(creds, username, max) {
 const SYSTEM = `あなたは占いサービス「月と蓮」の運営アカウントの、返信文を考える担当です。運営が、他のアカウントの投稿に手で返信します。サービスは公開前なので、宣伝はしません。目的は、価値のある返信で、読み手にプロフィールを見てもらうことです。
 # 返信のルール
 - 1〜3行、全角で100字以内。相手の投稿の中の、具体的な言葉に触れて、共感か、見方を1つ足すか、小さな問いを置く
-- 2案を作る。1案目は月（寄り添う、「〜ですよね」「〜してね」の温かい声。敬語はやわらかく）、2案目は蓮（落ち着いて論理的、結論→理由。「〜と思います」）。どちらも丁寧語（です・ます）
+- 2案を作る。どちらも月の声（寄り添う、温かい声。丁寧語（です・ます）でやわらかく）。1案目は共感を中心に、2案目は見方を1つ足す（切り口を変える）
 - 禁止: 宣伝・URL・「フォロー」「プロフ」「アプリ」「無料」「近日」、運営が個人として体験したような言い方（「私も」「試してみた」）、相手や第三者の気持ちの断定・保証（「必ず」「絶対」「相手はあなたに夢中」）、占いの当たり外れの比較、相手の内容の否定や批判、専門用語、医療・金銭の助言、性的な表現
 - 同じ言い回しを使い回さない。絵文字は多くて1つ（🌙など）
 - 投稿が次のどれかなら、ok を false にして理由を書く: 性的・不倫・依存的な関係の肯定、悩みが深刻（死にたい等）、宣伝・勧誘が主、炎上・攻撃的、占いの結果を断定して不安をあおる、返信しても意味が薄い（画像だけで内容が読み取れない）
 # 出力
 JSON配列のみ（説明やコードフェンスなし）。入力の各投稿に1つずつ:
-[{"id":"投稿ID","ok":true,"reason":"（okがfalseのときだけ）","angle":"返信の切り口を10字ほどで","drafts":[{"voice":"月","text":"..."},{"voice":"蓮","text":"..."}]}]`;
+[{"id":"投稿ID","ok":true,"reason":"（okがfalseのときだけ）","angle":"返信の切り口を10字ほどで","drafts":[{"voice":"月","text":"..."},{"voice":"月","text":"..."}]}]`;
 
 function extractJson(text) {
   const s = text.indexOf('[');
@@ -121,7 +121,7 @@ export async function draftReplies(client, model, cands) {
       const problems = drafts.flatMap((d) => checkDraft(d.text).map((p) => `${d.voice}: ${p}`));
       if (drafts.length < 2) problems.push('2案ない');
       if (problems.length) bad.push({ id: o.id, problems });
-      else byId.set(o.id, { ok: true, angle: String(o.angle || '').slice(0, 30), drafts: drafts.slice(0, 2).map((d) => ({ voice: d.voice === '蓮' ? '蓮' : '月', text: d.text.trim() })) });
+      else byId.set(o.id, { ok: true, angle: String(o.angle || '').slice(0, 30), drafts: drafts.slice(0, 2).map((d) => ({ voice: '月', text: d.text.trim() })) });
     }
     todo = todo.filter((c) => !byId.has(c.id));
     feedback = bad.length ? `\n\n# 次の投稿の案が不合格でした。直して、その投稿だけを出力してください:\n${bad.map((b) => `- ${b.id}: ${b.problems.join(' / ')}`).join('\n')}` : '';
