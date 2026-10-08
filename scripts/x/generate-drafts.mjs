@@ -12,6 +12,8 @@ import { FORMAT_TEASER, withTeaser } from './lib/teasers.mjs';
 import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
+import { parseCardText, renderCard } from './lib/card.mjs';
+import fs from 'node:fs';
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
@@ -58,7 +60,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 
 # 出力
 指定された本数（ユーザーメッセージの「今日の本数」にあるスロット）を、JSONの配列のみで出力する（前後に説明やコードフェンスを付けない）。
-[{"slot":"am","text":"..."},{"slot":"pm","text":"...","replyText":"（問いかけ型のときだけ）"}]`;
+[{"slot":"noon","text":"..."},{"slot":"pm","text":"...","replyText":"（問いかけ型のときだけ）"},{"slot":"night","text":"...","card":"（画像つきの一言の型のときだけ。行は|で区切る）"}]`;
 
 const planned = pickFormats(date); // { noon, evening, night }
 // build() を持つ型は、アプリの鑑定ロジックだけで本文を作る（AIは使わない）。それ以外はAIが言い回しを書く
@@ -102,6 +104,14 @@ function validate(posts) {
     const candidate = { ...p, slot, kind: f.kind || 'value' };
     for (const pr of lintPost(candidate, history, { allowLinks })) problems.push(`${slot}: ${pr}`);
     if (!/-(月|蓮)-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」か「-蓮-」の署名を付ける`);
+    if (f.card) {
+      if (!p.card) problems.push(`${slot}: 画像つきの型は card（画像に載せる言葉）も書く`);
+      else {
+        for (const pr of parseCardText(p.card).problems) problems.push(`${slot}: ${pr}`);
+        const plain = String(p.card).replace(/[|\[\]]/g, '');
+        for (const pr of lintPost({ slot, kind: 'value', text: `${plain}\n${(String(p.text).match(/-(月|蓮)-\s*$/) || ['-月-'])[0].trim()}` }, history, { allowLinks })) problems.push(`${slot}の画像の言葉: ${pr}`);
+      }
+    } else if (p.card) problems.push(`${slot}: 画像つきの型ではないので card は不要`);
     if (f.poll) {
       if (!p.replyText) problems.push(`${slot}: 問いかけ型は replyText（答え合わせの返信）も書く`);
       else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
@@ -192,11 +202,16 @@ const beastItems = buildBeastItems(all, date, history, { allowLinks });
 const buzzItem = (slot, time) => {
   const f = planned[slot];
   const p = posts.find((x) => x.slot === slot);
-  return {
+  const item = {
     id: `${date}-${slot}`, date, slot, kind: f.kind || 'value', text: p.text.trim(),
     format: f.id, system: f.system, purpose: f.purpose, // 反応の比較用（どの型が取れたか）
     status: 'scheduled', createdAt: new Date().toISOString(),
   };
+  if (f.card && p.card) {
+    item.card = { text: String(p.card).trim(), who: /-蓮-\s*$/.test(item.text) ? '蓮' : '月' }; // 画像の元（作り直し・ホームの縮小画像用）
+    item.image = `data/x/cards/${date}-${slot}.png`;
+  }
+  return item;
 };
 // 問いかけ型は、答え合わせの返信（親のあとに出す）を、別の項目として追加する
 const replyOf = (slot) => {
@@ -214,6 +229,12 @@ const items = [...beastItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), .
 if (dryRun) {
   console.log(JSON.stringify(items, null, 2));
   process.exit(0);
+}
+// 画像つきの一言カードのPNGを作る（リポジトリ内に置き、投稿時にアップロードされる）
+for (const it of items.filter((x) => x.card)) {
+  const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(it.image));
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, await renderCard(it.card));
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);
