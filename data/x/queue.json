@@ -771,8 +771,10 @@
     "format": "mbti_love",
     "system": "mbti_love",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:28.912Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T17:53:28.912Z",
+    "postedAt": "2026-10-08T10:10:19.853Z",
+    "tweetId": "2108137911707164981"
   },
   {
     "id": "2026-10-08-evening-reply",
@@ -784,8 +786,10 @@
     "format": "mbti_love_reply",
     "system": "mbti_love",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-06T15:19:52.433Z"
+    "status": "posted",
+    "createdAt": "2026-10-06T15:19:52.433Z",
+    "postedAt": "2026-10-08T10:10:19.853Z",
+    "tweetId": "2108137912789286944"
   },
   {
     "id": "2026-10-08-night",
