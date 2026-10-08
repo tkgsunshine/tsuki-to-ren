@@ -82,3 +82,30 @@ test('実行: 疑似の検索API・疑似LLMで、候補と返信案が data/x/r
   assert.equal(j.items[0].drafts[0].voice, '月');
   assert.ok(searchHits[0].includes('sort_order=relevancy') && searchHits[0].includes('start_time='));
 });
+
+test('クエリの動作確認（--probe）: 件数・エラーを表示し、候補ファイルは書かない', async () => {
+  const x = http.createServer((req, res) => {
+    res.setHeader('content-type', 'application/json');
+    if (decodeURIComponent(req.url).includes('min_faves')) {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ errors: [{ message: "Reference to invalid operator 'min_faves'" }] }));
+    } else res.end(JSON.stringify({ data: [{ id: '1', author_id: 'u', text: '恋愛の投稿', created_at: new Date().toISOString(), public_metrics: { like_count: 50, reply_count: 1 } }], includes: { users: [{ id: 'u', username: 'zz', public_metrics: { followers_count: 5000 } }] } }));
+  });
+  await new Promise((r) => x.listen(0, r));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xp-'));
+  fs.writeFileSync(path.join(dir, 't.json'), JSON.stringify(cfg));
+  const run = (q) => new Promise((resolve) => {
+    const env = { ...process.env, X_API_KEY: 'k', X_API_SECRET: 's', X_ACCESS_TOKEN: '1-t', X_ACCESS_TOKEN_SECRET: 'ts', X_API_BASE: `http://127.0.0.1:${x.address().port}`, X_REPLY_TARGETS_PATH: path.join(dir, 't.json'), X_REPLY_CANDIDATES_PATH: path.join(dir, 'c.json') };
+    delete env.ANTHROPIC_API_KEY;
+    const c = spawn(process.execPath, ['--experimental-strip-types', path.join(import.meta.dirname, 'find-replies.mjs'), `--probe=${q}`], { env });
+    let out = '';
+    c.stdout.on('data', (d) => (out += d));
+    c.on('close', () => resolve(out));
+  });
+  assert.match(await run('恋愛 min_faves:100'), /エラー: .*400.*min_faves/s);
+  const ok = await run('恋愛 lang:ja');
+  assert.match(ok, /結果: 1件/);
+  assert.match(ok, /いいね50/);
+  x.close();
+  assert.ok(!fs.existsSync(path.join(dir, 'c.json')));
+});

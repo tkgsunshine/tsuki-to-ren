@@ -130,12 +130,26 @@ export async function draftReplies(client, model, cands) {
   return byId;
 }
 
+/** 検索クエリの動作確認（--probe="クエリ"）: そのクエリを1回だけ検索し、件数・上位の投稿・エラーを表示する。候補の保存・返信案の作成はしない */
+async function probe(creds, query, cfg) {
+  const start = new Date(Date.now() - (cfg.maxAgeMinutes ?? 240) * 60000 - 5 * 60000).toISOString();
+  try {
+    const hits = await search(creds, query, 10, start);
+    console.log(`クエリ: ${query}\n結果: ${hits.length}件`);
+    for (const { t, user } of hits.slice(0, 10)) console.log(`- いいね${t.public_metrics?.like_count} 返信${t.public_metrics?.reply_count} @${user?.username}(${user?.public_metrics?.followers_count}) ${String(t.text).replace(/\n/g, ' ').slice(0, 50)}`);
+  } catch (e) {
+    console.log(`クエリ: ${query}\nエラー: ${e.message}`);
+  }
+}
+
 async function main() {
   const creds = { apiKey: process.env.X_API_KEY, apiSecret: process.env.X_API_SECRET, accessToken: process.env.X_ACCESS_TOKEN, accessTokenSecret: process.env.X_ACCESS_TOKEN_SECRET };
   if (!Object.values(creds).every(Boolean)) return console.warn('X の認証情報が未設定のため、何もしません。');
-  if (!process.env.ANTHROPIC_API_KEY) return console.warn('ANTHROPIC_API_KEY が未設定のため、何もしません。');
   const dryRun = process.argv.includes('--dry-run');
   const cfg = readJson(TARGETS_PATH, {});
+  const probeArg = process.argv.find((a) => a.startsWith('--probe='));
+  if (probeArg) return probe(creds, probeArg.slice(8), cfg);
+  if (!process.env.ANTHROPIC_API_KEY) return console.warn('ANTHROPIC_API_KEY が未設定のため、何もしません。');
   const now = new Date();
   const start = new Date(now.getTime() - (cfg.maxAgeMinutes ?? 240) * 60000 - 5 * 60000).toISOString();
   const errors = [];
