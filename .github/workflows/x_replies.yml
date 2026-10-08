@@ -1,13 +1,15 @@
 name: X Reply Research (Hasu-to-Tsuki)
 
-# 1日3回（JST 8:20 / 12:20 / 20:20）、恋愛・占い系で「いま伸びている投稿」を X API の検索で探し、返信文の案（月・蓮）まで作って
+# （定期実行は停止中。手動実行のみ）恋愛・占い系で「いま伸びている投稿」を X API の検索で探し、返信文の案（月・蓮）まで作って
 # data/x/reply-candidates.json に書く。運営がホームの「返信候補」から、投稿を開いて、案をコピーして貼る（自動返信はしない）。
 # 検索は読み取り量に応じて料金がかかる。回数・件数は data/x/reply-targets.json と、この cron で調整する
+# 2026-10-08 から、定期実行は停止（手動実行のみ）。理由: X API v2 の検索では min_faves が使えず、画面の検索（運営が手で実施）より精度が低いわりに、読み取り料金がかかるため。
+# 再開するときは、下の schedule の3行（# を外す）を戻す
 on:
-  schedule:
-    - cron: '20 23 * * *'
-    - cron: '20 3 * * *'
-    - cron: '20 11 * * *'
+  # schedule:
+  #   - cron: '20 23 * * *'
+  #   - cron: '20 3 * * *'
+  #   - cron: '20 11 * * *'
   workflow_dispatch:
     inputs:
       probe_query:
