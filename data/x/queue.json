@@ -267,7 +267,7 @@
     "postedAt": "2026-10-06T02:56:27.104Z",
     "tweetId": "2107303947799077240",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 7,
       "likes": 1,
       "replies": 0,
@@ -308,7 +308,7 @@
     "postedAt": "2026-10-06T13:21:51.926Z",
     "tweetId": "2107461341057343933",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 8,
       "likes": 1,
       "replies": 1,
@@ -339,7 +339,7 @@
     "postedAt": "2026-10-06T15:07:52.716Z",
     "tweetId": "2107488017879572866",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 3,
       "likes": 0,
       "replies": 1,
@@ -370,7 +370,7 @@
     "postedAt": "2026-10-06T15:07:52.716Z",
     "tweetId": "2107488018919739417",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 1,
       "likes": 0,
       "replies": 0,
@@ -493,7 +493,7 @@
     "postedAt": "2026-10-06T10:21:30.730Z",
     "tweetId": "2107415951071162536",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 7,
       "likes": 0,
       "replies": 1,
@@ -526,7 +526,7 @@
     "postedAt": "2026-10-06T15:07:52.716Z",
     "tweetId": "2107488016751349859",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 3,
       "likes": 0,
       "replies": 0,
@@ -554,7 +554,25 @@
     "status": "posted",
     "createdAt": "2026-10-05T17:53:28.911Z",
     "postedAt": "2026-10-08T00:08:45.648Z",
-    "tweetId": "2107986523341685091"
+    "tweetId": "2107986523341685091",
+    "metrics": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 14,
+      "likes": 0,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 14,
+      "likes": 0,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-08-chara-1-reply",
@@ -567,7 +585,25 @@
     "status": "posted",
     "createdAt": "2026-10-06T08:41:36.237Z",
     "postedAt": "2026-10-08T00:08:45.648Z",
-    "tweetId": "2107986524708966603"
+    "tweetId": "2107986524708966603",
+    "metrics": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 12,
+      "likes": 0,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 12,
+      "likes": 0,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-08-chara-1-reply2",
@@ -580,7 +616,25 @@
     "status": "posted",
     "createdAt": "2026-10-06T08:41:36.237Z",
     "postedAt": "2026-10-08T00:08:45.648Z",
-    "tweetId": "2107986525879206098"
+    "tweetId": "2107986525879206098",
+    "metrics": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 2,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 2,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-08-chara-2",
@@ -702,7 +756,25 @@
     "status": "posted",
     "createdAt": "2026-10-05T17:53:28.912Z",
     "postedAt": "2026-10-08T01:49:41.842Z",
-    "tweetId": "2108011923916890553"
+    "tweetId": "2108011923916890553",
+    "metrics": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 13,
+      "likes": 0,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 13,
+      "likes": 0,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-08-am-reply",
@@ -717,7 +789,25 @@
     "status": "posted",
     "createdAt": "2026-10-05T17:57:56.530Z",
     "postedAt": "2026-10-08T01:49:41.842Z",
-    "tweetId": "2108011925007384602"
+    "tweetId": "2108011925007384602",
+    "metrics": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 12,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 12,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-08-noon",
@@ -731,7 +821,25 @@
     "status": "posted",
     "createdAt": "2026-10-05T17:53:28.912Z",
     "postedAt": "2026-10-08T04:08:02.926Z",
-    "tweetId": "2108046740347564043"
+    "tweetId": "2108046740347564043",
+    "metrics": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 10,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 10,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-08-pm",
@@ -1827,7 +1935,7 @@
     "postedAt": "2026-10-07T00:09:22.160Z",
     "tweetId": "2107624288412897631",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 3,
       "likes": 0,
       "replies": 1,
@@ -1858,7 +1966,7 @@
     "postedAt": "2026-10-07T00:09:22.160Z",
     "tweetId": "2107624289725792594",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 3,
       "likes": 0,
       "replies": 1,
@@ -1889,7 +1997,7 @@
     "postedAt": "2026-10-07T00:09:22.160Z",
     "tweetId": "2107624290841411612",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 1,
       "likes": 0,
       "replies": 0,
@@ -1919,7 +2027,7 @@
     "postedAt": "2026-10-07T05:08:46.346Z",
     "tweetId": "2107699635418751069",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 1,
       "likes": 0,
       "replies": 1,
@@ -1950,7 +2058,7 @@
     "postedAt": "2026-10-07T05:08:46.346Z",
     "tweetId": "2107699636756705554",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 1,
       "likes": 0,
       "replies": 1,
@@ -1981,7 +2089,7 @@
     "postedAt": "2026-10-07T05:08:46.346Z",
     "tweetId": "2107699637788590392",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 0,
       "likes": 0,
       "replies": 0,
@@ -2011,7 +2119,7 @@
     "postedAt": "2026-10-07T09:08:40.887Z",
     "tweetId": "2107760012059611493",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 7,
       "likes": 0,
       "replies": 1,
@@ -2042,7 +2150,7 @@
     "postedAt": "2026-10-07T09:08:40.887Z",
     "tweetId": "2107760013515080091",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 5,
       "likes": 0,
       "replies": 1,
@@ -2073,7 +2181,7 @@
     "postedAt": "2026-10-07T09:08:40.887Z",
     "tweetId": "2107760014609846427",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 3,
       "likes": 0,
       "replies": 0,
@@ -2103,8 +2211,8 @@
     "postedAt": "2026-10-07T13:04:51.268Z",
     "tweetId": "2107819446454624380",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
-      "impressions": 11,
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 12,
       "likes": 0,
       "replies": 0,
       "reposts": 0,
@@ -2159,7 +2267,7 @@
     "postedAt": "2026-10-07T02:07:58.904Z",
     "tweetId": "2107654136351412292",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 2,
       "likes": 0,
       "replies": 1,
@@ -2192,7 +2300,7 @@
     "postedAt": "2026-10-07T02:07:58.904Z",
     "tweetId": "2107654137399918595",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 2,
       "likes": 0,
       "replies": 0,
@@ -2224,7 +2332,7 @@
     "postedAt": "2026-10-07T04:08:56.245Z",
     "tweetId": "2107684575887376438",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 2,
       "likes": 0,
       "replies": 0,
@@ -2256,7 +2364,7 @@
     "postedAt": "2026-10-07T07:08:53.127Z",
     "tweetId": "2107729862337470520",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 1,
       "likes": 0,
       "replies": 1,
@@ -2289,7 +2397,7 @@
     "postedAt": "2026-10-07T08:09:14.783Z",
     "tweetId": "2107745052243972428",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 1,
       "likes": 0,
       "replies": 0,
@@ -2321,7 +2429,7 @@
     "postedAt": "2026-10-07T10:09:26.801Z",
     "tweetId": "2107775302080278619",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 6,
       "likes": 0,
       "replies": 1,
@@ -2354,7 +2462,7 @@
     "postedAt": "2026-10-07T10:09:26.801Z",
     "tweetId": "2107775303418290251",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 6,
       "likes": 0,
       "replies": 0,
@@ -2386,7 +2494,7 @@
     "postedAt": "2026-10-07T12:08:54.766Z",
     "tweetId": "2107805365572395400",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 9,
       "likes": 0,
       "replies": 1,
@@ -2418,8 +2526,8 @@
     "postedAt": "2026-10-07T13:29:08.571Z",
     "tweetId": "2107825556423385462",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
-      "impressions": 16,
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 18,
       "likes": 0,
       "replies": 1,
       "reposts": 0,
@@ -2451,8 +2559,8 @@
     "postedAt": "2026-10-07T13:29:08.571Z",
     "tweetId": "2107825557346115910",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
-      "impressions": 16,
+      "at": "2026-10-09T00:38:23.887Z",
+      "impressions": 17,
       "likes": 0,
       "replies": 0,
       "reposts": 0,
@@ -2484,7 +2592,7 @@
     "postedAt": "2026-10-07T12:08:54.766Z",
     "tweetId": "2107805366566494563",
     "metrics": {
-      "at": "2026-10-08T12:06:24.136Z",
+      "at": "2026-10-09T00:38:23.887Z",
       "impressions": 8,
       "likes": 0,
       "replies": 0,
