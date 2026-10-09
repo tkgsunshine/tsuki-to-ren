@@ -2,7 +2,7 @@
 // ts を直接読むため、実行は node --experimental-strip-types で行う。
 import { generateFortuneResult, calculateDayPillar, calculateHonmeiStar } from '../../../src/utils/fortuneEngine.ts';
 import { dayPillar } from './signals.mjs';
-import { lintPost } from './lint.mjs';
+import { lintPost, weightedLength } from './lint.mjs';
 import { bandOf, STEM_FLAVOR, BAND_AIR, BAND_ACTION, ANIMAL_ACTION } from './beast-texts.mjs';
 import { BEAST_TEASER } from './teasers.mjs';
 
@@ -149,8 +149,16 @@ function hoursLine(hours, postTime) {
     const [ph, pm] = postTime.split(':').map(Number);
     if (end <= ph * 60 + pm) return '';
   }
-  return `【お相手へのLINEのおすすめ時間】${hours}`;
+  return `【LINEのおすすめ時間】${hours}`;
 }
+
+/** 本文が280（日本語140字）を超えるとき（ごく一部の組み合わせ）だけ使う、短い言い換え。意味は変えない */
+const SHORT_ONE_LINE = {
+  '魅力と自信が溢れ、幸運が味方する最高日': '魅力と自信が溢れる最高日',
+  '新しい挑戦や積極的発信で評価が高まる日': '積極的な発信で評価が高まる日',
+  '心身を調和させ、自分らしさを輝かせる日': '心身を整え、自分らしさが輝く日',
+  '外部刺激を遮断し、自分を甘やかし整える日': '刺激を避け、自分を整える日',
+};
 
 /** 投稿文を組み立てる。sign は「-月-」「-蓮-」。postTime（"HH:MM"）を渡すと、すでに過ぎた時間帯のおすすめは省く。
  *  replyText は、【今日の空気】のくわしい解説（リプ欄に、親の60分後以降に出す） */
@@ -160,19 +168,23 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   const tone = sign.includes('蓮') ? 'ren' : 'tsuki';
   const advice = st.advice?.[tone];
   const flavor = STEM_FLAVOR[tone][c.stem];
-  const lines = [
+  const compose = (oneLine) => [
     `❤️🔮${mm}月${dd}日の恋愛運🔮❤️`,
+    '守護獣と本命星の鑑定は固定ポストでリプしてね✨',
+    '',
     '-対象-',
     `【守護獣】：${c.name}（${c.theme}×${c.animalYomi}）`,
     `【本命星】：${st.name}`,
     '',
     '-結果-',
     `【今日の点数】：${st.score}点`,
-    `【今日の空気】${st.oneLine}`,
+    `【今日の空気】${oneLine}`,
     hoursLine(st.hours, postTime),
     '',
-    advice && flavor ? '（詳細な解説はリプ欄へ）' : '',
-  ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined));
+    advice && flavor ? '（解説はリプ欄へ）' : '',
+  ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined)).join('\n').trim();
+  let postText = compose(st.oneLine);
+  if (weightedLength(postText) > 280 && SHORT_ONE_LINE[st.oneLine]) postText = compose(SHORT_ONE_LINE[st.oneLine]);
   // リプ欄は2通（Xの280字の制限のため、分ける）。
   // 1通目=【今日の空気】のくわしい解説（アプリの鑑定の解説＋守護獣の十干のひとこと。署名の人格のトーン）
   // 2通目=【開運アクション】（点数の帯の過ごし方＋守護獣の十二支のアクション）＋診断の案内
@@ -181,7 +193,7 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   const replyText2 = replyText
     ? ['【開運アクション】', '', action, BEAST_TEASER, sign].join('\n')
     : '';
-  return { text: lines.join('\n').trim(), replyText, replyText2, star: st };
+  return { text: postText, replyText, replyText2, star: st };
 }
 
 /** 守護獣の投稿は、毎朝1本（日柱の守護獣。60日で全タイプが一巡する）。2026-10-09 から4本→1本に減らした（反応の数字が出るまで、本数より型の検証を優先）。
