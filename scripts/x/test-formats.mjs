@@ -130,24 +130,27 @@ test('アプリの予告: 返信の最後（署名の直前）に入る。守護
   assert.equal(FORMAT_TEASER.gap_rank, MBTI_TEASER);
   assert.equal(FORMAT_TEASER.mbti_love, MBTI_TEASER);
   const r = buildBeastPairRanking('2026-10-07');
-  assert.ok(r.replyText.includes(BEAST_TEASER) && r.replyText.trimEnd().endsWith('-月-'));
-  for (const text of [t, r.replyText]) assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), []);
+  assert.ok(r.replyText2.includes(BEAST_TEASER) && r.replyText2.trimEnd().endsWith('-月-'));
+  for (const text of [t, r.replyText2]) assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), []);
 });
 
-test('守護獣の相性ランキング: 主役を1つ選び、TOP12とワースト10。点数は、アプリの鑑定ロジック（0〜100点）', () => {
+test('守護獣の相性ランキング: 主役を1つ選び、本文はTOP3（メダル＋一言）、返信1は4位から、返信2はワースト。点数は、アプリの鑑定ロジック（0〜100点）', () => {
   const r = buildBeastPairRanking('2026-10-07');
-  assert.ok(r.top.length >= 8 && r.top.length <= 12, `TOP${r.top.length}`);
-  assert.equal(r.worst.length, 10);
+  assert.equal(r.top.length, 3);
+  assert.ok(r.mid.length >= 2 && r.mid.length <= 5, `mid ${r.mid.length}`);
+  assert.ok(r.worst.length >= 2 && r.worst.length <= 5, `worst ${r.worst.length}`);
+  assert.match(r.text, /🥇1位/);
+  assert.ok(!/🥇|🥈|🥉/.test(r.replyText2), 'ワーストにメダルは付けない');
   const all = beastList();
   const a = all.find((b) => b.name === r.anchor);
-  for (const t of [...r.top, ...r.worst]) {
+  for (const t of [...r.top, ...r.mid, ...r.worst]) {
     const b = all.find((x) => x.name === t.name);
     assert.equal(t.score, getPillarPairScore(a.stem, a.branch, b.stem, b.branch));
     assert.ok(t.score >= 0 && t.score <= 100);
     assert.notEqual(t.name, r.anchor, '主役自身は載せない');
   }
-  assert.ok(r.top[0].score >= r.top.at(-1).score && r.worst[0].score <= r.worst[9].score);
-  assert.ok(r.top.at(-1).score > r.worst[0].score);
+  assert.ok(r.top.at(-1).score >= r.mid[0].score && r.mid.at(-1).score > r.worst[0].score);
+  assert.ok(r.worst[0].score <= r.worst.at(-1).score);
   // 入れ替えても同じ点数（2人の間の相性）
   const b = all[7];
   assert.equal(getPillarPairScore(a.stem, a.branch, b.stem, b.branch), getPillarPairScore(b.stem, b.branch, a.stem, a.branch));
@@ -161,7 +164,7 @@ test('守護獣の相性ランキング: 本文と返信が自動チェックを
     const r = buildBeastPairRanking(d);
     anchors.add(r.anchor);
     seen.add(r.text);
-    for (const text of [r.text, r.replyText]) {
+    for (const text of [r.text, r.replyText, r.replyText2]) {
       assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), [], `${d}`);
       assert.ok(weightedLength(text) <= 280, `${d} ${weightedLength(text)}`);
       assert.ok(!text.includes('％') && !text.includes('%'));

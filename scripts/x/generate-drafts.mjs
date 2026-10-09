@@ -136,11 +136,12 @@ const detPosts = detSlots.map((slot) => {
   const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
   if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks }).map((x) => `返信: ${x}`));
+  if (out.replyText2) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText2 }, history, { allowLinks }).map((x) => `返信2: ${x}`));
   if (problems.length) {
     console.error(`${slot}（${f.id}）の本文がチェック不合格:\n - ${problems.join('\n - ')}`);
     process.exit(1);
   }
-  return { slot, text: out.text, replyText: out.replyText };
+  return { slot, text: out.text, replyText: out.replyText, replyText2: out.replyText2 };
 });
 
 let posts = [];
@@ -218,11 +219,17 @@ const replyOf = (slot) => {
   const f = planned[slot];
   const p = posts.find((x) => x.slot === slot);
   if (!(f.poll || f.reply) || !p.replyText) return [];
+  // 返信が2通ある型（ランキングなど）は、2通目を、1通目への返信として続ける
+  const second = p.replyText2 ? [{
+    id: `${date}-${slot}-reply2`, date, slot, kind: 'value', text: String(p.replyText2).trim(), replyTo: `${date}-${slot}-reply`,
+    format: `${f.id}_reply2`, system: f.system, purpose: f.purpose,
+    status: 'scheduled', createdAt: new Date().toISOString(),
+  }] : [];
   return [{
     id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: finalReply(f, p.replyText), replyTo: `${date}-${slot}`,
     format: `${f.id}_reply`, system: f.system, purpose: f.purpose,
     status: 'scheduled', createdAt: new Date().toISOString(),
-  }];
+  }, ...second];
 };
 const items = [...beastItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
 
