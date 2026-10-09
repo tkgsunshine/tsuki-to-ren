@@ -104,3 +104,10 @@ test('守護獣の返信: 22日続けて作っても、過去の投稿との同�
     hist = hist.concat(items);
   }
 });
+
+test('守護獣の順番: 60すべてを1回ずつ回し、どの日も「その日の日柱と同じ守護獣」にならない（同じだと、毎日100点に張り付く）', async () => {
+  const { BEAST_ORDER } = await import('./lib/characters.mjs');
+  assert.equal(BEAST_ORDER.length, 60);
+  assert.equal(new Set(BEAST_ORDER).size, 60);
+  BEAST_ORDER.forEach((b, i) => assert.notEqual(b, i, `日柱${i}`));
+});
