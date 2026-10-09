@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-13",
+  "internal": {
+    "stem": "庚",
+    "branch": "申",
+    "element": "金"
+  },
+  "todayMood": {
+    "name": "見極め",
+    "hint": "手放す・決める・区切りをつける",
+    "caution": "言い方がきつくならないように"
+  },
+  "moon": {
+    "age": 1.7,
+    "name": "新月"
+  },
+  "featuredTypes": [
+    {
+      "code": "ISTJ",
+      "nick": "管理者",
+      "trait": "誠実でコツコツ・約束を守る"
+    },
+    {
+      "code": "ISTP",
+      "nick": "巨匠",
+      "trait": "冷静で器用・必要なときに動く"
+    },
+    {
+      "code": "ESTJ",
+      "nick": "幹部",
+      "trait": "段取り上手・物事をまとめて進める"
+    },
+    {
+      "code": "ESTP",
+      "nick": "起業家",
+      "trait": "行動が速い・まず試してみる"
+    }
+  ]
+}
