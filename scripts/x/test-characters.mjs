@@ -93,3 +93,14 @@ test('守護獣の投稿: LINEのおすすめ時間と「解説はリプ欄へ�
     assert.equal(seen.size, 60, `枠${k + 1}`);
   }
 });
+
+test('守護獣の返信: 22日続けて作っても、過去の投稿との同一文で止まらない（言い回しの候補が有限でも、別の言い回しに替える）', async () => {
+  const { computeAll, buildBeastItems } = await import('./lib/characters.mjs');
+  let hist = [];
+  for (let i = 0; i < 22; i++) {
+    const d = new Date(Date.UTC(2026, 9, 19 + i)).toISOString().slice(0, 10);
+    const items = buildBeastItems(computeAll(d), d, hist, { allowLinks: false });
+    assert.equal(items.length, 3, d);
+    hist = hist.concat(items);
+  }
+});
