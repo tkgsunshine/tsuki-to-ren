@@ -2,6 +2,9 @@ import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { installStandaloneBottomGapFix } from './utils/pwaHelper'
+
+installStandaloneBottomGapFix()
 
 // index.html の起動スプラッシュを、アプリが描画されたあとにフェードアウトして外す
 function BootSplashRemover() {

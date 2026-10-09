@@ -422,7 +422,8 @@ body {
 
 .navbar-container {
   position: fixed !important;
-  bottom: 0 !important;
+  /* iOS ホーム画面アプリで表示領域が短く報告される分だけ下げる（通常は 0） */
+  bottom: calc(-1 * var(--pwa-bottom-gap, 0px)) !important;
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
