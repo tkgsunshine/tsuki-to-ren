@@ -3,7 +3,7 @@
 import { generateFortuneResult, calculateDayPillar, calculateHonmeiStar } from '../../../src/utils/fortuneEngine.ts';
 import { dayPillar } from './signals.mjs';
 import { lintPost } from './lint.mjs';
-import { bandOf, STEM_FLAVOR, BAND_ACTION, ANIMAL_ACTION } from './beast-texts.mjs';
+import { bandOf, STEM_FLAVOR, BAND_AIR, BAND_ACTION, ANIMAL_ACTION } from './beast-texts.mjs';
 import { BEAST_TEASER } from './teasers.mjs';
 
 // 十干の読み（名前のふりがな用）と、動物の読み
@@ -177,9 +177,9 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   // 1通目=【今日の空気】のくわしい解説（アプリの鑑定の解説＋守護獣の十干のひとこと。署名の人格のトーン）
   // 2通目=【開運アクション】（点数の帯の過ごし方＋守護獣の十二支のアクション）＋診断の案内
   const action = BAND_ACTION[bandOf(st.score)] + (ANIMAL_ACTION[c.animal] || '');
-  const replyText = advice && flavor ? ['【今日の空気】詳細', '', `【${c.name}】${advice}${flavor}`, sign].join('\n') : '';
+  const replyText = advice && flavor ? ['【今日の空気】', '', `${BAND_AIR[bandOf(st.score)]}${flavor}`, sign].join('\n') : '';
   const replyText2 = replyText
-    ? ['【開運アクション】', '', `【${c.name}】${action}`, BEAST_TEASER, sign].join('\n')
+    ? ['【開運アクション】', '', action, BEAST_TEASER, sign].join('\n')
     : '';
   return { text: lines.join('\n').trim(), replyText, replyText2, star: st };
 }

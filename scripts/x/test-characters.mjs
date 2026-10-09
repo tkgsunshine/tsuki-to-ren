@@ -49,7 +49,7 @@ test('守護獣の投稿: LINEのおすすめ時間と「詳細な解説はリ�
     assert.ok(r.text.endsWith('\n\n（詳細な解説はリプ欄へ）'), `${tag}: 本文の一番下に、詳細な解説がリプ欄にあると書く`);
     assert.ok(!r.text.includes('-月-') && !r.text.includes('-蓮-'), `${tag}: 本文に署名は置かない`);
     assert.ok(!r.text.includes('近日公開'), `${tag}: 本文に案内は置かない`);
-    assert.ok(r.replyText.startsWith('【今日の空気】詳細') && !/UNKNOWN/.test(r.replyText), `${tag}: 解説`);
+    assert.ok(r.replyText.startsWith('【今日の空気】') && !/UNKNOWN/.test(r.replyText), `${tag}: 解説`);
     assert.ok(r.replyText2.startsWith('【開運アクション】') && r.replyText2.includes(cta) && r.replyText2.endsWith(sign) && r.replyText.endsWith(sign), `${tag}: 2通目`);
     for (const t of [r.text, r.replyText, r.replyText2]) {
       assert.ok(weightedLength(t) <= 280, `${tag}: ${weightedLength(t)}`);
