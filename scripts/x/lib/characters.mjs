@@ -196,12 +196,28 @@ export function buildPostText(c, dateStr, sign, postTime = '', variant = 0) {
   return { text: postText, replyText, replyText2, star: st };
 }
 
-/** 守護獣の投稿は、毎朝1本（日柱の守護獣。60日で全タイプが一巡する）。2026-10-09 から4本→1本に減らした（反応の数字が出るまで、本数より型の検証を優先）。
+/** 守護獣の投稿は、毎朝1本。60日で全タイプが一巡する。2026-10-09 から4本→1本に減らした（反応の数字が出るまで、本数より型の検証を優先）。
+ *  2026-10-09 まで、「その日の日柱と同じ守護獣」だけを選んでいた。その人は、今日の干支と自分の干支が同じで、エンジンの今日の点数に、同じ地支（+12。平均は+2.6）と同じ天干（+4。平均は+2.3）が足され、毎日100点に張り付いた。
+ *  そのため、60の守護獣を、決まった順番（下の BEAST_ORDER。固定の種で並べ替えた、日柱と同じにならない順）で回す。点数はエンジンの計算のまま、60〜100に散らばる（全組み合わせの平均 約86に近い）。
  *  昼・夕・夜の枠（beast2〜4）を復活させたいときは、ここに { slot: 'beast2', time: '13:15' } などを足す。2本目以降は 15・30・45日ずらした守護獣になる */
 export const BEAST_SLOTS = [{ slot: 'morning', time: '08:15' }];
+/** 固定の種（1）で60を並べ替え、どの日も「日柱と同じ守護獣」にならないようにした順番（日柱の番号 → 守護獣の番号）。変えると、同じ日の守護獣が変わるので、むやみに変えない */
+export const BEAST_ORDER = (() => {
+  let seed = 1;
+  const rnd = () => {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const a = Array.from({ length: 60 }, (_, i) => i);
+  for (let i = 59; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  for (let i = 0; i < 60; i++) if (a[i] === i) { const j = (i + 1) % 60; [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+})();
 export function pickBeasts(all, dateStr) {
   const i = dayPillar(dateStr).index;
-  return BEAST_SLOTS.map((_, k) => all[(i + 15 * k) % all.length]);
+  return BEAST_SLOTS.map((_, k) => all[BEAST_ORDER[(i + 15 * k) % 60] % all.length]);
 }
 
 /** 守護獣の投稿（BEAST_SLOTS の本数。queue 用の項目）。署名は常に「-月-」。lint 不合格なら例外。各投稿に、リプ欄の解説2通が付く */
