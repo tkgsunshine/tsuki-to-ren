@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-16",
+  "internal": {
+    "stem": "癸",
+    "branch": "亥",
+    "element": "水"
+  },
+  "todayMood": {
+    "name": "ゆらぎ",
+    "hint": "感じる・休む・人の話を聴く",
+    "caution": "考えすぎて動けなくならない"
+  },
+  "moon": {
+    "age": 4.7,
+    "name": "三日月"
+  },
+  "featuredTypes": [
+    {
+      "code": "ISFJ",
+      "nick": "擁護者",
+      "trait": "気配り上手・身近な人をそっと支える"
+    },
+    {
+      "code": "ISFP",
+      "nick": "冒険家",
+      "trait": "マイペースでしなやか・感覚を大事にする"
+    },
+    {
+      "code": "ESFJ",
+      "nick": "領事官",
+      "trait": "場を和ませる・人との縁を大切にする"
+    },
+    {
+      "code": "ESFP",
+      "nick": "エンターテイナー",
+      "trait": "今を楽しむ・場を明るくする"
+    }
+  ]
+}
