@@ -3200,5 +3200,105 @@
     "purpose": "buzz",
     "status": "scheduled",
     "createdAt": "2026-10-09T08:54:32.927Z"
+  },
+  {
+    "id": "2026-10-18-chara-1",
+    "date": "2026-10-18",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月18日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：乙牛（精霊使い、風花×うし）\n【本命星】：九紫火星\n\n-結果-\n【今日の点数】：99点\n【今日の空気】魅力と自信が溢れる最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_ox_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:56:53.986Z"
+  },
+  {
+    "id": "2026-10-18-chara-1-reply",
+    "date": "2026-10-18",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、あなたの魅力がそのまま届く日。しなやかさが、味方だよ。\n-月-",
+    "replyTo": "2026-10-18-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:56:53.986Z"
+  },
+  {
+    "id": "2026-10-18-chara-1-reply2",
+    "date": "2026-10-18",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n気になる人に、素直な気持ちを送ってみて。続けていることを、5分だけ進めてみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-18-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:56:53.986Z"
+  },
+  {
+    "id": "2026-10-18-noon",
+    "date": "2026-10-18",
+    "slot": "noon",
+    "kind": "value",
+    "text": "ゆっくりな恋をしてる人へ\n今日の言葉、保存しておいてね\n#恋愛 #片思い\n-月-",
+    "format": "card_voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:56:53.987Z",
+    "card": {
+      "text": "焦らなくていいよ。|あなたの[好き]は、|ちゃんと育ってる。",
+      "who": "月",
+      "style": "portrait"
+    },
+    "image": "data/x/cards/2026-10-18-noon.png"
+  },
+  {
+    "id": "2026-10-18-evening",
+    "date": "2026-10-18",
+    "slot": "evening",
+    "kind": "value",
+    "text": "見た目はのんびり、恋愛はいちばん行動が早い16タイプ（MBTI）\n\n1位 ISFP 冒険家\n2位 INFP 仲介者\n3位 ISTP 巨匠\n4位 INTP 論理学者\n5位 ISFJ 擁護者\n6位 INFJ 提唱者\n7位 ESFP エンターテイナー\n8位 ENFP 運動家\n\n続きの9位〜16位は、リプ欄に。あなたは何位？\n-月-",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:56:53.987Z"
+  },
+  {
+    "id": "2026-10-18-evening-reply",
+    "date": "2026-10-18",
+    "slot": "evening",
+    "kind": "value",
+    "text": "続きの9位〜16位です\n\n9位 ISTJ 管理者\n10位 INTJ 建築家\n11位 ESTP 起業家\n12位 ENFJ 主人公\n13位 ESFJ 領事官\n14位 ENTP 討論者\n15位 ESTJ 幹部\n16位 ENTJ 指揮官\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-18-evening",
+    "format": "gap_rank_reply",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:56:53.987Z"
+  },
+  {
+    "id": "2026-10-18-night",
+    "date": "2026-10-18",
+    "slot": "night",
+    "kind": "value",
+    "text": "好きな人を初めて誘うときの、3つのコツ\n① 候補の日を2つ出す（相手が選びやすくなるよ）\n② 1時間くらいのお茶から（気軽にうなずけるから）\n③ 断られても「また今度ね」で返す（次の誘いにつながるよ）\n\nそのまま使える誘い文の例は、リプ欄に。保存してね\n-月-",
+    "format": "save_list",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:56:53.987Z"
+  },
+  {
+    "id": "2026-10-18-night-reply",
+    "date": "2026-10-18",
+    "slot": "night",
+    "kind": "value",
+    "text": "【誘い文の例】詳細\n選びやすくて短いと、返事も軽くなるよ。\n「土曜か日曜、1時間だけお茶しない？」\n「無理なら、また誘うね」\n-月-",
+    "replyTo": "2026-10-18-night",
+    "format": "save_list_reply",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:56:53.987Z"
   }
 ]

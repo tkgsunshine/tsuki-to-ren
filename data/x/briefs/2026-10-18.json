@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-18",
+  "internal": {
+    "stem": "乙",
+    "branch": "丑",
+    "element": "木"
+  },
+  "todayMood": {
+    "name": "芽吹き",
+    "hint": "新しいことを始める・手を伸ばす",
+    "caution": "焦って詰め込みすぎない"
+  },
+  "moon": {
+    "age": 6.7,
+    "name": "上弦の月"
+  },
+  "featuredTypes": [
+    {
+      "code": "INFJ",
+      "nick": "提唱者",
+      "trait": "人の気持ちを深く汲み取る・理想を静かに抱く"
+    },
+    {
+      "code": "INFP",
+      "nick": "仲介者",
+      "trait": "自分の感性を大切にする・やさしい理想家"
+    },
+    {
+      "code": "ENFJ",
+      "nick": "主人公",
+      "trait": "人を巻き込み励ます・面倒見がいい"
+    },
+    {
+      "code": "ENFP",
+      "nick": "運動家",
+      "trait": "好奇心旺盛・ひらめきで動く"
+    }
+  ]
+}
