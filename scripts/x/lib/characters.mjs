@@ -3,7 +3,7 @@
 import { generateFortuneResult, calculateDayPillar, calculateHonmeiStar } from '../../../src/utils/fortuneEngine.ts';
 import { dayPillar } from './signals.mjs';
 import { lintPost, weightedLength } from './lint.mjs';
-import { bandOf, STEM_FLAVOR, BAND_AIR, BAND_ACTION, ANIMAL_ACTION } from './beast-texts.mjs';
+import { bandOf, pickVariant, STEM_FLAVOR, BAND_AIR, BAND_ACTION, ANIMAL_ACTION } from './beast-texts.mjs';
 import { BEAST_TEASER } from './teasers.mjs';
 
 // 十干の読み（名前のふりがな用）と、動物の読み
@@ -162,7 +162,7 @@ const SHORT_ONE_LINE = {
 
 /** 投稿文を組み立てる。sign は「-月-」「-蓮-」。postTime（"HH:MM"）を渡すと、すでに過ぎた時間帯のおすすめは省く。
  *  replyText は、【今日の空気】のくわしい解説（リプ欄に、親の60分後以降に出す） */
-export function buildPostText(c, dateStr, sign, postTime = '') {
+export function buildPostText(c, dateStr, sign, postTime = '', variant = 0) {
   const st = pickStar(c, dateStr); // 本命星を投稿ごとに1つ選び、その星の人に実際に出る点数を出す
   const [, mm, dd] = dateStr.split('-').map(Number);
   const tone = sign.includes('蓮') ? 'ren' : 'tsuki';
@@ -188,8 +188,8 @@ export function buildPostText(c, dateStr, sign, postTime = '') {
   // リプ欄は2通（Xの280字の制限のため、分ける）。
   // 1通目=【今日の空気】のくわしい解説（アプリの鑑定の解説＋守護獣の十干のひとこと。署名の人格のトーン）
   // 2通目=【開運アクション】（点数の帯の過ごし方＋守護獣の十二支のアクション）＋診断の案内
-  const action = BAND_ACTION[bandOf(st.score)] + (ANIMAL_ACTION[c.animal] || '');
-  const replyText = advice && flavor ? ['【今日の空気】', '', `${BAND_AIR[bandOf(st.score)]}${flavor}`, sign].join('\n') : '';
+  const action = pickVariant(BAND_ACTION[bandOf(st.score)], `${dateStr}:${c.key}:action:${variant}`) + (ANIMAL_ACTION[c.animal] || '');
+  const replyText = advice && flavor ? ['【今日の空気】', '', `${pickVariant(BAND_AIR[bandOf(st.score)], `${dateStr}:${c.key}:air:${variant}`)}${flavor}`, sign].join('\n') : '';
   const replyText2 = replyText
     ? ['【開運アクション】', '', action, BEAST_TEASER, sign].join('\n')
     : '';
@@ -211,30 +211,41 @@ export function buildBeastItems(all, dateStr, history = [], opts = {}) {
   return BEAST_SLOTS.flatMap(({ slot, time }, k) => {
     const c = beasts[k];
     const sign = '-月-'; // 2026-10-08〜: X もアプリも、話し手は月だけ
-    const { text, replyText, replyText2 } = buildPostText(c, dateStr, sign, time);
-    const item = {
-      id: `${dateStr}-chara-${k + 1}`,
-      date: dateStr,
-      slot,
-      kind: 'value',
-      text,
-      image: c.imageF, // 女性版の1枚
-      status: 'scheduled',
-      createdAt: new Date().toISOString(),
-    };
-    const problems = lintPost(item, [...history, ...made], opts);
-    if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
-    if (!replyText) {
+    // 返信の同一文の判定は、直近21日の投稿だけと比べる（文の候補が有限なので、全期間と比べると、いずれ必ず重なる）。重なったら、別の言い回しに替える
+    const recent = history.filter((h) => !h.date || (Date.parse(dateStr) - Date.parse(h.date)) / 86400000 <= 21);
+    let built = null;
+    let lastErr = '';
+    for (let variant = 0; variant < 24 && !built; variant++) {
+      const { text, replyText, replyText2 } = buildPostText(c, dateStr, sign, time, variant);
+      const item = {
+        id: `${dateStr}-chara-${k + 1}`,
+        date: dateStr,
+        slot,
+        kind: 'value',
+        text,
+        image: c.imageF, // 女性版の1枚
+        status: 'scheduled',
+        createdAt: new Date().toISOString(),
+      };
+      const problems = lintPost(item, [...recent, ...made], opts);
+      if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
+      if (!replyText) {
+        built = { item, replies: [] };
+        break;
+      }
+      // 【今日の空気】のくわしい解説は、リプ欄に（親の投稿と同じ実行で続けて出る）。2通目（開運アクション＋診断の案内）は、1通目へのスレッド返信
+      const mk = (id, text, replyTo, format) => ({ id, date: dateStr, slot, kind: 'value', text, replyTo, format, status: 'scheduled', createdAt: item.createdAt });
+      const replies = [mk(`${item.id}-reply`, replyText, item.id, 'beast_daily_reply')];
+      if (replyText2) replies.push(mk(`${item.id}-reply2`, replyText2, replies[0].id, 'beast_daily_reply2'));
+      const rp = replies.flatMap((r) => lintPost(r, [...recent, ...made], opts));
+      if (rp.length) lastErr = rp.join('\n - ');
+      else built = { item, replies };
+    }
+    if (!built) throw new Error(`守護獣の返信が lint 不合格（${c.name}）:\n - ${lastErr}`);
+    const { item, replies } = built;
+    if (!replies.length) {
       made.push(item);
       return [item];
-    }
-    // 【今日の空気】のくわしい解説は、リプ欄に（親の投稿と同じ実行で続けて出る）。2通目（開運アクション＋診断の案内）は、1通目へのスレッド返信
-    const mk = (id, text, replyTo, format) => ({ id, date: dateStr, slot, kind: 'value', text, replyTo, format, status: 'scheduled', createdAt: item.createdAt });
-    const replies = [mk(`${item.id}-reply`, replyText, item.id, 'beast_daily_reply')];
-    if (replyText2) replies.push(mk(`${item.id}-reply2`, replyText2, replies[0].id, 'beast_daily_reply2'));
-    for (const r of replies) {
-      const rp = lintPost(r, [...history, ...made], opts);
-      if (rp.length) throw new Error(`守護獣の返信が lint 不合格（${c.name}）:\n - ${rp.join('\n - ')}`);
     }
     made.push(item, ...replies);
     return [item, ...replies];
