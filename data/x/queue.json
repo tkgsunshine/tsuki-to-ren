@@ -3106,5 +3106,99 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-09T08:51:56.367Z"
+  },
+  {
+    "id": "2026-10-17-chara-1",
+    "date": "2026-10-17",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月17日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：甲鼠（巨木の王、開拓者×ねずみ）\n【本命星】：六白金星\n\n-結果-\n【今日の点数】：94点\n【今日の空気】魅力と自信が溢れる最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_rat_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:54:32.927Z"
+  },
+  {
+    "id": "2026-10-17-chara-1-reply",
+    "date": "2026-10-17",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、あなたの魅力がそのまま届く日。軸は、ぶらさなくて大丈夫。\n-月-",
+    "replyTo": "2026-10-17-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:54:32.927Z"
+  },
+  {
+    "id": "2026-10-17-chara-1-reply2",
+    "date": "2026-10-17",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n気になる人に、素直な気持ちを送ってみて。ひらめいたことを、メモに残してみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-17-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:54:32.927Z"
+  },
+  {
+    "id": "2026-10-17-noon",
+    "date": "2026-10-17",
+    "slot": "noon",
+    "kind": "value",
+    "text": "元恋人から、ひさしぶりに連絡が来た人へ\n\n復縁の可能性、どう思う？\nA：まだ気持ちが残ってるのかも\nB：さみしくなっただけかも\nC：深い意味はなさそう\n\n直感で選んでみて。答え合わせは、リプ欄でね。\n#恋愛 #復縁\n-月-",
+    "format": "comeback",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:54:32.927Z"
+  },
+  {
+    "id": "2026-10-17-noon-reply",
+    "date": "2026-10-17",
+    "slot": "noon",
+    "kind": "value",
+    "text": "Aは期待、Bは不安、Cは冷静さが出てるかも。見たいのは、連絡が来たことより、なぜ今なのか。あなたは何を選んだ？\n-月-",
+    "replyTo": "2026-10-17-noon",
+    "format": "comeback_reply",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:54:32.927Z"
+  },
+  {
+    "id": "2026-10-17-evening",
+    "date": "2026-10-17",
+    "slot": "evening",
+    "kind": "value",
+    "text": "見た目はクール、恋愛はいちばん甘えたい16タイプ（MBTI）\n\n1位 INTJ 建築家\n2位 ISTP 巨匠\n3位 INTP 論理学者\n4位 ENTJ 指揮官\n5位 ISTJ 管理者\n6位 INFJ 提唱者\n7位 ESTJ 幹部\n8位 ENTP 討論者\n\n続きの9位〜16位は、リプ欄に。あなたは何位？\n-月-",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:54:32.927Z"
+  },
+  {
+    "id": "2026-10-17-evening-reply",
+    "date": "2026-10-17",
+    "slot": "evening",
+    "kind": "value",
+    "text": "続きの9位〜16位です\n\n9位 ESTP 起業家\n10位 INFP 仲介者\n11位 ISFJ 擁護者\n12位 ISFP 冒険家\n13位 ENFJ 主人公\n14位 ENFP 運動家\n15位 ESFJ 領事官\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-17-evening",
+    "format": "gap_rank_reply",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:54:32.927Z"
+  },
+  {
+    "id": "2026-10-17-night",
+    "date": "2026-10-17",
+    "slot": "night",
+    "kind": "value",
+    "text": "好きな人のストーリーに、いいねを押すかでずっと迷ってる人へ\n\n押したら、意識してるのがバレそう。\n押さないと、見てないって思われそう。\n結局そっと閉じて、また開いちゃう。\n\nその迷い、ちゃんと好きな証拠だよ。\n#恋愛あるある\n-月-",
+    "format": "voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T08:54:32.927Z"
   }
 ]

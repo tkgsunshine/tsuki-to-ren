@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-17",
+  "internal": {
+    "stem": "甲",
+    "branch": "子",
+    "element": "木"
+  },
+  "todayMood": {
+    "name": "芽吹き",
+    "hint": "新しいことを始める・手を伸ばす",
+    "caution": "焦って詰め込みすぎない"
+  },
+  "moon": {
+    "age": 5.7,
+    "name": "三日月"
+  },
+  "featuredTypes": [
+    {
+      "code": "ISTJ",
+      "nick": "管理者",
+      "trait": "誠実でコツコツ・約束を守る"
+    },
+    {
+      "code": "ISTP",
+      "nick": "巨匠",
+      "trait": "冷静で器用・必要なときに動く"
+    },
+    {
+      "code": "ESTJ",
+      "nick": "幹部",
+      "trait": "段取り上手・物事をまとめて進める"
+    },
+    {
+      "code": "ESTP",
+      "nick": "起業家",
+      "trait": "行動が速い・まず試してみる"
+    }
+  ]
+}
