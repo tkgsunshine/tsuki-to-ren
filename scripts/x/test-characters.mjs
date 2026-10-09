@@ -35,21 +35,24 @@ test('withFixedNow は new Date() だけを固定し、終わったら元に戻�
   assert.equal(Date, real);
 });
 
-test('守護獣の投稿: LINEのおすすめ時間と「詳細な解説はリプ欄へ」を本文に、解説（1通目）・開運アクションと診断の案内（2通目）をリプ欄に。540通りすべて280以内', async () => {
+test('守護獣の投稿: LINEのおすすめ時間と「解説はリプ欄へ」を本文に、解説（1通目）・開運アクションと診断の案内（2通目）をリプ欄に。540通りすべて280以内', async () => {
   const { buildPostText, buildBeastItems, computeAll, pickBeasts } = await import('./lib/characters.mjs');
   const { weightedLength, lintPost } = await import('./lib/lint.mjs');
   const all = computeAll('2026-10-08');
   const cta = '近日、あなたの守護獣を鑑定するアプリを公開します';
   const seen = new Set();
-  for (const c of all) for (const st of c.stars) for (const sign of ['-月-', '-蓮-']) {
-    const r = buildPostText({ ...c, stars: [st] }, '2026-10-08', sign, '08:15');
+  // 見出しの日付が最も長い12月31日も含めて、全パターン（60×9×署名2）の長さを確かめる
+  const allDec = computeAll('2026-12-31');
+  for (const [date, list] of [['2026-10-08', all], ['2026-12-31', allDec]]) for (const c of list) for (const st of c.stars) for (const sign of ['-月-', '-蓮-']) {
+    const r = buildPostText({ ...c, stars: [st] }, date, sign, '08:15');
     const tag = `${c.key}/${st.name}/${sign}`;
     seen.add(r.replyText);
-    assert.ok(r.text.includes('【お相手へのLINEのおすすめ時間】'), `${tag}: 時間の行`);
-    assert.ok(r.text.endsWith('\n\n（詳細な解説はリプ欄へ）'), `${tag}: 本文の一番下に、詳細な解説がリプ欄にあると書く`);
+    assert.ok(r.text.includes('【LINEのおすすめ時間】'), `${tag}: 時間の行`);
+    assert.ok(r.text.split('\n')[1] === '守護獣と本命星の鑑定は固定ポストでリプしてね✨' && r.text.split('\n')[2] === '', `${tag}: 2行目の案内`);
+    assert.ok(r.text.endsWith('\n\n（解説はリプ欄へ）'), `${tag}: 本文の一番下に、解説がリプ欄にあると書く`);
     assert.ok(!r.text.includes('-月-') && !r.text.includes('-蓮-'), `${tag}: 本文に署名は置かない`);
     assert.ok(!r.text.includes('近日公開'), `${tag}: 本文に案内は置かない`);
-    assert.ok(r.replyText.startsWith('【今日の空気】詳細') && !/UNKNOWN/.test(r.replyText), `${tag}: 解説`);
+    assert.ok(r.replyText.startsWith('【今日の空気】') && !/UNKNOWN/.test(r.replyText), `${tag}: 解説`);
     assert.ok(r.replyText2.startsWith('【開運アクション】') && r.replyText2.includes(cta) && r.replyText2.endsWith(sign) && r.replyText.endsWith(sign), `${tag}: 2通目`);
     for (const t of [r.text, r.replyText, r.replyText2]) {
       assert.ok(weightedLength(t) <= 280, `${tag}: ${weightedLength(t)}`);
