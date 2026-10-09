@@ -3300,5 +3300,105 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-09T08:56:53.987Z"
+  },
+  {
+    "id": "2026-10-19-chara-1",
+    "date": "2026-10-19",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月19日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：丙虎（太陽の英雄×とら）\n【本命星】：四緑木星\n\n-結果-\n【今日の点数】：100点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_tiger_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T09:26:37.499Z"
+  },
+  {
+    "id": "2026-10-19-chara-1-reply",
+    "date": "2026-10-19",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、自信を持って動いていい日。あなたらしさで、まっすぐね。\n-月-",
+    "replyTo": "2026-10-19-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T09:26:37.499Z"
+  },
+  {
+    "id": "2026-10-19-chara-1-reply2",
+    "date": "2026-10-19",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n気になる人に、素直な気持ちを送ってみて。気になっていたことへ、小さな一歩を。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-19-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T09:26:37.499Z"
+  },
+  {
+    "id": "2026-10-19-noon",
+    "date": "2026-10-19",
+    "slot": "noon",
+    "kind": "value",
+    "text": "好きな人が、前にちょっと話したことを覚えてた。これって脈あり？\n\nA：気になってるから覚えてた\nB：もともと記憶力がいい人\nC：誰の話もちゃんと聞く人\n\nあなたならどう思う？\n#恋愛あるある\n-月-",
+    "format": "psych_poll",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T09:26:37.500Z"
+  },
+  {
+    "id": "2026-10-19-noon-reply",
+    "date": "2026-10-19",
+    "slot": "noon",
+    "kind": "value",
+    "text": "Aなら、あなたに関心がある合図かも。Bは性格、Cはやさしさ。どれでも、話が届いてたのはうれしいよね。あなたは何を選んだ？\n-月-",
+    "replyTo": "2026-10-19-noon",
+    "format": "psych_poll_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T09:26:37.500Z"
+  },
+  {
+    "id": "2026-10-19-evening",
+    "date": "2026-10-19",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ISFPの恋愛】\n好きになると：相手のペースにそっと寄りそう\n愛情表現：言葉より、さりげない行動で見せる\n惹かれる人：自然体のままでいられる人\nつまずき：本音をしまいこんで、すれ違いがち\nコツ：「好き」を小さく言葉にしてみて\n\nあなたのまわりのISFPは、当てはまる？\n-月-",
+    "format": "mbti_love",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T09:26:37.500Z"
+  },
+  {
+    "id": "2026-10-19-evening-reply",
+    "date": "2026-10-19",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ISFPの恋愛】詳細\n好きな人には、小さな手間で想いを見せるタイプ。我慢しすぎたら、本音をひとこと足してね。\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-19-evening",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T09:26:37.500Z"
+  },
+  {
+    "id": "2026-10-19-night",
+    "date": "2026-10-19",
+    "slot": "night",
+    "kind": "value",
+    "text": "今夜は、少しだけ自分を甘やかしてね。\n保存して、眠れない夜に見返して\n#恋愛 #片思い\n-月-",
+    "format": "card_voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-09T09:26:37.500Z",
+    "card": {
+      "text": "言えない「好き」も、|[あなたの宝物]|にしていいんだよ。",
+      "who": "月",
+      "style": "portrait"
+    },
+    "image": "data/x/cards/2026-10-19-night.png"
   }
 ]

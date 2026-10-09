@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-19",
+  "internal": {
+    "stem": "丙",
+    "branch": "寅",
+    "element": "火"
+  },
+  "todayMood": {
+    "name": "ひらめき",
+    "hint": "気持ちを表に出す・楽しむ",
+    "caution": "勢いで言い過ぎない"
+  },
+  "moon": {
+    "age": 7.7,
+    "name": "上弦の月"
+  },
+  "featuredTypes": [
+    {
+      "code": "INTJ",
+      "nick": "建築家",
+      "trait": "先を見通して計画する・一人の時間が力になる"
+    },
+    {
+      "code": "INTP",
+      "nick": "論理学者",
+      "trait": "「なぜ？」を掘り下げる・考えるのが好き"
+    },
+    {
+      "code": "ENTJ",
+      "nick": "指揮官",
+      "trait": "決断が速い・目標に向かって引っぱる"
+    },
+    {
+      "code": "ENTP",
+      "nick": "討論者",
+      "trait": "発想が自由・新しい切り口が好き"
+    }
+  ]
+}
