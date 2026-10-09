@@ -48,7 +48,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
         if (parsed.name) return parsed.name;
       }
     } catch (e) {}
-    return '';
+    return 'あなた';
   });
 
   const [myBirth, setMyBirth] = useState(() => {
@@ -103,7 +103,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const [mode, setMode] = useState<'single' | 'match'>('match');
 
   // Opponent Info states
-  const [oppName, setOppName] = useState('');
+  const [oppName, setOppName] = useState('お相手');
   const [oppBirth, setOppBirth] = useState('');
   const [oppMbti, setOppMbti] = useState(() => {
     if (urlPair?.opp) return urlPair.opp;
