@@ -363,6 +363,9 @@ function App() {
     const rel = decodeRel(params.get('r') || params.get('rel'));
     const rawMode = params.get('mode');
     const runMode = (rawMode === 's' || rawMode === 'single') ? 'single' : (rawMode === 'm' || rawMode === 'match' || (oBirth && oMbti)) ? 'match' : null;
+    // Character tab to open on (the daily mail's link sets it, so the app opens on the mail's character)
+    const rawChar = params.get('c');
+    const urlCharacter = rawChar === 'r' ? 'ren' : (rawChar === 't' ? 'tsuki' : undefined);
 
     // Dynamic SEO Metadata Injection for 256 MBTI combinations & search terms
     const effectiveMMbti = mMbti || initialRoute.compatibilityPair?.myMbti;
@@ -391,11 +394,11 @@ function App() {
         setOppGender(oGender);
         setRelationship(rel);
         setMode('match');
-        startDiagnosis(mName, mBirth, mMbti, mGender, oName, oBirth, oMbti, oGender, rel, 'match');
+        startDiagnosis(mName, mBirth, mMbti, mGender, oName, oBirth, oMbti, oGender, rel, 'match', false, urlCharacter);
       } else {
         setMode('single');
         setRelationship(rel);
-        startDiagnosis(mName, mBirth, mMbti, mGender, '', '', 'UNKNOWN', 'female', rel, 'single');
+        startDiagnosis(mName, mBirth, mMbti, mGender, '', '', 'UNKNOWN', 'female', rel, 'single', false, urlCharacter);
       }
     } else {
       // Restore last diagnosis result when returning from 2-step email verification link

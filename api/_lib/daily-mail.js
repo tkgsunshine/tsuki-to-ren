@@ -54,6 +54,33 @@ export const subjectFor = (date) => `🌙【月と蓮】本日の恋愛運＆LIN
 const SITE = 'https://www.tsuki-to-ren.com';
 const GOLD = '#e2c074';
 
+const REL_CODES = { '片思い中': 'k', '両思い・交際中': 'r', '交際中': 'r', '復縁したい': 'f', '結婚・夫婦': 'm', '複雑愛・秘密の恋': 'c' };
+
+/**
+ * The "本日の詳細鑑定を見る" link: carries the same inputs the mail was computed from, in the short keys the app's
+ * share links already use (App.tsx parses them and runs the diagnosis), so the app shows the mail's score
+ * instead of whatever was last diagnosed in the browser that opens the link.
+ */
+export function resultUrlFor(sub, hasOpponent) {
+  const params = new URLSearchParams();
+  if (sub.myName && sub.myName !== 'あなた') params.set('mn', String(sub.myName).slice(0, 8));
+  params.set('mb', String(sub.myBirth || '').replace(/-/g, ''));
+  params.set('mm', sub.myMbti || 'UNKNOWN');
+  params.set('mg', sub.myGender === 'male' ? 'm' : 'f');
+  if (hasOpponent) {
+    if (sub.oppName && sub.oppName !== 'お相手') params.set('on', String(sub.oppName).slice(0, 8));
+    params.set('ob', String(sub.oppBirth || '').replace(/-/g, ''));
+    params.set('om', sub.oppMbti || 'UNKNOWN');
+    params.set('og', sub.oppGender === 'male' ? 'm' : 'f');
+    params.set('mode', 'm');
+  } else {
+    params.set('mode', 's');
+  }
+  params.set('r', REL_CODES[sub.relationship] || 'k');
+  params.set('c', sub.character === 'ren' ? 'r' : 't');
+  return `${SITE}/?${params.toString()}`; // "/" like the share links: the loading screen, then the result
+}
+
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
   const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
@@ -212,7 +239,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- CTA -->
           <tr>
             <td align="center" style="padding: 22px 25px 28px; text-align: center;">
-              <a href="${SITE}/result" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; background-image: linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%); color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
+              <a href="${esc(resultUrlFor(sub, content.hasOpponent))}" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; background-image: linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%); color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
                 本日の詳細鑑定を見る &#10132;
               </a>
             </td>
