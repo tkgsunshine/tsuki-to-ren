@@ -155,7 +155,7 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
   const lines = text.split('\n');
   return lines.map((line, i) => (
     <React.Fragment key={i}>
-      {renderCharHeading(line, 18)}
+      {renderCharHeading(line, 32)}
       {i < lines.length - 1 ? '\n' : null}
     </React.Fragment>
   ));
@@ -989,7 +989,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {activeResult.topics.map((topic) => (
             <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
               <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#93c5fd' : '#d8b4fe', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                {renderCharHeading(topic.title, 22)}
+                {renderCharHeading(topic.title, 36)}
               </h3>
               <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {formatAppraisalText(topic.text)}
