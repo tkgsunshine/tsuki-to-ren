@@ -27,7 +27,7 @@ import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
-import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type UserProfile as FirebaseUser } from './services/firebase';
+import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -35,6 +35,8 @@ const formatBirthDate = (val: string): string => {
   if (digits.length <= 6) return `${digits.slice(0, 4)}/${digits.slice(4)}`;
   return `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
 };
+
+const NEW_PARTNER_ID = '__new__';
 
 // A complete, real calendar date (YYYY-MM-DD). The daily email cannot compute a fortune without one.
 const isValidBirthDate = (val: string): boolean => {
@@ -534,6 +536,66 @@ function App() {
   const [showNotifyEmailModal, setShowNotifyEmailModal] = useState(false);
   const [notifyEmailInput, setNotifyEmailInput] = useState('');
 
+  // Whose fortune the daily mail is about: 'self', a saved partner's id, or 'keep' (the partner already in the
+  // subscription but not saved on this device). The subscription in Firestore is the truth the 8:00 mail uses.
+  const [notifyTarget, setNotifyTarget] = useState<string>('self');
+  const [notifySub, setNotifySub] = useState<EmailSubscriptionData | null>(null);
+  const [notifyAfterPartnerAdd, setNotifyAfterPartnerAdd] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setNotifySub(null);
+      return;
+    }
+    let cancelled = false;
+    getEmailSubscription().then((sub) => {
+      if (!cancelled) setNotifySub(sub);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser]);
+
+  // A "match" subscription without a partner birth date is sent as the solo fortune (api/_lib/daily-mail.js)
+  const subHasPartner = !!(notifySub && notifySub.mode !== 'single' && notifySub.oppBirth);
+  const isSubPartner = (p: SavedPartner) => subHasPartner && p.name === notifySub?.oppName && p.birth.replace(/\//g, '-') === notifySub?.oppBirth;
+  const showKeepTarget = subHasPartner && !savedPartners.some(isSubPartner);
+  const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${notifySub.oppName || 'お相手'}さんとの相性` : 'あなたの運勢');
+
+  const openNotifyModal = (target?: string) => {
+    setNotifyEmailInput(notifyEmail || currentUser?.email || '');
+    if (target) {
+      setNotifyTarget(target);
+    } else if (subHasPartner) {
+      setNotifyTarget(savedPartners.find(isSubPartner)?.id || 'keep');
+    } else {
+      setNotifyTarget('self');
+    }
+    setShowNotifyEmailModal(true);
+  };
+
+  // Saves the subscription with "me" from the profile and the chosen partner (null = solo fortune)
+  const saveNotifySubscription = async (email: string, partner: SavedPartner | 'keep' | null): Promise<boolean> => {
+    const opp = partner === 'keep' && notifySub
+      ? { oppName: notifySub.oppName || '', oppBirth: notifySub.oppBirth || '', oppGender: notifySub.oppGender, oppMbti: notifySub.oppMbti || 'UNKNOWN', relationship: notifySub.relationship || '片思い中', mode: 'match' as const }
+      : partner && partner !== 'keep'
+        ? { oppName: partner.name, oppBirth: partner.birth.replace(/\//g, '-'), oppGender: partner.gender, oppMbti: partner.mbti, relationship: partner.relationship, mode: 'match' as const }
+        : { oppName: '', oppBirth: '', oppGender: 'male' as const, oppMbti: 'UNKNOWN', relationship: relationship, mode: 'single' as const };
+    const data: EmailSubscriptionData = {
+      email,
+      enabled: true,
+      myName: myName || currentUser?.displayName || 'あなた',
+      myBirth: myBirth || '',
+      myGender: myGender,
+      myMbti: myMbti,
+      ...opp,
+      character: selectedCharacter
+    };
+    const saved = await saveEmailSubscriptionData(data);
+    if (saved) setNotifySub(data);
+    return saved;
+  };
+
   useEffect(() => {
     try {
       localStorage.setItem('hasu_notify_daily_luck', JSON.stringify(notifyDailyLuck));
@@ -557,6 +619,18 @@ function App() {
   const [editPartnerRel, setEditPartnerRel] = useState('single');
   const [showEditDatePicker, setShowEditDatePicker] = useState(false);
 
+  // Adding a partner by hand reuses the edit form with a draft row (id NEW_PARTNER_ID)
+  const startNewPartner = () => {
+    if (!canAddPartner()) return false;
+    setEditingPartnerId(NEW_PARTNER_ID);
+    setEditPartnerName('');
+    setEditPartnerBirth('');
+    setEditPartnerMbti('UNKNOWN');
+    setEditPartnerGender(myGender === 'female' ? 'male' : 'female');
+    setEditPartnerRel('片思い中');
+    return true;
+  };
+
   const startEditPartner = (partner: SavedPartner) => {
     setEditingPartnerId(partner.id);
     setEditPartnerName(partner.name);
@@ -572,35 +646,39 @@ function App() {
       alert('生年月日は「19950401」のように数字8桁で入力してください。');
       return;
     }
-    const updated = savedPartners.map(p => {
-      if (p.id === editingPartnerId) {
-        return {
-          ...p,
-          name: editPartnerName || 'お相手',
-          birth: editPartnerBirth,
-          mbti: editPartnerMbti,
-          gender: editPartnerGender,
-          relationship: editPartnerRel
-        };
+    const fields = {
+      name: editPartnerName || 'お相手',
+      birth: editPartnerBirth,
+      mbti: editPartnerMbti,
+      gender: editPartnerGender,
+      relationship: editPartnerRel
+    };
+    if (editingPartnerId === NEW_PARTNER_ID) {
+      const newPartner: SavedPartner = { id: `${fields.name}_${fields.birth}_${Date.now()}`, ...fields };
+      setSavedPartners([...savedPartners, newPartner]);
+      setEditingPartnerId(null);
+      if (notifyAfterPartnerAdd) {
+        // Came from the daily mail settings: go back there with the new partner chosen
+        setNotifyAfterPartnerAdd(false);
+        openNotifyModal(newPartner.id);
+      } else {
+        alert(`${newPartner.name}様の情報を保存しました。`);
       }
-      return p;
-    });
+      return;
+    }
+    const before = savedPartners.find(p => p.id === editingPartnerId);
+    const updated = savedPartners.map(p => (p.id === editingPartnerId ? { ...p, ...fields } : p));
     setSavedPartners(updated);
     setEditingPartnerId(null);
+    // If this partner is the one the daily mail is about, the mail follows the edit
+    if (before && isSubPartner(before) && notifySub?.enabled && notifySub.email) {
+      saveNotifySubscription(notifySub.email, { ...before, ...fields });
+    }
     alert('お相手の情報を更新しました。');
   };
 
-  const handleSavePartner = () => {
-    if (!oppBirth) {
-      alert('保存するお相手の情報がありません。');
-      return;
-    }
-    const exists = savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
-    if (exists) {
-      alert('このお相手は既に保存されています。');
-      return;
-    }
-
+  // Checks the saved-partner limit for the member level; shows the upgrade prompt and returns false when full
+  const canAddPartner = () => {
     const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
     if (savedPartners.length >= limit) {
       if (!isRegistered) {
@@ -616,8 +694,22 @@ function App() {
       } else {
         alert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
       }
+      return false;
+    }
+    return true;
+  };
+
+  const handleSavePartner = () => {
+    if (!oppBirth) {
+      alert('保存するお相手の情報がありません。');
       return;
     }
+    const exists = savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
+    if (exists) {
+      alert('このお相手は既に保存されています。');
+      return;
+    }
+    if (!canAddPartner()) return;
 
     const newPartner: SavedPartner = {
       id: `${oppName}_${oppBirth}_${Date.now()}`,
@@ -1283,6 +1375,18 @@ function App() {
                       <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>
                         {notifyDailyLuck && notifyEmail ? `送信先: ${notifyEmail}` : '本日の運気とLINE推奨時間を毎朝お届け'}
                       </span>
+                      {notifyDailyLuck && notifySub?.enabled && notifyTargetLabel && (
+                        <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>
+                          内容: {notifyTargetLabel}{' '}
+                          <button
+                            type="button"
+                            onClick={() => openNotifyModal()}
+                            style={{ background: 'none', border: 'none', padding: 0, color: '#fbbf24', fontSize: '0.72rem', textDecoration: 'underline', cursor: 'pointer' }}
+                          >
+                            変更
+                          </button>
+                        </span>
+                      )}
                     </div>
                   </div>
                   <button
@@ -1301,8 +1405,7 @@ function App() {
                       } else if (!isRegistered && !currentUser) {
                         setShowAuthModal(true);
                       } else {
-                        setNotifyEmailInput(notifyEmail || currentUser?.email || '');
-                        setShowNotifyEmailModal(true);
+                        openNotifyModal();
                       }
                     }}
                     style={{
@@ -1660,14 +1763,38 @@ function App() {
                   </span>
                 </div>
 
-                {savedPartners.length === 0 ? (
+                {editingPartnerId !== NEW_PARTNER_ID && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNotifyAfterPartnerAdd(false);
+                      startNewPartner();
+                    }}
+                    style={{
+                      padding: '0.6rem 0.85rem',
+                      borderRadius: '10px',
+                      background: 'transparent',
+                      border: '1px dashed rgba(255,255,255,0.2)',
+                      color: '#cbd5e1',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ＋ お相手を追加
+                  </button>
+                )}
+
+                {savedPartners.length === 0 && editingPartnerId !== NEW_PARTNER_ID ? (
                   <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#9ca3af', fontSize: '0.8rem', lineHeight: '1.6' }}>
                     保存したお相手のデータはありません。<br />
-                    相性鑑定の結果画面からお相手を保存できます。
+                    相性鑑定の結果画面か、「＋ お相手を追加」から保存できます。
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {savedPartners.map((partner) => {
+                    {(editingPartnerId === NEW_PARTNER_ID
+                      ? [...savedPartners, { id: NEW_PARTNER_ID, name: '', birth: '', mbti: 'UNKNOWN', gender: 'male' as const, relationship: '片思い中' }]
+                      : savedPartners
+                    ).map((partner) => {
                       if (editingPartnerId === partner.id) {
                         return (
                           <div
@@ -1683,7 +1810,7 @@ function App() {
                             }}
                           >
                             <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--color-gold)' }}>
-                              お相手情報の編集
+                              {partner.id === NEW_PARTNER_ID ? '新しいお相手' : 'お相手情報の編集'}
                             </div>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
@@ -1711,7 +1838,7 @@ function App() {
                                 <input
                                   type="text"
                                   value={editPartnerBirth}
-                                  onChange={(e) => setEditPartnerBirth(formatBirthDate(e.target.value))}
+                                  onChange={(e) => setEditPartnerBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
                                   placeholder="例: 19950125"
                                   style={{
                                     flex: 1,
@@ -1826,11 +1953,18 @@ function App() {
                                   cursor: 'pointer'
                                 }}
                               >
-                                変更を保存
+                                {partner.id === NEW_PARTNER_ID ? '保存する' : '変更を保存'}
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setEditingPartnerId(null)}
+                                onClick={() => {
+                                  setEditingPartnerId(null);
+                                  if (notifyAfterPartnerAdd) {
+                                    // Back to the daily mail settings it was opened from
+                                    setNotifyAfterPartnerAdd(false);
+                                    openNotifyModal();
+                                  }
+                                }}
                                 style={{
                                   background: 'rgba(255,255,255,0.05)',
                                   border: '1px solid rgba(255,255,255,0.1)',
@@ -2461,6 +2595,57 @@ function App() {
               />
             </div>
 
+            {/* Whose fortune the mail is about (the "詳細を見る" link in the mail opens the same reading) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>誰との運勢を届ける？</span>
+              {[
+                { id: 'self', label: '🌙 自分だけの運勢' },
+                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${notifySub?.oppName || 'お相手'}さんとの相性（いまの設定）` }] : []),
+                ...savedPartners.map(p => ({ id: p.id, label: `💞 ${p.name}さんとの相性` }))
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setNotifyTarget(opt.id)}
+                  style={{
+                    padding: '0.6rem 0.85rem',
+                    borderRadius: '10px',
+                    background: notifyTarget === opt.id ? 'rgba(226, 192, 116, 0.15)' : 'rgba(255,255,255,0.04)',
+                    border: notifyTarget === opt.id ? '1px solid rgba(226, 192, 116, 0.5)' : '1px solid rgba(255,255,255,0.08)',
+                    color: notifyTarget === opt.id ? '#fef08a' : '#cbd5e1',
+                    fontSize: '0.82rem',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  // Opens the saved-partner form; saving it comes back here with the new partner chosen
+                  setShowNotifyEmailModal(false);
+                  setActiveTab('profile');
+                  setSettingsSubView('partners');
+                  if (startNewPartner()) setNotifyAfterPartnerAdd(true);
+                }}
+                style={{
+                  padding: '0.6rem 0.85rem',
+                  borderRadius: '10px',
+                  background: 'transparent',
+                  border: '1px dashed rgba(255,255,255,0.2)',
+                  color: '#cbd5e1',
+                  fontSize: '0.82rem',
+                  textAlign: 'left',
+                  cursor: 'pointer'
+                }}
+              >
+                ＋ 新しいお相手を入力
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={async () => {
@@ -2483,22 +2668,14 @@ function App() {
                   return;
                 }
 
+                const partner = savedPartners.find(p => p.id === notifyTarget);
+                if (partner && !isValidBirthDate(partner.birth.replace(/\//g, '-'))) {
+                  alert(`${partner.name}様の生年月日が正しくありません。「保存したお相手」で直してから選んでください。`);
+                  return;
+                }
+
                 // Sync the subscription to Firestore; the 8:00 AM cron reads it for delivery
-                const saved = await saveEmailSubscriptionData({
-                  email: cleanEmail,
-                  enabled: true,
-                  myName: myName || currentUser?.displayName || 'あなた',
-                  myBirth: myBirth || '',
-                  myGender: myGender,
-                  myMbti: myMbti,
-                  oppName: oppName || '',
-                  oppBirth: oppBirth || '',
-                  oppGender: oppGender,
-                  oppMbti: oppMbti,
-                  relationship: relationship,
-                  mode: mode,
-                  character: selectedCharacter
-                });
+                const saved = await saveNotifySubscription(cleanEmail, partner || (notifyTarget === 'keep' && showKeepTarget ? 'keep' : null));
                 if (!saved) {
                   alert('通知の登録に失敗しました。ログインし直してから、もう一度お試しください。');
                   return;
@@ -2517,7 +2694,7 @@ function App() {
                 cursor: 'pointer'
               }}
             >
-              通知を有効化する
+              {notifyDailyLuck ? 'この内容で保存する' : '通知を有効化する'}
             </button>
           </div>
         </div>

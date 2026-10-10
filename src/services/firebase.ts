@@ -15,7 +15,7 @@ import {
   type User
 } from 'firebase/auth';
 
-import { getFirestore, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 declare global {
   interface Window {
@@ -395,6 +395,21 @@ export interface EmailSubscriptionData {
   mode?: 'single' | 'match';
   character?: 'ren' | 'tsuki';
 }
+
+/**
+ * Reads the signed-in user's daily fortune email subscription (whose fortune the mail is about), or null.
+ */
+export const getEmailSubscription = async (): Promise<EmailSubscriptionData | null> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) return null;
+  try {
+    const snap = await getDoc(doc(db, 'subscriptions', user.uid));
+    return snap.exists() ? (snap.data() as EmailSubscriptionData) : null;
+  } catch (err) {
+    console.warn('⚠️ Could not read the email subscription:', err);
+    return null;
+  }
+};
 
 /**
  * Saves or updates the signed-in user's daily fortune email subscription (subscriptions/{uid}).

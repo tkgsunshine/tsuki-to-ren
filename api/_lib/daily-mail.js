@@ -21,7 +21,8 @@ const buildInput = (sub, isMatch) => ({
  * The engine reads "today" from the process clock, so the caller must run with TZ=Asia/Tokyo.
  */
 export function buildDailyContent(sub) {
-  const isMatch = sub.mode ? sub.mode === 'match' : !!sub.oppBirth;
+  // "match" without a partner birth date (saved by older app versions) cannot be computed: send the solo fortune instead of nothing.
+  const isMatch = !!sub.oppBirth && (sub.mode ? sub.mode === 'match' : true);
   const character = sub.character === 'ren' ? 'ren' : 'tsuki';
   const result = generateFortuneResult(buildInput(sub, isMatch), character);
 
