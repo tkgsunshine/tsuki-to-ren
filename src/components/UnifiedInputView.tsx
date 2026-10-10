@@ -589,7 +589,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>
-                お相手との関係性 <span style={{ color: '#e2c074' }}>(必須)</span>
+                お相手との関係性 <span style={{ color: '#ef4444' }}>(必須)</span>
               </label>
               <select
                 value={relationship}
