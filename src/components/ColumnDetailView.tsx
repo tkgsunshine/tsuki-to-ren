@@ -57,9 +57,37 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
       >
         あなたとお相手の運命の相性を今すぐ確かめてみませんか？
       </Heading>
-      <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0, maxWidth: '500px' }}>
-        生年月日と16タイプを入力するだけで、約7,465万通りの算術マトリクスから二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間が瞬時に鑑定できます。
-      </p>
+      <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left', maxWidth: '500px' }}>
+        <img
+          src="/assets/tsuki.webp"
+          alt="月"
+          loading="lazy"
+          style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            objectPosition: '50% 12%',
+            border: '1.5px solid rgba(244, 114, 182, 0.6)',
+            flexShrink: 0
+          }}
+        />
+        <div
+          style={{
+            flex: 1,
+            padding: '0.7rem 0.9rem',
+            background: 'rgba(244, 114, 182, 0.08)',
+            border: '1px solid rgba(244, 114, 182, 0.3)',
+            borderRadius: '4px 16px 16px 16px',
+            fontSize: '0.78rem',
+            color: '#f3e8ff',
+            lineHeight: '1.7'
+          }}
+        >
+          <div style={{ fontSize: '0.68rem', color: '#f9a8d4', fontWeight: 'bold', marginBottom: '0.2rem' }}>月</div>
+          生年月日と16タイプを入れてくださいね。約7,465万通りの算術マトリクスから、二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間を、すぐにお届けします。
+        </div>
+      </div>
       <button
         type="button"
         onClick={onNavigateHome}
