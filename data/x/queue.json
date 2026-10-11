@@ -1518,7 +1518,25 @@
     "createdAt": "2026-10-05T17:53:29.164Z",
     "postedAt": "2026-10-10T13:06:49.000Z",
     "tweetId": "2108907103175987403",
-    "manual": true
+    "manual": true,
+    "metrics": {
+      "at": "2026-10-11T23:58:41.568Z",
+      "impressions": 4,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-11T23:58:41.568Z",
+      "impressions": 4,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-10-pm",
@@ -1784,8 +1802,11 @@
     "format": "voice",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-05T17:53:29.285Z"
+    "status": "posted",
+    "createdAt": "2026-10-05T17:53:29.285Z",
+    "postedAt": "2026-10-11T05:33:28.000Z",
+    "tweetId": "2109155400939618662",
+    "manual": true
   },
   {
     "id": "2026-10-11-pm",
@@ -2822,7 +2843,7 @@
     "tweetId": "2108476231859720370",
     "manual": true,
     "metrics": {
-      "at": "2026-10-10T23:49:05.018Z",
+      "at": "2026-10-11T23:58:41.568Z",
       "impressions": 5,
       "likes": 0,
       "replies": 0,
