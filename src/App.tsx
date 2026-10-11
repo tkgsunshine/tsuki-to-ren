@@ -986,7 +986,7 @@ function App() {
                   まだ鑑定結果がありません
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: '#d1d5db', lineHeight: '1.6', maxWidth: '340px', margin: 0 }}>
-                  「恋愛診断」から生年月日を入力すると、約7,465万通りの算術マトリクスから二人の本音・相性スコア・LINE吉時間がここに表示されます。
+                  「恋愛診断」から生年月日を入力すると、約7,465万通りの条件の掛け合わせから二人の本音・相性スコア・LINE吉時間がここに表示されます。
                 </p>
                 <button 
                   className="consult-btn font-serif" 
@@ -2107,7 +2107,7 @@ function App() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
                     <span style={{ fontSize: '1.1rem' }}>🔮</span>
                     <h4 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0 }}>
-                      約7,465万通りの算術マトリクス
+                      約7,465万通りの条件の掛け合わせ
                     </h4>
                   </div>
                   <p style={{ fontSize: '0.76rem', color: '#cbd5e1', lineHeight: '1.6', margin: '0 0 0.85rem 0' }}>

@@ -860,7 +860,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           fontWeight: '600',
           letterSpacing: '0.02em'
         }}>
-          ✨ 約7,465万通りの算術マトリクスから算出
+          ✨ 約7,465万通りの条件の掛け合わせから算出
         </div>
         
         {/* Luxury Score Pods Side-by-Side */}

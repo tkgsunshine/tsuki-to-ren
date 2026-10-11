@@ -85,7 +85,7 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
           }}
         >
           <div style={{ fontSize: '0.68rem', color: '#f9a8d4', fontWeight: 'bold', marginBottom: '0.2rem' }}>月</div>
-          生年月日と16タイプを入れてくださいね。約7,465万通りの算術マトリクスから、二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間を、すぐにお届けします。
+          生年月日と16タイプを入れてくださいね。約7,465万通りの条件の掛け合わせから、二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間を、すぐにお届けします。
         </div>
       </div>
       <button
