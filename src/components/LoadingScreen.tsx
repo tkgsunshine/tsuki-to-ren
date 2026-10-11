@@ -27,44 +27,66 @@ export const LoadingScreen: React.FC = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '2rem',
+      gap: '1.5rem',
       padding: '2rem',
       textAlign: 'center',
       animation: 'fadeIn 0.3s ease'
     }}>
       
-      {/* Animated Lotus Emblem Spinner */}
+      {/* Lotus Emblem inside double rings (outer solid ring spins, inner dashed ring counter-spins) */}
       <div style={{
         position: 'relative',
-        width: '120px',
-        height: '120px',
+        width: '200px',
+        height: '200px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        {/* Ring Aura */}
         <div style={{
           position: 'absolute',
           inset: 0,
-          border: '2px solid rgba(226, 192, 116, 0.1)',
+          border: '2px solid rgba(226, 192, 116, 0.15)',
           borderRadius: '50%',
           borderTopColor: 'var(--color-gold)',
-          animation: 'spin 2s linear infinite',
+          animation: 'spin 2.4s linear infinite',
           boxShadow: 'var(--shadow-gold)'
         }} />
-        
-        {/* Lotus Emblem */}
+        <div style={{
+          position: 'absolute',
+          inset: '14px',
+          border: '1px dashed rgba(226, 192, 116, 0.4)',
+          borderRadius: '50%',
+          animation: 'spin 9s linear infinite reverse'
+        }} />
         <img
           src="/assets/lotus-emblem.jpg"
           alt="Loading Emblem"
           style={{
-            width: '80%',
-            height: '80%',
+            width: '60%',
+            height: '60%',
             borderRadius: '50%',
             objectFit: 'cover',
+            boxShadow: '0 0 30px rgba(168, 85, 247, 0.5)',
             animation: 'pulse 1.5s ease-in-out infinite'
           }}
         />
+      </div>
+
+      {/* Petal progress: one petal lights up per calculation step */}
+      <div aria-hidden="true" style={{ display: 'flex', gap: '10px' }}>
+        {loadingTexts.map((_, i) => {
+          const on = i <= textIndex;
+          return (
+            <i key={i} style={{
+              width: '12px',
+              height: '22px',
+              borderRadius: '50% 50% 50% 50% / 70% 70% 30% 30%',
+              background: on ? 'var(--color-gold)' : '#3a2b63',
+              boxShadow: on ? '0 0 10px var(--color-gold)' : 'none',
+              transition: 'background 0.4s ease, box-shadow 0.4s ease'
+            }} />
+          );
+        })}
       </div>
 
       {/* Dynamic Text */}
@@ -81,7 +103,7 @@ export const LoadingScreen: React.FC = () => {
 
       {/* Micro Info */}
       <span style={{ fontSize: '0.65rem', color: '#9ca3af', opacity: 0.6 }}>
-        東洋占星術と現代心理学を多角的に統合しています
+        {textIndex + 1} / {loadingTexts.length} ステップ
       </span>
     </div>
   );
