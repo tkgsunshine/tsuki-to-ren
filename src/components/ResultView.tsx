@@ -2010,7 +2010,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* 2. 絶対NG行動 5選 (Item 1 is visible teaser, Item 2-5 are blurred) */}
           <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)', position: 'relative' }}>
             <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fca5a5', marginBottom: '0.5rem' }}>
-              ⚠️ 絶対NGな取扱注意行動 5选
+              ⚠️ 絶対NGな取扱注意行動 5選
             </div>
             <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#fee2e2', lineHeight: '1.75' }}>
               {activeResult.opponentTorisetsu.ngBehaviors.length > 0 && (
