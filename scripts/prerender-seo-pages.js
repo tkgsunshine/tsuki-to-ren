@@ -346,7 +346,7 @@ writePage(
       <article>
         <h1 style="font-size: 1.6rem; color: #fef08a; border-bottom: 1px solid rgba(226,192,116,0.3); padding-bottom: 0.5rem;">月と蓮の占術ロジック解説</h1>
         <section style="margin-top: 1.5rem;">
-          <h2 style="font-size: 1.15rem; color: #e2c074;">約7,465万通りの算術マトリクス</h2>
+          <h2 style="font-size: 1.15rem; color: #e2c074;">約7,465万通りの条件の掛け合わせ</h2>
           <p>四柱推命（日柱の組み合わせ60×60＝3,600通り）× 九星気学（本命星の組み合わせ9×9＝81通り）× 西洋16タイプ理論（16×16＝256通り）＝ 約7,465万通りの多角アプローチを完全自動算出するオーダーメイド相性鑑定エンジンです。</p>
         </section>
         <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
