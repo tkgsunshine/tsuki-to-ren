@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Sparkles, Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
@@ -474,6 +475,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const oppNickname = opponentName || 'お相手';
   const [isNotified, setIsNotified] = useState(false);
   const [isPastGuardian, setIsPastGuardian] = useState(false);
+  const [isShareDismissed, setIsShareDismissed] = useState(() => {
+    try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
+  });
   const myAstrologyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -3149,6 +3153,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       )}
 
       {/* Floating Sticky Bottom Share CTA Bar */}
+      {SHOW_SHARE_BUTTON && !isShareDismissed && (
       <div style={{
         position: 'fixed',
         bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
@@ -3158,7 +3163,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         pointerEvents: isPastGuardian ? 'auto' : 'none',
         transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         width: 'calc(100% - 2rem)',
-        maxWidth: '440px',
+        maxWidth: '320px',
         zIndex: 9990,
         boxSizing: 'border-box'
       }}>
@@ -3168,8 +3173,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           onClick={onOpenShareCard}
           style={{
             width: '100%',
-            padding: '0.9rem 1.25rem',
-            fontSize: '1rem',
+            padding: '0.6rem 1rem',
+            fontSize: '0.85rem',
             fontWeight: '800',
             letterSpacing: '0.04em',
             display: 'flex',
@@ -3185,10 +3190,37 @@ export const ResultView: React.FC<ResultViewProps> = ({
             transition: 'all 0.2s ease'
           }}
         >
-          <Sparkles size={18} style={{ color: '#000000' }} />
+          <Sparkles size={15} style={{ color: '#000000' }} />
           <span>鑑定結果をシェアする</span>
         </button>
+        <button
+          type="button"
+          aria-label="シェアボタンを閉じる"
+          onClick={() => {
+            setIsShareDismissed(true);
+            try { sessionStorage.setItem('shareBtnDismissed', '1'); } catch { /* ignore */ }
+          }}
+          style={{
+            position: 'absolute',
+            top: '-10px',
+            right: '-6px',
+            width: '24px',
+            height: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            borderRadius: '9999px',
+            border: '1px solid rgba(255,255,255,0.25)',
+            background: 'rgba(0,0,0,0.75)',
+            color: '#ffffff',
+            cursor: 'pointer'
+          }}
+        >
+          <X size={14} />
+        </button>
       </div>
+      )}
 
       {/* A2HS Step Guide Modal */}
       <InstallGuideModal
