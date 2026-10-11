@@ -1,3 +1,4 @@
+import { CharBubble } from './PremiumLPModal';
 import React, { useState, useRef, useEffect } from 'react';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Sparkles, Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
@@ -2336,27 +2337,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 width: '100%',
                 boxSizing: 'border-box'
               }}>
-                <div>
-                  <span style={{
-                    fontSize: '0.6rem',
-                    color: 'var(--color-gold)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    fontWeight: 'bold',
-                    background: 'rgba(226, 192, 116, 0.1)',
-                    padding: '2px 8px',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(226, 192, 116, 0.2)'
-                  }}>
-                    ✦ プレミアムプラン解放 ✦
-                  </span>
-                  <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
-                    二人の取扱説明書・6軸詳細相性・未来予測をすべて解禁
-                  </h3>
-                  <p style={{ fontSize: '0.72rem', color: '#d1d5db', lineHeight: '1.4', margin: 0 }}>
-                    月額500円で、取扱説明書8大コンテンツや6軸詳細相性分析、今後の運勢バイオリズムをいつでも確認できます。
-                  </p>
-                </div>
+                <CharBubble small>
+                  ここまで読んでくれて、ありがとう。<br />
+                  お二人の取扱説明書、6軸の詳しい相性、これからの流れは、まだ鍵がかかったままです。<br />
+                  月額500円で、私が全部ひらいてお見せしますね。
+                </CharBubble>
 
                 {/* Comprehensive Premium Benefits list */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -2410,7 +2395,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       letterSpacing: '0.02em'
                     }}
                   >
-                    🔒 プレミアム登録して全解禁 (月額500円)
+                    🔒 月に全部見せてもらう（月額500円）
                   </button>
                 </div>
               </div>
