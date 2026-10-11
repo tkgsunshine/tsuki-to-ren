@@ -2353,9 +2353,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
                     二人の取扱説明書・6軸詳細相性・未来予測をすべて解禁
                   </h3>
-                  <p style={{ fontSize: '0.72rem', color: '#d1d5db', lineHeight: '1.4', margin: 0 }}>
-                    月額500円で、取扱説明書8大コンテンツや6軸詳細相性分析、今後の運勢バイオリズムをいつでも確認できます。
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
+                    <CharHeadingIcon char="月" size={34} />
+                    <p style={{ fontSize: '0.72rem', color: '#e9d5ff', lineHeight: '1.6', margin: 0 }}>
+                      月額500円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
+                    </p>
+                  </div>
                 </div>
 
                 {/* Comprehensive Premium Benefits list */}
