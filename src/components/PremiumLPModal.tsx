@@ -54,7 +54,7 @@ const speakers = {
 };
 
 /** 月・蓮のセリフ（アイコン付きの吹き出し） */
-export const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speakers; small?: boolean }> = ({ children, who = 'tsuki', small = false }) => {
+const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speakers; small?: boolean }> = ({ children, who = 'tsuki', small = false }) => {
   const sp = speakers[who];
   return (
     <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left' }}>
