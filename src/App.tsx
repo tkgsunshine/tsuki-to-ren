@@ -2422,8 +2422,6 @@ function App() {
           </div>
         )}
 
-        {/* Global Bottom Scroll Spacer for Mobile Safe Area & Navbar Coverage */}
-        <div style={{ height: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))', width: '100%', flexShrink: 0 }} />
       </main>
 
       {/* Interactive Chat Modal Simulator (Lobby active) */}

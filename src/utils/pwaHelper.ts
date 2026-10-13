@@ -76,6 +76,8 @@ export const installStandaloneBottomGapFix = (): void => {
   if (typeof window === 'undefined') return;
   const { isIOS, isStandalone } = getDevicePwaStatus();
   if (!isIOS || !isStandalone) return;
+  // 背景の入った外枠も下メニューと同じ下端まで伸ばす（index.css の html.ios-standalone）
+  document.documentElement.classList.add('ios-standalone');
 
   const update = () => {
     const isPortrait = window.innerHeight > window.innerWidth;
