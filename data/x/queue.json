@@ -1593,8 +1593,8 @@
     "tweetId": "2109527141331456249",
     "manual": true,
     "metrics": {
-      "at": "2026-10-13T02:14:09.270Z",
-      "impressions": 6,
+      "at": "2026-10-13T23:52:05.221Z",
+      "impressions": 9,
       "likes": 0,
       "replies": 0,
       "reposts": 0,
@@ -1829,7 +1829,7 @@
     "tweetId": "2109155400939618662",
     "manual": true,
     "metrics": {
-      "at": "2026-10-13T02:14:09.270Z",
+      "at": "2026-10-13T23:52:05.221Z",
       "impressions": 4,
       "likes": 0,
       "replies": 0,
@@ -2869,8 +2869,8 @@
     "tweetId": "2109526968559640867",
     "manual": true,
     "metrics": {
-      "at": "2026-10-13T02:14:09.270Z",
-      "impressions": 6,
+      "at": "2026-10-13T23:52:05.221Z",
+      "impressions": 8,
       "likes": 0,
       "replies": 0,
       "reposts": 0,
@@ -3006,8 +3006,11 @@
     "format": "comeback",
     "system": "psychology",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-09T08:43:38.053Z"
+    "status": "posted",
+    "createdAt": "2026-10-09T08:43:38.053Z",
+    "postedAt": "2026-10-13T08:47:47.000Z",
+    "tweetId": "2109929077352399248",
+    "manual": true
   },
   {
     "id": "2026-10-13-noon-reply",
