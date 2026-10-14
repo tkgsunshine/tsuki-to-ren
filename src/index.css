@@ -91,6 +91,20 @@ body {
   box-sizing: border-box;
 }
 
+/* iOS ホーム画面アプリでは 100dvh 等が画面より短く計算され、外枠（星空背景）の下端と
+   下メニューの間に黒い帯が出る。外枠を下メニューと同じ基準（fixed + --pwa-bottom-gap）で
+   画面の下端まで伸ばす。クラスは pwaHelper.ts の installStandaloneBottomGapFix が付ける。 */
+html.ios-standalone .app-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--pwa-bottom-gap, 0px));
+  height: auto;
+  min-width: 0;
+  margin: 0 auto;
+}
+
 /* Glassmorphism Class */
 .glass-panel {
   background: var(--bg-card);
