@@ -72,7 +72,7 @@ const all = computeAll(date); // 守護獣・本命星の今日の点数（ア�
 const finalReply = (f, text) => (FORMAT_TEASER[f.id] ? withTeaser(String(text).trim(), FORMAT_TEASER[f.id]) : String(text).trim());
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
-  const reply = f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : '';
+  const reply = f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : '';
   return `## ${slot}（${SYSTEMS[f.system]}／${PURPOSES[f.purpose]}／kind=${f.kind || 'value'}）\n- 型: ${f.guide}${reply}${facts ? `\n- 事実: ${JSON.stringify(facts)}` : '\n- 事実: なし（数字は出さない）'}`;
 };
 const userBase = `# 対象日: ${date}

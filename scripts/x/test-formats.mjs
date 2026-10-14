@@ -210,3 +210,17 @@ test('手動投稿モード（apiPosting=false）: APIでは何も投稿せず�
   assert.equal(r.bodies.length, 0);
   assert.deepEqual(r.queue.map((x) => x.status), ['scheduled', 'scheduled'], '期限切れにもしない');
 });
+
+test('番号選び（pick_number）: 返信つき（60分後）の型で、10日に2本、昼の枠に入る', () => {
+  const f = FORMATS.find((x) => x.id === 'pick_number');
+  assert.ok(f && f.poll && f.replyGuide && f.purpose === 'buzz');
+  let n = 0;
+  for (let i = 0; i < 10; i++) {
+    const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
+    const day = pickFormats(d);
+    for (const [slot, fm] of Object.entries(day)) if (fm.id === 'pick_number') { n++; assert.equal(slot, 'noon', d); }
+  }
+  assert.equal(n, 2);
+  const cfg = JSON.parse(fs.readFileSync(new URL('../../data/x/config.json', import.meta.url), 'utf8'));
+  assert.ok(cfg.delayedReplyFormats.includes('pick_number_reply'));
+});

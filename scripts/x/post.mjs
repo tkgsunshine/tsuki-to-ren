@@ -76,7 +76,7 @@ let changed = false;
 //  ・問いかけの答え合わせ（delayedReplyFormats）: 親が投稿された replyDelayMinutes 分後から（みんなが答える時間をとる）
 //  ・それ以外（解説・続き・ワーストなど）: 親の投稿と同じ実行で、すぐに続けて出す（返信への返信も、順に）
 const byId = new Map(queue.map((p) => [p.id, p]));
-const DELAYED_REPLY_FORMATS = config.delayedReplyFormats ?? ['psych_poll_reply', 'comeback_reply', 'quiz_ab_reply'];
+const DELAYED_REPLY_FORMATS = config.delayedReplyFormats ?? ['psych_poll_reply', 'comeback_reply', 'quiz_ab_reply', 'pick_number_reply'];
 const replyDelayMsOf = (p) => (DELAYED_REPLY_FORMATS.includes(p.format) ? (config.replyDelayMinutes ?? 60) * 60000 : 0);
 const replyReadyAt = (p) => {
   const parent = byId.get(p.replyTo);
