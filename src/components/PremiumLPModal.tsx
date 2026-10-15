@@ -120,7 +120,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   const handleSubscribeAction = () => {
     if (!isRegistered) {
-      if (confirm('プレミアムのお申し込みには、無料の会員登録が必要です（Google・X・メールアドレスで登録できます）。\n登録画面へ進みますか？')) {
+      if (confirm('プレミアムのお申し込みには、無料の会員登録が必要です。\n登録画面へ進みますか？')) {
         onClose();
         onRegisterFirst();
       }
