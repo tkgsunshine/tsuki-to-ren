@@ -1721,9 +1721,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   if (ok) handleScrollToRegister();
                 });
               } else if (!isSubscribed) {
-                if (confirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？')) {
-                  handleScrollToSub();
-                }
+                showConfirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+                  if (ok) handleScrollToSub();
+                });
               } else {
                 setIsNotified(!isNotified);
                 showAlert(!isNotified ? '🔔 毎朝8時の運勢通知をONに設定しました。' : '🔕 デイリー通知をOFFに設定しました。');
