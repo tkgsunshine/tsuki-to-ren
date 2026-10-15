@@ -91,6 +91,11 @@ body {
   box-sizing: border-box;
 }
 
+/* トップの恋愛診断（入力画面）だけは紫の宇宙の背景のまま（TAKASHI判断 2026-10-15） */
+.app-container.bg-cosmos {
+  background-image: url('/assets/bg-cosmos.webp');
+}
+
 /* iOS ホーム画面アプリでは 100dvh 等が画面より短く計算され、外枠（星空背景）の下端と
    下メニューの間に黒い帯が出る。外枠を下メニューと同じ基準（fixed + --pwa-bottom-gap）で
    画面の下端まで伸ばす。クラスは pwaHelper.ts の installStandaloneBottomGapFix が付ける。 */

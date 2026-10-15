@@ -875,7 +875,7 @@ function App() {
   const activeResult = selectedCharacter === 'ren' ? renResult : tsukiResult;
 
   return (
-    <div className="app-container" style={{
+    <div className={`app-container${activeTab === 'home' && flowStep !== 'result' ? ' bg-cosmos' : ''}`} style={{
       '--color-theme': selectedCharacter === 'tsuki' ? '#cdbfe2' : '#9cc6d8',
       '--color-theme-accent': selectedCharacter === 'tsuki' ? '#9f86c0' : '#3a86ab',
       '--shadow-theme-glow': selectedCharacter === 'tsuki' ? '0 0 15px rgba(159, 134, 192, 0.45)' : '0 0 15px rgba(58, 134, 171, 0.45)',
