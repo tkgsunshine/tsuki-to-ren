@@ -32,19 +32,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
       </button>
 
       <button
-        className={`navbar-item ${activeTab === 'column' ? 'active' : ''}`}
-        onClick={() => setActiveTab('column')}
-      >
-        <BookOpen />
-        <span>コラム</span>
-      </button>
-
-      <button
         className={`navbar-item ${activeTab === 'chat' ? 'active' : ''}`}
         onClick={() => setActiveTab('chat')}
       >
         <MessageCircle />
         <span>チャット</span>
+      </button>
+
+      <button
+        className={`navbar-item ${activeTab === 'column' ? 'active' : ''}`}
+        onClick={() => setActiveTab('column')}
+      >
+        <BookOpen />
+        <span>コラム</span>
       </button>
 
       <button
