@@ -2064,7 +2064,7 @@ function App() {
                             <button
                               type="button"
                               onClick={() => {
-                                showConfirm(`${partner.name}様の保存データを削除しますか？`, { okLabel: '削除する' }).then(ok => {
+                                showConfirm(`${partner.name}様の保存データを削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
                                 });
                               }}

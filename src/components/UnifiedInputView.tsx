@@ -511,7 +511,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          showConfirm(`${partner.name}様を削除しますか？`, { okLabel: '削除する' }).then(ok => {
+                          showConfirm(`${partner.name}様を削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
                             if (ok) onDeletePartner(partner.id);
                           });
                         }}

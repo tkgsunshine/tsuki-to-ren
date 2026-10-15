@@ -7,6 +7,8 @@ type DialogOptions = {
   title?: string;
   okLabel?: string;
   cancelLabel?: string;
+  // 削除など取り消せない操作のとき、決定ボタンを赤系にする
+  danger?: boolean;
 };
 
 type DialogRequest = DialogOptions & {
@@ -136,11 +138,12 @@ export function AppDialogHost() {
               padding: '0.75rem',
               borderRadius: '14px',
               border: 'none',
-              background: 'linear-gradient(135deg, #f2e2b3 0%, #e2c074 50%, #b8692d 100%)',
-              color: '#0e141d',
+              background: current.danger ? 'linear-gradient(135deg, #e07a63 0%, #b8432d 100%)' : 'linear-gradient(135deg, #f2e2b3 0%, #e2c074 50%, #b8692d 100%)',
+              color: current.danger ? '#ffffff' : '#0e141d',
               fontSize: '0.86rem',
               fontWeight: 'bold',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              outline: 'none'
             }}
           >
             {current.okLabel || (isConfirm ? 'はい' : 'OK')}
