@@ -607,11 +607,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   boxShadow: '0 0 10px rgba(226, 192, 116, 0.1)'
                 }}
               >
-                <option value="片思い中">💕 片思い中</option>
-                <option value="両思い・交際中">💖 両思い・交際中</option>
-                <option value="復縁したい">🔄 復縁したい</option>
-                <option value="結婚・夫婦">💍 結婚・夫婦</option>
-                <option value="複雑愛・秘密の恋">🌙 複雑愛・秘密の恋</option>
+                <option value="片思い中">片思い中</option>
+                <option value="両思い・交際中">両思い・交際中</option>
+                <option value="復縁したい">復縁したい</option>
+                <option value="結婚・夫婦">結婚・夫婦</option>
+                <option value="複雑愛・秘密の恋">複雑愛・秘密の恋</option>
               </select>
             </div>
 
