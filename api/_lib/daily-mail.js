@@ -97,9 +97,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
   const hourBorder = content.hasOpponent ? '#1fbf6b' : 'rgba(196, 161, 255, 0.4)';
   const hourLabel = content.hasOpponent ? '#3be08a' : GOLD;
   const hourNoteColor = content.hasOpponent ? '#7be8ae' : '#a8a3bd';
-  // Gmail's dark mode (iOS app) darkens background-color but leaves background-image alone,
-  // so the green is also painted as a flat gradient: it stays bright green and the text Gmail darkens stays readable.
-  const hourBgImage = content.hasOpponent ? ` background-image: linear-gradient(160deg, #0f3a2a 0%, #0a2219 100%);` : '';
+  const hourClass = content.hasOpponent ? ' class="hour-grad"' : '';
   const isRen = sub.character === 'ren';
   const charName = isRen ? '蓮' : '月';
   const charImg = `${SITE}/assets/${isRen ? 'ren' : 'tsuki'}.jpg`;
@@ -112,13 +110,29 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <title>本日の恋愛運・吉時間 | 月と蓮</title>
+  <!--
+    Dark mode: Gmail's apps invert every text and background COLOR in dark mode (dark purple becomes pale lavender,
+    light text becomes dark) but never touch background IMAGES. Text over an image therefore turns dark on a still-dark
+    image and becomes unreadable. So nothing with text on it gets a background image inline: the images live in these
+    classes, and Gmail (matched by "u + .body") drops them, so its inversion flips text and background together.
+    A client that ignores <style> just shows the flat colors.
+  -->
+  <style>
+    :root { color-scheme: light dark; supported-color-schemes: light dark; }
+    .mail-stars { background-image: url('${SITE}/assets/mail-bg.jpg'); background-size: cover; background-position: top center; }
+    .hour-grad { background-image: linear-gradient(160deg, #0f3a2a 0%, #0a2219 100%); }
+    .cta-grad { background-image: linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%); }
+    u + .body .mail-stars, u + .body .hour-grad, u + .body .cta-grad { background-image: none !important; }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #090714; font-family: 'Hiragino Sans', 'Yu Gothic', 'Helvetica Neue', Arial, sans-serif; color: #f3f4f6;">
+<body class="body" style="margin: 0; padding: 0; background-color: #090714; font-family: 'Hiragino Sans', 'Yu Gothic', 'Helvetica Neue', Arial, sans-serif; color: #f3f4f6;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#090714" style="background-color: #090714; padding: 20px 10px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#120e24" background="${SITE}/assets/mail-bg.jpg" style="max-width: 540px; background-color: #120e24; background-image: url('${SITE}/assets/mail-bg.jpg'); background-size: cover; background-position: top center; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 20px; overflow: hidden;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#120e24" class="mail-stars" style="max-width: 540px; background-color: #120e24; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 20px; overflow: hidden;">
 
           <!-- Hero: title text is baked into the image so mail-client dark-mode color shifts cannot make it unreadable -->
           <tr>
@@ -179,7 +193,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- LINE golden hour (LINE green when it is the LINE time; gold card in single mode) -->
           <tr>
             <td style="padding: 0 25px 14px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="${hourBg}" style="background-color: ${hourBg};${hourBgImage} border: 1px solid ${hourBorder}; border-radius: 16px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="${hourBg}"${hourClass} style="background-color: ${hourBg}; border: 1px solid ${hourBorder}; border-radius: 16px;">
                 <tr>
                   <td align="center" style="padding: 20px 18px; text-align: center;">
                     <div style="font-size: 12px; color: ${hourLabel}; font-weight: bold; letter-spacing: 0.1em;">${content.hasOpponent ? '&#9679; ' : ''}${hourTitle}</div>
@@ -240,7 +254,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- CTA -->
           <tr>
             <td align="center" style="padding: 22px 25px 28px; text-align: center;">
-              <a href="${esc(resultUrlFor(sub, content.hasOpponent))}" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; background-image: linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%); color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
+              <a href="${esc(resultUrlFor(sub, content.hasOpponent))}" class="cta-grad" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
                 本日の詳細鑑定を見る &#10132;
               </a>
             </td>
