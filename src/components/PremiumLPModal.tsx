@@ -11,31 +11,31 @@ const worries = [
 const benefits = [
   {
     Icon: Calendar,
-    color: '#60a5fa',
+    color: '#5d9fc0',
     title: 'これからの7日間と、10年先までの流れ',
     body: '明日から7日間の二人の相性の波と、この先10年の「結婚・同棲・運気が大きく開く時期」まで、鍵のかかっていたところをぜんぶ読めるようになりますよ。'
   },
   {
     Icon: BookOpen,
-    color: '#f472b6',
+    color: '#d68ba4',
     title: 'あの人のトリセツと、6つの相性グラフ',
     body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、ぜんぶ見られます。'
   },
   {
     Icon: Bell,
-    color: '#fbbf24',
+    color: '#e8a93a',
     title: '毎朝届く、あなたのための運勢メール',
     body: 'その日の運勢と吉方位、二人にとって大事な転機の日を毎朝お届けします。チャンスの日も、少し気をつけたい日も、先に知っておけますよ。'
   },
   {
     Icon: Heart,
-    color: '#34d399',
+    color: '#6fb08f',
     title: '気になる人を10人まで保存',
     body: '本命の人も、まだ気になっているだけの人も、10人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。'
   },
   {
     Icon: MessageCircle,
-    color: '#c084fc',
+    color: '#b9a3d6',
     title: '私と蓮に、いつでも相談',
     body: '返信の文面を一緒に考えたり、あの人の本音を一緒に読み解いたり。24時間、回数を気にせず話しかけてくださいね。寄り添う私と、冷静に整理してくれる蓮がいます。'
   }
@@ -49,8 +49,8 @@ const sectionTitleStyle: React.CSSProperties = {
 };
 
 const speakers = {
-  tsuki: { name: '月', img: '/assets/tsuki.webp', accent: '244, 114, 182', label: '#f9a8d4' },
-  ren: { name: '蓮', img: '/assets/ren.webp', accent: '96, 165, 250', label: '#93c5fd' }
+  tsuki: { name: '月', img: '/assets/tsuki.webp', accent: '244, 114, 182', label: '#e8b7c7' },
+  ren: { name: '蓮', img: '/assets/ren.webp', accent: '96, 165, 250', label: '#9cc6d8' }
 };
 
 /** 月・蓮のセリフ（アイコン付きの吹き出し） */
@@ -78,7 +78,7 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
         border: `1px solid rgba(${sp.accent}, 0.3)`,
         borderRadius: '4px 16px 16px 16px',
         fontSize: small ? '0.76rem' : '0.8rem',
-        color: '#f3e8ff',
+        color: '#f0ebf5',
         lineHeight: '1.75'
       }}>
         <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem' }}>
@@ -158,7 +158,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(5, 4, 12, 0.92)',
+      background: 'rgba(5, 7, 10, 0.92)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
       zIndex: 200000,
@@ -172,7 +172,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
         maxWidth: '440px',
         maxHeight: '90vh',
         height: '760px',
-        background: 'linear-gradient(180deg, #130d2a 0%, #090615 100%)',
+        background: 'linear-gradient(180deg, #111823 0%, #080c11 100%)',
         border: '1.5px solid rgba(226, 192, 116, 0.35)',
         borderRadius: '28px',
         boxShadow: '0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(226, 192, 116, 0.15)',
@@ -189,13 +189,13 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           alignItems: 'center',
           padding: '0.85rem 1.25rem',
           borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          background: 'rgba(19, 13, 42, 0.95)',
+          background: 'rgba(17, 24, 35, 0.95)',
           backdropFilter: 'blur(10px)',
           zIndex: 20,
           flexShrink: 0
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Crown size={18} style={{ color: '#fef08a' }} />
+            <Crown size={18} style={{ color: '#f2e2b3' }} />
             <span className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
               月と蓮 プレミアム
             </span>
@@ -214,7 +214,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#cbd5e1',
+              color: '#d8d2c6',
               cursor: 'pointer'
             }}
           >
@@ -245,10 +245,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(180deg, rgba(19, 13, 42, 0) 45%, rgba(19, 13, 42, 0.85) 80%, #130d2a 100%)'
+              background: 'linear-gradient(180deg, rgba(17, 24, 35, 0) 45%, rgba(17, 24, 35, 0.85) 80%, #111823 100%)'
             }} />
             <div style={{ position: 'absolute', left: 0, right: 0, bottom: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>
-              <div style={{ fontSize: '0.72rem', color: '#f9a8d4', fontWeight: 'bold', letterSpacing: '0.12em', marginBottom: '0.35rem' }}>
+              <div style={{ fontSize: '0.72rem', color: '#e8b7c7', fontWeight: 'bold', letterSpacing: '0.12em', marginBottom: '0.35rem' }}>
                 月からのご案内
               </div>
               <h1 className="font-serif gold-text" style={{
@@ -287,10 +287,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   border: '1px solid rgba(255, 255, 255, 0.07)',
                   borderRadius: '12px',
                   fontSize: '0.78rem',
-                  color: '#e5e7eb',
+                  color: '#e8e3d8',
                   lineHeight: '1.5'
                 }}>
-                  <Moon size={14} style={{ color: '#f9a8d4', flexShrink: 0 }} />
+                  <Moon size={14} style={{ color: '#e8b7c7', flexShrink: 0 }} />
                   <span>{w}</span>
                 </div>
               ))}
@@ -332,10 +332,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   <Icon size={17} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f3f4f6' }}>
+                  <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f3efe6' }}>
                     {title}
                   </span>
-                  <p style={{ fontSize: '0.73rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
+                  <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
                     {body}
                   </p>
                 </div>
@@ -346,22 +346,22 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {/* 料金 */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             <div style={{
-              background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.1) 0%, rgba(217, 119, 6, 0.12) 100%)',
-              border: '1.5px solid rgba(250, 204, 21, 0.35)',
+              background: 'linear-gradient(135deg, rgba(230, 184, 92, 0.1) 0%, rgba(184, 105, 45, 0.12) 100%)',
+              border: '1.5px solid rgba(230, 184, 92, 0.35)',
               borderRadius: '20px',
               padding: '1.1rem 1rem',
               textAlign: 'center'
             }}>
-              <div style={{ fontSize: '0.75rem', color: '#fef08a', fontWeight: 'bold', marginBottom: '0.2rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#f2e2b3', fontWeight: 'bold', marginBottom: '0.2rem' }}>
                 プレミアム（月額）
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.25rem' }}>
                 <span className="font-serif gold-text" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>
                   ¥500
                 </span>
-                <span style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>/ 月（税込）</span>
+                <span style={{ fontSize: '0.82rem', color: '#d8d2c6' }}>/ 月（税込）</span>
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.72rem', color: '#d8d2c6', marginTop: '0.25rem' }}>
                 1日あたり約16円
               </div>
             </div>
@@ -400,7 +400,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                       alignItems: 'center',
                       background: 'transparent',
                       border: 'none',
-                      color: '#f3f4f6',
+                      color: '#f3efe6',
                       fontSize: '0.78rem',
                       fontWeight: '600',
                       textAlign: 'left',
@@ -413,7 +413,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                       style={{
                         transform: activeFaq === index ? 'rotate(180deg)' : 'rotate(0deg)',
                         transition: 'transform 0.2s',
-                        color: '#9ca3af'
+                        color: '#a9a49a'
                       }}
                     />
                   </button>
@@ -421,7 +421,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     <div style={{
                       padding: '0 0.9rem 0.75rem',
                       fontSize: '0.72rem',
-                      color: '#9ca3af',
+                      color: '#a9a49a',
                       lineHeight: '1.55',
                       borderTop: '1px dashed rgba(255,255,255,0.05)',
                       paddingTop: '0.55rem'
@@ -449,11 +449,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             justifyContent: 'center',
             gap: '0.75rem',
             fontSize: '0.68rem',
-            color: '#9ca3af',
+            color: '#a9a49a',
             padding: '0.5rem 0 1rem 0'
           }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-              <ShieldCheck size={12} style={{ color: '#4ade80' }} /> いつでも解約できます
+              <ShieldCheck size={12} style={{ color: '#7dbb8a' }} /> いつでも解約できます
             </span>
             <span>•</span>
             <span>カード / Apple Pay / Google Pay</span>
@@ -463,7 +463,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
         {/* PINNED FIXED BOTTOM CTA FOOTER */}
         <div style={{
           padding: '0.85rem 1.25rem max(1.75rem, calc(0.85rem + env(safe-area-inset-bottom, 24px))) 1.25rem',
-          background: 'rgba(13, 9, 30, 0.96)',
+          background: 'rgba(12, 17, 24, 0.96)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderTop: '1px solid rgba(226, 192, 116, 0.3)',
@@ -477,9 +477,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 width: '100%',
                 textAlign: 'center',
                 padding: '0.75rem',
-                background: 'rgba(52, 211, 153, 0.95)',
+                background: 'rgba(111, 176, 143, 0.95)',
                 backdropFilter: 'blur(10px)',
-                border: '1px solid #34d399',
+                border: '1px solid #6fb08f',
                 borderRadius: '14px',
                 color: '#000',
                 fontSize: '0.85rem',
@@ -495,15 +495,15 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#9ca3af',
+                  color: '#a9a49a',
                   fontSize: '0.75rem',
                   textDecoration: 'underline',
                   cursor: 'pointer',
                   padding: '0.2rem 0.5rem',
                   transition: 'color 0.2s'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#fca5a5')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#e6a99c')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#a9a49a')}
               >
                 プレミアム会員の解約手続きはこちら
               </button>
@@ -524,11 +524,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.45rem',
-                background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
                 color: '#000000',
                 border: 'none',
                 borderRadius: '9999px',
-                boxShadow: '0 6px 20px rgba(234, 179, 8, 0.55)',
+                boxShadow: '0 6px 20px rgba(217, 164, 65, 0.55)',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
               }}

@@ -31,9 +31,9 @@ export const SeoFooterSection: React.FC = () => {
     <footer style={{
       marginTop: '0.75rem',
       padding: '1.25rem 1.25rem 0.5rem',
-      background: 'linear-gradient(180deg, rgba(10, 7, 24, 0) 0%, rgba(13, 9, 32, 0.95) 20%, rgba(8, 5, 20, 0.99) 100%)',
+      background: 'linear-gradient(180deg, rgba(10, 13, 19, 0) 0%, rgba(13, 17, 25, 0.95) 20%, rgba(8, 11, 15, 0.99) 100%)',
       borderTop: '1px solid rgba(226, 192, 116, 0.15)',
-      color: '#cbd5e1',
+      color: '#d8d2c6',
       fontSize: '0.78rem',
       lineHeight: '1.6',
       flexShrink: 0,
@@ -63,7 +63,7 @@ export const SeoFooterSection: React.FC = () => {
           <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>
             無料本格恋愛相性占い『月と蓮』| 片思い・復縁・好きな人の本音鑑定
           </h2>
-          <p style={{ fontSize: '0.73rem', color: '#94a3b8', margin: 0, lineHeight: '1.55' }}>
+          <p style={{ fontSize: '0.73rem', color: '#a39d91', margin: 0, lineHeight: '1.55' }}>
             四柱推命・九星気学・16タイプ（MBTI）で片思い・復縁・好きな人との本気度を無料診断。二人の運命バイオリズムとお相手のトリセツ、心を掴むLINE吉時間を導き出します。
           </p>
         </div>
@@ -94,7 +94,7 @@ export const SeoFooterSection: React.FC = () => {
                     alignItems: 'center',
                     background: 'transparent',
                     border: 'none',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     fontSize: '0.76rem',
                     fontWeight: 'bold',
                     textAlign: 'left',
@@ -107,7 +107,7 @@ export const SeoFooterSection: React.FC = () => {
                     style={{
                       transform: activeFaq === idx ? 'rotate(180deg)' : 'rotate(0deg)',
                       transition: 'transform 0.2s',
-                      color: '#9ca3af',
+                      color: '#a9a49a',
                       flexShrink: 0,
                       marginLeft: '0.5rem'
                     }}
@@ -117,7 +117,7 @@ export const SeoFooterSection: React.FC = () => {
                 <div hidden={activeFaq !== idx} style={{
                   padding: '0 0.9rem 0.75rem',
                   fontSize: '0.71rem',
-                  color: '#94a3b8',
+                  color: '#a39d91',
                   lineHeight: '1.55',
                   borderTop: '1px dashed rgba(255, 255, 255, 0.05)',
                   paddingTop: '0.55rem'
@@ -159,7 +159,7 @@ export const SeoFooterSection: React.FC = () => {
                 href={`/compatibility/${item.pair}`}
                 style={{
                   fontSize: '0.72rem',
-                  color: '#cbd5e1',
+                  color: '#d8d2c6',
                   background: 'rgba(255, 255, 255, 0.05)',
                   padding: '4px 8px',
                   borderRadius: '6px',
@@ -193,22 +193,22 @@ export const SeoFooterSection: React.FC = () => {
           gap: '0.75rem 1.25rem',
           justifyContent: 'center',
           fontSize: '0.72rem',
-          color: '#94a3b8'
+          color: '#a39d91'
         }}>
-          <a href="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>恋愛診断ホーム</a>
-          <a href="/column" style={{ color: '#cbd5e1', textDecoration: 'none' }}>開運コラム</a>
-          <a href="/compatibility" style={{ color: '#cbd5e1', textDecoration: 'none' }}>16タイプ相性一覧</a>
-          <a href="/terms" style={{ color: '#94a3b8', textDecoration: 'none' }}>利用規約</a>
-          <a href="/privacy" style={{ color: '#94a3b8', textDecoration: 'none' }}>プライバシーポリシー</a>
-          <a href="/tokushoho" style={{ color: '#94a3b8', textDecoration: 'none' }}>特定商取引法に基づく表記</a>
-          <a href="/company" style={{ color: '#94a3b8', textDecoration: 'none' }}>運営会社</a>
+          <a href="/" style={{ color: '#d8d2c6', textDecoration: 'none' }}>恋愛診断ホーム</a>
+          <a href="/column" style={{ color: '#d8d2c6', textDecoration: 'none' }}>開運コラム</a>
+          <a href="/compatibility" style={{ color: '#d8d2c6', textDecoration: 'none' }}>16タイプ相性一覧</a>
+          <a href="/terms" style={{ color: '#a39d91', textDecoration: 'none' }}>利用規約</a>
+          <a href="/privacy" style={{ color: '#a39d91', textDecoration: 'none' }}>プライバシーポリシー</a>
+          <a href="/tokushoho" style={{ color: '#a39d91', textDecoration: 'none' }}>特定商取引法に基づく表記</a>
+          <a href="/company" style={{ color: '#a39d91', textDecoration: 'none' }}>運営会社</a>
         </div>
 
         {/* Copyright */}
         <div style={{
           textAlign: 'center',
           fontSize: '0.68rem',
-          color: '#64748b',
+          color: '#736e65',
           borderTop: '1px solid rgba(255, 255, 255, 0.05)',
           paddingTop: '1.25rem'
         }}>

@@ -63,7 +63,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(5, 4, 12, 0.94)',
+      background: 'rgba(5, 7, 10, 0.94)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
       zIndex: 210000,
@@ -76,10 +76,10 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
         width: '100%',
         maxWidth: '440px',
         maxHeight: '92vh',
-        background: 'linear-gradient(180deg, #160d2e 0%, #0a0618 100%)',
-        border: '1.5px solid rgba(239, 68, 68, 0.4)',
+        background: 'linear-gradient(180deg, #131a26 0%, #090d13 100%)',
+        border: '1.5px solid rgba(207, 90, 67, 0.4)',
         borderRadius: '28px',
-        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(239, 68, 68, 0.15)',
+        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(207, 90, 67, 0.15)',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
@@ -93,14 +93,14 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
           alignItems: 'center',
           padding: '0.9rem 1.25rem',
           borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          background: 'rgba(22, 13, 46, 0.95)',
+          background: 'rgba(19, 26, 38, 0.95)',
           backdropFilter: 'blur(10px)',
           zIndex: 20,
           flexShrink: 0
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <ShieldAlert size={18} style={{ color: '#f87171' }} />
-            <span className="font-serif" style={{ fontSize: '0.92rem', fontWeight: 'bold', color: '#fca5a5' }}>
+            <ShieldAlert size={18} style={{ color: '#d9786a' }} />
+            <span className="font-serif" style={{ fontSize: '0.92rem', fontWeight: 'bold', color: '#e6a99c' }}>
               プレミアム会員 解約手続き
             </span>
           </div>
@@ -118,7 +118,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#cbd5e1',
+              color: '#d8d2c6',
               cursor: 'pointer'
             }}
           >
@@ -135,13 +135,13 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
         }}>
           {/* Loss Notification Box */}
           <div style={{
-            background: 'rgba(239, 68, 68, 0.08)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            background: 'rgba(207, 90, 67, 0.08)',
+            border: '1px solid rgba(207, 90, 67, 0.3)',
             borderRadius: '16px',
             padding: '1rem',
             marginBottom: '1.25rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fca5a5', fontWeight: 'bold', fontSize: '0.82rem', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#e6a99c', fontWeight: 'bold', fontSize: '0.82rem', marginBottom: '0.5rem' }}>
               <AlertTriangle size={16} />
               解約すると利用できなくなる機能
             </div>
@@ -149,7 +149,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
               margin: 0,
               paddingLeft: '1.2rem',
               fontSize: '0.74rem',
-              color: '#cbd5e1',
+              color: '#d8d2c6',
               lineHeight: '1.6'
             }}>
               <li>7日間の相性バイオリズム ＆ 月次・10年運命年表の閲覧</li>
@@ -167,10 +167,10 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
                 display: 'block',
                 fontSize: '0.85rem',
                 fontWeight: 'bold',
-                color: '#f3f4f6',
+                color: '#f3efe6',
                 marginBottom: '0.65rem'
               }}>
-                解約理由を教えてください <span style={{ color: '#ef4444', fontSize: '0.72rem', marginLeft: '0.2rem' }}>(必須・複数選択可)</span>
+                解約理由を教えてください <span style={{ color: '#cf5a43', fontSize: '0.72rem', marginLeft: '0.2rem' }}>(必須・複数選択可)</span>
               </label>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -185,19 +185,19 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
                         alignItems: 'center',
                         gap: '0.65rem',
                         padding: '0.75rem 0.85rem',
-                        background: isChecked ? 'rgba(239, 68, 68, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-                        border: isChecked ? '1px solid rgba(239, 68, 68, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
+                        background: isChecked ? 'rgba(207, 90, 67, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                        border: isChecked ? '1px solid rgba(207, 90, 67, 0.6)' : '1px solid rgba(255, 255, 255, 0.08)',
                         borderRadius: '12px',
                         cursor: 'pointer',
                         transition: 'all 0.18s ease'
                       }}
                     >
                       {isChecked ? (
-                        <CheckSquare size={18} style={{ color: '#f87171', flexShrink: 0 }} />
+                        <CheckSquare size={18} style={{ color: '#d9786a', flexShrink: 0 }} />
                       ) : (
-                        <Square size={18} style={{ color: '#6b7280', flexShrink: 0 }} />
+                        <Square size={18} style={{ color: '#7a756c', flexShrink: 0 }} />
                       )}
-                      <span style={{ fontSize: '0.78rem', color: isChecked ? '#fef2f2' : '#d1d5db', lineHeight: '1.45' }}>
+                      <span style={{ fontSize: '0.78rem', color: isChecked ? '#fef2f2' : '#d5cfc3', lineHeight: '1.45' }}>
                         {opt.label}
                       </span>
                     </div>
@@ -212,10 +212,10 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
                 display: 'block',
                 fontSize: '0.8rem',
                 fontWeight: 'bold',
-                color: selectedReasons.includes('other') ? '#fca5a5' : '#9ca3af',
+                color: selectedReasons.includes('other') ? '#e6a99c' : '#a9a49a',
                 marginBottom: '0.45rem'
               }}>
-                詳細理由・ご意見・改善点 {selectedReasons.includes('other') ? <span style={{ color: '#ef4444' }}>(必須)</span> : '(任意)'}
+                詳細理由・ご意見・改善点 {selectedReasons.includes('other') ? <span style={{ color: '#cf5a43' }}>(必須)</span> : '(任意)'}
               </label>
               <textarea
                 value={otherReasonText}
@@ -232,12 +232,12 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
                 style={{
                   width: '100%',
                   padding: '0.75rem',
-                  background: '#0c081c',
+                  background: '#0b1016',
                   border: selectedReasons.includes('other')
-                    ? '1.5px solid rgba(239, 68, 68, 0.5)'
+                    ? '1.5px solid rgba(207, 90, 67, 0.5)'
                     : '1px solid rgba(255, 255, 255, 0.12)',
                   borderRadius: '12px',
-                  color: '#f3f4f6',
+                  color: '#f3efe6',
                   fontSize: '0.78rem',
                   lineHeight: '1.5',
                   outline: 'none',
@@ -251,10 +251,10 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
             {errorMessage && (
               <div style={{
                 padding: '0.65rem 0.85rem',
-                background: 'rgba(239, 68, 68, 0.2)',
-                border: '1px solid #ef4444',
+                background: 'rgba(207, 90, 67, 0.2)',
+                border: '1px solid #cf5a43',
                 borderRadius: '10px',
-                color: '#fca5a5',
+                color: '#e6a99c',
                 fontSize: '0.74rem',
                 fontWeight: 'bold',
                 textAlign: 'center'
@@ -271,15 +271,15 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  background: 'rgba(239, 68, 68, 0.25)',
-                  border: '1px solid #ef4444',
+                  background: 'rgba(207, 90, 67, 0.25)',
+                  border: '1px solid #cf5a43',
                   borderRadius: '9999px',
-                  color: '#fca5a5',
+                  color: '#e6a99c',
                   fontSize: '0.88rem',
                   fontWeight: 'bold',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
-                  boxShadow: '0 4px 15px rgba(239, 68, 68, 0.2)'
+                  boxShadow: '0 4px 15px rgba(207, 90, 67, 0.2)'
                 }}
               >
                 {isSubmitting ? '解約処理中...' : '解約を確定する'}
@@ -291,14 +291,14 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                  background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
                   border: 'none',
                   borderRadius: '9999px',
                   color: '#000000',
                   fontSize: '0.88rem',
                   fontWeight: '800',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(234, 179, 8, 0.4)',
+                  boxShadow: '0 4px 15px rgba(217, 164, 65, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

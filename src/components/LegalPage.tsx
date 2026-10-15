@@ -10,7 +10,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
     <div style={{
       position: 'absolute',
       inset: 0,
-      background: 'linear-gradient(180deg, rgba(15, 12, 28, 0.99) 0%, rgba(8, 8, 18, 1) 100%)',
+      background: 'linear-gradient(180deg, rgba(13, 18, 26, 0.99) 0%, rgba(8, 11, 16, 1) 100%)',
       zIndex: 900,
       display: 'flex',
       flexDirection: 'column',
@@ -34,7 +34,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
           marginBottom: '1.5rem',
           position: 'sticky',
           top: 0,
-          background: 'rgba(15, 12, 28, 0.95)',
+          background: 'rgba(13, 18, 26, 0.95)',
           backdropFilter: 'blur(8px)',
           padding: '0.75rem 0',
           zIndex: 10
@@ -52,7 +52,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
             style={{
               background: 'rgba(255,255,255,0.08)',
               border: 'none',
-              color: '#cbd5e1',
+              color: '#d8d2c6',
               width: '34px',
               height: '34px',
               borderRadius: '50%',
@@ -76,13 +76,13 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
             paddingBottom: '0.75rem',
             borderBottom: '1px solid rgba(226, 192, 116, 0.25)'
           }}>
-            <FileText size={16} style={{ color: '#fbbf24' }} />
-            <h2 className="font-serif" style={{ fontSize: '1.05rem', color: '#fef08a', margin: 0, fontWeight: 'bold' }}>
+            <FileText size={16} style={{ color: '#e8a93a' }} />
+            <h2 className="font-serif" style={{ fontSize: '1.05rem', color: '#f2e2b3', margin: 0, fontWeight: 'bold' }}>
               利用規約
             </h2>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.82rem', color: '#d1d5db', lineHeight: '1.7' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.82rem', color: '#d5cfc3', lineHeight: '1.7' }}>
             <Article title="第1条（サービスの概要）">
               本サービス「月と蓮（つきとれん）」（以下「本サービス」）は、四柱推命をベースとした恋愛相性鑑定、運勢予測、およびAIチャットによるアドバイス機能を提供するウェブアプリケーションです。本サービスの利用をもって、本利用規約に同意したものとみなします。
             </Article>
@@ -152,13 +152,13 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
             paddingBottom: '0.75rem',
             borderBottom: '1px solid rgba(226, 192, 116, 0.25)'
           }}>
-            <Shield size={16} style={{ color: '#4ade80' }} />
-            <h2 className="font-serif" style={{ fontSize: '1.05rem', color: '#86efac', margin: 0, fontWeight: 'bold' }}>
+            <Shield size={16} style={{ color: '#7dbb8a' }} />
+            <h2 className="font-serif" style={{ fontSize: '1.05rem', color: '#a8d3b0', margin: 0, fontWeight: 'bold' }}>
               プライバシーポリシー
             </h2>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.82rem', color: '#d1d5db', lineHeight: '1.7' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.82rem', color: '#d5cfc3', lineHeight: '1.7' }}>
             <Article title="1. 収集する情報">
               本サービスでは、以下の情報を収集する場合があります。
               <ul style={{ margin: '0.4rem 0 0 1rem', padding: 0, listStyle: 'disc' }}>
@@ -234,7 +234,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
             paddingBottom: '0.75rem',
             borderBottom: '1px solid rgba(226, 192, 116, 0.25)'
           }}>
-            <FileText size={16} style={{ color: '#a78bfa' }} />
+            <FileText size={16} style={{ color: '#a996c9' }} />
             <h2 className="font-serif" style={{ fontSize: '1.05rem', color: '#c4b5fd', margin: 0, fontWeight: 'bold' }}>
               運営会社情報
             </h2>
@@ -246,30 +246,30 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
             borderRadius: '14px',
             padding: '1.25rem 1.15rem',
             fontSize: '0.82rem',
-            color: '#d1d5db',
+            color: '#d5cfc3',
             lineHeight: '2'
           }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
                 <tr>
-                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>会社名</td>
-                  <td style={{ fontWeight: '600', color: '#e2e8f0' }}>Ill株式会社</td>
+                  <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>会社名</td>
+                  <td style={{ fontWeight: '600', color: '#e7e1d5' }}>Ill株式会社</td>
                 </tr>
                 <tr>
-                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>所在地</td>
-                  <td style={{ color: '#e2e8f0' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</td>
+                  <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>所在地</td>
+                  <td style={{ color: '#e7e1d5' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</td>
                 </tr>
                 <tr>
-                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>お問合せ</td>
-                  <td style={{ color: '#e2e8f0' }}>support@tsuki-to-ren.com</td>
+                  <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>お問合せ</td>
+                  <td style={{ color: '#e7e1d5' }}>support@tsuki-to-ren.com</td>
                 </tr>
                 <tr>
-                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>電話番号</td>
-                  <td style={{ color: '#e2e8f0' }}>08053565283</td>
+                  <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>電話番号</td>
+                  <td style={{ color: '#e7e1d5' }}>08053565283</td>
                 </tr>
                 <tr>
-                  <td style={{ color: '#9ca3af', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
-                  <td style={{ color: '#e2e8f0' }}>2026年9月1日（最終改定日：2026年9月29日）</td>
+                  <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
+                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年9月29日）</td>
                 </tr>
               </tbody>
             </table>
@@ -285,7 +285,7 @@ const Article: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   <div>
     <h3 style={{
       fontSize: '0.85rem',
-      color: '#e2e8f0',
+      color: '#e7e1d5',
       fontWeight: '600',
       margin: '0 0 0.4rem',
       letterSpacing: '0.02em'

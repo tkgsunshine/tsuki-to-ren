@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, X, Sparkles } from 'lucide-react';
+import { Send, X } from 'lucide-react';
+import { MoonMark } from './icons/BrandIcons';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
@@ -189,7 +190,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'rgba(5, 5, 10, 0.95)',
+            background: 'rgba(5, 6, 9, 0.95)',
             backdropFilter: 'blur(12px)',
             zIndex: 100,
             display: 'flex',
@@ -201,19 +202,19 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             animation: 'fadeIn 0.3s ease'
           }}>
             <div style={{ color: 'var(--color-gold)', marginBottom: '0.75rem' }}>
-              <Sparkles size={40} className="animate-float" />
+              <MoonMark size={40} className="animate-float" />
             </div>
             <h3 className="font-serif gold-text" style={{ fontSize: '1.15rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
               蓮・月との個別相談チャット
             </h3>
-            <p style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.75rem', color: '#d8d2c6', lineHeight: '1.5', marginBottom: '1.25rem' }}>
               無料のメンバー登録を行うことで、気になることや恋愛のお悩みなど、どうぞお気軽にご相談ください。
             </p>
             {emailSentChat ? (
               <div style={{ textAlign: 'center', padding: '1rem 0' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✉️</div>
                 <p style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>認証メールを送信しました！</p>
-                <p style={{ fontSize: '0.75rem', color: '#9ca3af', lineHeight: '1.6' }}>
+                <p style={{ fontSize: '0.75rem', color: '#a9a49a', lineHeight: '1.6' }}>
                   メールに届いたリンクをクリックすると<br />
                   登録が完了し、チャットが解放されます。
                 </p>
@@ -249,7 +250,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                     fontSize: '0.8rem'
                   }}
                 />
-                <button type="submit" className="consult-btn" style={{ fontSize: '0.85rem', padding: '0.75rem', background: 'linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%)', color: '#000', fontWeight: 'bold' }}>
+                <button type="submit" className="consult-btn" style={{ fontSize: '0.85rem', padding: '0.75rem', background: 'linear-gradient(135deg, #e8a93a 0%, #b07d2b 100%)', color: '#000', fontWeight: 'bold' }}>
                   無料で登録してチャットを開始
                 </button>
               </form>
@@ -257,7 +258,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
             <div style={{ display: 'flex', alignItems: 'center', width: '100%', margin: '1rem 0', gap: '0.75rem' }}>
               <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
-              <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>または</span>
+              <span style={{ fontSize: '0.7rem', color: '#7a756c' }}>または</span>
               <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }}></div>
             </div>
 
@@ -277,7 +278,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                   justifyContent: 'center',
                   gap: '0.5rem',
                   background: '#ffffff',
-                  color: '#1f2937',
+                  color: '#22262b',
                   border: 'none',
                   borderRadius: '12px',
                   padding: '0.7rem',
@@ -336,7 +337,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
             <button 
               onClick={() => setShowRegisterOverlay(false)}
-              style={{ background: 'transparent', border: 'none', color: '#9ca3af', fontSize: '0.7rem', marginTop: '1rem', cursor: 'pointer', textDecoration: 'underline' }}
+              style={{ background: 'transparent', border: 'none', color: '#a9a49a', fontSize: '0.7rem', marginTop: '1rem', cursor: 'pointer', textDecoration: 'underline' }}
             >
               閉じる
             </button>
@@ -348,7 +349,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'rgba(2, 2, 5, 0.85)',
+            background: 'rgba(2, 3, 4, 0.85)',
             backdropFilter: 'blur(12px)',
             zIndex: 100,
             display: 'flex',
@@ -360,7 +361,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             <div style={{
               width: '100%',
               maxWidth: '380px',
-              background: 'rgba(15, 7, 40, 0.95)',
+              background: 'rgba(14, 20, 29, 0.95)',
               border: '1px solid rgba(226, 192, 116, 0.25)',
               borderRadius: '28px',
               padding: '1.5rem 1.25rem',
@@ -373,9 +374,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               {/* Badge */}
               <div style={{
                 fontSize: '0.62rem',
-                color: '#fef08a',
-                border: '1px solid rgba(254, 240, 138, 0.3)',
-                background: 'rgba(254, 240, 138, 0.1)',
+                color: '#f2e2b3',
+                border: '1px solid rgba(242, 226, 179, 0.3)',
+                background: 'rgba(242, 226, 179, 0.1)',
                 borderRadius: '20px',
                 padding: '3px 12px',
                 fontWeight: 'bold',
@@ -398,7 +399,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               {/* Subtitle */}
               <p style={{
                 fontSize: '0.68rem',
-                color: '#cbd5e1',
+                color: '#d8d2c6',
                 lineHeight: '1.4',
                 marginBottom: '1rem'
               }}>
@@ -427,8 +428,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                   '本日の運気の波・LINE吉時間を毎日お届け'
                 ].map((item, idx) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem' }}>
-                    <span style={{ color: '#fbbf24', fontSize: '0.75rem', lineHeight: '1.1', fontWeight: 'bold' }}>✓</span>
-                    <span style={{ fontSize: '0.68rem', color: '#e2e8f0', lineHeight: '1.3' }}>{item}</span>
+                    <span style={{ color: '#e8a93a', fontSize: '0.75rem', lineHeight: '1.1', fontWeight: 'bold' }}>✓</span>
+                    <span style={{ fontSize: '0.68rem', color: '#e7e1d5', lineHeight: '1.3' }}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -446,11 +447,11 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                   fontSize: '0.82rem',
                   padding: '0.75rem',
                   background: 'linear-gradient(135deg, #e2c074 0%, #c5a059 100%)',
-                  color: '#0f0728',
+                  color: '#0e141d',
                   fontWeight: '900',
                   borderRadius: '30px',
                   border: 'none',
-                  boxShadow: '0 4px 15px rgba(226, 192, 116, 0.4), 0 0 10px rgba(254, 240, 138, 0.2)',
+                  boxShadow: '0 4px 15px rgba(226, 192, 116, 0.4), 0 0 10px rgba(242, 226, 179, 0.2)',
                   cursor: 'pointer',
                   letterSpacing: '0.02em',
                   display: 'flex',
@@ -468,7 +469,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#9ca3af',
+                  color: '#a9a49a',
                   fontSize: '0.7rem',
                   marginTop: '0.85rem',
                   cursor: 'pointer',

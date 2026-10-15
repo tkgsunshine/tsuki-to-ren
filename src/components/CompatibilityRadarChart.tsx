@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Lock, Sparkles } from 'lucide-react';
+import { Lock } from 'lucide-react';
+import { MoonMark } from './icons/BrandIcons';
 import type { CompatibilityRadarScores } from '../utils/fortuneEngine';
 
 interface CompatibilityRadarChartProps {
@@ -64,13 +65,13 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
   // グリッド線（5段階の六角形）
   const gridLevels = [0.2, 0.4, 0.6, 0.8, 1.0];
 
-  const themeColor = character === 'ren' ? '#93c5fd' : '#fef08a';
-  const strokeColor = character === 'ren' ? '#60a5fa' : '#eab308';
-  const fillColor = character === 'ren' ? 'rgba(59, 130, 246, 0.25)' : 'rgba(234, 179, 8, 0.22)';
+  const themeColor = character === 'ren' ? '#9cc6d8' : '#f2e2b3';
+  const strokeColor = character === 'ren' ? '#5d9fc0' : '#d9a441';
+  const fillColor = character === 'ren' ? 'rgba(58, 134, 171, 0.25)' : 'rgba(217, 164, 65, 0.22)';
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(20, 20, 35, 0.95) 0%, rgba(10, 10, 20, 0.98) 100%)',
+      background: 'linear-gradient(135deg, rgba(18, 24, 35, 0.95) 0%, rgba(11, 17, 27, 0.98) 100%)',
       border: '1px solid rgba(226, 192, 116, 0.35)',
       borderRadius: '20px',
       padding: '1.25rem 1rem',
@@ -95,7 +96,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
           borderRadius: '20px',
           border: '1px solid rgba(255, 255, 255, 0.12)'
         }}>
-          <Sparkles className="w-3.5 h-3.5" />
+          <MoonMark className="w-3.5 h-3.5" />
           多角相性 6軸アナリシス
         </div>
         <h3 className="font-serif" style={{
@@ -106,7 +107,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
         }}>
           二人の詳細相性レーダー
         </h3>
-        <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: 0 }}>
+        <p style={{ fontSize: '0.72rem', color: '#a9a49a', margin: 0 }}>
           四柱推命・16タイプ・九星気学を統合した精密判定
         </p>
       </div>
@@ -181,7 +182,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                   fill="#ffffff"
                   stroke={strokeColor}
                   strokeWidth="2"
-                  style={{ filter: 'drop-shadow(0 0 6px #fef08a)' }}
+                  style={{ filter: 'drop-shadow(0 0 6px #f2e2b3)' }}
                 />
               </g>
             );
@@ -241,7 +242,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
             inset: 0,
             backdropFilter: 'blur(2px)',
             WebkitBackdropFilter: 'blur(2px)',
-            backgroundColor: 'rgba(8, 6, 18, 0.22)',
+            backgroundColor: 'rgba(7, 10, 15, 0.22)',
             borderRadius: '16px',
             display: 'flex',
             flexDirection: 'column',
@@ -257,13 +258,13 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
+              background: 'linear-gradient(135deg, #d9a441 0%, #b07d2b 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#000',
               marginBottom: '0.35rem',
-              boxShadow: '0 0 20px rgba(234, 179, 8, 0.6)'
+              boxShadow: '0 0 20px rgba(217, 164, 65, 0.6)'
             }}>
               <Lock className="w-5 h-5" />
             </div>
@@ -279,7 +280,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                 else setDemoUnlocked(true);
               }}
               style={{
-                background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+                background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
                 color: '#000000',
                 border: 'none',
                 padding: '0.7rem 1.25rem',
@@ -290,7 +291,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.4rem',
-                boxShadow: '0 4px 18px rgba(234, 179, 8, 0.45)',
+                boxShadow: '0 4px 18px rgba(217, 164, 65, 0.45)',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -303,7 +304,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#9ca3af',
+                color: '#a9a49a',
                 fontSize: '0.65rem',
                 textDecoration: 'underline',
                 cursor: 'pointer',
@@ -340,7 +341,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.72rem', color: '#f3f4f6', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '0.72rem', color: '#f3efe6', fontWeight: '700', whiteSpace: 'nowrap' }}>
                   {axis.label}
                 </span>
                 <div className="font-serif" style={{
@@ -373,7 +374,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               </div>
               <p style={{
                 fontSize: '0.62rem',
-                color: isLocked ? '#6b7280' : '#9ca3af',
+                color: isLocked ? '#7a756c' : '#a9a49a',
                 marginTop: '0.2rem',
                 margin: '0.2rem 0 0 0',
                 lineHeight: '1.3',
