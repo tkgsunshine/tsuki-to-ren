@@ -2113,17 +2113,9 @@ function App() {
                       約7,465万通りの条件の掛け合わせ
                     </h4>
                   </div>
-                  <p style={{ fontSize: '0.76rem', color: '#d8d2c6', lineHeight: '1.6', margin: '0 0 0.85rem 0' }}>
+                  <p style={{ fontSize: '0.76rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
                     『月と蓮』の鑑定結果は単なる属性の当てはめではありません。お二人それぞれの「四柱推命」「九星気学」「16タイプ性格」を掛け合わせた約7,465万通りの完全オーダーメイド判定プログラムです。
                   </p>
-                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', borderRadius: '12px', padding: '0.75rem', border: '1px solid rgba(226, 192, 116, 0.2)', fontSize: '0.72rem', color: '#a39d91', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    <div>・四柱推命 日柱干支相性：60 × 60 ＝ <strong style={{ color: '#ffffff' }}>3,600通り</strong></div>
-                    <div>・九星気学 本命星相性：9 × 9 ＝ <strong style={{ color: '#ffffff' }}>81通り</strong></div>
-                    <div>・16タイプ（MBTI）相性：16 × 16 ＝ <strong style={{ color: '#ffffff' }}>256通り</strong></div>
-                    <div style={{ borderTop: '1px solid rgba(226, 192, 116, 0.25)', paddingTop: '0.4rem', marginTop: '0.2rem', color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.78rem', textAlign: 'right' }}>
-                      ＝ 3,600 × 81 × 256 ＝ 74,649,600通り
-                    </div>
-                  </div>
                 </div>
 
                 {/* Rare Character / Stars Highlight Card */}
