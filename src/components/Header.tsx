@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, User, LogIn } from 'lucide-react';
+import { User, LogIn } from 'lucide-react';
 import type { UserProfile } from '../services/firebase';
 
 interface HeaderProps {
@@ -9,7 +9,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
   return (
-    <header className="app-header" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', flexShrink: 0, padding: '0.5rem 0.75rem 0.75rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
+    <header className="app-header" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', flexShrink: 0, padding: '2.6rem 0.75rem 0.75rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
       {/* Top Auth Bar (Pinned Absolute Top-Right) */}
       {onOpenAuth && (
         <div style={{
@@ -27,13 +27,13 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
               gap: '0.35rem',
               padding: '0.35rem 0.75rem',
               background: currentUser
-                ? 'rgba(74, 222, 128, 0.12)'
+                ? 'rgba(125, 187, 138, 0.12)'
                 : 'rgba(255, 255, 255, 0.08)',
               border: currentUser
-                ? '1px solid rgba(74, 222, 128, 0.35)'
+                ? '1px solid rgba(125, 187, 138, 0.35)'
                 : '1px solid rgba(226, 192, 116, 0.35)',
               borderRadius: '20px',
-              color: currentUser ? '#4ade80' : '#fef08a',
+              color: currentUser ? '#7dbb8a' : '#f2e2b3',
               fontSize: '0.75rem',
               fontWeight: '600',
               cursor: 'pointer',
@@ -82,23 +82,22 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
         alignItems: 'center',
         gap: '0.4rem',
         padding: '0.35rem 0.85rem',
-        background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.12) 0%, rgba(168, 85, 247, 0.12) 100%)',
+        background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.12) 0%, rgba(159, 134, 192, 0.12) 100%)',
         border: '1px solid rgba(226, 192, 116, 0.3)',
         borderRadius: '20px',
         boxShadow: '0 0 15px rgba(226, 192, 116, 0.15)'
       }}>
-        <Sparkles size={12} style={{ color: 'var(--color-gold)' }} />
-        <span className="font-serif gold-text" style={{ fontSize: '0.82rem', fontWeight: '700', letterSpacing: '0.06em', textAlign: 'center', lineHeight: '1.45' }}>
-          四柱推命 × 九星気学 × 16タイプで解き明かす<br />約7,465万通りの超精密本格恋愛診断
+        <span className="font-serif gold-text" style={{ fontSize: '0.82rem', fontWeight: '700', letterSpacing: '0.03em', textAlign: 'center', lineHeight: '1.45' }}>
+          <span className="nobr">四柱推命 × 九星気学 × 16タイプで</span><span className="nobr">解き明かす</span><br />
+          <span className="nobr">約7,465万通りの</span><span className="nobr">超精密本格恋愛診断</span>
         </span>
-        <Sparkles size={12} style={{ color: 'var(--color-gold)' }} />
       </div>
 
       {/* Impact Catchphrase Box */}
       <div style={{
         marginTop: '1rem',
         padding: '1.1rem 1.1rem',
-        background: 'linear-gradient(135deg, rgba(20, 16, 35, 0.85) 0%, rgba(30, 20, 50, 0.85) 100%)',
+        background: 'linear-gradient(135deg, rgba(17, 23, 33, 0.85) 0%, rgba(30, 20, 50, 0.85) 100%)',
         border: '1.5px solid rgba(226, 192, 116, 0.4)',
         borderRadius: '18px',
         width: '100%',
@@ -106,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
         boxSizing: 'border-box',
         margin: '1rem auto 0',
         fontSize: '0.88rem',
-        color: '#f3f4f6',
+        color: '#f3efe6',
         lineHeight: '1.7',
         textAlign: 'center',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(226, 192, 116, 0.08)',
@@ -114,10 +113,10 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
         WebkitBackdropFilter: 'blur(16px)'
       }}>
         <div style={{ fontWeight: 'bold', color: '#ffffff', marginBottom: '0.35rem', fontSize: '0.86rem', letterSpacing: '0.01em', lineHeight: '1.5' }}>
-          東洋の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>命式</span>と西洋の<span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>心理統計</span>が導く<br />
-          <span style={{ color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)', fontWeight: '800' }}>約7,465万通り</span>の運命マトリクス
+          東洋の<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>命式</span>と西洋の<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>心理統計</span>が導く<br />
+          <span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>約7,465万通り</span>の運命マトリクス
         </div>
-        <div style={{ color: '#cbd5e1', fontSize: '0.78rem', fontWeight: '500', letterSpacing: '-0.01em', wordBreak: 'break-word' }}>
+        <div style={{ color: '#d8d2c6', fontSize: '0.78rem', fontWeight: '500', letterSpacing: '-0.01em', wordBreak: 'break-word' }}>
           二人の魂の相性・運気のバイオリズム・LINE攻略法を徹底鑑定します。
         </div>
       </div>

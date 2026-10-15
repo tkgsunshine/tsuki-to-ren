@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BookOpen, Search, Clock, Calendar, ChevronRight, Sparkles } from 'lucide-react';
+import { BookOpen, Search, Clock, Calendar, ChevronRight } from 'lucide-react';
+import { MoonMark } from './icons/BrandIcons';
 import { COLUMNS_DATA } from '../data/columnsData';
 
 interface ColumnListViewProps {
@@ -57,7 +58,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
       <div className="glass-panel" style={{
         padding: '1.5rem',
         textAlign: 'center',
-        background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%)',
+        background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(159, 134, 192, 0.1) 100%)',
         border: '1px solid rgba(226, 192, 116, 0.3)',
         borderRadius: '20px',
         display: 'flex',
@@ -73,7 +74,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
           borderRadius: '20px',
           background: 'rgba(226, 192, 116, 0.15)',
           border: '1px solid rgba(226, 192, 116, 0.4)',
-          color: '#fef08a',
+          color: '#f2e2b3',
           fontSize: '0.72rem',
           fontWeight: 'bold'
         }}>
@@ -83,7 +84,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
         <h1 className="font-serif gold-text" style={{ fontSize: '1.35rem', fontWeight: 'bold', margin: '0.2rem 0', lineHeight: '1.4' }}>
           四柱推命 × 16タイプで紐解く<br />恋愛成就・相性攻略ガイド
         </h1>
-        <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0 }}>
+        <p style={{ fontSize: '0.78rem', color: '#d8d2c6', lineHeight: '1.5', margin: 0 }}>
           魁罡（かいごう）の強運本質、16タイプ相性分析、LINEの吉時間、復縁・ツインレイの深層知識を分かりやすく解説。
         </p>
       </div>
@@ -103,7 +104,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
             width: '100%',
             padding: '0.85rem 1rem 0.85rem 2.75rem',
             borderRadius: '14px',
-            background: 'rgba(15, 10, 30, 0.92)',
+            background: 'rgba(13, 18, 26, 0.92)',
             border: '1.5px solid rgba(226, 192, 116, 0.5)',
             color: '#ffffff',
             fontSize: '0.88rem',
@@ -113,7 +114,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)'
           }}
         />
-        <Search size={18} style={{ position: 'absolute', left: '0.95rem', top: '50%', transform: 'translateY(-50%)', color: '#fef08a' }} />
+        <Search size={18} style={{ position: 'absolute', left: '0.95rem', top: '50%', transform: 'translateY(-50%)', color: '#f2e2b3' }} />
       </div>
 
       {/* Category Pill Filters (Multi-line 2-3 rows) */}
@@ -138,12 +139,12 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
               fontSize: '0.78rem',
               fontWeight: 'bold',
               whiteSpace: 'nowrap',
-              border: selectedCategory === cat ? '1.5px solid #fef08a' : '1px solid rgba(255, 255, 255, 0.25)',
-              background: selectedCategory === cat ? 'linear-gradient(135deg, rgba(254, 240, 138, 0.3) 0%, rgba(217, 119, 6, 0.4) 100%)' : 'rgba(15, 10, 30, 0.85)',
-              color: selectedCategory === cat ? '#fef08a' : '#e2e8f0',
+              border: selectedCategory === cat ? '1.5px solid #f2e2b3' : '1px solid rgba(255, 255, 255, 0.25)',
+              background: selectedCategory === cat ? 'linear-gradient(135deg, rgba(242, 226, 179, 0.3) 0%, rgba(184, 105, 45, 0.4) 100%)' : 'rgba(13, 18, 26, 0.85)',
+              color: selectedCategory === cat ? '#f2e2b3' : '#e7e1d5',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: selectedCategory === cat ? '0 0 12px rgba(254, 240, 138, 0.3)' : 'none'
+              boxShadow: selectedCategory === cat ? '0 0 12px rgba(242, 226, 179, 0.3)' : 'none'
             }}
           >
             {cat === 'ALL' ? '全コラム' : cat}
@@ -154,7 +155,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
       {/* Article Grid List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {paginatedArticles.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#e2e8f0', fontSize: '0.88rem', fontWeight: 'bold' }}>
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#e7e1d5', fontSize: '0.88rem', fontWeight: 'bold' }}>
             検索結果が見つかりませんでした。「魁罡」や「16タイプ」などキーワードを変えてお試しください。
           </div>
         ) : (
@@ -171,7 +172,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 border: '1.5px solid rgba(255, 255, 255, 0.15)',
-                background: 'rgba(15, 10, 30, 0.85)',
+                background: 'rgba(13, 18, 26, 0.85)',
                 boxShadow: '0 4px 18px rgba(0,0,0,0.5)'
               }}
             >
@@ -182,7 +183,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                 borderRadius: '12px',
                 overflow: 'hidden',
                 flexShrink: 0,
-                background: '#110c26',
+                background: '#10161f',
                 border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
                 <img
@@ -200,14 +201,14 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                       fontSize: '0.65rem',
                       padding: '2px 8px',
                       borderRadius: '10px',
-                      background: 'rgba(168, 85, 247, 0.15)',
-                      border: '1px solid rgba(168, 85, 247, 0.3)',
-                      color: '#d8b4fe',
+                      background: 'rgba(159, 134, 192, 0.15)',
+                      border: '1px solid rgba(159, 134, 192, 0.3)',
+                      color: '#cdbfe2',
                       fontWeight: 'bold'
                     }}>
                       {article.category}
                     </span>
-                    <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ fontSize: '0.68rem', color: '#d8d2c6', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <Clock size={11} /> {article.readTimeMinutes}分で読める
                     </span>
                   </div>
@@ -228,10 +229,10 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.35rem' }}>
-                  <span style={{ fontSize: '0.68rem', color: '#cbd5e1', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                  <span style={{ fontSize: '0.68rem', color: '#d8d2c6', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                     <Calendar size={11} /> {article.publishedAt.split('T')[0].replace(/-/g, '/')}
                   </span>
-                  <span style={{ fontSize: '0.72rem', color: '#fef08a', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.72rem', color: '#f2e2b3', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
                     読む <ChevronRight size={14} />
                   </span>
                 </div>
@@ -263,9 +264,9 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
               borderRadius: '10px',
               fontSize: '0.75rem',
               fontWeight: 'bold',
-              background: currentPage === 1 ? 'rgba(255,255,255,0.03)' : 'rgba(15, 10, 30, 0.85)',
+              background: currentPage === 1 ? 'rgba(255,255,255,0.03)' : 'rgba(13, 18, 26, 0.85)',
               border: currentPage === 1 ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.2)',
-              color: currentPage === 1 ? '#6b7280' : '#e2e8f0',
+              color: currentPage === 1 ? '#7a756c' : '#e7e1d5',
               cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
             }}
           >
@@ -288,12 +289,12 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                 fontSize: '0.8rem',
                 fontWeight: 'bold',
                 background: currentPage === page
-                  ? 'linear-gradient(135deg, rgba(254, 240, 138, 0.35) 0%, rgba(217, 119, 6, 0.45) 100%)'
-                  : 'rgba(15, 10, 30, 0.85)',
-                border: currentPage === page ? '1.5px solid #fef08a' : '1px solid rgba(255,255,255,0.15)',
-                color: currentPage === page ? '#fef08a' : '#cbd5e1',
+                  ? 'linear-gradient(135deg, rgba(242, 226, 179, 0.35) 0%, rgba(184, 105, 45, 0.45) 100%)'
+                  : 'rgba(13, 18, 26, 0.85)',
+                border: currentPage === page ? '1.5px solid #f2e2b3' : '1px solid rgba(255,255,255,0.15)',
+                color: currentPage === page ? '#f2e2b3' : '#d8d2c6',
                 cursor: 'pointer',
-                boxShadow: currentPage === page ? '0 0 12px rgba(254, 240, 138, 0.3)' : 'none'
+                boxShadow: currentPage === page ? '0 0 12px rgba(242, 226, 179, 0.3)' : 'none'
               }}
             >
               {page}
@@ -313,9 +314,9 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
               borderRadius: '10px',
               fontSize: '0.75rem',
               fontWeight: 'bold',
-              background: currentPage === totalPages ? 'rgba(255,255,255,0.03)' : 'rgba(15, 10, 30, 0.85)',
+              background: currentPage === totalPages ? 'rgba(255,255,255,0.03)' : 'rgba(13, 18, 26, 0.85)',
               border: currentPage === totalPages ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.2)',
-              color: currentPage === totalPages ? '#6b7280' : '#e2e8f0',
+              color: currentPage === totalPages ? '#7a756c' : '#e7e1d5',
               cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
             }}
           >
@@ -329,19 +330,19 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
         padding: '1.25rem',
         borderRadius: '18px',
         textAlign: 'center',
-        background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%, rgba(217, 119, 6, 0.15) 100%)',
-        border: '1px solid rgba(234, 179, 8, 0.4)',
+        background: 'linear-gradient(135deg, rgba(217, 164, 65, 0.12) 0%, rgba(184, 105, 45, 0.15) 100%)',
+        border: '1px solid rgba(217, 164, 65, 0.4)',
         marginTop: '1rem',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0.65rem'
       }}>
-        <Sparkles size={20} style={{ color: '#fef08a' }} />
+        <MoonMark size={20} style={{ color: '#f2e2b3' }} />
         <h3 className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold', margin: 0 }}>
           あなたとお相手の本格相性を今すぐ占ってみませんか？
         </h3>
-        <p style={{ fontSize: '0.75rem', color: '#cbd5e1', margin: 0 }}>
+        <p style={{ fontSize: '0.75rem', color: '#d8d2c6', margin: 0 }}>
           約7,465万通りの条件の掛け合わせで、二人の運命スコア・トリセツ・LINE吉時間を完全鑑定できます。
         </p>
         <button
@@ -357,7 +358,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
             marginTop: '0.2rem'
           }}
         >
-          ✨ 無料相性鑑定をスタートする ➔
+          無料相性鑑定をスタートする ➔
         </button>
       </div>
     </div>

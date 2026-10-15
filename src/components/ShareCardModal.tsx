@@ -28,9 +28,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   const [activeTab, setActiveTab] = useState<'match' | 'single'>('match');
   const showOpponent = hasOpponent && activeTab === 'match';
 
-  const myTagColor = isRen ? '#93c5fd' : '#d8b4fe';
-  const myTagBg = isRen ? 'rgba(59, 130, 246, 0.12)' : 'rgba(168, 85, 247, 0.12)';
-  const myTagBorder = isRen ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(168, 85, 247, 0.3)';
+  const myTagColor = isRen ? '#9cc6d8' : '#cdbfe2';
+  const myTagBg = isRen ? 'rgba(58, 134, 171, 0.12)' : 'rgba(159, 134, 192, 0.12)';
+  const myTagBorder = isRen ? '1px solid rgba(58, 134, 171, 0.3)' : '1px solid rgba(159, 134, 192, 0.3)';
 
   const cardRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
@@ -109,7 +109,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         useCORS: true,
         allowTaint: true,
         scale: 2,
-        backgroundColor: '#05040a',
+        backgroundColor: '#05080d',
         logging: false,
         width: targetEl.offsetWidth || 800,
         height: targetEl.offsetHeight || 1240
@@ -204,7 +204,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(2, 2, 5, 0.92)',
+      background: 'rgba(2, 3, 4, 0.92)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
       zIndex: 100000,
@@ -225,7 +225,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           top: 0,
           width: '800px',
           height: '1240px',
-          backgroundColor: '#05040a',
+          backgroundColor: '#05080d',
           borderRadius: '36px',
           overflow: 'hidden',
           display: 'flex',
@@ -238,7 +238,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         }}
       >
         {/* Background Base64 Images (Vertical stacked avatars with extended height) */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 1, backgroundColor: '#05040a' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 1, backgroundColor: '#05080d' }}>
           {showOpponent && result.opponentAvatarUrl ? (
             <>
               <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '32px' }}>
@@ -256,7 +256,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 5, 12, 0.55) 100%)'
+            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 7, 10, 0.55) 100%)'
           }} />
         </div>
 
@@ -266,7 +266,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {/* Top Left: My Name Badge */}
               <div style={{
-                background: 'rgba(5, 5, 15, 0.75)',
+                background: 'rgba(6, 8, 12, 0.75)',
                 border: '1.5px solid rgba(255, 255, 255, 0.25)',
                 padding: '8px 20px',
                 borderRadius: '20px',
@@ -281,16 +281,16 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 <span>{formatName(myName)}</span>
                 {(result.isKaigo || result.isRare) && (
-                  <span style={{ fontSize: '13px', color: '#fbbf24', fontWeight: 'bold' }}>
-                    {result.isKaigo ? '👑 魁罡' : '👑 極星'}
+                  <span style={{ fontSize: '13px', color: '#e8a93a', fontWeight: 'bold' }}>
+                    {result.isKaigo ? '魁罡' : '極星'}
                   </span>
                 )}
               </div>
 
               {/* Top Right: 基本相性 (画面の右上) */}
               <div style={{
-                background: 'rgba(5, 5, 15, 0.75)',
-                border: '1.5px solid rgba(251, 191, 36, 0.5)',
+                background: 'rgba(6, 8, 12, 0.75)',
+                border: '1.5px solid rgba(232, 169, 58, 0.5)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '20px',
                 padding: '8px 20px',
@@ -299,8 +299,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 gap: '10px',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
               }}>
-                <span style={{ fontSize: '15px', color: '#cbd5e1' }}>基本相性</span>
-                <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#fbbf24', lineHeight: '1' }}>
+                <span style={{ fontSize: '15px', color: '#d8d2c6' }}>基本相性</span>
+                <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#e8a93a', lineHeight: '1' }}>
                   {result.baseScore}<span style={{ fontSize: '16px' }}>点</span>
                 </span>
               </div>
@@ -308,7 +308,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           ) : (
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{
-                background: 'rgba(10, 10, 25, 0.75)',
+                background: 'rgba(10, 15, 21, 0.75)',
                 border: '2px solid rgba(255, 255, 255, 0.25)',
                 padding: '16px 28px',
                 borderRadius: '24px',
@@ -317,37 +317,37 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 gap: '8px'
               }}>
                 <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#ffffff' }}>
-                  {formatName(myName)} <span style={{ fontSize: '24px', color: '#fbbf24' }}>の運勢</span>
+                  {formatName(myName)} <span style={{ fontSize: '24px', color: '#e8a93a' }}>の運勢</span>
                 </div>
                 {(result.isKaigo || result.isRare) && (
                   <span style={{
                     fontSize: '18px',
                     padding: '6px 14px',
                     borderRadius: '10px',
-                    background: result.isKaigo ? 'linear-gradient(135deg, #7f1d1d, #b91c1c)' : 'linear-gradient(135deg, #b45309, #d97706)',
+                    background: result.isKaigo ? 'linear-gradient(135deg, #7f1d1d, #9e3a2c)' : 'linear-gradient(135deg, #b45309, #b8692d)',
                     color: '#fff',
                     fontWeight: 'bold',
                     alignSelf: 'flex-start'
                   }}>
-                    {result.isKaigo ? '👑 魁罡 (かいごう)' : '👑 選ばれし極星'}
+                    {result.isKaigo ? '魁罡 (かいごう)' : '選ばれし極星'}
                   </span>
                 )}
               </div>
 
               <div style={{
-                background: 'rgba(10, 10, 25, 0.75)',
-                border: '2px solid rgba(147, 197, 253, 0.4)',
+                background: 'rgba(10, 15, 21, 0.75)',
+                border: '2px solid rgba(156, 198, 216, 0.4)',
                 padding: '16px 28px',
                 borderRadius: '24px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center'
               }}>
-                <span style={{ fontSize: '18px', color: '#94a3b8' }}>今日の運勢</span>
-                <span style={{ fontSize: '48px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1.1' }}>
+                <span style={{ fontSize: '18px', color: '#a39d91' }}>今日の運勢</span>
+                <span style={{ fontSize: '48px', fontWeight: 'bold', color: '#9cc6d8', lineHeight: '1.1' }}>
                   {result.dailyScore}<span style={{ fontSize: '24px' }}>点</span>
                 </span>
-                <span style={{ fontSize: '16px', color: '#64748b', marginTop: '4px' }}>
+                <span style={{ fontSize: '16px', color: '#736e65', marginTop: '4px' }}>
                   {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
                 </span>
               </div>
@@ -372,10 +372,10 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                 <div style={{
                   fontSize: '18px',
-                  color: '#fef08a',
+                  color: '#f2e2b3',
                   fontWeight: 'bold',
                   letterSpacing: '0.08em',
-                  background: 'rgba(5, 5, 15, 0.85)',
+                  background: 'rgba(6, 8, 12, 0.85)',
                   border: '1.5px solid rgba(226, 192, 116, 0.6)',
                   padding: '8px 20px',
                   borderRadius: '30px',
@@ -394,7 +394,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
               {/* Left: Opponent Name (相手のキャラの左上) */}
               <div style={{
-                background: 'rgba(5, 5, 15, 0.75)',
+                background: 'rgba(6, 8, 12, 0.75)',
                 border: '1.5px solid rgba(255, 255, 255, 0.25)',
                 padding: '8px 20px',
                 borderRadius: '20px',
@@ -409,16 +409,16 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 <span>{formatName(oppNickname)}</span>
                 {(result.opponentIsKaigo || result.opponentIsRare) && (
-                  <span style={{ fontSize: '13px', color: '#fbbf24', fontWeight: 'bold' }}>
-                    {result.opponentIsKaigo ? '👑 魁罡' : '👑 極星'}
+                  <span style={{ fontSize: '13px', color: '#e8a93a', fontWeight: 'bold' }}>
+                    {result.opponentIsKaigo ? '魁罡' : '極星'}
                   </span>
                 )}
               </div>
 
               {/* Right: 今日の相性 (基本相性と同じ右端位置) */}
               <div style={{
-                background: 'rgba(5, 5, 15, 0.75)',
-                border: '1.5px solid rgba(147, 197, 253, 0.5)',
+                background: 'rgba(6, 8, 12, 0.75)',
+                border: '1.5px solid rgba(156, 198, 216, 0.5)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '20px',
                 padding: '8px 20px',
@@ -427,8 +427,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 gap: '10px',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
               }}>
-                <span style={{ fontSize: '15px', color: '#cbd5e1' }}>今日の相性</span>
-                <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#93c5fd', lineHeight: '1' }}>
+                <span style={{ fontSize: '15px', color: '#d8d2c6' }}>今日の相性</span>
+                <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#9cc6d8', lineHeight: '1' }}>
                   {result.dailyScore}<span style={{ fontSize: '16px' }}>点</span>
                 </span>
               </div>
@@ -468,16 +468,16 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             {!showOpponent && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{
-                  background: 'rgba(59, 130, 246, 0.25)',
-                  border: '1px solid rgba(59, 130, 246, 0.6)',
-                  color: '#93c5fd',
+                  background: 'rgba(58, 134, 171, 0.25)',
+                  border: '1px solid rgba(58, 134, 171, 0.6)',
+                  color: '#9cc6d8',
                   padding: '10px 20px',
                   borderRadius: '14px',
                   fontSize: '18px',
                   fontWeight: 'bold'
                 }}>
                   あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
-                  {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
+                  {result.isKaigo ? ' / 魁罡' : (result.isRare ? ' / 極星' : '')}
                 </div>
               </div>
             )}
@@ -490,11 +490,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             gap: '12px',
             paddingTop: '6px'
           }}>
-            <span style={{ fontSize: '14px', color: '#cbd5e1', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+            <span style={{ fontSize: '14px', color: '#d8d2c6', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
               鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
             </span>
             <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
-            <span style={{ fontSize: '16px', color: '#cbd5e1', letterSpacing: '0.08em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
+            <span style={{ fontSize: '16px', color: '#d8d2c6', letterSpacing: '0.08em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
               恋愛鑑定アプリ - 蓮と月
             </span>
           </div>
@@ -530,7 +530,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             right: 0,
             background: 'rgba(255, 255, 255, 0.08)',
             border: 'none',
-            color: '#cbd5e1',
+            color: '#d8d2c6',
             width: '30px',
             height: '30px',
             borderRadius: '50%',
@@ -547,7 +547,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         {hasOpponent && (
           <div style={{
             display: 'flex',
-            background: 'rgba(15, 15, 25, 0.8)',
+            background: 'rgba(13, 18, 26, 0.8)',
             borderRadius: '25px',
             padding: '3px',
             border: '1px solid rgba(255, 255, 255, 0.15)',
@@ -562,11 +562,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 fontSize: '0.78rem',
                 fontWeight: '600',
                 border: 'none',
-                background: activeTab === 'match' ? 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)' : 'transparent',
-                color: activeTab === 'match' ? '#ffffff' : '#94a3b8',
+                background: activeTab === 'match' ? 'linear-gradient(135deg, #9f86c0 0%, #5b6aa8 100%)' : 'transparent',
+                color: activeTab === 'match' ? '#ffffff' : '#a39d91',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: activeTab === 'match' ? '0 2px 8px rgba(168, 85, 247, 0.4)' : 'none'
+                boxShadow: activeTab === 'match' ? '0 2px 8px rgba(159, 134, 192, 0.4)' : 'none'
               }}
             >
               二人の相性
@@ -580,11 +580,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 fontSize: '0.78rem',
                 fontWeight: '600',
                 border: 'none',
-                background: activeTab === 'single' ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)' : 'transparent',
-                color: activeTab === 'single' ? '#ffffff' : '#94a3b8',
+                background: activeTab === 'single' ? 'linear-gradient(135deg, #3a86ab 0%, #5b6aa8 100%)' : 'transparent',
+                color: activeTab === 'single' ? '#ffffff' : '#a39d91',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: activeTab === 'single' ? '0 2px 8px rgba(59, 130, 246, 0.4)' : 'none'
+                boxShadow: activeTab === 'single' ? '0 2px 8px rgba(58, 134, 171, 0.4)' : 'none'
               }}
             >
               自分の運勢
@@ -599,9 +599,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             width: '100%',
             aspectRatio: '3/4.6',
             border: (result.isKaigo || result.isRare || (showOpponent && (result.opponentIsKaigo || result.opponentIsRare))) ? 'none' : '1.5px solid rgba(255, 255, 255, 0.12)',
-            boxShadow: result.isKaigo ? '0 0 25px rgba(220, 38, 38, 0.45)' : (result.isRare ? '0 0 25px rgba(251, 191, 36, 0.45)' : (selectedChar === 'tsuki' 
-              ? '0 20px 40px rgba(168, 85, 247, 0.25)' 
-              : '0 20px 40px rgba(59, 130, 246, 0.25)')),
+            boxShadow: result.isKaigo ? '0 0 25px rgba(184, 74, 55, 0.45)' : (result.isRare ? '0 0 25px rgba(232, 169, 58, 0.45)' : (selectedChar === 'tsuki' 
+              ? '0 20px 40px rgba(159, 134, 192, 0.25)' 
+              : '0 20px 40px rgba(58, 134, 171, 0.25)')),
             borderRadius: '24px',
             padding: '1.5rem',
             display: 'flex',
@@ -618,7 +618,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             zIndex: 1,
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: '#05040a'
+            backgroundColor: '#05080d'
           }}>
             {showOpponent && result.opponentAvatarUrl ? (
               <>
@@ -638,7 +638,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 5, 12, 0.55) 100%)'
+              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 7, 10, 0.55) 100%)'
             }} />
           </div>
           {/* Card Top */}
@@ -653,7 +653,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 {/* Top Left Name Badge */}
                 <div style={{
-                  background: 'rgba(5, 5, 15, 0.72)',
+                  background: 'rgba(6, 8, 12, 0.72)',
                   border: '1px solid rgba(255, 255, 255, 0.25)',
                   padding: '3px 8px',
                   borderRadius: '12px',
@@ -670,15 +670,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   <span>{formatName(myName)}</span>
                   {(result.isKaigo || result.isRare) && (
                     <span className={result.isKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.48rem', padding: '1px 4px', borderRadius: '4px' }}>
-                      {result.isKaigo ? '👑 魁罡' : '👑 極星'}
+                      {result.isKaigo ? '魁罡' : '極星'}
                     </span>
                   )}
                 </div>
 
                 {/* Top Right: 基本相性 */}
                 <div style={{
-                  background: 'rgba(5, 5, 15, 0.72)',
-                  border: '1.2px solid rgba(251, 191, 36, 0.45)',
+                  background: 'rgba(6, 8, 12, 0.72)',
+                  border: '1.2px solid rgba(232, 169, 58, 0.45)',
                   padding: '3px 8px',
                   borderRadius: '12px',
                   backdropFilter: 'blur(6px)',
@@ -688,7 +688,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   gap: '4px',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
                 }}>
-                  <span style={{ fontSize: '0.55rem', color: '#cbd5e1' }}>基本相性</span>
+                  <span style={{ fontSize: '0.55rem', color: '#d8d2c6' }}>基本相性</span>
                   <span className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold', lineHeight: '1' }}>
                     {result.baseScore}<span style={{ fontSize: '0.55rem' }}>点</span>
                   </span>
@@ -704,7 +704,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 {/* Top Left: Title Badge */}
                 <div style={{
-                  background: 'rgba(10, 10, 25, 0.75)',
+                  background: 'rgba(10, 15, 21, 0.75)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   padding: '8px 14px',
                   borderRadius: '16px',
@@ -719,7 +719,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   {(result.isKaigo || result.isRare) && (
                     <div>
                       <span className={result.isKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.58rem', padding: '2px 8px', borderRadius: '6px', display: 'inline-block' }}>
-                        {result.isKaigo ? '👑 魁罡 (かいごう)' : '👑 選ばれし極星'}
+                        {result.isKaigo ? '魁罡 (かいごう)' : '選ばれし極星'}
                       </span>
                     </div>
                   )}
@@ -727,8 +727,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
                 {/* Top Right: Score & Date Card */}
                 <div style={{
-                  background: 'rgba(10, 10, 25, 0.75)',
-                  border: '1px solid rgba(147, 197, 253, 0.3)',
+                  background: 'rgba(10, 15, 21, 0.75)',
+                  border: '1px solid rgba(156, 198, 216, 0.3)',
                   padding: '6px 12px',
                   borderRadius: '16px',
                   display: 'flex',
@@ -736,11 +736,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   alignItems: 'center',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
                 }}>
-                  <span style={{ fontSize: '0.58rem', color: '#94a3b8' }}>今日の運勢</span>
-                  <span className="font-serif" style={{ fontSize: '1.4rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1.1' }}>
+                  <span style={{ fontSize: '0.58rem', color: '#a39d91' }}>今日の運勢</span>
+                  <span className="font-serif" style={{ fontSize: '1.4rem', color: '#9cc6d8', fontWeight: 'bold', lineHeight: '1.1' }}>
                     {result.dailyScore}<span style={{ fontSize: '0.75rem' }}>点</span>
                   </span>
-                  <span style={{ fontSize: '0.52rem', color: '#64748b', marginTop: '2px' }}>
+                  <span style={{ fontSize: '0.52rem', color: '#736e65', marginTop: '2px' }}>
                     {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
                   </span>
                 </div>
@@ -765,10 +765,10 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                   <div style={{
                     fontSize: '0.62rem',
-                    color: '#fef08a',
+                    color: '#f2e2b3',
                     fontWeight: 'bold',
                     letterSpacing: '0.04em',
-                    background: 'rgba(5, 5, 15, 0.85)',
+                    background: 'rgba(6, 8, 12, 0.85)',
                     border: '1px solid rgba(226, 192, 116, 0.5)',
                     padding: '3px 10px',
                     borderRadius: '20px',
@@ -788,7 +788,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                 {/* Left: 相手の名前 (相手のキャラ画像の左上) */}
                 <div style={{
-                  background: 'rgba(5, 5, 15, 0.72)',
+                  background: 'rgba(6, 8, 12, 0.72)',
                   border: '1px solid rgba(255, 255, 255, 0.25)',
                   padding: '3px 8px',
                   borderRadius: '12px',
@@ -806,15 +806,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   <span>{formatName(oppNickname)}</span>
                   {(result.opponentIsKaigo || result.opponentIsRare) && (
                     <span className={result.opponentIsKaigo ? 'kaigo-badge' : 'rare-badge'} style={{ fontSize: '0.48rem', padding: '1px 4px', borderRadius: '4px' }}>
-                      {result.opponentIsKaigo ? '👑 魁罡' : '👑 極星'}
+                      {result.opponentIsKaigo ? '魁罡' : '極星'}
                     </span>
                   )}
                 </div>
 
                 {/* Right: 今日の相性 (基本相性と全く同じ右端揃え) */}
                 <div style={{
-                  background: 'rgba(5, 5, 15, 0.72)',
-                  border: '1.2px solid rgba(147, 197, 253, 0.45)',
+                  background: 'rgba(6, 8, 12, 0.72)',
+                  border: '1.2px solid rgba(156, 198, 216, 0.45)',
                   padding: '3px 8px',
                   borderRadius: '12px',
                   backdropFilter: 'blur(6px)',
@@ -825,8 +825,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
                   flexShrink: 0
                 }}>
-                  <span style={{ fontSize: '0.55rem', color: '#cbd5e1' }}>今日の相性</span>
-                  <span className="font-serif" style={{ fontSize: '0.9rem', color: '#93c5fd', fontWeight: 'bold', lineHeight: '1' }}>
+                  <span style={{ fontSize: '0.55rem', color: '#d8d2c6' }}>今日の相性</span>
+                  <span className="font-serif" style={{ fontSize: '0.9rem', color: '#9cc6d8', fontWeight: 'bold', lineHeight: '1' }}>
                     {result.dailyScore}<span style={{ fontSize: '0.55rem' }}>点</span>
                   </span>
                 </div>
@@ -868,7 +868,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 <div style={{ fontSize: '0.6rem', color: myTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
                   <span style={{ background: myTagBg, padding: '4px 10px', borderRadius: '8px', border: myTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
                     あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
-                    {result.isKaigo ? ' / 👑 魁罡' : (result.isRare ? ' / 👑 極星' : '')}
+                    {result.isKaigo ? ' / 魁罡' : (result.isRare ? ' / 極星' : '')}
                   </span>
                 </div>
               )}
@@ -882,11 +882,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               paddingTop: '0.2rem',
               marginTop: '0.1rem'
             }}>
-              <span style={{ fontSize: '0.52rem', color: '#cbd5e1', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+              <span style={{ fontSize: '0.52rem', color: '#d8d2c6', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
                 鑑定日: {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
               </span>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.52rem' }}>|</span>
-              <span style={{ fontSize: '0.58rem', color: '#cbd5e1', letterSpacing: '0.05em', textShadow: '0 1px 4px rgba(0,0,0,0.95)', fontWeight: '500' }}>
+              <span style={{ fontSize: '0.58rem', color: '#d8d2c6', letterSpacing: '0.05em', textShadow: '0 1px 4px rgba(0,0,0,0.95)', fontWeight: '500' }}>
                 恋愛鑑定アプリ - 蓮と月
               </span>
             </div>
@@ -915,7 +915,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 cursor: isSaving ? 'not-allowed' : 'pointer'
               }}
             >
-              <span style={{ color: savedSuccess ? '#4ade80' : 'white', fontWeight: 'bold' }}>
+              <span style={{ color: savedSuccess ? '#7dbb8a' : 'white', fontWeight: 'bold' }}>
                 {isSaving ? '生成・保存中...' : savedSuccess ? '✓ 保存しました' : '画像で保存'}
               </span>
             </button>

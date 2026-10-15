@@ -1,5 +1,6 @@
 import React from 'react';
-import { X, Share, PlusSquare, CheckCircle, Sparkles } from 'lucide-react';
+import { X, Share, PlusSquare, CheckCircle } from 'lucide-react';
+import { MoonMark } from './icons/BrandIcons';
 import { getDevicePwaStatus, triggerAndroidInstallPrompt } from '../utils/pwaHelper';
 
 interface InstallGuideModalProps {
@@ -27,7 +28,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
         left: 0,
         right: 0,
         bottom: 0,
-        background: 'rgba(5, 3, 10, 0.85)',
+        background: 'rgba(4, 6, 8, 0.85)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         display: 'flex',
@@ -47,12 +48,12 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
           maxWidth: '380px',
           maxHeight: '90vh',
           overflowY: 'auto',
-          background: 'linear-gradient(165deg, rgba(26, 20, 42, 0.96) 0%, rgba(12, 10, 22, 0.98) 100%)',
+          background: 'linear-gradient(165deg, rgba(21, 28, 41, 0.96) 0%, rgba(10, 14, 21, 0.98) 100%)',
           border: '1.5px solid rgba(226, 192, 116, 0.35)',
           boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(226, 192, 116, 0.15)',
           borderRadius: '24px',
           padding: '1.5rem',
-          color: '#f3f4f6',
+          color: '#f3efe6',
           position: 'relative',
           boxSizing: 'border-box'
         }}
@@ -69,7 +70,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
             right: '1rem',
             background: 'rgba(255, 255, 255, 0.08)',
             border: 'none',
-            color: '#cbd5e1',
+            color: '#d8d2c6',
             width: '32px',
             height: '32px',
             borderRadius: '50%',
@@ -102,7 +103,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
           <h3 className="font-serif gold-text" style={{ fontSize: '1.3rem', fontWeight: 'bold', margin: '0 0 0.35rem 0', letterSpacing: '0.04em' }}>
             ホーム画面に追加
           </h3>
-          <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.5', margin: 0 }}>
+          <p style={{ fontSize: '0.78rem', color: '#d8d2c6', lineHeight: '1.5', margin: 0 }}>
             アプリのように全画面で起動でき、<br />
             毎日の相性バイオリズムや吉時間を素早く確認できます。
           </p>
@@ -112,19 +113,19 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
         {status.isStandalone ? (
           <div
             style={{
-              background: 'rgba(74, 222, 128, 0.1)',
-              border: '1px solid rgba(74, 222, 128, 0.3)',
+              background: 'rgba(125, 187, 138, 0.1)',
+              border: '1px solid rgba(125, 187, 138, 0.3)',
               borderRadius: '16px',
               padding: '1rem',
               textAlign: 'center',
               marginBottom: '1rem'
             }}
           >
-            <CheckCircle size={32} style={{ color: '#4ade80', margin: '0 auto 0.5rem' }} />
-            <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#4ade80', marginBottom: '0.25rem' }}>
+            <CheckCircle size={32} style={{ color: '#7dbb8a', margin: '0 auto 0.5rem' }} />
+            <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#7dbb8a', marginBottom: '0.25rem' }}>
               すでに追加されています
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
+            <div style={{ fontSize: '0.75rem', color: '#d8d2c6' }}>
               現在ホーム画面アプリ（スタンドアロン）から快適にご利用いただいています。
             </div>
           </div>
@@ -149,7 +150,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
                   height: '28px',
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #e2c074 0%, #b89850 100%)',
-                  color: '#0a0a14',
+                  color: '#0b111b',
                   fontWeight: 'bold',
                   fontSize: '0.85rem',
                   display: 'flex',
@@ -160,8 +161,8 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
               >
                 1
               </div>
-              <div style={{ flex: 1, fontSize: '0.82rem', color: '#e2e8f0', lineHeight: '1.4' }}>
-                画面下のメニューにある <strong style={{ color: '#60a5fa', display: 'inline-flex', alignItems: 'center', gap: '2px' }}><Share size={14} /> 共有ボタン</strong> をタップ
+              <div style={{ flex: 1, fontSize: '0.82rem', color: '#e7e1d5', lineHeight: '1.4' }}>
+                画面下のメニューにある <strong style={{ color: '#5d9fc0', display: 'inline-flex', alignItems: 'center', gap: '2px' }}><Share size={14} /> 共有ボタン</strong> をタップ
               </div>
             </div>
 
@@ -183,7 +184,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
                   height: '28px',
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #e2c074 0%, #b89850 100%)',
-                  color: '#0a0a14',
+                  color: '#0b111b',
                   fontWeight: 'bold',
                   fontSize: '0.85rem',
                   display: 'flex',
@@ -194,8 +195,8 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
               >
                 2
               </div>
-              <div style={{ flex: 1, fontSize: '0.82rem', color: '#e2e8f0', lineHeight: '1.4' }}>
-                メニューをスクロールして <strong style={{ color: '#fef08a', display: 'inline-flex', alignItems: 'center', gap: '2px' }}><PlusSquare size={14} />「ホーム画面に追加」</strong> を選択
+              <div style={{ flex: 1, fontSize: '0.82rem', color: '#e7e1d5', lineHeight: '1.4' }}>
+                メニューをスクロールして <strong style={{ color: '#f2e2b3', display: 'inline-flex', alignItems: 'center', gap: '2px' }}><PlusSquare size={14} />「ホーム画面に追加」</strong> を選択
               </div>
             </div>
 
@@ -217,7 +218,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
                   height: '28px',
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #e2c074 0%, #b89850 100%)',
-                  color: '#0a0a14',
+                  color: '#0b111b',
                   fontWeight: 'bold',
                   fontSize: '0.85rem',
                   display: 'flex',
@@ -228,13 +229,13 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
               >
                 3
               </div>
-              <div style={{ flex: 1, fontSize: '0.82rem', color: '#e2e8f0', lineHeight: '1.4' }}>
-                右上の <strong style={{ color: '#4ade80' }}>「追加」</strong> をタップするとホーム画面にアプリアイコンが作成されます
+              <div style={{ flex: 1, fontSize: '0.82rem', color: '#e7e1d5', lineHeight: '1.4' }}>
+                右上の <strong style={{ color: '#7dbb8a' }}>「追加」</strong> をタップするとホーム画面にアプリアイコンが作成されます
               </div>
             </div>
 
             {!status.isSafari && (
-              <div style={{ fontSize: '0.7rem', color: '#f87171', background: 'rgba(248, 113, 113, 0.1)', padding: '0.5rem 0.75rem', borderRadius: '10px', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.7rem', color: '#d9786a', background: 'rgba(217, 120, 106, 0.1)', padding: '0.5rem 0.75rem', borderRadius: '10px', marginTop: '0.25rem' }}>
                 ※ Safari以外のブラウザ（LINE内ブラウザやChrome等）をお使いの場合は、Safariで開き直してからお試しください。
               </div>
             )}
@@ -252,8 +253,8 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
                   padding: '0.85rem',
                   fontSize: '0.95rem',
                   fontWeight: 'bold',
-                  background: 'linear-gradient(135deg, #e2c074 0%, #ca8a04 100%)',
-                  color: '#0a0a14',
+                  background: 'linear-gradient(135deg, #e2c074 0%, #b07d2b 100%)',
+                  color: '#0b111b',
                   borderRadius: '14px',
                   border: 'none',
                   cursor: 'pointer',
@@ -264,11 +265,11 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
                   boxShadow: '0 4px 15px rgba(226, 192, 116, 0.4)'
                 }}
               >
-                <Sparkles size={18} />
+                <MoonMark size={18} />
                 <span>今すぐホーム画面に追加</span>
               </button>
             ) : (
-              <div style={{ fontSize: '0.82rem', color: '#e2e8f0', lineHeight: '1.6', background: 'rgba(255, 255, 255, 0.04)', padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              <div style={{ fontSize: '0.82rem', color: '#e7e1d5', lineHeight: '1.6', background: 'rgba(255, 255, 255, 0.04)', padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
                 Chromeの右上メニュー（<strong>︙</strong>）をタップし、<strong>「ホーム画面に追加」</strong>または<strong>「アプリをインストール」</strong>を選択してください。
               </div>
             )}
@@ -276,7 +277,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
         ) : (
           /* PC / Others */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
-            <div style={{ fontSize: '0.82rem', color: '#e2e8f0', lineHeight: '1.6', background: 'rgba(255, 255, 255, 0.04)', padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <div style={{ fontSize: '0.82rem', color: '#e7e1d5', lineHeight: '1.6', background: 'rgba(255, 255, 255, 0.04)', padding: '0.85rem', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
               ブラウザのアドレスバーにあるインストールアイコン、またはスマートフォン（Safari / Chrome）からアクセスしてホーム画面に追加してください。
             </div>
           </div>
@@ -293,7 +294,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
             background: 'linear-gradient(135deg, #e2c074 0%, #b89850 100%)',
             border: 'none',
             borderRadius: '16px',
-            color: '#0a0a14',
+            color: '#0b111b',
             fontWeight: 'bold',
             letterSpacing: '0.05em',
             boxShadow: '0 4px 15px rgba(226, 192, 116, 0.35)',

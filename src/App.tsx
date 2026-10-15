@@ -18,7 +18,8 @@ import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
-import { Sparkles, HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
+import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
+import { MoonMark } from './components/icons/BrandIcons';
 import { CustomDatePicker } from './components/CustomDatePicker';
 import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
@@ -875,9 +876,9 @@ function App() {
 
   return (
     <div className="app-container" style={{
-      '--color-theme': selectedCharacter === 'tsuki' ? '#d8b4fe' : '#93c5fd',
-      '--color-theme-accent': selectedCharacter === 'tsuki' ? '#a855f7' : '#3b82f6',
-      '--shadow-theme-glow': selectedCharacter === 'tsuki' ? '0 0 15px rgba(168, 85, 247, 0.45)' : '0 0 15px rgba(59, 130, 246, 0.45)',
+      '--color-theme': selectedCharacter === 'tsuki' ? '#cdbfe2' : '#9cc6d8',
+      '--color-theme-accent': selectedCharacter === 'tsuki' ? '#9f86c0' : '#3a86ab',
+      '--shadow-theme-glow': selectedCharacter === 'tsuki' ? '0 0 15px rgba(159, 134, 192, 0.45)' : '0 0 15px rgba(58, 134, 171, 0.45)',
     } as React.CSSProperties}>
       {/* Dynamic Background Glow Orb (Smooth transition) */}
       <div style={{
@@ -889,8 +890,8 @@ function App() {
         height: '380px',
         borderRadius: '50%',
         background: selectedCharacter === 'tsuki' 
-          ? 'radial-gradient(circle, rgba(168, 85, 247, 0.22) 0%, rgba(244, 63, 94, 0.08) 50%, rgba(0,0,0,0) 100%)' 
-          : 'radial-gradient(circle, rgba(59, 130, 246, 0.22) 0%, rgba(6, 182, 212, 0.08) 50%, rgba(0,0,0,0) 100%)',
+          ? 'radial-gradient(circle, rgba(159, 134, 192, 0.22) 0%, rgba(201, 86, 106, 0.08) 50%, rgba(0,0,0,0) 100%)' 
+          : 'radial-gradient(circle, rgba(58, 134, 171, 0.22) 0%, rgba(6, 182, 212, 0.08) 50%, rgba(0,0,0,0) 100%)',
         filter: 'blur(50px)',
         zIndex: 0,
         pointerEvents: 'none',
@@ -980,12 +981,12 @@ function App() {
             ) : (
               <div className="glass-panel" style={{ padding: '2.5rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem', marginTop: '2rem' }}>
                 <div style={{ color: 'var(--color-gold)', display: 'flex', justifyContent: 'center' }}>
-                  <Sparkles size={48} className="animate-float" />
+                  <MoonMark size={48} className="animate-float" />
                 </div>
                 <h3 className="font-serif gold-text" style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>
                   まだ鑑定結果がありません
                 </h3>
-                <p style={{ fontSize: '0.85rem', color: '#d1d5db', lineHeight: '1.6', maxWidth: '340px', margin: 0 }}>
+                <p style={{ fontSize: '0.85rem', color: '#d5cfc3', lineHeight: '1.6', maxWidth: '340px', margin: 0 }}>
                   「恋愛診断」から生年月日を入力すると、約7,465万通りの条件の掛け合わせから二人の本音・相性スコア・LINE吉時間がここに表示されます。
                 </p>
                 <button 
@@ -1006,7 +1007,7 @@ function App() {
             <h2 className="font-serif gold-text" style={{ fontSize: '1.8rem', textAlign: 'center', margin: '1rem 0 0.5rem' }}>
               対話ロビー
             </h2>
-            <p style={{ fontSize: '0.8rem', color: '#9ca3af', textAlign: 'center', marginBottom: '2rem' }}>
+            <p style={{ fontSize: '0.8rem', color: '#a9a49a', textAlign: 'center', marginBottom: '2rem' }}>
               相談したいガイドのチャットルームに入室してください。
             </p>
             
@@ -1018,7 +1019,7 @@ function App() {
                 alignItems: 'center',
                 gap: '1rem',
                 cursor: 'pointer',
-                border: '1px solid rgba(59,130,246,0.15)',
+                border: '1px solid rgba(58, 134, 171,0.15)',
                 transition: 'all 0.3s ease',
                 opacity: isRegistered ? 1 : 0.85
               }} onClick={() => {
@@ -1047,14 +1048,14 @@ function App() {
                   )}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#93c5fd', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    蓮の書斎 (🔮) {!isRegistered && <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', border: '1px solid rgba(226,192,116,0.3)', padding: '1px 4px', borderRadius: '4px', background: 'rgba(226,192,116,0.05)' }}>要登録</span>}
+                  <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#9cc6d8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    蓮の書斎 {!isRegistered && <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', border: '1px solid rgba(226,192,116,0.3)', padding: '1px 4px', borderRadius: '4px', background: 'rgba(226,192,116,0.05)' }}>要登録</span>}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
+                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
                 </div>
                 {isRegistered ? (
-                  <span style={{ fontSize: '0.7rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '6px', height: '6px', background: '#34d399', borderRadius: '50%', boxShadow: '0 0 8px #34d399' }} />
+                  <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
                     待機中
                   </span>
                 ) : (
@@ -1071,7 +1072,7 @@ function App() {
                 alignItems: 'center',
                 gap: '1rem',
                 cursor: 'pointer',
-                border: '1px solid rgba(168,85,247,0.15)',
+                border: '1px solid rgba(159, 134, 192,0.15)',
                 transition: 'all 0.3s ease',
                 opacity: isRegistered ? 1 : 0.85
               }} onClick={() => {
@@ -1100,14 +1101,14 @@ function App() {
                   )}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#d8b4fe', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#cdbfe2', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     月の温室 (🌙) {!isRegistered && <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', border: '1px solid rgba(226,192,116,0.3)', padding: '1px 4px', borderRadius: '4px', background: 'rgba(226,192,116,0.05)' }}>要登録</span>}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>「不安な気持ち、そのまま話してくださいね。ちゃんと受けとめますよ。」</div>
+                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「不安な気持ち、そのまま話してくださいね。ちゃんと受けとめますよ。」</div>
                 </div>
                 {isRegistered ? (
-                  <span style={{ fontSize: '0.7rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '6px', height: '6px', background: '#34d399', borderRadius: '50%', boxShadow: '0 0 8px #34d399' }} />
+                  <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
                     待機中
                   </span>
                 ) : (
@@ -1119,8 +1120,8 @@ function App() {
             </div>
             
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'center', margin: '2.5rem 0 1rem', padding: '0.75rem', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <HelpCircle size={14} style={{ color: '#ca8a04' }} />
-              <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
+              <HelpCircle size={14} style={{ color: '#b07d2b' }} />
+              <span style={{ fontSize: '0.7rem', color: '#a9a49a' }}>
                 {isRegistered 
                   ? '相性診断の結果について質問すると、より深い解説が得られます。' 
                   : '※チャットでの対話相談機能は、無料会員登録が必要です。'}
@@ -1220,13 +1221,13 @@ function App() {
                     justifyContent: 'space-between',
                     padding: '1.15rem 1.25rem',
                     background: currentUser 
-                      ? 'linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(20, 16, 35, 0.8) 100%)' 
-                      : 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+                      ? 'linear-gradient(135deg, rgba(125, 187, 138, 0.1) 0%, rgba(17, 23, 33, 0.8) 100%)' 
+                      : 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(159, 134, 192, 0.15) 100%)',
                     border: currentUser 
-                      ? '1px solid rgba(74, 222, 128, 0.4)' 
+                      ? '1px solid rgba(125, 187, 138, 0.4)' 
                       : '1.5px solid rgba(226, 192, 116, 0.5)',
                     borderRadius: '18px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
                   }}
@@ -1239,7 +1240,7 @@ function App() {
                         width: '38px',
                         height: '38px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+                        background: 'linear-gradient(135deg, #9f86c0 0%, #5b6aa8 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1252,15 +1253,15 @@ function App() {
                       </div>
                     )}
                     <div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: currentUser ? '#ffffff' : '#fef08a' }}>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: currentUser ? '#ffffff' : '#f2e2b3' }}>
                         {currentUser ? currentUser.displayName : 'Google / X で無料登録・ログイン'}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: currentUser ? '#4ade80' : '#cbd5e1', marginTop: '2px' }}>
+                      <div style={{ fontSize: '0.75rem', color: currentUser ? '#7dbb8a' : '#d8d2c6', marginTop: '2px' }}>
                         {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })()) ? 'メール認証完了' : 'Google 連携中'} (${currentUser.email || '登録済み'})` : '鑑定履歴・お相手データをクラウド保存'}
                       </div>
                     </div>
                   </div>
-                  <ChevronRight size={18} style={{ color: currentUser ? '#4ade80' : 'var(--color-gold)' }} />
+                  <ChevronRight size={18} style={{ color: currentUser ? '#7dbb8a' : 'var(--color-gold)' }} />
                 </div>
 
                 {/* Premium Plan Upgrade Banner Card / Member Rank (2nd) */}
@@ -1272,10 +1273,10 @@ function App() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '1.15rem 1.25rem',
-                    background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.12) 0%, rgba(217, 119, 6, 0.15) 100%)',
-                    border: '1px solid rgba(250, 204, 21, 0.4)',
+                    background: 'linear-gradient(135deg, rgba(230, 184, 92, 0.12) 0%, rgba(184, 105, 45, 0.15) 100%)',
+                    border: '1px solid rgba(230, 184, 92, 0.4)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
@@ -1283,7 +1284,7 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem', minWidth: 0 }}>
-                    <Crown size={18} style={{ color: '#fef08a', flexShrink: 0 }} />
+                    <Crown size={18} style={{ color: '#f2e2b3', flexShrink: 0 }} />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#ffffff' }}>
@@ -1291,7 +1292,7 @@ function App() {
                         </span>
                         <span style={{
                           fontSize: '0.6rem',
-                          background: isSubscribed ? '#22c55e' : '#ef4444',
+                          background: isSubscribed ? '#6aa97c' : '#cf5a43',
                           color: '#fff',
                           padding: '1px 6px',
                           borderRadius: '6px',
@@ -1302,7 +1303,7 @@ function App() {
                       </div>
                     </div>
                   </div>
-                  <ChevronRight size={16} style={{ color: '#fef08a', flexShrink: 0 }} />
+                  <ChevronRight size={16} style={{ color: '#f2e2b3', flexShrink: 0 }} />
                 </div>
 
                 <div 
@@ -1316,7 +1317,7 @@ function App() {
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
@@ -1327,7 +1328,7 @@ function App() {
                     <User size={20} style={{ color: '#e2c074' }} />
                     <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>プロフィール編集</span>
                   </div>
-                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                  <ChevronRight size={18} style={{ color: '#a9a49a' }} />
                 </div>
 
                 <div 
@@ -1341,7 +1342,7 @@ function App() {
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
@@ -1349,10 +1350,10 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <Users size={20} style={{ color: '#34d399' }} />
+                    <Users size={20} style={{ color: '#6fb08f' }} />
                     <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>保存したお相手 ({savedPartners.length}人)</span>
                   </div>
-                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                  <ChevronRight size={18} style={{ color: '#a9a49a' }} />
                 </div>
 
                 {/* 毎朝8時 運勢・吉時間通知設定 (ON / OFF Toggle) */}
@@ -1366,25 +1367,25 @@ function App() {
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     width: '100%',
                     boxSizing: 'border-box'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem', minWidth: 0 }}>
-                    <Bell size={20} style={{ color: '#fef08a', flexShrink: 0 }} />
+                    <Bell size={20} style={{ color: '#f2e2b3', flexShrink: 0 }} />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
                       <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>毎朝8時の運勢・吉時間通知</span>
-                      <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#d8d2c6' }}>
                         {notifyDailyLuck && notifyEmail ? `送信先: ${notifyEmail}` : '本日の運気とLINE推奨時間を毎朝お届け'}
                       </span>
                       {notifyDailyLuck && notifySub?.enabled && notifyTargetLabel && (
-                        <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#d8d2c6' }}>
                           内容: {notifyTargetLabel}{' '}
                           <button
                             type="button"
                             onClick={() => openNotifyModal()}
-                            style={{ background: 'none', border: 'none', padding: 0, color: '#fbbf24', fontSize: '0.72rem', textDecoration: 'underline', cursor: 'pointer' }}
+                            style={{ background: 'none', border: 'none', padding: 0, color: '#e8a93a', fontSize: '0.72rem', textDecoration: 'underline', cursor: 'pointer' }}
                           >
                             変更
                           </button>
@@ -1415,13 +1416,13 @@ function App() {
                       width: '46px',
                       height: '26px',
                       borderRadius: '13px',
-                      background: notifyDailyLuck ? 'linear-gradient(135deg, #fbbf24 0%, #ca8a04 100%)' : 'rgba(255,255,255,0.15)',
+                      background: notifyDailyLuck ? 'linear-gradient(135deg, #e8a93a 0%, #b07d2b 100%)' : 'rgba(255,255,255,0.15)',
                       border: 'none',
                       position: 'relative',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
                       flexShrink: 0,
-                      boxShadow: notifyDailyLuck ? '0 0 10px rgba(251, 191, 36, 0.4)' : 'none'
+                      boxShadow: notifyDailyLuck ? '0 0 10px rgba(232, 169, 58, 0.4)' : 'none'
                     }}
                   >
                     <span style={{
@@ -1450,7 +1451,7 @@ function App() {
                     background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.08) 0%, rgba(255,255,255,0.02) 100%)',
                     border: '1px solid rgba(226, 192, 116, 0.3)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
@@ -1458,10 +1459,10 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <Smartphone size={20} style={{ color: '#fef08a' }} />
+                    <Smartphone size={20} style={{ color: '#f2e2b3' }} />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
                       <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>ホーム画面に追加（アプリ化）</span>
-                      <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>毎日ワンタップで運気やLINE吉時間をチェック</span>
+                      <span style={{ fontSize: '0.72rem', color: '#d8d2c6' }}>毎日ワンタップで運気やLINE吉時間をチェック</span>
                     </div>
                   </div>
                   <ChevronRight size={18} style={{ color: '#e2c074' }} />
@@ -1481,7 +1482,7 @@ function App() {
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
@@ -1489,10 +1490,10 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <BookOpen size={20} style={{ color: '#a855f7' }} />
+                    <BookOpen size={20} style={{ color: '#9f86c0' }} />
                     <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>月と蓮について (占い解説)</span>
                   </div>
-                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                  <ChevronRight size={18} style={{ color: '#a9a49a' }} />
                 </div>
 
                 <div 
@@ -1509,7 +1510,7 @@ function App() {
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
@@ -1517,10 +1518,10 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <ShieldAlert size={20} style={{ color: '#3b82f6' }} />
+                    <ShieldAlert size={20} style={{ color: '#3a86ab' }} />
                     <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>特定商取引法に基づく表記</span>
                   </div>
-                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                  <ChevronRight size={18} style={{ color: '#a9a49a' }} />
                 </div>
 
                 <div 
@@ -1537,7 +1538,7 @@ function App() {
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
@@ -1545,10 +1546,10 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    <FileText size={20} style={{ color: '#10b981' }} />
+                    <FileText size={20} style={{ color: '#5c9c7c' }} />
                     <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>利用規約・プライバシーポリシー</span>
                   </div>
-                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                  <ChevronRight size={18} style={{ color: '#a9a49a' }} />
                 </div>
 
                 <div 
@@ -1565,7 +1566,7 @@ function App() {
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: '16px',
-                    color: '#f3f4f6',
+                    color: '#f3efe6',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     width: '100%',
@@ -1576,7 +1577,7 @@ function App() {
                     <Building2 size={20} style={{ color: '#f59e0b' }} />
                     <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>運営会社</span>
                   </div>
-                  <ChevronRight size={18} style={{ color: '#9ca3af' }} />
+                  <ChevronRight size={18} style={{ color: '#a9a49a' }} />
                 </div>
               </div>
             )}
@@ -1597,7 +1598,7 @@ function App() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>生年月日 <span style={{ color: '#ef4444' }}>(必須)</span></label>
+                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                     <input
                       type="text"
@@ -1632,7 +1633,7 @@ function App() {
                   <select
                     value={myMbti}
                     onChange={(e) => setMyMbti(e.target.value)}
-                    style={{ background: '#0d0d18', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '0.85rem 1rem', color: 'white', outline: 'none', fontSize: '0.95rem' }}
+                    style={{ background: '#0c1017', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', padding: '0.85rem 1rem', color: 'white', outline: 'none', fontSize: '0.95rem' }}
                   >
                     {mbtiOptions.map((opt: { value: string; label: string }) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1641,22 +1642,22 @@ function App() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>性別 <span style={{ color: '#ef4444' }}>(必須)</span></label>
+                  <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>性別 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                     <button
                       type="button"
                       onClick={() => setMyGender('female')}
                       style={{
-                        background: myGender === 'female' ? 'rgba(168, 85, 247, 0.22)' : 'rgba(255,255,255,0.03)',
+                        background: myGender === 'female' ? 'rgba(159, 134, 192, 0.22)' : 'rgba(255,255,255,0.03)',
                         border: myGender === 'female' ? '1.5px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '12px',
                         padding: '0.85rem',
-                        color: myGender === 'female' ? '#d8b4fe' : '#9ca3af',
+                        color: myGender === 'female' ? '#cdbfe2' : '#a9a49a',
                         fontSize: '0.95rem',
                         fontWeight: 'bold',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
-                        boxShadow: myGender === 'female' ? '0 0 15px rgba(168, 85, 247, 0.3)' : 'none'
+                        boxShadow: myGender === 'female' ? '0 0 15px rgba(159, 134, 192, 0.3)' : 'none'
                       }}
                     >
                       女性
@@ -1665,16 +1666,16 @@ function App() {
                       type="button"
                       onClick={() => setMyGender('male')}
                       style={{
-                        background: myGender === 'male' ? 'rgba(59, 130, 246, 0.22)' : 'rgba(255,255,255,0.03)',
+                        background: myGender === 'male' ? 'rgba(58, 134, 171, 0.22)' : 'rgba(255,255,255,0.03)',
                         border: myGender === 'male' ? '1.5px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '12px',
                         padding: '0.85rem',
-                        color: myGender === 'male' ? '#93c5fd' : '#9ca3af',
+                        color: myGender === 'male' ? '#9cc6d8' : '#a9a49a',
                         fontSize: '0.95rem',
                         fontWeight: 'bold',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
-                        boxShadow: myGender === 'male' ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
+                        boxShadow: myGender === 'male' ? '0 0 15px rgba(58, 134, 171, 0.3)' : 'none'
                       }}
                     >
                       男性
@@ -1717,7 +1718,7 @@ function App() {
                 </button>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', marginTop: '0.5rem' }}>
-                  <label style={{ fontSize: '0.75rem', color: '#9ca3af' }}>会員ステータス (開発用テスト)</label>
+                  <label style={{ fontSize: '0.75rem', color: '#a9a49a' }}>会員ステータス (開発用テスト)</label>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <button
                       type="button"
@@ -1728,7 +1729,7 @@ function App() {
                         borderRadius: '8px',
                         padding: '4px 10px',
                         fontSize: '0.7rem',
-                        color: isRegistered ? 'var(--color-gold)' : '#9ca3af',
+                        color: isRegistered ? 'var(--color-gold)' : '#a9a49a',
                         cursor: 'pointer'
                       }}
                     >
@@ -1738,12 +1739,12 @@ function App() {
                       type="button"
                       onClick={() => setIsSubscribed(!isSubscribed)}
                       style={{
-                        background: isSubscribed ? 'rgba(52, 211, 153, 0.15)' : 'rgba(255,255,255,0.02)',
-                        border: isSubscribed ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.08)',
+                        background: isSubscribed ? 'rgba(111, 176, 143, 0.15)' : 'rgba(255,255,255,0.02)',
+                        border: isSubscribed ? '1px solid #6fb08f' : '1px solid rgba(255,255,255,0.08)',
                         borderRadius: '8px',
                         padding: '4px 10px',
                         fontSize: '0.7rem',
-                        color: isSubscribed ? '#34d399' : '#9ca3af',
+                        color: isSubscribed ? '#6fb08f' : '#a9a49a',
                         cursor: 'pointer'
                       }}
                     >
@@ -1758,10 +1759,10 @@ function App() {
             {settingsSubView === 'partners' && (
               <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.65rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 'bold' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
                     保存件数: {savedPartners.length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
                   </span>
-                  <span style={{ fontSize: '0.65rem', color: '#9ca3af' }}>
+                  <span style={{ fontSize: '0.65rem', color: '#a9a49a' }}>
                     {isSubscribed ? '有料会員 (最大10人)' : (isRegistered ? '無料会員 (最大2人)' : '非会員 (最大1人)')}
                   </span>
                 </div>
@@ -1778,7 +1779,7 @@ function App() {
                       borderRadius: '10px',
                       background: 'transparent',
                       border: '1px dashed rgba(255,255,255,0.2)',
-                      color: '#cbd5e1',
+                      color: '#d8d2c6',
                       fontSize: '0.82rem',
                       cursor: 'pointer'
                     }}
@@ -1788,7 +1789,7 @@ function App() {
                 )}
 
                 {savedPartners.length === 0 && editingPartnerId !== NEW_PARTNER_ID ? (
-                  <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#9ca3af', fontSize: '0.8rem', lineHeight: '1.6' }}>
+                  <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#a9a49a', fontSize: '0.8rem', lineHeight: '1.6' }}>
                     保存したお相手のデータはありません。<br />
                     相性鑑定の結果画面か、「＋ お相手を追加」から保存できます。
                   </div>
@@ -1817,7 +1818,7 @@ function App() {
                             </div>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                              <label style={{ fontSize: '0.72rem', color: '#9ca3af' }}>ニックネーム</label>
+                              <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>ニックネーム</label>
                               <input
                                 type="text"
                                 value={editPartnerName}
@@ -1836,7 +1837,7 @@ function App() {
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', position: 'relative' }}>
-                              <label style={{ fontSize: '0.72rem', color: '#9ca3af' }}>生年月日 (数字8桁)</label>
+                              <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input
                                   type="text"
@@ -1862,7 +1863,7 @@ function App() {
                                     border: '1px solid rgba(255,255,255,0.1)',
                                     borderRadius: '8px',
                                     padding: '0 0.6rem',
-                                    color: '#d1d5db',
+                                    color: '#d5cfc3',
                                     cursor: 'pointer'
                                   }}
                                 >
@@ -1882,12 +1883,12 @@ function App() {
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                              <label style={{ fontSize: '0.72rem', color: '#9ca3af' }}>16タイプ診断 (MBTI)</label>
+                              <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>16タイプ診断 (MBTI)</label>
                               <select
                                 value={editPartnerMbti}
                                 onChange={(e) => setEditPartnerMbti(e.target.value)}
                                 style={{
-                                  background: 'rgba(20, 15, 30, 0.95)',
+                                  background: 'rgba(15, 21, 30, 0.95)',
                                   border: '1px solid rgba(255,255,255,0.1)',
                                   borderRadius: '8px',
                                   padding: '0.5rem 0.75rem',
@@ -1903,15 +1904,15 @@ function App() {
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                              <label style={{ fontSize: '0.72rem', color: '#9ca3af' }}>性別</label>
+                              <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>性別</label>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                                 <button
                                   type="button"
                                   onClick={() => setEditPartnerGender('female')}
                                   style={{
-                                    background: editPartnerGender === 'female' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255,255,255,0.03)',
-                                    border: editPartnerGender === 'female' ? '1px solid #a855f7' : '1px solid rgba(255,255,255,0.1)',
-                                    color: editPartnerGender === 'female' ? '#d8b4fe' : '#9ca3af',
+                                    background: editPartnerGender === 'female' ? 'rgba(159, 134, 192, 0.2)' : 'rgba(255,255,255,0.03)',
+                                    border: editPartnerGender === 'female' ? '1px solid #9f86c0' : '1px solid rgba(255,255,255,0.1)',
+                                    color: editPartnerGender === 'female' ? '#cdbfe2' : '#a9a49a',
                                     borderRadius: '8px',
                                     padding: '0.45rem',
                                     fontSize: '0.78rem',
@@ -1925,9 +1926,9 @@ function App() {
                                   type="button"
                                   onClick={() => setEditPartnerGender('male')}
                                   style={{
-                                    background: editPartnerGender === 'male' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.03)',
-                                    border: editPartnerGender === 'male' ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
-                                    color: editPartnerGender === 'male' ? '#93c5fd' : '#9ca3af',
+                                    background: editPartnerGender === 'male' ? 'rgba(58, 134, 171, 0.2)' : 'rgba(255,255,255,0.03)',
+                                    border: editPartnerGender === 'male' ? '1px solid #3a86ab' : '1px solid rgba(255,255,255,0.1)',
+                                    color: editPartnerGender === 'male' ? '#9cc6d8' : '#a9a49a',
                                     borderRadius: '8px',
                                     padding: '0.45rem',
                                     fontSize: '0.78rem',
@@ -1946,7 +1947,7 @@ function App() {
                                 onClick={saveEditPartner}
                                 style={{
                                   flex: 1,
-                                  background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 50%, #d97706 100%)',
+                                  background: 'linear-gradient(135deg, #f2e2b3 0%, #e2c074 50%, #b8692d 100%)',
                                   border: 'none',
                                   borderRadius: '8px',
                                   color: '#000',
@@ -1972,7 +1973,7 @@ function App() {
                                   background: 'rgba(255,255,255,0.05)',
                                   border: '1px solid rgba(255,255,255,0.1)',
                                   borderRadius: '8px',
-                                  color: '#9ca3af',
+                                  color: '#a9a49a',
                                   padding: '0.55rem 0.85rem',
                                   fontSize: '0.8rem',
                                   cursor: 'pointer'
@@ -2008,9 +2009,9 @@ function App() {
                                 fontSize: '0.6rem',
                                 padding: '1px 6px',
                                 borderRadius: '6px',
-                                background: partner.gender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                                color: partner.gender === 'female' ? '#d8b4fe' : '#93c5fd',
-                                border: partner.gender === 'female' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)',
+                                background: partner.gender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)',
+                                color: partner.gender === 'female' ? '#cdbfe2' : '#9cc6d8',
+                                border: partner.gender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)',
                                 fontWeight: '600'
                               }}>
                                 {partner.gender === 'female' ? '女性' : '男性'}
@@ -2029,7 +2030,7 @@ function App() {
                                 </span>
                               )}
                             </div>
-                            <span style={{ fontSize: '0.72rem', color: '#9ca3af' }}>
+                            <span style={{ fontSize: '0.72rem', color: '#a9a49a' }}>
                               生年月日: {partner.birth.replace(/-/g, '/')}
                             </span>
                           </div>
@@ -2063,10 +2064,10 @@ function App() {
                                 }
                               }}
                               style={{
-                                background: 'rgba(239, 68, 68, 0.1)',
-                                border: '1px solid rgba(239, 68, 68, 0.25)',
+                                background: 'rgba(207, 90, 67, 0.1)',
+                                border: '1px solid rgba(207, 90, 67, 0.25)',
                                 borderRadius: '8px',
-                                color: '#ef4444',
+                                color: '#cf5a43',
                                 padding: '0.4rem 0.5rem',
                                 fontSize: '0.72rem',
                                 cursor: 'pointer',
@@ -2090,43 +2091,43 @@ function App() {
             {settingsSubView === 'about' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem', width: '100%', boxSizing: 'border-box' }}>
                 {/* Intro Card */}
-                <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(30, 20, 50, 0.6) 0%, rgba(15, 10, 30, 0.7) 100%)', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.25)' }}>
+                <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(30, 20, 50, 0.6) 0%, rgba(13, 18, 26, 0.7) 100%)', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.25)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.6rem' }}>
-                    <Sparkles size={18} style={{ color: 'var(--color-gold)' }} />
+                    <MoonMark size={18} style={{ color: 'var(--color-gold)' }} />
                     <h3 className="font-serif gold-text" style={{ fontSize: '1.05rem', fontWeight: 'bold', margin: 0 }}>
                       ハイブリッド鑑定エンジンの概要
                     </h3>
                   </div>
-                  <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
+                  <p style={{ fontSize: '0.8rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
                     『月と蓮』は、東洋最古にして最高峰の伝承占術「四柱推命」「九星気学」と、西洋の多角性格分類学「16タイプ心理診断」を独自アルゴリズムで統合した超精密相性鑑定エンジンです。感情の引き寄せから行動パターンの一致度、日々の運勢の波まで、約7,465万通りのマトリクスで多層的かつ論理的に解析します。
                   </p>
                 </div>
 
                 {/* 7,465万通り Calculation Matrix Card */}
-                <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.08) 0%, rgba(168, 85, 247, 0.1) 100%)', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+                <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.08) 0%, rgba(159, 134, 192, 0.1) 100%)', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
-                    <span style={{ fontSize: '1.1rem' }}>🔮</span>
+                    <MoonMark size={18} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
                     <h4 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0 }}>
                       約7,465万通りの条件の掛け合わせ
                     </h4>
                   </div>
-                  <p style={{ fontSize: '0.76rem', color: '#cbd5e1', lineHeight: '1.6', margin: '0 0 0.85rem 0' }}>
+                  <p style={{ fontSize: '0.76rem', color: '#d8d2c6', lineHeight: '1.6', margin: '0 0 0.85rem 0' }}>
                     『月と蓮』の鑑定結果は単なる属性の当てはめではありません。お二人それぞれの「四柱推命」「九星気学」「16タイプ性格」を掛け合わせた約7,465万通りの完全オーダーメイド判定プログラムです。
                   </p>
-                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', borderRadius: '12px', padding: '0.75rem', border: '1px solid rgba(226, 192, 116, 0.2)', fontSize: '0.72rem', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', borderRadius: '12px', padding: '0.75rem', border: '1px solid rgba(226, 192, 116, 0.2)', fontSize: '0.72rem', color: '#a39d91', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                     <div>・四柱推命 日柱干支相性：60 × 60 ＝ <strong style={{ color: '#ffffff' }}>3,600通り</strong></div>
                     <div>・九星気学 本命星相性：9 × 9 ＝ <strong style={{ color: '#ffffff' }}>81通り</strong></div>
                     <div>・16タイプ（MBTI）相性：16 × 16 ＝ <strong style={{ color: '#ffffff' }}>256通り</strong></div>
-                    <div style={{ borderTop: '1px solid rgba(226, 192, 116, 0.25)', paddingTop: '0.4rem', marginTop: '0.2rem', color: '#fef08a', fontWeight: 'bold', fontSize: '0.78rem', textAlign: 'right' }}>
+                    <div style={{ borderTop: '1px solid rgba(226, 192, 116, 0.25)', paddingTop: '0.4rem', marginTop: '0.2rem', color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.78rem', textAlign: 'right' }}>
                       ＝ 3,600 × 81 × 256 ＝ 74,649,600通り
                     </div>
                   </div>
                 </div>
 
                 {/* Rare Character / Stars Highlight Card */}
-                <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.06) 0%, rgba(168, 85, 247, 0.08) 100%)', borderRadius: '20px', border: '1px solid rgba(236, 72, 153, 0.25)' }}>
-                  <h4 style={{ color: '#f472b6', fontSize: '0.92rem', fontWeight: 'bold', margin: '0 0 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Sparkles size={16} style={{ color: '#f472b6' }} />
+                <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(201, 122, 149, 0.06) 0%, rgba(159, 134, 192, 0.08) 100%)', borderRadius: '20px', border: '1px solid rgba(201, 122, 149, 0.25)' }}>
+                  <h4 style={{ color: '#d68ba4', fontSize: '0.92rem', fontWeight: 'bold', margin: '0 0 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <MoonMark size={16} style={{ color: '#d68ba4' }} />
                     特殊星・レアキャラクター例
                   </h4>
                   
@@ -2142,7 +2143,7 @@ function App() {
                       background: 'rgba(0, 0, 0, 0.45)',
                       borderRadius: '16px',
                       padding: '0.75rem',
-                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      border: '1px solid rgba(207, 90, 67, 0.3)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center'
@@ -2154,7 +2155,7 @@ function App() {
                         overflow: 'hidden',
                         position: 'relative',
                         marginBottom: '0.5rem',
-                        boxShadow: '0 0 20px rgba(220, 38, 38, 0.5)'
+                        boxShadow: '0 0 20px rgba(184, 74, 55, 0.5)'
                       }}>
                         <img
                           src="/assets/astrology_dragon_sample.jpg"
@@ -2166,9 +2167,9 @@ function App() {
                         <div className="avatar-halo-spotlight" />
                       </div>
                       <span className="kaigo-badge" style={{ fontSize: '0.55rem', padding: '2px 6px', borderRadius: '4px', marginBottom: '0.25rem' }}>
-                        👑 魁罡
+                        魁罡
                       </span>
-                      <span style={{ fontSize: '0.68rem', color: '#fca5a5', fontWeight: 'bold' }}>
+                      <span style={{ fontSize: '0.68rem', color: '#e6a99c', fontWeight: 'bold' }}>
                         出現率：3.3%
                       </span>
                     </div>
@@ -2178,7 +2179,7 @@ function App() {
                       background: 'rgba(0, 0, 0, 0.45)',
                       borderRadius: '16px',
                       padding: '0.75rem',
-                      border: '1px solid rgba(250, 204, 21, 0.3)',
+                      border: '1px solid rgba(230, 184, 92, 0.3)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center'
@@ -2190,7 +2191,7 @@ function App() {
                         overflow: 'hidden',
                         position: 'relative',
                         marginBottom: '0.5rem',
-                        boxShadow: '0 0 20px rgba(251, 191, 36, 0.5)'
+                        boxShadow: '0 0 20px rgba(232, 169, 58, 0.5)'
                       }}>
                         <img
                           src="/assets/astrology_tiger_sample.jpg"
@@ -2202,15 +2203,15 @@ function App() {
                         <div className="avatar-halo-spotlight" />
                       </div>
                       <span className="rare-badge" style={{ fontSize: '0.55rem', padding: '2px 6px', borderRadius: '4px', marginBottom: '0.25rem' }}>
-                        👑 選ばれし極星
+                        選ばれし極星
                       </span>
-                      <span style={{ fontSize: '0.68rem', color: '#fef08a', fontWeight: 'bold' }}>
+                      <span style={{ fontSize: '0.68rem', color: '#f2e2b3', fontWeight: 'bold' }}>
                         出現率：7.0%
                       </span>
                     </div>
                   </div>
 
-                  <div style={{ fontSize: '0.74rem', color: '#d1d5db', lineHeight: '1.55', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#d5cfc3', lineHeight: '1.55', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                     <div>
                       <strong style={{ color: '#fbcfe8' }}>・魁罡（かいごう：3.3%）</strong>：全12干支キャラクターすべてにおいて3.3%の確率で宿る強力な神殺の化身。強烈なカリスマと勝負運を持つオーラが発動します。
                     </div>
@@ -2221,7 +2222,7 @@ function App() {
                 </div>
 
                 {/* 4 Core Logic Section */}
-                <div className="glass-panel" style={{ padding: '1.25rem', background: 'rgba(18, 14, 32, 0.65)', border: '1.5px solid rgba(226, 192, 116, 0.2)', borderRadius: '20px' }}>
+                <div className="glass-panel" style={{ padding: '1.25rem', background: 'rgba(15, 21, 30, 0.65)', border: '1.5px solid rgba(226, 192, 116, 0.2)', borderRadius: '20px' }}>
                   <h3 className="font-serif gold-text" style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '1rem', textAlign: 'center' }}>
                     4つの多角的アプローチ
                   </h3>
@@ -2230,11 +2231,11 @@ function App() {
                     {/* 1. 四柱推命 */}
                     <div style={{ display: 'flex', gap: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.85rem' }}>
                       <div style={{ fontWeight: 'bold', color: '#e2c074', fontSize: '0.82rem', width: '85px', flexShrink: 0, letterSpacing: '0.03em' }}>
-                        四柱推命<br/><span style={{ fontSize: '0.62rem', color: '#9ca3af', fontWeight: 'normal' }}>（日柱・五行）</span>
+                        四柱推命<br/><span style={{ fontSize: '0.62rem', color: '#a9a49a', fontWeight: 'normal' }}>（日柱・五行）</span>
                       </div>
                       <div>
                         <div style={{ fontWeight: 'bold', fontSize: '0.82rem', color: '#ffffff', marginBottom: '0.25rem' }}>魂・本質レベルの相性判定</div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.72rem', lineHeight: '1.45', margin: 0 }}>
+                        <p style={{ color: '#a9a49a', fontSize: '0.72rem', lineHeight: '1.45', margin: 0 }}>
                           生年月日の「日」から導かれる十干十二支に基づき、生まれ持った本質・価値観・エネルギーの強弱を精密判定。互いを補い高め合える「相生」や、すれ違いやすいポイントを解明します。
                         </p>
                       </div>
@@ -2242,12 +2243,12 @@ function App() {
 
                     {/* 2. レア星・特殊干支解析 */}
                     <div style={{ display: 'flex', gap: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.85rem' }}>
-                      <div style={{ fontWeight: 'bold', color: '#f43f5e', fontSize: '0.82rem', width: '85px', flexShrink: 0, letterSpacing: '0.03em' }}>
-                        特殊干支・レア星<br/><span style={{ fontSize: '0.62rem', color: '#fca5a5', fontWeight: 'normal' }}>（魁罡・貴人等）</span>
+                      <div style={{ fontWeight: 'bold', color: '#c9566a', fontSize: '0.82rem', width: '85px', flexShrink: 0, letterSpacing: '0.03em' }}>
+                        特殊干支・レア星<br/><span style={{ fontSize: '0.62rem', color: '#e6a99c', fontWeight: 'normal' }}>（魁罡・貴人等）</span>
                       </div>
                       <div>
                         <div style={{ fontWeight: 'bold', fontSize: '0.82rem', color: '#fecdd3', marginBottom: '0.25rem' }}>秘められた才能と宿命星の検出</div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.72rem', lineHeight: '1.45', margin: 0 }}>
+                        <p style={{ color: '#a9a49a', fontSize: '0.72rem', lineHeight: '1.45', margin: 0 }}>
                           確率数％の強烈なカリスマと勝負運を秘めた「魁罡（かいごう）」や、生涯のピンチをチャンスに変える最高吉星「天乙貴人（てんおつきじん）」、奇跡的な強運の絆を結ぶ「天地徳合」などを自動検出・鑑定結果に反映します。
                         </p>
                       </div>
@@ -2255,12 +2256,12 @@ function App() {
 
                     {/* 3. 九星気学 */}
                     <div style={{ display: 'flex', gap: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.85rem' }}>
-                      <div style={{ fontWeight: 'bold', color: '#c084fc', fontSize: '0.82rem', width: '85px', flexShrink: 0, letterSpacing: '0.03em' }}>
-                        九星気学<br/><span style={{ fontSize: '0.62rem', color: '#9ca3af', fontWeight: 'normal' }}>（本命五行）</span>
+                      <div style={{ fontWeight: 'bold', color: '#b9a3d6', fontSize: '0.82rem', width: '85px', flexShrink: 0, letterSpacing: '0.03em' }}>
+                        九星気学<br/><span style={{ fontSize: '0.62rem', color: '#a9a49a', fontWeight: 'normal' }}>（本命五行）</span>
                       </div>
                       <div>
                         <div style={{ fontWeight: 'bold', fontSize: '0.82rem', color: '#ffffff', marginBottom: '0.25rem' }}>生活テンポと運気の調和</div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.72rem', lineHeight: '1.45', margin: 0 }}>
+                        <p style={{ color: '#a9a49a', fontSize: '0.72rem', lineHeight: '1.45', margin: 0 }}>
                           生まれた「年」の九星エネルギーから、日常の行動ペースや決断のタイミングを分析。二人の相乗効果が高まる時期や、協力時のベストな関係性を提示します。
                         </p>
                       </div>
@@ -2268,12 +2269,12 @@ function App() {
 
                     {/* 4. 16タイプ */}
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
-                      <div style={{ fontWeight: 'bold', color: '#60a5fa', fontSize: '0.82rem', width: '85px', flexShrink: 0, letterSpacing: '0.03em' }}>
-                        16タイプ<br/><span style={{ fontSize: '0.62rem', color: '#9ca3af', fontWeight: 'normal' }}>（心理傾向）</span>
+                      <div style={{ fontWeight: 'bold', color: '#5d9fc0', fontSize: '0.82rem', width: '85px', flexShrink: 0, letterSpacing: '0.03em' }}>
+                        16タイプ<br/><span style={{ fontSize: '0.62rem', color: '#a9a49a', fontWeight: 'normal' }}>（心理傾向）</span>
                       </div>
                       <div>
                         <div style={{ fontWeight: 'bold', fontSize: '0.82rem', color: '#ffffff', marginBottom: '0.25rem' }}>会話癖とLINEコミュニケーション</div>
-                        <p style={{ color: '#9ca3af', fontSize: '0.72rem', lineHeight: '1.45', margin: 0 }}>
+                        <p style={{ color: '#a9a49a', fontSize: '0.72rem', lineHeight: '1.45', margin: 0 }}>
                           心理分析理論を用いて、相手の会話の癖・思考プロセス・感情表現の傾向を解析。心の距離を縮める最適な接し方やLINE送信用実効テクニックを導き出します。
                         </p>
                       </div>
@@ -2286,7 +2287,7 @@ function App() {
                   <h3 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
                     日盤連動バイオリズムと吉時間
                   </h3>
-                  <p style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: '1.55', margin: 0 }}>
+                  <p style={{ fontSize: '0.75rem', color: '#d8d2c6', lineHeight: '1.55', margin: 0 }}>
                     『月と蓮』のデイリー運気は、当日の日盤運気の巡りとご自身の本質を掛け合わせてリアルタイム算出。引き寄せが高まる「幸運日」や、連絡に最適な「LINE推奨時間」をグラフ表示します。
                   </p>
                 </div>
@@ -2297,51 +2298,51 @@ function App() {
             {settingsSubView === 'tokushoho' && (
               <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.75rem', lineHeight: '1.6', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>販売事業者</span>
+                  <span style={{ color: '#a9a49a' }}>販売事業者</span>
                   <span style={{ color: 'white', fontWeight: 'bold' }}>Ill株式会社</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>運営責任者</span>
+                  <span style={{ color: '#a9a49a' }}>運営責任者</span>
                   <span style={{ color: 'white' }}>山下 高志</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>所在地</span>
+                  <span style={{ color: '#a9a49a' }}>所在地</span>
                   <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>お問合せ</span>
+                  <span style={{ color: '#a9a49a' }}>お問合せ</span>
                   <span style={{ color: 'white' }}>support@tsuki-to-ren.com</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>電話番号</span>
+                  <span style={{ color: '#a9a49a' }}>電話番号</span>
                   <span style={{ color: 'white' }}>08053565283</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>販売価格</span>
+                  <span style={{ color: '#a9a49a' }}>販売価格</span>
                   <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額500円 (税込)</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>契約期間・自動更新</span>
+                  <span style={{ color: '#a9a49a' }}>契約期間・自動更新</span>
                   <span style={{ color: 'white' }}>30日間のサブスクリプション。契約期間満了日までに解約手続き（自動更新の停止）を行わない限り、同一条件で30日ごとに自動的に契約が更新され、継続課金が発生します。</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>支払方法</span>
+                  <span style={{ color: '#a9a49a' }}>支払方法</span>
                   <span style={{ color: 'white' }}>クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Pay</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>商品代金以外の料金</span>
+                  <span style={{ color: '#a9a49a' }}>商品代金以外の料金</span>
                   <span style={{ color: 'white' }}>パケット通信料等（お使いの回線に応じます）</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>商品の引き渡し</span>
+                  <span style={{ color: '#a9a49a' }}>商品の引き渡し</span>
                   <span style={{ color: 'white' }}>購入手続き完了後、ただちにご利用可能</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>解約方法（自動更新の停止）</span>
+                  <span style={{ color: '#a9a49a' }}>解約方法（自動更新の停止）</span>
                   <span style={{ color: 'white' }}>マイページ（設定画面）内の「プレミアム会員の解約手続き」より、いつでも即座に定期課金の自動更新停止・解約手続きが可能です。解約を行わない限り契約は自動更新されます。解約完了後も次回更新日（有効期限満了日）までは有料機能を引き続きご利用いただけます。</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>動作環境</span>
+                  <span style={{ color: '#a9a49a' }}>動作環境</span>
                   <span style={{ color: 'white' }}>
                     【スマートフォン・タブレット・PC】<br />
                     ・iOS: 最新バージョンのSafari<br />
@@ -2351,7 +2352,7 @@ function App() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>返品・返金について</span>
+                  <span style={{ color: '#a9a49a' }}>返品・返金について</span>
                   <span style={{ color: 'white' }}>デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</span>
                 </div>
               </div>
@@ -2359,7 +2360,7 @@ function App() {
 
             {/* Sub-View: PRIVACY POLICY */}
             {settingsSubView === 'privacy' && (
-              <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.75rem', lineHeight: '1.6', color: '#cbd5e1', width: '100%', boxSizing: 'border-box' }}>
+              <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.75rem', lineHeight: '1.6', color: '#d8d2c6', width: '100%', boxSizing: 'border-box' }}>
                 <div>
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>1. 収集する個人情報</h4>
                   <p>本アプリは、正確な占星術鑑定及びAI相談の提供目的で、生年月日、ニックネーム、16タイプ性格データ、チャットテキストを収集・保持します。</p>
@@ -2390,31 +2391,31 @@ function App() {
             {settingsSubView === 'company' && (
               <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.75rem', lineHeight: '1.6', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>社名</span>
+                  <span style={{ color: '#a9a49a' }}>社名</span>
                   <span style={{ color: 'white', fontWeight: 'bold' }}>Ill株式会社</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>代表取締役</span>
+                  <span style={{ color: '#a9a49a' }}>代表取締役</span>
                   <span style={{ color: 'white' }}>山下 高志</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>設立</span>
+                  <span style={{ color: '#a9a49a' }}>設立</span>
                   <span style={{ color: 'white' }}>2022年6月1日</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>所在地</span>
+                  <span style={{ color: '#a9a49a' }}>所在地</span>
                   <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>電話番号</span>
+                  <span style={{ color: '#a9a49a' }}>電話番号</span>
                   <span style={{ color: 'white' }}>08053565283</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#9ca3af' }}>お問合せ</span>
+                  <span style={{ color: '#a9a49a' }}>お問合せ</span>
                   <span style={{ color: 'white' }}>support@tsuki-to-ren.com</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ color: '#9ca3af' }}>事業内容</span>
+                  <span style={{ color: '#a9a49a' }}>事業内容</span>
                   <span style={{ color: 'white' }}>AI占いコンテンツ開発、次世代マッチングプラットフォーム『月と蓮』の企画運営・システム提供。</span>
                 </div>
               </div>
@@ -2478,7 +2479,7 @@ function App() {
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(2, 2, 5, 0.85)',
+          background: 'rgba(2, 3, 4, 0.85)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           zIndex: 200,
@@ -2490,7 +2491,7 @@ function App() {
           <div className="glass-panel" style={{
             width: '100%',
             maxWidth: '420px',
-            background: 'linear-gradient(180deg, rgba(20, 16, 38, 0.98) 0%, rgba(10, 8, 22, 0.99) 100%)',
+            background: 'linear-gradient(180deg, rgba(17, 24, 35, 0.98) 0%, rgba(9, 13, 19, 0.99) 100%)',
             border: '1px solid rgba(226, 192, 116, 0.3)',
             borderRadius: '24px',
             padding: '1.75rem 1.5rem',
@@ -2499,7 +2500,7 @@ function App() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Bell size={20} style={{ color: '#fbbf24' }} />
+                <Bell size={20} style={{ color: '#e8a93a' }} />
                 <h3 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: 0, fontWeight: 'bold' }}>
                   運勢通知の送信先設定
                 </h3>
@@ -2510,7 +2511,7 @@ function App() {
                 style={{
                   background: 'rgba(255,255,255,0.08)',
                   border: 'none',
-                  color: '#9ca3af',
+                  color: '#a9a49a',
                   width: '30px',
                   height: '30px',
                   borderRadius: '50%',
@@ -2524,14 +2525,14 @@ function App() {
               </button>
             </div>
 
-            <p style={{ fontSize: '0.82rem', color: '#d1d5db', lineHeight: '1.6', marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.82rem', color: '#d5cfc3', lineHeight: '1.6', marginBottom: '1.25rem' }}>
               毎朝8時に「本日の運勢・吉時間」をメールでお届けします。通知の受け取り用メールアドレスを選択または入力してください。
             </p>
 
             {/* Quick select buttons if logged in email or existing email is available */}
             {(currentUser?.email || (notifyEmail && notifyEmail !== currentUser?.email)) && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-                <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>連携済みアドレスから選択:</span>
+                <span style={{ fontSize: '0.75rem', color: '#a9a49a' }}>連携済みアドレスから選択:</span>
                 {currentUser?.email && (
                   <button
                     type="button"
@@ -2541,7 +2542,7 @@ function App() {
                       borderRadius: '10px',
                       background: notifyEmailInput === currentUser.email ? 'rgba(226, 192, 116, 0.15)' : 'rgba(255,255,255,0.04)',
                       border: notifyEmailInput === currentUser.email ? '1px solid rgba(226, 192, 116, 0.5)' : '1px solid rgba(255,255,255,0.08)',
-                      color: notifyEmailInput === currentUser.email ? '#fef08a' : '#cbd5e1',
+                      color: notifyEmailInput === currentUser.email ? '#f2e2b3' : '#d8d2c6',
                       fontSize: '0.82rem',
                       textAlign: 'left',
                       cursor: 'pointer',
@@ -2560,7 +2561,7 @@ function App() {
                       borderRadius: '10px',
                       background: notifyEmailInput === notifyEmail ? 'rgba(226, 192, 116, 0.15)' : 'rgba(255,255,255,0.04)',
                       border: notifyEmailInput === notifyEmail ? '1px solid rgba(226, 192, 116, 0.5)' : '1px solid rgba(255,255,255,0.08)',
-                      color: notifyEmailInput === notifyEmail ? '#fef08a' : '#cbd5e1',
+                      color: notifyEmailInput === notifyEmail ? '#f2e2b3' : '#d8d2c6',
                       fontSize: '0.82rem',
                       textAlign: 'left',
                       cursor: 'pointer',
@@ -2574,7 +2575,7 @@ function App() {
             )}
 
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.4rem' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#a9a49a', marginBottom: '0.4rem' }}>
                 直接入力 / 変更:
               </label>
               <input
@@ -2598,7 +2599,7 @@ function App() {
 
             {/* Whose fortune the mail is about (the "詳細を見る" link in the mail opens the same reading) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>誰との運勢を届ける？</span>
+              <span style={{ fontSize: '0.75rem', color: '#a9a49a' }}>誰との運勢を届ける？</span>
               {[
                 { id: 'self', label: '🌙 自分だけの運勢' },
                 ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${notifySub?.oppName || 'お相手'}さんとの相性（いまの設定）` }] : []),
@@ -2613,7 +2614,7 @@ function App() {
                     borderRadius: '10px',
                     background: notifyTarget === opt.id ? 'rgba(226, 192, 116, 0.15)' : 'rgba(255,255,255,0.04)',
                     border: notifyTarget === opt.id ? '1px solid rgba(226, 192, 116, 0.5)' : '1px solid rgba(255,255,255,0.08)',
-                    color: notifyTarget === opt.id ? '#fef08a' : '#cbd5e1',
+                    color: notifyTarget === opt.id ? '#f2e2b3' : '#d8d2c6',
                     fontSize: '0.82rem',
                     textAlign: 'left',
                     cursor: 'pointer',
@@ -2637,7 +2638,7 @@ function App() {
                   borderRadius: '10px',
                   background: 'transparent',
                   border: '1px dashed rgba(255,255,255,0.2)',
-                  color: '#cbd5e1',
+                  color: '#d8d2c6',
                   fontSize: '0.82rem',
                   textAlign: 'left',
                   cursor: 'pointer'
@@ -2720,7 +2721,7 @@ function App() {
             <h3 className="font-serif gold-text" style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>
               ✉️ メール認証の最終確認
             </h3>
-            <p style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
+            <p style={{ fontSize: '0.78rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
               メールリンクからのアクセスを確認いたしました。<br />
               完了するため、ご入力されたメールアドレスを入力してください。
             </p>

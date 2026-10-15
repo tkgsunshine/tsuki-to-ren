@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { ArrowLeft, Clock, Calendar, Share2, Sparkles, BookOpen, ChevronRight, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, Share2, BookOpen, ChevronRight, HelpCircle } from 'lucide-react';
+import { MoonMark } from './icons/BrandIcons';
 import { COLUMNS_DATA } from '../data/columnsData';
 
 interface ColumnDetailViewProps {
@@ -24,8 +25,8 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
         padding: '1.5rem',
         borderRadius: '20px',
         textAlign: 'center',
-        background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
-        border: '1.5px solid rgba(234, 179, 8, 0.5)',
+        background: 'linear-gradient(135deg, rgba(217, 164, 65, 0.15) 0%, rgba(159, 134, 192, 0.15) 100%)',
+        border: '1.5px solid rgba(217, 164, 65, 0.5)',
         boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
         display: 'flex',
         flexDirection: 'column',
@@ -38,9 +39,9 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
         style={{
           padding: '0.35rem 0.85rem',
           borderRadius: '20px',
-          background: 'rgba(254, 240, 138, 0.2)',
-          border: '1px solid rgba(254, 240, 138, 0.5)',
-          color: '#fef08a',
+          background: 'rgba(242, 226, 179, 0.2)',
+          border: '1px solid rgba(242, 226, 179, 0.5)',
+          color: '#f2e2b3',
           fontSize: '0.72rem',
           fontWeight: 'bold',
           display: 'inline-flex',
@@ -48,7 +49,7 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
           gap: '0.35rem'
         }}
       >
-        <Sparkles size={14} />
+        <MoonMark size={14} />
         <span>無料・約7,465万通り即時鑑定</span>
       </div>
       <Heading
@@ -68,7 +69,7 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
             borderRadius: '50%',
             objectFit: 'cover',
             objectPosition: '50% 12%',
-            border: '1.5px solid rgba(244, 114, 182, 0.6)',
+            border: '1.5px solid rgba(214, 139, 164, 0.6)',
             flexShrink: 0
           }}
         />
@@ -76,15 +77,15 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
           style={{
             flex: 1,
             padding: '0.7rem 0.9rem',
-            background: 'rgba(244, 114, 182, 0.08)',
-            border: '1px solid rgba(244, 114, 182, 0.3)',
+            background: 'rgba(214, 139, 164, 0.08)',
+            border: '1px solid rgba(214, 139, 164, 0.3)',
             borderRadius: '4px 16px 16px 16px',
             fontSize: '0.78rem',
-            color: '#f3e8ff',
+            color: '#f0ebf5',
             lineHeight: '1.7'
           }}
         >
-          <div style={{ fontSize: '0.68rem', color: '#f9a8d4', fontWeight: 'bold', marginBottom: '0.2rem' }}>月</div>
+          <div style={{ fontSize: '0.68rem', color: '#e8b7c7', fontWeight: 'bold', marginBottom: '0.2rem' }}>月</div>
           生年月日と16タイプを入れてくださいね。約7,465万通りの条件の掛け合わせから、二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間を、すぐにお届けします。
         </div>
       </div>
@@ -99,10 +100,10 @@ const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, head
           borderRadius: '9999px',
           cursor: 'pointer',
           marginTop: '0.35rem',
-          boxShadow: '0 8px 25px rgba(234, 179, 8, 0.4)'
+          boxShadow: '0 8px 25px rgba(217, 164, 65, 0.4)'
         }}
       >
-        ✨ 今すぐ無料で相性を鑑定する ➔
+        今すぐ無料で相性を鑑定する ➔
       </button>
     </div>
   );
@@ -310,7 +311,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
             border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: '20px',
             padding: '0.4rem 0.85rem',
-            color: '#cbd5e1',
+            color: '#d8d2c6',
             fontSize: '0.78rem',
             cursor: 'pointer'
           }}
@@ -329,7 +330,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
             border: '1px solid rgba(226, 192, 116, 0.35)',
             borderRadius: '20px',
             padding: '0.4rem 0.85rem',
-            color: '#fef08a',
+            color: '#f2e2b3',
             fontSize: '0.78rem',
             fontWeight: 'bold',
             cursor: 'pointer'
@@ -352,17 +353,17 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
             fontSize: '0.72rem',
             padding: '3px 10px',
             borderRadius: '12px',
-            background: 'rgba(168, 85, 247, 0.2)',
-            border: '1px solid rgba(168, 85, 247, 0.4)',
-            color: '#d8b4fe',
+            background: 'rgba(159, 134, 192, 0.2)',
+            border: '1px solid rgba(159, 134, 192, 0.4)',
+            color: '#cdbfe2',
             fontWeight: 'bold'
           }}>
             {article.category}
           </span>
-          <span style={{ fontSize: '0.72rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <span style={{ fontSize: '0.72rem', color: '#a9a49a', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <Calendar size={12} /> {article.publishedAt.split('T')[0].replace(/-/g, '/')}
           </span>
-          <span style={{ fontSize: '0.72rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <span style={{ fontSize: '0.72rem', color: '#a9a49a', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <Clock size={12} /> 読了目安 {article.readTimeMinutes}分
           </span>
         </div>
@@ -398,13 +399,13 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
         {/* Table of Contents (TOC) Component (Regulated 2-level numbering) */}
         {article.toc && article.toc.length > 0 && (
           <nav style={{
-            background: 'rgba(15, 10, 30, 0.65)',
+            background: 'rgba(13, 18, 26, 0.65)',
             border: '1px solid rgba(226, 192, 116, 0.3)',
             borderRadius: '14px',
             padding: '1rem 1.15rem',
             marginBottom: '1.5rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#fef08a', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.65rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.65rem' }}>
               <BookOpen size={16} /> 目次
             </div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
@@ -413,7 +414,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
                   <a
                     href={`#${item.id}`}
                     style={{
-                      color: item.level === 1 ? '#e2e8f0' : '#cbd5e1',
+                      color: item.level === 1 ? '#e7e1d5' : '#d8d2c6',
                       fontSize: item.level === 1 ? '0.82rem' : '0.78rem',
                       fontWeight: item.level === 1 ? 'bold' : 'normal',
                       textDecoration: 'none',
@@ -437,7 +438,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
               className="article-body-content"
               dangerouslySetInnerHTML={{ __html: firstContentPart }}
               style={{
-                color: '#e2e8f0',
+                color: '#e7e1d5',
                 fontSize: '0.88rem',
                 lineHeight: '1.8',
                 wordBreak: 'break-word'
@@ -452,7 +453,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
               className="article-body-content"
               dangerouslySetInnerHTML={{ __html: secondContentPart }}
               style={{
-                color: '#e2e8f0',
+                color: '#e7e1d5',
                 fontSize: '0.88rem',
                 lineHeight: '1.8',
                 wordBreak: 'break-word'
@@ -464,7 +465,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
             className="article-body-content"
             dangerouslySetInnerHTML={{ __html: article.content }}
             style={{
-              color: '#e2e8f0',
+              color: '#e7e1d5',
               fontSize: '0.88rem',
               lineHeight: '1.8',
               wordBreak: 'break-word'
@@ -486,10 +487,10 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
                   borderRadius: '12px',
                   padding: '0.85rem 1rem'
                 }}>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#fef08a', marginBottom: '0.35rem' }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.35rem' }}>
                     Q. {faq.question}
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#cbd5e1', lineHeight: '1.55' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#d8d2c6', lineHeight: '1.55' }}>
                     A. {faq.answer}
                   </div>
                 </div>
@@ -525,10 +526,10 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
                   background: 'rgba(255,255,255,0.02)'
                 }}
               >
-                <div style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#cbd5e1', paddingRight: '0.5rem' }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#d8d2c6', paddingRight: '0.5rem' }}>
                   {rel.title}
                 </div>
-                <ChevronRight size={16} style={{ color: '#fef08a', flexShrink: 0 }} />
+                <ChevronRight size={16} style={{ color: '#f2e2b3', flexShrink: 0 }} />
               </div>
             ))}
           </div>

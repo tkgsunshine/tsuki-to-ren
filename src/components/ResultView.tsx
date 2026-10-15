@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
-import { Sparkles, Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
+import { Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
+import { MoonMark } from './icons/BrandIcons';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { InstallGuideModal } from './InstallGuideModal';
@@ -34,31 +35,31 @@ const XIcon = () => (
 );
 
 const getAstrologyColors = (colorName?: string, element?: string) => {
-  if (!colorName) return { primary: '#e2c074', secondary: '#9ca3af', shadow: 'rgba(226, 192, 116, 0.2)' };
+  if (!colorName) return { primary: '#e2c074', secondary: '#a9a49a', shadow: 'rgba(226, 192, 116, 0.2)' };
   
   const col = colorName.trim();
   const el = element?.trim() || '';
   
   if (col.includes('紫') && col.includes('橙')) {
-    return { primary: '#c084fc', secondary: '#fb923c', shadow: 'rgba(168, 85, 247, 0.35)' };
+    return { primary: '#b9a3d6', secondary: '#fb923c', shadow: 'rgba(159, 134, 192, 0.35)' };
   }
   if (col.includes('赤') || el.includes('火')) {
-    return { primary: '#f87171', secondary: '#facc15', shadow: 'rgba(239, 68, 68, 0.35)' };
+    return { primary: '#d9786a', secondary: '#e6b85c', shadow: 'rgba(207, 90, 67, 0.35)' };
   }
   if (col.includes('深緑') || col.includes('黄緑') || el.includes('木')) {
-    return { primary: '#34d399', secondary: '#a3e635', shadow: 'rgba(16, 185, 129, 0.35)' };
+    return { primary: '#6fb08f', secondary: '#a3e635', shadow: 'rgba(92, 156, 124, 0.35)' };
   }
   if (col.includes('黄土') || col.includes('茶') || el.includes('土')) {
-    return { primary: '#fbbf24', secondary: '#b45309', shadow: 'rgba(217, 119, 6, 0.35)' };
+    return { primary: '#e8a93a', secondary: '#b45309', shadow: 'rgba(184, 105, 45, 0.35)' };
   }
   if (col.includes('銀') || col.includes('白') || col.includes('白銀') || el.includes('金')) {
-    return { primary: '#cbd5e1', secondary: '#c084fc', shadow: 'rgba(203, 213, 225, 0.35)' };
+    return { primary: '#d8d2c6', secondary: '#b9a3d6', shadow: 'rgba(216, 210, 198, 0.35)' };
   }
   if (col.includes('紺') || col.includes('蒼') || col.includes('青') || el.includes('水')) {
-    return { primary: '#60a5fa', secondary: '#22d3ee', shadow: 'rgba(59, 130, 246, 0.35)' };
+    return { primary: '#5d9fc0', secondary: '#22d3ee', shadow: 'rgba(58, 134, 171, 0.35)' };
   }
   
-  return { primary: '#e2c074', secondary: '#ca8a04', shadow: 'rgba(226, 192, 116, 0.3)' };
+  return { primary: '#e2c074', secondary: '#b07d2b', shadow: 'rgba(226, 192, 116, 0.3)' };
 };
 // hexToRgb removed as it is no longer used in styling inline boxes
 
@@ -73,27 +74,27 @@ const getScoreVisuals = (score: number) => {
     };
   } else if (score >= 70) {
     return {
-      textColor: '#34d399', // Emerald/Green
-      bg: 'rgba(52, 211, 153, 0.08)',
-      border: '1px solid rgba(52, 211, 153, 0.25)',
-      barColor: 'linear-gradient(180deg, #10b981 0%, #047857 100%)',
-      shadow: '0 0 8px rgba(52, 211, 153, 0.25)'
+      textColor: '#6fb08f', // Emerald/Green
+      bg: 'rgba(111, 176, 143, 0.08)',
+      border: '1px solid rgba(111, 176, 143, 0.25)',
+      barColor: 'linear-gradient(180deg, #5c9c7c 0%, #047857 100%)',
+      shadow: '0 0 8px rgba(111, 176, 143, 0.25)'
     };
   } else if (score >= 50) {
     return {
-      textColor: '#60a5fa', // Blue/Normal
-      bg: 'rgba(96, 165, 250, 0.06)',
-      border: '1px solid rgba(96, 165, 250, 0.2)',
-      barColor: 'linear-gradient(180deg, #60a5fa 0%, #2563eb 100%)',
+      textColor: '#5d9fc0', // Blue/Normal
+      bg: 'rgba(93, 159, 192, 0.06)',
+      border: '1px solid rgba(93, 159, 192, 0.2)',
+      barColor: 'linear-gradient(180deg, #5d9fc0 0%, #2f7196 100%)',
       shadow: 'none'
     };
   } else {
     return {
-      textColor: '#f87171', // Red/Caution
-      bg: 'rgba(248, 113, 113, 0.08)',
-      border: '1px solid rgba(248, 113, 113, 0.25)',
-      barColor: 'linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)',
-      shadow: '0 0 8px rgba(248, 113, 113, 0.3)'
+      textColor: '#d9786a', // Red/Caution
+      bg: 'rgba(217, 120, 106, 0.08)',
+      border: '1px solid rgba(217, 120, 106, 0.25)',
+      barColor: 'linear-gradient(180deg, #cf5a43 0%, #9e3a2c 100%)',
+      shadow: '0 0 8px rgba(217, 120, 106, 0.3)'
     };
   }
 };
@@ -134,7 +135,7 @@ const CharHeadingIcon: React.FC<{ char: '月' | '蓮'; size?: number }> = ({ cha
       objectFit: 'cover',
       verticalAlign: 'middle',
       marginRight: '0.35em',
-      border: `1px solid ${char === '蓮' ? 'rgba(147, 197, 253, 0.7)' : 'rgba(216, 180, 254, 0.7)'}`,
+      border: `1px solid ${char === '蓮' ? 'rgba(156, 198, 216, 0.7)' : 'rgba(205, 191, 226, 0.7)'}`,
       flexShrink: 0
     }}
   />
@@ -164,10 +165,10 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
 
 const getMbtiColor = (mbtiCode: string) => {
   const code = (mbtiCode || '').toUpperCase();
-  if (code.includes('N') && code.includes('F')) return '#34d399'; // Emerald Green
-  if (code.includes('N') && code.includes('T')) return '#c084fc'; // Purple
-  if (code.includes('S') && code.includes('J')) return '#60a5fa'; // Blue
-  return '#facc15'; // Explorer Gold
+  if (code.includes('N') && code.includes('F')) return '#6fb08f'; // Emerald Green
+  if (code.includes('N') && code.includes('T')) return '#b9a3d6'; // Purple
+  if (code.includes('S') && code.includes('J')) return '#5d9fc0'; // Blue
+  return '#e6b85c'; // Explorer Gold
 };
 
 const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
@@ -180,10 +181,10 @@ const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
   else if (code.includes('S') && code.includes('P')) group = 'explorer';
 
   const colors = {
-    diplomat: '#34d399', // Emerald Green
-    analyst: '#c084fc',  // Purple
-    sentinel: '#60a5fa', // Blue
-    explorer: '#facc15'  // Amber Gold
+    diplomat: '#6fb08f', // Emerald Green
+    analyst: '#b9a3d6',  // Purple
+    sentinel: '#5d9fc0', // Blue
+    explorer: '#e6b85c'  // Amber Gold
   };
   
   const color = colors[group];
@@ -571,7 +572,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         useCORS: true,
         allowTaint: true,
         scale: 3, // High-resolution export
-        backgroundColor: '#05040a',
+        backgroundColor: '#05080d',
         logging: false
       });
 
@@ -652,16 +653,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {showWelcomePremium && (
         <div role="status" style={{
           position: 'relative',
-          background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(20, 16, 36, 0.96) 100%)',
+          background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(17, 23, 34, 0.96) 100%)',
           border: '1px solid rgba(226, 192, 116, 0.55)',
           borderRadius: '14px',
           padding: '0.9rem 2.4rem 0.9rem 1rem',
-          color: '#fef3c7',
+          color: '#f5ecd4',
           boxShadow: '0 4px 18px rgba(226, 192, 116, 0.18)',
           animation: 'fadeIn 0.4s ease'
         }}>
           <div style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>🎉 プレミアム会員になりました</div>
-          <div style={{ fontSize: '0.82rem', color: '#e5e7eb', lineHeight: 1.6 }}>
+          <div style={{ fontSize: '0.82rem', color: '#e8e3d8', lineHeight: 1.6 }}>
             鑑定結果のすべてが解放されました。ここから順番にお読みください。
           </div>
           <button
@@ -669,7 +670,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             className="tap-target"
             aria-label="閉じる"
             onClick={() => setShowWelcomePremium(false)}
-            style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'transparent', border: 'none', color: '#d1d5db', cursor: 'pointer', padding: '0.25rem', display: 'inline-flex' }}
+            style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'transparent', border: 'none', color: '#d5cfc3', cursor: 'pointer', padding: '0.25rem', display: 'inline-flex' }}
           >
             <X size={18} />
           </button>
@@ -715,7 +716,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         width: '100%',
         maxWidth: '360px',
         margin: '0 auto 0.5rem',
-        background: 'rgba(12, 10, 24, 0.92)',
+        background: 'rgba(11, 15, 21, 0.92)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         border: '1.5px solid rgba(226, 192, 116, 0.3)',
@@ -737,7 +738,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           alignItems: 'center',
           gap: '3px'
         }}>
-          <Sparkles size={10} /> タップしてアドバイスを切り替え <Sparkles size={10} />
+          <MoonMark size={10} /> タップしてアドバイスを切り替え <MoonMark size={10} />
         </div>
         <div style={{
           display: 'grid',
@@ -748,11 +749,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <button
             onClick={() => setSelectedChar('tsuki')}
             style={{
-              background: selectedChar === 'tsuki' ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
+              background: selectedChar === 'tsuki' ? 'rgba(159, 134, 192, 0.15)' : 'transparent',
               border: 'none',
               borderRadius: '12px',
               padding: '0.55rem 0.65rem',
-              color: selectedChar === 'tsuki' ? '#d8b4fe' : '#9ca3af',
+              color: selectedChar === 'tsuki' ? '#cdbfe2' : '#a9a49a',
               fontSize: '0.8rem',
               fontWeight: '600',
               fontFamily: 'var(--font-serif)',
@@ -762,7 +763,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               justifyContent: 'center',
               gap: '0.5rem',
               transition: 'all 0.3s ease',
-              boxShadow: selectedChar === 'tsuki' ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none'
+              boxShadow: selectedChar === 'tsuki' ? '0 0 10px rgba(159, 134, 192, 0.2)' : 'none'
             }}
           >
             <img 
@@ -773,7 +774,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 height: '32px', 
                 borderRadius: '50%', 
                 objectFit: 'cover', 
-                border: selectedChar === 'tsuki' ? '2px solid #d8b4fe' : '1.5px solid rgba(255,255,255,0.2)' 
+                border: selectedChar === 'tsuki' ? '2px solid #cdbfe2' : '1.5px solid rgba(255,255,255,0.2)' 
               }} 
             />
             <span>月 (女性・共感)</span>
@@ -781,11 +782,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <button
             onClick={() => setSelectedChar('ren')}
             style={{
-              background: selectedChar === 'ren' ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+              background: selectedChar === 'ren' ? 'rgba(58, 134, 171, 0.15)' : 'transparent',
               border: 'none',
               borderRadius: '12px',
               padding: '0.55rem 0.65rem',
-              color: selectedChar === 'ren' ? '#93c5fd' : '#9ca3af',
+              color: selectedChar === 'ren' ? '#9cc6d8' : '#a9a49a',
               fontSize: '0.8rem',
               fontWeight: '600',
               fontFamily: 'var(--font-serif)',
@@ -795,7 +796,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               justifyContent: 'center',
               gap: '0.5rem',
               transition: 'all 0.3s ease',
-              boxShadow: selectedChar === 'ren' ? '0 0 10px rgba(59, 130, 246, 0.2)' : 'none'
+              boxShadow: selectedChar === 'ren' ? '0 0 10px rgba(58, 134, 171, 0.2)' : 'none'
             }}
           >
             <img 
@@ -806,7 +807,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 height: '32px', 
                 borderRadius: '50%', 
                 objectFit: 'cover', 
-                border: selectedChar === 'ren' ? '2px solid #93c5fd' : '1.5px solid rgba(255,255,255,0.2)' 
+                border: selectedChar === 'ren' ? '2px solid #9cc6d8' : '1.5px solid rgba(255,255,255,0.2)' 
               }} 
             />
             <span>蓮 (男性・論理)</span>
@@ -822,7 +823,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         gap: '0.9rem',
         border: '1.5px solid rgba(226, 192, 116, 0.35)',
         borderRadius: '24px',
-        background: 'linear-gradient(135deg, rgba(30, 25, 55, 0.85) 0%, rgba(15, 12, 30, 0.95) 100%)',
+        background: 'linear-gradient(135deg, rgba(30, 25, 55, 0.85) 0%, rgba(13, 18, 27, 0.95) 100%)',
         boxShadow: '0 12px 35px rgba(0,0,0,0.6), 0 0 25px rgba(226,192,116,0.1)'
       }}>
         {/* Pair Name Tag */}
@@ -832,8 +833,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           justifyContent: 'center',
           gap: '0.45rem',
           fontSize: '0.85rem',
-          color: '#fef08a',
-          background: 'linear-gradient(90deg, rgba(226,192,116,0.15) 0%, rgba(168,85,247,0.15) 100%)',
+          color: '#f2e2b3',
+          background: 'linear-gradient(90deg, rgba(226,192,116,0.15) 0%, rgba(159, 134, 192,0.15) 100%)',
           border: '1px solid rgba(226,192,116,0.4)',
           borderRadius: '20px',
           padding: '0.4rem 1.1rem',
@@ -843,7 +844,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           letterSpacing: '0.03em',
           boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
         }}>
-          <Heart size={14} style={{ fill: '#fef08a', color: '#fef08a' }} />
+          <Heart size={14} style={{ fill: '#f2e2b3', color: '#f2e2b3' }} />
           <span>{hasOpponent ? `${myName} × ${oppNickname}` : `${myName} の全運勢`}</span>
         </div>
 
@@ -860,14 +861,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
           fontWeight: '600',
           letterSpacing: '0.02em'
         }}>
-          ✨ 約7,465万通りの条件の掛け合わせから算出
+          約7,465万通りの条件の掛け合わせから算出
         </div>
         
         {/* Luxury Score Pods Side-by-Side */}
         <div style={{ display: 'grid', gridTemplateColumns: hasOpponent ? '1fr 1fr' : '1fr', gap: '0.75rem', margin: '0.2rem 0' }}>
           {hasOpponent && (
             <div style={{
-              background: 'linear-gradient(135deg, rgba(226,192,116,0.12) 0%, rgba(202,138,4,0.04) 100%)',
+              background: 'linear-gradient(135deg, rgba(226,192,116,0.12) 0%, rgba(176, 125, 43,0.04) 100%)',
               border: '1px solid rgba(226,192,116,0.35)',
               borderRadius: '16px',
               padding: '0.85rem 0.5rem',
@@ -877,13 +878,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
               justifyContent: 'center',
               boxShadow: 'inset 0 0 15px rgba(226,192,116,0.08)'
             }}>
-              <span style={{ fontSize: '0.72rem', color: '#e5e7eb', fontWeight: '500', marginBottom: '0.2rem' }}>基本相性</span>
+              <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>基本相性</span>
               <div className="font-serif" style={{
                 fontSize: '2.5rem',
                 fontWeight: '800',
-                color: '#fef08a',
+                color: '#f2e2b3',
                 lineHeight: 1,
-                textShadow: '0 0 15px rgba(254, 240, 138, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
+                textShadow: '0 0 15px rgba(242, 226, 179, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
                 display: 'flex',
                 alignItems: 'baseline',
                 gap: '2px'
@@ -894,27 +895,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
           )}
 
           <div style={{
-            background: 'linear-gradient(135deg, rgba(168,85,247,0.14) 0%, rgba(59,130,246,0.05) 100%)',
-            border: '1px solid rgba(168,85,247,0.4)',
+            background: 'linear-gradient(135deg, rgba(159, 134, 192,0.14) 0%, rgba(58, 134, 171,0.05) 100%)',
+            border: '1px solid rgba(159, 134, 192,0.4)',
             borderRadius: '16px',
             padding: '0.85rem 0.5rem',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: 'inset 0 0 15px rgba(168,85,247,0.08)'
+            boxShadow: 'inset 0 0 15px rgba(159, 134, 192,0.08)'
           }}>
-            <span style={{ fontSize: '0.72rem', color: '#e5e7eb', fontWeight: '500', marginBottom: '0.2rem' }}>
+            <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>
               {hasOpponent ? '今日の日次相性' : '今日の総合運気'}
             </span>
             <div className="font-serif" style={{
               fontSize: '2.5rem',
               fontWeight: '800',
-              color: selectedChar === 'ren' ? '#93c5fd' : '#e9d5ff',
+              color: selectedChar === 'ren' ? '#9cc6d8' : '#e2d9ee',
               lineHeight: 1,
               textShadow: selectedChar === 'ren'
-                ? '0 0 15px rgba(147, 197, 253, 0.6), 0 2px 4px rgba(0,0,0,0.5)'
-                : '0 0 15px rgba(233, 213, 255, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
+                ? '0 0 15px rgba(156, 198, 216, 0.6), 0 2px 4px rgba(0,0,0,0.5)'
+                : '0 0 15px rgba(226, 217, 238, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
               display: 'flex',
               alignItems: 'baseline',
               gap: '2px'
@@ -930,7 +931,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             textAlign: 'center',
             fontSize: '0.9rem',
             lineHeight: '1.6',
-            color: '#fef08a',
+            color: '#f2e2b3',
             background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(226,192,116,0.08) 100%)',
             padding: '0.75rem 0.9rem',
             borderRadius: '14px',
@@ -950,10 +951,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               justifyContent: 'center',
               gap: '0.4rem',
               padding: '0.65rem 1rem',
-              background: isPartnerSaved ? 'rgba(52, 211, 153, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-              border: isPartnerSaved ? '1px solid #34d399' : '1px solid rgba(255, 255, 255, 0.15)',
+              background: isPartnerSaved ? 'rgba(111, 176, 143, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+              border: isPartnerSaved ? '1px solid #6fb08f' : '1px solid rgba(255, 255, 255, 0.15)',
               borderRadius: '12px',
-              color: isPartnerSaved ? '#34d399' : '#f3f4f6',
+              color: isPartnerSaved ? '#6fb08f' : '#f3efe6',
               fontSize: '0.78rem',
               fontWeight: '600',
               cursor: 'pointer',
@@ -980,10 +981,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* Free Summary Section (Fully Visible) */}
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
         <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-          <Sparkles size={16} />
+          <MoonMark size={16} />
           {hasOpponent ? '基本相性サマリー' : '基本運勢サマリー'}
         </h2>
-        <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', whiteSpace: 'pre-wrap', margin: 0 }}>
+        <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
           {renderTextWithCharHeadings(formatAppraisalText(activeResult.summary))}
         </p>
       </div>
@@ -992,10 +993,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {activeResult.topics.map((topic) => (
             <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
-              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#93c5fd' : '#d8b4fe', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
                 {renderCharHeading(topic.title, 36)}
               </h3>
-              <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d1d5db', margin: 0, whiteSpace: 'pre-wrap' }}>
+              <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {formatAppraisalText(topic.text)}
               </p>
             </div>
@@ -1043,7 +1044,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 justifyContent: 'center',
                 gap: '0.4rem',
                 padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(168, 85, 247, 0.14) 100%)',
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%)',
                 border: '1.5px solid rgba(226, 192, 116, 0.45)',
                 borderRadius: '20px',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
@@ -1053,8 +1054,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <span className="font-serif" style={{
                   fontSize: '1rem',
                   fontWeight: 'bold',
-                  color: '#fef08a',
-                  textShadow: '0 0 10px rgba(254, 240, 138, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                  color: '#f2e2b3',
+                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
                   letterSpacing: '0.05em'
                 }}>
                   ✦ あなたの守護獣 ✦
@@ -1069,7 +1070,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   aspectRatio: '3 / 4',
                   borderRadius: '16px',
                   overflow: 'hidden',
-                  boxShadow: activeResult.isKaigo ? '0 0 25px rgba(220, 38, 38, 0.45)' : (activeResult.isRare ? '0 0 20px rgba(251, 191, 36, 0.4)' : `0 0 15px ${colors.shadow}`),
+                  boxShadow: activeResult.isKaigo ? '0 0 25px rgba(184, 74, 55, 0.45)' : (activeResult.isRare ? '0 0 20px rgba(232, 169, 58, 0.4)' : `0 0 15px ${colors.shadow}`),
                   border: (activeResult.isKaigo || activeResult.isRare) ? 'none' : `2px solid ${colors.primary}`,
                   marginBottom: '0.85rem',
                   zIndex: 1,
@@ -1116,7 +1117,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   border: '1px solid rgba(226, 192, 116, 0.4)',
                   borderRadius: '12px',
                   padding: '3px 8px',
-                  color: '#fef08a',
+                  color: '#f2e2b3',
                   fontSize: '0.62rem',
                   fontWeight: 'bold',
                   display: 'flex',
@@ -1134,7 +1135,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {/* Sub-text explaining tap to save */}
               <div style={{
                 fontSize: '0.68rem',
-                color: '#9ca3af',
+                color: '#a9a49a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -1162,26 +1163,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   fontSize: '0.72rem',
                   padding: '2px 7px',
                   borderRadius: '4px',
-                  background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)'),
-                  color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#d8b4fe' : '#93c5fd'),
-                  border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)')
+                  background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
+                  color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
+                  border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
                 }}>
-                  {activeResult.isKaigo ? '👑 魁罡' : (activeResult.isRare ? '👑 選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
+                  {activeResult.isKaigo ? '魁罡' : (activeResult.isRare ? '選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
                 </span>
               </div>
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d1d5db' }}>五行 (陰陽)</span>
+                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3' }}>五行 (陰陽)</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyElement || '火・陰'}</span>
                 </div>
-                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d1d5db', whiteSpace: 'nowrap' }}>性格分類</span>
+                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>性格分類</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
                 </div>
-                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d1d5db' }}>守護カラー</span>
+                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3' }}>守護カラー</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
                 </div>
               </div>
@@ -1198,7 +1199,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     onClick={() => handleShowPillarExplanation(activeResult.myPillar)}
                     className="font-serif"
                     style={{
-                      background: 'rgba(30, 22, 10, 0.72)',
+                      background: 'rgba(14, 20, 29, 0.72)',
                       border: '1px dashed rgba(226, 192, 116, 0.6)',
                       padding: '6px 11px',
                       borderRadius: '8px',
@@ -1211,7 +1212,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       gap: '4px'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(226, 192, 116, 0.15)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(30, 22, 10, 0.72)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(14, 20, 29, 0.72)'}
                   >
                     日柱: {activeResult.myPillar} ({getKanjiReading(activeResult.myPillar)}) <span style={{
                       display: 'inline-flex',
@@ -1233,12 +1234,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     onClick={() => handleShowStarExplanation(activeResult.myStar)}
                     className="font-serif"
                     style={{
-                      background: 'rgba(12, 10, 24, 0.72)',
+                      background: 'rgba(11, 15, 21, 0.72)',
                       border: '1px dashed rgba(255,255,255,0.4)',
                       padding: '6px 11px',
                       borderRadius: '8px',
                       fontSize: '0.86rem',
-                      color: '#f3f4f6',
+                      color: '#f3efe6',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
                       display: 'inline-flex',
@@ -1246,7 +1247,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       gap: '4px'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(12, 10, 24, 0.72)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(11, 15, 21, 0.72)'}
                   >
                     本命星: {activeResult.myStar.split(' ')[0]} ({getHonmeiStarReading(activeResult.myStar)}) <span style={{
                       display: 'inline-flex',
@@ -1265,7 +1266,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </button>
                   {activeResult.myMbtiCode !== 'UNKNOWN' && (
                     <div style={{
-                      background: 'rgba(12, 10, 24, 0.72)',
+                      background: 'rgba(11, 15, 21, 0.72)',
                       border: '1px solid rgba(255,255,255,0.2)',
                       padding: '6px 12px 6px 7px',
                       borderRadius: '8px',
@@ -1288,7 +1289,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       }}>
                         {getMbtiEmblem(activeResult.myMbtiCode, 10)}
                       </div>
-                      <span style={{ fontSize: '0.84rem', fontWeight: '500', color: '#f3f4f6', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '0.84rem', fontWeight: '500', color: '#f3efe6', whiteSpace: 'nowrap' }}>
                         16タイプ診断: <span style={{ fontWeight: 'bold', color: getMbtiColor(activeResult.myMbtiCode) }}>{activeResult.myMbtiCode}</span> ({activeResult.myMbtiName})
                       </span>
                     </div>
@@ -1340,7 +1341,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 justifyContent: 'center',
                 gap: '0.4rem',
                 padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(59, 130, 246, 0.14) 100%)',
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%)',
                 border: '1.5px solid rgba(226, 192, 116, 0.45)',
                 borderRadius: '20px',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
@@ -1350,8 +1351,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <span className="font-serif" style={{
                   fontSize: '1rem',
                   fontWeight: 'bold',
-                  color: '#fef08a',
-                  textShadow: '0 0 10px rgba(254, 240, 138, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                  color: '#f2e2b3',
+                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
                   letterSpacing: '0.05em'
                 }}>
                   ✦ お相手の守護獣 ✦
@@ -1366,7 +1367,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   aspectRatio: '3 / 4',
                   borderRadius: '16px',
                   overflow: 'hidden',
-                  boxShadow: activeResult.opponentIsKaigo ? '0 0 25px rgba(220, 38, 38, 0.45)' : (activeResult.opponentIsRare ? '0 0 20px rgba(251, 191, 36, 0.4)' : `0 0 15px ${colors.shadow}`),
+                  boxShadow: activeResult.opponentIsKaigo ? '0 0 25px rgba(184, 74, 55, 0.45)' : (activeResult.opponentIsRare ? '0 0 20px rgba(232, 169, 58, 0.4)' : `0 0 15px ${colors.shadow}`),
                   border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? 'none' : `2px solid ${colors.primary}`,
                   marginBottom: '0.85rem',
                   zIndex: 1,
@@ -1413,7 +1414,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   border: '1px solid rgba(226, 192, 116, 0.4)',
                   borderRadius: '12px',
                   padding: '3px 8px',
-                  color: '#fef08a',
+                  color: '#f2e2b3',
                   fontSize: '0.62rem',
                   fontWeight: 'bold',
                   display: 'flex',
@@ -1431,7 +1432,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {/* Sub-text explaining tap to save */}
               <div style={{
                 fontSize: '0.68rem',
-                color: '#9ca3af',
+                color: '#a9a49a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -1459,26 +1460,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   fontSize: '0.72rem',
                   padding: '2px 7px',
                   borderRadius: '4px',
-                  background: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)'),
-                  color: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '#d8b4fe' : '#93c5fd'),
-                  border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)')
+                  background: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
+                  color: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
+                  border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
                 }}>
-                  {activeResult.opponentIsKaigo ? '👑 魁罡' : (activeResult.opponentIsRare ? '👑 選ばれし極星' : (activeResult.opponentGender === 'female' ? '女性' : '男性'))}
+                  {activeResult.opponentIsKaigo ? '魁罡' : (activeResult.opponentIsRare ? '選ばれし極星' : (activeResult.opponentGender === 'female' ? '女性' : '男性'))}
                 </span>
               </div>
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d1d5db' }}>五行 (陰陽)</span>
+                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3' }}>五行 (陰陽)</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyElement || '火・陰'}</span>
                 </div>
-                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d1d5db', whiteSpace: 'nowrap' }}>性格分類</span>
+                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>性格分類</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
                 </div>
-                <div style={{ background: 'rgba(12, 10, 24, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d1d5db' }}>守護カラー</span>
+                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3' }}>守護カラー</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
                 </div>
               </div>
@@ -1495,7 +1496,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     onClick={() => handleShowPillarExplanation(activeResult.opponentPillar || '')}
                     className="font-serif"
                     style={{
-                      background: 'rgba(30, 22, 10, 0.72)',
+                      background: 'rgba(14, 20, 29, 0.72)',
                       border: '1px dashed rgba(226, 192, 116, 0.6)',
                       padding: '6px 11px',
                       borderRadius: '8px',
@@ -1508,7 +1509,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       gap: '4px'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(226, 192, 116, 0.15)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(30, 22, 10, 0.72)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(14, 20, 29, 0.72)'}
                   >
                     日柱: {activeResult.opponentPillar} ({getKanjiReading(activeResult.opponentPillar || '')}) <span style={{
                       display: 'inline-flex',
@@ -1530,12 +1531,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     onClick={() => handleShowStarExplanation(activeResult.opponentStar || '')}
                     className="font-serif"
                     style={{
-                      background: 'rgba(12, 10, 24, 0.72)',
+                      background: 'rgba(11, 15, 21, 0.72)',
                       border: '1px dashed rgba(255,255,255,0.4)',
                       padding: '6px 11px',
                       borderRadius: '8px',
                       fontSize: '0.86rem',
-                      color: '#f3f4f6',
+                      color: '#f3efe6',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
                       display: 'inline-flex',
@@ -1543,7 +1544,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       gap: '4px'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(12, 10, 24, 0.72)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(11, 15, 21, 0.72)'}
                   >
                     本命星: {activeResult.opponentStar ? activeResult.opponentStar.split(' ')[0] : ''} ({getHonmeiStarReading(activeResult.opponentStar || '')}) <span style={{
                       display: 'inline-flex',
@@ -1562,7 +1563,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </button>
                   {activeResult.opponentMbtiCode && activeResult.opponentMbtiCode !== 'UNKNOWN' && (
                     <div style={{
-                      background: 'rgba(12, 10, 24, 0.72)',
+                      background: 'rgba(11, 15, 21, 0.72)',
                       border: '1px solid rgba(255,255,255,0.2)',
                       padding: '6px 12px 6px 7px',
                       borderRadius: '8px',
@@ -1585,7 +1586,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       }}>
                         {getMbtiEmblem(activeResult.opponentMbtiCode, 10)}
                       </div>
-                      <span style={{ fontSize: '0.84rem', fontWeight: '500', color: '#f3f4f6', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '0.84rem', fontWeight: '500', color: '#f3efe6', whiteSpace: 'nowrap' }}>
                         16タイプ診断: <span style={{ fontWeight: 'bold', color: getMbtiColor(activeResult.opponentMbtiCode) }}>{activeResult.opponentMbtiCode}</span> ({activeResult.opponentMbtiName})
                       </span>
                     </div>
@@ -1612,7 +1613,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         flexDirection: 'column',
         gap: '0.75rem',
         border: '1.5px solid rgba(6, 199, 85, 0.35)',
-        background: 'linear-gradient(135deg, rgba(12, 28, 18, 0.75) 0%, rgba(10, 15, 25, 0.85) 100%)',
+        background: 'linear-gradient(135deg, rgba(14, 19, 27, 0.75) 0%, rgba(12, 16, 23, 0.85) 100%)',
         boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 199, 85, 0.1)'
       }}>
         {/* Header with Official LINE Logo */}
@@ -1623,7 +1624,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {hasOpponent ? '本日のLINE吉時間 ＆ 運勢' : '本日の開運黄金時間 ＆ 運勢'}
             </span>
           </div>
-          <span style={{ fontSize: '0.65rem', color: '#86efac', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
+          <span style={{ fontSize: '0.65rem', color: '#a8d3b0', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
             毎日0時更新
           </span>
         </div>
@@ -1639,7 +1640,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           gap: '0.4rem',
           boxShadow: '0 4px 20px rgba(6, 199, 85, 0.15)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#4ade80', fontWeight: 'bold' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#7dbb8a', fontWeight: 'bold' }}>
             <LineLogoIcon size={18} />
             <span>推奨送信タイミング</span>
           </div>
@@ -1652,12 +1653,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
             {/* Line 2: 朝の短文一言メッセージ */}
             {(activeResult.bestContactHour || '').match(/[（\(](.*?)[）\)]/) ? (
-              <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
+              <div style={{ fontSize: '0.78rem', color: '#a8d3b0', fontWeight: '600', letterSpacing: '0.02em' }}>
                 {(activeResult.bestContactHour || '').match(/[（\(](.*?)[）\)]/)?.[1]}
               </div>
             ) : (
               (activeResult.bestContactHour || '').includes('（') || (activeResult.bestContactHour || '').includes('(') ? (
-                <div style={{ fontSize: '0.78rem', color: '#86efac', fontWeight: '600', letterSpacing: '0.02em' }}>
+                <div style={{ fontSize: '0.78rem', color: '#a8d3b0', fontWeight: '600', letterSpacing: '0.02em' }}>
                   {(activeResult.bestContactHour || '').replace(/.*?[（\(]/, '').replace(/[）\)].*/, '').trim()}
                 </div>
               ) : null
@@ -1674,7 +1675,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           borderRadius: '10px',
           padding: '0.65rem 0.85rem',
           fontSize: '0.76rem',
-          color: '#e5e7eb',
+          color: '#e8e3d8',
           lineHeight: '1.55',
           display: 'flex',
           gap: '0.4rem',
@@ -1682,8 +1683,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
         }}>
           <span style={{ fontSize: '0.9rem', flexShrink: 0, marginTop: '1px' }}>💡</span>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <div style={{ color: '#fef08a', fontWeight: 'bold' }}>本日のアプローチ助言</div>
-            <div style={{ color: '#e5e7eb', lineHeight: '1.55' }}>
+            <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>本日のアプローチ助言</div>
+            <div style={{ color: '#e8e3d8', lineHeight: '1.55' }}>
               {activeResult.dailyActionAdvice}
             </div>
           </div>
@@ -1693,7 +1694,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div style={{
           marginTop: '0.25rem',
           padding: '0.85rem',
-          background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%)',
+          background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.08) 0%, rgba(159, 134, 192, 0.08) 100%)',
           border: '1px dashed rgba(226, 192, 116, 0.3)',
           borderRadius: '12px',
           display: 'flex',
@@ -1703,11 +1704,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
             <Bell size={16} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
-            <div style={{ fontSize: '0.7rem', color: '#e5e7eb', lineHeight: '1.45', minWidth: 0 }}>
+            <div style={{ fontSize: '0.7rem', color: '#e8e3d8', lineHeight: '1.45', minWidth: 0 }}>
               <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                 毎朝8時に運勢＆LINE吉時間をお届け
               </div>
-              <div style={{ color: '#9ca3af', fontSize: '0.66rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+              <div style={{ color: '#a9a49a', fontSize: '0.66rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                 相性と運気は毎日変化します
               </div>
             </div>
@@ -1728,10 +1729,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }
             }}
             style={{
-              background: isNotified ? 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)' : 'linear-gradient(135deg, #fef08a 0%, #e2c074 50%, #d97706 100%)',
+              background: isNotified ? 'linear-gradient(135deg, #6aa97c 0%, #15803d 100%)' : 'linear-gradient(135deg, #f2e2b3 0%, #e2c074 50%, #b8692d 100%)',
               border: 'none',
               borderRadius: '20px',
-              color: isNotified ? '#ffffff' : '#0f0728',
+              color: isNotified ? '#ffffff' : '#0e141d',
               padding: '0.5rem 0.95rem',
               fontSize: '0.75rem',
               fontWeight: '900',
@@ -1749,7 +1750,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
         {/* 5 Detailed Appraisal Topics */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-          <Sparkles size={18} />
+          <MoonMark size={18} />
           深層鑑定結果
         </h2>
 
@@ -1758,21 +1759,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
             {/* Topic Card */}
             <div className="glass-panel" style={{ padding: '1.25rem', position: 'relative', overflow: 'hidden' }}>
-              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#93c5fd' : '#d8b4fe', fontSize: '1rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>
                 {topic.title}
               </h3>
               
               {isRegistered ? (
-                <p className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
+                <p className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                   {formatAppraisalText(`${topic.intro}\n\n${topic.detail}`)}
                 </p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
+                  <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                     {formatAppraisalText(topic.intro)}
                   </p>
                   <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleLockTagClick}>
-                    <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d1d5db", margin: 0, whiteSpace: "pre-wrap" }}>
+                    <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                       {formatAppraisalText(`${topic.detail} ${topic.detail}`)}
                     </p>
                     
@@ -1791,7 +1792,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             {index === 1 && !isRegistered && (
               <div ref={registerCardRef} className="glass-panel" style={{
                 padding: '2rem 1.5rem',
-                background: 'linear-gradient(135deg, rgba(20, 15, 35, 0.9) 0%, rgba(10, 10, 20, 0.96) 100%)',
+                background: 'linear-gradient(135deg, rgba(16, 23, 33, 0.9) 0%, rgba(11, 17, 27, 0.96) 100%)',
                 border: '1.5px solid rgba(226, 192, 116, 0.35)',
                 boxShadow: '0 0 25px rgba(226, 192, 116, 0.15)',
                 borderRadius: '20px',
@@ -1803,23 +1804,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div>
                   <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', fontWeight: 'bold', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', whiteSpace: 'nowrap' }}>
-                    <Sparkles size={16} style={{ flexShrink: 0 }} />
+                    <MoonMark size={16} style={{ flexShrink: 0 }} />
                     無料会員登録で鑑定結果の続きを開く
                   </h2>
-                  <p style={{ fontSize: '0.75rem', color: '#d1d5db', lineHeight: '1.5', margin: 0 }}>
+                  <p style={{ fontSize: '0.75rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
                     会員登録をいただくと深層鑑定結果の続きを全てご覧になれます。
                   </p>
                 </div>
 
                 {emailSent ? (
                   <div style={{
-                    background: 'rgba(52, 211, 153, 0.12)',
-                    border: '1px solid rgba(52, 211, 153, 0.35)',
+                    background: 'rgba(111, 176, 143, 0.12)',
+                    border: '1px solid rgba(111, 176, 143, 0.35)',
                     borderRadius: '14px',
                     padding: '1.1rem 1rem',
                     textAlign: 'center',
                     fontSize: '0.82rem',
-                    color: '#34d399',
+                    color: '#6fb08f',
                     lineHeight: '1.6'
                   }}>
                     <div style={{ fontWeight: 'bold', fontSize: '0.92rem', marginBottom: '0.4rem', color: '#6ee7b7' }}>
@@ -1854,7 +1855,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1rem' }}>
-                  <span style={{ fontSize: '0.6rem', color: '#9ca3af' }}>── または ──</span>
+                  <span style={{ fontSize: '0.6rem', color: '#a9a49a' }}>── または ──</span>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
                     <button
                       type="button"
@@ -1867,8 +1868,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       }}
                       style={{
                         background: '#ffffff',
-                        border: '1px solid #e5e7eb',
-                        color: '#1f2937',
+                        border: '1px solid #e8e3d8',
+                        color: '#22262b',
                         fontSize: '0.78rem',
                         fontWeight: '600',
                         padding: '0.6rem 0.8rem',
@@ -1915,7 +1916,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </div>
                 </div>
 
-                <div style={{ fontSize: '0.6rem', color: '#9ca3af', opacity: 0.9, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'center', width: '100%' }}>
+                <div style={{ fontSize: '0.6rem', color: '#a9a49a', opacity: 0.9, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'center', width: '100%' }}>
                   登録することにより、
                   <button
                     type="button"
@@ -1949,7 +1950,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           gap: '1rem',
           border: '1.5px solid rgba(226, 192, 116, 0.35)',
           borderRadius: '20px',
-          background: 'linear-gradient(135deg, rgba(25, 20, 45, 0.9) 0%, rgba(15, 12, 30, 0.9) 100%)',
+          background: 'linear-gradient(135deg, rgba(21, 29, 42, 0.9) 0%, rgba(13, 18, 27, 0.9) 100%)',
           position: 'relative',
           overflow: 'hidden'
         }}>
@@ -1962,10 +1963,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* 1. 刺さる言葉 TOP5 (Item 1 & 2 visible, Item 3-5 blurred) */}
           <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', position: 'relative' }}>
-            <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fef08a', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               <span>💘 刺さる言葉 TOP5（キュンとさせる褒め方）</span>
             </div>
-            <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#f3f4f6', lineHeight: '1.75' }}>
+            <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#f3efe6', lineHeight: '1.75' }}>
               {activeResult.opponentTorisetsu.killingWords.slice(0, 1).map((word, idx) => (
                 <li key={idx} style={{ marginBottom: '0.2rem' }}>{word.replace(/〇〇/g, oppNickname || 'お相手')}</li>
               ))}
@@ -1975,7 +1976,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 margin: 0,
                 paddingLeft: '1.2rem',
                 fontSize: '0.8rem',
-                color: '#f3f4f6',
+                color: '#f3efe6',
                 lineHeight: '1.75',
                 filter: !isSubscribed ? 'blur(4.5px)' : 'none',
                 userSelect: !isSubscribed ? 'none' : 'auto',
@@ -2012,8 +2013,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
 
           {/* 2. 絶対NG行動 5選 (Item 1 is visible teaser, Item 2-5 are blurred) */}
-          <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)', position: 'relative' }}>
-            <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fca5a5', marginBottom: '0.5rem' }}>
+          <div style={{ background: 'rgba(207, 90, 67, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(207, 90, 67, 0.2)', position: 'relative' }}>
+            <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#e6a99c', marginBottom: '0.5rem' }}>
               ⚠️ 絶対NGな取扱注意行動 5選
             </div>
             <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#fee2e2', lineHeight: '1.75' }}>
@@ -2067,8 +2068,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* Section 3-8 Container */}
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             {/* 3. 返信が遅い時の心理とベストな返信例 */}
-            <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)', position: 'relative' }}>
-              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#93c5fd', marginBottom: '0.35rem' }}>
+            <div style={{ background: 'rgba(58, 134, 171, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(58, 134, 171, 0.2)', position: 'relative' }}>
+              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#9cc6d8', marginBottom: '0.35rem' }}>
                 💬 返信が遅い時の裏心理 ＆ ベストな神返信例
               </div>
               <div className="font-serif" style={{
@@ -2081,7 +2082,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ position: 'relative' }}>
                   <p style={{
                     margin: 0,
-                    color: '#60a5fa',
+                    color: '#5d9fc0',
                     filter: !isSubscribed ? 'blur(4.5px)' : 'none',
                     userSelect: !isSubscribed ? 'none' : 'auto',
                     opacity: !isSubscribed ? 0.65 : 1
@@ -2112,8 +2113,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 4. 脈ありサイン 3段階レベル */}
-            <div style={{ background: 'rgba(34, 197, 94, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(34, 197, 94, 0.2)', position: 'relative' }}>
-              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#86efac', marginBottom: '0.35rem' }}>
+            <div style={{ background: 'rgba(106, 169, 124, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(106, 169, 124, 0.2)', position: 'relative' }}>
+              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#a8d3b0', marginBottom: '0.35rem' }}>
                 🟢 脈ありサイン 3段階レベル診断
               </div>
               <div className="font-serif" style={{
@@ -2154,7 +2155,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 5. 脈なしサイン ＆ 挽回テクニック */}
-            <div style={{ background: 'rgba(244, 63, 94, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(244, 63, 94, 0.2)', position: 'relative' }}>
+            <div style={{ background: 'rgba(201, 86, 106, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(201, 86, 106, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fda4af', marginBottom: '0.35rem' }}>
                 🔴 脈なしサイン ＆ 逆転挽回アプローチ
               </div>
@@ -2195,13 +2196,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
 
             {/* 6. そのまま使えるLINEキラーテンプレート */}
-            <div style={{ background: 'rgba(168, 85, 247, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(168, 85, 247, 0.2)', position: 'relative' }}>
-              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#c084fc', marginBottom: '0.35rem' }}>
+            <div style={{ background: 'rgba(159, 134, 192, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(159, 134, 192, 0.2)', position: 'relative' }}>
+              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#b9a3d6', marginBottom: '0.35rem' }}>
                 💌 そのまま使えるLINEキラーテンプレート
               </div>
               <div className="font-serif" style={{
                 fontSize: '0.78rem',
-                color: '#f3e8ff',
+                color: '#f0ebf5',
                 lineHeight: '1.6',
                 display: 'flex',
                 flexDirection: 'column',
@@ -2245,7 +2246,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
             {/* 7. 喜ばれるデート＆プレゼント傾向 */}
             <div style={{ background: 'rgba(226, 192, 116, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 192, 116, 0.2)' }}>
-              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fef08a', marginBottom: '0.35rem' }}>
+              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.35rem' }}>
                 🎁 喜ばれるデートスポット ＆ プレゼント傾向
               </div>
               <div style={{ position: 'relative', marginTop: '0.2rem' }}>
@@ -2292,7 +2293,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <div style={{ position: 'relative', marginTop: '0.2rem' }}>
                 <p className="font-serif" style={{
                   fontSize: '0.78rem',
-                  color: '#e2e8f0',
+                  color: '#e7e1d5',
                   margin: 0,
                   lineHeight: '1.8',
                   filter: !isSubscribed ? 'blur(4.5px)' : 'none',
@@ -2328,7 +2329,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             {/* Lock CTA Card placed BELOW the content boxes for Non-Premium Users */}
             {!isSubscribed && (
               <div className="glass-panel animate-pulse-subtle" style={{
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.04) 0%, rgba(15, 15, 27, 0.98) 100%)',
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.04) 0%, rgba(13, 18, 27, 0.98) 100%)',
                 border: '1px solid rgba(226, 192, 116, 0.25)',
                 borderRadius: '16px',
                 padding: '1.25rem',
@@ -2359,7 +2360,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
-                    <p style={{ fontSize: '0.72rem', color: '#e9d5ff', lineHeight: '1.6', margin: 0 }}>
+                    <p style={{ fontSize: '0.72rem', color: '#e2d9ee', lineHeight: '1.6', margin: 0 }}>
                       月額500円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
                     </p>
                   </div>
@@ -2367,27 +2368,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
                 {/* Comprehensive Premium Benefits list */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                     <span><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                     <span><strong>6軸詳細相性分析（レーダーチャート）の完全解説</strong></span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                     <span><strong>月次・年次運勢スケジュールの完全閲覧</strong></span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                     <span><strong>お相手の保存上限が10人に拡大</strong>（無料会員2人 → 10人）</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                     <span><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                     <span><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></span>
                   </div>
@@ -2413,7 +2414,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       fontWeight: 'bold',
                       width: '100%',
                       cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(254,240,138,0.3)',
+                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(242, 226, 179,0.3)',
                       letterSpacing: '0.02em'
                     }}
                   >
@@ -2453,7 +2454,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? '今後7日間の相性バイオリズム' : '今後7日間の運気バイオリズム'} {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? '今後7日間の相性バイオリズム' : '今後7日間の運気バイオリズム'} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
               <div 
                 className={isSubscribed ? '' : 'timeline-blurred'} 
@@ -2483,7 +2484,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         boxShadow: visuals.shadow,
                         transition: 'all 0.3s ease'
                       }} />
-                      <span style={{ fontSize: '0.64rem', color: '#9ca3af', marginTop: '2px', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
+                      <span style={{ fontSize: '0.64rem', color: '#a9a49a', marginTop: '2px', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
                         {index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day}
                       </span>
                     </div>
@@ -2506,7 +2507,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Monthly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 月次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 月次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
@@ -2550,7 +2551,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
-                        color: '#cbd5e1',
+                        color: '#d8d2c6',
                         fontSize: '0.65rem',
                         marginTop: '0.35rem',
                         lineHeight: '1.6',
@@ -2563,7 +2564,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {m.text}
                       </p>
                       {!isSubscribed && (
-                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(10, 10, 20, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
+                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
                           <button 
                             type="button"
                             className="premium-lock-tag" 
@@ -2584,7 +2585,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Yearly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
@@ -2628,7 +2629,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
-                        color: '#cbd5e1',
+                        color: '#d8d2c6',
                         fontSize: '0.65rem',
                         marginTop: '0.35rem',
                         lineHeight: '1.6',
@@ -2641,7 +2642,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {y.text}
                       </p>
                       {!isSubscribed && (
-                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(10, 10, 20, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
+                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
                           <button 
                             type="button"
                             className="premium-lock-tag" 
@@ -2661,7 +2662,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {/* Subscription CTA Panel */}
           {isRegistered && !isSubscribed && (
             <div ref={subCardRef} className="glass-panel animate-pulse-subtle" style={{
-              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.04) 0%, rgba(15, 15, 27, 0.98) 100%)',
+              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.04) 0%, rgba(13, 18, 27, 0.98) 100%)',
               border: '1px solid rgba(226, 192, 116, 0.25)',
               borderRadius: '16px',
               padding: '1.25rem',
@@ -2688,37 +2689,37 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
                   {hasOpponent ? '二人の未来予測スケジュールをすべて解禁' : 'あなたの未来予測スケジュールをすべて解禁'}
                 </h3>
-                <p style={{ fontSize: '0.72rem', color: '#d1d5db', lineHeight: '1.4', margin: 0 }}>
+                <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.4', margin: 0 }}>
                   月額500円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
                 </p>
               </div>
 
               {/* Comprehensive Premium Benefits list */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                   <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                   <span><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                   <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                   <span><strong>月次・年次運勢スケジュールの完全閲覧</strong></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                   <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                   <span><strong>お相手の保存上限が10人に拡大</strong>（無料会員2人 → 10人）</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                   <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                   <span><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e5e7eb' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                   <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                   <span><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></span>
                 </div>
               </div>
 
               {subSuccess ? (
-                <div style={{ color: '#34d399', fontSize: '0.8rem', fontWeight: 'bold', padding: '0.5rem' }}>
+                <div style={{ color: '#6fb08f', fontSize: '0.8rem', fontWeight: 'bold', padding: '0.5rem' }}>
                   🎉 プレミアム会員登録が完了しました！
                 </div>
               ) : (
@@ -2742,7 +2743,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       fontWeight: 'bold',
                       width: '100%',
                       cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(254,240,138,0.3)',
+                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(242, 226, 179,0.3)',
                       letterSpacing: '0.02em'
                     }}
                   >
@@ -2793,7 +2794,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             style={{
               position: 'fixed',
               inset: 0,
-              background: 'rgba(2, 2, 5, 0.95)',
+              background: 'rgba(2, 3, 4, 0.95)',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
               zIndex: 100000,
@@ -2850,11 +2851,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 className={zoomedImg.isKaigo ? 'kaigo-border' : (zoomedImg.isRare ? 'rare-rainbow-border' : '')}
                 style={{
                   width: '100%',
-                  backgroundColor: '#05040a',
+                  backgroundColor: '#05080d',
                   borderRadius: '20px',
                   overflow: 'hidden',
                   border: (zoomedImg.isKaigo || zoomedImg.isRare) ? 'none' : '2px solid rgba(226, 192, 116, 0.4)',
-                  boxShadow: zoomedImg.isKaigo ? '0 0 30px rgba(220, 38, 38, 0.5)' : (zoomedImg.isRare ? '0 0 25px rgba(251, 191, 36, 0.45)' : '0 20px 50px rgba(0, 0, 0, 0.8)'),
+                  boxShadow: zoomedImg.isKaigo ? '0 0 30px rgba(184, 74, 55, 0.5)' : (zoomedImg.isRare ? '0 0 25px rgba(232, 169, 58, 0.45)' : '0 20px 50px rgba(0, 0, 0, 0.8)'),
                   position: 'relative',
                   display: 'flex',
                   flexDirection: 'column'
@@ -2866,7 +2867,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   top: 0,
                   left: 0,
                   right: 0,
-                  background: 'linear-gradient(to bottom, rgba(8, 6, 20, 0.92) 0%, rgba(12, 9, 28, 0.65) 65%, rgba(12, 9, 28, 0) 100%)',
+                  background: 'linear-gradient(to bottom, rgba(8, 11, 16, 0.92) 0%, rgba(11, 16, 23, 0.65) 65%, rgba(11, 16, 23, 0) 100%)',
                   padding: '0.85rem 1rem',
                   display: 'flex',
                   alignItems: 'center',
@@ -2884,7 +2885,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     borderRadius: '16px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
                   }}>
-                    <span className="font-serif" style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.6)' }}>
+                    <span className="font-serif" style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)' }}>
                       {zoomedImg.headerTitle}
                     </span>
                   </div>
@@ -2894,14 +2895,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <div style={{
                       padding: '0.25rem 0.65rem',
                       background: 'rgba(0, 0, 0, 0.75)',
-                      border: '1px solid rgba(254, 240, 138, 0.5)',
+                      border: '1px solid rgba(242, 226, 179, 0.5)',
                       borderRadius: '12px',
                       maxWidth: '150px',
                       whiteSpace: 'nowrap',
                       flexShrink: 0,
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.7), 0 0 12px rgba(254, 240, 138, 0.2)'
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.7), 0 0 12px rgba(242, 226, 179, 0.2)'
                     }}>
-                      <span className="font-serif" style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#fef08a', textShadow: '0 0 8px rgba(254, 240, 138, 0.7), 0 2px 4px rgba(0,0,0,0.95)', letterSpacing: '0.04em' }}>
+                      <span className="font-serif" style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.7), 0 2px 4px rgba(0,0,0,0.95)', letterSpacing: '0.04em' }}>
                         {zoomedImg.nickname.slice(0, 8)}
                       </span>
                     </div>
@@ -2922,7 +2923,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
                 {/* Glass Bottom Overlay inside Image */}
                 <div style={{
-                  background: 'linear-gradient(to bottom, rgba(5, 4, 10, 0.85) 0%, rgba(8, 6, 20, 0.98) 30%, rgba(5, 4, 10, 1) 100%)',
+                  background: 'linear-gradient(to bottom, rgba(5, 8, 13, 0.85) 0%, rgba(8, 11, 16, 0.98) 30%, rgba(5, 8, 13, 1) 100%)',
                   padding: '0.85rem 0.75rem 0.75rem',
                   display: 'flex',
                   flexDirection: 'column',
@@ -2933,22 +2934,22 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   position: 'relative'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
-                    <span className="font-serif" style={{ fontSize: '1.15rem', fontWeight: '800', color: '#fef08a', textShadow: '0 0 12px rgba(254, 240, 138, 0.8), 0 2px 6px rgba(0,0,0,0.95)', letterSpacing: '0.03em' }}>
+                    <span className="font-serif" style={{ fontSize: '1.15rem', fontWeight: '800', color: '#f2e2b3', textShadow: '0 0 12px rgba(242, 226, 179, 0.8), 0 2px 6px rgba(0,0,0,0.95)', letterSpacing: '0.03em' }}>
                       {zoomedImg.astrologyName}
                     </span>
                     <span className={zoomedImg.isKaigo ? 'kaigo-badge' : (zoomedImg.isRare ? 'rare-badge' : '')} style={{
                       fontSize: '0.6rem',
                       padding: '2px 6px',
                       borderRadius: '4px',
-                      background: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(59, 130, 246, 0.25)'),
-                      color: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '#d8b4fe' : '#93c5fd'),
-                      border: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '1px solid rgba(168, 85, 247, 0.4)' : '1px solid rgba(59, 130, 246, 0.4)')
+                      background: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? 'rgba(159, 134, 192, 0.25)' : 'rgba(58, 134, 171, 0.25)'),
+                      color: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
+                      border: (zoomedImg.isKaigo || zoomedImg.isRare) ? undefined : (zoomedImg.myGender === 'female' ? '1px solid rgba(159, 134, 192, 0.4)' : '1px solid rgba(58, 134, 171, 0.4)')
                     }}>
-                      {zoomedImg.isKaigo ? '👑 魁罡' : (zoomedImg.isRare ? '👑 選ばれし極星' : (zoomedImg.myGender === 'female' ? '女性' : '男性'))}
+                      {zoomedImg.isKaigo ? '魁罡' : (zoomedImg.isRare ? '選ばれし極星' : (zoomedImg.myGender === 'female' ? '女性' : '男性'))}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '0.72rem', color: '#e2e8f0', lineHeight: '1.3', fontWeight: '500', textAlign: 'center', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#e7e1d5', lineHeight: '1.3', fontWeight: '500', textAlign: 'center', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
                     {zoomedImg.astrologyTheme}
                   </div>
 
@@ -2961,16 +2962,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     marginTop: '0.2rem'
                   }}>
                     <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.54rem', color: '#cbd5e1' }}>五行 (陰陽)</span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#fef08a' }}>{zoomedImg.astrologyElement || '金・陽'}</span>
+                      <span style={{ fontSize: '0.54rem', color: '#d8d2c6' }}>五行 (陰陽)</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}>{zoomedImg.astrologyElement || '金・陽'}</span>
                     </div>
                     <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.54rem', color: '#cbd5e1', whiteSpace: 'nowrap' }}>性格分類</span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#fef08a' }}>{zoomedImg.branchPersonality || '策士'}</span>
+                      <span style={{ fontSize: '0.54rem', color: '#d8d2c6', whiteSpace: 'nowrap' }}>性格分類</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}>{zoomedImg.branchPersonality || '策士'}</span>
                     </div>
                     <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.54rem', color: '#cbd5e1' }}>守護カラー</span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#fef08a' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
+                      <span style={{ fontSize: '0.54rem', color: '#d8d2c6' }}>守護カラー</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
                     </div>
                   </div>
                 </div>
@@ -2995,7 +2996,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}
               >
                 <Download size={16} />
-                <span style={{ color: avatarSavedSuccess ? '#4ade80' : 'inherit' }}>
+                <span style={{ color: avatarSavedSuccess ? '#7dbb8a' : 'inherit' }}>
                   {isZoomedSaving ? '画像を保存中...' : avatarSavedSuccess ? '✓ 保存しました' : '画像を保存する'}
                 </span>
               </button>
@@ -3010,7 +3011,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(2, 2, 5, 0.85)',
+            background: 'rgba(2, 3, 4, 0.85)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             display: 'flex',
@@ -3023,7 +3024,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <div className="glass-panel" style={{
               width: '90%',
               maxWidth: '340px',
-              background: 'linear-gradient(135deg, rgba(20, 15, 30, 0.96) 0%, rgba(10, 10, 20, 0.98) 100%)',
+              background: 'linear-gradient(135deg, rgba(15, 21, 30, 0.96) 0%, rgba(11, 17, 27, 0.98) 100%)',
               border: '1.5px solid rgba(226, 192, 116, 0.25)',
               boxShadow: '0 15px 40px rgba(0, 0, 0, 0.7)',
               borderRadius: '20px',
@@ -3034,10 +3035,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <h3 className="font-serif gold-text" style={{ fontSize: '1.15rem', fontWeight: 'bold', margin: '0 0 0.35rem 0', letterSpacing: '0.05em' }}>
                 {explanation.title}
               </h3>
-              <div style={{ fontSize: '0.72rem', color: '#a78bfa', marginBottom: '0.95rem', fontWeight: '600', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: '0.72rem', color: '#a996c9', marginBottom: '0.95rem', fontWeight: '600', letterSpacing: '0.05em' }}>
                 【よみがな】 {explanation.reading}
               </div>
-              <p className="font-serif" style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: '1.6', margin: '0 0 1.25rem 0', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
+              <p className="font-serif" style={{ fontSize: '0.75rem', color: '#d8d2c6', lineHeight: '1.6', margin: '0 0 1.25rem 0', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
                 {explanation.body}
               </p>
               <button
@@ -3048,7 +3049,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   fontSize: '0.8rem',
                   padding: '0.65rem',
                   background: 'linear-gradient(135deg, #e2c074 0%, #b89850 100%)',
-                  color: '#0a0a14',
+                  color: '#0b111b',
                   fontWeight: 'bold',
                   borderRadius: '10px',
                   border: 'none',
@@ -3083,12 +3084,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '0.75rem 0.95rem',
-              background: 'linear-gradient(135deg, rgba(26, 20, 42, 0.94) 0%, rgba(15, 12, 28, 0.96) 100%)',
+              background: 'linear-gradient(135deg, rgba(21, 28, 41, 0.94) 0%, rgba(13, 18, 26, 0.96) 100%)',
               border: '1.5px solid rgba(226, 192, 116, 0.45)',
               borderRadius: '16px',
               boxShadow: '0 8px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(226, 192, 116, 0.2)',
               cursor: 'pointer',
-              color: '#f3f4f6'
+              color: '#f3efe6'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
@@ -3103,13 +3104,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 flexShrink: 0,
                 boxShadow: '0 2px 8px rgba(226, 192, 116, 0.3)'
               }}>
-                <Smartphone size={18} style={{ color: '#0a0a14' }} />
+                <Smartphone size={18} style={{ color: '#0b111b' }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <div style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#fef08a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   ホーム画面に追加してアプリ化 ✦
                 </div>
-                <div style={{ fontSize: '0.68rem', color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: '0.68rem', color: '#d8d2c6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   毎日の運気・LINE吉時間をすぐ確認
                 </div>
               </div>
@@ -3121,8 +3122,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 fontWeight: 'bold',
                 padding: '4px 10px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #e2c074 0%, #ca8a04 100%)',
-                color: '#0a0a14'
+                background: 'linear-gradient(135deg, #e2c074 0%, #b07d2b 100%)',
+                color: '#0b111b'
               }}>
                 追加する
               </span>
@@ -3140,7 +3141,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#9ca3af',
+                  color: '#a9a49a',
                   cursor: 'pointer',
                   padding: 0
                 }}
@@ -3181,16 +3182,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.5rem',
-            background: 'linear-gradient(90deg, #fde047 0%, #eab308 50%, #d97706 100%)',
+            background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
             color: '#000000',
             border: 'none',
             borderRadius: '9999px',
-            boxShadow: '0 8px 30px rgba(234, 179, 8, 0.6), 0 4px 15px rgba(0,0,0,0.8)',
+            boxShadow: '0 8px 30px rgba(217, 164, 65, 0.6), 0 4px 15px rgba(0,0,0,0.8)',
             cursor: 'pointer',
             transition: 'all 0.2s ease'
           }}
         >
-          <Sparkles size={15} style={{ color: '#000000' }} />
+          <MoonMark size={15} style={{ color: '#000000' }} />
           <span>鑑定結果をシェアする</span>
         </button>
         <button

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Sparkles, MessageCircle, User, BookOpen } from 'lucide-react';
+import { MessageCircle, User, BookOpen } from 'lucide-react';
+import { PillarsMark } from './icons/BrandIcons';
 
 interface NavbarProps {
   activeTab: string;
@@ -26,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
         className={`navbar-item ${activeTab === 'fortune' ? 'active' : ''}`}
         onClick={() => setActiveTab('fortune')}
       >
-        <Sparkles />
+        <PillarsMark />
         <span>鑑定結果</span>
       </button>
 

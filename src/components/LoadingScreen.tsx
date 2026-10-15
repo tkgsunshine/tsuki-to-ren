@@ -22,7 +22,7 @@ export const LoadingScreen: React.FC = () => {
       position: 'fixed',
       inset: 0,
       zIndex: 999999,
-      background: 'radial-gradient(circle at 50% 30%, #171131 0%, #090714 80%)',
+      background: 'radial-gradient(circle at 50% 30%, #171131 0%, #0a1019 80%)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -66,7 +66,7 @@ export const LoadingScreen: React.FC = () => {
             height: '60%',
             borderRadius: '50%',
             objectFit: 'cover',
-            boxShadow: '0 0 30px rgba(168, 85, 247, 0.5)',
+            boxShadow: '0 0 30px rgba(159, 134, 192, 0.5)',
             animation: 'pulse 1.5s ease-in-out infinite'
           }}
         />
@@ -102,7 +102,7 @@ export const LoadingScreen: React.FC = () => {
       </div>
 
       {/* Micro Info */}
-      <span style={{ fontSize: '0.65rem', color: '#9ca3af', opacity: 0.6 }}>
+      <span style={{ fontSize: '0.65rem', color: '#a9a49a', opacity: 0.6 }}>
         {textIndex + 1} / {loadingTexts.length} ステップ
       </span>
     </div>

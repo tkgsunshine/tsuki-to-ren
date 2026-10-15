@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Sparkles, Calendar, MessageCircle } from 'lucide-react';
+import { Calendar, MessageCircle } from 'lucide-react';
+import { MoonMark } from './icons/BrandIcons';
 import type { SavedPartner } from '../App';
 import { CustomDatePicker } from './CustomDatePicker';
 import { mbtiOptions } from '../constants/mbti';
@@ -212,7 +213,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           alignItems: 'center',
           gap: '0.5rem',
           padding: '0.4rem 1.1rem',
-          background: 'rgba(10, 7, 24, 0.85)',
+          background: 'rgba(10, 13, 19, 0.85)',
           border: '1px solid rgba(226, 192, 116, 0.45)',
           borderRadius: '20px',
           boxShadow: '0 4px 15px rgba(0, 0, 0, 0.6), 0 0 15px rgba(226, 192, 116, 0.2)',
@@ -220,7 +221,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           WebkitBackdropFilter: 'blur(8px)'
         }}>
           <span style={{ fontSize: '0.75rem', color: '#e2c074' }}>✦</span>
-          <span className="font-serif" style={{ fontSize: '0.92rem', color: '#fef08a', letterSpacing: '0.08em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
+          <span className="font-serif" style={{ fontSize: '0.92rem', color: '#f2e2b3', letterSpacing: '0.04em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
             相談するキャラクターを選んでください
           </span>
           <span style={{ fontSize: '0.75rem', color: '#e2c074' }}>✦</span>
@@ -290,7 +291,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
         
         {urlPair && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+            background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.15) 0%, rgba(159, 134, 192, 0.15) 100%)',
             border: '1px solid rgba(226, 192, 116, 0.4)',
             borderRadius: '14px',
             padding: '0.85rem 1rem',
@@ -300,12 +301,12 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             gap: '0.75rem'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Sparkles size={18} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
-              <span style={{ fontSize: '0.82rem', color: '#fef08a', fontWeight: 'bold' }}>
+              <MoonMark size={18} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
+              <span style={{ fontSize: '0.82rem', color: '#f2e2b3', fontWeight: 'bold' }}>
                 【{urlPair.my} × {urlPair.opp}】相性診断モード適用中
               </span>
             </div>
-            <span style={{ fontSize: '0.7rem', color: '#cbd5e1', background: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '6px' }}>16タイプ設定済</span>
+            <span style={{ fontSize: '0.7rem', color: '#d8d2c6', background: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '6px' }}>16タイプ設定済</span>
           </div>
         )}
 
@@ -316,7 +317,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>ニックネーム (任意)</label>
+            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>ニックネーム (任意)</label>
             <input
               type="text"
               maxLength={8}
@@ -328,7 +329,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>生年月日 <span style={{ color: '#ef4444' }}>(必須)</span></label>
+            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
             <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
               <input
                 type="text"
@@ -344,7 +345,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowMyDatePicker(true)}
-                  style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#e2e8f0' }}
+                  style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#e7e1d5' }}
                 >
                   <Calendar size={18} />
                 </button>
@@ -353,11 +354,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>16タイプ診断 (任意)</label>
+            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>16タイプ診断 (任意)</label>
             <select
               value={myMbti}
               onChange={(e) => setMyMbti(e.target.value)}
-              style={{ background: '#0a0a14', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+              style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
             >
               {mbtiOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -366,17 +367,17 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>性別 <span style={{ color: '#ef4444' }}>(必須)</span></label>
+            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>性別 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
               <button
                 type="button"
                 onClick={() => handleMyGenderChange('female')}
                 style={{
-                  background: myGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255,255,255,0.02)',
+                  background: myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(255,255,255,0.02)',
                   border: myGender === 'female' ? '1px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.08)',
                   borderRadius: '10px',
                   padding: '0.55rem',
-                  color: myGender === 'female' ? '#d8b4fe' : '#9ca3af',
+                  color: myGender === 'female' ? '#cdbfe2' : '#a9a49a',
                   fontSize: '0.8rem',
                   fontWeight: '600',
                   cursor: 'pointer',
@@ -389,11 +390,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 type="button"
                 onClick={() => handleMyGenderChange('male')}
                 style={{
-                  background: myGender === 'male' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255,255,255,0.02)',
+                  background: myGender === 'male' ? 'rgba(58, 134, 171, 0.15)' : 'rgba(255,255,255,0.02)',
                   border: myGender === 'male' ? '1px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.08)',
                   borderRadius: '10px',
                   padding: '0.55rem',
-                  color: myGender === 'male' ? '#93c5fd' : '#9ca3af',
+                  color: myGender === 'male' ? '#9cc6d8' : '#a9a49a',
                   fontSize: '0.8rem',
                   fontWeight: '600',
                   cursor: 'pointer',
@@ -422,7 +423,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             }}
           >
             <div style={{ fontSize: '0.85rem', fontWeight: '600', color: mode === 'match' ? 'var(--color-gold)' : 'white' }}>相性を占う</div>
-            <div style={{ fontSize: '0.6rem', color: '#9ca3af', marginTop: '0.15rem' }}>お相手の情報を追加</div>
+            <div style={{ fontSize: '0.6rem', color: '#a9a49a', marginTop: '0.15rem' }}>お相手の情報を追加</div>
           </div>
           
           <div
@@ -439,7 +440,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             }}
           >
             <div style={{ fontSize: '0.85rem', fontWeight: '600', color: mode === 'single' ? 'var(--color-gold)' : 'white' }}>自分だけ占う</div>
-            <div style={{ fontSize: '0.6rem', color: '#9ca3af', marginTop: '0.15rem' }}>今日の恋愛運勢を表示</div>
+            <div style={{ fontSize: '0.6rem', color: '#a9a49a', marginTop: '0.15rem' }}>今日の恋愛運勢を表示</div>
           </div>
         </div>
 
@@ -453,7 +454,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             {/* Saved Partners list */}
             {savedPartners && savedPartners.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.85rem' }}>
-                <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 'bold' }}>
+                <span style={{ fontSize: '0.72rem', color: '#6fb08f', fontWeight: 'bold' }}>
                   ● 保存したお相手から選ぶ ({savedPartners.length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人)
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
@@ -464,19 +465,19 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                         key={partner.id}
                         onClick={() => onSelectPartner && onSelectPartner(partner)}
                         style={{
-                          background: isSelected ? 'rgba(52, 211, 153, 0.12)' : 'rgba(255,255,255,0.03)',
-                          border: isSelected ? '1.5px solid #34d399' : '1px solid rgba(255,255,255,0.08)',
+                          background: isSelected ? 'rgba(111, 176, 143, 0.12)' : 'rgba(255,255,255,0.03)',
+                          border: isSelected ? '1.5px solid #6fb08f' : '1px solid rgba(255,255,255,0.08)',
                           borderRadius: '10px',
                           padding: '0.45rem 0.75rem',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           cursor: 'pointer',
-                          boxShadow: isSelected ? '0 0 10px rgba(52, 211, 153, 0.25)' : 'none',
+                          boxShadow: isSelected ? '0 0 10px rgba(111, 176, 143, 0.25)' : 'none',
                           transition: 'all 0.2s ease'
                         }}
                         onMouseOver={(e) => {
-                          if (!isSelected) e.currentTarget.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+                          if (!isSelected) e.currentTarget.style.borderColor = 'rgba(111, 176, 143, 0.4)';
                         }}
                         onMouseOut={(e) => {
                           if (!isSelected) e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
@@ -486,15 +487,15 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                         <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'white' }}>
                           {partner.name}
                         </span>
-                        <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
+                        <span style={{ fontSize: '0.7rem', color: '#a9a49a' }}>
                           {partner.birth.replace(/-/g, '/')}
                         </span>
                         {partner.mbti && partner.mbti !== 'UNKNOWN' && (
                           <span style={{
                             fontSize: '0.65rem',
-                            color: '#d8b4fe',
-                            background: 'rgba(168, 85, 247, 0.12)',
-                            border: '1px solid rgba(168, 85, 247, 0.25)',
+                            color: '#cdbfe2',
+                            background: 'rgba(159, 134, 192, 0.12)',
+                            border: '1px solid rgba(159, 134, 192, 0.25)',
                             padding: '1px 6px',
                             borderRadius: '6px',
                             fontWeight: '600'
@@ -514,7 +515,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                           }
                         }}
                         style={{
-                          background: 'rgba(239, 68, 68, 0.1)',
+                          background: 'rgba(207, 90, 67, 0.1)',
                           border: 'none',
                           borderRadius: '50%',
                           width: '20px',
@@ -522,7 +523,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: '#ef4444',
+                          color: '#cf5a43',
                           cursor: 'pointer',
                           fontSize: '0.7rem',
                           padding: 0,
@@ -539,7 +540,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             )}
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手のニックネーム (任意)</label>
+              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手のニックネーム (任意)</label>
               <input
                 type="text"
                 maxLength={8}
@@ -551,7 +552,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の生年月日 <span style={{ color: '#ef4444' }}>(必須)</span></label>
+              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
               <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                 <input
                   type="text"
@@ -566,7 +567,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowOpponentDatePicker(true)}
-                    style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#e2e8f0' }}
+                    style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#e7e1d5' }}
                   >
                     <Calendar size={18} />
                   </button>
@@ -575,11 +576,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の16タイプ診断 (任意)</label>
+              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の16タイプ診断 (任意)</label>
               <select
                 value={oppMbti}
                 onChange={(e) => setOppMbti(e.target.value)}
-                style={{ background: '#0a0a14', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
               >
                 {mbtiOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -588,18 +589,18 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>
-                お相手との関係性 <span style={{ color: '#ef4444' }}>(必須)</span>
+              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>
+                お相手との関係性 <span style={{ color: '#cf5a43' }}>(必須)</span>
               </label>
               <select
                 value={relationship}
                 onChange={(e) => setRelationship(e.target.value)}
                 style={{
-                  background: '#0a0a14',
+                  background: '#0b111b',
                   border: '1px solid rgba(226, 192, 116, 0.35)',
                   borderRadius: '10px',
                   padding: '0.65rem 0.75rem',
-                  color: '#fef08a',
+                  color: '#f2e2b3',
                   outline: 'none',
                   fontSize: '0.85rem',
                   fontWeight: 'bold',
@@ -615,17 +616,17 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#f3f4f6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の性別 <span style={{ color: '#ef4444' }}>(必須)</span></label>
+              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の性別 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <button
                   type="button"
                   disabled={true}
                   style={{
-                    background: oppGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255,255,255,0.01)',
+                    background: oppGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(255,255,255,0.01)',
                     border: oppGender === 'female' ? '1px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.04)',
                     borderRadius: '10px',
                     padding: '0.55rem',
-                    color: oppGender === 'female' ? '#d8b4fe' : '#4b5563',
+                    color: oppGender === 'female' ? '#cdbfe2' : '#5c5850',
                     fontSize: '0.8rem',
                     fontWeight: '600',
                     cursor: 'not-allowed',
@@ -639,11 +640,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   type="button"
                   disabled={true}
                   style={{
-                    background: oppGender === 'male' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255,255,255,0.01)',
+                    background: oppGender === 'male' ? 'rgba(58, 134, 171, 0.15)' : 'rgba(255,255,255,0.01)',
                     border: oppGender === 'male' ? '1px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.04)',
                     borderRadius: '10px',
                     padding: '0.55rem',
-                    color: oppGender === 'male' ? '#93c5fd' : '#4b5563',
+                    color: oppGender === 'male' ? '#9cc6d8' : '#5c5850',
                     fontSize: '0.8rem',
                     fontWeight: '600',
                     cursor: 'not-allowed',
@@ -654,7 +655,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   男性
                 </button>
               </div>
-              <span style={{ fontSize: '0.62rem', color: '#9ca3af', marginTop: '0.1rem', opacity: 0.7, lineHeight: '1.3' }}>
+              <span style={{ fontSize: '0.62rem', color: '#a9a49a', marginTop: '0.1rem', opacity: 0.7, lineHeight: '1.3' }}>
                 ※相性診断は異性との組み合わせのみに対応しているため、自動的にもう一方の性別が選ばれます。
               </span>
             </div>
@@ -669,7 +670,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           style={{ marginTop: '0.5rem', opacity: !myBirth ? 0.5 : 1 }}
         >
           鑑定を開始する
-          <Sparkles size={16} style={{ marginLeft: '0.5rem' }} />
+          <MoonMark size={16} style={{ marginLeft: '0.5rem' }} />
         </button>
       </form>
 
@@ -679,26 +680,26 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
 
 
         <h2 className="font-serif text-center" style={{ fontSize: '1.1rem', color: '#e2c074', marginBottom: '0.25rem', marginTop: '0.5rem', fontWeight: 'bold' }}>
-          四柱推命・九星気学・16タイプ診断を融合した3大アプローチ
+          <span className="nobr">四柱推命・九星気学・16タイプ診断を</span><span className="nobr">融合した3大アプローチ</span>
         </h2>
         
         <div className="glass-panel" style={{ display: 'flex', padding: '1rem', gap: '0.75rem', alignItems: 'flex-start' }}>
-          <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.5rem', borderRadius: '50%', color: '#3b82f6', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <div style={{ background: 'rgba(58, 134, 171, 0.1)', padding: '0.5rem', borderRadius: '50%', color: '#3a86ab', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <Calendar size={18} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3f4f6' }}>① 東洋占術の極み「四柱推命」で本質・本音を見抜く</span>
-            <span style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: '1.45' }}>あなたの生年月日から導き出される本質的な「命式」を多角的に分析。相手が言葉にしない本音、建前、そして既読スルーや沈黙の裏に隠された本当の理由を、確かな占術理論に基づいて論理的かつ具体的に解明します。深層心理レベルでのズレを見落としません。</span>
+            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3efe6' }}>① 東洋占術の極み「四柱推命」で本質・本音を見抜く</span>
+            <span style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: '1.45' }}>あなたの生年月日から導き出される本質的な「命式」を多角的に分析。相手が言葉にしない本音、建前、そして既読スルーや沈黙の裏に隠された本当の理由を、確かな占術理論に基づいて論理的かつ具体的に解明します。深層心理レベルでのズレを見落としません。</span>
           </div>
         </div>
 
         <div className="glass-panel" style={{ display: 'flex', padding: '1rem', gap: '0.75rem', alignItems: 'flex-start' }}>
-          <div style={{ background: 'rgba(168, 85, 247, 0.1)', padding: '0.5rem', borderRadius: '50%', color: '#a855f7', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            <Sparkles size={18} />
+          <div style={{ background: 'rgba(159, 134, 192, 0.1)', padding: '0.5rem', borderRadius: '50%', color: '#9f86c0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <MoonMark size={18} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3f4f6' }}>② 「九星気学」で動くべき黄金のタイミングを特定</span>
-            <span style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: '1.45' }}>運気のサイクルと時の流れを司る九星気学を用いて、二人の運勢のバイオリズムが交差する瞬間を特定。今週、あなたが取るべき「攻めの日」と「待つべき日」をピンポイントで可視化し、すれ違いを最小限に抑えながら最も引き寄せの力が強まる最適な行動タイミングを導き出します。</span>
+            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3efe6' }}>② 「九星気学」で動くべき黄金のタイミングを特定</span>
+            <span style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: '1.45' }}>運気のサイクルと時の流れを司る九星気学を用いて、二人の運勢のバイオリズムが交差する瞬間を特定。今週、あなたが取るべき「攻めの日」と「待つべき日」をピンポイントで可視化し、すれ違いを最小限に抑えながら最も引き寄せの力が強まる最適な行動タイミングを導き出します。</span>
           </div>
         </div>
 
@@ -707,8 +708,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             <MessageCircle size={18} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3f4f6' }}>③ 心理統計学「16タイプ診断」で具体的アプローチを提示</span>
-            <span style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: '1.45' }}>西洋の心理統計学である16タイプ性格理論と相性論を融合し、日常の会話で生じる意思疎通のすれ違いや認知の癖を解剖。お相手のタイプに最も響くコミュニケーションの取り方を分析し、今日すぐにそのままコピー＆ペーストして送信できる具体的なLINEのメッセージ文案やアプローチ法を提示します。</span>
+            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3efe6' }}>③ 心理統計学「16タイプ診断」で具体的アプローチを提示</span>
+            <span style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: '1.45' }}>西洋の心理統計学である16タイプ性格理論と相性論を融合し、日常の会話で生じる意思疎通のすれ違いや認知の癖を解剖。お相手のタイプに最も響くコミュニケーションの取り方を分析し、今日すぐにそのままコピー＆ペーストして送信できる具体的なLINEのメッセージ文案やアプローチ法を提示します。</span>
           </div>
         </div>
       </div>

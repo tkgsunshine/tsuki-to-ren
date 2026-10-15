@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Sparkles, Mail } from 'lucide-react';
+import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail } from 'lucide-react';
+import { MoonMark } from './icons/BrandIcons';
 import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, type UserProfile } from '../services/firebase';
 
 interface AuthModalProps {
@@ -97,7 +98,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(2, 2, 5, 0.82)',
+      background: 'rgba(2, 3, 4, 0.82)',
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
       zIndex: 100000,
@@ -115,7 +116,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
         margin: 'auto auto',
         flexShrink: 0,
         boxSizing: 'border-box',
-        background: 'linear-gradient(145deg, rgba(20, 16, 35, 0.95) 0%, rgba(10, 10, 22, 0.98) 100%)',
+        background: 'linear-gradient(145deg, rgba(17, 23, 33, 0.95) 0%, rgba(10, 14, 20, 0.98) 100%)',
         border: '1.5px solid rgba(226, 192, 116, 0.35)',
         borderRadius: '24px',
         padding: '1.75rem 1.5rem',
@@ -137,7 +138,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
             right: '1rem',
             background: 'rgba(255, 255, 255, 0.08)',
             border: 'none',
-            color: '#cbd5e1',
+            color: '#d8d2c6',
             width: '32px',
             height: '32px',
             borderRadius: '50%',
@@ -155,7 +156,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
           <h2 className="font-serif gold-text" style={{ fontSize: '1.35rem', margin: 0, fontWeight: 'bold', letterSpacing: '0.04em' }}>
             {currentUser ? 'アカウント情報' : '会員登録 / ログイン'}
           </h2>
-          <p style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '0.4rem', marginBottom: 0 }}>
+          <p style={{ fontSize: '0.78rem', color: '#d8d2c6', marginTop: '0.4rem', marginBottom: 0 }}>
             {currentUser
               ? '連携済みのアカウントで鑑定データが同期されます'
               : 'Google・X アカウントで簡単に無料登録できます'}
@@ -165,9 +166,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
         {errorMsg && (
           <div style={{
             fontSize: '0.78rem',
-            color: '#f87171',
-            background: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            color: '#d9786a',
+            background: 'rgba(207, 90, 67, 0.12)',
+            border: '1px solid rgba(207, 90, 67, 0.3)',
             padding: '8px 12px',
             borderRadius: '12px',
             textAlign: 'center'
@@ -199,7 +200,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 width: '64px',
                 height: '64px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+                background: 'linear-gradient(135deg, #9f86c0 0%, #5b6aa8 100%)',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
@@ -216,7 +217,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
               <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: 'white' }}>
                 {currentUser.displayName || 'ユーザー'}
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.78rem', color: '#a39d91', marginTop: '2px' }}>
                 {currentUser.email ? currentUser.email : (currentUser.providerId === 'twitter.com' ? 'X連携アカウント' : 'アカウント連携完了')}
               </div>
               <div style={{
@@ -224,9 +225,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 alignItems: 'center',
                 gap: '4px',
                 fontSize: '0.72rem',
-                color: '#4ade80',
-                background: 'rgba(74, 222, 128, 0.12)',
-                border: '1px solid rgba(74, 222, 128, 0.3)',
+                color: '#7dbb8a',
+                background: 'rgba(125, 187, 138, 0.12)',
+                border: '1px solid rgba(125, 187, 138, 0.3)',
                 padding: '3px 10px',
                 borderRadius: '12px',
                 marginTop: '8px'
@@ -248,9 +249,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 width: '100%',
                 padding: '0.75rem',
                 borderRadius: '14px',
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                color: '#fca5a5',
+                background: 'rgba(207, 90, 67, 0.15)',
+                border: '1px solid rgba(207, 90, 67, 0.3)',
+                color: '#e6a99c',
                 fontSize: '0.85rem',
                 fontWeight: '600',
                 display: 'flex',
@@ -278,7 +279,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 borderRadius: '16px',
                 background: '#ffffff',
                 border: 'none',
-                color: '#1f2937',
+                color: '#22262b',
                 fontSize: '0.92rem',
                 fontWeight: 'bold',
                 display: 'flex',
@@ -327,13 +328,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
               <span>{loading === 'x' ? 'X 認証中...' : 'X で登録 / ログイン'}</span>
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '0.2rem 0', color: '#64748b', fontSize: '0.72rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '0.2rem 0', color: '#736e65', fontSize: '0.72rem' }}>
               <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
               <span>またはメールアドレスで手軽に登録</span>
               <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
             </div>
             {emailSent ? (
-              <div style={{ background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)', borderRadius: '14px', padding: '1rem', textAlign: 'center', fontSize: '0.82rem', color: '#34d399', lineHeight: '1.6' }}>
+              <div style={{ background: 'rgba(111, 176, 143, 0.12)', border: '1px solid rgba(111, 176, 143, 0.3)', borderRadius: '14px', padding: '1rem', textAlign: 'center', fontSize: '0.82rem', color: '#6fb08f', lineHeight: '1.6' }}>
                 <div style={{ fontWeight: 'bold', fontSize: '0.95rem', marginBottom: '0.35rem', color: '#6ee7b7' }}>
                   ✉️ 認証メールを送信しました！
                 </div>
@@ -360,7 +361,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                       boxSizing: 'border-box'
                     }}
                   />
-                  <Mail size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <Mail size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#a39d91' }} />
                 </div>
 
                 <button
@@ -385,7 +386,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
 
         {/* Benefits Highlight Box */}
         <div style={{
-          background: 'rgba(15, 12, 28, 0.7)',
+          background: 'rgba(13, 18, 26, 0.7)',
           border: '1px solid rgba(226, 192, 116, 0.2)',
           borderRadius: '16px',
           padding: '0.85rem 1rem',
@@ -393,12 +394,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
           flexDirection: 'column',
           gap: '0.5rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: '#fef08a', fontWeight: 'bold' }}>
-            <Sparkles size={14} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: '#f2e2b3', fontWeight: 'bold' }}>
+            <MoonMark size={14} />
             <span>会員登録（無料）のメリット</span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.74rem', color: '#cbd5e1', lineHeight: '1.4' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.74rem', color: '#d8d2c6', lineHeight: '1.4' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <ShieldCheck size={13} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
               <span>鑑定結果や相手の命式データを安全に保存</span>
@@ -411,7 +412,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
         </div>
 
         {/* Privacy Note */}
-        <div style={{ fontSize: '0.68rem', color: '#64748b', textAlign: 'center', lineHeight: '1.4' }}>
+        <div style={{ fontSize: '0.68rem', color: '#736e65', textAlign: 'center', lineHeight: '1.4' }}>
           ※ 登録により、利用規約およびプライバシーポリシーに同意したものとみなされます。勝手にSNSへ投稿されることはありません。
         </div>
       </div>

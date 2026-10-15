@@ -82,7 +82,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(2, 2, 5, 0.85)',
+      background: 'rgba(2, 3, 4, 0.85)',
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
       display: 'flex',
@@ -94,7 +94,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
       <div className="glass-panel" style={{
         width: '90%',
         maxWidth: '340px',
-        background: 'rgba(15, 15, 27, 0.95)',
+        background: 'rgba(13, 18, 27, 0.95)',
         border: '1px solid rgba(255, 255, 255, 0.1)',
         borderRadius: '24px',
         padding: '1.25rem',
@@ -121,7 +121,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
             }}
           >
             {years.map(y => (
-              <option key={y} value={y} style={{ background: '#0a0a14' }}>{y}年</option>
+              <option key={y} value={y} style={{ background: '#0b111b' }}>{y}年</option>
             ))}
           </select>
 
@@ -141,7 +141,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
             }}
           >
             {Array.from({ length: 12 }).map((_, idx) => (
-              <option key={idx} value={idx} style={{ background: '#0a0a14' }}>{idx + 1}月</option>
+              <option key={idx} value={idx} style={{ background: '#0b111b' }}>{idx + 1}月</option>
             ))}
           </select>
         </div>
@@ -152,7 +152,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
             <span key={w} style={{
               fontSize: '0.7rem',
               fontWeight: 'bold',
-              color: idx === 0 ? '#f87171' : (idx === 6 ? '#60a5fa' : '#9ca3af')
+              color: idx === 0 ? '#d9786a' : (idx === 6 ? '#5d9fc0' : '#a9a49a')
             }}>
               {w}
             </span>
@@ -176,7 +176,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
                   borderRadius: '50%',
                   border: 'none',
                   background: isSelected ? 'var(--color-gold)' : 'transparent',
-                  color: isSelected ? '#0a0a14' : 'white',
+                  color: isSelected ? '#0b111b' : 'white',
                   fontSize: '0.8rem',
                   fontWeight: isSelected ? 'bold' : 'normal',
                   cursor: 'pointer',
@@ -210,7 +210,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
               border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '12px',
               padding: '0.6rem',
-              color: '#9ca3af',
+              color: '#a9a49a',
               fontSize: '0.8rem',
               fontWeight: '600',
               cursor: 'pointer'
