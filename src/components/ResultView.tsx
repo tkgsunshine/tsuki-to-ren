@@ -1720,7 +1720,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   handleScrollToRegister();
                 }
               } else if (!isSubscribed) {
-                if (confirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？')) {
+                if (onOpenPremiumLP) {
+                  onOpenPremiumLP();
+                } else {
                   handleScrollToSub();
                 }
               } else {
