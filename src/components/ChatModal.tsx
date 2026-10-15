@@ -4,6 +4,7 @@ import { MoonMark } from './icons/BrandIcons';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
+import { showAlert } from './AppDialog';
 
 interface ChatModalProps {
   character: 'ren' | 'tsuki';
@@ -224,14 +225,14 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                 e.preventDefault();
                 const emailInput = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value.trim().toLowerCase();
                 if (!emailInput || !emailInput.includes('@')) {
-                  alert('有効なメールアドレスを入力してください。');
+                  showAlert('有効なメールアドレスを入力してください。');
                   return;
                 }
                 try {
                   await onRegister(emailInput);
                   setEmailSentChat(true);
                 } catch {
-                  alert('メール送信に失敗しました。もう一度お試しください。');
+                  showAlert('メール送信に失敗しました。もう一度お試しください。');
                 }
               }} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                 <input
@@ -439,7 +440,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                 onClick={() => {
                   onSubscribe();
                   setShowSubscribeOverlay(false);
-                  alert('プレミアムプランに登録しました！チャットが無制限になります。');
+                  showAlert('プレミアムプランに登録しました！チャットが無制限になります。');
                 }} 
                 className="consult-btn" 
                 style={{

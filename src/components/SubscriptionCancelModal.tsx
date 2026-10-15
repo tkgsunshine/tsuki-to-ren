@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, CheckSquare, Square, X, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { showAlert } from './AppDialog';
 
 interface SubscriptionCancelModalProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
     setTimeout(() => {
       setIsSubmitting(false);
       onConfirmCancel();
-      alert('🎉 プレミアム会員の解約手続きが完了いたしました。\nこれまで「月と蓮」をご利用いただき誠にありがとうございました。');
+      showAlert('🎉 プレミアム会員の解約手続きが完了いたしました。\nこれまで「月と蓮」をご利用いただき誠にありがとうございました。');
       onClose();
     }, 600);
   };

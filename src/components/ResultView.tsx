@@ -7,6 +7,7 @@ import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
+import { showAlert, showConfirm } from './AppDialog';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -616,7 +617,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setTimeout(() => setAvatarSavedSuccess(false), 2500);
     } catch (err) {
       console.error('Download failed:', err);
-      alert('画像の保存に失敗しました。もう一度お試しください。');
+      showAlert('画像の保存に失敗しました。もう一度お試しください。');
     } finally {
       setIsZoomedSaving(false);
     }
@@ -630,7 +631,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     e.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !cleanEmail.includes('@')) {
-      alert('有効なメールアドレスを入力してください。');
+      showAlert('有効なメールアドレスを入力してください。');
       return;
     }
     setRegisteringEmail(true);
@@ -640,7 +641,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     } catch (err: any) {
       console.error('Registration email error:', err);
       const detail = err?.code ? ` (${err.code}: ${err.message})` : '';
-      alert(`認証メールの送信に失敗しました。${detail}`);
+      showAlert(`認証メールの送信に失敗しました。${detail}`);
     } finally {
       setRegisteringEmail(false);
     }
@@ -1716,16 +1717,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <button
             onClick={() => {
               if (!isRegistered) {
-                if (confirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？')) {
-                  handleScrollToRegister();
-                }
+                showConfirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
+                  if (ok) handleScrollToRegister();
+                });
               } else if (!isSubscribed) {
                 if (confirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？')) {
                   handleScrollToSub();
                 }
               } else {
                 setIsNotified(!isNotified);
-                alert(!isNotified ? '🔔 毎朝8時の運勢通知をONに設定しました。' : '🔕 デイリー通知をOFFに設定しました。');
+                showAlert(!isNotified ? '🔔 毎朝8時の運勢通知をONに設定しました。' : '🔕 デイリー通知をOFFに設定しました。');
               }
             }}
             style={{

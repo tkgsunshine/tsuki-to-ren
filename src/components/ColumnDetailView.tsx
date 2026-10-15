@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { ArrowLeft, Clock, Calendar, Share2, BookOpen, ChevronRight, HelpCircle } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import { COLUMNS_DATA } from '../data/columnsData';
+import { showAlert } from './AppDialog';
 
 interface ColumnDetailViewProps {
   slug: string;
@@ -283,7 +284,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('記事URLをコピーしました！');
+      showAlert('記事URLをコピーしました！');
     }
   };
 

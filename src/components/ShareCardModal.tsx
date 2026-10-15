@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { getPillarWithReading } from '../utils/fortuneEngine';
+import { showAlert } from './AppDialog';
 
 interface ShareCardModalProps {
   selectedChar: 'ren' | 'tsuki';
@@ -157,7 +158,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       setTimeout(() => setSavedSuccess(false), 2500);
     } catch (err) {
       console.error('Failed to save image:', err);
-      alert('画像の保存に失敗しました。もう一度お試しください。');
+      showAlert('画像の保存に失敗しました。もう一度お試しください。');
     } finally {
       setIsSaving(false);
     }
@@ -180,7 +181,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (e) {
-        alert('リンクのコピーに失敗しました。');
+        showAlert('リンクのコピーに失敗しました。');
       }
       document.body.removeChild(input);
     }
