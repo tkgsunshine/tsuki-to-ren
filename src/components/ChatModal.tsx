@@ -15,6 +15,7 @@ interface ChatModalProps {
   onSubscribe: () => void;
   onClose: () => void;
   result?: FortuneResult | null;
+  opponentName?: string;
 }
 
 interface Message {
@@ -32,7 +33,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   onRegister,
   onSubscribe,
   onClose,
-  result
+  result,
+  opponentName
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -61,9 +63,12 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  // 干支名（例: 辛蛇）は分かりにくいので、結果画面の称号（例: 【宝石貴族 × 蛇】）を「お相手（宝石貴族×蛇）」の形で出す
+  // 相手のニックネームが入力されていれば「〇〇さん」で出す。
+  // 未入力なら、干支名（例: 辛蛇）は分かりにくいので結果画面の称号（例: 【宝石貴族 × 蛇】）を「お相手（宝石貴族×蛇）」の形で出す
+  const oppNickname = (opponentName || '').trim();
+  const hasOppNickname = !!oppNickname && oppNickname !== 'お相手';
   const oppTitle = (result?.opponentAstrologyTheme || '').replace(/[【】]/g, '').replace(/\s*×\s*/g, '×').trim();
-  const oppDisplayName = oppTitle ? `お相手（${oppTitle}）` : 'お相手';
+  const oppDisplayName = hasOppNickname ? `${oppNickname}さん` : (oppTitle ? `お相手（${oppTitle}）` : 'お相手');
   const presetOptions = [
     { key: 'no_reply', text: `${oppDisplayName}から連絡が来ない理由と対策は？` },
     { key: 'unknown_feelings', text: `${oppDisplayName}の本音や脈ありサインを教えて` },
@@ -76,7 +81,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       userInput,
       character,
       result,
-      history: messages
+      history: messages,
+      opponentName: hasOppNickname ? oppNickname : undefined
     });
   };
 
@@ -91,7 +97,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     if (hasOpp) {
       return `${basicInfo}
       
-【お相手の属性】
+【お相手の属性】${hasOppNickname ? `
+呼び名: ${oppNickname}さん` : ''}
 命式の日干: ${result.opponentPillar}
 本命星: ${result.opponentStar}
 性格タイプ: ${result.opponentMbtiText || '不明'} (${result.opponentMbtiName || '不明'})
