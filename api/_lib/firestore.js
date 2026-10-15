@@ -1,5 +1,6 @@
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 // Admin SDK access to Firestore (bypasses firestore.rules). Server-side only.
 // FIREBASE_SERVICE_ACCOUNT holds the service-account key file: either its JSON text as is,
@@ -33,4 +34,10 @@ export function getDb() {
     initializeApp({ credential: cert(parseServiceAccount(raw)) });
   }
   return getFirestore();
+}
+
+// Admin SDK Auth (verifies sign-in tokens, lists accounts). Server-side only.
+export function getAdminAuth() {
+  getDb(); // initializes the app
+  return getAuth();
 }

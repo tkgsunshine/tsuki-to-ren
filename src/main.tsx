@@ -1,10 +1,15 @@
-import { StrictMode, useEffect } from 'react'
+import { StrictMode, Suspense, lazy, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { installStandaloneBottomGapFix } from './utils/pwaHelper'
+import { initAttribution } from './services/analytics'
+
+const AdminView = lazy(() => import('./components/AdminView'))
+const isAdminPage = /^\/admin\/?$/.test(window.location.pathname)
 
 installStandaloneBottomGapFix()
+if (!isAdminPage) initAttribution()
 
 // index.html の起動スプラッシュを、アプリが描画されたあとにフェードアウトして外す
 function BootSplashRemover() {
@@ -19,7 +24,13 @@ function BootSplashRemover() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {isAdminPage ? (
+      <Suspense fallback={null}>
+        <AdminView />
+      </Suspense>
+    ) : (
+      <App />
+    )}
     <BootSplashRemover />
   </StrictMode>,
 )

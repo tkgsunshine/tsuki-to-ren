@@ -27,6 +27,7 @@ import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
+import { trackFortune } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 
 const formatBirthDate = (val: string): string => {
@@ -773,6 +774,7 @@ function App() {
     setOppGender(data.oppGender);
     setRelationship(data.relationship);
     setMode(data.mode);
+    trackFortune();
 
     startDiagnosis(
       data.myName,

@@ -35,6 +35,10 @@
       "destination": "https://tsuki-to-ren-dba8c.firebaseapp.com/__/auth/:path*"
     },
     {
+      "source": "/admin",
+      "destination": "/index.html"
+    },
+    {
       "source": "/fortune",
       "destination": "/index.html"
     },
@@ -94,6 +98,19 @@
         {
           "key": "X-Robots-Tag",
           "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
         }
       ]
     }

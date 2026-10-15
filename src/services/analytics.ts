@@ -1,0 +1,115 @@
+import type { User } from 'firebase/auth';
+
+// The site's own counters for the admin page (/admin): where a visit came from, which page it landed on,
+// how many fortunes were run and how many accounts were created. Sends no names, birth dates or emails.
+
+interface Attribution {
+  source: string;
+  landing: string;
+}
+
+const SESSION_KEY = 'hasu_attrib';       // this browser session's source / landing page
+const FIRST_KEY = 'hasu_first_attrib';   // the very first visit's, used for the sign-up
+const SIGNUP_KEY = 'hasu_signup_tracked';
+const SIGNUP_WINDOW_MS = 48 * 3600 * 1000;
+
+const read = (store: Storage | undefined, key: string): Attribution | null => {
+  try {
+    const raw = store?.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+const write = (store: Storage | undefined, key: string, value: unknown) => {
+  try { store?.setItem(key, typeof value === 'string' ? value : JSON.stringify(value)); } catch {}
+};
+const session = () => (typeof window === 'undefined' ? undefined : window.sessionStorage);
+const local = () => (typeof window === 'undefined' ? undefined : window.localStorage);
+
+const REFERRERS: [RegExp, string][] = [
+  [/(^|\.)mail\.google\.com$|(^|\.)outlook\.|(^|\.)mail\.yahoo\./, 'email'],
+  [/(^|\.)google\./, 'google'],
+  [/(^|\.)yahoo\./, 'yahoo'],
+  [/(^|\.)bing\.com$/, 'bing'],
+  [/^t\.co$|(^|\.)x\.com$|(^|\.)twitter\.com$/, 'x'],
+  [/(^|\.)instagram\.com$/, 'instagram'],
+  [/(^|\.)line\.me$|(^|\.)line-apps\.com$/, 'line'],
+  [/(^|\.)facebook\.com$|^l\.facebook\.com$/, 'facebook'],
+  [/(^|\.)threads\.(net|com)$/, 'threads'],
+  [/(^|\.)tiktok\.com$/, 'tiktok'],
+  [/(^|\.)youtube\.com$|^youtu\.be$/, 'youtube'],
+  [/(^|\.)note\.com$/, 'note'],
+];
+
+export const sourceFrom = (search: string, referrer: string, ownHost: string): string => {
+  const utm = new URLSearchParams(search).get('utm_source');
+  if (utm) {
+    const clean = utm.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 30);
+    if (clean) return `utm:${clean}`;
+  }
+  if (!referrer) return 'direct';
+  let host = '';
+  try { host = new URL(referrer).hostname.toLowerCase(); } catch { return 'other'; }
+  if (host === ownHost || host.endsWith('tsuki-to-ren.com')) return 'direct';
+  return REFERRERS.find(([re]) => re.test(host))?.[1] || 'other';
+};
+
+export const landingFrom = (pathname: string, search: string): string => {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  const params = new URLSearchParams(search);
+  if ((params.get('mb') || params.get('mBirth')) && (path === '/' || path === '/result' || path === '/fortune')) return 'result_link';
+  if (path === '/') return 'home';
+  if (path === '/column') return 'column_list';
+  const col = /^\/column\/([a-z0-9-]{1,100})$/i.exec(path);
+  if (col) return `column:${col[1].toLowerCase()}`;
+  if (path.startsWith('/compatibility')) return 'compat';
+  if (path === '/chat') return 'chat';
+  if (path === '/mypage' || path === '/profile') return 'mypage';
+  return 'other';
+};
+
+const isAutomated = () => typeof navigator !== 'undefined' && (navigator as Navigator & { webdriver?: boolean }).webdriver === true;
+
+const send = (payload: Record<string, string>, token?: string) => {
+  if (isAutomated()) return Promise.resolve();
+  return fetch('/api/track', {
+    method: 'POST',
+    keepalive: true,
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify(payload),
+  }).then(() => undefined).catch(() => undefined);
+};
+
+/** Records where this browser session came from, once per session. Call once at start-up. */
+export const initAttribution = () => {
+  if (typeof window === 'undefined' || read(session(), SESSION_KEY)) return;
+  const attrib: Attribution = {
+    source: sourceFrom(window.location.search, document.referrer, window.location.hostname),
+    landing: landingFrom(window.location.pathname, window.location.search),
+  };
+  write(session(), SESSION_KEY, attrib);
+  if (!read(local(), FIRST_KEY)) write(local(), FIRST_KEY, attrib);
+  void send({ type: 'visit', ...attrib });
+};
+
+const current = (): Attribution => read(session(), SESSION_KEY) || { source: 'direct', landing: 'other' };
+
+/** One fortune run from the input form. */
+export const trackFortune = () => {
+  void send({ type: 'fortune', ...current() });
+};
+
+/** Counts a newly created account once, with the source of its first visit. */
+export const trackSignupIfNew = async (user: User) => {
+  const created = Date.parse(user.metadata.creationTime || '');
+  if (!created || Date.now() - created > SIGNUP_WINDOW_MS) return;
+  try {
+    if (local()?.getItem(`${SIGNUP_KEY}_${user.uid}`)) return;
+  } catch {}
+  try {
+    const token = await user.getIdToken();
+    await send({ type: 'signup', ...(read(local(), FIRST_KEY) || current()) }, token);
+    write(local(), `${SIGNUP_KEY}_${user.uid}`, '1');
+  } catch {}
+};

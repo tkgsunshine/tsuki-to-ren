@@ -16,6 +16,7 @@ import {
 } from 'firebase/auth';
 
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { trackSignupIfNew } from './analytics';
 
 declare global {
   interface Window {
@@ -334,6 +335,8 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
       callback(null);
       return;
     }
+
+    void trackSignupIfNew(user);
 
     const rawProvider = user.providerData[0]?.providerId || '';
     let providerId: 'google.com' | 'twitter.com' | 'email' = 'google.com';
