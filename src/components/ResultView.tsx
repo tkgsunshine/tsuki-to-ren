@@ -258,8 +258,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const [emailSent, setEmailSent] = useState(false);
   const [registeringEmail, setRegisteringEmail] = useState(false);
   const [subSuccess, setSubSuccess] = useState(false);
-  // サブスク登録が完了した瞬間に、鑑定結果の先頭へ戻して全解放後の結果を最初から読めるようにする
+  // サブスク登録が完了した瞬間に、お相手のトリセツ（有料で解放される最初の部分）へ移動する。
+  // トリセツが無い鑑定（お相手なし）のときは、鑑定結果の先頭へ戻す
   const resultTopRef = useRef<HTMLDivElement>(null);
+  const torisetsuRef = useRef<HTMLDivElement>(null);
   const wasSubscribedRef = useRef(isSubscribed);
   const [showWelcomePremium, setShowWelcomePremium] = useState(false);
   useEffect(() => {
@@ -267,6 +269,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setShowWelcomePremium(true);
       // モーダルが閉じてから戻す（閉じる前だと body のスクロールロック解除で位置がずれる）
       const timer = setTimeout(() => {
+        if (torisetsuRef.current) {
+          torisetsuRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
         const mainEl = document.querySelector('.main-content') as HTMLElement | null;
         if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -646,11 +652,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
     }
   };
 
-  return (
-    <div ref={resultTopRef} style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.4s ease', paddingTop: '0.25rem', paddingBottom: 'calc(5.5rem + var(--safe-bottom, 0px))', scrollMarginTop: '1rem' }}>
-
-      {/* プレミアム登録完了のお知らせ（登録直後に結果の先頭へ戻したときだけ出す） */}
-      {showWelcomePremium && (
+  // プレミアム登録完了のお知らせ（登録直後に移動した先の先頭に出す）
+  const welcomePremiumBanner = showWelcomePremium ? (
         <div role="status" style={{
           position: 'relative',
           background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(17, 23, 34, 0.96) 100%)',
@@ -663,7 +666,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         }}>
           <div style={{ fontSize: '0.95rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>🎉 プレミアム会員になりました</div>
           <div style={{ fontSize: '0.82rem', color: '#e8e3d8', lineHeight: 1.6 }}>
-            鑑定結果のすべてが解放されました。ここから順番にお読みください。
+            {activeResult.opponentTorisetsu ? 'トリセツの続きと、この下の深層鑑定がすべて読めるようになりました。ここから順番にお読みください。' : '鑑定結果のすべてが解放されました。ここから順番にお読みください。'}
           </div>
           <button
             type="button"
@@ -675,7 +678,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <X size={18} />
           </button>
         </div>
-      )}
+  ) : null;
+
+  return (
+    <div ref={resultTopRef} style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.4s ease', paddingTop: '0.25rem', paddingBottom: 'calc(5.5rem + var(--safe-bottom, 0px))', scrollMarginTop: '1rem' }}>
+
+      {/* プレミアム登録完了のお知らせ（トリセツが無い鑑定では、結果の先頭に出す） */}
+      {!activeResult.opponentTorisetsu && welcomePremiumBanner}
       
       {/* Top Back Navigation Button */}
       {onReset && (
@@ -1943,7 +1952,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
         {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
       {activeResult.opponentTorisetsu && (
-        <div className="glass-panel" style={{
+        <div ref={torisetsuRef} className="glass-panel" style={{
+          scrollMarginTop: '1rem',
           padding: '1.25rem',
           display: 'flex',
           flexDirection: 'column',
@@ -1954,6 +1964,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           position: 'relative',
           overflow: 'hidden'
         }}>
+          {welcomePremiumBanner}
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
             <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>📖</span>
             <h2 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0, whiteSpace: 'nowrap', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis' }}>

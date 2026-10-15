@@ -132,7 +132,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       setIsProcessing(false);
       onClose();
       onSubscribe();
-      // 鑑定結果の表示中は、ResultView が結果の先頭へ戻して完了のお知らせを出す
+      // 鑑定結果の表示中は、ResultView がトリセツ（無いときは結果の先頭）へ移動して完了のお知らせを出す
       if (!isResultVisible) {
         alert('🌙 プレミアムへようこそ。\nすべての機能が使えるようになりました。これから毎日、そばで見守らせてくださいね。');
       }
