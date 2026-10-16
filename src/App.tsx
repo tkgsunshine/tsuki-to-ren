@@ -853,10 +853,16 @@ function App() {
       setTsukiResult(resTsuki);
       
       setFlowStep('result');
-      // Transition active view automatically to result detail and push history entry for browser back
-      setActiveTab('home');
+      // Transition active view automatically to result detail and push history entry for browser back.
+      // On /result (e.g. a reload of the 鑑定結果 tab), stay on that tab so the bottom menu matches the screen.
+      const onResultPath = getInitialRoute().tab === 'fortune';
+      setActiveTab(onResultPath ? 'fortune' : 'home');
       try {
-        window.history.pushState({ flowStep: 'result' }, '');
+        if (skipLoading && onResultPath) {
+          window.history.replaceState({ ...window.history.state, flowStep: 'result' }, '');
+        } else {
+          window.history.pushState({ flowStep: 'result' }, '');
+        }
       } catch (e) {
         console.error(e);
       }
