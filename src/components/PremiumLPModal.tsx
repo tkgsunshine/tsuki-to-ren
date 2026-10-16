@@ -239,15 +239,15 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               style={{
                 display: 'block',
                 width: '100%',
-                height: '300px',
+                height: '380px',
                 objectFit: 'cover',
-                objectPosition: '50% 15%'
+                objectPosition: '50% 0%'
               }}
             />
             <div style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(180deg, rgba(17, 24, 35, 0) 45%, rgba(17, 24, 35, 0.85) 80%, #111823 100%)'
+              background: 'linear-gradient(180deg, rgba(17, 24, 35, 0) 55%, rgba(17, 24, 35, 0.85) 85%, #111823 100%)'
             }} />
             <div style={{ position: 'absolute', left: 0, right: 0, bottom: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>
               <div style={{ fontSize: '0.72rem', color: '#e8b7c7', fontWeight: 'bold', letterSpacing: '0.12em', marginBottom: '0.35rem' }}>
