@@ -224,3 +224,18 @@ test('番号選び（pick_number）: 返信つき（60分後）の型で、毎�
   const cfg = JSON.parse(fs.readFileSync(new URL('../../data/x/config.json', import.meta.url), 'utf8'));
   assert.ok(cfg.delayedReplyFormats.includes('pick_number_reply'));
 });
+
+// コラム紹介（毎日1本・10:15）
+import { pickColumn, loadColumns, columnUrl, withColumnUrl } from './lib/column-post.mjs';
+test('コラム紹介: 未紹介のコラムを古い順に選び、URL付きの本文はコラム紹介の検査だけ通る', () => {
+  const cols = loadColumns();
+  const first = pickColumn([], cols);
+  assert.ok(first, '紹介できるコラムがある');
+  assert.ok(!/復縁|ツインレイ|引き寄せ/.test(first.title));
+  const used = [{ text: `x\n${columnUrl(first.slug)}` }];
+  assert.notEqual(pickColumn(used, cols).slug, first.slug, '紹介済みは選ばない');
+  const text = withColumnUrl('悩んでいるあなたへ\n・要点1\n-月-\n▼題名', first);
+  assert.deepEqual(lintPost({ slot: 'am', kind: 'value', text }, [], { allowLinks: false, columnUrl: true }), []);
+  assert.ok(lintPost({ slot: 'am', kind: 'value', text }, [], { allowLinks: false }).length, '通常の投稿ではURLは不可');
+  assert.ok(lintPost({ slot: 'am', kind: 'value', text: `${text.split('\n').slice(0, -1).join('\n')}\nhttps://example.com/` }, [], { allowLinks: false, columnUrl: true }).length);
+});
