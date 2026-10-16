@@ -11,6 +11,7 @@ export interface ChatContext {
   character: 'ren' | 'tsuki';
   result?: FortuneResult | null;
   history?: { sender: 'bot' | 'user'; text: string }[];
+  opponentName?: string;
 }
 
 // 十干の五行対応
@@ -34,7 +35,7 @@ export function generateChatResponse(context: ChatContext): string {
   // 1. プロフィール・属性データの抽出
   const hasOpp = !!result?.opponentPillar;
   const oppName = hasOpp
-    ? (result?.opponentAstrologyName?.replace(/👑魁罡👑 |👑極稀👑 /g, '') || 'お相手')
+    ? (context.opponentName || result?.opponentAstrologyName?.replace(/👑魁罡👑 |👑極稀👑 /g, '') || 'お相手')
     : 'お相手';
 
   const myPillar = result?.myPillar || '甲子';

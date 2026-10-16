@@ -2440,6 +2440,7 @@ function App() {
           onSubscribe={() => setIsSubscribed(true)}
           onClose={() => setIsChatOpen(false)}
           result={activeResult}
+          opponentName={mode === 'match' ? oppName : undefined}
         />
       )}
 
