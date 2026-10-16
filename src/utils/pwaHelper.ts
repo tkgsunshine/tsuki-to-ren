@@ -68,9 +68,10 @@ export const triggerAndroidInstallPrompt = async (): Promise<boolean> => {
   }
 };
 
-// iOS のホーム画面アプリ（スタンドアロン）で、表示領域の高さが画面より短く報告され、
-// bottom: 0 の下メニューが画面の下端より上に浮く（下に空白ができる）ことがある。
-// 画面の高さと表示領域の高さの差を測り、CSS 変数 --pwa-bottom-gap に入れて下メニューを下げる。
+// iOS のホーム画面アプリ（スタンドアロン）で、表示領域が画面の下端まで届かないことがある
+// （その下はシステムが theme-color で塗る）。以前はこの差の分だけ下メニューを下げていたが、
+// 表示領域の外に出た部分（メニューの文字）は描かれず切れてしまう。
+// そこで差を CSS 変数 --pwa-bottom-gap に入れ、下メニューの下の余白を減らすのにだけ使う（index.css）。
 // 差がない端末・ブラウザ表示では 0 のままなので影響しない。
 export const installStandaloneBottomGapFix = (): void => {
   if (typeof window === 'undefined') return;

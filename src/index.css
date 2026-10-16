@@ -96,16 +96,17 @@ body {
   background-image: url('/assets/bg-cosmos.webp');
 }
 
-/* iOS ホーム画面アプリでは 100dvh 等が画面より短く計算され、外枠（星空背景）の下端と
-   下メニューの間に黒い帯が出る。外枠を下メニューと同じ基準（fixed + --pwa-bottom-gap）で
-   画面の下端まで伸ばす。クラスは pwaHelper.ts の installStandaloneBottomGapFix が付ける。 */
+/* iOS ホーム画面アプリでは、アプリの表示領域が画面の下端まで届かないことがある（下端の帯は
+   システムが theme-color で塗る）。100dvh 等も実際の表示領域とずれて黒い帯が出るため、
+   外枠は表示領域の上端から下端までに固定する。クラスは pwaHelper.ts の installStandaloneBottomGapFix が付ける。 */
 html.ios-standalone .app-container {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  bottom: calc(-1 * var(--pwa-bottom-gap, 0px));
-  height: auto;
+  bottom: 0;
+  height: auto !important;
+  min-height: 0 !important;
   min-width: 0;
   margin: 0 auto;
 }
@@ -452,8 +453,7 @@ h1, h2, h3, h4, button, label {
 
 .navbar-container {
   position: fixed !important;
-  /* iOS ホーム画面アプリで表示領域が短く報告される分だけ下げる（通常は 0） */
-  bottom: calc(-1 * var(--pwa-bottom-gap, 0px)) !important;
+  bottom: 0 !important;
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
@@ -473,6 +473,9 @@ h1, h2, h3, h4, button, label {
   padding-right: 0.25rem !important;
   padding-bottom: 24px !important;
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 24px)) !important;
+  /* iOS ホーム画面アプリで表示領域が画面の下端より短いときは、ホームバーの下の余白はシステム側にあるので、
+     その分だけ下の余白を減らす（メニューを画面外へ下げると文字が切れるため、位置は動かさない） */
+  padding-bottom: max(0.5rem, calc(0.5rem + env(safe-area-inset-bottom, 0px) - var(--pwa-bottom-gap, 0px))) !important;
   z-index: 99999 !important;
   box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.8) !important;
   pointer-events: auto !important;
