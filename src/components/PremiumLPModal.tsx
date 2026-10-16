@@ -14,30 +14,40 @@ const benefits = [
     Icon: Calendar,
     color: '#5d9fc0',
     title: 'これからの7日間と、10年先までの流れ',
+    shot: '/assets/premium/timeline.webp',
+    shotAlt: '7日間の相性グラフと年ごとの運勢の画面',
     body: '明日から7日間の二人の相性の波と、この先10年の「結婚・同棲・運気が大きく開く時期」まで、鍵のかかっていたところをぜんぶ読めるようになりますよ。'
   },
   {
     Icon: BookOpen,
     color: '#d68ba4',
     title: 'あの人のトリセツと、6つの相性グラフ',
+    shot: '/assets/premium/torisetsu.webp',
+    shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
     body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、ぜんぶ見られます。'
   },
   {
     Icon: Bell,
     color: '#e8a93a',
     title: '毎朝届く、あなたのための運勢メール',
+    shot: '/assets/premium/mail.webp',
+    shotAlt: '毎朝届く運勢メールの画面',
     body: 'その日の運勢と吉方位、二人にとって大事な転機の日を毎朝お届けします。チャンスの日も、少し気をつけたい日も、先に知っておけますよ。'
   },
   {
     Icon: Heart,
     color: '#6fb08f',
     title: '気になる人を10人まで保存',
+    shot: '/assets/premium/partners.webp',
+    shotAlt: '保存したお相手の一覧画面',
     body: '本命の人も、まだ気になっているだけの人も、10人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。'
   },
   {
     Icon: MessageCircle,
     color: '#b9a3d6',
     title: '私と蓮に、いつでも相談',
+    shot: '/assets/premium/chat.webp',
+    shotAlt: '月とのチャット画面',
     body: '返信の文面を一緒に考えたり、あの人の本音を一緒に読み解いたり。24時間、回数を気にせず話しかけてくださいね。寄り添う私と、冷静に整理してくれる蓮がいます。'
   }
 ];
@@ -116,6 +126,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [zoomShot, setZoomShot] = useState<{ src: string; alt: string } | null>(null);
 
   if (!isOpen) return null;
 
@@ -310,15 +321,16 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
               プレミアムでできること
             </h2>
-            {benefits.map(({ Icon, color, title, body }) => (
+            {benefits.map(({ Icon, color, title, body, shot, shotAlt }) => (
               <div key={title} className="glass-panel" style={{
                 padding: '0.9rem 1rem',
                 display: 'flex',
-                gap: '0.8rem',
-                alignItems: 'flex-start',
+                flexDirection: 'column',
+                gap: '0.75rem',
                 border: `1px solid ${color}4d`,
                 background: `${color}0a`
               }}>
+              <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
                 <div style={{
                   width: '36px',
                   height: '36px',
@@ -341,6 +353,44 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     {body}
                   </p>
                 </div>
+              </div>
+                {/* 実際の画面の参考スクショ（ダミーデータ）。タップで全体を拡大 */}
+                <button
+                  type="button"
+                  aria-label={`${shotAlt}を拡大して見る`}
+                  onClick={() => setZoomShot({ src: shot, alt: shotAlt })}
+                  style={{
+                    position: 'relative',
+                    display: 'block',
+                    width: '100%',
+                    padding: 0,
+                    border: `1px solid ${color}40`,
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    background: '#0a0e14',
+                    cursor: 'zoom-in'
+                  }}
+                >
+                  <img
+                    src={shot}
+                    alt={shotAlt}
+                    loading="lazy"
+                    decoding="async"
+                    style={{ display: 'block', width: '100%', height: '170px', objectFit: 'cover', objectPosition: 'top' }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    right: '0.45rem',
+                    bottom: '0.45rem',
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    background: 'rgba(5, 7, 10, 0.75)',
+                    color: '#e8e3d8',
+                    fontSize: '0.62rem'
+                  }}>
+                    画面イメージ・タップで拡大
+                  </span>
+                </button>
               </div>
             ))}
           </div>
@@ -548,6 +598,58 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           )}
         </div>
       </div>
+
+      {zoomShot && (
+        <div
+          role="dialog"
+          aria-label={zoomShot.alt}
+          onClick={() => setZoomShot(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200001,
+            background: 'rgba(5, 7, 10, 0.94)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: 'calc(1rem + env(safe-area-inset-top, 0px)) 0.75rem calc(1rem + env(safe-area-inset-bottom, 0px))',
+            boxSizing: 'border-box',
+            overflowY: 'auto',
+            cursor: 'zoom-out'
+          }}
+        >
+          <button
+            type="button"
+            aria-label="閉じる"
+            onClick={() => setZoomShot(null)}
+            style={{
+              alignSelf: 'flex-end',
+              flexShrink: 0,
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#e8e3d8',
+              cursor: 'pointer',
+              marginBottom: '0.6rem'
+            }}
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={zoomShot.src}
+            alt={zoomShot.alt}
+            style={{ display: 'block', width: '100%', maxWidth: '440px', height: 'auto', borderRadius: '14px', flexShrink: 0 }}
+          />
+          <p style={{ fontSize: '0.7rem', color: '#a9a49a', margin: '0.6rem 0 0', flexShrink: 0 }}>
+            ※ 画面はイメージです（表示している名前や内容はサンプルです）
+          </p>
+        </div>
+      )}
 
       <SubscriptionCancelModal
         isOpen={showCancelModal}
