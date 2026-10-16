@@ -30,6 +30,7 @@ import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { trackFortune } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { showAlert, showConfirm } from './components/AppDialog';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -648,7 +649,7 @@ function App() {
   const saveEditPartner = () => {
     if (!editingPartnerId) return;
     if (!editPartnerBirth || editPartnerBirth.length < 10) {
-      alert('生年月日は「19950401」のように数字8桁で入力してください。');
+      showAlert('生年月日は「19950401」のように数字8桁で入力してください。');
       return;
     }
     const fields = {
@@ -667,7 +668,7 @@ function App() {
         setNotifyAfterPartnerAdd(false);
         openNotifyModal(newPartner.id);
       } else {
-        alert(`${newPartner.name}様の情報を保存しました。`);
+        showAlert(`${newPartner.name}様の情報を保存しました。`);
       }
       return;
     }
@@ -679,7 +680,7 @@ function App() {
     if (before && isSubPartner(before) && notifySub?.enabled && notifySub.email) {
       saveNotifySubscription(notifySub.email, { ...before, ...fields });
     }
-    alert('お相手の情報を更新しました。');
+    showAlert('お相手の情報を更新しました。');
   };
 
   // Checks the saved-partner limit for the member level; shows the upgrade prompt and returns false when full
@@ -687,17 +688,19 @@ function App() {
     const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
     if (savedPartners.length >= limit) {
       if (!isRegistered) {
-        if (confirm(`非会員の保存上限（1人）に達しています。\n無料会員登録を行うと最大2人まで保存できます。無料登録しますか？`)) {
+        showConfirm(`非会員の保存上限（1人）に達しています。\n無料会員登録を行うと最大2人まで保存できます。無料登録しますか？`, { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
+          if (!ok) return;
           setActiveTab('profile');
           setSettingsSubView('profile');
-        }
+        });
       } else if (!isSubscribed) {
-        if (confirm(`無料会員の保存上限（2人）に達しています。\n月額500円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`)) {
+        showConfirm(`無料会員の保存上限（2人）に達しています。\n月額500円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+          if (!ok) return;
           setActiveTab('profile');
           setSettingsSubView('main');
-        }
+        });
       } else {
-        alert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
+        showAlert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
       }
       return false;
     }
@@ -706,12 +709,12 @@ function App() {
 
   const handleSavePartner = () => {
     if (!oppBirth) {
-      alert('保存するお相手の情報がありません。');
+      showAlert('保存するお相手の情報がありません。');
       return;
     }
     const exists = savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
     if (exists) {
-      alert('このお相手は既に保存されています。');
+      showAlert('このお相手は既に保存されています。');
       return;
     }
     if (!canAddPartner()) return;
@@ -726,7 +729,7 @@ function App() {
     };
 
     setSavedPartners([...savedPartners, newPartner]);
-    alert(`${newPartner.name}様の情報を保存しました。`);
+    showAlert(`${newPartner.name}様の情報を保存しました。`);
   };
 
   const handleDeletePartner = (id: string) => {
@@ -1403,10 +1406,10 @@ function App() {
                         setNotifyDailyLuck(false);
                         const ok = await unsubscribeEmailSubscription();
                         if (ok) {
-                          alert('🔕 毎朝8時の運勢通知をOFFにしました。');
+                          showAlert('🔕 毎朝8時の運勢通知をOFFにしました。');
                         } else {
                           setNotifyDailyLuck(true);
-                          alert('通知をOFFにできませんでした。通信状態を確認するか、ログインし直してからもう一度お試しください。');
+                          showAlert('通知をOFFにできませんでした。通信状態を確認するか、ログインし直してからもう一度お試しください。');
                         }
                       } else if (!isRegistered && !currentUser) {
                         setShowAuthModal(true);
@@ -1691,7 +1694,7 @@ function App() {
                   className="consult-btn"
                   onClick={async () => {
                     if (!isValidBirthDate(myBirth)) {
-                      alert('生年月日を「19950401」のように8桁で正しく入力してください。');
+                      showAlert('生年月日を「19950401」のように8桁で正しく入力してください。');
                       return;
                     }
                     try {
@@ -1706,12 +1709,12 @@ function App() {
                     if (notifyDailyLuck && currentUser) {
                       const synced = await updateEmailSubscriptionProfile({ myName: myName || 'あなた', myBirth, myGender, myMbti });
                       if (!synced) {
-                        alert('プロフィールは保存しましたが、毎朝のメールへの反映に失敗しました。ログインし直してから、もう一度保存してください。');
+                        showAlert('プロフィールは保存しましたが、毎朝のメールへの反映に失敗しました。ログインし直してから、もう一度保存してください。');
                         setSettingsSubView('main');
                         return;
                       }
                     }
-                    alert('プロフィール変更を保存しました！');
+                    showAlert('プロフィール変更を保存しました！');
                     setSettingsSubView('main');
                   }}
                   style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem', fontSize: '0.9rem', fontWeight: 'bold' }}
@@ -2061,9 +2064,9 @@ function App() {
                             <button
                               type="button"
                               onClick={() => {
-                                if (confirm(`${partner.name}様の保存データを削除しますか？`)) {
-                                  handleDeletePartner(partner.id);
-                                }
+                                showConfirm(`${partner.name}様の保存データを削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
+                                  if (ok) handleDeletePartner(partner.id);
+                                });
                               }}
                               style={{
                                 background: 'rgba(207, 90, 67, 0.1)',
@@ -2646,34 +2649,34 @@ function App() {
               type="button"
               onClick={async () => {
                 if (!notifyEmailInput || !notifyEmailInput.includes('@')) {
-                  alert('有効なメールアドレスを入力してください。');
+                  showAlert('有効なメールアドレスを入力してください。');
                   return;
                 }
                 if (!isValidBirthDate(myBirth)) {
-                  alert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
+                  showAlert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
                   return;
                 }
                 const cleanEmail = notifyEmailInput.trim().toLowerCase();
                 const accountEmail = currentUser?.email?.toLowerCase();
                 if (!accountEmail) {
-                  alert('メール通知には、メールアドレス付きのアカウントでのログインが必要です。Googleまたはメールリンクでログインしてください。');
+                  showAlert('メール通知には、メールアドレス付きのアカウントでのログインが必要です。Googleまたはメールリンクでログインしてください。');
                   return;
                 }
                 if (cleanEmail !== accountEmail) {
-                  alert('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。');
+                  showAlert('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。');
                   return;
                 }
 
                 const partner = savedPartners.find(p => p.id === notifyTarget);
                 if (partner && !isValidBirthDate(partner.birth.replace(/\//g, '-'))) {
-                  alert(`${partner.name}様の生年月日が正しくありません。「保存したお相手」で直してから選んでください。`);
+                  showAlert(`${partner.name}様の生年月日が正しくありません。「保存したお相手」で直してから選んでください。`);
                   return;
                 }
 
                 // Sync the subscription to Firestore; the 8:00 AM cron reads it for delivery
                 const saved = await saveNotifySubscription(cleanEmail, partner || (notifyTarget === 'keep' && showKeepTarget ? 'keep' : null));
                 if (!saved) {
-                  alert('通知の登録に失敗しました。ログインし直してから、もう一度お試しください。');
+                  showAlert('通知の登録に失敗しました。ログインし直してから、もう一度お試しください。');
                   return;
                 }
                 setNotifyEmail(cleanEmail);
@@ -2730,7 +2733,7 @@ function App() {
               onClick={async () => {
                 const clean = promptEmailInput.trim().toLowerCase();
                 if (!clean || !clean.includes('@')) {
-                  alert('有効なメールアドレスを入力してください。');
+                  showAlert('有効なメールアドレスを入力してください。');
                   return;
                 }
                 const res = await completeEmailMagicLinkSignIn(clean);
@@ -2739,7 +2742,7 @@ function App() {
                   setIsRegistered(true);
                   setShowEmailPromptModal(false);
                 } else {
-                  alert('認証に失敗しました。メールアドレスが正しいかご確認ください。');
+                  showAlert('認証に失敗しました。メールアドレスが正しいかご確認ください。');
                 }
               }}
               className="consult-btn font-serif"

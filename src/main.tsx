@@ -2,6 +2,7 @@ import { StrictMode, Suspense, lazy, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { AppDialogHost } from './components/AppDialog'
 import { installStandaloneBottomGapFix } from './utils/pwaHelper'
 import { initAttribution } from './services/analytics'
 
@@ -31,6 +32,7 @@ createRoot(document.getElementById('root')!).render(
     ) : (
       <App />
     )}
+    <AppDialogHost />
     <BootSplashRemover />
   </StrictMode>,
 )

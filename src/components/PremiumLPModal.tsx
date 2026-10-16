@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
+import { showAlert, showConfirm } from './AppDialog';
 
 const worries = [
   '既読のまま返事がこなくて、なかなか眠れない夜',
@@ -120,10 +121,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   const handleSubscribeAction = () => {
     if (!isRegistered) {
-      if (confirm('プレミアムのお申し込みには、無料の会員登録が必要です。\n登録画面へ進みますか？')) {
+      showConfirm('プレミアムのお申し込みには、無料の会員登録が必要です。\n登録画面へ進みますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+        if (!ok) return;
         onClose();
         onRegisterFirst();
-      }
+      });
       return;
     }
 
@@ -134,7 +136,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       onSubscribe();
       // 鑑定結果の表示中は、ResultView が結果の先頭へ戻して完了のお知らせを出す
       if (!isResultVisible) {
-        alert('🌙 プレミアムへようこそ。\nすべての機能が使えるようになりました。これから毎日、そばで見守らせてくださいね。');
+        showAlert('🌙 プレミアムへようこそ。\nすべての機能が使えるようになりました。これから毎日、そばで見守らせてくださいね。');
       }
     }, 1200);
   };

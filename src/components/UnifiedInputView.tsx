@@ -4,6 +4,7 @@ import { MoonMark } from './icons/BrandIcons';
 import type { SavedPartner } from '../App';
 import { CustomDatePicker } from './CustomDatePicker';
 import { mbtiOptions } from '../constants/mbti';
+import { showAlert, showConfirm } from './AppDialog';
 export { mbtiOptions };
 
 interface UnifiedInputViewProps {
@@ -165,16 +166,16 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!myBirth || myBirth.length < 10) {
-      alert('あなたの生年月日は「19950401」のように数字8桁で入力してください。');
+      showAlert('あなたの生年月日は「19950401」のように数字8桁で入力してください。');
       return;
     }
     if (mode === 'match') {
       if (!oppName || !oppName.trim()) {
-        alert('お相手のニックネームを入力してください。');
+        showAlert('お相手のニックネームを入力してください。');
         return;
       }
       if (!oppBirth || oppBirth.length < 10) {
-        alert('お相手の生年月日は「19951221」のように数字8桁で入力してください。');
+        showAlert('お相手の生年月日は「19951221」のように数字8桁で入力してください。');
         return;
       }
     }
@@ -510,9 +511,9 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm(`${partner.name}様を削除しますか？`)) {
-                            onDeletePartner(partner.id);
-                          }
+                          showConfirm(`${partner.name}様を削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
+                            if (ok) onDeletePartner(partner.id);
+                          });
                         }}
                         style={{
                           background: 'rgba(207, 90, 67, 0.1)',
