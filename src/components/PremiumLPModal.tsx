@@ -231,17 +231,17 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           WebkitOverflowScrolling: 'touch',
           paddingBottom: '1.5rem'
         }}>
-          {/* Hero: 月の立ち姿と、月からの語りかけ */}
+          {/* Hero: 祈る月と、月からの語りかけ */}
           <div style={{ position: 'relative' }}>
             <img
-              src="/assets/tsuki.webp"
+              src="/assets/tsuki-prayer.webp"
               alt="プレミアムを案内する月"
               style={{
                 display: 'block',
                 width: '100%',
                 height: '300px',
                 objectFit: 'cover',
-                objectPosition: '50% 18%'
+                objectPosition: '50% 15%'
               }}
             />
             <div style={{
