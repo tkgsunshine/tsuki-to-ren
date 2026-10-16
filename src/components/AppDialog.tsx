@@ -100,7 +100,6 @@ export function AppDialogHost() {
           textAlign: 'center'
         }}
       >
-        <div aria-hidden="true" style={{ fontSize: '1.4rem', lineHeight: 1, marginBottom: '0.7rem', color: '#e8a93a' }}>☾</div>
         {current.title && (
           <h3 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.6rem', fontWeight: 'bold' }}>
             {current.title}
