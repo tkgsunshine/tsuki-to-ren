@@ -506,10 +506,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   const handleLockTagClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (onOpenPremiumLP) {
-      onOpenPremiumLP();
-    } else if (!isRegistered) {
+    // 非会員はまず無料会員登録へ（購入LPには飛ばさない）
+    if (!isRegistered) {
       handleScrollToRegister();
+    } else if (onOpenPremiumLP) {
+      onOpenPremiumLP();
     } else {
       handleScrollToSub();
     }
