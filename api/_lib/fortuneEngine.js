@@ -1074,7 +1074,7 @@ export function getDailyContactAndAdvice(dailyScore, hasOpponent, character, _my
             subtitle = subs.tLow;
             const delayReason = oppMbtiTrait?.delayDeepReason || oppStemTrait?.delayReason || '一人でじっくり考えを整理したい充電フェーズにあるため';
             if (character === 'tsuki') {
-                advice = `本日は星の巡りが相剋・休息フェーズです。${oppNick}様は現在『${delayReason}』という状態になりやすいため、あえて連絡を休んで自分磨きに集中しましょう。追わないあなたの凛とした余裕が、お相手の「どうしたのかな？」を引き出します。`;
+                advice = `本日は星の巡りがひと休みのタイミングです。${oppNick}様は現在『${delayReason}』という状態になりやすいため、あえて連絡を休んで自分磨きに集中しましょう。追わないあなたの凛とした余裕が、お相手の「どうしたのかな？」を引き出します。`;
             }
             else {
                 advice = `本日の接触成功確率は極めて低調です。お相手は『${delayReason}』という心理的キャパシティ低下フェーズにあります。本日は一切の連絡を凍結し、相手の自発的アクションを待つ「サイレント静観戦略」が最も合理的な生存ルートです。`;
@@ -1415,6 +1415,8 @@ const getAstrologyAvatar = (branch, gender) => {
     return isMale ? '/assets/ren.webp' : '/assets/tsuki.webp';
 };
 // 五行関係に基づく本日と日干の関係性（通変星）判定ロジック
+// 通変星の分類名は専門用語なので、画面に出すときは平易な言葉にする（AGENTS.md §2）
+const DAY_CATEGORY_LABEL = { '比劫': '自分らしさ', '食傷': '表現力', '財星': '魅力', '官殺': 'ご縁', '印星': '安らぎ' };
 function getTenGodsCategory(myStem, todayStem) {
     const elements = ['木', '火', '土', '金', '水'];
     const myEl = stemElements[myStem] || '木';
@@ -1687,11 +1689,11 @@ export function generateFortuneResult(input, character) {
         if (character === 'tsuki') {
             if (baseScore >= 85) {
                 oneLiner = `【${myPillarObj.stem}の輝き】あなたの内なる魅力が満開となり、理想の良縁を引き寄せる絶頂期です。`;
-                summary = `${myNickname}様の日柱（${myPillar}）は「${myElTrait}」を宿しており、本来周囲を温かく惹きつける強いオーラを持っています。九星気学の本命星（${myStarObj.name}）との相乗効果により、今日はあなた自身の自然体な笑顔が最高の開運アイテムとなります。他人への遠慮を手放し、自分が本当に心地よいと感じる選択を楽しんでください。`;
+                summary = `${myNickname}様の生まれ持った星は「${myElTrait}」を宿しており、本来周囲を温かく惹きつける強いオーラを持っています。九星気学の本命星（${myStarObj.name}）との相乗効果により、今日はあなた自身の自然体な笑顔が最高の開運アイテムとなります。他人への遠慮を手放し、自分が本当に心地よいと感じる選択を楽しんでください。`;
             }
             else if (baseScore >= 70) {
                 oneLiner = `【${myPillarObj.stem}の循環】運気は順調な拡大傾向。心を満たす自己投資が良縁の土壌を整えます。`;
-                summary = `日柱エネルギーが安定して巡っています。あなたの16タイプ性格（${input.myMbti}）が持つ長所を素直に表現できる環境に身を置くことで、波長の合う特別な存在との距離が自然と縮まります。小さなワクワクを大切にしてください。`;
+                summary = `あなたの生まれ持った星のエネルギーが安定して巡っています。あなたの16タイプ性格（${input.myMbti}）が持つ長所を素直に表現できる環境に身を置くことで、波長の合う特別な存在との距離が自然と縮まります。小さなワクワクを大切にしてください。`;
             }
             else if (baseScore >= 55) {
                 oneLiner = `【${myPillarObj.stem}の休息】心を静かに整える平穏期。焦らず自分のペースを大切に慈しみましょう。`;
@@ -1705,7 +1707,7 @@ export function generateFortuneResult(input, character) {
         else { // ren
             if (baseScore >= 85) {
                 oneLiner = `【${myPillarObj.stem}の最高効率】知性と判断力が極限まで冴え渡る開運日。理想の設計図を実行に移すべきです。`;
-                summary = `四柱推命・気学・性格分析データ統合評価：日柱（${myPillar}）のポテンシャルが最高水準で発揮されています。あなたの16タイプ（${input.myMbti}）の強みである分析力と実行力をフル活用し、今後のパートナーシップやキャリアの具体的な目標設定に着手してください。成果は極大化されます。`;
+                summary = `生年月日と性格タイプを合わせて見ると、あなたの生まれ持った力が最高の状態で発揮されています。あなたの16タイプ（${input.myMbti}）の強みである分析力と実行力をフル活用し、今後のパートナーシップやキャリアの具体的な目標設定に着手してください。成果は極大化されます。`;
             }
             else if (baseScore >= 70) {
                 oneLiner = `【${myPillarObj.stem}の安定運用】理性的な選択が好循環を生む好調日。スマートな情報収集を進めてください。`;
@@ -1849,10 +1851,10 @@ export function generateFortuneResult(input, character) {
         const branchImp = getBranchImpact(mPillar.branch, myPillarObj.branch);
         let astroNote = '';
         if (stemImp >= 16 || branchImp >= 10) {
-            astroNote = `（月柱の相性が『干合・合法』を示し、強烈なお引き寄せの追い風が吹きます）`;
+            astroNote = `（この月は二人の星が強く引き合い、強烈なお引き寄せの追い風が吹きます）`;
         }
         else if (branchImp <= -14 || stemImp <= -14) {
-            astroNote = `（月柱に『六沖・相剋』の波が生じるため、丁寧で柔軟な対話が良好な運気を保つ鍵となります）`;
+            astroNote = `（この月は星どうしがぶつかりやすい波が来るため、丁寧で柔軟な対話が良好な運気を保つ鍵となります）`;
         }
         if (hasOpponent) {
             if (character === 'tsuki') {
@@ -2000,10 +2002,10 @@ export function generateFortuneResult(input, character) {
         const branchImp = getBranchImpact(yPillar.branch, myPillarObj.branch);
         let astroNote = '';
         if (stemImp >= 16 || branchImp >= 10) {
-            astroNote = `（${yPillar.stem}${yPillar.branch}の年柱干支が宿命の日柱と『干合・三合』を形成し、人生の大きな転換・開運の波をもたらします）`;
+            astroNote = `（この年の星があなたの生まれ持った星と強く引き合い、人生の大きな転換・開運の波をもたらします）`;
         }
         else if (branchImp <= -14 || stemImp <= -14) {
-            astroNote = `（${yPillar.stem}${yPillar.branch}の年柱が『六沖・相剋』の波を示すため、慎重なリスク管理と客観的な判断が守りの軸となります）`;
+            astroNote = `（この年は星どうしがぶつかりやすい波が来るため、慎重なリスク管理と客観的な判断が守りの軸となります）`;
         }
         if (hasOpponent) {
             if (character === 'tsuki') {
@@ -2240,7 +2242,7 @@ export function generateFortuneResult(input, character) {
             let topic1Detail = '';
             if (character === 'tsuki') {
                 if (score >= 85) {
-                    topic1Intro = `四柱推命の日柱重ね合わせにおいて${sTitle}が成立。${myNickname}様とお相手（${oppNick}様）の間には、言葉を超えた魂の引き寄せと絶対的な信頼が宿っています。`;
+                    topic1Intro = `二人の生まれ持った星を重ね合わせると、${sTitle}が成立。${myNickname}様とお相手（${oppNick}様）の間には、言葉を超えた魂の引き寄せと絶対的な信頼が宿っています。`;
                     topic1Detail = `${sDetail}\n\n${bDetail} さらに${starDetail}\n\n🌙 月からの導き：${oppNick}様にとって、${myNickname}様は「他では決して得られない深い安らぎ」を感じる存在です。お互いの弱さや本音を素直に打ち明け合うことで、魂の結びつきは一生涯揺るぎないものへと昇華します。`;
                 }
                 else if (score >= 70) {
@@ -2252,14 +2254,14 @@ export function generateFortuneResult(input, character) {
                     topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：一時的にお相手が自分の世界に入り込んでいるように見えても、それはあなたを拒絶しているのではなく、エネルギーを補給している合図です。焦らず温かい見守りを続けることが信頼の種となります。`;
                 }
                 else {
-                    topic1Intro = `命式の波が一時的に「相剋・慎重」の波紋を描いており、些細なすれ違いが起きやすい注意期です。感情に任せたアプローチは避け、静観を保ちましょう。`;
+                    topic1Intro = `二人の星の巡りが一時的に「慎重に」の波を描いており、些細なすれ違いが起きやすい注意期です。感情に任せたアプローチは避け、静観を保ちましょう。`;
                     topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：今は無理に白黒をつけようとせず、相手のスペースを確保してあげることが最善の選択です。まずはあなた自身の心を優しく満たすことで、不要な摩擦を回避し運気の好転を促せます。`;
                 }
             }
             else { // ren
                 if (score >= 85) {
                     topic1Intro = `命式データおよび認知機能の定量分析により、両者は極めて高い補完シナジー構造を有していると実証されます。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：日干の五行生剋バランスおよび九星気学のデータから、両者の衝突リスクは極小と算出されます。この追い風の局面を逃さず、将来の具体的な方針や約束を取り付ける論理的交渉を進めるべきタイミングです。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：二人の生まれ持った星のバランスと九星気学のデータから、両者の衝突リスクは極小と算出されます。この追い風の局面を逃さず、将来の具体的な方針や約束を取り付ける論理的交渉を進めるべきタイミングです。`;
                 }
                 else if (score >= 70) {
                     topic1Intro = `両者の関係性は着実な上昇トレンドを描いています。相手の認知行動パターンを客観的に観察し、スマートな関係構築が可能です。`;
@@ -2324,7 +2326,7 @@ export function generateFortuneResult(input, character) {
             const ng1 = oppMbtiTrait?.ngList[0] || '相手のペースを無視した連絡の連投';
             const ng2 = oppMbtiTrait?.ngList[1] || '感情的な詰問や試し行為';
             const ng3 = oppMbtiTrait?.ngList[2] || 'プライベートな領域への過度な干渉';
-            const stemNgNote = oppStemTrait ? `（さらに日干【${oppPillarObj?.stem}】の宿命上、『${oppStemTrait.ng.join('』『')}』も強い拒絶反応を招きます）` : '';
+            const stemNgNote = oppStemTrait ? `（さらにお相手の生まれ持った星の性質上、『${oppStemTrait.ng.join('』『')}』も強い拒絶反応を招きます）` : '';
             let topic3Intro = '';
             let topic3Detail = '';
             if (character === 'tsuki') {
@@ -2371,7 +2373,7 @@ export function generateFortuneResult(input, character) {
             if (character === 'tsuki') {
                 if (score >= 85) {
                     topic4Intro = `今後1ヶ月の運気推移の中で、二人の距離が急接近する絶好の「運命の転機日」が特定されています。`;
-                    topic4Detail = `📍 お相手（${oppNick}様）が最も喜ぶデートスポット：\n${oppDateSpot}\n\n💌 心を動かすお誘いテンプレート：\n${oppLineInvite}\n\n🌙 月からのアドバイス：日柱干支の共鳴が最高潮に達する好運日（週次予測の絶好調日）において、二人きりになれる機会が巡ってきます。その日は躊躇せず、このスポットとお誘い文句を活用して素直な想いを伝えましょう。一気に進展へ結びつきます。`;
+                    topic4Detail = `📍 お相手（${oppNick}様）が最も喜ぶデートスポット：\n${oppDateSpot}\n\n💌 心を動かすお誘いテンプレート：\n${oppLineInvite}\n\n🌙 月からのアドバイス：二人の星の共鳴が最高潮に達する好運日（週次予測の絶好調日）において、二人きりになれる機会が巡ってきます。その日は躊躇せず、このスポットとお誘い文句を活用して素直な想いを伝えましょう。一気に進展へ結びつきます。`;
                 }
                 else if (score >= 70) {
                     topic4Intro = `運気が追い風に変わるチャンス日が複数特定されています。自然なお誘いが奏功します。`;
@@ -2464,7 +2466,7 @@ export function generateFortuneResult(input, character) {
                     return [
                         {
                             title: '1. 本日の運勢と運気の流れ',
-                            intro: `日柱（${myPillar}）と本命星（${myStarObj.name}）のエネルギーが完璧に共鳴する絶好調日です。`,
+                            intro: `あなたの生まれ持った星と本命星（${myStarObj.name}）のエネルギーが完璧に共鳴する絶好調日です。`,
                             detail: `あなたの持つ本来のオーラ（${myStemPraise}）が最高潮に輝いています。周囲に無理に合わせる必要はありません。自分自身の心地よさを最優先することで、素晴らしい良縁が自然と引き寄せられます。`
                         },
                         {
@@ -2494,7 +2496,7 @@ export function generateFortuneResult(input, character) {
                         {
                             title: '1. 本日の運勢と運気の流れ',
                             intro: `運気は順調な拡大傾向にあり、前向きな気持ちで過ごせる好調日です。`,
-                            detail: `日柱のエネルギーが安定しており、周囲とのコミュニケーションがスムーズに進みます。小さな挑戦や新しい場所への参加が吉となります。`
+                            detail: `あなたの生まれ持った星のエネルギーが安定しており、周囲とのコミュニケーションがスムーズに進みます。小さな挑戦や新しい場所への参加が吉となります。`
                         },
                         {
                             title: '2. 自己表現と周囲への伝わり方',
@@ -2808,16 +2810,16 @@ export function generateFortuneResult(input, character) {
                 return '【天地徳合・百年に一度の奇跡相性】';
             }
             if (isKango) {
-                return `【干合の引力】${pairType}・運命のソウルメイト`;
+                return `【運命の引力】${pairType}・運命のソウルメイト`;
             }
             if (isShigo) {
-                return `【支合調和】${pairType}・心身が溶け合うツインレイ`;
+                return `【以心伝心】${pairType}・心身が溶け合うツインレイ`;
             }
             if (isSango) {
-                return `【三合同盟】${pairType}・最強のシナジーパートナー`;
+                return `【相乗効果バツグン】${pairType}・最強のシナジーパートナー`;
             }
             if (isRikuchu) {
-                return `【六沖覚醒】惹かれ合い試練を越えるドラマティック相性`;
+                return `【真逆だから惹かれ合う】試練を越えるドラマティック相性`;
             }
             if (baseScore >= 85) {
                 return `【五行調和】${pairType}・愛と信頼の最上相性`;
@@ -2841,34 +2843,34 @@ export function generateFortuneResult(input, character) {
             const dayCategory = getTenGodsCategory(myPillarObj.stem, dayStem);
             if (dailyScore >= 85) {
                 return isTodayKango
-                    ? `【日干合・超大吉日】\n天の引力で心が通じ合う奇跡の好機`
-                    : `【超大吉日（${dayCategory}盛運）】\n告白・デート誘いに最適な最愛日`;
+                    ? `【運命の絆・超大吉日】\n天の引力で心が通じ合う奇跡の好機`
+                    : `【超大吉日（${DAY_CATEGORY_LABEL[dayCategory]}が上向き）】\n告白・デート誘いに最適な最愛日`;
             }
             if (dailyScore >= 73) {
-                return `【恋の急展開日（${dayCategory}活性）】\n予想外の返信や展開が引き寄せられる日`;
+                return `【恋の急展開日（${DAY_CATEGORY_LABEL[dayCategory]}が活発）】\n予想外の返信や展開が引き寄せられる日`;
             }
             if (dailyScore >= 60) {
-                return `【安定親密日（${dayCategory}調和）】\n普段通りの自然体な雑談で絆が深まる日`;
+                return `【安定親密日（${DAY_CATEGORY_LABEL[dayCategory]}が安定）】\n普段通りの自然体な雑談で絆が深まる日`;
             }
             if (dailyScore >= 45) {
-                return `【連絡慎重日（${dayCategory}調整）】\n短文・労い重視で相手のペースを尊重すべき日`;
+                return `【連絡慎重日（${DAY_CATEGORY_LABEL[dayCategory]}を整える）】\n短文・労い重視で相手のペースを尊重すべき日`;
             }
-            return `【冷却静養日（${dayCategory}内省）】\nあえて連絡を控え、相手にあなたの存在を意識させる日`;
+            return `【冷却静養日（${DAY_CATEGORY_LABEL[dayCategory]}を見つめ直す）】\nあえて連絡を控え、相手にあなたの存在を意識させる日`;
         })() : (() => {
             const dayCategory = getTenGodsCategory(myPillarObj.stem, todayPillar.stem);
             if (dailyScore >= 85) {
-                return `【超大開運日（${dayCategory}絶好調）】\n魅力と自信が溢れ、幸運が味方する最高日`;
+                return `【超大開運日（${DAY_CATEGORY_LABEL[dayCategory]}が絶好調）】\n魅力と自信が溢れ、幸運が味方する最高日`;
             }
             if (dailyScore >= 73) {
-                return `【エネルギー充実日（${dayCategory}活性）】\n新しい挑戦や積極的発信で評価が高まる日`;
+                return `【エネルギー充実日（${DAY_CATEGORY_LABEL[dayCategory]}が活発）】\n新しい挑戦や積極的発信で評価が高まる日`;
             }
             if (dailyScore >= 60) {
-                return `【安定整調日（${dayCategory}調和）】\n心身を調和させ、自分らしさを輝かせる日`;
+                return `【安定整調日（${DAY_CATEGORY_LABEL[dayCategory]}が安定）】\n心身を調和させ、自分らしさを輝かせる日`;
             }
             if (dailyScore >= 45) {
-                return `【内省静養日（${dayCategory}充電）】\n無理せずエネルギーを蓄積し整える日`;
+                return `【内省静養日（${DAY_CATEGORY_LABEL[dayCategory]}を充電）】\n無理せずエネルギーを蓄積し整える日`;
             }
-            return `【自己愛向上日（${dayCategory}自愛）】\n外部刺激を遮断し、自分を甘やかし整える日`;
+            return `【自己愛向上日（${DAY_CATEGORY_LABEL[dayCategory]}を大切に）】\n外部刺激を遮断し、自分を甘やかし整える日`;
         })(),
         bestContactHour: dailyContactAdvice.bestContactHour,
         dailyActionAdvice: dailyContactAdvice.dailyActionAdvice,
