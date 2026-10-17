@@ -3492,8 +3492,11 @@
     "format": "gap_rank_reply",
     "system": "mbti_love",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-09T08:54:32.927Z"
+    "status": "posted",
+    "createdAt": "2026-10-09T08:54:32.927Z",
+    "postedAt": "2026-10-17T11:10:24.000Z",
+    "tweetId": "2111414520115855368",
+    "manual": true
   },
   {
     "id": "2026-10-17-night",
