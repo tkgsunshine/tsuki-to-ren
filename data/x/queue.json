@@ -3709,5 +3709,125 @@
       "style": "portrait"
     },
     "image": "data/x/cards/2026-10-19-night.png"
+  },
+  {
+    "id": "2026-10-20-chara-1",
+    "date": "2026-10-20",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月20日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：庚犬（鋼鉄の戦神×いぬ）\n【本命星】：二黒土星\n\n-結果-\n【今日の点数】：84点\n【今日の空気】新しい挑戦や積極的発信で評価が高まる日\n【LINEのおすすめ時間】18:00〜20:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_dog_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-chara-1-reply",
+    "date": "2026-10-20",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、小さな勇気が実りやすい日。ぶれない軸を、大切にね。\n-月-",
+    "replyTo": "2026-10-20-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-chara-1-reply2",
+    "date": "2026-10-20",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n軽い連絡が、いいご縁につながりやすいよ。ありがとうを、ひとつ丁寧に伝えて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-20-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-noon",
+    "date": "2026-10-20",
+    "slot": "noon",
+    "kind": "value",
+    "text": "好きな人に、今日ひとつ伝えるなら？✨\n\n①ありがとうの一言\n②「楽しかった」の感想\n③まだ心にしまっておく\n\n近い番号を、ひとつだけ置いていってね\n#片思い\n-月-",
+    "format": "pick_number",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-noon-reply",
+    "date": "2026-10-20",
+    "slot": "noon",
+    "kind": "value",
+    "text": "選んでくれてありがとう\n①短くていいの。素直なお礼は、ちゃんと届くよ\n②楽しかった場面をひとつだけ、言葉にしてみて\n③しまうのもあり。今日は気持ちを温める日にしよう\nほかの番号の人も、気軽に教えてね\n-月-",
+    "replyTo": "2026-10-20-noon",
+    "format": "pick_number_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-evening",
+    "date": "2026-10-20",
+    "slot": "evening",
+    "kind": "value",
+    "text": "❤️ 丁蛇（ひのと・へび）の相性TOP3（100点満点）\n\n🥇1位 己蛇 87点\n気持ちが通じ合いやすい、特別な相性\n\n🥈2位 己鳥 85点\n言葉にしなくても、伝わりやすい相性\n\n🥉3位 壬猿 83点\n出会えたら、大切にしたい相性\n\nあなたの守護獣は何位？4位以降は、リプ欄に🌙\n-月-",
+    "format": "beast_pair_rank",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-evening-reply",
+    "date": "2026-10-20",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【4位〜8位】\n\n4位 乙蛇 81点\n気持ちが通じ合いやすい、特別な相性\n\n4位 丁鳥 81点\n言葉にしなくても、伝わりやすい相性\n\n6位 乙鳥 79点\n自然体で、長く続きやすい相性\n\n7位 己牛 77点\nいっしょにいて、素でいられる相性\n\n7位 壬犬 77点\n安心して、本音を話せる相性\n\nつづきは、さらにリプ欄に🌙\n-月-",
+    "replyTo": "2026-10-20-evening",
+    "format": "beast_pair_rank_reply",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-evening-reply2",
+    "date": "2026-10-20",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【丁蛇と、ぶつかりやすい守護獣 ワースト3】\n（点数が低い順）\n\n1位 辛猪 6点\n正反対だからこそ、歩み寄りが大切\n\n2位 癸猪 11点\n真逆の魅力に、惹かれ合うことも\n\n3位 庚鼠 27点\n気持ちを確かめ合うことが大切\n\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-20-evening-reply",
+    "format": "beast_pair_rank_reply2",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-night",
+    "date": "2026-10-20",
+    "slot": "night",
+    "kind": "value",
+    "text": "週末のデート、決め方に性格が出るかも🌙\n\n恋愛するならどっち？\nA：その日の気分で行き先を決める\nB：前から一緒に計画を立てる\n\nあなたはどっち？\n#恋愛\n-月-",
+    "format": "quiz_ab",
+    "system": "quiz",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
+  },
+  {
+    "id": "2026-10-20-night-reply",
+    "date": "2026-10-20",
+    "slot": "night",
+    "kind": "value",
+    "text": "Aは、その場のワクワクを分け合いたい人。Bは、待つ時間ごと楽しみたい人。相手と違っても大丈夫。あなたはどっちを選んだ？\n-月-",
+    "replyTo": "2026-10-20-night",
+    "format": "quiz_ab_reply",
+    "system": "quiz",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-18T15:47:06.067Z"
   }
 ]
