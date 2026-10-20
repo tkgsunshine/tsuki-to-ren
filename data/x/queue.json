@@ -3941,5 +3941,112 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-19T18:41:25.701Z"
+  },
+  {
+    "id": "2026-10-22-chara-1",
+    "date": "2026-10-22",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月22日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：戊虎（要塞の守護者×とら）\n【本命星】：九紫火星\n\n-結果-\n【今日の点数】：100点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_tiger_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.130Z"
+  },
+  {
+    "id": "2026-10-22-chara-1-reply",
+    "date": "2026-10-22",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、あなたの魅力がそのまま届く日。焦らず、どっしりでいいよ。\n-月-",
+    "replyTo": "2026-10-22-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.130Z"
+  },
+  {
+    "id": "2026-10-22-chara-1-reply2",
+    "date": "2026-10-22",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n思ったことを、そのまま伝えてみて。気になっていたことへ、小さな一歩を。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-22-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.130Z"
+  },
+  {
+    "id": "2026-10-22-noon",
+    "date": "2026-10-22",
+    "slot": "noon",
+    "kind": "value",
+    "text": "恋で今、いちばん整えたいことは？✨\n\n①返事を待つ気持ち\n②連絡のペース\n③自分への自信\n\n今のあなたに近い番号、ひとつだけ聞かせてね\n#片思い\n-月-",
+    "format": "pick_number",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.131Z"
+  },
+  {
+    "id": "2026-10-22-noon-reply",
+    "date": "2026-10-22",
+    "slot": "noon",
+    "kind": "value",
+    "text": "選んでくれてありがとう\n①待つ時間に、好きなことをひとつ入れてみて\n②相手に合わせすぎないで。心地いい間隔でいいの\n③今日できたことを、寝る前にひとつ数えてあげて\nほかの番号の人も、気軽に聞かせてね\n-月-",
+    "replyTo": "2026-10-22-noon",
+    "format": "pick_number_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.132Z"
+  },
+  {
+    "id": "2026-10-22-evening",
+    "date": "2026-10-22",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ISTJの恋愛】\n\n好きになると：小さな約束をきちんと守る\n愛情表現：言葉より、続ける行動で見せる\n惹かれる人：誠実で、うそのない人\nつまずき：気持ちを口にするのが遅れがち\nコツ：「うれしい」を、ひとこと声に出す\n\nあなたのまわりのISTJは、当てはまる？\n#16タイプ\n-月-",
+    "format": "mbti_love",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.132Z"
+  },
+  {
+    "id": "2026-10-22-evening-reply",
+    "date": "2026-10-22",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ISTJの恋愛】詳細\n好意は、守った約束ににじみやすいの。照れずに言葉でも伝えると、ぐっと届くよ\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-22-evening",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.132Z"
+  },
+  {
+    "id": "2026-10-22-night",
+    "date": "2026-10-22",
+    "slot": "night",
+    "kind": "value",
+    "text": "好きな人に、予定の変更を伝えるときの3つのコツ\n\n①わかった時点ですぐ送る（待たせる時間が減るから）\n②理由は短く、正直に（言い訳っぽく見えにくいの）\n③次の候補日を添える（会いたい気持ちが伝わるよ）\n\nそのまま送れる例文は、リプ欄に。保存しておいてね\n-月-",
+    "format": "save_list",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.132Z"
+  },
+  {
+    "id": "2026-10-22-night-reply",
+    "date": "2026-10-22",
+    "slot": "night",
+    "kind": "value",
+    "text": "【例文】詳細\n「ごめんね、急な用事で土曜むずかしくなった。来週の日曜はどう？」\n早めに、正直に、次の約束までがセット。それだけで安心してもらえるよ\n-月-",
+    "replyTo": "2026-10-22-night",
+    "format": "save_list_reply",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-20T16:48:45.132Z"
   }
 ]
