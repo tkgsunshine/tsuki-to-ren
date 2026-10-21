@@ -4048,5 +4048,118 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-20T16:48:45.132Z"
+  },
+  {
+    "id": "2026-10-23-chara-1",
+    "date": "2026-10-23",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月23日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：丁蛇（灯火の魔術師×へび）\n【本命星】：五黄土星\n\n-結果-\n【今日の点数】：100点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_snake_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.472Z"
+  },
+  {
+    "id": "2026-10-23-chara-1-reply",
+    "date": "2026-10-23",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、運気がぐっと味方してくれる日。小さな光を、絶やさないでね。\n-月-",
+    "replyTo": "2026-10-23-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.472Z"
+  },
+  {
+    "id": "2026-10-23-chara-1-reply2",
+    "date": "2026-10-23",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n会いたい人に、ひとこと連絡してみて。気になったことを、静かに調べてみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-23-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.472Z"
+  },
+  {
+    "id": "2026-10-23-noon",
+    "date": "2026-10-23",
+    "slot": "noon",
+    "kind": "value",
+    "text": "恋で今日、そっと手放したいものは？🌙\n\n①既読を待つ時間\n②誰かと比べるクセ\n③言えなかった後悔\n\n番号だけでいいから、そっと置いていってね\n#片思い\n-月-",
+    "format": "pick_number",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.473Z"
+  },
+  {
+    "id": "2026-10-23-noon-reply",
+    "date": "2026-10-23",
+    "slot": "noon",
+    "kind": "value",
+    "text": "選んでくれてありがとう\n①スマホを少し置いて、温かい飲み物をいれてみて\n②比べそうになったら、自分の好きな所を数えてみて\n③言えなかった分、次はひとことだけ届ければいいよ\nほかの番号の人も、気軽に教えてね\n-月-",
+    "replyTo": "2026-10-23-noon",
+    "format": "pick_number_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.473Z"
+  },
+  {
+    "id": "2026-10-23-evening",
+    "date": "2026-10-23",
+    "slot": "evening",
+    "kind": "value",
+    "text": "❤️ 戊馬（つちのえ・うま）の相性TOP3（100点満点）\n\n🥇1位 丙馬 87点\n気持ちが通じ合いやすい、特別な相性\n\n🥈2位 丙虎 85点\n言葉にしなくても、伝わりやすい相性\n\n🥉3位 庚馬 81点\n出会えたら、大切にしたい相性\n\nあなたの守護獣は何位？4位以降は、リプ欄に🌙\n-月-",
+    "format": "beast_pair_rank",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.473Z"
+  },
+  {
+    "id": "2026-10-23-evening-reply",
+    "date": "2026-10-23",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【4位〜7位】\n\n🥉3位 戊虎 81点\n気持ちが通じ合いやすい、特別な相性\n\n🥉3位 癸羊 81点\n言葉にしなくても、伝わりやすい相性\n\n6位 庚虎 79点\n自然体で、長く続きやすい相性\n\n7位 丙犬 77点\nいっしょにいて、素でいられる相性\n\nつづきは、さらにリプ欄に🌙\n-月-",
+    "replyTo": "2026-10-23-evening",
+    "format": "beast_pair_rank_reply",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.474Z"
+  },
+  {
+    "id": "2026-10-23-evening-reply2",
+    "date": "2026-10-23",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【戊馬と、ぶつかりやすい守護獣 ワースト3】\n（点数が低い順）\n\n1位 甲鼠 6点\n正反対だからこそ、歩み寄りが大切\n\n2位 壬鼠 11点\n真逆の魅力に、惹かれ合うことも\n\n2位 甲猿 11点\nゆずり合えば、ぐっと近づく相性\n\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-23-evening-reply",
+    "format": "beast_pair_rank_reply2",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.474Z"
+  },
+  {
+    "id": "2026-10-23-night",
+    "date": "2026-10-23",
+    "slot": "night",
+    "kind": "value",
+    "text": "迷う夜に、すぐ開けるように保存してね\n#恋愛 #片思い\n-月-",
+    "format": "card_voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-21T17:05:01.474Z",
+    "card": {
+      "text": "決められない日も、|あなたの気持ちは|[ちゃんと本物]だよ。",
+      "who": "月",
+      "style": "portrait"
+    },
+    "image": "data/x/cards/2026-10-23-night.png"
   }
 ]
