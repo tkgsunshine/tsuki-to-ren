@@ -13,6 +13,7 @@ import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 import { parseCardText, renderCard } from './lib/card.mjs';
+import { pickColumn, COLUMN_GUIDE, withColumnUrl } from './lib/column-post.mjs';
 import fs from 'node:fs';
 
 const args = process.argv.slice(2);
@@ -232,7 +233,42 @@ const replyOf = (slot) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   }, ...second];
 };
-const items = [...beastItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
+// コラム紹介の1本（10:15）。1本で完結（返信なし）。紹介できるコラムが尽きたら作らない
+const columnItems = [];
+const col = pickColumn([...history, ...queue]);
+if (col) {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
+  let feedback = '';
+  for (let attempt = 1; attempt <= 3 && !columnItems.length; attempt++) {
+    const res = await client.messages.create({
+      model, max_tokens: 1000, system,
+      messages: [{ role: 'user', content: `今日の本数: am 1本\n${COLUMN_GUIDE(col)}\n\n出力: [{"slot":"am","text":"..."}] のJSON配列のみ${feedback}` }],
+    });
+    let text;
+    try {
+      const out = extractJson(res.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
+      text = withColumnUrl(out[0].text, col);
+    } catch (e) {
+      feedback = `\n\n# 前回の出力は不正でした: ${e.message}`;
+      continue;
+    }
+    const problems = lintPost({ slot: 'am', kind: 'value', text }, history, { allowLinks, columnUrl: true });
+    if (!text.includes('▼')) problems.push('「▼題名」の行がない');
+    if (problems.length) {
+      console.warn(`コラム紹介 attempt ${attempt}: 不合格\n - ${problems.join('\n - ')}`);
+      feedback = `\n\n# 前回の出力は次の理由で不合格でした。直して再出力:\n- ${problems.join('\n- ')}`;
+      continue;
+    }
+    columnItems.push({
+      id: `${date}-am`, date, slot: 'am', kind: 'value', text,
+      format: 'column_intro', system: 'column', purpose: 'follow', column: col.slug,
+      status: 'scheduled', createdAt: new Date().toISOString(),
+    });
+  }
+  if (!columnItems.length) console.warn('コラム紹介の下書きは、検査を通らなかったので今日は作りません（ほかの投稿は通常どおり）');
+}
+const items = [...beastItems, ...columnItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
 
 if (dryRun) {
   console.log(JSON.stringify(items, null, 2));
