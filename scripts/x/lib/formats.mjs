@@ -123,7 +123,27 @@ export function buildBeastPairRanking(date) {
   return { text, replyText: r1.text, replyText2: r2.text, anchor: anchor.name, top, mid: r1.mid, worst: r2.worst };
 }
 
+// 月の満ち欠け（計算。2000-01-06 18:14 UTC の新月を基準に、朔望月 29.530589 日で数える）。投稿の「月のことば」の事実に使う
+const SYNODIC = 29.530588853;
+const NEW_MOON_REF = Date.UTC(2000, 0, 6, 18, 14);
+export function moonPhase(date) {
+  const noon = Date.parse(`${date}T03:00:00Z`); // JST正午
+  const age = (((noon - NEW_MOON_REF) / 86400000) % SYNODIC + SYNODIC) % SYNODIC;
+  const name = age < 1.5 || age > SYNODIC - 1.5 ? '新月（月が見えない夜。始まりの日）'
+    : age < 6.5 ? '三日月ごろ（満ちはじめ）'
+    : age < 8.5 ? '上弦の月（半分。決める・動くタイミングに例えられる）'
+    : age < 13.2 ? '満ちていく月（十三夜ごろ）'
+    : age < 14 ? 'ほぼ満月（満月の前夜ごろ。「満月」と言い切らず、「もうすぐ満月」と書く）'
+    : age < 15.5 ? '満月（いちばん満ちた夜。気持ちがあふれやすいと言われる）'
+    : age < 16.5 ? '満月を過ぎたばかりの月（十六夜ごろ。「満月の翌日」と書く）'
+    : age < 21 ? '欠けはじめの月（手放し・ゆるめるころ）'
+    : age < 23.5 ? '下弦の月（半分。ふり返り・整理に例えられる）'
+    : '細くなる月（そっと終わらせ、休むころ）';
+  return { age: Math.round(age * 10) / 10, name };
+}
+
 const FACTS = {
+  moon: ({ date }) => ({ note: '今日の月（計算した事実。月のことばに使ってよい。本文では「今日は〇〇」と軽く触れる程度で、月の満ち欠けで運勢・結果を断定しない）', moon: moonPhase(date) }),
   year_star: ({ date }) => {
     const years = pickN(Array.from({ length: 25 }, (_, i) => 1985 + i), 3, `${date}:year`).sort();
     return {
@@ -178,31 +198,41 @@ export const FORMATS = [
   { id: 'save_list', system: 'psychology', purpose: 'follow', reply: true,
     replyGuide: '1通目の続きとして、3つの理由と、そのまま使える例文を書く（日本語でおよそ55〜70文字。短く）。最初の行は「【〇〇】詳細」（〇〇は「例文」「誘い文の例」など内容に合う語）。例文は「」で、実際に送れる自然な言葉を1つか2つ。理由は、ひとことだけ。署名は親の投稿と同じ。相手を操作する内容は書かない',
     guide: '「好きな人に〇〇するときの、3つのコツ」の、保存したくなるリスト。テーマは毎回変える（LINEの送り方／デートの別れ際／告白の前に確認すること／初めて誘うとき など）。1行目はタイトル。次に ① ② ③ を1行ずつ、各項目に、短い理由を（　）で添える。最後は「そのまま使える例文は、リプ欄に。保存してね」のように、リプ欄を見たくなる一文。日本語でおよそ120〜135文字（重み付き280）まで使い切る。具体的で、すぐ使える内容。相手を操作するコツは書かない。声は、月（寄り添ってやさしく、「〜だよ」「〜してね」）' },
+  // G: 格言（月のオリジナルの短い言葉。保存・引用・フォローをねらう。毎日1本・15:15）
+  { id: 'maxim', system: 'psychology', purpose: 'follow',
+    guide: '恋の格言。月のオリジナルの言葉（実在の人物の名言・引用・出典は書かない）。構成: 1行目に、記憶に残る核心の一文（15〜25文字。常識を一段ひっくり返す、または言い当てる）。続けて、2〜3行で、その理由や見方を、恋の具体的な場面（返信を待つ／既読／会う前の夜／別れたあと／誘うとき など）にからめて書く。最後に、そっと肯定する一言。全体はおよそ100〜125文字。きれいごとの一般論（「大切にしよう」「素直がいちばん」）にしない。切り口と場面は毎回変える（直近の投稿と同じ言い回しを使わない）。相手の気持ち・結末の断定はしない。声は、月（寄り添ってやさしく、ただし言い切る）' },
+  { id: 'maxim_spirit', system: 'psychology', purpose: 'follow', facts: 'moon',
+    guide: '月のことば（スピリチュアル寄りの格言。たまに出す型）。月の満ち欠け・星・巡り・夜明け・潮など、自然のモチーフを使って、恋のもやもやがふっと腑に落ちる言葉にする（月のオリジナル。実在の人物の名言・出典は書かない）。事実の「今日の月」を、軽く使ってよい。1行目は詩のような核心の一文。続けて2〜3行で、いまの恋に引き寄せた意味づけ（「〜かもしれない」「〜のようなもの」など、比喩としてやわらかく）。最後に、静かに背中を押す一言。およそ100〜125文字。「必ず」「運命が決まる」「〇日までに」など、断定・予言・保証は書かない。専門用語（干支・五行など）、「占い」の宣伝、アプリ・URLは書かない。月の満ち欠けで、相手の気持ちや結果を決めつけない' },
+  // H: 厚い実用型（やること・やめること＋理由。リプ欄に、そのまま使える一言）
+  { id: 'howto', system: 'psychology', purpose: 'follow', reply: true,
+    replyGuide: '1通目の続きとして、そのまま送れる文例を1〜2個「」で書く（実際に送れる自然な言葉）と、使うタイミングを1行で。最初の行は「【一言例】」。日本語でおよそ60〜80文字。署名は親の投稿と同じ。相手を操作する内容は書かない',
+    guide: '具体的な場面ごとの「やること・やめること」。1行目: 読み手の場面を、そのままタイトルに（例:「返信が遅いとき、やっていいこと・やめること」。場面は毎回変える: 返信が遅い／既読スルー／会う約束を決める／デートのあと／気まずくなったあと／嫉妬したとき／自分から連絡するとき など）。次に「〇 」で、やっていいこと2〜3個を「／」でつなぐ（行動は具体的に: 時間・回数・文字数など）。次に「× 」で、やめること2〜3個を「／」でつなぐ。最後に「理由：」で、なぜ効くかを1行（心の動きとして、傾向として）。最後に、「そのまま使える一言は、リプ欄に」。日本語でおよそ120〜135文字（重み付き280まで）を使い切る。説教口調・一般論にしない。相手を操作する内容は書かない' },
   // アプリ誘導（予告。1日に最大1本）
   { id: 'pair_teaser', system: 'pair', purpose: 'app', kind: 'promo',
     guide: '「あなたのタイプだけでは、本当の相性はわからない。大事なのは あなた × 好きな人」。16タイプ×生年月日で2人の相性を見る占いが、近日公開、と予告する（「近日公開」を必ず入れる）。数字は出さない' },
 ];
 
-/** バズ検証の投稿枠（1日3本）。noon=12:15 / evening=18:15 / night=20:15（時刻は config.slots）。2026-10-09 から6本→3本に減らした（朝の守護獣1本と合わせて1日4本） */
-export const BUZZ_SLOTS = ['noon', 'evening', 'night'];
+/** バズ検証の投稿枠（1日4本）。noon=12:15 / pm=15:15（格言） / evening=18:15 / night=20:15（時刻は config.slots）。朝の守護獣1本・10:15のコラム紹介1本と合わせて1日6本 */
+export const BUZZ_SLOTS = ['noon', 'pm', 'evening', 'night'];
 
-/** 10日で一巡する、1日3本の型の並び（BUZZ_SLOTS の順）。A〜Fを、バランスよく混ぜる。2026-10-08 が先頭。
- *  昼=番号選び（pick_number）を毎日1本（2026-10-14〜。返信を集めやすい型）／夕=ランキング・解説・復縁の問い／夜=保存・共感・問いかけ。10日で全12型が出る。画像つき一言（card_voice）は10日に2本、文字だけの一言（voice）は1本 */
+/** 10日で一巡する、1日4本の型の並び（BUZZ_SLOTS の順: 昼12:15・格言15:15・夕18:15・夜20:15）。2026-10-08 が先頭。
+ *  2026-10-22 の見直し: 選択式の問いかけ（番号選び・A/B・脈あり？）を減らし、厚い実用型（howto）・保存型・格言を増やした。
+ *  格言（15:15）は毎日1本。そのうち10日に3回は、スピリチュアル寄りの「月のことば」（maxim_spirit）。10日で全15型が出る。 */
 const PLAN_DAYS = [
-  ['pick_number', 'gap_rank', 'card_voice'],
-  ['pick_number', 'mbti_love', 'psych_poll'],
-  ['pick_number', 'beast_pair_rank', 'quiz_ab'],
-  ['pick_number', 'gap_rank', 'name_self'],
-  ['pick_number', 'mbti_love', 'save_list'],
-  ['pick_number', 'beast_pair_rank', 'card_voice'],
-  ['pick_number', 'gap_rank', 'save_list'],
-  ['pick_number', 'mbti_love', 'pair_teaser'],
-  ['pick_number', 'beast_pair_rank', 'save_list'],
-  ['pick_number', 'comeback', 'voice'],
+  ['howto', 'maxim', 'gap_rank', 'card_voice'],
+  ['pick_number', 'maxim_spirit', 'mbti_love', 'save_list'],
+  ['voice', 'maxim', 'beast_pair_rank', 'howto'],
+  ['howto', 'maxim', 'gap_rank', 'name_self'],
+  ['quiz_ab', 'maxim_spirit', 'mbti_love', 'howto'],
+  ['save_list', 'maxim', 'beast_pair_rank', 'card_voice'],
+  ['howto', 'maxim', 'gap_rank', 'psych_poll'],
+  ['comeback', 'maxim_spirit', 'mbti_love', 'pair_teaser'],
+  ['howto', 'maxim', 'beast_pair_rank', 'save_list'],
+  ['psych_poll', 'maxim', 'gap_rank', 'voice'],
 ];
 const PLAN_START_DAYS = dayPillar('2026-10-08').days;
 
-/** その日の3本の型を決める（{ noon, evening, night }）。1日にアプリ誘導は最大1本 */
+/** その日の4本の型を決める（{ noon, pm, evening, night }）。1日にアプリ誘導は最大1本 */
 export function pickFormats(date) {
   const n = PLAN_DAYS.length;
   const day = (((dayPillar(date).days - PLAN_START_DAYS) % n) + n) % n;
