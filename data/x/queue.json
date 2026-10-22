@@ -4161,5 +4161,125 @@
       "style": "portrait"
     },
     "image": "data/x/cards/2026-10-23-night.png"
+  },
+  {
+    "id": "2026-10-24-chara-1",
+    "date": "2026-10-24",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月24日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：壬鼠（海王、嵐使い×ねずみ）\n【本命星】：八白土星\n\n-結果-\n【今日の点数】：88点\n【今日の空気】魅力と自信が溢れる最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_rat_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:03.417Z"
+  },
+  {
+    "id": "2026-10-24-chara-1-reply",
+    "date": "2026-10-24",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、あなたの魅力がそのまま届く日。流れに、身をまかせてみて。\n-月-",
+    "replyTo": "2026-10-24-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:03.417Z"
+  },
+  {
+    "id": "2026-10-24-chara-1-reply2",
+    "date": "2026-10-24",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n気になる人に、素直な気持ちを送ってみて。ひらめいたことを、メモに残してみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-24-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:03.417Z"
+  },
+  {
+    "id": "2026-10-24-am",
+    "date": "2026-10-24",
+    "slot": "am",
+    "kind": "value",
+    "text": "「正反対すぎて合わないかも」って不安な人へ。\n違うからこそ惹かれ合うこともあるんだよ。\n・INFPとENTJが惹かれ合うわけ\n・気持ちと理屈がぶつかる時のコツ\n・足りない所を補い合える関係\n-月-\n▼「仲介者」と「指揮官」の凸凹ペア\nhttps://www.tsuki-to-ren.com/column/infp-entj-contrast-relationship?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "infp-entj-contrast-relationship",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:11.038Z"
+  },
+  {
+    "id": "2026-10-24-noon",
+    "date": "2026-10-24",
+    "slot": "noon",
+    "kind": "value",
+    "text": "恋で今、決めたいことは？✨\n\n①気持ちを伝えるかどうか\n②連絡を待つか送るか\n③この恋との向き合い方\n\n迷ったままでも大丈夫。\nいちばん近い番号、ひとつだけ聞かせてね\n#片思い\n-月-",
+    "format": "pick_number",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:11.038Z"
+  },
+  {
+    "id": "2026-10-24-noon-reply",
+    "date": "2026-10-24",
+    "slot": "noon",
+    "kind": "value",
+    "text": "選んでくれてありがとう\n①伝える言葉は、ひと言だけ決めておくと楽だよ\n②待つなら、いつまで待つか自分で決めてみてね\n③答えを急がなくていい。今の自分の本音から見てね\nほかの番号の人も、気軽に聞かせてね\n-月-",
+    "replyTo": "2026-10-24-noon",
+    "format": "pick_number_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:11.038Z"
+  },
+  {
+    "id": "2026-10-24-evening",
+    "date": "2026-10-24",
+    "slot": "evening",
+    "kind": "value",
+    "text": "見た目はさっぱり、恋愛は区切りが苦手な16タイプ（MBTI）\n\n1位 ISTP 巨匠\n2位 INTJ 建築家\n3位 ESTP 起業家\n4位 INTP 論理学者\n5位 ENTJ 指揮官\n6位 ISTJ 管理者\n7位 ESTJ 幹部\n8位 ENTP 討論者\n\n続きの9位〜16位は、リプ欄に。あなたは何位？\n-月-",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:11.038Z"
+  },
+  {
+    "id": "2026-10-24-evening-reply",
+    "date": "2026-10-24",
+    "slot": "evening",
+    "kind": "value",
+    "text": "続きの9位〜16位です\n\n9位 ESFP エンターテイナー\n10位 ISFP 冒険家\n11位 ENFP 運動家\n12位 INFJ 提唱者\n13位 ESFJ 領事官\n14位 ISFJ 擁護者\n15位 ENFJ 主人公\n16位 INFP 仲介者\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-24-evening",
+    "format": "gap_rank_reply",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:11.038Z"
+  },
+  {
+    "id": "2026-10-24-night",
+    "date": "2026-10-24",
+    "slot": "night",
+    "kind": "value",
+    "text": "好きな人に、モヤッとしたことを伝える3つのコツ\n\n① 責めずに「わたしは」で話す（相手が身構えにくいよ）\n② 一度に伝えるのは、ひとつだけ（話がこじれにくい）\n③ 最後に「ありがとう」を添える（あったかく終われる）\n\nそのまま使える例文は、リプ欄に。保存してね\n-月-",
+    "format": "save_list",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:11.038Z"
+  },
+  {
+    "id": "2026-10-24-night-reply",
+    "date": "2026-10-24",
+    "slot": "night",
+    "kind": "value",
+    "text": "【例文】詳細\n「この前、返事がなくてちょっとさみしかったんだ。聞いてくれてありがとう」\n責めずに、気持ちだけ渡すのがコツだよ\n-月-",
+    "replyTo": "2026-10-24-night",
+    "format": "save_list_reply",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:46:11.038Z"
   }
 ]
