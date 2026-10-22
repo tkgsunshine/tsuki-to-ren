@@ -4281,5 +4281,112 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-22T05:46:11.038Z"
+  },
+  {
+    "id": "2026-10-25-chara-1",
+    "date": "2026-10-25",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月25日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：癸羊（深海の術師×ひつじ）\n【本命星】：八白土星\n\n-結果-\n【今日の点数】：66点\n【今日の空気】心身を調和させ、自分らしさを輝かせる日\n【LINEのおすすめ時間】12:00〜14:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_sheep_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:47:51.406Z"
+  },
+  {
+    "id": "2026-10-25-chara-1-reply",
+    "date": "2026-10-25",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、いつもどおりで大丈夫な日。静かな直感を、大切にね。\n-月-",
+    "replyTo": "2026-10-25-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:47:51.406Z"
+  },
+  {
+    "id": "2026-10-25-chara-1-reply2",
+    "date": "2026-10-25",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n普段どおりの自分で、いてね。温かい飲み物で、ひと息ついて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-25-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:47:51.406Z"
+  },
+  {
+    "id": "2026-10-25-am",
+    "date": "2026-10-25",
+    "slot": "am",
+    "kind": "value",
+    "text": "好きな人が提唱者（INFJ）で、本音が見えなくて不安な人へ\nやさしいのに、どこか遠く感じちゃうよね\n・心に壁をつくる理由\n・心を開いたときのサイン\n・距離が縮まる話し方\n-月-\n▼提唱者が心を開く特別な相手の特徴\nhttps://www.tsuki-to-ren.com/column/infj-soulmate-opening-heart?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "infj-soulmate-opening-heart",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:48:00.128Z"
+  },
+  {
+    "id": "2026-10-25-noon",
+    "date": "2026-10-25",
+    "slot": "noon",
+    "kind": "value",
+    "text": "恋で今、いちばん欲しいものは？🌙\n\n①安心できるひとこと\n②あの人と話す時間\n③何も考えない夜\n\n揺れる日は、欲しいものも変わるよね。\n近い番号だけ、そっと置いていってね\n#片思い\n-月-",
+    "format": "pick_number",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:48:00.128Z"
+  },
+  {
+    "id": "2026-10-25-noon-reply",
+    "date": "2026-10-25",
+    "slot": "noon",
+    "kind": "value",
+    "text": "選んでくれてありがとう\n①自分にも「よくやってる」って言ってあげてね\n②短い話題をひとつ用意しておくと気楽だよ\n③今日はスマホを置いて、早めに眠っていいよ\nほかの番号の人も、気軽に教えてね\n-月-",
+    "replyTo": "2026-10-25-noon",
+    "format": "pick_number_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:48:00.128Z"
+  },
+  {
+    "id": "2026-10-25-evening",
+    "date": "2026-10-25",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ESTPの恋愛】\n好きになると：すぐ会いに行きたくなる\n愛情表現：一緒に出かけて楽しませる\n惹かれる人：ノリよく笑ってくれる人\nつまずき：勢いで進めて相手が戸惑う\nコツ：ときどき相手のペースを聞いてみて\n\nあなたのまわりのESTPは、当てはまる？\n-月-",
+    "format": "mbti_love",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:48:00.128Z"
+  },
+  {
+    "id": "2026-10-25-evening-reply",
+    "date": "2026-10-25",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ESTPの恋愛】詳細\n「行こう！」って誘うのが好きの合図かも。急ぎすぎたら、ひと呼吸おけば大丈夫。\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-25-evening",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:48:00.128Z"
+  },
+  {
+    "id": "2026-10-25-night",
+    "date": "2026-10-25",
+    "slot": "night",
+    "kind": "promo",
+    "text": "好きな人との相性、自分のタイプだけで見てない？\n\nあなたのタイプだけじゃ、本当の相性はわからないんだ。\n大事なのは、あなた × 好きな人。\n\n16タイプ（MBTI）と生年月日で、2人の相性を見る占いを近日公開するよ。\n誰との相性、見てみたい？\n#相性占い\n-月-",
+    "format": "pair_teaser",
+    "system": "pair",
+    "purpose": "app",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:48:00.128Z"
   }
 ]
