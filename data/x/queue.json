@@ -4095,31 +4095,6 @@
     "createdAt": "2026-10-22T06:24:35.379Z"
   },
   {
-    "id": "2026-10-23-noon",
-    "date": "2026-10-23",
-    "slot": "noon",
-    "kind": "value",
-    "text": "好きな人とのLINEを、自分から終わらせるときの3つのコツ\n\n①盛り上がっているうちに切り上げる（次も話したくなるから）\n②「楽しかった」をひとこと添える（終わり方が温かく残るの）\n③話の続きをひとつ残しておく（明日送るきっかけになるよ）\n\nそのまま使える例文は、リプ欄に。保存してね\n-月-",
-    "format": "save_list",
-    "system": "psychology",
-    "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:24:35.379Z"
-  },
-  {
-    "id": "2026-10-23-noon-reply",
-    "date": "2026-10-23",
-    "slot": "noon",
-    "kind": "value",
-    "text": "【例文】詳細\n「話せて楽しかった！映画の続き、また明日聞かせて。おやすみ」\n楽しさと続きの話、両方入ると安心して眠れるよ\n-月-",
-    "replyTo": "2026-10-23-noon",
-    "format": "save_list_reply",
-    "system": "psychology",
-    "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:24:35.379Z"
-  },
-  {
     "id": "2026-10-23-pm",
     "date": "2026-10-23",
     "slot": "pm",
@@ -4352,31 +4327,6 @@
     "createdAt": "2026-10-22T06:27:33.114Z"
   },
   {
-    "id": "2026-10-25-noon",
-    "date": "2026-10-25",
-    "slot": "noon",
-    "kind": "value",
-    "text": "元恋人から、急に「元気？」って連絡が来た。\nこれって、復縁の可能性ある？\n\nA さみしくて思い出しただけ\nB ずっと気になってて、勇気を出した\nC 近況が知りたい、ただの好奇心\n\n返事を打つ前に、ちょっと立ち止まって。あなたならどう読む？\n#恋愛 #復縁\n-月-",
-    "format": "comeback",
-    "system": "psychology",
-    "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:28:07.268Z"
-  },
-  {
-    "id": "2026-10-25-noon-reply",
-    "date": "2026-10-25",
-    "slot": "noon",
-    "kind": "value",
-    "text": "Aなら一時の寂しさ、Bなら気持ちの整理がついた合図かも。Cは軽いノリのことも。来たことより「なぜ今なのか」を見てね。あなたは何を選んだ？\n-月-",
-    "replyTo": "2026-10-25-noon",
-    "format": "comeback_reply",
-    "system": "psychology",
-    "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:28:07.268Z"
-  },
-  {
     "id": "2026-10-25-pm",
     "date": "2026-10-25",
     "slot": "pm",
@@ -4533,31 +4483,6 @@
     "createdAt": "2026-10-22T06:30:24.029Z"
   },
   {
-    "id": "2026-10-26-night",
-    "date": "2026-10-26",
-    "slot": "night",
-    "kind": "value",
-    "text": "好きな人の話を聴くときの、3つのコツ\n① 途中で自分の話にしない（最後まで聞けた安心が残るから）\n② 「それでどうなったの？」と1回聞く（興味が伝わるよ）\n③ アドバイスは聞かれてから（まず味方がほしい時もあるの）\nそのまま使える例文は、リプ欄に。保存してね\n-月-",
-    "format": "save_list",
-    "system": "psychology",
-    "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:30:24.029Z"
-  },
-  {
-    "id": "2026-10-26-night-reply",
-    "date": "2026-10-26",
-    "slot": "night",
-    "kind": "value",
-    "text": "【あいづちの例】詳細\n①安心 ②興味 ③味方の合図になるよ\n「それ、しんどかったね」\n「で、そのあとどうしたの？」\n-月-",
-    "replyTo": "2026-10-26-night",
-    "format": "save_list_reply",
-    "system": "psychology",
-    "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:30:24.029Z"
-  },
-  {
     "id": "2026-10-27-chara-1",
     "date": "2026-10-27",
     "slot": "morning",
@@ -4588,31 +4513,6 @@
     "format": "beast_daily_reply2",
     "status": "scheduled",
     "createdAt": "2026-10-22T06:31:35.185Z"
-  },
-  {
-    "id": "2026-10-27-noon",
-    "date": "2026-10-27",
-    "slot": "noon",
-    "kind": "value",
-    "text": "「この前話した映画、観たよ」\n好きな人から、急にこれだけ届いたら？\n1週間前に、何気なく話したやつ。\n\nA 話を覚えててくれた。脈ありかも\nB 感想を言いたかっただけ\nC 話しかけるきっかけを探してた\n\nあなたならどう思う？\n-月-",
-    "format": "psych_poll",
-    "system": "psychology",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:32:07.591Z"
-  },
-  {
-    "id": "2026-10-27-noon-reply",
-    "date": "2026-10-27",
-    "slot": "noon",
-    "kind": "value",
-    "text": "Aは話を覚えてた合図。Bは気楽に話せる相手って見方。Cは連絡の口実かも。「どうだった？」で返すと続くよ。あなたは何を選んだ？\n-月-",
-    "replyTo": "2026-10-27-noon",
-    "format": "psych_poll_reply",
-    "system": "psychology",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:32:07.591Z"
   },
   {
     "id": "2026-10-27-pm",
