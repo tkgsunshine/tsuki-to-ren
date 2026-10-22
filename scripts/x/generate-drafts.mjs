@@ -24,7 +24,9 @@ const date = dateArg || tomorrow;
 
 const config = readConfig();
 const queue = readQueue();
-if (queue.some((p) => p.date === date)) {
+// --column-only: その日の投稿は既にあるが、コラム紹介（am）だけ無いときに、コラム紹介の1本だけを追加する
+const columnOnly = args.includes('--column-only');
+if (queue.some((p) => p.date === date) && !(columnOnly && !queue.some((p) => p.id === `${date}-am`))) {
   console.log(`${date} の投稿は既にキューにあります。何もしません。`);
   process.exit(0);
 }
@@ -149,7 +151,7 @@ const detPosts = detSlots.map((slot) => {
 });
 
 let posts = [];
-if (llmSlots.length) {
+if (llmSlots.length && !columnOnly) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.error('ANTHROPIC_API_KEY が未設定です。手動で書く場合は docs/X_ACCOUNT_OPERATION.md を参照してください。');
@@ -252,7 +254,9 @@ if (col) {
       const out = extractJson(res.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
       text = withColumnUrl(out[0].text, col);
     } catch (e) {
-      feedback = `\n\n# 前回の出力は不正でした: ${e.message}`;
+      const raw = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('').slice(0, 300).replace(/\n/g, '\\n');
+      console.warn(`コラム紹介 attempt ${attempt}: 出力を読めません（${e.message}）。出力の先頭: ${raw}`);
+      feedback = `\n\n# 前回の出力は不正でした: ${e.message}。[{"slot":"am","text":"..."}] のJSON配列のみを出力する（改行は \\n）`;
       continue;
     }
     const problems = lintPost({ slot: 'am', kind: 'value', text }, history, { allowLinks, columnUrl: true });
@@ -269,6 +273,12 @@ if (col) {
     });
   }
   if (!columnItems.length) console.warn('コラム紹介の下書きは、検査を通らなかったので今日は作りません（ほかの投稿は通常どおり）');
+}
+if (columnOnly) {
+  if (!columnItems.length) { console.error('コラム紹介を作れませんでした。キューは変更しません。'); process.exit(1); }
+  if (!dryRun) writeQueue([...queue, ...columnItems]);
+  console.log(`${date} のコラム紹介1本をキューに追記しました。`);
+  process.exit(0);
 }
 const items = [...beastItems, ...columnItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
 
