@@ -4626,5 +4626,17 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-22T13:46:22.452Z"
+  },
+  {
+    "id": "2026-10-25-noon",
+    "date": "2026-10-25",
+    "slot": "noon",
+    "kind": "value",
+    "text": "「帰り道の答え合わせ」って、あると思う。\n会ってる間はずっと笑ってたのに、改札で別れた瞬間から始まるの。\nあの返し、変だったかな。沈黙、長かったかな。\n好きだから、小さなズレが大きく見えちゃうんだよ。\n相手が覚えてるのは、楽しかった空気のほうが多いの。丸つけは明日でいいからね。\n-月-",
+    "format": "coined_feeling",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T13:47:38.895Z"
   }
 ]
