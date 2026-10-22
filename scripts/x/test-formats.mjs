@@ -15,7 +15,7 @@ import { getPillarPairScore } from '../../src/utils/fortuneEngine.ts';
 const OPTS = { allowLinks: false };
 
 test('型の一覧（A〜F）: 3つの目的（バズ・フォロー・アプリ誘導）がそろう。アプリ誘導はpromo', () => {
-  for (const id of ['gap_rank', 'voice', 'name_self', 'psych_poll', 'mbti_love', 'save_list']) assert.ok(FORMATS.some((f) => f.id === id), id);
+  for (const id of ['gap_rank', 'voice', 'mbti_love', 'coined_feeling', 'mbti_habit', 'flip', 'maxim']) assert.ok(FORMATS.some((f) => f.id === id), id);
   for (const p of Object.keys(PURPOSES)) assert.ok(FORMATS.some((f) => f.purpose === p), p);
   for (const f of FORMATS) {
     assert.ok(SYSTEMS[f.system] && PURPOSES[f.purpose], f.id);
@@ -36,12 +36,12 @@ test('毎日4本: 4つの枠すべてに型が入り、1日にアプリ誘導は
   assert.deepEqual(BUZZ_SLOTS, ['noon', 'pm', 'evening', 'night']);
 });
 
-test('事実はアプリの鑑定ロジックから出る（生まれ年の本命星・2人の16タイプ）', () => {
+test('事実はアプリの鑑定ロジックから出る（16タイプ4つ・今日の月）', () => {
   const all = computeAll('2026-10-07');
   const ctx = { date: '2026-10-07', all };
   for (const f of FORMATS.filter((x) => x.facts)) assert.ok(buildFacts(f, ctx), f.id);
   // 同じ日なら、何度実行しても同じ事実
-  assert.deepEqual(buildFacts(FORMATS.find((f) => f.id === 'name_self'), ctx), buildFacts(FORMATS.find((f) => f.id === 'name_self'), ctx));
+  assert.deepEqual(buildFacts(FORMATS.find((f) => f.id === 'mbti_habit'), ctx), buildFacts(FORMATS.find((f) => f.id === 'mbti_habit'), ctx));
 });
 
 test('夕方（evening）の枠で投稿できる。promoは「近日公開」が必須', () => {
@@ -255,4 +255,14 @@ test('コラム紹介: 未紹介のコラムを古い順に選び、URL付きの
   assert.deepEqual(lintPost({ slot: 'am', kind: 'value', text }, [], { allowLinks: false, columnUrl: true }), []);
   assert.ok(lintPost({ slot: 'am', kind: 'value', text }, [], { allowLinks: false }).length, '通常の投稿ではURLは不可');
   assert.ok(lintPost({ slot: 'am', kind: 'value', text: `${text.split('\n').slice(0, -1).join('\n')}\nhttps://example.com/` }, [], { allowLinks: false, columnUrl: true }).length);
+});
+
+test('却下された型（選択式の問いかけ・保存型）は、型の一覧と並びから外れている', () => {
+  for (const id of ['psych_poll', 'quiz_ab', 'comeback', 'pick_number', 'name_self', 'save_list']) assert.ok(!FORMATS.some((f) => f.id === id), id);
+  for (let i = 0; i < 20; i++) {
+    const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
+    for (const f of Object.values(pickFormats(d))) assert.ok(!f.poll, `${d}: 選択式の問いかけは出さない`);
+  }
+  const four = buildFacts(FORMATS.find((f) => f.id === 'mbti_habit'), { date: '2026-10-24' }).types;
+  assert.equal(new Set(four.map((t) => t.code)).size, 4);
 });

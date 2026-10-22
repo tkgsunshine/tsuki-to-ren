@@ -24,9 +24,13 @@ const date = dateArg || tomorrow;
 
 const config = readConfig();
 const queue = readQueue();
-// --column-only: その日の投稿は既にあるが、コラム紹介（am）だけ無いときに、コラム紹介の1本だけを追加する
-const columnOnly = args.includes('--column-only');
-if (queue.some((p) => p.date === date) && !(columnOnly && !queue.some((p) => p.id === `${date}-am`))) {
+// --fill-missing（旧 --column-only）: その日の投稿が既にあるとき、無い枠（朝・コラム紹介・昼・格言・夕・夜）だけを作って足す。
+//   型を取り下げて作り直すときに使う（取り下げた枠だけ、今の型の並びで作り直す）
+const fillMissing = args.includes('--fill-missing') || args.includes('--column-only');
+const haveIds = new Set(queue.filter((p) => p.date === date).map((p) => p.id));
+const missing = (id) => !fillMissing || !haveIds.has(`${date}-${id}`);
+const slotMissing = (slot) => !haveIds.has(`${date}-${slot}`);
+if (haveIds.size && !(fillMissing && (slotMissing('am') || slotMissing('chara-1') || BUZZ_SLOTS.some(slotMissing)))) {
   console.log(`${date} の投稿は既にキューにあります。何もしません。`);
   process.exit(0);
 }
@@ -71,8 +75,9 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 
 const planned = pickFormats(date); // { noon, evening, night }
 // build() を持つ型は、アプリの鑑定ロジックだけで本文を作る（AIは使わない）。それ以外はAIが言い回しを書く
-const detSlots = Object.keys(planned).filter((k) => planned[k].build);
-const llmSlots = Object.keys(planned).filter((k) => !planned[k].build);
+const activeSlots = BUZZ_SLOTS.filter((k) => !fillMissing || slotMissing(k)); // 今回作る枠（通常は全部。--fill-missing のときは、無い枠だけ）
+const detSlots = activeSlots.filter((k) => planned[k].build);
+const llmSlots = activeSlots.filter((k) => !planned[k].build);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
 // 守護獣・MBTIの話題の返信には、アプリの予告の行（署名の直前）を自動で入れる
 const finalReply = (f, text) => (FORMAT_TEASER[f.id] ? withTeaser(String(text).trim(), FORMAT_TEASER[f.id]) : String(text).trim());
@@ -143,7 +148,7 @@ function validate(posts) {
 }
 
 // アプリの鑑定ロジックだけで作る本文（ランキングなど）を、先にチェックする
-const detPosts = (columnOnly ? [] : detSlots).map((slot) => {
+const detPosts = detSlots.map((slot) => {
   const f = planned[slot];
   const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
@@ -157,7 +162,7 @@ const detPosts = (columnOnly ? [] : detSlots).map((slot) => {
 });
 
 let posts = [];
-if (llmSlots.length && !columnOnly) {
+if (llmSlots.length) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.error('ANTHROPIC_API_KEY が未設定です。手動で書く場合は docs/X_ACCOUNT_OPERATION.md を参照してください。');
@@ -210,7 +215,7 @@ if (llmSlots.length && !columnOnly) {
 posts = [...detPosts, ...posts];
 
 // 守護獣の1本（朝 08:15）。署名は常に「-月-」（話し手は月だけ）
-const beastItems = buildBeastItems(all, date, history, { allowLinks });
+const beastItems = missing('chara-1') ? buildBeastItems(all, date, history, { allowLinks }) : [];
 
 const buzzItem = (slot, time) => {
   const f = planned[slot];
@@ -245,7 +250,7 @@ const replyOf = (slot) => {
 };
 // コラム紹介の1本（10:15）。1本で完結（返信なし）。紹介できるコラムが尽きたら作らない
 const columnItems = [];
-const col = pickColumn([...history, ...queue]);
+const col = missing('am') ? pickColumn([...history, ...queue]) : null;
 if (col) {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
@@ -280,13 +285,7 @@ if (col) {
   }
   if (!columnItems.length) console.warn('コラム紹介の下書きは、検査を通らなかったので今日は作りません（ほかの投稿は通常どおり）');
 }
-if (columnOnly) {
-  if (!columnItems.length) { console.error('コラム紹介を作れませんでした。キューは変更しません。'); process.exit(1); }
-  if (!dryRun) writeQueue([...queue, ...columnItems]);
-  console.log(`${date} のコラム紹介1本をキューに追記しました。`);
-  process.exit(0);
-}
-const items = [...beastItems, ...columnItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
+const items = [...beastItems, ...columnItems, ...activeSlots.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
 
 if (dryRun) {
   console.log(JSON.stringify(items, null, 2));
