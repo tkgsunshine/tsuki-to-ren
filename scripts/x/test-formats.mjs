@@ -230,6 +230,7 @@ test('格言（maxim）: 15:15（pm）に毎日1本。10日に3回は、スピ�
   assert.equal(sp.facts, 'moon');
   const f = buildFacts(sp, { date: '2026-10-26' });
   assert.equal(f.moon.name.startsWith('満月'), true);
+  assert.equal(buildFacts(sp, { date: '2026-10-25' }).moon.name.startsWith('ほぼ満月'), true, '満月の前日は「満月」と言い切らない');
 });
 
 test('厚い実用型（howto）: 返信つき。月のことばの本文に、断定・予言・専門用語が入ると不合格', () => {
