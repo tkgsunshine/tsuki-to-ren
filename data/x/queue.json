@@ -4662,5 +4662,18 @@
     "purpose": "buzz",
     "status": "scheduled",
     "createdAt": "2026-10-22T06:32:07.591Z"
+  },
+  {
+    "id": "2026-10-25-am",
+    "date": "2026-10-25",
+    "slot": "am",
+    "kind": "value",
+    "text": "既読のまま、もう半日。\n嫌われたかもって、スマホばかり見ちゃうよね。\n・既読スルー＝嫌われた、じゃない\n・16タイプ（MBTI）で違う返信の止まり方\n・重くならない追いLINEのコツ\n-月-\n▼なぜ返信が来ない？16タイプ別の心理と「思わず返したくなる」追いLINEの技術\nhttps://www.tsuki-to-ren.com/column/line-unread-through-psychology-mbti?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "line-unread-through-psychology-mbti",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:34:59.326Z"
   }
 ]
