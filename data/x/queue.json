@@ -4521,5 +4521,112 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-22T05:50:05.866Z"
+  },
+  {
+    "id": "2026-10-27-chara-1",
+    "date": "2026-10-27",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月27日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：庚鼠（鋼鉄の戦神×ねずみ）\n【本命星】：四緑木星\n\n-結果-\n【今日の点数】：59点\n【今日の空気】無理せずエネルギーを蓄積し整える日\n【LINEのおすすめ時間】21:30〜23:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_rat_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:47.983Z"
+  },
+  {
+    "id": "2026-10-27-chara-1-reply",
+    "date": "2026-10-27",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、焦らず内側を見つめる日。ぶれない軸を、大切にね。\n-月-",
+    "replyTo": "2026-10-27-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:47.983Z"
+  },
+  {
+    "id": "2026-10-27-chara-1-reply2",
+    "date": "2026-10-27",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n連絡は控えめに、自分を整えてね。ひらめいたことを、メモに残してみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-27-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:47.983Z"
+  },
+  {
+    "id": "2026-10-27-am",
+    "date": "2026-10-27",
+    "slot": "am",
+    "kind": "value",
+    "text": "既読がつかないと、何回もスマホ見ちゃうよね。\nその不安、すごくわかる。\n・未読のままになる、よくある理由\n・やりがちな追いLINEはがまん\n・3日待ってから、短く再開する流れ\n-月-\n▼既読がつかない理由と、焦らず待って自然に再開する3つのステップ\nhttps://www.tsuki-to-ren.com/column/line-unread-recovery-timing-secrets?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "line-unread-recovery-timing-secrets",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:57.583Z"
+  },
+  {
+    "id": "2026-10-27-noon",
+    "date": "2026-10-27",
+    "slot": "noon",
+    "kind": "value",
+    "text": "満月の今日、恋でふみ出したい一歩は？✨\n\n①自分から「おはよう」\n②気になる話題をふる\n③好きな気持ちを認める\n\n小さくていいの。詰めこまなくて大丈夫。\nいちばん近い番号、こっそり教えてね\n#片思い\n-月-",
+    "format": "pick_number",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:57.583Z"
+  },
+  {
+    "id": "2026-10-27-noon-reply",
+    "date": "2026-10-27",
+    "slot": "noon",
+    "kind": "value",
+    "text": "選んでくれてありがとう\n①一言だけでOK。笑顔をそえられたら十分だよ\n②あの人が好きそうな話、ひとつ用意しとこう\n③好きって思えた自分、まずはそれで満点だよ\nほかの番号の人も、気軽に聞かせてね\n-月-",
+    "replyTo": "2026-10-27-noon",
+    "format": "pick_number_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:57.583Z"
+  },
+  {
+    "id": "2026-10-27-evening",
+    "date": "2026-10-27",
+    "slot": "evening",
+    "kind": "value",
+    "text": "元恋人から、急に連絡が来た人へ。\n復縁の可能性、あなたはどう見る？\n\nA まだ気持ちが残ってる\nB さみしくなっただけ\nC 話してみないとわからない\n\nうれしいのも、こわいのも、両方あっていいんだよ。\n答え合わせはリプ欄で\n-月-",
+    "format": "comeback",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:57.583Z"
+  },
+  {
+    "id": "2026-10-27-evening-reply",
+    "date": "2026-10-27",
+    "slot": "evening",
+    "kind": "value",
+    "text": "Aは期待、Bは警戒、Cは冷静さの表れかも。見てほしいのは、連絡が来たことより「なぜ今」なのか。あなたはどれを選んだ？\n-月-",
+    "replyTo": "2026-10-27-evening",
+    "format": "comeback_reply",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:57.583Z"
+  },
+  {
+    "id": "2026-10-27-night",
+    "date": "2026-10-27",
+    "slot": "night",
+    "kind": "value",
+    "text": "好きな人の名前が、\nぜんぜん関係ない会話で出てきただけで、\nちょっと耳が熱くなる人へ。\n\nなにも悪いことしてないのに、隠したくなるよね。\nそれ、ちゃんと恋してる証拠だよ。\n#片思いあるある\n-月-",
+    "format": "voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T05:51:57.583Z"
   }
 ]
