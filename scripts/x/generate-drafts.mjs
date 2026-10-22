@@ -1,6 +1,6 @@
 // 指定日（既定: 明日JST）の投稿を作り、data/x/queue.json に status:"scheduled" で追記する。
 //   朝1本（08:15）: 守護獣（60タイプ）の今日の恋愛運（アプリの鑑定ロジックで算出。AI不要）。日ごとに1タイプ進み、60日で全タイプが一巡
-//   バズ検証3本（12:15 / 18:15 / 20:15）: バズ検証用の投稿（8系統×バズ/フォロー/アプリ誘導の型。lib/formats.mjs）。数字・ランキング・相性はアプリの鑑定ロジックで算出し、Claude は言い回しだけを書く
+//   バズ検証4本（12:15 / 15:15 格言 / 18:15 / 20:15）: バズ検証用の投稿（8系統×バズ/フォロー/アプリ誘導の型。lib/formats.mjs）。数字・ランキング・相性はアプリの鑑定ロジックで算出し、Claude は言い回しだけを書く
 // 使い方: node --experimental-strip-types scripts/x/generate-drafts.mjs [YYYY-MM-DD] [--dry-run]
 // 必要な環境変数: ANTHROPIC_API_KEY（任意: ANTHROPIC_MODEL。既定 claude-opus-5-5）
 import Anthropic from '@anthropic-ai/sdk';
@@ -12,7 +12,8 @@ import { FORMAT_TEASER, withTeaser } from './lib/teasers.mjs';
 import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
-import { parseCardText, renderCard } from './lib/card.mjs';
+import { parseCardText, renderCard, EXPRESSIONS } from './lib/card.mjs';
+import { pickColumn, COLUMN_GUIDE, withColumnUrl } from './lib/column-post.mjs';
 import fs from 'node:fs';
 
 const args = process.argv.slice(2);
@@ -23,7 +24,9 @@ const date = dateArg || tomorrow;
 
 const config = readConfig();
 const queue = readQueue();
-if (queue.some((p) => p.date === date)) {
+// --column-only: その日の投稿は既にあるが、コラム紹介（am）だけ無いときに、コラム紹介の1本だけを追加する
+const columnOnly = args.includes('--column-only');
+if (queue.some((p) => p.date === date) && !(columnOnly && !queue.some((p) => p.id === `${date}-am`))) {
   console.log(`${date} の投稿は既にキューにあります。何もしません。`);
   process.exit(0);
 }
@@ -32,6 +35,7 @@ const brief = buildBrief(date);
 
 const history = queue.filter((p) => p.status === 'posted' || p.status === 'scheduled');
 const recentTexts = history.slice(-9).map((p) => `- ${p.text.replace(/\n/g, ' / ')}`).join('\n') || '（なし）';
+const recentFaces = history.filter((p) => p.card?.expression).slice(-5).map((p) => p.card.expression).join(' / ') || '（なし）';
 
 const allowLinks = config.allowLinks !== false;
 const serviceLine = allowLinks
@@ -51,7 +55,9 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 - 1行目は、読み手が自分ごとと感じる引きのある一文にする（例:「返事を待ちすぎている人へ」）。挨拶だけで始めない
 - 夜の投稿は、「あなたはどう？」のような、気軽に答えたくなる問いかけで終えてよい（リプライをもらうため）
 - 他アカウントの文面を真似しない。毎回オリジナルの表現にする
-- AIが書いた感じを出さない。友達にLINEで話すような、短い話し言葉にする。避ける表現: 「〜することが大切です」「〜でしょう」「〜と言えます」「素晴らしい」「大切にしましょう」「〜してみてはいかがでしょうか」、きれいにまとめる締めの一文、同じ語尾（〜よ／〜ね）の連続、体言止めの連発、説明口調、「そのため」「また」「さらに」などの接続詞。1文は短く、言い切る。返信（replyText）は、親の投稿よりさらに短く、ひとこと中心にする
+- AIが書いた感じを出さない。友達にLINEで話すような、短い話し言葉にする。避ける表現: 「〜することが大切です」「〜でしょう」「〜と言えます」「素晴らしい」「大切にしましょう」「〜してみてはいかがでしょうか」、きれいにまとめる締めの一文、同じ語尾（〜よ／〜ね）の連続、体言止めの連発、説明口調、「そのため」「また」「さらに」などの接続詞。1文は短く、言い切る。
+- **内容を薄くしない**: 一般論・きれいごと（「素直がいちばん」「自分を大切に」だけ）で終わらせない。具体的な場面（返信待ち・既読・会う前の夜・別れたあと など）、具体的な行動（時間・回数・言葉）、理由（なぜそう感じるか）のどれかを必ず入れる。字数は、重み付き280の範囲で使い切る（目安: 日本語110〜135文字。格言は100〜125文字）。同じ型でも、場面と切り口は毎回変える
+- 返信（replyText）は、親の投稿を補う具体的な内容（理由・文例・次の一歩）にする。型ごとの指定がある場合はそれに従う
 
 # 数字・事実のルール（最重要）
 - 点数・順位・相性・生まれ年と本命星・各タイプの特徴は、ユーザーメッセージの「事実」にあるものだけを使う。事実にない数字・割合（「〇〇%の人」）・調査結果・統計・「〇〇タイプに多い」は作らない
@@ -61,7 +67,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 
 # 出力
 指定された本数（ユーザーメッセージの「今日の本数」にあるスロット）を、JSONの配列のみで出力する（前後に説明やコードフェンスを付けない）。
-[{"slot":"noon","text":"..."},{"slot":"pm","text":"...","replyText":"（問いかけ型のときだけ）"},{"slot":"night","text":"...","card":"（画像つきの一言の型のときだけ。行は|で区切る）"}]`;
+[{"slot":"noon","text":"...","replyText":"（返信つきの型のときだけ）"},{"slot":"pm","text":"..."},{"slot":"night","text":"...","card":"（画像つきの一言の型のときだけ。行は|で区切る）","expression":"（画像つきの一言の型のときだけ。画像の月の表情のキー）"}]`;
 
 const planned = pickFormats(date); // { noon, evening, night }
 // build() を持つ型は、アプリの鑑定ロジックだけで本文を作る（AIは使わない）。それ以外はAIが言い回しを書く
@@ -73,7 +79,8 @@ const finalReply = (f, text) => (FORMAT_TEASER[f.id] ? withTeaser(String(text).t
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
   const reply = f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : '';
-  return `## ${slot}（${SYSTEMS[f.system]}／${PURPOSES[f.purpose]}／kind=${f.kind || 'value'}）\n- 型: ${f.guide}${reply}${facts ? `\n- 事実: ${JSON.stringify(facts)}` : '\n- 事実: なし（数字は出さない）'}`;
+  const face = f.card ? `\n- expression も書く（画像の月の表情。card の言葉の気持ちにいちばん合うものを、次のキーから1つ。直近の画像と同じ表情が続かないようにする）: ${Object.entries(EXPRESSIONS).map(([k, v]) => `${k}=${v}`).join('、')}` : '';
+  return `## ${slot}（${SYSTEMS[f.system]}／${PURPOSES[f.purpose]}／kind=${f.kind || 'value'}）\n- 型: ${f.guide}${reply}${face}${facts ? `\n- 事実: ${JSON.stringify(facts)}` : '\n- 事実: なし（数字は出さない）'}`;
 };
 const userBase = `# 対象日: ${date}
 # ブリーフ（今日の空気。参考）
@@ -83,7 +90,10 @@ ${JSON.stringify({ moon: brief.moon, mood: brief.todayMood }, null, 2)}
 ${llmSlots.map((k) => describe(k, planned[k])).join('\n\n')}
 
 # 直近の投稿（これらと被らないようにする）
-${recentTexts}`;
+${recentTexts}
+
+# 直近の画像の月の表情（古い順。同じ表情が続かないようにする）
+${recentFaces}`;
 
 function extractJson(text) {
   const s = text.indexOf('[');
@@ -107,12 +117,13 @@ function validate(posts) {
     if (!/-月-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」の署名を付ける（話し手は月だけ）`);
     if (f.card) {
       if (!p.card) problems.push(`${slot}: 画像つきの型は card（画像に載せる言葉）も書く`);
+      if (!EXPRESSIONS[p.expression]) problems.push(`${slot}: expression（月の表情）は ${Object.keys(EXPRESSIONS).join(' / ')} のどれか1つにする`);
       else {
         for (const pr of parseCardText(p.card).problems) problems.push(`${slot}: ${pr}`);
         const plain = String(p.card).replace(/[|\[\]]/g, '');
         for (const pr of lintPost({ slot, kind: 'value', text: `${plain}\n${(String(p.text).match(/-(月|蓮)-\s*$/) || ['-月-'])[0].trim()}` }, history, { allowLinks })) problems.push(`${slot}の画像の言葉: ${pr}`);
       }
-    } else if (p.card) problems.push(`${slot}: 画像つきの型ではないので card は不要`);
+    } else if (p.card || p.expression) problems.push(`${slot}: 画像つきの型ではないので card・expression は不要`);
     if (f.poll) {
       if (!p.replyText) problems.push(`${slot}: 問いかけ型は replyText（答え合わせの返信）も書く`);
       else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
@@ -132,7 +143,7 @@ function validate(posts) {
 }
 
 // アプリの鑑定ロジックだけで作る本文（ランキングなど）を、先にチェックする
-const detPosts = detSlots.map((slot) => {
+const detPosts = (columnOnly ? [] : detSlots).map((slot) => {
   const f = planned[slot];
   const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
@@ -146,7 +157,7 @@ const detPosts = detSlots.map((slot) => {
 });
 
 let posts = [];
-if (llmSlots.length) {
+if (llmSlots.length && !columnOnly) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.error('ANTHROPIC_API_KEY が未設定です。手動で書く場合は docs/X_ACCOUNT_OPERATION.md を参照してください。');
@@ -210,7 +221,7 @@ const buzzItem = (slot, time) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   };
   if (f.card && p.card) {
-    item.card = { text: String(p.card).trim(), who: '月', style: 'portrait' }; // 画像の元（作り直し・ホームの縮小画像用）
+    item.card = { text: String(p.card).trim(), who: '月', style: 'portrait', expression: p.expression }; // 画像の元（作り直し・ホームの縮小画像用）
     item.image = `data/x/cards/${date}-${slot}.png`;
   }
   return item;
@@ -232,7 +243,50 @@ const replyOf = (slot) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   }, ...second];
 };
-const items = [...beastItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
+// コラム紹介の1本（10:15）。1本で完結（返信なし）。紹介できるコラムが尽きたら作らない
+const columnItems = [];
+const col = pickColumn([...history, ...queue]);
+if (col) {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
+  let feedback = '';
+  for (let attempt = 1; attempt <= 3 && !columnItems.length; attempt++) {
+    const res = await client.messages.create({
+      model, max_tokens: 2500, system,
+      messages: [{ role: 'user', content: `今日の本数: am 1本\n${COLUMN_GUIDE(col)}\n\n出力: [{"slot":"am","text":"..."}] のJSON配列のみ${feedback}` }],
+    });
+    let text;
+    try {
+      const out = extractJson(res.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
+      text = withColumnUrl(out[0].text, col);
+    } catch (e) {
+      const raw = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('').slice(0, 300).replace(/\n/g, '\\n');
+      console.warn(`コラム紹介 attempt ${attempt}: 出力を読めません（${e.message}、stop_reason=${res.stop_reason}）。出力の先頭: ${raw}`);
+      feedback = `\n\n# 前回の出力は不正でした: ${e.message}。[{"slot":"am","text":"..."}] のJSON配列のみを出力する（改行は \\n）`;
+      continue;
+    }
+    const problems = lintPost({ slot: 'am', kind: 'value', text }, history, { allowLinks, columnUrl: true });
+    if (!text.includes('▼')) problems.push('「▼題名」の行がない');
+    if (problems.length) {
+      console.warn(`コラム紹介 attempt ${attempt}: 不合格\n - ${problems.join('\n - ')}`);
+      feedback = `\n\n# 前回の出力は次の理由で不合格でした。直して再出力:\n- ${problems.join('\n- ')}`;
+      continue;
+    }
+    columnItems.push({
+      id: `${date}-am`, date, slot: 'am', kind: 'value', text,
+      format: 'column_intro', system: 'column', purpose: 'follow', column: col.slug,
+      status: 'scheduled', createdAt: new Date().toISOString(),
+    });
+  }
+  if (!columnItems.length) console.warn('コラム紹介の下書きは、検査を通らなかったので今日は作りません（ほかの投稿は通常どおり）');
+}
+if (columnOnly) {
+  if (!columnItems.length) { console.error('コラム紹介を作れませんでした。キューは変更しません。'); process.exit(1); }
+  if (!dryRun) writeQueue([...queue, ...columnItems]);
+  console.log(`${date} のコラム紹介1本をキューに追記しました。`);
+  process.exit(0);
+}
+const items = [...beastItems, ...columnItems, ...BUZZ_SLOTS.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
 
 if (dryRun) {
   console.log(JSON.stringify(items, null, 2));
@@ -246,4 +300,4 @@ for (const it of items.filter((x) => x.card)) {
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);
-console.log(`${date} の${items.filter((x) => !x.replyTo).length}本（守護獣1・バズ検証3: ${BUZZ_SLOTS.map((k) => planned[k].id).join(' / ')}）と、答え合わせの返信${items.filter((x) => x.replyTo).length}本をキューに追記しました。`);
+console.log(`${date} の${items.filter((x) => !x.replyTo).length}本（守護獣1・バズ検証4: ${BUZZ_SLOTS.map((k) => planned[k].id).join(' / ')}）と、答え合わせの返信${items.filter((x) => x.replyTo).length}本をキューに追記しました。`);

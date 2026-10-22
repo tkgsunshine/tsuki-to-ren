@@ -23,7 +23,7 @@ test('型の一覧（A〜F）: 3つの目的（バズ・フォロー・アプリ
   }
 });
 
-test('毎日3本: 3つの枠すべてに型が入り、1日にアプリ誘導は最大1本。10日で全ての型が出る', () => {
+test('毎日4本: 4つの枠すべてに型が入り、1日にアプリ誘導は最大1本。10日で全ての型が出る', () => {
   const seen = new Set();
   for (let i = 0; i < 20; i++) {
     const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
@@ -33,7 +33,7 @@ test('毎日3本: 3つの枠すべてに型が入り、1日にアプリ誘導は
     for (const f of Object.values(day)) seen.add(f.id);
   }
   assert.equal(seen.size, FORMATS.length, '全ての型が一巡する');
-  assert.deepEqual(BUZZ_SLOTS, ['noon', 'evening', 'night']);
+  assert.deepEqual(BUZZ_SLOTS, ['noon', 'pm', 'evening', 'night']);
 });
 
 test('事実はアプリの鑑定ロジックから出る（生まれ年の本命星・2人の16タイプ）', () => {
@@ -211,16 +211,48 @@ test('手動投稿モード（apiPosting=false）: APIでは何も投稿せず�
   assert.deepEqual(r.queue.map((x) => x.status), ['scheduled', 'scheduled'], '期限切れにもしない');
 });
 
-test('番号選び（pick_number）: 返信つき（60分後）の型で、毎日1本、昼の枠に入る', () => {
-  const f = FORMATS.find((x) => x.id === 'pick_number');
-  assert.ok(f && f.poll && f.replyGuide && f.purpose === 'buzz');
-  let n = 0;
+test('格言（maxim）: 15:15（pm）に毎日1本。10日に3回は、スピリチュアル寄りの月のことば（maxim_spirit）。選択式の問いかけは減らす', () => {
+  let maxim = 0, spirit = 0, polls = 0;
   for (let i = 0; i < 10; i++) {
     const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
     const day = pickFormats(d);
-    for (const [slot, fm] of Object.entries(day)) if (fm.id === 'pick_number') { n++; assert.equal(slot, 'noon', d); }
+    assert.ok(['maxim', 'maxim_spirit'].includes(day.pm.id), `${d}: 15:15は格言`);
+    if (day.pm.id === 'maxim') maxim++; else spirit++;
+    for (const [slot, fm] of Object.entries(day)) {
+      if (slot !== 'pm') assert.ok(!['maxim', 'maxim_spirit'].includes(fm.id), `${d}: 格言はpmだけ`);
+      if (fm.poll) polls++;
+    }
   }
-  assert.equal(n, 10);
-  const cfg = JSON.parse(fs.readFileSync(new URL('../../data/x/config.json', import.meta.url), 'utf8'));
-  assert.ok(cfg.delayedReplyFormats.includes('pick_number_reply'));
+  assert.equal(maxim + spirit, 10);
+  assert.equal(spirit, 3);
+  assert.ok(polls <= 5, `選択式の問いかけは10日で5本以下（実際 ${polls}）`);
+  const sp = FORMATS.find((x) => x.id === 'maxim_spirit');
+  assert.equal(sp.facts, 'moon');
+  const f = buildFacts(sp, { date: '2026-10-26' });
+  assert.equal(f.moon.name.startsWith('満月'), true);
+  assert.equal(buildFacts(sp, { date: '2026-10-25' }).moon.name.startsWith('ほぼ満月'), true, '満月の前日は「満月」と言い切らない');
+});
+
+test('厚い実用型（howto）: 返信つき。月のことばの本文に、断定・予言・専門用語が入ると不合格', () => {
+  const f = FORMATS.find((x) => x.id === 'howto');
+  assert.ok(f && f.reply && f.replyGuide);
+  const ok = { slot: 'pm', kind: 'value', text: '満ちていく月みたいに、恋もゆっくり。\n焦らなくていい夜かもしれない。\n-月-' };
+  assert.deepEqual(lintPost(ok, [], OPTS), []);
+  assert.ok(lintPost({ ...ok, text: '今夜、運命が決まる。\n-月-' }, [], OPTS).length);
+  assert.ok(lintPost({ ...ok, text: '日干が甲の人は、必ず叶う。\n-月-' }, [], OPTS).length);
+});
+
+// コラム紹介（毎日1本・10:15）
+import { pickColumn, loadColumns, columnUrl, withColumnUrl } from './lib/column-post.mjs';
+test('コラム紹介: 未紹介のコラムを古い順に選び、URL付きの本文はコラム紹介の検査だけ通る', () => {
+  const cols = loadColumns();
+  const first = pickColumn([], cols);
+  assert.ok(first, '紹介できるコラムがある');
+  assert.ok(!/復縁|ツインレイ|引き寄せ/.test(first.title));
+  const used = [{ text: `x\n${columnUrl(first.slug)}` }];
+  assert.notEqual(pickColumn(used, cols).slug, first.slug, '紹介済みは選ばない');
+  const text = withColumnUrl('悩んでいるあなたへ\n・要点1\n-月-\n▼題名', first);
+  assert.deepEqual(lintPost({ slot: 'am', kind: 'value', text }, [], { allowLinks: false, columnUrl: true }), []);
+  assert.ok(lintPost({ slot: 'am', kind: 'value', text }, [], { allowLinks: false }).length, '通常の投稿ではURLは不可');
+  assert.ok(lintPost({ slot: 'am', kind: 'value', text: `${text.split('\n').slice(0, -1).join('\n')}\nhttps://example.com/` }, [], { allowLinks: false, columnUrl: true }).length);
 });

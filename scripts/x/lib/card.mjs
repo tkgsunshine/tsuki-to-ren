@@ -25,8 +25,22 @@ const COLORS = {
 let fontData;
 let emblemUri;
 let portraitUri;
+const expressionUri = {};
 const font = () => (fontData ??= fs.readFileSync(path.join(DIR, 'ShipporiMincho-Bold.ttf')));
 const portrait = () => (portraitUri ??= `data:image/png;base64,${fs.readFileSync(path.join(DIR, 'tsuki-portrait.png')).toString('base64')}`);
+/** 月の表情（scripts/x/assets/tsuki/<キー>.png。740×675、縁は透明にぼかしてある）。portrait カードの expression に指定する */
+export const EXPRESSIONS = {
+  normal: '通常（やさしい微笑み）',
+  smile: '笑顔（目を閉じて明るく笑う）',
+  gaze: '見つめる（振り返って、こちらを見る）',
+  thinking: '考え中（あごに手を当てて考える）',
+  shy: '照れ（口元に手を当てて、はにかむ）',
+  prayer: '祈り（目を閉じて手を合わせる）',
+  inviting: '誘い（笑顔で手を差しのべる）',
+  surprised: '驚き（口を開けて、はっとする）',
+  moonlit: '月夜（横顔で満月を見上げる）',
+};
+const expression = (key) => (expressionUri[key] ??= `data:image/png;base64,${fs.readFileSync(path.join(DIR, 'tsuki', `${key}.png`)).toString('base64')}`);
 const emblem = () => (emblemUri ??= `data:image/png;base64,${fs.readFileSync(path.join(DIR, 'emblem.png')).toString('base64')}`);
 
 /** 「|」で行に分け、[ ] を強調に。行の長さ・行数の問題を返す（空なら合格） */
@@ -50,9 +64,10 @@ export function parseCardText(text) {
 }
 
 /** カードのPNG（Buffer）。width を小さくすると縮小版（ホームの確認用）になる。
- *  style: 'emblem'（月と蓮のエンブレム＋大きな一言）／ 'portrait'（月が吹き出しで語りかける。月の立ち絵＋吹き出し） */
-export async function renderCard({ text, who = '月', width = W, style = 'emblem' }) {
-  if (style === 'portrait') return renderPortrait({ text, width });
+ *  style: 'emblem'（月と蓮のエンブレム＋大きな一言）／ 'portrait'（月が吹き出しで語りかける。月の立ち絵＋吹き出し）
+ *  expression: portrait のときの月の表情（EXPRESSIONS のキー）。省略すると立ち絵 */
+export async function renderCard({ text, who = '月', width = W, style = 'emblem', expression }) {
+  if (style === 'portrait') return renderPortrait({ text, width, expression });
   const { lines, problems } = parseCardText(text);
   if (problems.length) throw new Error(problems.join(' / '));
   const c = COLORS[who] || COLORS.月;
@@ -85,9 +100,10 @@ export async function renderCard({ text, who = '月', width = W, style = 'emblem
 }
 
 /** 月が語りかけるカード（立ち絵＋吹き出し）。話し手は常に月 */
-async function renderPortrait({ text, width = W }) {
+async function renderPortrait({ text, width = W, expression: face }) {
   const { lines, problems } = parseCardText(text);
   if (problems.length) throw new Error(problems.join(' / '));
+  if (face && !EXPRESSIONS[face]) throw new Error(`月の表情が不明: ${face}（${Object.keys(EXPRESSIONS).join(' / ')}）`);
   const c = COLORS.月;
   const maxChars = Math.max(...lines.map((segs) => [...segs.map((s) => s.t).join('')].length));
   const size = Math.min(76, Math.floor(780 / maxChars), Math.floor(330 / (1.55 * lines.length)));
@@ -106,7 +122,9 @@ async function renderPortrait({ text, width = W }) {
     [
       el('div', { position: 'absolute', left: 48, top: 48, width: W - 96, height: H - 96, border: '2px solid rgba(226,192,116,0.55)', borderRadius: 28 }),
       el('div', { position: 'absolute', left: 62, top: 62, width: W - 124, height: H - 124, border: '1px solid rgba(226,192,116,0.22)', borderRadius: 18 }),
-      { type: 'img', props: { src: portrait(), width: 560, height: 648, style: { position: 'absolute', left: (W - 560) / 2, top: 70 } } },
+      face
+        ? { type: 'img', props: { src: expression(face), width: 740, height: 675, style: { position: 'absolute', left: (W - 740) / 2, top: 72 } } }
+        : { type: 'img', props: { src: portrait(), width: 560, height: 648, style: { position: 'absolute', left: (W - 560) / 2, top: 70 } } },
       el('div', { position: 'absolute', left: 90, top: 762, width: W - 180, height: 360, backgroundColor: BUBBLE, border: `2px solid ${c.accent}`, borderRadius: 40 }),
       el('div', { position: 'absolute', left: W / 2 - 22, top: 748, width: 44, height: 44, backgroundColor: BUBBLE, borderTop: `2px solid ${c.accent}`, borderLeft: `2px solid ${c.accent}`, transform: 'rotate(45deg)' }),
       el('div', { position: 'absolute', left: 110, top: 782, width: W - 220, height: 320, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', fontSize: size, letterSpacing: '0.03em' }, msg),

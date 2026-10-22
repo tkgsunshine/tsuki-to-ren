@@ -1,7 +1,7 @@
 // node --test scripts/x/test-card.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCardText, renderCard, MAX_LINES, MAX_CHARS_PER_LINE } from './lib/card.mjs';
+import { parseCardText, renderCard, EXPRESSIONS, MAX_LINES, MAX_CHARS_PER_LINE } from './lib/card.mjs';
 
 test('カード文面: 行と強調を読み取り、長さの問題を検出する', () => {
   const ok = parseCardText('連絡が来ない日は、|[あなたが悪い]|わけじゃない。');
@@ -36,4 +36,13 @@ test('カード文面: 行の長さの差が大きいと不合格（見た目の
   assert.ok(parseCardText('あなたの今日の恋愛運、|かんたん鑑定|するよ。').problems.some((p) => p.includes('そろっていない')));
   assert.deepEqual(parseCardText('あなたの[今日の恋愛運]を、|かんたん鑑定するよ。').problems, []);
   assert.deepEqual(parseCardText('連絡が来ない日は、|[あなたが悪い]|わけじゃないよ。').problems, []);
+});
+
+test('月の表情（portrait の expression）: 9つすべてで1080×1350のPNGができる。不明なキーは拒否する', async () => {
+  assert.equal(Object.keys(EXPRESSIONS).length, 9);
+  for (const expression of Object.keys(EXPRESSIONS)) {
+    const png = await renderCard({ text: 'あなたの|[守護獣]、|調べるよ。', style: 'portrait', expression, width: 360 });
+    assert.equal(png.readUInt32BE(16), 360, expression);
+  }
+  await assert.rejects(renderCard({ text: 'あなたの|[守護獣]、|調べるよ。', style: 'portrait', expression: 'angry' }), /表情が不明/);
 });

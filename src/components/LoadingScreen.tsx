@@ -4,7 +4,7 @@ export const LoadingScreen: React.FC = () => {
   const [textIndex, setTextIndex] = useState(0);
   const loadingTexts = [
     '生年月日から命式を抽出しています…',
-    '日柱の相生・相剋関係を計算中…',
+    '生まれ持った星どうしの相性を計算中…',
     '九星気学の本命星を算出しています…',
     '今日の盤面から日次運気を予測中…',
     '16タイプ診断の行動パターンの照合中…'
