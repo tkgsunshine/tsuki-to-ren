@@ -137,7 +137,7 @@ function validate(posts) {
 }
 
 // アプリの鑑定ロジックだけで作る本文（ランキングなど）を、先にチェックする
-const detPosts = detSlots.map((slot) => {
+const detPosts = (columnOnly ? [] : detSlots).map((slot) => {
   const f = planned[slot];
   const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
