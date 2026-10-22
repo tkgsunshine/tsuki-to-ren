@@ -43,5 +43,35 @@
     "date": "2026-10-16",
     "followers": 31,
     "tweets": 164
+  },
+  {
+    "date": "2026-10-17",
+    "followers": 38,
+    "tweets": 176
+  },
+  {
+    "date": "2026-10-18",
+    "followers": 37,
+    "tweets": 183
+  },
+  {
+    "date": "2026-10-19",
+    "followers": 40,
+    "tweets": 185
+  },
+  {
+    "date": "2026-10-20",
+    "followers": 41,
+    "tweets": 190
+  },
+  {
+    "date": "2026-10-21",
+    "followers": 41,
+    "tweets": 206
+  },
+  {
+    "date": "2026-10-22",
+    "followers": 47,
+    "tweets": 213
   }
 ]
