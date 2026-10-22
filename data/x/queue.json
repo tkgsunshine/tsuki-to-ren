@@ -4638,5 +4638,17 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-22T13:47:38.895Z"
+  },
+  {
+    "id": "2026-10-26-night",
+    "date": "2026-10-26",
+    "slot": "night",
+    "kind": "value",
+    "text": "「月がきれい」って、好きな人に送りたくなった人へ。\n写真まで撮ったのに、トーク画面で指が止まる。\n重いかなって消して、カメラロールに今夜の月だけが増えていくの。\nきれいなものを見て、最初に浮かぶ顔があるんだね。\nそれ、もう立派な恋だと思う。あなたは今夜、送れた？\n-月-",
+    "format": "voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T13:48:55.533Z"
   }
 ]
