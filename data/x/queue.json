@@ -4688,5 +4688,18 @@
     "column": "line-unread-recovery-timing-secrets",
     "status": "scheduled",
     "createdAt": "2026-10-22T06:37:47.276Z"
+  },
+  {
+    "id": "2026-10-27-am",
+    "date": "2026-10-27",
+    "slot": "am",
+    "kind": "value",
+    "text": "理屈で考える相手と、気持ちで感じるあなた。\n話がかみ合わない気がして、ちょっと不安になるよね。\n・INTJがINFPに心を開くわけ\n・INTJがこっそり見せる愛情表現\n・すれ違わないための二人のルール\n-月-\n▼「建築家」と「仲介者」の静かなる引力\nhttps://www.tsuki-to-ren.com/column/intj-infp-soul-bond-attraction?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "intj-infp-soul-bond-attraction",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:38:45.614Z"
   }
 ]
