@@ -4601,5 +4601,30 @@
     "column": "intj-infp-soul-bond-attraction",
     "status": "scheduled",
     "createdAt": "2026-10-22T06:38:45.614Z"
+  },
+  {
+    "id": "2026-10-23-noon",
+    "date": "2026-10-23",
+    "slot": "noon",
+    "kind": "value",
+    "text": "嫉妬したとき、やっていいこと・やめること\n〇 1時間おいてから返す／モヤモヤを3行メモに書く／「さみしかった」と一言\n× SNSを何度も見る／「誰といたの？」と問いつめる\n理由：嫉妬は不安の裏返し。責める言葉より、弱さのほうが届きやすいの\nそのまま使える一言は、リプ欄に\n-月-",
+    "format": "howto",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T13:46:22.452Z"
+  },
+  {
+    "id": "2026-10-23-noon-reply",
+    "date": "2026-10-23",
+    "slot": "noon",
+    "kind": "value",
+    "text": "【一言例】\n「昨日ちょっとさみしかった。今度ゆっくり話せたらうれしいな」\n「気にしすぎかもだけど、声聞けて安心した」\nメモを書いて落ち着いてから、夜より昼に送ってね\n-月-",
+    "replyTo": "2026-10-23-noon",
+    "format": "howto_reply",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T13:46:22.452Z"
   }
 ]
