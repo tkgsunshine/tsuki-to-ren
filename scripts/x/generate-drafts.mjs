@@ -12,7 +12,7 @@ import { FORMAT_TEASER, withTeaser } from './lib/teasers.mjs';
 import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
-import { parseCardText, renderCard } from './lib/card.mjs';
+import { parseCardText, renderCard, EXPRESSIONS } from './lib/card.mjs';
 import { pickColumn, COLUMN_GUIDE, withColumnUrl } from './lib/column-post.mjs';
 import fs from 'node:fs';
 
@@ -35,6 +35,7 @@ const brief = buildBrief(date);
 
 const history = queue.filter((p) => p.status === 'posted' || p.status === 'scheduled');
 const recentTexts = history.slice(-9).map((p) => `- ${p.text.replace(/\n/g, ' / ')}`).join('\n') || '（なし）';
+const recentFaces = history.filter((p) => p.card?.expression).slice(-5).map((p) => p.card.expression).join(' / ') || '（なし）';
 
 const allowLinks = config.allowLinks !== false;
 const serviceLine = allowLinks
@@ -66,7 +67,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 
 # 出力
 指定された本数（ユーザーメッセージの「今日の本数」にあるスロット）を、JSONの配列のみで出力する（前後に説明やコードフェンスを付けない）。
-[{"slot":"noon","text":"...","replyText":"（返信つきの型のときだけ）"},{"slot":"pm","text":"..."},{"slot":"night","text":"...","card":"（画像つきの一言の型のときだけ。行は|で区切る）"}]`;
+[{"slot":"noon","text":"...","replyText":"（返信つきの型のときだけ）"},{"slot":"pm","text":"..."},{"slot":"night","text":"...","card":"（画像つきの一言の型のときだけ。行は|で区切る）","expression":"（画像つきの一言の型のときだけ。画像の月の表情のキー）"}]`;
 
 const planned = pickFormats(date); // { noon, evening, night }
 // build() を持つ型は、アプリの鑑定ロジックだけで本文を作る（AIは使わない）。それ以外はAIが言い回しを書く
@@ -78,7 +79,8 @@ const finalReply = (f, text) => (FORMAT_TEASER[f.id] ? withTeaser(String(text).t
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
   const reply = f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : '';
-  return `## ${slot}（${SYSTEMS[f.system]}／${PURPOSES[f.purpose]}／kind=${f.kind || 'value'}）\n- 型: ${f.guide}${reply}${facts ? `\n- 事実: ${JSON.stringify(facts)}` : '\n- 事実: なし（数字は出さない）'}`;
+  const face = f.card ? `\n- expression も書く（画像の月の表情。card の言葉の気持ちにいちばん合うものを、次のキーから1つ。直近の画像と同じ表情が続かないようにする）: ${Object.entries(EXPRESSIONS).map(([k, v]) => `${k}=${v}`).join('、')}` : '';
+  return `## ${slot}（${SYSTEMS[f.system]}／${PURPOSES[f.purpose]}／kind=${f.kind || 'value'}）\n- 型: ${f.guide}${reply}${face}${facts ? `\n- 事実: ${JSON.stringify(facts)}` : '\n- 事実: なし（数字は出さない）'}`;
 };
 const userBase = `# 対象日: ${date}
 # ブリーフ（今日の空気。参考）
@@ -88,7 +90,10 @@ ${JSON.stringify({ moon: brief.moon, mood: brief.todayMood }, null, 2)}
 ${llmSlots.map((k) => describe(k, planned[k])).join('\n\n')}
 
 # 直近の投稿（これらと被らないようにする）
-${recentTexts}`;
+${recentTexts}
+
+# 直近の画像の月の表情（古い順。同じ表情が続かないようにする）
+${recentFaces}`;
 
 function extractJson(text) {
   const s = text.indexOf('[');
@@ -112,12 +117,13 @@ function validate(posts) {
     if (!/-月-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」の署名を付ける（話し手は月だけ）`);
     if (f.card) {
       if (!p.card) problems.push(`${slot}: 画像つきの型は card（画像に載せる言葉）も書く`);
+      if (!EXPRESSIONS[p.expression]) problems.push(`${slot}: expression（月の表情）は ${Object.keys(EXPRESSIONS).join(' / ')} のどれか1つにする`);
       else {
         for (const pr of parseCardText(p.card).problems) problems.push(`${slot}: ${pr}`);
         const plain = String(p.card).replace(/[|\[\]]/g, '');
         for (const pr of lintPost({ slot, kind: 'value', text: `${plain}\n${(String(p.text).match(/-(月|蓮)-\s*$/) || ['-月-'])[0].trim()}` }, history, { allowLinks })) problems.push(`${slot}の画像の言葉: ${pr}`);
       }
-    } else if (p.card) problems.push(`${slot}: 画像つきの型ではないので card は不要`);
+    } else if (p.card || p.expression) problems.push(`${slot}: 画像つきの型ではないので card・expression は不要`);
     if (f.poll) {
       if (!p.replyText) problems.push(`${slot}: 問いかけ型は replyText（答え合わせの返信）も書く`);
       else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
@@ -215,7 +221,7 @@ const buzzItem = (slot, time) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   };
   if (f.card && p.card) {
-    item.card = { text: String(p.card).trim(), who: '月', style: 'portrait' }; // 画像の元（作り直し・ホームの縮小画像用）
+    item.card = { text: String(p.card).trim(), who: '月', style: 'portrait', expression: p.expression }; // 画像の元（作り直し・ホームの縮小画像用）
     item.image = `data/x/cards/${date}-${slot}.png`;
   }
   return item;

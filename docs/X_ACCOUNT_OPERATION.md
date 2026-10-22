@@ -118,6 +118,7 @@
 - 反応が出やすいと見えた「1つの短い言葉で完結する画像つき投稿」の検証（2026-10-08）。10日のうち5本（昼・夜）がこの型で、文字だけの一言 `voice`（2本）と反応を比べる。**ただし、アカウントが「人間確認」の制限を受けている間は、表示回数が低く出る可能性があり、比較は制限が外れてから**
 - 下書き生成（`generate-drafts.mjs`）が、Claude に `card`（画像に載せる言葉）と `text`（投稿の本文）を書かせる。`card` は2〜3行（1行14字以内・最大4行）、行は「|」で区切り、強調する短い語だけ `[ ]` で囲む。相手の気持ちの断定は書かない
 - 画像は `scripts/x/lib/card.mjs` が作る（1080×1350のPNG。style は `emblem`（エンブレム）と `portrait`（月の立ち絵＋吹き出し。下書き生成は portrait）。ブラウザ不要の satori＋resvg-wasm。フォントは `scripts/x/assets/ShipporiMincho-Bold.ttf`＝SIL OFL、ロゴは月と蓮のエンブレム `scripts/x/assets/emblem.png`）。`data/x/cards/<日付>-<枠>.png` に置き、キューの項目の `image` と `card`（文面・署名）に記録する。投稿時に `post.mjs` がアップロードする
+- 月の表情（2026-10-16〜）: portrait カードの月は、9つの表情（`scripts/x/assets/tsuki/<キー>.png`: normal 通常・smile 笑顔・gaze 見つめる・thinking 考え中・shy 照れ・prayer 祈り・inviting 誘い・surprised 驚き・moonlit 月夜）から選ぶ。下書き生成で Claude が `card` の言葉に合う `expression` を選び（直近5枚の表情を見せて、続かないようにする）、キューの `card.expression` に記録する。`expression` のない項目（それ以前のもの）は、これまでの立ち絵（`tsuki-portrait.png`）のまま。表情の画像は、元の素材（約437×400px）をアニメ絵向けのAI拡大（Real-ESRGAN anime 6B）で4倍にし、左下の表情名の文字を消し、740×675に縮小して縁を透明にぼかしたもの
 - ホームの承認画面で画像を確認できるよう、縮小版は `node scripts/x/card-thumb.mjs <投稿ID>`（data URIを出力）で作り、`x_posts` の `thumb` に入れる
 - 作り直し: キューの `card` を直して、`renderCard` で同じパスに書き直す
 
