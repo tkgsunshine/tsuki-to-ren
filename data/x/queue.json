@@ -4556,5 +4556,111 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-10-22T06:30:24.029Z"
+  },
+  {
+    "id": "2026-10-27-chara-1",
+    "date": "2026-10-27",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月27日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：庚鼠（鋼鉄の戦神×ねずみ）\n【本命星】：四緑木星\n\n-結果-\n【今日の点数】：59点\n【今日の空気】無理せずエネルギーを蓄積し整える日\n【LINEのおすすめ時間】21:30〜23:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_rat_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:31:35.185Z"
+  },
+  {
+    "id": "2026-10-27-chara-1-reply",
+    "date": "2026-10-27",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【今日の空気】\n\n今日は、焦らず内側を見つめる日。ぶれない軸を、大切にね。\n-月-",
+    "replyTo": "2026-10-27-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:31:35.185Z"
+  },
+  {
+    "id": "2026-10-27-chara-1-reply2",
+    "date": "2026-10-27",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n連絡は控えめに、自分を整えてね。ひらめいたことを、メモに残してみて。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-27-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:31:35.185Z"
+  },
+  {
+    "id": "2026-10-27-noon",
+    "date": "2026-10-27",
+    "slot": "noon",
+    "kind": "value",
+    "text": "「この前話した映画、観たよ」\n好きな人から、急にこれだけ届いたら？\n1週間前に、何気なく話したやつ。\n\nA 話を覚えててくれた。脈ありかも\nB 感想を言いたかっただけ\nC 話しかけるきっかけを探してた\n\nあなたならどう思う？\n-月-",
+    "format": "psych_poll",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:32:07.591Z"
+  },
+  {
+    "id": "2026-10-27-noon-reply",
+    "date": "2026-10-27",
+    "slot": "noon",
+    "kind": "value",
+    "text": "Aは話を覚えてた合図。Bは気楽に話せる相手って見方。Cは連絡の口実かも。「どうだった？」で返すと続くよ。あなたは何を選んだ？\n-月-",
+    "replyTo": "2026-10-27-noon",
+    "format": "psych_poll_reply",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:32:07.591Z"
+  },
+  {
+    "id": "2026-10-27-pm",
+    "date": "2026-10-27",
+    "slot": "pm",
+    "kind": "value",
+    "text": "誘うのが怖いのは、答えより自分を守りたいから。\n「今度ごはん行かない？」の一行に、30分かけちゃう。\n断られたら、自分ごと否定された気がするからだよ。\nでも返ってくるのは、日にちへの答え。あなたへの点数じゃない。\n怖いまま送れたら、それで十分えらいの。\n-月-",
+    "format": "maxim",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:32:07.591Z"
+  },
+  {
+    "id": "2026-10-27-evening",
+    "date": "2026-10-27",
+    "slot": "evening",
+    "kind": "value",
+    "text": "見た目はクール、恋愛はいちばん甘えたい16タイプ（MBTI）\n\n1位 INTJ 建築家\n2位 ISTP 巨匠\n3位 INTP 論理学者\n4位 ISTJ 管理者\n5位 INFJ 提唱者\n6位 ENTJ 指揮官\n7位 ISFJ 擁護者\n8位 ESTP 起業家\n\n続きの9位〜16位は、リプ欄に。あなたは何位？\n-月-",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:32:07.591Z"
+  },
+  {
+    "id": "2026-10-27-evening-reply",
+    "date": "2026-10-27",
+    "slot": "evening",
+    "kind": "value",
+    "text": "続きの9位〜16位です\n\n9位 ENTP 討論者\n10位 INFP 仲介者\n11位 ESTJ 幹部\n12位 ISFP 冒険家\n13位 ENFJ 主人公\n14位 ESFJ 領事官\n15位 ENFP 運動家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-27-evening",
+    "format": "gap_rank_reply",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:32:07.591Z"
+  },
+  {
+    "id": "2026-10-27-night",
+    "date": "2026-10-27",
+    "slot": "night",
+    "kind": "value",
+    "text": "好きな人と同じ名字を、看板で見つけて立ち止まった人へ。\nレシートに載ってた店員さんの名前でも、ちょっとドキッとする。\n誰にも言えないくらい、小さなことなのにね。\n頭のすみに、ずっとその人がいるんだよ。\nその小さなドキッ、かわいいと思う。あなたは最近、どこで見つけた？\n-月-",
+    "format": "voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-22T06:32:07.591Z"
   }
 ]
