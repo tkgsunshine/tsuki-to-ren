@@ -137,7 +137,7 @@ function validate(posts) {
 }
 
 // アプリの鑑定ロジックだけで作る本文（ランキングなど）を、先にチェックする
-const detPosts = detSlots.map((slot) => {
+const detPosts = (columnOnly ? [] : detSlots).map((slot) => {
   const f = planned[slot];
   const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
@@ -246,7 +246,7 @@ if (col) {
   let feedback = '';
   for (let attempt = 1; attempt <= 3 && !columnItems.length; attempt++) {
     const res = await client.messages.create({
-      model, max_tokens: 1000, system,
+      model, max_tokens: 2500, system,
       messages: [{ role: 'user', content: `今日の本数: am 1本\n${COLUMN_GUIDE(col)}\n\n出力: [{"slot":"am","text":"..."}] のJSON配列のみ${feedback}` }],
     });
     let text;
@@ -255,7 +255,7 @@ if (col) {
       text = withColumnUrl(out[0].text, col);
     } catch (e) {
       const raw = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('').slice(0, 300).replace(/\n/g, '\\n');
-      console.warn(`コラム紹介 attempt ${attempt}: 出力を読めません（${e.message}）。出力の先頭: ${raw}`);
+      console.warn(`コラム紹介 attempt ${attempt}: 出力を読めません（${e.message}、stop_reason=${res.stop_reason}）。出力の先頭: ${raw}`);
       feedback = `\n\n# 前回の出力は不正でした: ${e.message}。[{"slot":"am","text":"..."}] のJSON配列のみを出力する（改行は \\n）`;
       continue;
     }
