@@ -161,7 +161,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   <td valign="top" style="font-size: 14px; line-height: 1.7; color: #e2e8f0;">
                     <div style="font-size: 11px; font-weight: bold; color: ${accent}; letter-spacing: 0.1em; margin-bottom: 2px;">${charName}より</div>
                     ${esc(name)} 様${oppLabel}<br>
-                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、『月と蓮』守護エンジンより本日のあなたの恋愛運をお届けします。
+                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、月と蓮より、本日のあなたの恋愛運をお届けします。
                   </td>
                 </tr>
               </table>
