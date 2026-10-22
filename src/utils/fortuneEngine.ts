@@ -1181,7 +1181,7 @@ export function getDailyContactAndAdvice(
       if (character === 'tsuki') {
         advice = `${oppNick}様（${oppNorm}）との魂の波長が最高潮に達する日です。小手先の駆け引きは不要です。${killing}のように相手の存在そのものを認める温かな言葉を届けたり、${invite}と素直なお誘いを送ることで、一気に進展する奇跡の好機となります。`;
       } else {
-        advice = `本日はアプローチ成功確率がデータ上極大化（90%超）する最適勝負日です。${oppNick}様（${oppNorm}）の意思決定特性を踏まえ、${invite}と5W1Hで具体的な提案を行ってください。迷わず行動に移すことが関係の進展を確定させます。`;
+        advice = `本日は星の巡りがあなたの背中を強く押す、絶好の勝負日です。${oppNick}様（${oppNorm}）の意思決定特性を踏まえ、${invite}と5W1Hで具体的な提案を行ってください。迷わず行動に移すことが関係の進展を確定させます。`;
       }
     } else if (dailyScore >= 73) {
       timeSlot = '19:30 〜 21:00';
@@ -1199,7 +1199,7 @@ export function getDailyContactAndAdvice(
       if (character === 'tsuki') {
         advice = `無理に関係を急がせず、日々の小さな信頼を積み重ねる日です。${oppNick}様の返信ペース（${habit}）を温かく尊重しながら、お昼休みに日常のちょっとした写真や労いの言葉を届けてみてください。居心地の良さが深く心に残ります。`;
       } else {
-        advice = `相性パラメータは安定巡航中です。相手のコミュニケーション特性（${habit}）に合わせ、お昼に要点を絞った短文で連絡を入れてください。低負荷なやり取りの継続が長期的信頼の土台となります。`;
+        advice = `二人の運気は穏やかに安定しています。相手のコミュニケーション特性（${habit}）に合わせ、お昼に要点を絞った短文で連絡を入れてください。低負荷なやり取りの継続が長期的信頼の土台となります。`;
       }
     } else if (dailyScore >= 45) {
       timeSlot = '7:30 〜 8:30';
@@ -1208,7 +1208,7 @@ export function getDailyContactAndAdvice(
       if (character === 'tsuki') {
         advice = `本日は運気の波が一時的な調整期に入っています。${oppNick}様の地雷である『${ng}』を厳重に避け、朝の時間帯に「今日もお互い無理せず頑張ろうね！」などの返信不要な爽やかな一言に留めるのがベストです。`;
       } else {
-        advice = `摩擦リスクが検知される注意日です。${oppNick}様の防衛本能を刺激するNG行動『${ng}』を絶対に回避してください。連絡を入れる場合は朝の7:30〜8:30に要点のみの1行メッセージに限定し、即座にクローズするのが論理的リスクヘッジです。`;
+        advice = `すれ違いが起きやすい注意日です。${oppNick}様の防衛本能を刺激するNG行動『${ng}』を絶対に回避してください。連絡を入れる場合は朝の7:30〜8:30に要点のみの1行メッセージに限定し、すぐに切り上げるのが賢い守り方です。`;
       }
     } else {
       timeSlot = '終日静観推奨';
@@ -1217,7 +1217,7 @@ export function getDailyContactAndAdvice(
       if (character === 'tsuki') {
         advice = `本日は星の巡りが相剋・休息フェーズです。${oppNick}様は現在『${delayReason}』という状態になりやすいため、あえて連絡を休んで自分磨きに集中しましょう。追わないあなたの凛とした余裕が、お相手の「どうしたのかな？」を引き出します。`;
       } else {
-        advice = `本日の接触成功確率は極めて低調です。お相手は『${delayReason}』という心理的キャパシティ低下フェーズにあります。本日は一切の連絡を凍結し、相手の自発的アクションを待つ「サイレント静観戦略」が最も合理的な生存ルートです。`;
+        advice = `本日は連絡が届きにくい、星の巡りが静かな日です。お相手は『${delayReason}』という心理的キャパシティ低下フェーズにあります。本日は連絡を控え、相手から動き出すのを静かに待つのがいちばんの近道です。`;
       }
     }
 
@@ -1254,7 +1254,7 @@ export function getDailyContactAndAdvice(
       if (character === 'tsuki') {
         advice = `心が非常に安定している日です。16タイプ（${myNorm}）特有のマイペースを大切にし、美味しい食事や好きな音楽で自分自身を満たすことが、自然と人を惹きつけるオーラとなります。`;
       } else {
-        advice = `現状維持とシステム調整に適した平穏日です。身の回りのデジタル環境やスケジュールの整理に集中することで、思考のノイズがクリアになり精神的余裕が生まれます。`;
+        advice = `今の流れを保ち、足元を整えるのに向いた平穏日です。身の回りのデジタル環境やスケジュールの整理に集中することで、思考のノイズがクリアになり精神的余裕が生まれます。`;
       }
     } else if (dailyScore >= 45) {
       timeSlot = '21:30 〜 23:00';
@@ -1271,7 +1271,7 @@ export function getDailyContactAndAdvice(
       if (character === 'tsuki') {
         advice = `今日は徹底的に自分を慈しむ充電のスペシャルデーです。不要な外部情報を遮断し、自分をたっぷり甘やかして褒めてあげることで、明日以降の大開運ウェーブを迎え入れる心の余白が完成します。`;
       } else {
-        advice = `リスク管理に徹するべき静観日です。外部との通信を最小限に抑え、睡眠と栄養補給に専念してください。冷却期間を設けることが、次なる戦略の成功確率を最大化させます。`;
+        advice = `リスク管理に徹するべき静観日です。人とのやり取りは最小限にして、睡眠と栄養補給に専念してください。心と体を休ませることが、次のチャンスをつかむ力になります。`;
       }
     }
 
@@ -1840,7 +1840,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       }
     } else { // ren
       if (baseScore >= 85) {
-        oneLiner = `${sTitle}。データが証明する抜群の相性シナジー。具体的なお誘いに進むベストタイミングです。`;
+        oneLiner = `${sTitle}。星が示す抜群の相性。具体的なお誘いに進むベストタイミングです。`;
         summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。関係性は着実に上昇中。相手の好む会話のペースに合わせるのが効果的です。`;
@@ -1876,12 +1876,12 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     } else { // ren
       if (baseScore >= 85) {
         oneLiner = `【${myPillarObj.stem}の最高効率】知性と判断力が極限まで冴え渡る開運日。理想の設計図を実行に移すべきです。`;
-        summary = `四柱推命・気学・性格分析データ統合評価：日柱（${myPillar}）のポテンシャルが最高水準で発揮されています。あなたの16タイプ（${input.myMbti}）の強みである分析力と実行力をフル活用し、今後のパートナーシップやキャリアの具体的な目標設定に着手してください。成果は極大化されます。`;
+        summary = `四柱推命・九星気学・16タイプから読み解くと、日柱（${myPillar}）のポテンシャルが最高水準で発揮されています。あなたの16タイプ（${input.myMbti}）の強みである分析力と実行力をフル活用し、今後のパートナーシップやキャリアの具体的な目標設定に着手してください。成果は極大化されます。`;
       } else if (baseScore >= 70) {
         oneLiner = `【${myPillarObj.stem}の安定運用】理性的な選択が好循環を生む好調日。スマートな情報収集を進めてください。`;
         summary = `認知パフォーマンスは良好です。感情論を排し、共通の価値観や将来目標を持つ人々が集まる環境をリサーチ・選択することで、高次元のパートナーシップ候補との接点を論理的に創出できます。`;
       } else if (baseScore >= 55) {
-        oneLiner = `【${myPillarObj.stem}の現状維持】パラメータはフラット推移。これまでの行動データの見直しと調整を推奨します。`;
+        oneLiner = `【${myPillarObj.stem}の現状維持】運気は穏やかな横ばい。これまでの行動を振り返り、整えるのに向いた日です。`;
         summary = `運気指標は中庸レベルです。無謀な新規アクションは控え、身の回りのタスク整理や環境整備に注力することが、次期の飛躍に向けたリソース配分の最適解です。`;
       } else {
         oneLiner = `【${myPillarObj.stem}のリスクヘッジ】判断ノイズが増加する静観日。無駄なアプローチを凍結してください。`;
@@ -1948,15 +1948,15 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     } else if (adviceCategory === '財星') {
       firstCardText = `${meta}関係性のロードマップを客観的に評価する日です。曖昧な感情論ではなく、互いの目的やリソース配分が一致しているかを冷静に見極め、着実な進展ルートを選択してください。`;
       secondCardText = hasOpponent && oppMbtiTrait
-        ? `事実ベースの合意形成をロジカルに提案してください。お相手のデートスポットとして『${oppMbtiTrait.dateSpot}』を選定することで、合意確率は大幅に向上します。`
-        : `支出の見直しや将来計画の精査に最適な日です。無駄を省き合理的システムを構築することが、精神的余裕と魅力を生みます。`;
+        ? `事実ベースの合意形成をロジカルに提案してください。お相手のデートスポットとして『${oppMbtiTrait.dateSpot}』を選定することで、話がぐっとまとまりやすくなります。`
+        : `支出の見直しや将来計画の精査に最適な日です。無駄を省き暮らしを整えることが、精神的余裕と魅力を生みます。`;
     } else if (adviceCategory === '官殺') {
       firstCardText = `${meta}お相手の状況や心理的プレッシャーを静かに分析し、あえて「引き気味でサポートする」のがベスト戦略です。返信を急かさず、理知的な冷静さを保ってください。`;
       secondCardText = hasOpponent && oppMbtiTrait
         ? `リスクヘッジ戦略：お相手の心理的NG行動である『${oppMbtiTrait.ngList[0]}』を厳重に警戒してください。本日の連絡は労いの一言を含めた短文のみに限定することが最善策です。`
         : `突発的なトラブルや予定変更に備え、余裕を持ったスケジュール管理を徹底してください。冷静なトラブル処理能力があなたの価値を高めます。`;
     } else { // 印星
-      firstCardText = `${meta}これまでの二人のやり取りのテキストや反応データを冷静に振り返り、成功パターンと改善点を客観的に抽出する内省の日です。感情的な焦りはデータ分析のノイズになります。`;
+      firstCardText = `${meta}これまでの二人のやり取りや相手の反応を冷静に振り返り、成功パターンと改善点を客観的に抽出する内省の日です。焦る気持ちは、物事を見る目を曇らせてしまいます。`;
       secondCardText = hasOpponent && oppMbtiTrait
         ? `次に動くべき好機に向け、情報収集とアプローチの計画を綿密に練り直しましょう。相手の褒め言葉として『${oppMbtiTrait.killingExtra}』を準備しておくことが次回接触時の切り札となります。`
         : `専門スキルのアップデートや読書に専念してください。蓄積された知識と冷静な洞察力が、今後の対人関係において圧倒的な優位性を担保します。`;
@@ -2067,7 +2067,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         } else if (score >= 55) {
           const pool = [
             `今月はお互いの関係性を客観的に整理し、無理のないペースで調整を図る安定期です。感情に振り回されることなく、冷静に次のステップへの準備を整えられます。${astroNote}`,
-            `来月は、現状のシステムやコミュニケーションの無駄を省く調整月となります。スマートな振る舞いを維持することで、盤石な土台が完成します。${astroNote}`,
+            `来月は、今の習慣やコミュニケーションの無駄を省く調整月となります。スマートな振る舞いを維持することで、盤石な土台が完成します。${astroNote}`,
             `再来月は、冷静な自己コントロールが試される平穏期です。慌てず確実な基盤を維持することで、次期戦略に向けた優位性が保たれます。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
@@ -2190,7 +2190,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         if (score >= 85) {
           if (yearsLater === 1) return `${displayYear}は、二人の関係性に潜む課題を論理的にクリアにし、現実的な改善計画を実行に移す「軌道修正と大開運の年」となります。明確な将来設計により、二人の距離を合理的に詰める好機会です。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、強力な運気のバックアップを受け、将来に向けた具体的な「契約やステップアップ」が実現する最良の時期です。${myNickname}様のリードによりスマートな進展が叶います。${astroNote}`;
-          if (yearsLater === 3) return `${displayYear}は、二人の関係が安定した「恒久的パートナーシップ・システム」として定着する年です。将来設計に基づいて生活基盤や資産を統合するのに最も適した時期となります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、二人の関係が安定した「揺るがないパートナーシップ」として定着する年です。将来設計に基づいて生活基盤や資産を統合するのに最も適した時期となります。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、強固な信頼関係のもと互いのキャリアや社会活動が活性化する「共生と発展の時期」です。精神的支えが盤石になり、次のステージへ飛躍できます。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、長期ロードマップの中間評価と次なる十年を見据えた「再設計と投資の年」です。築き上げた基盤をさらに豊かなものへとアップデートできます。${astroNote}`;
           return `${displayYear}は、十年にわたる合理的かつ論理的な信頼の積み重ねが「完全なる運命共同体」として結実する到達期です。最高水準のステータスと安定が維持されます。${astroNote}`;
@@ -2204,7 +2204,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         } else if (score >= 55) {
           if (yearsLater === 1) return `${displayYear}は、二人の生活基盤や価値観を整理し、無理のないペースで安定へと繋げる「計画と調整の年」となります。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、客観的な現状分析とリスク管理により、堅実な信頼関係の土台を固める着実な準備期です。${astroNote}`;
-          if (yearsLater === 3) return `${displayYear}は、慌てず確実な基盤を維持し、将来の大きな展開に備えたシステム調整を行う安定年となります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、慌てず確実な基盤を維持し、将来の大きな展開に備えて足元を整える安定年となります。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、お互いの自立した役割を全うしつつ、静かに信頼を蓄積していく堅実な時期です。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、これまでの成果を整理し、次なる発展に向けた戦略を再確認する着実な基盤構築年となります。${astroNote}`;
           return `${displayYear}は、長年の堅実なリスク管理と客観的視点が実を結び、どんな環境変化にも耐えうる盤石な生活基盤が定着する時期です。${astroNote}`;
@@ -2214,7 +2214,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           if (yearsLater === 3) return `${displayYear}は、無理な成果を求めず、基盤の点検と長期的戦略の練り直しに徹する調整の時期です。冷静なリスクヘッジにより不確実な波乱をスマートに回避できます。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、リソースを慎重に配分し無駄な摩擦を起こさない静観の時期です。安定した自己コントロールが最大の武器となります。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、思考のノイズを削ぎ落とし再構築を図る時期です。賢明な静観が成功への最短ルートとなります。${astroNote}`;
-          return `${displayYear}は、自己管理と客観的分析の成果が結実し、どんな環境変化にも動じない強固な人生システムが完成する到達期となります。${astroNote}`;
+          return `${displayYear}は、自己管理と客観的分析の成果が結実し、どんな環境変化にも動じない強い自分が完成する到達期となります。${astroNote}`;
         }
       }
     } else {
@@ -2255,7 +2255,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           if (yearsLater === 3) return `${displayYear}は、理想の関係性を現実的かつ合理的な形で定着させ、生活基盤として統合する到達期となります。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、知的なシナジー効果が最大化し、互いの社会的成功を支援し合える最高水準のパートナーシップが機能します。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、スケールの大きい共通目標やビジョンの拡張を実行し、関係を次世代ステージへと進化させる時期です。${astroNote}`;
-          return `${displayYear}は、十年にわたる知性的アプローチと自己改善が結実し、完璧なライフスタイル・システムが完成する到達期となります。${astroNote}`;
+          return `${displayYear}は、十年にわたる知性的アプローチと自己改善が結実し、理想の暮らし方が完成する到達期となります。${astroNote}`;
         } else if (score >= 70) {
           if (yearsLater === 1) return `${displayYear}は、価値観や将来目標を明確に提示することで、尊敬し合える洗練されたパートナー候補と発展する「好調年」です。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、自立した大人の魅力が際立ち、お互いに高め合える優秀なパートナーシップが構築される発展期です。${astroNote}`;
@@ -2276,7 +2276,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           if (yearsLater === 3) return `${displayYear}は、無理な拡大を避け、基盤の点検と長期的戦略の練り直しに徹する調整の時期です。冷静なリスクヘッジにより不確実な波乱をスマートに回避できます。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、リソースを慎重に配分し無駄な摩擦を起こさない静観の時期です。安定した自己コントロールが最大の武器となります。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、思考のノイズを削ぎ落とし再構築を図る時期です。賢明な静観が成功への最短ルートとなります。${astroNote}`;
-          return `${displayYear}は、自己管理と客観的分析の成果が結実し、どんな環境変化にも動じない強固な人生システムが完成する到達期となります。${astroNote}`;
+          return `${displayYear}は、自己管理と客観的分析の成果が結実し、どんな環境変化にも動じない強い自分が完成する到達期となります。${astroNote}`;
         }
       }
     }
@@ -2312,16 +2312,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         }
       } else { // ren
         if (score >= 85) {
-          topic1Intro = `命式データおよび認知機能の定量分析により、両者は極めて高い補完シナジー構造を有していると実証されます。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：日干の五行生剋バランスおよび九星気学のデータから、両者の衝突リスクは極小と算出されます。この追い風の局面を逃さず、将来の具体的な方針や約束を取り付ける論理的交渉を進めるべきタイミングです。`;
+          topic1Intro = `二人の命式と性格タイプを重ね合わせると、互いの足りない部分を補い合う、とても相性の良い組み合わせだと読み取れます。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：生まれ持った星の相性と九星気学の巡りから見て、二人がぶつかる心配はほとんどありません。この追い風の局面を逃さず、将来の具体的な方針や約束を取り付ける論理的交渉を進めるべきタイミングです。`;
         } else if (score >= 70) {
           topic1Intro = `両者の関係性は着実な上昇トレンドを描いています。相手の認知行動パターンを客観的に観察し、スマートな関係構築が可能です。`;
           topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：感情論ではなく、共通の目標や趣味、事実情報をベースに対話を重ねることで、効率的に親密性を高められます。`;
         } else if (score >= 55) {
-          topic1Intro = `現在の相性パラメータはボラティリティの低いフラット推移です。強引なアプローチはコストに見合わないため、現状維持戦略が合理的です。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：相手の意思決定プロセスや心理的余裕の低下が検知されています。返信催促などの過剰アプローチは厳禁とし、3〜5日スパンの事実ベースの定期連絡に留めるのが最適解です。`;
+          topic1Intro = `今の二人の運気は、大きな波のない穏やかな流れです。強引に動くより、今の関係を大切に育てるのが賢い選択です。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：今のお相手は、心の余裕が少し落ちている時期です。返信催促などの過剰アプローチは厳禁とし、3〜5日スパンの事実ベースの定期連絡に留めるのが最適解です。`;
         } else {
-          topic1Intro = `現在の命式相互作用には一時的な「摩擦リスク」が検知されています。相手のパーソナルゾーンに対する不用意な侵入は厳禁です。`;
+          topic1Intro = `今の二人の命式には、一時的にすれ違いやすい巡りが表れています。相手のパーソナルゾーンに対する不用意な侵入は厳禁です。`;
           topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：お相手（${mbtiLabel}）は現在防衛フェーズにあり、感情的な長文メッセージは強い反発を招きます。接触頻度を通常の30%以下に抑制し、静観戦略を取ることが最善のリスクヘッジです。`;
         }
       }
@@ -2352,16 +2352,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       } else { // ren
         if (score >= 85) {
           topic2Intro = `認知行動分析により、会話の伝達効率が最高水準にあります。${myNickname}様の明確な発信がお相手にストレートに響きます。`;
-          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信遅延の内部ロジック：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：お相手の意思決定プロセスに合わせ、5W1Hで用件を明確にした3行以内の提案が極めて高い返信率（90%以上）をもたらします。話題には${oppLineTopic}を選定してください。`;
+          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信が遅くなる理由：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：お相手の意思決定プロセスに合わせ、5W1Hで用件を明確にした3行以内の提案が返事をもらいやすくなります。話題には${oppLineTopic}を選定してください。`;
         } else if (score >= 70) {
           topic2Intro = `対話における情報伝達は円滑です。感情論ではなく、事実情報や共通の興味を中心としたコミュニケーションが奏功します。`;
-          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信遅延の内部ロジック：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：要点を冒頭に置き、疑問形は1通につき1つに絞ることで、相手の返信負荷を最小化し安定したやり取りを継続できます。`;
+          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信が遅くなる理由：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：要点を冒頭に置き、疑問形は1通につき1つに絞ることで、相手の返信負荷を最小化し安定したやり取りを継続できます。`;
         } else if (score >= 55) {
           topic2Intro = `対話の応答速度が低下しやすい調整期です。相手の情報処理キャパシティを超えない文量制御が必須です。`;
-          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信遅延の内部ロジック：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：現在は仕事等の個人的タスクに相手のリソースが割かれています。メッセージは労いを含む短文に限定し、返信プレッシャーをゼロに抑えるのが合理的です。`;
+          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信が遅くなる理由：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：現在は仕事等の個人的タスクに相手のリソースが割かれています。メッセージは労いを含む短文に限定し、返信プレッシャーをゼロに抑えるのが合理的です。`;
         } else {
           topic2Intro = `コミュニケーションにおけるノイズと誤解の発生率が高まっています。不用意な発言は裏目に出るリスクが大です。`;
-          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信遅延の内部ロジック：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：議論や問い詰めるような文面は即刻中止してください。必要最小限の業務連絡トーンに留め、冷却期間を置くことが最適です。`;
+          topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信が遅くなる理由：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：議論や問い詰めるような文面は即刻中止してください。必要最小限の業務連絡トーンに留め、冷却期間を置くことが最適です。`;
         }
       }
 
@@ -2391,7 +2391,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         }
       } else { // ren
         if (score >= 85) {
-          topic3Intro = `双方の弱点を補い合う最高水準のシナジー効果がデータ上確認されています。`;
+          topic3Intro = `双方の弱点を補い合うとても良い組み合わせが、星の配置に表れています。`;
           topic3Detail = `💘 お相手（${mbtiLabel}）の意思決定トリガー：\n${oppFallInLove}\n\n✨ 効果的な評価フィードバック：\n${oppKilling}\n\n⚠️ 【リスク管理：厳禁の地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：対等な個としてのリスペクトを維持し、上記地雷を100%回避することが、関係性の破綻リスクをゼロに抑える絶対条件です。`;
         } else if (score >= 70) {
           topic3Intro = `互いの長所が引き出される良好なアライアンス関係が構築されています。`;
@@ -2400,7 +2400,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           topic3Intro = `価値観の差異が目立つものの、適切な距離感を維持すれば摩擦は防げます。`;
           topic3Detail = `💘 お相手の心理トリガー：\n${oppFallInLove}\n\n⚠️ 【防衛反応を誘発するNG行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手の行動原理を「異文化」として客観認識し、ドライかつ礼儀正しい接し方を維持してください。`;
         } else {
-          topic3Intro = `性格タイプおよび命式の相互干渉において不協和音が検知されています。`;
+          topic3Intro = `性格タイプと命式の組み合わせに、少し噛み合いにくい部分が表れています。`;
           topic3Detail = `⚠️ 【致命的拒絶を引き起こす地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：現在の配置では、アプローチを強化するほど相手の回避傾向が高まります。上記地雷を厳重に避け、一時的にアプローチを完全停止するのが論理的最適解です。`;
         }
       }
@@ -2427,17 +2427,17 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         }
       } else { // ren
         if (score >= 85) {
-          topic4Intro = `定量データ分析により、二人のアプローチ成功確率が最大化（90%以上）する「最適Xデー」を特定しました。`;
+          topic4Intro = `星の巡りを読み解き、二人の距離がいちばん縮まりやすい「勝負の日」を見つけました。`;
           topic4Detail = `📍 承諾率最大化スポット：\n${oppDateSpot}\n\n💌 黄金お誘いテンプレート：\n${oppLineInvite}\n\n🔮 蓮のアクションプラン：週次スコアが85点を超えるXデーに焦点を合わせ、上記テンプレートの日程・場所を具体的に埋めて提示してください。迷わず実行することが成功を確定させます。`;
         } else if (score >= 70) {
           topic4Intro = `運気の好調期を活用したスケジュール策定が推奨されます。`;
           topic4Detail = `📍 推奨ロケーション：\n${oppDateSpot}\n\n💌 アプローチテンプレート：\n${oppLineInvite}\n\n🔮 蓮のアクションプラン：週次スコアが高水準を示す日にフォーカスし、相手が承諾しやすい負荷の低いオファー（短時間のランチやコーヒー等）を提示するのが最も再現性の高い戦略です。`;
         } else if (score >= 55) {
           topic4Intro = `現在はローリスク運用の安定期です。`;
-          topic4Detail = `📍 将来の候補スポット：\n${oppDateSpot}\n\n🔮 蓮のアクションプラン：大きな提案は避け、相手のスケジュールの空き状況や関心事をリサーチするデータ収集フェーズと位置づけて行動してください。`;
+          topic4Detail = `📍 将来の候補スポット：\n${oppDateSpot}\n\n🔮 蓮のアクションプラン：大きな提案は避け、相手の予定や関心事をさりげなく知る期間と考えて動いてください。`;
         } else {
           topic4Intro = `アプローチにおけるハイリスク期が続いています。`;
-          topic4Detail = `🔮 蓮のアクションプラン：現在のアプローチ成功確率は低調です。アクションを起こすほど摩擦リスクが高まるため、次期の運気上昇期まで一切の仕掛けを凍結するのが論理的最適解です。`;
+          topic4Detail = `🔮 蓮のアクションプラン：今は想いが届きにくい時期です。動くほどすれ違いやすいので、次に運気が上向くまで、仕掛けるのは待つのが賢明です。`;
         }
       }
 
@@ -2448,7 +2448,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       if (character === 'tsuki') {
         if (score >= 85) {
           topic5Intro = `月と蓮の鑑定が示す最終結論。お二人の絆はどんな試練も乗り越えられる本物の愛へと結びついています。`;
-          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}。\n\n全天文学・心理学データが、${myNickname}様と${oppNick}様が将来にわたって深く愛し合い、互いを支え合う最高の相性であることを証明しています。自分を信じ、相手を愛するその温かな心を持ち続ければ、理想の未来は確実にあなたの手の中にあります。`;
+          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}。\n\n四柱推命・九星気学・16タイプのすべてが、${myNickname}様と${oppNick}様が将来にわたって深く愛し合い、互いを支え合う最高の相性であることを証明しています。自分を信じ、相手を愛するその温かな心を持ち続ければ、理想の未来は確実にあなたの手の中にあります。`;
         } else if (score >= 70) {
           topic5Intro = `時間を重ねるほどに味わいと信頼が増していく、素晴らしい未来が約束されています。`;
           topic5Detail = `命式と性格タイプの相互作用は、安定した絆の形成を示しています。焦らず二人のペースを慈しんで進んでください。お互いへの感謝と気遣いを忘れないことで、二人の関係は永久に輝き続ける温かな愛の居場所となります。`;
@@ -2461,8 +2461,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         }
       } else { // ren
         if (score >= 85) {
-          topic5Intro = `四柱推命・九星気学・16タイプ統合診断の全データに基づく最終結論を出力します。`;
-          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}。\n\n理論的にも実証的にも極めて強固な成功確率を示しています。提示されたアクションプランとロジックを忠実に実行することで、望む関係性の定義（成就・将来の約束）は極めて高確率で達成されると結論づけられます。`;
+          topic5Intro = `四柱推命・九星気学・16タイプのすべてを重ね合わせた、最後のメッセージをお伝えします。`;
+          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}。\n\nどの占術から見ても、二人の未来には力強い追い風が吹いています。ここでお伝えした行動を一つずつ実行していけば、望む関係（想いの成就・将来の約束）にきっと手が届きます。`;
         } else if (score >= 70) {
           topic5Intro = `計画的かつ継続的なアプローチにより、安定した成就への到達が期待されます。`;
           topic5Detail = `感情の揺れを抑え、客観的な戦略に基づいてコミュニケーションを継続してください。確かな信頼の積み重ねが、最終的な勝利（永続的パートナーシップ）を担保します。`;
@@ -2471,7 +2471,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           topic5Detail = `課題を特定し、相手の認知特性に合わせたアプローチのアップデートを継続してください。論理的な修正が次の成果を生みます。`;
         } else {
           topic5Intro = `現時点での評価とリスク管理に関する最終アドバイスです。`;
-          topic5Detail = `無謀な突入は避け、状況を客観的に再評価してください。戦略を練り直す冷却期間を設けることが、将来的な成功確率を最大化させる唯一の合理ルートです。`;
+          topic5Detail = `無謀な突入は避け、状況を客観的に再評価してください。戦略を練り直す冷却期間を設けることが、望む未来へ近づくいちばんの近道です。`;
         }
       }
 
@@ -2610,7 +2610,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '1. 本日の運勢と運気の流れ',
               intro: `行動力と分析力が冴え渡る最高水準の開運日です。明確な目標設定と計画実行が大きな成果を生みます。`,
-              detail: `四柱推命・九星気学のデータが示す通り、本日のパフォーマンスは極めて高く維持されます。あなたの強みである『${myStemPraise}』を存分に発揮してください。`
+              detail: `四柱推命・九星気学の星が示す通り、本日のパフォーマンスは極めて高く維持されます。あなたの強みである『${myStemPraise}』を存分に発揮してください。`
             },
             {
               title: '2. 自己表現と周囲への伝わり方',
@@ -2625,12 +2625,12 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '4. 好機を引き寄せる開運アクション',
               intro: `スキルアップや知的なコミュニティへの参加が将来の良縁を引き寄せます。`,
-              detail: `推奨スポットは『${myDateSpot}』。関心のある分野のインプットや目標の言語化が、運命の引き寄せ確率を跳ね上げます。`
+              detail: `推奨スポットは『${myDateSpot}』。関心のある分野のインプットや目標の言語化が、運命の引き寄せをぐっと強めます。`
             },
             {
               title: '5. 今後の可能性と総合アドバイス',
               intro: `戦略的アプローチと自己管理により、理想の人生シナリオを自ら構築できる時期です。`,
-              detail: `確かなデータと自信に基づき、ブレずに前進してください。望む結果は最短ルートで達成可能です。`
+              detail: `これまで積み重ねてきたことに自信を持ち、ブレずに前進してください。望む結果は最短ルートで達成可能です。`
             }
           ];
         } else if (score >= 70) {
@@ -2665,8 +2665,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           return [
             {
               title: '1. 本日の運勢と運気の流れ',
-              intro: `本日は現状維持とシステム調整に適したフラットな運気です。`,
-              detail: `急な進展や大きな勝負をかける時期ではありません。現状のデータや行動パターンを静かにレビューしてください。`
+              intro: `本日は今の流れを保ち、足元を整えるのに向いた穏やかな運気です。`,
+              detail: `急な進展や大きな勝負をかける時期ではありません。これまでの行動を静かに振り返ってみてください。`
             },
             {
               title: '2. 自己表現と周囲への伝わり方',
@@ -2686,7 +2686,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '5. 今後の可能性と総合アドバイス',
               intro: `準備と調整を徹底することで、次期の開運波に完璧に乗ることが可能です。`,
-              detail: `慌てず焦らず、自分のデータと向き合い改善点を修正する期間として活用してください。`
+              detail: `慌てず焦らず、自分自身と向き合い、改善点を見直す期間として活用してください。`
             }
           ];
         } else {
@@ -2708,7 +2708,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
-              intro: `外部との通信を遮断し、静かなプライベート空間で休養を取ることです。`,
+              intro: `人とのやり取りから少し離れ、静かなプライベート空間で休養を取ることです。`,
               detail: `デジタルデトックスを行い、睡眠と栄養補給に専念することが最速の回復力となります。`
             },
             {
