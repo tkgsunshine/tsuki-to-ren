@@ -1693,11 +1693,50 @@ export const ResultView: React.FC<ResultViewProps> = ({
           alignItems: 'flex-start'
         }}>
           <span style={{ fontSize: '0.9rem', flexShrink: 0, marginTop: '1px' }}>💡</span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: 0, flex: 1 }}>
             <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>本日のアプローチ助言</div>
-            <div style={{ color: '#e8e3d8', lineHeight: '1.55' }}>
-              {activeResult.dailyActionAdvice}
-            </div>
+            {(() => {
+              const parts = activeResult.dailyActionAdviceParts?.length ? activeResult.dailyActionAdviceParts : [activeResult.dailyActionAdvice || ''];
+              const tips = activeResult.lineTips;
+              // 2段落目以降と「二人のLINEのコツ」。非会員にはぼかして見せ、無料会員登録で開く。
+              const more = (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {parts.slice(1).map((p, i) => (
+                    <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{p}</div>
+                  ))}
+                  {tips && (
+                    <div style={{ marginTop: '0.35rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ</div>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{tips.intro}</div>
+                      {tips.items.map((it, i) => (
+                        <div key={i} style={{ lineHeight: '1.65' }}>
+                          <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
+                          <div style={{ color: '#e8e3d8' }}>{it.text}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+              const hasMore = parts.length > 1 || !!tips;
+              return (
+                <>
+                  <div style={{ color: '#e8e3d8', lineHeight: '1.55' }}>{parts[0]}</div>
+                  {hasMore && (isRegistered ? (
+                    <div style={{ marginTop: '0.35rem' }}>{more}</div>
+                  ) : (
+                    <div className="premium-blur-container" style={{ maxHeight: '140px', minHeight: '120px', cursor: 'pointer', borderRadius: '8px', marginTop: '0.2rem' }} onClick={handleLockTagClick}>
+                      <div className="mosaic-blurred-text" style={{ display: 'block' }}>{more}</div>
+                      <div className="premium-lock-overlay">
+                        <button className="premium-lock-tag" onClick={handleLockTagClick}>
+                          <Lock size={11} /> 無料会員登録で続きを読む
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              );
+            })()}
           </div>
         </div>
 
