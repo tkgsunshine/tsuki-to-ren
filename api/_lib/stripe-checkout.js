@@ -1,5 +1,5 @@
-import { getDb, getAdminAuth } from '../_lib/firestore.js';
-import { PREMIUM, getStripe, parseBody, safeReturnPath, verifyUser, withParam } from '../_lib/stripe.js';
+import { getDb, getAdminAuth } from './firestore.js';
+import { PREMIUM, getStripe, parseBody, safeReturnPath, verifyUser, withParam } from './stripe.js';
 
 // Starts a Premium sign-up: creates a Stripe Checkout session for the signed-in account and returns its URL.
 // The account's uid goes on the session and on the subscription, so the webhook knows whose membership it is.

@@ -3,6 +3,8 @@
 アプリは Stripe の決済画面（Checkout）と解約画面（カスタマーポータル）に移動するだけで、カード情報を扱いません。
 会員の状態は Webhook が Firestore の `premium/{uid}` に書き、アプリは `/api/stripe/status` で読みます。
 
+4つとも `api/stripe/[action].js` の1つの関数で受ける（Vercel Hobby は1デプロイあたり関数12個まで。今は合計10個）。中身は `api/_lib/stripe-*.js`。
+
 | API | 役割 |
 | --- | --- |
 | `POST /api/stripe/checkout` | ログイン中のアカウント用の決済画面を作り、URLを返す |

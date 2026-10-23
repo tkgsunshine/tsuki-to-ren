@@ -1,5 +1,5 @@
-import { getDb, getAdminAuth } from '../_lib/firestore.js';
-import { PREMIUM, verifyUser } from '../_lib/stripe.js';
+import { getDb, getAdminAuth } from './firestore.js';
+import { PREMIUM, verifyUser } from './stripe.js';
 
 // The signed-in account's Premium membership, as the webhook last recorded it.
 export default async function handler(req, res, deps = {}) {

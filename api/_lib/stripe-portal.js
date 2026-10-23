@@ -1,5 +1,5 @@
-import { getDb, getAdminAuth } from '../_lib/firestore.js';
-import { PREMIUM, getStripe, parseBody, safeReturnPath, verifyUser, withParam } from '../_lib/stripe.js';
+import { getDb, getAdminAuth } from './firestore.js';
+import { PREMIUM, getStripe, parseBody, safeReturnPath, verifyUser, withParam } from './stripe.js';
 
 // Opens Stripe's customer portal (cancel, change card, receipts) for the signed-in member.
 // Cancel reasons picked in the app's cancel form are kept in cancelFeedback (no names or emails).

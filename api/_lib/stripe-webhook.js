@@ -1,10 +1,9 @@
-import { getDb } from '../_lib/firestore.js';
-import { PREMIUM, getStripe, premiumRecord } from '../_lib/stripe.js';
+import { getDb } from './firestore.js';
+import { PREMIUM, getStripe, premiumRecord } from './stripe.js';
 
 // Stripe → app: keeps premium/{uid} in step with the subscription.
 // Register https://www.tsuki-to-ren.com/api/stripe/webhook in Stripe with the events below.
 // Events can arrive late or out of order, so each one re-reads the subscription from Stripe and writes its current state.
-export const config = { api: { bodyParser: false } };
 
 const SUBSCRIPTION_EVENTS = new Set([
   'customer.subscription.created',

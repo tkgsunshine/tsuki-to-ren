@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import Stripe from 'stripe';
-import checkout from '../api/stripe/checkout.js';
-import portal from '../api/stripe/portal.js';
-import status from '../api/stripe/status.js';
-import webhook from '../api/stripe/webhook.js';
+import checkout from '../api/_lib/stripe-checkout.js';
+import portal from '../api/_lib/stripe-portal.js';
+import status from '../api/_lib/stripe-status.js';
+import webhook from '../api/_lib/stripe-webhook.js';
 import { premiumRecord, safeReturnPath } from '../api/_lib/stripe.js';
 
 const mockRes = () => {
@@ -128,4 +128,19 @@ test('webhook does not let an old ended subscription switch off a newer one', as
   const res = mockRes();
   await webhook(signedEvent({ type: 'customer.subscription.deleted', data: { object: { id: 'sub_1' } } }), res, { webhookSecret: SECRET, stripe: stripeWith(subscription({ status: 'canceled' })), db });
   assert.equal(db.docs['premium/u1'].active, true);
+});
+
+test('one function serves every /api/stripe/* route and passes the raw body on', async () => {
+  const { Readable } = await import('node:stream');
+  const { default: route } = await import('../api/stripe/[action].js');
+  const req = Object.assign(Readable.from([Buffer.from('{}')]), { method: 'POST', url: '/api/stripe/webhook', query: {}, headers: { 'stripe-signature': 't=1,v1=x' } });
+  const res = mockRes();
+  process.env.STRIPE_WEBHOOK_SECRET = '';
+  await route(req, res);
+  assert.equal(res.code, 500); // reached the webhook handler (no secret configured here)
+  assert.ok(Buffer.isBuffer(req.body));
+
+  const missing = mockRes();
+  await route({ method: 'GET', url: '/api/stripe/nope', query: { action: 'nope' }, headers: {} }, missing);
+  assert.equal(missing.code, 404);
 });
