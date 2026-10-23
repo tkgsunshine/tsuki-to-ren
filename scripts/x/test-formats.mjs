@@ -134,12 +134,14 @@ test('アプリの予告: 返信の最後（署名の直前）に入る。守護
   for (const text of [t, r.replyText2]) assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), []);
 });
 
-test('守護獣の相性ランキング: 主役を1つ選び、本文はTOP3（メダル＋一言）、返信1は4位から、返信2はワースト。点数は、アプリの鑑定ロジック（0〜100点）', () => {
+test('守護獣の相性ランキング: 主役を1つ選び、本文は4位から、返信1は1〜3位（メダル＋一言）、返信2はワースト。点数は、アプリの鑑定ロジック（0〜100点）', () => {
   const r = buildBeastPairRanking('2026-10-07');
   assert.equal(r.top.length, 3);
-  assert.ok(r.mid.length >= 2 && r.mid.length <= 5, `mid ${r.mid.length}`);
+  assert.ok(r.mid.length >= 2 && r.mid.length <= 8, `mid ${r.mid.length}`);
   assert.ok(r.worst.length >= 2 && r.worst.length <= 5, `worst ${r.worst.length}`);
-  assert.match(r.text, /🥇1位/);
+  assert.match(r.replyText, /🥇1位/);
+  assert.ok(!/🥇|🥈|🥉|1位 /.test(r.text.replace(/いちばん相性がいい1〜3位は、リプ欄に/, '')), '1〜3位は本文に出さない');
+  assert.ok(r.text.includes('【4位〜'));
   assert.ok(!/🥇|🥈|🥉/.test(r.replyText2), 'ワーストにメダルは付けない');
   const all = beastList();
   const a = all.find((b) => b.name === r.anchor);
