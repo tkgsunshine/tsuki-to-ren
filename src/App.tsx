@@ -2326,7 +2326,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>契約期間・自動更新</span>
-                  <span style={{ color: 'white' }}>30日間のサブスクリプション。契約期間満了日までに解約手続き（自動更新の停止）を行わない限り、同一条件で30日ごとに自動的に契約が更新され、継続課金が発生します。</span>
+                  <span style={{ color: 'white' }}>1か月ごとの自動更新のサブスクリプション（初回はお申し込み時、2回目以降は毎月の更新日に決済）。更新日までに解約手続き（自動更新の停止）を行わない限り、同一条件で1か月ごとに自動的に契約が更新され、継続課金が発生します。無料お試し期間はありません。</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>支払方法</span>
@@ -2374,7 +2374,7 @@ function App() {
                 </div>
                 <div>
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>3. 情報の保護と管理</h4>
-                  <p>お預かりした生年月日等のデータは暗号化通信を行い、法令に基づく場合を除いて第三者への無断共有や提供は一切行いません。</p>
+                  <p>お預かりした生年月日等のデータは暗号化通信を行い、法令に基づく場合を除いて第三者への無断共有や提供は一切行いません。なお、有料プランの決済は決済代行会社 Stripe を通じて行い、クレジットカード情報は当社のサーバーに保存されません。</p>
                 </div>
                 <div>
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>4. 個人データの保存期間と削除方法</h4>

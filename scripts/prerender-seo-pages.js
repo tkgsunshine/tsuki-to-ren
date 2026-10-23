@@ -84,7 +84,7 @@ writePage(
           <h2 style="font-size: 1.1rem; color: #e2c074;">第4条（サービス内容と免責事項）</h2>
           <p>本サービスが提供する相性鑑定結果、運勢予測、バイオリズム、およびAIキャラクターによるアドバイス等は、東洋占術および性格類型論に基づく参考情報・エンターテインメント目的のコンテンツであり、<strong>将来の出来事、恋愛・婚姻の成就、特定の成果や効果を確実に保証・実証するものではありません</strong>。鑑定結果に基づく判断・意思決定・行動はユーザー自身の責任において行ってください。本サービスの利用により生じた損害について、運営者に故意または重大な過失がある場合を除き、一切の責任を負いません。</p>
           <h2 style="font-size: 1.1rem; color: #e2c074;">第5条（有料サブスクリプションサービス）</h2>
-          <p>本サービスでは、月額500円（税込）等の有料サブスクリプション機能を提供しています。契約期間満了日までに解約手続き（自動更新停止）が行われない場合、30日ごとに自動更新されます。デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</p>
+          <p>本サービスでは、月額500円（税込）等の有料サブスクリプション機能を提供しています。お申し込み日を起算日として1か月ごとに自動更新され、更新日に決済が行われます（無料お試し期間はありません）。更新日までに解約手続き（自動更新停止）を行えば、次回以降の課金は発生しません。デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</p>
           <h2 style="font-size: 1.1rem; color: #e2c074;">第6条（運営会社）</h2>
           <p>運営会社：Ill株式会社 / お問合せ：support@tsuki-to-ren.com / 電話番号：08053565283</p>
         </section>
@@ -128,7 +128,7 @@ writePage(
           <h2 style="font-size: 1.1rem; color: #86efac;">4. 個人データの保存期間と削除方法</h2>
           <p>個人データはアカウント保有中およびサービス提供に必要な期間に限り保管します。ユーザーは設定画面またはサポート窓口（support@tsuki-to-ren.com）への連絡により、いつでも個人データの開示・訂正・完全削除を請求可能です。端末内のローカルデータはブラウザのキャッシュ消去により即時に削除されます。</p>
           <h2 style="font-size: 1.1rem; color: #86efac;">5. データの安全管理</h2>
-          <p>Google Firebaseの暗号化セキュアクラウド環境にて厳重に管理されます。</p>
+          <p>Google Firebaseの暗号化セキュアクラウド環境にて厳重に管理されます。有料プランの決済は決済代行会社 Stripe を通じて行い、クレジットカード情報は当社のサーバーに保存されません。</p>
           <h2 style="font-size: 1.1rem; color: #86efac;">6. 苦情・相談対応体制</h2>
           <p>個人情報の取扱いに関する苦情・相談は、下記窓口までお申し出ください。<br/>
           運営会社：Ill株式会社（個人情報管理責任者：山下 高志）<br/>
@@ -173,7 +173,7 @@ writePage(
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">08053565283</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">販売価格</th><td style="padding: 0.75rem 0;">プレミアムプラン: 月額500円（税込）</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">契約期間・自動更新</th><td style="padding: 0.75rem 0;">30日間のサブスクリプション。契約期間満了日までに解約手続き（自動更新の停止）を行わない限り、同一条件で30日ごとに自動的に契約が更新され、継続課金が発生します。</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">契約期間・自動更新</th><td style="padding: 0.75rem 0;">1か月ごとの自動更新のサブスクリプション（初回はお申し込み時、2回目以降は毎月の更新日に決済）。更新日までに解約手続き（自動更新の停止）を行わない限り、同一条件で1か月ごとに自動的に契約が更新され、継続課金が発生します。無料お試し期間はありません。</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">支払方法</th><td style="padding: 0.75rem 0;">クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Pay</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">商品の引き渡し</th><td style="padding: 0.75rem 0;">決済完了後、ただちにご利用可能</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">解約方法（自動更新の停止）</th><td style="padding: 0.75rem 0;">マイページ（設定画面）内の「プレミアム会員の解約手続き」より、いつでも即座に定期課金の自動更新停止・解約手続きが可能です。解約を行わない限り契約は自動更新されます。解約完了後も次回更新日（有効期限満了日）までは有料機能を引き続きご利用いただけます。</td></tr>

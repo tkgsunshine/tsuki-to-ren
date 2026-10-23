@@ -107,7 +107,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
             <Article title="第5条（有料サブスクリプションサービス）">
               本サービスでは、月額利用プラン等の有料サブスクリプション機能（以下「有料プラン」）を提供しています。
               <ul style={{ margin: '0.4rem 0 0 1rem', padding: 0, listStyle: 'disc' }}>
-                <li style={{ marginBottom: '0.35rem' }}><strong>契約期間と更新</strong>：有料プランは購入日を起算日とする30日間の自動継続型サブスクリプションサービスです。契約期間満了までに解約手続きが行われない場合、自動的に同期間延長更新されます。</li>
+                <li style={{ marginBottom: '0.35rem' }}><strong>契約期間と更新</strong>：有料プランは月額500円（税込）、お申し込み日を起算日とする1か月ごとの自動継続型サブスクリプションサービスです（無料お試し期間はありません）。更新日までに解約手続きが行われない場合、自動的に1か月延長更新され、更新日に決済が行われます。</li>
                 <li style={{ marginBottom: '0.35rem' }}><strong>返金・キャンセルポリシー</strong>：デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。</li>
                 <li style={{ marginBottom: '0.35rem' }}><strong>解約手続き</strong>：ユーザーはアプリ内の設定画面等からいつでも自動更新の停止（解約）手続きが可能です。解約手続き完了後も、現在の有効期間満了日までは有料機能を引き続きご利用いただけます。</li>
                 <li style={{ marginBottom: '0.35rem' }}><strong>料金の変更</strong>：運営者は有料プランの価格を変更することがあります。価格変更を行う場合は、あらかじめサービス内にてユーザーに通知します。</li>
@@ -183,7 +183,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
               <ul style={{ margin: '0.4rem 0 0 1rem', padding: 0, listStyle: 'disc' }}>
                 <li style={{ marginBottom: '0.35rem' }}>ユーザー本人の同意がある場合</li>
                 <li style={{ marginBottom: '0.35rem' }}>法令に基づく開示要求がある場合</li>
-                <li style={{ marginBottom: '0.35rem' }}>サービス提供に必要な業務委託先（Google Firebase、Resend 等のクラウドサービス）への提供。この場合、適切な管理・監督を行います。</li>
+                <li style={{ marginBottom: '0.35rem' }}>サービス提供に必要な業務委託先（Google Firebase、Resend、Anthropic 等のクラウドサービス、および決済代行会社 Stripe）への提供。この場合、適切な管理・監督を行います。なお、クレジットカード情報は Stripe が直接取り扱い、運営者のサーバーには保存されません。</li>
               </ul>
             </Article>
 
@@ -269,7 +269,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
-                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年9月29日）</td>
+                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年10月23日）</td>
                 </tr>
               </tbody>
             </table>
