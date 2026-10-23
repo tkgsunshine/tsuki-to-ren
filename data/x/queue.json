@@ -4107,44 +4107,6 @@
     "createdAt": "2026-10-22T06:24:35.379Z"
   },
   {
-    "id": "2026-10-23-evening",
-    "date": "2026-10-23",
-    "slot": "evening",
-    "kind": "value",
-    "text": "❤️ 戊馬（つちのえ・うま）の相性TOP3（100点満点）\n\n🥇1位 丙馬 87点\n気持ちが通じ合いやすい、特別な相性\n\n🥈2位 丙虎 85点\n言葉にしなくても、伝わりやすい相性\n\n🥉3位 庚馬 81点\n出会えたら、大切にしたい相性\n\nあなたの守護獣は何位？4位以降は、リプ欄に🌙\n-月-",
-    "format": "beast_pair_rank",
-    "system": "pair",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:24:35.379Z"
-  },
-  {
-    "id": "2026-10-23-evening-reply",
-    "date": "2026-10-23",
-    "slot": "evening",
-    "kind": "value",
-    "text": "【4位〜7位】\n\n🥉3位 戊虎 81点\n気持ちが通じ合いやすい、特別な相性\n\n🥉3位 癸羊 81点\n言葉にしなくても、伝わりやすい相性\n\n6位 庚虎 79点\n自然体で、長く続きやすい相性\n\n7位 丙犬 77点\nいっしょにいて、素でいられる相性\n\nつづきは、さらにリプ欄に🌙\n-月-",
-    "replyTo": "2026-10-23-evening",
-    "format": "beast_pair_rank_reply",
-    "system": "pair",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:24:35.379Z"
-  },
-  {
-    "id": "2026-10-23-evening-reply2",
-    "date": "2026-10-23",
-    "slot": "evening",
-    "kind": "value",
-    "text": "【戊馬と、ぶつかりやすい守護獣 ワースト3】\n（点数が低い順）\n\n1位 甲鼠 6点\n正反対だからこそ、歩み寄りが大切\n\n2位 壬鼠 11点\n真逆の魅力に、惹かれ合うことも\n\n2位 甲猿 11点\nゆずり合えば、ぐっと近づく相性\n\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
-    "replyTo": "2026-10-23-evening-reply",
-    "format": "beast_pair_rank_reply2",
-    "system": "pair",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:24:35.379Z"
-  },
-  {
     "id": "2026-10-23-night",
     "date": "2026-10-23",
     "slot": "night",
@@ -4230,31 +4192,6 @@
     "format": "maxim",
     "system": "psychology",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:26:13.757Z"
-  },
-  {
-    "id": "2026-10-24-evening",
-    "date": "2026-10-24",
-    "slot": "evening",
-    "kind": "value",
-    "text": "見た目はクール、恋愛はいちばん一途な16タイプ（MBTI）\n\n1位 INTJ 建築家\n2位 ISTJ 管理者\n3位 INTP 論理学者\n4位 ISTP 巨匠\n5位 INFJ 提唱者\n6位 ENTJ 指揮官\n7位 ISFJ 擁護者\n8位 INFP 仲介者\n\n続きの9位〜16位は、リプ欄に。あなたは何位？\n-月-",
-    "format": "gap_rank",
-    "system": "mbti_love",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:26:13.757Z"
-  },
-  {
-    "id": "2026-10-24-evening-reply",
-    "date": "2026-10-24",
-    "slot": "evening",
-    "kind": "value",
-    "text": "続きの9位〜16位です\n\n9位 ESTJ 幹部\n10位 ISFP 冒険家\n11位 ENTP 討論者\n12位 ESTP 起業家\n13位 ENFJ 主人公\n14位 ESFJ 領事官\n15位 ENFP 運動家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
-    "replyTo": "2026-10-24-evening",
-    "format": "gap_rank_reply",
-    "system": "mbti_love",
-    "purpose": "buzz",
     "status": "scheduled",
     "createdAt": "2026-10-22T06:26:13.757Z"
   },
@@ -4412,44 +4349,6 @@
     "createdAt": "2026-10-22T06:30:24.029Z"
   },
   {
-    "id": "2026-10-26-evening",
-    "date": "2026-10-26",
-    "slot": "evening",
-    "kind": "value",
-    "text": "❤️ 庚猿（かのえ・さる）の相性TOP3（100点満点）\n\n🥇1位 乙蛇 91点\n気持ちが通じ合いやすい、特別な相性\n\n🥈2位 乙羊 85点\n言葉にしなくても、伝わりやすい相性\n\n🥈2位 壬猿 85点\n出会えたら、大切にしたい相性\n\nあなたの守護獣は何位？4位以降は、リプ欄に🌙\n-月-",
-    "format": "beast_pair_rank",
-    "system": "pair",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:30:24.029Z"
-  },
-  {
-    "id": "2026-10-26-evening-reply",
-    "date": "2026-10-26",
-    "slot": "evening",
-    "kind": "value",
-    "text": "【4位〜8位】\n\n4位 乙鳥 81点\n気持ちが通じ合いやすい、特別な相性\n\n5位 壬龍 80点\n言葉にしなくても、伝わりやすい相性\n\n6位 庚龍 79点\n自然体で、長く続きやすい相性\n\n7位 乙牛 77点\nいっしょにいて、素でいられる相性\n\n7位 乙猪 77点\n安心して、本音を話せる相性\n\nつづきは、さらにリプ欄に🌙\n-月-",
-    "replyTo": "2026-10-26-evening",
-    "format": "beast_pair_rank_reply",
-    "system": "pair",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:30:24.029Z"
-  },
-  {
-    "id": "2026-10-26-evening-reply2",
-    "date": "2026-10-26",
-    "slot": "evening",
-    "kind": "value",
-    "text": "【庚猿と、ぶつかりやすい守護獣 ワースト3】\n（点数が低い順）\n\n1位 丙虎 2点\n正反対だからこそ、歩み寄りが大切\n\n1位 甲虎 2点\n真逆の魅力に、惹かれ合うことも\n\n3位 甲馬 17点\n気持ちを確かめ合うことが大切\n\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
-    "replyTo": "2026-10-26-evening-reply",
-    "format": "beast_pair_rank_reply2",
-    "system": "pair",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:30:24.029Z"
-  },
-  {
     "id": "2026-10-27-chara-1",
     "date": "2026-10-27",
     "slot": "morning",
@@ -4479,31 +4378,6 @@
     "format": "maxim",
     "system": "psychology",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:32:07.591Z"
-  },
-  {
-    "id": "2026-10-27-evening",
-    "date": "2026-10-27",
-    "slot": "evening",
-    "kind": "value",
-    "text": "見た目はクール、恋愛はいちばん甘えたい16タイプ（MBTI）\n\n1位 INTJ 建築家\n2位 ISTP 巨匠\n3位 INTP 論理学者\n4位 ISTJ 管理者\n5位 INFJ 提唱者\n6位 ENTJ 指揮官\n7位 ISFJ 擁護者\n8位 ESTP 起業家\n\n続きの9位〜16位は、リプ欄に。あなたは何位？\n-月-",
-    "format": "gap_rank",
-    "system": "mbti_love",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:32:07.591Z"
-  },
-  {
-    "id": "2026-10-27-evening-reply",
-    "date": "2026-10-27",
-    "slot": "evening",
-    "kind": "value",
-    "text": "続きの9位〜16位です\n\n9位 ENTP 討論者\n10位 INFP 仲介者\n11位 ESTJ 幹部\n12位 ISFP 冒険家\n13位 ENFJ 主人公\n14位 ESFJ 領事官\n15位 ENFP 運動家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
-    "replyTo": "2026-10-27-evening",
-    "format": "gap_rank_reply",
-    "system": "mbti_love",
-    "purpose": "buzz",
     "status": "scheduled",
     "createdAt": "2026-10-22T06:32:07.591Z"
   },
