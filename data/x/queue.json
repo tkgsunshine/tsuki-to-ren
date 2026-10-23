@@ -4593,5 +4593,30 @@
     "purpose": "buzz",
     "status": "scheduled",
     "createdAt": "2026-10-23T07:04:04.016Z"
+  },
+  {
+    "id": "2026-10-27-evening",
+    "date": "2026-10-27",
+    "slot": "evening",
+    "kind": "value",
+    "text": "見た目はクール、恋愛はいちばん寂しがりな16タイプ（MBTI）\n\n4位 ISTJ 管理者\n5位 INFJ 提唱者\n6位 ENTJ 指揮官\n7位 ISFP 冒険家\n8位 INFP 仲介者\n9位 ESTJ 幹部\n10位 ENTP 討論者\n11位 ISFJ 擁護者\n\n1位〜3位と12位〜16位は、リプ欄に。あなたは何位？\n-月-",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-23T07:05:20.392Z"
+  },
+  {
+    "id": "2026-10-27-evening-reply",
+    "date": "2026-10-27",
+    "slot": "evening",
+    "kind": "value",
+    "text": "1位 INTJ 建築家\n2位 ISTP 巨匠\n3位 INTP 論理学者\n\n12位 ESTP 起業家\n13位 ENFJ 主人公\n14位 ESFJ 領事官\n15位 ENFP 運動家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-27-evening",
+    "format": "gap_rank_reply",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-23T07:05:20.392Z"
   }
 ]
