@@ -104,14 +104,18 @@ export function buildBeastPairRanking(date) {
   const ranked = withRanks(desc);
   const fits = (text) => weightedLength(text) <= 280;
   // 本文: 4位から（点数だけの1行ずつ。280に収まる件数。最大8）。1〜3位は、リプ欄に出す（2026-10-23〜。先を見たくなるように）
-  const top = ranked.slice(0, 3);
+  const top = ranked.filter((t) => t.rank <= 3).slice(0, 5); // 3位が同点のときは、同点の全員を、1〜3位として、リプ欄に出す
   let k = 8;
-  const mk0 = (n) => ({ mid: ranked.slice(3, 3 + n), get text() { return [`❤️ ${anchor.full}の相性ランキング（100点満点）`, '', `【4位〜${3 + n}位】`, this.mid.map((t) => `${t.rank}位 ${t.name} ${t.score}点`).join('\n'), '', 'いちばん相性がいい1〜3位は、リプ欄に🌙', 'あなたの守護獣は何位？', '-月-'].join('\n'); } });
+  const mk0 = (n) => ({ mid: ranked.slice(top.length, top.length + n), get text() { return [`❤️ ${anchor.full}の相性ランキング（100点満点）`, '', `【${this.mid[0].rank}位〜${this.mid.at(-1).rank}位】`, this.mid.map((t) => `${t.rank}位 ${t.name} ${t.score}点`).join('\n'), '', 'いちばん相性がいい1〜3位は、リプ欄に🌙', 'あなたの守護獣は何位？', '-月-'].join('\n'); } });
   let r0 = mk0(k);
   while (!fits(r0.text) && k > 2) r0 = mk0(--k);
   const text = r0.text;
   // 返信1: 1〜3位（メダル＋一言）
-  const replyText = ['【相性ベスト3】', '', top.map((t, i) => rankBlock(t, i)).join('\n\n'), '', 'ぶつかりやすい守護獣は、さらにリプ欄に🌙', '-月-'].join('\n');
+  // 一言つきは先頭3件まで。同点で4件目以降になるぶんは、点数だけの1行（280字に収めるため）
+  const mkReply = (n) => ['【相性ベスト3】', '', top.slice(0, n).map((t, i) => (i < 3 ? rankBlock(t, i) : `${MEDAL[t.rank] || ''}${t.rank}位 ${t.name} ${t.score}点`)).join('\n\n'), '', 'ぶつかりやすい守護獣は、さらにリプ欄に🌙', '-月-'].join('\n');
+  let nTop = top.length;
+  while (!fits(mkReply(nTop)) && nTop > 3) nTop--;
+  const replyText = mkReply(nTop);
   // 返信2: ワースト（低い順）。280に収まる件数（最大5）。アプリの予告の行を、署名の直前に入れる
   const worstAll = withRanks([...desc].reverse());
   let w = 5;
@@ -169,7 +173,7 @@ const FACTS = {
 export const FORMATS = [
   // A: ギャップ・キャラ化（「見た目は〇〇、恋愛は△△」。名乗り・引用をねらう）
   { id: 'gap_rank', system: 'mbti_love', purpose: 'buzz', reply: true, rank16: true,
-    replyGuide: '1位〜3位と、12位〜16位を、1行ずつ（「1位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す）。最初の行は「【1位〜3位】」、その3行のあと空行、「【12位〜16位】」とその5行。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。アプリの予告の行は、署名の前に自動で入る（書かない）。最後は「あなたは何位だった？」のような問い',
+    replyGuide: '1位〜3位と、12位〜16位を、1行ずつ（「1位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す）。見出しは付けない。1位〜3位の3行、空行、12位〜16位の5行、の順。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。アプリの予告の行は、署名の前に自動で入る（書かない）。最後は空行のあと「あなたは何位だった？」のような問い（1行）。1位〜3位と12位〜16位以外の行は書かない',
     guide: '「見た目は〇〇、恋愛は△△な16タイプ」の形のランキング。16タイプ全員を順位づけし、この投稿には4位〜11位を、1行ずつ（「4位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す。理由は書かない）。1位〜3位と12位〜16位は replyText（リプ欄）に出す。テーマ（「見た目は〇〇、恋愛は△△な」の部分）は、全角26文字以内にする（各行に二つ名が付くため、280字に収める）。テーマは毎回変える（例: 見た目はおだやか、恋愛はいちばん重い／連絡はマメそうで、返信がいちばん遅い／好きになると、急に行動力が出る／好きでも、素直に言えない／別れたあと、いちばん引きずる／嫉妬を隠すのがうまい）。統計・調査・「〇〇%」は書かない（独自の見立てであり、調査ではない）。最後は「1位〜3位と12位〜16位は、リプ欄に。あなたは何位？」のような、リプ欄を見たくなる問い' },
   // B: 一言代弁（共感。返信・保存をねらう）
   { id: 'voice', system: 'psychology', purpose: 'buzz',
