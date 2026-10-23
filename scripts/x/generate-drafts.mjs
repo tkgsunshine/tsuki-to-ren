@@ -8,7 +8,7 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
-import { FORMAT_TEASER, withTeaser } from './lib/teasers.mjs';
+import { FORMAT_TEASER, withTeaser, BEAST_TEASER } from './lib/teasers.mjs';
 import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
@@ -30,7 +30,9 @@ const fillMissing = args.includes('--fill-missing') || args.includes('--column-o
 const haveIds = new Set(queue.filter((p) => p.date === date).map((p) => p.id));
 const missing = (id) => !fillMissing || !haveIds.has(`${date}-${id}`);
 const slotMissing = (slot) => !haveIds.has(`${date}-${slot}`);
-if (haveIds.size && !(fillMissing && (slotMissing('am') || slotMissing('chara-1') || BUZZ_SLOTS.some(slotMissing)))) {
+// --redo-beast-reply: その日の守護獣のリプ欄だけを、Claudeで書き直す（本文は変えない。2通→1通への移行用）
+const redoBeast = args.includes('--redo-beast-reply');
+if (haveIds.size && !redoBeast && !(fillMissing && (slotMissing('am') || slotMissing('chara-1') || BUZZ_SLOTS.some(slotMissing)))) {
   console.log(`${date} の投稿は既にキューにあります。何もしません。`);
   process.exit(0);
 }
@@ -75,7 +77,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 
 const planned = pickFormats(date); // { noon, evening, night }
 // build() を持つ型は、アプリの鑑定ロジックだけで本文を作る（AIは使わない）。それ以外はAIが言い回しを書く
-const activeSlots = BUZZ_SLOTS.filter((k) => !fillMissing || slotMissing(k)); // 今回作る枠（通常は全部。--fill-missing のときは、無い枠だけ）
+const activeSlots = redoBeast ? [] : BUZZ_SLOTS.filter((k) => !fillMissing || slotMissing(k)); // 今回作る枠（通常は全部。--fill-missing のときは、無い枠だけ）
 const detSlots = activeSlots.filter((k) => planned[k].build);
 const llmSlots = activeSlots.filter((k) => !planned[k].build);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
@@ -215,7 +217,65 @@ if (llmSlots.length) {
 posts = [...detPosts, ...posts];
 
 // 守護獣の1本（朝 08:15）。署名は常に「-月-」（話し手は月だけ）
-const beastItems = missing('chara-1') ? buildBeastItems(all, date, history, { allowLinks }) : [];
+const beastItems = missing('chara-1') && !redoBeast ? buildBeastItems(all, date, history, { allowLinks }) : [];
+// 守護獣のリプ欄（1通）は、アプリの鑑定の解説（facts.advice）をもとに、Claudeが書く。検査に通らなければ、定型文のまま（保険）
+const BEAST_REPLY_SPEC = `守護獣の今日の恋愛運の投稿への、スレッド返信（1通）を書く。構成（この順・この見出し）:
+1) 1行目「【月からのひとこと】」、空行
+2) ひとこと（日本語40〜55文字）: 「今日の点数の帯」と「守護獣のイメージ（theme・animal）」にそって、いまの気持ちに寄り添い、恋の具体的な場面（連絡・会う・気持ちの整理・待つ時間 など）にからめる。アプリの鑑定の解説（advice）の内容を、月の言葉でかみ砕いて使う（そのまま写さない）。きれいごとの一般論で終わらせない
+3) 空行、「【開運アクション】」、空行
+4) 今日できる小さな恋のアクションを1つ（日本語30〜45文字）: いつ・何を・どうする、のどれかを具体的に（時間帯・回数・実際に送る言葉 など）。点数の帯が低い日（band が D か E）は、無理に動かず、自分をいたわる行動にする。advice のおすすめ時間（hours）を使ってよい
+- 見出しの「【月からのひとこと】」「【開運アクション】」は、この表記のまま
+- 点数・順位の数字は書かない。署名・「近日…」の予告の行は書かない（あとで自動で付く）
+- 専門用語・断定・保証・相手の気持ちの断定は書かない。「風」の比喩は使わない
+出力: {"replyText":"..."} のJSONのみ（改行は \\n）`;
+async function writeBeastReply(parent, reply, hist) {
+  if (!process.env.ANTHROPIC_API_KEY) return false;
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
+  let feedback = '';
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    let body = '';
+    try {
+      const res = await client.messages.create({
+        model, max_tokens: 2500, system,
+        messages: [{ role: 'user', content: `${BEAST_REPLY_SPEC}\n\n# 今日の事実\n${JSON.stringify(parent.facts)}\n\n# 直近の投稿（言い回しが被らないように）\n${recentTexts}${feedback}` }],
+      });
+      const raw = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+      body = String(JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1)).replyText || '').trim();
+    } catch (e) {
+      console.warn(`守護獣のリプ欄 attempt ${attempt}: 出力を読めません（${e.message}）`);
+      feedback = '\n\n# 前回の出力は読めませんでした。{"replyText":"..."} のJSONのみ（改行は \\n）';
+      continue;
+    }
+    const full = `${body}\n${BEAST_TEASER}\n-月-`;
+    const problems = lintPost({ slot: 'morning', kind: 'value', text: full }, [...hist, parent], { allowLinks });
+    if (!body.startsWith('【月からのひとこと】') || !body.includes('【開運アクション】')) problems.push('見出し「【月からのひとこと】」「【開運アクション】」が必要');
+    if (/\d+点|\d+位/.test(body)) problems.push('点数・順位の数字は書かない');
+    if (problems.length) {
+      console.warn(`守護獣のリプ欄 attempt ${attempt}: 不合格\n - ${problems.join('\n - ')}`);
+      feedback = `\n\n# 前回の出力は次の理由で不合格でした。直して再出力:\n- ${problems.join('\n- ')}`;
+      continue;
+    }
+    reply.text = full;
+    return true;
+  }
+  return false;
+}
+if (redoBeast) {
+  const fresh = buildBeastItems(all, date, history.filter((h) => h.date !== date), { allowLinks });
+  const oldParent = queue.find((p) => p.id === fresh[0].id);
+  const oldReply = queue.find((p) => p.id === `${fresh[0].id}-reply`);
+  if (!oldParent || !oldReply) { console.log('守護獣の投稿が無いので、何もしません。'); process.exit(0); }
+  if (oldParent.text !== fresh[0].text) { console.error('守護獣の本文が、作り直した本文と違うので、リプ欄の書き直しを中止します。'); process.exit(1); }
+  const probe = { ...fresh[1] };
+  if (!(await writeBeastReply(fresh[0], probe, history.filter((h) => h.date !== date)))) { console.error('リプ欄を書けませんでした。キューは変更しません。'); process.exit(1); }
+  oldReply.text = probe.text;
+  const rest = queue.filter((p) => p.id !== `${fresh[0].id}-reply2`);
+  if (!dryRun) writeQueue(rest);
+  console.log(`${date} の守護獣のリプ欄を、1通に書き直しました。`);
+  process.exit(0);
+}
+if (beastItems.length > 1) await writeBeastReply(beastItems[0], beastItems[1], history);
 
 const buzzItem = (slot, time) => {
   const f = planned[slot];
@@ -250,7 +310,7 @@ const replyOf = (slot) => {
 };
 // コラム紹介の1本（10:15）。1本で完結（返信なし）。紹介できるコラムが尽きたら作らない
 const columnItems = [];
-const col = missing('am') ? pickColumn([...history, ...queue]) : null;
+const col = missing('am') && !redoBeast ? pickColumn([...history, ...queue]) : null;
 if (col) {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
