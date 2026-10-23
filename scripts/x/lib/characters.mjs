@@ -185,15 +185,20 @@ export function buildPostText(c, dateStr, sign, postTime = '', variant = 0) {
   ].filter((l, i, arr) => !(l === '' && (arr[i - 1] === '' || i === 0)) && !(l === undefined)).join('\n').trim();
   let postText = compose(st.oneLine);
   if (weightedLength(postText) > 280 && SHORT_ONE_LINE[st.oneLine]) postText = compose(SHORT_ONE_LINE[st.oneLine]);
-  // リプ欄は2通（Xの280字の制限のため、分ける）。
-  // 1通目=【今日の空気】のくわしい解説（アプリの鑑定の解説＋守護獣の十干のひとこと。署名の人格のトーン）
-  // 2通目=【開運アクション】（点数の帯の過ごし方＋守護獣の十二支のアクション）＋診断の案内
+  // リプ欄は1通（2026-10-23〜。それまでは、【今日の空気】と【開運アクション】の2通）。
+  // 通常は、generate-drafts.mjs が、アプリの鑑定の解説（facts.advice）をもとにClaudeが書く。ここで作るのは、その保険（定型文）。
+  // 定型文は、280字（日本語140字）に収まるよう、長いものから順に削る（十干のひとこと → 空気の文）
+  const air = pickVariant(BAND_AIR[bandOf(st.score)], `${dateStr}:${c.key}:air:${variant}`);
   const action = pickVariant(BAND_ACTION[bandOf(st.score)], `${dateStr}:${c.key}:action:${variant}`) + (ANIMAL_ACTION[c.animal] || '');
-  const replyText = advice && flavor ? ['【今日の空気】', '', `${pickVariant(BAND_AIR[bandOf(st.score)], `${dateStr}:${c.key}:air:${variant}`)}${flavor}`, sign].join('\n') : '';
-  const replyText2 = replyText
-    ? ['【開運アクション】', '', action, BEAST_TEASER, sign].join('\n')
-    : '';
-  return { text: postText, replyText, replyText2, star: st };
+  const composeReply = (hito) => ['【月からのひとこと】', '', hito, '', '【開運アクション】', '', action, BEAST_TEASER, sign].join('\n');
+  let replyText = '';
+  if (advice && flavor) {
+    replyText = composeReply(`${air}${flavor}`);
+    if (weightedLength(replyText) > 280) replyText = composeReply(air);
+    if (weightedLength(replyText) > 280) replyText = composeReply(flavor);
+  }
+  const facts = { name: c.name, theme: c.theme, animal: c.animal, animalYomi: c.animalYomi, star: st.name, score: st.score, band: bandOf(st.score), oneLine: st.oneLine, hours: st.hours, advice: st.advice?.tsuki || '', flavor: flavor || '' };
+  return { text: postText, replyText, replyText2: '', star: st, facts };
 }
 
 /** 守護獣の投稿は、毎朝1本。60日で全タイプが一巡する。2026-10-09 から4本→1本に減らした（反応の数字が出るまで、本数より型の検証を優先）。
@@ -232,7 +237,7 @@ export function buildBeastItems(all, dateStr, history = [], opts = {}) {
     let built = null;
     let lastErr = '';
     for (let variant = 0; variant < 24 && !built; variant++) {
-      const { text, replyText, replyText2 } = buildPostText(c, dateStr, sign, time, variant);
+      const { text, replyText, replyText2, facts } = buildPostText(c, dateStr, sign, time, variant);
       const item = {
         id: `${dateStr}-chara-${k + 1}`,
         date: dateStr,
@@ -243,13 +248,14 @@ export function buildBeastItems(all, dateStr, history = [], opts = {}) {
         status: 'scheduled',
         createdAt: new Date().toISOString(),
       };
+      Object.defineProperty(item, 'facts', { value: facts, enumerable: false }); // リプ欄をClaudeが書くときの材料（キューには保存しない）
       const problems = lintPost(item, [...recent, ...made], opts);
       if (problems.length) throw new Error(`守護獣の投稿が lint 不合格（${c.name}）:\n - ${problems.join('\n - ')}`);
       if (!replyText) {
         built = { item, replies: [] };
         break;
       }
-      // 【今日の空気】のくわしい解説は、リプ欄に（親の投稿と同じ実行で続けて出る）。2通目（開運アクション＋診断の案内）は、1通目へのスレッド返信
+      // リプ欄は1通（【月からのひとこと】＋【開運アクション】＋診断の案内）。親の投稿と同じ実行で続けて出る
       const mk = (id, text, replyTo, format) => ({ id, date: dateStr, slot, kind: 'value', text, replyTo, format, status: 'scheduled', createdAt: item.createdAt });
       const replies = [mk(`${item.id}-reply`, replyText, item.id, 'beast_daily_reply')];
       if (replyText2) replies.push(mk(`${item.id}-reply2`, replyText2, replies[0].id, 'beast_daily_reply2'));
