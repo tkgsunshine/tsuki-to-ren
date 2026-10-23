@@ -35,7 +35,7 @@ test('withFixedNow は new Date() だけを固定し、終わったら元に戻�
   assert.equal(Date, real);
 });
 
-test('守護獣の投稿: LINEのおすすめ時間と「解説はリプ欄へ」を本文に、ひとこと・開運アクション・診断の案内を1通のリプ欄に（保険の定型文）。540通りすべて280以内', async () => {
+test('守護獣の投稿: LINEのおすすめ時間と「解説はリプ欄へ」を本文に、ひとこと（1通目）・開運アクションと診断の案内（2通目）をリプ欄に（保険の定型文）。540通りすべて280以内', async () => {
   const { buildPostText, buildBeastItems, computeAll, pickBeasts } = await import('./lib/characters.mjs');
   const { weightedLength, lintPost } = await import('./lib/lint.mjs');
   const all = computeAll('2026-10-08');
@@ -53,9 +53,9 @@ test('守護獣の投稿: LINEのおすすめ時間と「解説はリプ欄へ�
     assert.ok(!r.text.includes('-月-') && !r.text.includes('-蓮-'), `${tag}: 本文に署名は置かない`);
     assert.ok(!r.text.includes('近日公開'), `${tag}: 本文に案内は置かない`);
     assert.ok(r.replyText.startsWith('【月からのひとこと】') && !/UNKNOWN/.test(r.replyText), `${tag}: ひとこと`);
-    assert.ok(r.replyText.includes('【開運アクション】') && r.replyText.includes(cta) && r.replyText.endsWith(sign) && r.replyText2 === '', `${tag}: 返信は1通`);
+    assert.ok(r.replyText2.startsWith('【開運アクション】') && r.replyText2.includes(cta) && r.replyText2.endsWith(sign) && r.replyText.endsWith(sign), `${tag}: 2通目`);
     assert.ok(r.facts.advice && r.facts.name === c.name, `${tag}: Claudeに渡す材料`);
-    for (const t of [r.text, r.replyText]) {
+    for (const t of [r.text, r.replyText, r.replyText2]) {
       assert.ok(weightedLength(t) <= 280, `${tag}: ${weightedLength(t)}`);
       assert.deepEqual(lintPost({ slot: 'morning', kind: 'value', text: t }, [], { allowLinks: false }), []);
     }
@@ -63,15 +63,16 @@ test('守護獣の投稿: LINEのおすすめ時間と「解説はリプ欄へ�
   assert.ok(seen.size >= 50, `解説のパターン数: ${seen.size}`);
   // 過ぎた時間帯のおすすめは省く
   assert.ok(!buildPostText(all[0], '2026-10-08', '-月-', '23:00').text.includes('おすすめ時間'));
-  // 1日1本（朝）。各投稿にリプ欄が1通付く
+  // 1日1本（朝）。各投稿にリプ欄が2通（スレッド）付く
   const items = buildBeastItems(all, '2026-10-08', [], { allowLinks: false });
   const parents = items.filter((x) => !x.replyTo);
   assert.equal(parents.length, 1);
   assert.deepEqual(parents.map((x) => x.slot), ['morning']);
-  assert.equal(items.length, 2);
+  assert.equal(items.length, 3);
   for (const p of parents) {
     const r1 = items.find((x) => x.replyTo === p.id);
-    assert.ok(r1 && !items.some((x) => x.replyTo === r1.id)); // リプ欄は1通
+    const r2 = items.find((x) => x.replyTo === r1.id); // 2通目は、1通目へのスレッド返信
+    assert.ok(r1 && r2);
     assert.ok(p.text.startsWith('❤️🔮10月8日の恋愛運🔮❤️'));
   }
   // 同じ日の本文・返信が、すべて別の文面（同一文は投稿時に飛ばされるため）。長さも280以内
@@ -100,7 +101,7 @@ test('守護獣の返信: 22日続けて作っても、過去の投稿との同�
   for (let i = 0; i < 22; i++) {
     const d = new Date(Date.UTC(2026, 9, 19 + i)).toISOString().slice(0, 10);
     const items = buildBeastItems(computeAll(d), d, hist, { allowLinks: false });
-    assert.equal(items.length, 2, d);
+    assert.equal(items.length, 3, d);
     hist = hist.concat(items);
   }
 });
