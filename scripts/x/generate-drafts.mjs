@@ -220,64 +220,84 @@ posts = [...detPosts, ...posts];
 
 // 守護獣の1本（朝 08:15）。署名は常に「-月-」（話し手は月だけ）
 const beastItems = missing('chara-1') && !redoBeast ? buildBeastItems(all, date, history, { allowLinks }) : [];
-// 守護獣のリプ欄（1通）は、アプリの鑑定の解説（facts.advice）をもとに、Claudeが書く。検査に通らなければ、定型文のまま（保険）
-const BEAST_REPLY_SPEC = `守護獣の今日の恋愛運の投稿への、スレッド返信（1通）を書く。構成（この順・この見出し）:
+// 守護獣のリプ欄（2通）は、アプリの鑑定の解説（facts.advice）をもとに、Claudeが書く。検査に通らなければ、定型文のまま（保険）
+const BEAST_REPLY_SPEC = `守護獣の今日の恋愛運の投稿への、スレッド返信を2通書く。恋愛に共感してもらえて、保存・引用したくなる内容にする（薄い一般論にしない）。
+# replyText（1通目）
 1) 1行目「【月からのひとこと】」、空行
-2) ひとこと（日本語40〜55文字）: 「今日の点数の帯」と「守護獣のイメージ（theme・animal）」にそって、いまの気持ちに寄り添い、恋の具体的な場面（連絡・会う・気持ちの整理・待つ時間 など）にからめる。アプリの鑑定の解説（advice）の内容を、月の言葉でかみ砕いて使う（そのまま写さない）。きれいごとの一般論で終わらせない
-3) 空行、「【開運アクション】」、空行
-4) 今日できる小さな恋のアクションを1つ（日本語30〜45文字）: いつ・何を・どうする、のどれかを具体的に（時間帯・回数・実際に送る言葉 など）。点数の帯が低い日（band が D か E）は、無理に動かず、自分をいたわる行動にする。advice のおすすめ時間（hours）を使ってよい
-- 見出しの「【月からのひとこと】」「【開運アクション】」は、この表記のまま
+2) 共感（日本語50〜60文字）: 「今日の点数の帯」と「守護獣のイメージ（theme・animal）」にそって、読み手のいまの気持ちを、恋の具体的な場面（連絡待ち・会う前の夜・既読・気持ちの整理 など）で言い当てる。アプリの鑑定の解説（advice）を、月の言葉でかみ砕いて使う（そのまま写さない）
+3) 改行して、月の格言（日本語25〜40文字、1〜2文）: 記憶に残る言い切り（例の形:「〇〇は、△△じゃなくて□□。」）。実在の人物の名言・出典は書かない。きれいごと（「大切にしよう」「素直がいちばん」）にしない
+# replyText2（2通目）
+1) 1行目「【開運アクション】」、空行
+2) 今日できる小さな恋のアクション1つ（日本語40〜55文字）: いつ・何を・どうする、を具体的に（時間帯・回数・実際に送る言葉）。advice のおすすめ時間（hours）を使ってよい。点数の帯が低い日（band が D か E）は、無理に動かず、自分をいたわる行動にする
+3) 改行して、なぜそれが効くか（日本語20〜30文字。気持ちの動きとして）
+4) 改行して、背中を押す一言（日本語15〜25文字）
+# 共通
+- 2通とも、見出しはこの表記のまま
 - 点数・順位の数字は書かない。署名・「近日…」の予告の行は書かない（あとで自動で付く）
-- 専門用語・断定・保証・相手の気持ちの断定は書かない。「風」の比喩は使わない
-出力: {"replyText":"..."} のJSONのみ（改行は \\n）`;
-async function writeBeastReply(parent, reply, hist) {
+- 専門用語・断定・保証・相手の気持ちの断定は書かない。「風」の比喩は使わない。守護獣の動物の比喩は、1通目だけで、1回まで
+- 文字数の上限（各通とも、日本語で見出しを含め約130字）を守る
+出力: {"replyText":"...","replyText2":"..."} のJSONのみ（改行は \\n）`;
+async function writeBeastReply(parent, reply1, reply2, hist) {
   if (!process.env.ANTHROPIC_API_KEY) return false;
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const model = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
   let feedback = '';
   for (let attempt = 1; attempt <= 3; attempt++) {
-    let body = '';
+    let b1 = '', b2 = '';
     try {
       const res = await client.messages.create({
-        model, max_tokens: 2500, system,
+        model, max_tokens: 3000, system,
         messages: [{ role: 'user', content: `${BEAST_REPLY_SPEC}\n\n# 今日の事実\n${JSON.stringify(parent.facts)}\n\n# 直近の投稿（言い回しが被らないように）\n${recentTexts}${feedback}` }],
       });
       const raw = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
-      body = String(JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1)).replyText || '').trim();
+      const j = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+      b1 = String(j.replyText || '').trim();
+      b2 = String(j.replyText2 || '').trim();
     } catch (e) {
       console.warn(`守護獣のリプ欄 attempt ${attempt}: 出力を読めません（${e.message}）`);
-      feedback = '\n\n# 前回の出力は読めませんでした。{"replyText":"..."} のJSONのみ（改行は \\n）';
+      feedback = '\n\n# 前回の出力は読めませんでした。{"replyText":"...","replyText2":"..."} のJSONのみ（改行は \\n）';
       continue;
     }
-    const full = `${body}\n${BEAST_TEASER}\n-月-`;
-    const problems = lintPost({ slot: 'morning', kind: 'value', text: full }, [...hist, parent], { allowLinks });
-    if (!body.startsWith('【月からのひとこと】') || !body.includes('【開運アクション】')) problems.push('見出し「【月からのひとこと】」「【開運アクション】」が必要');
-    if (/\d+点|\d+位/.test(body)) problems.push('点数・順位の数字は書かない');
+    const full1 = `${b1}\n-月-`;
+    const full2 = `${b2}\n${BEAST_TEASER}\n-月-`;
+    const problems = [
+      ...lintPost({ slot: 'morning', kind: 'value', text: full1 }, [...hist, parent], { allowLinks }).map((x) => `1通目: ${x}`),
+      ...lintPost({ slot: 'morning', kind: 'value', text: full2 }, [...hist, parent], { allowLinks }).map((x) => `2通目: ${x}`),
+    ];
+    if (!b1.startsWith('【月からのひとこと】')) problems.push('1通目は「【月からのひとこと】」で始める');
+    if (!b2.startsWith('【開運アクション】')) problems.push('2通目は「【開運アクション】」で始める');
+    if (/\d+点|\d+位/.test(`${b1}\n${b2}`)) problems.push('点数・順位の数字は書かない');
+    if (Array.from(b1).length < 70 || Array.from(b2).length < 55) problems.push('短すぎる（1通目は見出しを含め約90字以上、2通目は約75字以上）');
     if (problems.length) {
       console.warn(`守護獣のリプ欄 attempt ${attempt}: 不合格\n - ${problems.join('\n - ')}`);
       feedback = `\n\n# 前回の出力は次の理由で不合格でした。直して再出力:\n- ${problems.join('\n- ')}`;
       continue;
     }
-    reply.text = full;
+    reply1.text = full1;
+    reply2.text = full2;
     return true;
   }
   return false;
 }
 if (redoBeast) {
-  const fresh = buildBeastItems(all, date, history.filter((h) => h.date !== date), { allowLinks });
+  const rest0 = history.filter((h) => h.date !== date);
+  const fresh = buildBeastItems(all, date, rest0, { allowLinks });
   const oldParent = queue.find((p) => p.id === fresh[0].id);
   const oldReply = queue.find((p) => p.id === `${fresh[0].id}-reply`);
   if (!oldParent || !oldReply) { console.log('守護獣の投稿が無いので、何もしません。'); process.exit(0); }
   if (oldParent.text !== fresh[0].text) { console.error('守護獣の本文が、作り直した本文と違うので、リプ欄の書き直しを中止します。'); process.exit(1); }
-  const probe = { ...fresh[1] };
-  if (!(await writeBeastReply(fresh[0], probe, history.filter((h) => h.date !== date)))) { console.error('リプ欄を書けませんでした。キューは変更しません。'); process.exit(1); }
-  oldReply.text = probe.text;
-  const rest = queue.filter((p) => p.id !== `${fresh[0].id}-reply2`);
+  const p1 = { ...fresh[1] }, p2 = { ...fresh[2] };
+  if (!(await writeBeastReply(fresh[0], p1, p2, rest0))) { console.error('リプ欄を書けませんでした。キューは変更しません。'); process.exit(1); }
+  oldReply.text = p1.text;
+  let rest = queue;
+  const oldReply2 = queue.find((p) => p.id === `${fresh[0].id}-reply2`);
+  if (oldReply2) oldReply2.text = p2.text;
+  else rest = [...queue, { ...p2 }];
   if (!dryRun) writeQueue(rest);
-  console.log(`${date} の守護獣のリプ欄を、1通に書き直しました。`);
+  console.log(`${date} の守護獣のリプ欄を、2通に書き直しました。`);
   process.exit(0);
 }
-if (beastItems.length > 1) await writeBeastReply(beastItems[0], beastItems[1], history);
+if (beastItems.length > 2) await writeBeastReply(beastItems[0], beastItems[1], beastItems[2], history);
 
 const buzzItem = (slot, time) => {
   const f = planned[slot];
