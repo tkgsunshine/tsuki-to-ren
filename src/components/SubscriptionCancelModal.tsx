@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { AlertTriangle, CheckSquare, Square, X, ShieldAlert, ArrowLeft } from 'lucide-react';
-import { showAlert } from './AppDialog';
 
 interface SubscriptionCancelModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirmCancel: () => void;
+  /** 解約理由を渡して、Stripe の解約画面へ移動する（解約の確定は Stripe の画面で行う） */
+  onConfirmCancel: (reasons: string[], note: string) => void | Promise<void>;
 }
 
 export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = ({
@@ -41,23 +41,9 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (selectedReasons.length === 0) {
-      setErrorMessage('解約理由を1つ以上選択してください。');
-      return;
-    }
-
-    if (selectedReasons.includes('other') && !otherReasonText.trim()) {
-      setErrorMessage('「その他」を選択した場合は、具体的な理由を記入してください。');
-      return;
-    }
-
+    // 理由は任意。答えなくても解約へ進める（解約をむずかしくしない）
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      onConfirmCancel();
-      showAlert('🎉 プレミアム会員の解約手続きが完了いたしました。\nこれまで「月と蓮」をご利用いただき誠にありがとうございました。');
-      onClose();
-    }, 600);
+    void Promise.resolve(onConfirmCancel(selectedReasons, otherReasonText.trim())).finally(() => setIsSubmitting(false));
   };
 
   return (
@@ -171,7 +157,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
                 color: '#f3efe6',
                 marginBottom: '0.65rem'
               }}>
-                解約理由を教えてください <span style={{ color: '#cf5a43', fontSize: '0.72rem', marginLeft: '0.2rem' }}>(必須・複数選択可)</span>
+                解約理由を教えてください <span style={{ color: '#cf5a43', fontSize: '0.72rem', marginLeft: '0.2rem' }}>(任意・複数選択可)</span>
               </label>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -283,7 +269,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
                   boxShadow: '0 4px 15px rgba(207, 90, 67, 0.2)'
                 }}
               >
-                {isSubmitting ? '解約処理中...' : '解約を確定する'}
+                {isSubmitting ? '解約画面へ移動しています...' : '解約画面へ進む'}
               </button>
 
               <button

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export interface SavedPartner {
   id: string;
@@ -31,6 +31,7 @@ import { ColumnDetailView } from './components/ColumnDetailView';
 import { trackFortune } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm } from './components/AppDialog';
+import { fetchPremiumStatus, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -57,6 +58,8 @@ interface InitialRoute {
   settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company';
   compatibilityPair: { myMbti: string; oppMbti: string } | null;
 }
+
+const IS_PRODUCTION_SITE = typeof window !== 'undefined' && window.location.hostname.endsWith('tsuki-to-ren.com');
 
 const getInitialRoute = (): InitialRoute => {
   if (typeof window === 'undefined') {
@@ -268,7 +271,67 @@ function App() {
 
   // Registration & Subscription Wall
   const [isRegistered, setIsRegistered] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  // Premium comes from Stripe (api/stripe/*). Start from the last known state of the stored account,
+  // so a member's screen does not briefly show the free version on each visit.
+  const [isSubscribed, setIsSubscribed] = useState(() => {
+    try { return readCachedPremium(JSON.parse(localStorage.getItem('hasu_tsuki_user') || 'null')?.uid); } catch { return false; }
+  });
+  const premiumUidRef = useRef<string | null>(null);
+  useEffect(() => {
+    const uid = currentUser?.uid || null;
+    if (!uid) {
+      if (premiumUidRef.current) setIsSubscribed(false); // signed out
+      premiumUidRef.current = null;
+      return;
+    }
+    premiumUidRef.current = uid;
+    // Coming back from Stripe: ?premium=success|cancel|portal. The webhook can take a few seconds, so after a payment keep asking.
+    const params = new URLSearchParams(window.location.search);
+    const back = params.get('premium');
+    if (back) {
+      params.delete('premium');
+      const qs = params.toString();
+      window.history.replaceState(window.history.state, '', window.location.pathname + (qs ? `?${qs}` : ''));
+    }
+    let cancelled = false;
+    (async () => {
+      const tries = back === 'success' ? 8 : 1;
+      for (let i = 0; i < tries; i++) {
+        const status = await fetchPremiumStatus();
+        if (cancelled) return;
+        if (status) setIsSubscribed(status.active);
+        if (status?.active) {
+          if (back === 'success') showAlert('🌙 プレミアムへようこそ。\nすべての機能が使えるようになりました。これから毎日、そばで見守らせてくださいね。');
+          return;
+        }
+        if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
+      }
+      if (back === 'success' && !cancelled) {
+        showAlert('お支払いを受け付けました。プレミアムの反映に少し時間がかかっています。\n1〜2分たってから、ページを再読み込みしてください。');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [currentUser?.uid]);
+
+  const handleStartCheckout = async () => {
+    if (!isRegistered) {
+      setShowAuthModal(true);
+      return;
+    }
+    try {
+      await startPremiumCheckout();
+    } catch (e) {
+      showAlert(e instanceof Error ? e.message : '決済画面を開けませんでした。');
+    }
+  };
+
+  const handleOpenBillingPortal = async (reasons: string[] = [], note = '') => {
+    try {
+      await openBillingPortal(reasons, note);
+    } catch (e) {
+      showAlert(e instanceof Error ? e.message : '解約・お支払いの画面を開けませんでした。');
+    }
+  };
   const [showPremiumLP, setShowPremiumLP] = useState(false);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
@@ -944,7 +1007,7 @@ function App() {
                 isRegistered={isRegistered}
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
-                onSubscribe={() => setIsSubscribed(true)}
+                onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
                 myName={myName}
@@ -975,7 +1038,7 @@ function App() {
                 isRegistered={isRegistered}
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
-                onSubscribe={() => setIsSubscribed(true)}
+                onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
                 myName={myName}
@@ -1728,41 +1791,44 @@ function App() {
                   変更内容を保存する
                 </button>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', marginTop: '0.5rem' }}>
-                  <label style={{ fontSize: '0.75rem', color: '#a9a49a' }}>会員ステータス (開発用テスト)</label>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      onClick={() => setIsRegistered(!isRegistered)}
-                      style={{
-                        background: isRegistered ? 'rgba(226, 192, 116, 0.15)' : 'rgba(255,255,255,0.02)',
-                        border: isRegistered ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: '8px',
-                        padding: '4px 10px',
-                        fontSize: '0.7rem',
-                        color: isRegistered ? 'var(--color-gold)' : '#a9a49a',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      無料会員: {isRegistered ? '登録済' : 'ゲスト'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsSubscribed(!isSubscribed)}
-                      style={{
-                        background: isSubscribed ? 'rgba(111, 176, 143, 0.15)' : 'rgba(255,255,255,0.02)',
-                        border: isSubscribed ? '1px solid #6fb08f' : '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: '8px',
-                        padding: '4px 10px',
-                        fontSize: '0.7rem',
-                        color: isSubscribed ? '#6fb08f' : '#a9a49a',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      有料会員: {isSubscribed ? '購読中' : '未購読'}
-                    </button>
+                {/* 開発用の切り替え。本番サイトでは出さない（押すだけで有料機能が開いてしまうため）。プレビューと手元では使える */}
+                {!IS_PRODUCTION_SITE && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', marginTop: '0.5rem' }}>
+                    <label style={{ fontSize: '0.75rem', color: '#a9a49a' }}>会員ステータス (開発用テスト)</label>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => setIsRegistered(!isRegistered)}
+                        style={{
+                          background: isRegistered ? 'rgba(226, 192, 116, 0.15)' : 'rgba(255,255,255,0.02)',
+                          border: isRegistered ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: '8px',
+                          padding: '4px 10px',
+                          fontSize: '0.7rem',
+                          color: isRegistered ? 'var(--color-gold)' : '#a9a49a',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        無料会員: {isRegistered ? '登録済' : 'ゲスト'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsSubscribed(!isSubscribed)}
+                        style={{
+                          background: isSubscribed ? 'rgba(111, 176, 143, 0.15)' : 'rgba(255,255,255,0.02)',
+                          border: isSubscribed ? '1px solid #6fb08f' : '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: '8px',
+                          padding: '4px 10px',
+                          fontSize: '0.7rem',
+                          color: isSubscribed ? '#6fb08f' : '#a9a49a',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        有料会員: {isSubscribed ? '購読中' : '未購読'}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -2437,7 +2503,7 @@ function App() {
           chatCount={chatCount}
           setChatCount={setChatCount}
           onRegister={handleRegister}
-          onSubscribe={() => setIsSubscribed(true)}
+          onSubscribe={handleStartCheckout}
           onClose={() => setIsChatOpen(false)}
           result={activeResult}
           opponentName={mode === 'match' ? oppName : undefined}
@@ -2710,9 +2776,8 @@ function App() {
       <PremiumLPModal
         isOpen={showPremiumLP}
         onClose={() => setShowPremiumLP(false)}
-        onSubscribe={() => setIsSubscribed(true)}
-        onCancelSubscription={() => setIsSubscribed(false)}
-        isResultVisible={(activeTab === 'home' && flowStep === 'result' && !!activeResult) || (activeTab === 'fortune' && !!activeResult && !!renResult && !!tsukiResult)}
+        onSubscribe={handleStartCheckout}
+        onCancelSubscription={handleOpenBillingPortal}
         isSubscribed={isSubscribed}
         isRegistered={isRegistered}
         onRegisterFirst={() => setShowAuthModal(true)}

@@ -445,9 +445,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               {/* Action Button */}
               <button 
                 onClick={() => {
+                  // Stripe の決済画面へ移動する（戻ってきたときの完了のお知らせは App が出す）
                   onSubscribe();
                   setShowSubscribeOverlay(false);
-                  showAlert('プレミアムプランに登録しました！チャットが無制限になります。');
                 }} 
                 className="consult-btn" 
                 style={{
