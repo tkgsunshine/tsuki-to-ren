@@ -138,7 +138,7 @@ function validate(posts) {
       if (!p.replyText) problems.push(`${slot}: 続き（1位〜3位・12位〜16位）の replyText も書く`);
       else {
         for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks })) problems.push(`${slot}の返信: ${pr}`);
-        if (/^\s*[123]位/m.test(p.text)) problems.push(`${slot}: 1位〜3位は、投稿ではなくリプ欄（replyText）に書く`);
+        if (/^\s*[123]位\s+[EI][NS][FT][JP]/m.test(p.text)) problems.push(`${slot}: 1位〜3位は、投稿ではなくリプ欄（replyText）に書く`);
         for (const n of [1, 2, 3]) if (!new RegExp(`^\\s*${n}位`, 'm').test(p.replyText)) problems.push(`${slot}: replyText に「${n}位」の行がない`);
         const joined = `${p.text}\n${p.replyText}`;
         for (const c of MBTI_TYPES.map((t) => t.code)) if ((joined.match(new RegExp(c, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、投稿と返信で1回ずつになっていない（16タイプ全員を重複なく）`);
