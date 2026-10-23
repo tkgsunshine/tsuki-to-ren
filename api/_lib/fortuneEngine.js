@@ -502,8 +502,8 @@ export function getMbtiTraits(oppMbti, _name) {
             lineTopic: `「最近ハマって調べてることある？」`,
             dateSpot: '静かなブックカフェ、美術館、落ち着いた個室レストラン',
             lineHabit: '用件のみの短文が基本。目的のないダラダラした雑談LINEは未読で後回しにしがち。',
-            delayDeepReason: '思考や重要タスクに没頭しており、返信する論理的理由や緊急性が見当たらないため。',
-            ngList: ['非論理的な感情論で詰め寄ること', '事前相談のない突発的な予定変更', 'プライベートな時間や聖域への無断侵入'],
+            delayDeepReason: '考えごとや大事な用事に集中していて、急いで返す理由が見当たらないため。',
+            ngList: ['筋の通らない感情論で詰め寄ること', '事前相談のない突発的な予定変更', 'プライベートな時間や聖域への無断侵入'],
             fallInLove: '自分の知性や将来ビジョンを深く理解し、精神的に完全に自立した姿を見せてくれた瞬間。'
         },
         'INTP': {
@@ -632,7 +632,7 @@ export function getMbtiTraits(oppMbti, _name) {
             lineTopic: `「最近仕事どう？忙しい？」`,
             dateSpot: 'アクセスが良く評価の高い人気レストラン、話題のスポット',
             lineHabit: '即断即決。用件が明確で、次に何をすべきかがハッキリしている実務的メッセージ。',
-            delayDeepReason: '優先順位に従ってタスクを消化中。緊急性のない連絡は業務終了後に回すため。',
+            delayDeepReason: 'やるべきことを順番に片付けている最中。急ぎでない連絡は、仕事が終わってから返すため。',
             ngList: ['感情的で要領を得ない愚痴の連発', '約束を反故にして言い訳すること', 'ルーズで不真面目な生活態度'],
             fallInLove: '自分の実力や努力を正当に評価してくれ、自立した凛とした強さを見せてくれた瞬間。'
         },
@@ -658,7 +658,7 @@ export function getMbtiTraits(oppMbti, _name) {
             lineTopic: `「最近買ってよかったものある？」`,
             dateSpot: 'ドライブ、アクティビティ施設、静かなガレージ風バー',
             lineHabit: '超短文。「り」「おけ」など必要最小限。用件が終われば既読スルーが通常運転。',
-            delayDeepReason: '一人で没頭したい作業や趣味があり、誰とも話したくない充電フェーズにあるため。',
+            delayDeepReason: '一人で没頭したい作業や趣味があり、誰とも話したくない充電中のため。',
             ngList: ['「何してるの？」「誰といるの？」などの過度な詮索', '感情的な長文メッセージの連投', '行動の自由を縛ること'],
             fallInLove: '余計な詮索をせず自分のペースを尊重してくれ、ピンチの時にサラリと助け合えた瞬間。'
         },
@@ -1019,134 +1019,189 @@ const singleTimingSubtitles = {
 export function getDailyContactAndAdvice(dailyScore, hasOpponent, character, _myNick, oppNick, oppMbti, myMbti, oppMbtiTrait, myMbtiTrait, oppStemTrait) {
     const oppNorm = (oppMbti || 'ENFP').toUpperCase();
     const myNorm = (myMbti || 'ENFP').toUpperCase();
+    const isType = (t) => /^[EI][NS][TF][JP]$/.test(t);
+    // 『』に入れて文中に埋めるため、末尾の句点を外す
+    const trimEnd = (s) => s.replace(/[。．]+$/, '');
+    // 助言は段落の配列で作る。1段落目（短い要点）は誰でも読め、2段落目以降は非会員にはぼかして表示する（ResultView）。
+    let timeSlot = '';
+    let subtitle = '';
+    let parts = [];
     if (hasOpponent) {
         const subs = mbtiTimingSubtitles[oppNorm] || mbtiTimingSubtitles['ENFP'];
-        let timeSlot = '';
-        let subtitle = '';
-        let advice = '';
+        const who = `${oppNick}様`;
+        const whoType = isType(oppNorm) ? `${who}（${oppNorm}）` : who;
+        const killing = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「いつも誠実でいてくれるとこ、ほんと尊敬してる」');
+        const praise = oppStemTrait?.praise[1] || oppMbtiTrait?.killingExtra || '「いつもありがとう。話してるとほっとする」';
+        const invite = oppMbtiTrait?.lineInvite || '「よさそうなお店見つけたから、今度一緒に行かない？」';
+        const topic = oppMbtiTrait?.lineTopic || '「最近ハマっていることある？」';
+        const habit = trimEnd(oppMbtiTrait?.lineHabit || 'マイペースで丁寧なやり取りを好む傾向');
+        const ng = oppMbtiTrait?.ngList[0] || '相手のペースを無視した連絡の連投';
+        const ng2 = oppMbtiTrait?.ngList[1] || oppStemTrait?.ng[0] || '感情的に問い詰めること';
+        const spot = oppMbtiTrait?.dateSpot || '落ち着いたカフェ';
+        const delayReason = trimEnd(oppMbtiTrait?.delayDeepReason || oppStemTrait?.delayReason || '一人でじっくり考えを整理したい充電中のため');
         if (dailyScore >= 85) {
             timeSlot = '21:00 〜 23:00';
             subtitle = subs.t85;
-            const killing = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「いつも誠実でいてくれるとこ、ほんと尊敬してる」');
-            const invite = oppMbtiTrait?.lineInvite || '「よさそうなお店見つけたから、今度一緒に行かない？」';
-            if (character === 'tsuki') {
-                advice = `${oppNick}様（${oppNorm}）との魂の波長が最高潮に達する日です。小手先の駆け引きは不要です。${killing}のように相手の存在そのものを認める温かな言葉を届けたり、${invite}と素直なお誘いを送ることで、一気に進展する奇跡の好機となります。`;
-            }
-            else {
-                advice = `本日は星の巡りがあなたの背中を強く押す、絶好の勝負日です。${oppNick}様（${oppNorm}）の意思決定特性を踏まえ、${invite}と5W1Hで具体的な提案を行ってください。迷わず行動に移すことが関係の進展を確定させます。`;
-            }
+            parts = character === 'tsuki' ? [
+                `今日は${who}と心の波長がいちばん重なる日。迷っていた一歩を踏み出してみて。`,
+                `連絡はゆったりできる${timeSlot}がおすすめです。駆け引きはいりません。${killing}のように、${who}のすてきなところをそのまま言葉にして届けてみてください。素直なひと言ほど、まっすぐ心に届く日です。`,
+                `会話があたたまってきたら、${invite}と軽くお誘いしてみて。行き先に迷ったら、${spot}のような場所が${who}の好みに合いそうですよ。`,
+                `もし返信がゆっくりでも大丈夫。${who}の返信のくせは『${habit}』なので、返事の速さで気持ちを決めつけないでくださいね。今日のあなたの言葉は、ちゃんと心に残っています。`
+            ] : [
+                `星の巡りがあなたの背中を強く押す、勝負の日です。考えすぎず動きましょう。`,
+                `連絡は${timeSlot}に。${whoType}を誘うなら、${invite}のように具体的なひと言で切り出してください。日にちや場所の候補まで添えると、相手はぐっと答えやすくなります。`,
+                `返事をもらえたら、その場で日にちまで決めてしまうのがコツです。「また今度」で流すと、せっかくの流れが止まってしまいます。行き先は${spot}あたりが${who}に合いそうです。`,
+                `ひとつだけ気をつけたいのは『${ng}』。気持ちが高まる日ほど勢いで出やすいので、そこだけは落ち着いて。あとは自信を持って進んでください。`
+            ];
         }
         else if (dailyScore >= 73) {
             timeSlot = '19:30 〜 21:00';
             subtitle = subs.t73;
-            const topic = oppMbtiTrait?.lineTopic || '「最近ハマっていることや好きなこと」';
-            if (character === 'tsuki') {
-                advice = `夕食後のリラックスタイムに、${topic}について優しく話を振ってみてください。${oppNorm}特有の関心と共鳴し、お相手から普段聞けない本音や嬉しい返信が返ってくる好調日です。`;
-            }
-            else {
-                advice = `対話の合意形成率が高まる好調日です。夕食後の時間帯に${topic}を投げかけ、テンポ良くキャッチボールを展開してください。感情論を挟まずスマートに会話を広げることが親密性向上の最適解です。`;
-            }
+            parts = character === 'tsuki' ? [
+                `今日は${who}から本音や嬉しい返事が返ってきやすい、恋が動く日です。`,
+                `夕ごはんのあと、${timeSlot}ごろのくつろいだ時間に、${topic}と話を振ってみてください。${whoType}が自然と話したくなる話題なので、いつもより会話が弾みやすいはずです。`,
+                `返事が来たら、あなたの意見より先に「そうなんだ！」「それいいね」と受け止める言葉を返してあげて。話を聞いてもらえる安心感が、${who}の心をぐっと近づけます。`,
+                `やり取りが続いたら、${praise}のように、感謝や好きなところをひと言添えるのもおすすめ。ただ、盛り上がっても『${ng}』だけは避けてくださいね。`
+            ] : [
+                `会話がかみ合い、やり取りがテンポよく続く好調日。話題選びが鍵です。`,
+                `${timeSlot}に、${topic}と投げかけてみてください。${whoType}が答えやすく、話を広げやすい話題です。`,
+                `返事が来たら、質問を重ねすぎず、自分の話も少し混ぜて「キャッチボール」にすること。質問ばかりだと、相手は面接を受けているような気分になってしまいます。`,
+                `会話がいちばん盛り上がったところで、「続きはまた今度聞かせて」と自分から切り上げるのが上手なやり方です。少しの物足りなさが、次の連絡のきっかけになります。`
+            ];
         }
         else if (dailyScore >= 60) {
             timeSlot = '12:30 〜 13:30';
             subtitle = subs.t60;
-            const habit = oppMbtiTrait?.lineHabit || 'マイペースで丁寧なやり取りを好む傾向';
-            if (character === 'tsuki') {
-                advice = `無理に関係を急がせず、日々の小さな信頼を積み重ねる日です。${oppNick}様の返信ペース（${habit}）を温かく尊重しながら、お昼休みに日常のちょっとした写真や労いの言葉を届けてみてください。居心地の良さが深く心に残ります。`;
-            }
-            else {
-                advice = `二人の運気は穏やかに安定しています。相手のコミュニケーション特性（${habit}）に合わせ、お昼に要点を絞った短文で連絡を入れてください。低負荷なやり取りの継続が長期的信頼の土台となります。`;
-            }
+            parts = character === 'tsuki' ? [
+                `関係を急がず、小さな安心を積み重ねる日。いつも通りのやさしさが効きます。`,
+                `お昼休みの${timeSlot}ごろに、ランチの写真や「午後もがんばろうね」のような軽いひと言を送ってみてください。返事を求めない気楽な連絡が、居心地のよさとして心に残ります。`,
+                `${who}の返信のくせは『${habit}』。返事のペースは相手に合わせて、あなたからの連投は控えめにしましょう。`,
+                `もし会話が続いたら、${praise}のように、ふだん言えていない感謝をひとつ伝えてみて。穏やかな日にもらった言葉は、意外と長く覚えているものですよ。`
+            ] : [
+                `二人の運気は穏やかに安定。大きく動くより、信頼を貯める日です。`,
+                `連絡は${timeSlot}のお昼休みに、要点をしぼった短い文で。${whoType}の返信のくせは『${habit}』なので、そのペースに合わせるのが近道です。`,
+                `話題は、前に${who}が話していたことの「その後」を聞くのがおすすめです。「この前言ってたあれ、どうなった？」のひと言で、ちゃんと覚えていてくれたという信頼が生まれます。`,
+                `今日は告白や大きなお誘いより、小さなやり取りを途切れさせないことを優先してください。こうした日の積み重ねが、勝負の日の追い風になります。`
+            ];
         }
         else if (dailyScore >= 45) {
             timeSlot = '7:30 〜 8:30';
             subtitle = subs.t45;
-            const ng = oppMbtiTrait?.ngList[0] || '相手のペースを無視した連絡の連投';
-            if (character === 'tsuki') {
-                advice = `本日は運気の波が一時的な調整期に入っています。${oppNick}様の地雷である『${ng}』を厳重に避け、朝の時間帯に「今日もお互い無理せず頑張ろうね！」などの返信不要な爽やかな一言に留めるのがベストです。`;
-            }
-            else {
-                advice = `すれ違いが起きやすい注意日です。${oppNick}様の防衛本能を刺激するNG行動『${ng}』を絶対に回避してください。連絡を入れる場合は朝の7:30〜8:30に要点のみの1行メッセージに限定し、すぐに切り上げるのが賢い守り方です。`;
-            }
+            parts = character === 'tsuki' ? [
+                `運気の波がひと休みする調整の日。いつもより少し言葉を控えめに。`,
+                `連絡するなら朝の${timeSlot}に、「今日もお互い無理せずがんばろうね！」のような、返事のいらない爽やかなひと言だけにしておくのがいちばんです。`,
+                `${who}が苦手なのは『${ng}』。今日は気持ちがすれ違いやすいので、ここだけは避けてくださいね。返事がそっけなく感じても、あなたのせいではありません。`,
+                `夜に不安になって追いLINEをしたくなったら、送る前にひと晩置いてみて。明日になれば流れは戻ってきます。今日は自分の時間を大切にしてね。`
+            ] : [
+                `すれ違いが起きやすい注意の日。攻めるより守りを固めましょう。`,
+                `${whoType}の気持ちを遠ざけやすいのは『${ng}』と『${ng2}』。どちらも今日は特に誤解されやすいので、意識して避けてください。`,
+                `連絡を入れるなら朝の${timeSlot}に、用件だけの1行メッセージにしぼり、すぐに切り上げるのが賢い守り方です。長文や質問攻めは、今日は逆効果になりがちです。`,
+                `返事がそっけなくても、深追いせずにそのまま流してください。今日波風を立てないことが、次の好調日にしっかり距離を縮めるための準備になります。`
+            ];
         }
         else {
             timeSlot = '終日静観推奨';
             subtitle = subs.tLow;
-            const delayReason = oppMbtiTrait?.delayDeepReason || oppStemTrait?.delayReason || '一人でじっくり考えを整理したい充電フェーズにあるため';
-            if (character === 'tsuki') {
-                advice = `本日は星の巡りがひと休みのタイミングです。${oppNick}様は現在『${delayReason}』という状態になりやすいため、あえて連絡を休んで自分磨きに集中しましょう。追わないあなたの凛とした余裕が、お相手の「どうしたのかな？」を引き出します。`;
-            }
-            else {
-                advice = `本日は連絡が届きにくい、星の巡りが静かな日です。お相手は『${delayReason}』という心理的キャパシティ低下フェーズにあります。本日は連絡を控え、相手から動き出すのを静かに待つのがいちばんの近道です。`;
-            }
+            parts = character === 'tsuki' ? [
+                `星の巡りがひと休みの日。連絡はお休みして、自分を大切にしましょう。`,
+                `${who}は今、『${delayReason}』という状態になりやすいとき。返事が遅くても、気持ちが離れたわけではないので安心してくださいね。`,
+                `その分、今日は自分磨きの時間に。好きな音楽を聴いたり、早めにお風呂に入ったり、心がほっとすることをしてあげてください。`,
+                `追わないあなたの凛とした余裕は、ちゃんと伝わります。少し間があくことで、${who}の「どうしてるかな？」が生まれますよ。`
+            ] : [
+                `連絡が届きにくい、星の巡りが静かな日。動かないことが一番の一手です。`,
+                `${who}は今、『${delayReason}』という状態になりやすいとき。ここで連絡を重ねると、気持ちの負担として受け取られやすくなります。`,
+                `今日は連絡を控え、相手から動き出すのを静かに待ちましょう。もし連絡が来たら、明るく短く返すだけで十分です。`,
+                `空いた時間は、睡眠や趣味など自分のために使ってください。あなたが落ち着いていることが、次に話すときの安心感になります。`
+            ];
         }
-        return {
-            bestContactHour: `${timeSlot}（${subtitle}）`,
-            dailyActionAdvice: advice
-        };
     }
     else {
         // シングルモード
         const subs = singleTimingSubtitles[myNorm] || singleTimingSubtitles['ENFP'];
-        let timeSlot = '';
-        let subtitle = '';
-        let advice = '';
+        const myType = isType(myNorm) ? `16タイプ（${myNorm}）の` : '';
+        const myNg = myMbtiTrait?.ngList[0] || '無理な我慢を強いられること';
+        const mySpot = myMbtiTrait?.dateSpot || '落ち着いたカフェ';
         if (dailyScore >= 85) {
             timeSlot = '20:00 〜 22:00';
             subtitle = subs.t85;
-            if (character === 'tsuki') {
-                advice = `あなたの持つ本来の魅力と愛のオーラが最高潮に達する日です。16タイプ（${myNorm}）の持ち味を活かし、お気に入りの服や心地よい場所へ出かけると、素晴らしい良縁や引き寄せが生まれます。`;
-            }
-            else {
-                advice = `行動力と知性が冴え渡る最高水準の開運日です。明確な目標設定と自己投資を断行してください。あなたの強みである論理的プレゼンスが周囲を強く惹きつけます。`;
-            }
+            parts = character === 'tsuki' ? [
+                `あなたの魅力がいちばん輝く日。いつもより少し外へ心を開いてみて。`,
+                `お気に入りの服を着て、${mySpot}のような心地よい場所へ出かけてみてください。${myType}あなたらしさが自然に出る場所ほど、すてきな出会いやご縁を引き寄せます。`,
+                `夜の${timeSlot}は、気になる人や久しぶりの友だちに連絡するのにぴったりの時間。「元気？ふと思い出したよ」のひと言から、思いがけない話が広がるかもしれません。`,
+                `誘いや紹介の話が来たら、迷ったら「行ってみる」を選んでね。今日のあなたは、自信を持っていい日ですよ。`
+            ] : [
+                `行動力と判断力が冴える最高の開運日。先のばしにしていたことを動かそう。`,
+                `出会いの場への参加や、気になる人への連絡など、ふだん迷っていることほど今日が向いています。返事を待つより、自分から最初の一歩を出すのがコツです。`,
+                `夜の${timeSlot}は、これからの目標を書き出すのに向いた時間です。恋愛も仕事も「いつまでに、何をするか」を決めておくと、追い風をそのまま形にできます。`,
+                `ただ、勢いのある日ほど予定を詰めこみすぎがちです。本当に大事なことを一つ選び、それに力を注いでください。`
+            ];
         }
         else if (dailyScore >= 73) {
             timeSlot = '18:00 〜 20:00';
             subtitle = subs.t73;
-            if (character === 'tsuki') {
-                advice = `内面からのエネルギーが満ちています。興味のある分野のインプットや、会いたい人に軽い連絡を入れてみることで、今後の人間関係を好転させる素晴らしい種が蒔かれます。`;
-            }
-            else {
-                advice = `知的な刺激に恵まれ、効率的な前進が可能な好調日です。関心のあるコミュニティへの参加やスキルアップに時間を割くことで、将来の良縁へのレバレッジが働きます。`;
-            }
+            parts = character === 'tsuki' ? [
+                `心のエネルギーが満ちて、人とのご縁が広がりやすい日です。`,
+                `夕方の${timeSlot}に、会いたい人へ軽く連絡を入れてみてください。用件がなくても「最近どう？」で十分。今日蒔いた小さな種が、あとで嬉しいつながりになって返ってきます。`,
+                `興味のあることを調べたり、新しいお店をのぞいたりするのもおすすめ。${mySpot}のような場所は、あなたの心をやさしくほどいてくれますよ。`,
+                `誰かにほめられたら、照れずに「ありがとう」と受け取ってね。素直な笑顔が、いちばんの魅力になる日です。`
+            ] : [
+                `よい刺激に恵まれ、物事が前に進みやすい好調日です。`,
+                `気になっていた集まりやイベントに参加したり、新しいことを学び始めたりするのに向いています。人の集まる場所に顔を出すほど、良いご縁につながります。`,
+                `夕方の${timeSlot}は、連絡やお誘いを送るのに向いた時間です。会話では、相手の話を一つ深く聞き返すと、印象に残る人になれます。`,
+                `今日始めたことは、まず三日だけ続けてみてください。小さな習慣が、あなたの自信と魅力の土台になります。`
+            ];
         }
         else if (dailyScore >= 60) {
             timeSlot = '12:00 〜 14:00';
             subtitle = subs.t60;
-            if (character === 'tsuki') {
-                advice = `心が非常に安定している日です。16タイプ（${myNorm}）特有のマイペースを大切にし、美味しい食事や好きな音楽で自分自身を満たすことが、自然と人を惹きつけるオーラとなります。`;
-            }
-            else {
-                advice = `今の流れを保ち、足元を整えるのに向いた平穏日です。身の回りのデジタル環境やスケジュールの整理に集中することで、思考のノイズがクリアになり精神的余裕が生まれます。`;
-            }
+            parts = character === 'tsuki' ? [
+                `心がとても安定している日。今日は自分のペースを大切にしましょう。`,
+                `お昼の${timeSlot}は、美味しいものを食べたり、好きな音楽を聴いたりして、自分を満たす時間に。満たされている人の笑顔は、自然と人を惹きつけます。`,
+                `${myType}あなたのマイペースさは、大切な魅力のひとつ。無理に周りに合わせなくて大丈夫ですよ。`,
+                `夜は、ゆっくり自分と向き合う時間に。「どんな人と、どんな恋がしたいか」を思い描いておくと、ご縁が来たときに迷わず手を伸ばせます。`
+            ] : [
+                `今の流れを保ち、足元を整えるのに向いた穏やかな日です。`,
+                `部屋やスマホの中、予定表を片付けるのにぴったりです。身の回りがすっきりすると、気持ちにも余裕が生まれます。`,
+                `お昼の${timeSlot}は、気分転換に少し外の空気を吸ってみてください。考えがまとまり、午後の判断がぐっと楽になります。`,
+                `大きな決断は、もっと調子のよい日に回して大丈夫。今日は「整える」ことが、次のチャンスへの準備になります。`
+            ];
         }
         else if (dailyScore >= 45) {
             timeSlot = '21:30 〜 23:00';
             subtitle = subs.t45;
-            const myNg = myMbtiTrait?.ngList[0] || '無理な自己犠牲や我慢';
-            if (character === 'tsuki') {
-                advice = `少し心身に疲れが出やすい調整日です。『${myNg}』に陥らないよう、暖かいお風呂に入って早めに休み、エネルギーを再充電しましょう。`;
-            }
-            else {
-                advice = `エネルギー消費を抑えるべき慎重日です。無理なタスク追加や突発的な約束は避け、リソースを自己防衛と休息に集中配分するのが合理的です。`;
-            }
+            parts = character === 'tsuki' ? [
+                `少し心と体に疲れが出やすい日。がんばりすぎず休ませてあげて。`,
+                `『${myNg}』のような、あなたが苦手なことに出会うと、いつもより心がすり減りやすい日です。嫌だなと感じたら、無理せず距離を置いてくださいね。`,
+                `夜の${timeSlot}は、温かいお風呂にゆっくりつかって、早めにお布団へ。しっかり眠ることが、いちばんの開運になります。`,
+                `うまくいかないことがあっても、今日は運気の波がひと休みしているだけ。自分を責めなくて大丈夫ですよ。`
+            ] : [
+                `エネルギーを使いすぎないよう、慎重に過ごしたい日です。`,
+                `急な予定や新しい頼まれごとは、できるだけ明日以降に回してください。今日は「断る」ことも大切な選択です。`,
+                `特に『${myNg}』のような場面は、いつもより気持ちを消耗しやすくなります。受け流すくらいの距離感でいましょう。`,
+                `夜の${timeSlot}は早めに休んで、心と体をしっかり回復させてください。休んだ分だけ、次の好調日に力を出せます。`
+            ];
         }
         else {
             timeSlot = '終日ゆっくり休息推奨';
             subtitle = subs.tLow;
-            if (character === 'tsuki') {
-                advice = `今日は徹底的に自分を慈しむ充電のスペシャルデーです。不要な外部情報を遮断し、自分をたっぷり甘やかして褒めてあげることで、明日以降の大開運ウェーブを迎え入れる心の余白が完成します。`;
-            }
-            else {
-                advice = `リスク管理に徹するべき静観日です。人とのやり取りは最小限にして、睡眠と栄養補給に専念してください。心と体を休ませることが、次のチャンスをつかむ力になります。`;
-            }
+            parts = character === 'tsuki' ? [
+                `今日は自分を思いきり甘やかす、充電のための特別な日です。`,
+                `SNSやニュースは少しお休みして、好きなスイーツを食べたり、お気に入りの動画を観たり。心がほっとすることを優先してください。`,
+                `寝る前に、今日の自分を「よくがんばったね」とほめてあげて。小さなことでも、自分をほめるほど心に余白が生まれます。`,
+                `その余白が、明日からの運気の波を迎え入れる準備になりますよ。焦らなくて大丈夫です。`
+            ] : [
+                `無理をせず、静かに過ごしたい日。休むことも立派な選択です。`,
+                `人とのやり取りは最小限にして、睡眠と食事をしっかりとってください。疲れているときの決めごとは、あとで後悔しやすいものです。`,
+                `気になる人への連絡や大事な決めごとは、明日以降に回しましょう。今日は決めないことが、正しい判断になります。`,
+                `心と体を休ませることが、次のチャンスをつかむ力になります。`
+            ];
         }
-        return {
-            bestContactHour: `${timeSlot}（${subtitle}）`,
-            dailyActionAdvice: advice
-        };
     }
+    return {
+        bestContactHour: `${timeSlot}（${subtitle}）`,
+        dailyActionAdvice: parts.join(''),
+        dailyActionAdviceParts: parts
+    };
 }
 // 2. 日干（生まれ持ったエネルギー）の宿命相性判定
 export function getStemCompatibility(myStem, oppStem, myNick, oppNick) {
@@ -2228,6 +2283,7 @@ export function generateFortuneResult(input, character) {
             }
         }
     };
+    let lineTips;
     const generateDetailedTopics = (score) => {
         const oppNick = oppNickname;
         const mbtiLabel = input.opponentMbti && input.opponentMbti !== 'UNKNOWN' ? input.opponentMbti : '未選択';
@@ -2282,44 +2338,46 @@ export function generateFortuneResult(input, character) {
             const oppLineTopic = oppMbtiTrait?.lineTopic || '「最近ハマっていることや好きなこと」';
             const tfText = mbtiDyn?.tfText || '';
             const jpText = mbtiDyn?.jpText || '';
-            let topic2Intro = '';
-            let topic2Detail = '';
-            if (character === 'tsuki') {
-                if (score >= 85) {
-                    topic2Intro = `お二人の間には、言葉の裏にある優しさやニュアンスが直感的に伝わる最高の対話運が巡っています。`;
-                    topic2Detail = `📱 お相手（${oppNick}様）のLINE癖：${oppLineHabit}\n\n⏳ 返信が遅い深層理由：${oppDelayReason}\n\n💡 心を通わせるヒント：${tfText} ${jpText}\n\n🌙 月からのアドバイス：メッセージを送るなら、相手がホッと一息つける21:00〜23:00頃が黄金時間帯です。${oppLineTopic}について軽く振ってみると、相手は嬉しそうに心を開いてくれます。`;
-                }
-                else if (score >= 70) {
-                    topic2Intro = `会話の波長は良好で、お互いの価値観を穏やかに共有できる時期です。`;
-                    topic2Detail = `📱 お相手（${oppNick}様）のLINE癖：${oppLineHabit}\n\n⏳ 返信が遅い深層理由：${oppDelayReason}\n\n💡 対話のポイント：${tfText} ${jpText}\n\n🌙 月からのアドバイス：相手が悩みや本音を漏らした時は、急いでアドバイスをせず「そうだったんだね」と優しく受け止める姿勢が絆を定着させます。`;
-                }
-                else if (score >= 55) {
-                    topic2Intro = `言葉の受け取り方に少しズレが生じやすい時期ですが、相手のペースを尊重することで安心感が深まります。`;
-                    topic2Detail = `📱 お相手（${oppNick}様）のLINE癖：${oppLineHabit}\n\n⏳ 返信が遅い深層理由：${oppDelayReason}\n\n💡 すれ違いを防ぐ鍵：${tfText} ${jpText}\n\n🌙 月からのアドバイス：長文や返信を急かすメッセージは避け、「返信は時間がある時で大丈夫だよ」という一言を添える余裕が相手に絶大な安心感を与えます。`;
-                }
-                else {
-                    topic2Intro = `感情が先走りやすく、誤解を生みやすい会話の波動が出ているため、慎重なコミュニケーションが必要です。`;
-                    topic2Detail = `📱 お相手（${oppNick}様）のLINE癖：${oppLineHabit}\n\n⏳ 返信が遅い深層理由：${oppDelayReason}\n\n💡 リスク回避の注意点：${tfText} ${jpText}\n\n🌙 月からのアドバイス：今は重大な話し合いや白黒をつける対話は避けてください。日常の短い挨拶程度にとどめ、相手が落ち着くまで時間の猶予を与えることが関係修復の最短ルートです。`;
-                }
-            }
-            else { // ren
-                if (score >= 85) {
-                    topic2Intro = `認知行動分析により、会話の伝達効率が最高水準にあります。${myNickname}様の明確な発信がお相手にストレートに響きます。`;
-                    topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信が遅くなる理由：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：お相手の意思決定プロセスに合わせ、5W1Hで用件を明確にした3行以内の提案が返事をもらいやすくなります。話題には${oppLineTopic}を選定してください。`;
-                }
-                else if (score >= 70) {
-                    topic2Intro = `対話における情報伝達は円滑です。感情論ではなく、事実情報や共通の興味を中心としたコミュニケーションが奏功します。`;
-                    topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信が遅くなる理由：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：要点を冒頭に置き、疑問形は1通につき1つに絞ることで、相手の返信負荷を最小化し安定したやり取りを継続できます。`;
-                }
-                else if (score >= 55) {
-                    topic2Intro = `対話の応答速度が低下しやすい調整期です。相手の情報処理キャパシティを超えない文量制御が必須です。`;
-                    topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信が遅くなる理由：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：現在は仕事等の個人的タスクに相手のリソースが割かれています。メッセージは労いを含む短文に限定し、返信プレッシャーをゼロに抑えるのが合理的です。`;
-                }
-                else {
-                    topic2Intro = `コミュニケーションにおけるノイズと誤解の発生率が高まっています。不用意な発言は裏目に出るリスクが大です。`;
-                    topic2Detail = `📱 お相手（${mbtiLabel}）のテキスト特性：${oppLineHabit}\n\n⏳ 返信が遅くなる理由：${oppDelayReason}\n\n💡 認知機能分析：${tfText} ${jpText}\n\n🔮 蓮の連絡戦術：議論や問い詰めるような文面は即刻中止してください。必要最小限の業務連絡トーンに留め、冷却期間を置くことが最適です。`;
-                }
-            }
+            // 「会話と伝わり方・LINE心理学」は、結果画面の「本日のLINE吉時間」カードに統合して表示する（lineTips）。
+            const intros = {
+                tsuki: [
+                    `言葉の裏にある優しさまで、すっと伝わり合う最高の会話運です。`,
+                    `会話の波長がよく、お互いの考えを穏やかに分かち合える時期です。`,
+                    `言葉の受け取り方に少しズレが出やすい時期。相手のペースを大切にすると、安心感が深まります。`,
+                    `気持ちが先走って、誤解が生まれやすい時期。いつもよりていねいな言葉選びを心がけましょう。`
+                ],
+                ren: [
+                    `あなたの言葉がまっすぐ届きやすい時期です。${myNickname}様の素直な気持ちは、そのまま相手に響きます。`,
+                    `やり取りはスムーズです。気持ちをぶつけるより、共通の話題や出来事を中心にすると会話が続きます。`,
+                    `返信がゆっくりになりやすい時期です。相手が読み疲れしない、短めの文を心がけてください。`,
+                    `言葉が誤解されやすく、すれ違いが起きやすい時期です。何気ないひと言が裏目に出ないよう気をつけましょう。`
+                ]
+            };
+            const advices = {
+                tsuki: [
+                    `${oppLineTopic}と軽く話を振ってみると、${oppNick}様は嬉しそうに心を開いてくれますよ。`,
+                    `相手が悩みや本音をこぼしたときは、急いでアドバイスせず「そうだったんだね」とやさしく受け止めてあげて。それだけで二人の絆はぐっと深まります。`,
+                    `長文や返信を急かすメッセージは控えて、「返信は時間があるときで大丈夫だよ」とひと言添えてみて。その余裕が、相手に大きな安心感を届けます。`,
+                    `今は大事な話し合いや、白黒をつけるやり取りは避けてね。短いあいさつくらいにとどめて、相手の気持ちが落ち着くのを待つのが、仲直りへのいちばんの近道です。`
+                ],
+                ren: [
+                    `誘うときは「いつ・どこで・何をするか」をはっきりさせて、3行以内で伝えると返事をもらいやすくなります。話題には${oppLineTopic}がおすすめです。`,
+                    `言いたいことは最初に書き、質問は1通につき1つにしぼってください。相手が返しやすくなり、やり取りが自然と続きます。`,
+                    `今の${oppNick}様は、仕事など自分のことで手いっぱいになりがちです。メッセージはねぎらいの短い文にして、返事を急かさないことが大切です。`,
+                    `問い詰めるような文や、言い合いになりそうな話題は今はやめておいてください。連絡は必要なことだけにして、少し距離を置くのがいちばんです。`
+                ]
+            };
+            const band = score >= 85 ? 0 : score >= 70 ? 1 : score >= 55 ? 2 : 3;
+            const hint = `${tfText} ${jpText}`.trim();
+            lineTips = {
+                intro: intros[character][band],
+                items: [
+                    { label: `📱 ${oppNick}様のLINEのくせ`, text: oppLineHabit },
+                    { label: '⏳ 返信が遅いときの理由', text: oppDelayReason },
+                    ...(hint ? [{ label: '💡 気持ちが伝わるコツ', text: hint }] : []),
+                    { label: character === 'tsuki' ? '🌙 月からのアドバイス' : '🔮 蓮からのアドバイス', text: advices[character][band] }
+                ]
+            };
             // Topic 3: 惹かれ合うポイント＆地雷行動3選
             const oppFallInLove = oppMbtiTrait?.fallInLove || '飾らない素直な笑顔と、自分の世界観を認めてくれた瞬間。';
             const oppKilling = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「いつも誠実でいてくれるとこ、ほんと尊敬してる」');
@@ -2448,10 +2506,9 @@ export function generateFortuneResult(input, character) {
             }
             return [
                 { title: '1. 二人の宿命と命式バランス', intro: topic1Intro, detail: topic1Detail },
-                { title: '2. 会話と伝わり方・LINE心理学', intro: topic2Intro, detail: topic2Detail },
-                { title: '3. 惹かれ合うポイント＆地雷行動3選', intro: topic3Intro, detail: topic3Detail },
-                { title: '4. 運命の転機日とアプローチ計画', intro: topic4Intro, detail: topic4Detail },
-                { title: '5. 最終的な結びつき', intro: topic5Intro, detail: topic5Detail }
+                { title: '2. 惹かれ合うポイント＆地雷行動3選', intro: topic3Intro, detail: topic3Detail },
+                { title: '3. 運命の転機日とアプローチ計画', intro: topic4Intro, detail: topic4Detail },
+                { title: '4. 最終的な結びつき', intro: topic5Intro, detail: topic5Detail }
             ];
         }
         else {
@@ -2874,6 +2931,8 @@ export function generateFortuneResult(input, character) {
         })(),
         bestContactHour: dailyContactAdvice.bestContactHour,
         dailyActionAdvice: dailyContactAdvice.dailyActionAdvice,
+        dailyActionAdviceParts: dailyContactAdvice.dailyActionAdviceParts,
+        lineTips,
         radarScores: (() => {
             // 相性の判定関数は、ユーザー向けの平易な名前（例:「運命の絆」）を返す。レーダーの点数は、四柱推命・九星気学の関係（干合・相生…）で決めるため、元の関係に戻して比べる。
             // 旧版は、平易な名前に改名された後も、旧名（'干合' など）と比べていたため、これらの分岐が一度も働かず、既定値だけだった。

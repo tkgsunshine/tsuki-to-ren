@@ -35,7 +35,8 @@ export function buildDailyContent(sub) {
     mbtiName: result.myMbtiName && result.myMbtiName !== '未選択' ? result.myMbtiName : '',
     hourMain: hour.split(/[（(]/)[0].trim(),
     hourNote: note ? note[1] : '',
-    advice: result.dailyActionAdvice || '',
+    // Paragraphs of the approach advice (the result screen shows the same paragraphs).
+    adviceParts: result.dailyActionAdviceParts?.length ? result.dailyActionAdviceParts : [result.dailyActionAdvice || ''],
     // The user's own profile card from the result screen (never the partner's: the mail stays about "you").
     profile: {
       title: (result.myAstrologyTheme || '').replace(/[【】]/g, ''),
@@ -85,7 +86,7 @@ export function resultUrlFor(sub, hasOpponent) {
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
   const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
-  const { score, hourMain, hourNote, advice, mbtiCode, mbtiName, profile = {} } = content;
+  const { score, hourMain, hourNote, adviceParts = [], mbtiCode, mbtiName, profile = {} } = content;
   const facts = [
     profile.star && ['本命星', esc(profile.star)],
     profile.color && ['守護カラー', esc(profile.color)],
@@ -213,7 +214,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   <td width="3" bgcolor="#e2c074" style="width: 3px; background-color: #e2c074; border-radius: 2px;">&nbsp;</td>
                   <td style="padding: 4px 0 4px 14px; font-size: 13px; line-height: 1.8; color: #cbd5e1;">
                     <strong style="color: #fef08a; letter-spacing: 0.06em;">本日のアプローチ助言</strong><br>
-                    ${esc(advice)}
+                    ${adviceParts.map(esc).join('<br><br>')}
                   </td>
                 </tr>
               </table>
