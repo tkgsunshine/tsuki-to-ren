@@ -3525,8 +3525,11 @@
     "format": "voice",
     "system": "psychology",
     "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-09T08:54:32.927Z"
+    "status": "posted",
+    "createdAt": "2026-10-09T08:54:32.927Z",
+    "postedAt": "2026-10-23T08:57:54.000Z",
+    "tweetId": "2113555501791551741",
+    "manual": true
   },
   {
     "id": "2026-10-18-chara-1",
