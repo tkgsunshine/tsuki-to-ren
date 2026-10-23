@@ -1,5 +1,5 @@
 import { getDb, getAdminAuth } from './firestore.js';
-import { PREMIUM, getStripe, parseBody, safeReturnPath, verifyUser, withParam } from './stripe.js';
+import { PREMIUM, getStripe, isLiveKey, parseBody, safeReturnPath, verifyUser, withParam } from './stripe.js';
 
 // Starts a Premium sign-up: creates a Stripe Checkout session for the signed-in account and returns its URL.
 // The account's uid goes on the session and on the subscription, so the webhook knows whose membership it is.
@@ -14,7 +14,9 @@ export default async function handler(req, res, deps = {}) {
     if (!priceId) throw new Error('STRIPE_PRICE_ID is not set');
 
     const db = deps.db || getDb();
-    const current = (await db.collection(PREMIUM).doc(user.uid).get()).data();
+    let current = (await db.collection(PREMIUM).doc(user.uid).get()).data();
+    // A record left by testing (or by live, while testing) belongs to the other mode; start fresh
+    if (current && (current.livemode === true) !== (deps.live ?? isLiveKey())) current = undefined;
     if (current?.active) return res.status(409).json({ status: 'error', message: 'すでにプレミアム会員です' });
 
     const back = safeReturnPath(parseBody(req.body).returnPath);

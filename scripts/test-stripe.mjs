@@ -73,16 +73,16 @@ test('checkout creates a subscription session tied to the account', async () => 
 
 test('checkout refuses an account that is already Premium', async () => {
   const res = mockRes();
-  await checkout(signedIn(), res, { auth, db: mockDb({ 'premium/u1': { active: true } }), stripe: {}, priceId: 'price_1' });
+  await checkout(signedIn(), res, { auth, db: mockDb({ 'premium/u1': { active: true, livemode: false } }), stripe: {}, priceId: 'price_1', live: false });
   assert.equal(res.code, 409);
 });
 
 test('portal opens for a paying member and keeps cancel reasons', async () => {
-  const db = mockDb({ 'premium/u1': { active: true, customerId: 'cus_1' } });
+  const db = mockDb({ 'premium/u1': { active: true, customerId: 'cus_1', livemode: false } });
   let params;
   const stripe = { billingPortal: { sessions: { create: async (p) => { params = p; return { url: 'https://billing.stripe.com/x' }; } } } };
   const res = mockRes();
-  await portal(signedIn({ body: { reasons: ['price', 'bogus'], note: 'n' } }), res, { auth, db, stripe });
+  await portal(signedIn({ body: { reasons: ['price', 'bogus'], note: 'n' } }), res, { auth, db, stripe, live: false });
   assert.equal(res.code, 200);
   assert.equal(params.customer, 'cus_1');
   const feedback = Object.entries(db.docs).find(([k]) => k.startsWith('cancelFeedback/'))?.[1];
@@ -91,7 +91,7 @@ test('portal opens for a paying member and keeps cancel reasons', async () => {
 
 test('status reports the recorded membership', async () => {
   const res = mockRes();
-  await status({ method: 'GET', headers: { authorization: 'Bearer good' } }, res, { auth, db: mockDb({ 'premium/u1': { active: true, status: 'active', customerId: 'cus_1' } }) });
+  await status({ method: 'GET', headers: { authorization: 'Bearer good' } }, res, { auth, db: mockDb({ 'premium/u1': { active: true, status: 'active', customerId: 'cus_1', livemode: true } }), live: true });
   assert.equal(res.body.active, true);
   assert.equal(res.body.hasBilling, true);
 });
@@ -143,4 +143,20 @@ test('one function serves every /api/stripe/* route and passes the raw body on',
   const missing = mockRes();
   await route({ method: 'GET', url: '/api/stripe/nope', query: { action: 'nope' }, headers: {} }, missing);
   assert.equal(missing.code, 404);
+});
+
+test('checkout ignores a membership left by the other Stripe mode', async () => {
+  let params;
+  const stripe = { checkout: { sessions: { create: async (p) => { params = p; return { url: 'https://checkout.stripe.com/x' }; } } } };
+  const res = mockRes();
+  await checkout(signedIn(), res, { auth, db: mockDb({ 'premium/u1': { active: false, livemode: false, customerId: 'cus_test' } }), stripe, priceId: 'price_1', live: true });
+  assert.equal(res.code, 200);
+  assert.equal(params.customer, undefined);
+  assert.equal(params.customer_email, 'a@example.com');
+});
+
+test('a test-mode membership does not count on the live site', async () => {
+  const res = mockRes();
+  await status({ method: 'GET', headers: { authorization: 'Bearer good' } }, res, { auth, db: mockDb({ 'premium/u1': { active: true, livemode: false, customerId: 'cus_t' } }), live: true });
+  assert.equal(res.body.active, false);
 });

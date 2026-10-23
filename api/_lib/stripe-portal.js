@@ -1,5 +1,5 @@
 import { getDb, getAdminAuth } from './firestore.js';
-import { PREMIUM, getStripe, parseBody, safeReturnPath, verifyUser, withParam } from './stripe.js';
+import { PREMIUM, getStripe, isLiveKey, parseBody, safeReturnPath, verifyUser, withParam } from './stripe.js';
 
 // Opens Stripe's customer portal (cancel, change card, receipts) for the signed-in member.
 // Cancel reasons picked in the app's cancel form are kept in cancelFeedback (no names or emails).
@@ -15,7 +15,7 @@ export default async function handler(req, res, deps = {}) {
 
     const db = deps.db || getDb();
     const current = (await db.collection(PREMIUM).doc(user.uid).get()).data();
-    if (!current?.customerId) return res.status(404).json({ status: 'error', message: 'お支払いの記録が見つかりませんでした' });
+    if (!current?.customerId || (current.livemode === true) !== (deps.live ?? isLiveKey())) return res.status(404).json({ status: 'error', message: 'お支払いの記録が見つかりませんでした' });
 
     const body = parseBody(req.body);
     const reasons = Array.isArray(body.reasons) ? body.reasons.filter((r) => REASONS.has(r)) : [];

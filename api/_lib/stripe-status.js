@@ -1,5 +1,5 @@
 import { getDb, getAdminAuth } from './firestore.js';
-import { PREMIUM, verifyUser } from './stripe.js';
+import { PREMIUM, isLiveKey, verifyUser } from './stripe.js';
 
 // The signed-in account's Premium membership, as the webhook last recorded it.
 export default async function handler(req, res, deps = {}) {
@@ -10,7 +10,9 @@ export default async function handler(req, res, deps = {}) {
     const user = await verifyUser(req, deps.auth || getAdminAuth());
     if (user.error) return res.status(user.error.status).json({ status: 'error', message: user.error.message });
     const db = deps.db || getDb();
-    const p = (await db.collection(PREMIUM).doc(user.uid).get()).data();
+    let p = (await db.collection(PREMIUM).doc(user.uid).get()).data();
+    // Only memberships from the Stripe mode in use count (a test payment must not unlock the live site)
+    if (p && (p.livemode === true) !== (deps.live ?? isLiveKey())) p = undefined;
     return res.status(200).json({
       status: 'ok',
       active: p?.active === true,

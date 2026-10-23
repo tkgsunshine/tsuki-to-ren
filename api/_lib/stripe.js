@@ -10,6 +10,9 @@ export const SITE = 'https://www.tsuki-to-ren.com';
 const ACTIVE_STATUSES = new Set(['active', 'trialing', 'past_due']);
 
 let client;
+// Test-mode and live-mode Stripe data are separate: a customer made while testing does not exist in live mode
+export const isLiveKey = () => String(process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_');
+
 export function getStripe() {
   if (!client) {
     const key = process.env.STRIPE_SECRET_KEY;
@@ -59,6 +62,7 @@ export function premiumRecord(sub) {
     subscriptionId: sub.id,
     currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
     cancelAtPeriodEnd: sub.cancel_at_period_end === true || Boolean(sub.cancel_at),
+    livemode: sub.livemode === true,
     updatedAt: new Date().toISOString()
   };
 }
