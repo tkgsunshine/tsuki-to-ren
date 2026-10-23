@@ -111,7 +111,11 @@ export function buildBeastPairRanking(date) {
   while (!fits(r0.text) && k > 2) r0 = mk0(--k);
   const text = r0.text;
   // 返信1: 1〜3位（メダル＋一言）
-  const replyText = ['【相性ベスト3】', '', top.map((t, i) => rankBlock(t, i)).join('\n\n'), '', 'ぶつかりやすい守護獣は、さらにリプ欄に🌙', '-月-'].join('\n');
+  // 一言つきは先頭3件まで。同点で4件目以降になるぶんは、点数だけの1行（280字に収めるため）
+  const mkReply = (n) => ['【相性ベスト3】', '', top.slice(0, n).map((t, i) => (i < 3 ? rankBlock(t, i) : `${MEDAL[t.rank] || ''}${t.rank}位 ${t.name} ${t.score}点`)).join('\n\n'), '', 'ぶつかりやすい守護獣は、さらにリプ欄に🌙', '-月-'].join('\n');
+  let nTop = top.length;
+  while (!fits(mkReply(nTop)) && nTop > 3) nTop--;
+  const replyText = mkReply(nTop);
   // 返信2: ワースト（低い順）。280に収まる件数（最大5）。アプリの予告の行を、署名の直前に入れる
   const worstAll = withRanks([...desc].reverse());
   let w = 5;
