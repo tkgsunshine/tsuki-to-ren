@@ -67,16 +67,8 @@ export function beastList() {
     return { index: i, stem, branch, name: `${stem}${BRANCH_ANIMAL[branch]}`, full: `${stem}${BRANCH_ANIMAL[branch]}（${STEM_YOMI[stem]}・${ANIMAL_YOMI[BRANCH_ANIMAL[branch]]}）` };
   });
 }
-/** 順位つきの並び（同点は同順位）。list は、点数の降順 */
-const withRanks = (list) => {
-  let prev = null;
-  let rank = 0;
-  return list.map((x, i) => {
-    if (x.score !== prev) rank = i + 1;
-    prev = x.score;
-    return { ...x, rank };
-  });
-};
+/** 順位つきの並び。同点でも同順位にせず、並び順どおりに1位・2位…とつける（どちらを上にしてもよい）。list は、点数の降順 */
+const withRanks = (list) => list.map((x, i) => ({ ...x, rank: i + 1 }));
 /** 点数の帯ごとの一言（組み合わせごとの解説ではなく、点数の見方の目安。AIには書かせない）。同じ投稿で同じ文が続かないよう、帯ごとに数通りを順に使う */
 const PAIR_NOTES = [
   [80, ['気持ちが通じ合いやすい、特別な相性', '言葉にしなくても、伝わりやすい相性', '出会えたら、大切にしたい相性']],
