@@ -4555,5 +4555,43 @@
     "purpose": "buzz",
     "status": "scheduled",
     "createdAt": "2026-10-23T07:03:01.650Z"
+  },
+  {
+    "id": "2026-10-26-evening",
+    "date": "2026-10-26",
+    "slot": "evening",
+    "kind": "value",
+    "text": "❤️ 庚猿（かのえ・さる）の相性ランキング（100点満点）\n\n【4位〜11位】\n4位 乙鳥 81点\n5位 壬龍 80点\n6位 庚龍 79点\n7位 乙牛 77点\n7位 乙猪 77点\n7位 戊猿 77点\n10位 己蛇 74点\n11位 壬鼠 73点\n\nいちばん相性がいい1〜3位は、リプ欄に🌙\nあなたの守護獣は何位？\n-月-",
+    "format": "beast_pair_rank",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-23T07:04:04.016Z"
+  },
+  {
+    "id": "2026-10-26-evening-reply",
+    "date": "2026-10-26",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【相性ベスト3】\n\n🥇1位 乙蛇 91点\n気持ちが通じ合いやすい、特別な相性\n\n🥈2位 乙羊 85点\n言葉にしなくても、伝わりやすい相性\n\n🥈2位 壬猿 85点\n出会えたら、大切にしたい相性\n\nぶつかりやすい守護獣は、さらにリプ欄に🌙\n-月-",
+    "replyTo": "2026-10-26-evening",
+    "format": "beast_pair_rank_reply",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-23T07:04:04.016Z"
+  },
+  {
+    "id": "2026-10-26-evening-reply2",
+    "date": "2026-10-26",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【庚猿と、ぶつかりやすい守護獣 ワースト3】\n（点数が低い順）\n\n1位 丙虎 2点\n正反対だからこそ、歩み寄りが大切\n\n1位 甲虎 2点\n真逆の魅力に、惹かれ合うことも\n\n3位 甲馬 17点\n気持ちを確かめ合うことが大切\n\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-26-evening-reply",
+    "format": "beast_pair_rank_reply2",
+    "system": "pair",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-23T07:04:04.016Z"
   }
 ]
