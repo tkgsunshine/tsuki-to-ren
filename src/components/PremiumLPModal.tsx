@@ -449,7 +449,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   {isProcessing ? '登録処理中...' : (
                     <>
                       <Moon size={16} style={{ fill: 'currentColor' }} />
-                      このプランではじめる
+                      プレミアムをはじめる
                       <ArrowRight size={16} />
                     </>
                   )}
