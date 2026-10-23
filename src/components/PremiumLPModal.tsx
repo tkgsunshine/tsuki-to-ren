@@ -402,7 +402,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               type="button"
               disabled={isSubscribed || isProcessing}
               onClick={handleSubscribeAction}
-              aria-label="月額500円でプレミアムをはじめる"
+              aria-label="月額500円ですべての機能を解放する"
               style={{
                 display: 'block',
                 width: '100%',
@@ -449,7 +449,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   {isProcessing ? '登録処理中...' : (
                     <>
                       <Moon size={16} style={{ fill: 'currentColor' }} />
-                      プレミアムをはじめる
+                      すべての機能を解放する
                       <ArrowRight size={16} />
                     </>
                   )}
