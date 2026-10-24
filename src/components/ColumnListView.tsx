@@ -38,6 +38,10 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
   }).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE) || 1;
+  // ページ番号ボタンは最大10個。現在ページが中央付近に来るようにずらす
+  const MAX_PAGE_BUTTONS = 10;
+  const pageWindowStart = Math.max(1, Math.min(currentPage - Math.floor(MAX_PAGE_BUTTONS / 2) + 1, totalPages - MAX_PAGE_BUTTONS + 1));
+  const visiblePages = Array.from({ length: Math.min(MAX_PAGE_BUTTONS, totalPages) }, (_, i) => pageWindowStart + i);
 
   const paginatedArticles = filteredArticles.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -273,7 +277,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
             ＜ 前へ
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {visiblePages.map((page) => (
             <button
               key={page}
               type="button"
