@@ -454,6 +454,9 @@ const branchThemes: Record<string, { animal: string; element: string; personalit
 };
 
 // 占術・相性スコア判定ロジック
+// 16タイプが選ばれているか（未選択は 'UNKNOWN' や空文字）。未選択のときはタイプ名を文中に出さない
+const isMbtiType = (t?: string): t is string => !!t && /^[EI][NS][TF][JP]$/i.test(t);
+
 export interface DiagnosisInput {
   myName: string;
   myBirth: string;
@@ -1521,7 +1524,7 @@ export function getMbtiCognitiveDynamics(myMbti: string, oppMbti: string, myNick
 
 function generateTorisetsu(
   oppStem: string,
-  oppBranch: string,
+  _oppBranch: string,
   oppMbti: string,
   myStem: string,
   myMbti: string,
@@ -1591,7 +1594,7 @@ function generateTorisetsu(
     lineTemplateInvite: mTrait.lineInvite,
     lineTemplateTopic: mTrait.lineTopic,
     idealDateSpot: mTrait.dateSpot,
-    approachTip: `${oppStem}の気質（${oppBranch}）と${oppMbti}の心理機能を持つ${name}さんには、相手の境界線を尊重しつつ、${isKango ? '宿命の引力を信じて飾らない誠実さを見せること' : '共鳴するポイントをピンポイントで褒めること'}が成就への最短ルートです。`
+    approachTip: `${isMbtiType(oppMbti) ? `${normMbti}タイプの` : ''}${name}様には、相手の境界線を尊重しつつ、${isKango ? '宿命の引力を信じて飾らない誠実さを見せること' : '共鳴するポイントをピンポイントで褒めること'}が成就への最短ルートです。`
   };
 }
 const getAstrologyAvatar = (branch: string, gender: string): string => {
@@ -1857,7 +1860,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   const stemComp = oppPillarObj ? getStemCompatibility(myPillarObj.stem, oppPillarObj.stem, myNickname, oppNickname) : null;
   const branchComp = oppPillarObj ? getBranchCompatibility(myPillarObj.branch, oppPillarObj.branch) : null;
   const starComp = opponentStarObj ? getStarCompatibility(myStarObj.name, opponentStarObj.name) : null;
-  const mbtiDyn = (input.myMbti && input.opponentMbti) ? getMbtiCognitiveDynamics(input.myMbti, input.opponentMbti, myNickname, oppNickname) : null;
+  // 未選択（空文字）でも文が欠けないよう、'UNKNOWN' として扱う
+  const mbtiDyn = hasOpponent ? getMbtiCognitiveDynamics(input.myMbti || 'UNKNOWN', input.opponentMbti || 'UNKNOWN', myNickname, oppNickname) : null;
   const myStemTrait = getStemTraits(myPillarObj.stem, myNickname);
   const oppMbtiTrait = input.opponentMbti ? getMbtiTraits(input.opponentMbti, oppNickname) : null;
   const myMbtiTrait = getMbtiTraits(input.myMbti, myNickname);
@@ -1937,7 +1941,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         summary = `${myNickname}様の生まれ持った星は「${myElTrait}」を宿しており、本来周囲を温かく惹きつける強いオーラを持っています。九星気学の本命星（${myStarObj.name}）との相乗効果により、今日はあなた自身の自然体な笑顔が最高の開運アイテムとなります。他人への遠慮を手放し、自分が本当に心地よいと感じる選択を楽しんでください。`;
       } else if (baseScore >= 70) {
         oneLiner = `【${myPillarObj.stem}の循環】運気は順調な拡大傾向。心を満たす自己投資が良縁の土壌を整えます。`;
-        summary = `あなたの生まれ持った星のエネルギーが安定して巡っています。あなたの16タイプ性格（${input.myMbti}）が持つ長所を素直に表現できる環境に身を置くことで、波長の合う特別な存在との距離が自然と縮まります。小さなワクワクを大切にしてください。`;
+        summary = `あなたの生まれ持った星のエネルギーが安定して巡っています。${isMbtiType(input.myMbti) ? `あなたの16タイプ性格（${input.myMbti.toUpperCase()}）` : 'あなた'}が持つ長所を素直に表現できる環境に身を置くことで、波長の合う特別な存在との距離が自然と縮まります。小さなワクワクを大切にしてください。`;
       } else if (baseScore >= 55) {
         oneLiner = `【${myPillarObj.stem}の休息】心を静かに整える平穏期。焦らず自分のペースを大切に慈しみましょう。`;
         summary = `現在はエネルギーの充電と自己対話に適した平穏な時期です。無理に外向きのアクションを起こすよりも、お部屋を清めたり好きな香りに包まれるなど、五感を満たす癒しを取り入れることで魅力の土台が完成します。`;
@@ -1948,7 +1952,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     } else { // ren
       if (baseScore >= 85) {
         oneLiner = `【${myPillarObj.stem}の最高効率】知性と判断力が極限まで冴え渡る開運日。理想の設計図を実行に移すべきです。`;
-        summary = `生年月日と性格タイプを合わせて見ると、あなたの生まれ持った力が最高の状態で発揮されています。あなたの16タイプ（${input.myMbti}）の強みである分析力と実行力をフル活用し、今後のパートナーシップやキャリアの具体的な目標設定に着手してください。成果は極大化されます。`;
+        summary = `生年月日と性格タイプを合わせて見ると、あなたの生まれ持った力が最高の状態で発揮されています。${isMbtiType(input.myMbti) ? `あなたの16タイプ（${input.myMbti.toUpperCase()}）の強み` : 'あなたの強み'}である分析力と実行力をフル活用し、今後のパートナーシップやキャリアの具体的な目標設定に着手してください。成果は極大化されます。`;
       } else if (baseScore >= 70) {
         oneLiner = `【${myPillarObj.stem}の安定運用】理性的な選択が好循環を生む好調日。スマートな情報収集を進めてください。`;
         summary = `認知パフォーマンスは良好です。感情論を排し、共通の価値観や将来目標を持つ人々が集まる環境をリサーチ・選択することで、高次元のパートナーシップ候補との接点を論理的に創出できます。`;
@@ -2010,7 +2014,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     if (adviceCategory === '比劫') {
       firstCardText = `${meta}本日は自分自身の境界線を守り、依存でも過保護でもない「対等な対話」を意識すべき日です。相手の顔色をうかがうアプローチは合理的ではありません。等身大の客観的事実を提示することが信頼度を高めます。`;
       secondCardText = hasOpponent && oppMbtiTrait
-        ? `最終結論：相手の認知パターン（${input.opponentMbti}）を考慮し、白黒をつける対話へ進む好機です。${oppMbtiTrait.lineInvite}と具体的な日程・場所を明記して論理的に提案してください。`
+        ? `最終結論：${isMbtiType(input.opponentMbti) ? `相手の認知パターン（${input.opponentMbti.toUpperCase()}）` : '相手の考え方のくせ'}を考慮し、白黒をつける対話へ進む好機です。${oppMbtiTrait.lineInvite}と具体的な日程・場所を明記して論理的に提案してください。`
         : `自己のスキルセットや長期ロードマップの棚卸しを行ってください。自立した大人の魅力こそが、質の高いパートナーを引き寄せる最大のレバレッジです。`;
     } else if (adviceCategory === '食傷') {
       firstCardText = `${meta}本日の行動戦略として「ポジティブな共通体験の提供」を最優先にしたアプローチを推奨します。感情のままに話すのではなく、相手の関心が高いテーマをスマートに提示してください。`;
@@ -2357,8 +2361,10 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   let lineTips: FortuneResult['lineTips'];
   const generateDetailedTopics = (score: number) => {
     const oppNick = oppNickname;
-    const mbtiLabel = input.opponentMbti && input.opponentMbti !== 'UNKNOWN' ? input.opponentMbti : '未選択';
-    const myMbtiLabel = input.myMbti && input.myMbti !== 'UNKNOWN' ? input.myMbti : '未選択';
+    const mbtiLabel = isMbtiType(input.opponentMbti) ? input.opponentMbti.toUpperCase() : '';
+    const myMbtiLabel = isMbtiType(input.myMbti) ? input.myMbti.toUpperCase() : '';
+    // 「お相手（INFP）」のように添える。未選択なら何も添えない
+    const oppTypeParen = mbtiLabel ? `（${mbtiLabel}）` : '';
 
     if (hasOpponent) {
       const sTitle = stemComp?.title || '【宿命の調和】';
@@ -2395,7 +2401,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：今のお相手は、心の余裕が少し落ちている時期です。返信催促などの過剰アプローチは厳禁とし、3〜5日スパンの事実ベースの定期連絡に留めるのが最適解です。`;
         } else {
           topic1Intro = `今の二人の命式には、一時的にすれ違いやすい巡りが表れています。相手のパーソナルゾーンに対する不用意な侵入は厳禁です。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：お相手（${mbtiLabel}）は現在防衛フェーズにあり、感情的な長文メッセージは強い反発を招きます。接触頻度を通常の30%以下に抑制し、静観戦略を取ることが最善のリスクヘッジです。`;
+          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の戦略分析：お相手${oppTypeParen}は現在防衛フェーズにあり、感情的な長文メッセージは強い反発を招きます。接触頻度を通常の30%以下に抑制し、静観戦略を取ることが最善のリスクヘッジです。`;
         }
       }
 
@@ -2474,7 +2480,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       } else { // ren
         if (score >= 85) {
           topic3Intro = `双方の弱点を補い合うとても良い組み合わせが、星の配置に表れています。`;
-          topic3Detail = `💘 お相手（${mbtiLabel}）の意思決定トリガー：\n${oppFallInLove}\n\n✨ 効果的な評価フィードバック：\n${oppKilling}\n\n⚠️ 【リスク管理：厳禁の地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：対等な個としてのリスペクトを維持し、上記地雷を100%回避することが、関係性の破綻リスクをゼロに抑える絶対条件です。`;
+          topic3Detail = `💘 お相手${oppTypeParen}の意思決定トリガー：\n${oppFallInLove}\n\n✨ 効果的な評価フィードバック：\n${oppKilling}\n\n⚠️ 【リスク管理：厳禁の地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：対等な個としてのリスペクトを維持し、上記地雷を100%回避することが、関係性の破綻リスクをゼロに抑える絶対条件です。`;
         } else if (score >= 70) {
           topic3Intro = `互いの長所が引き出される良好なアライアンス関係が構築されています。`;
           topic3Detail = `💘 お相手が惹かれるポイント：\n${oppFallInLove}\n\n✨ 推奨する褒め言葉：\n${oppKilling}\n\n⚠️ 【警戒すべきNG行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：感情的な依存を避け、目標に向かって高め合える「良きパートナー」としてのスタンスを提示することがアプローチ成功の秘訣です。`;
@@ -2530,7 +2536,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       if (character === 'tsuki') {
         if (score >= 85) {
           topic5Intro = `月と蓮の鑑定が示す最終結論。お二人の絆はどんな試練も乗り越えられる本物の愛へと結びついています。`;
-          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}。\n\n四柱推命・九星気学・16タイプのすべてが、${myNickname}様と${oppNick}様が将来にわたって深く愛し合い、互いを支え合う最高の相性であることを証明しています。自分を信じ、相手を愛するその温かな心を持ち続ければ、理想の未来は確実にあなたの手の中にあります。`;
+          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}${myMbtiLabel && mbtiLabel ? `、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}` : ''}。\n\n四柱推命・九星気学${myMbtiLabel && mbtiLabel ? '・16タイプ' : ''}のすべてが、${myNickname}様と${oppNick}様が将来にわたって深く愛し合い、互いを支え合う最高の相性であることを証明しています。自分を信じ、相手を愛するその温かな心を持ち続ければ、理想の未来は確実にあなたの手の中にあります。`;
         } else if (score >= 70) {
           topic5Intro = `時間を重ねるほどに味わいと信頼が増していく、素晴らしい未来が約束されています。`;
           topic5Detail = `命式と性格タイプの相互作用は、安定した絆の形成を示しています。焦らず二人のペースを慈しんで進んでください。お互いへの感謝と気遣いを忘れないことで、二人の関係は永久に輝き続ける温かな愛の居場所となります。`;
@@ -2544,7 +2550,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       } else { // ren
         if (score >= 85) {
           topic5Intro = `四柱推命・九星気学・16タイプのすべてを重ね合わせた、最後のメッセージをお伝えします。`;
-          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}。\n\nどの占術から見ても、二人の未来には力強い追い風が吹いています。ここでお伝えした行動を一つずつ実行していけば、望む関係（想いの成就・将来の約束）にきっと手が届きます。`;
+          topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}${myMbtiLabel && mbtiLabel ? `、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}` : ''}。\n\nどの占術から見ても、二人の未来には力強い追い風が吹いています。ここでお伝えした行動を一つずつ実行していけば、望む関係（想いの成就・将来の約束）にきっと手が届きます。`;
         } else if (score >= 70) {
           topic5Intro = `計画的かつ継続的なアプローチにより、安定した成就への到達が期待されます。`;
           topic5Detail = `感情の揺れを抑え、客観的な戦略に基づいてコミュニケーションを継続してください。確かな信頼の積み重ねが、最終的な勝利（永続的パートナーシップ）を担保します。`;
@@ -2582,7 +2588,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '2. 自己表現と周囲への伝わり方',
               intro: `素直な感情表現と温かな言葉遣いが、素敵な縁を手繰り寄せる秘訣です。`,
-              detail: `あなたの16タイプ（${myMbtiLabel}）の特性（${myMbtiHabit}）が、周囲に大きな安心感を与えています。感謝の言葉や笑顔を積極的に届けることで、思わぬ良縁のきっかけが生まれます。`
+              detail: `${myMbtiLabel ? `あなたの16タイプ（${myMbtiLabel}）の特性` : 'あなたの特性'}（${myMbtiHabit}）が、周囲に大きな安心感を与えています。感謝の言葉や笑顔を積極的に届けることで、思わぬ良縁のきっかけが生まれます。`
             },
             {
               title: '3. あなたの内に秘められた魅力＆落とし穴',
@@ -2696,7 +2702,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '2. 自己表現と周囲への伝わり方',
               intro: `知的で洗練されたプレゼンテーションが周囲を魅了します。`,
-              detail: `16タイプ（${myMbtiLabel}）の知性を活かし、論理的かつ端的にビジョンを提示することで、質の高いパートナーシップの芽が育ちます。`
+              detail: `${myMbtiLabel ? `16タイプ（${myMbtiLabel}）の知性` : 'あなたの知性'}を活かし、論理的かつ端的にビジョンを提示することで、質の高いパートナーシップの芽が育ちます。`
             },
             {
               title: '3. あなたの内に秘められた魅力＆落とし穴',
