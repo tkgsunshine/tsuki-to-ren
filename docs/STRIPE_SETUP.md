@@ -33,6 +33,8 @@
 ## 3. 動作確認（テストモード）
 1. テストモードの3つを Preview 環境に入れ、プレビューURLで確認する（Webhook もプレビューURL宛てに別途作る）。会員状態の保存に Firebase を使うので、`FIREBASE_SERVICE_ACCOUNT` も Preview に入れる（今は Production のみ）。
    - テストの記録は本番と同じ Firestore に入るが、テストか本番かを記録しており、本番の鍵のときはテストの会員を有料扱いしない。
+   - プレビューには Vercel のログイン保護（Vercel Authentication）がかかっているので、Stripe の Webhook は届かない。Vercel → Settings → Deployment Protection →「Protection Bypass for Automation」で文字列を作り、Webhook の URL の末尾に `?x-vercel-protection-bypass=<その文字列>` を付ける。
+   - プレビューでログインするには、Firebase → Authentication → 設定 →「承認済みドメイン」にプレビューのドメインを追加する。
 2. ログイン → プレミアム → 「月額980円ではじめる」→ カード `4242 4242 4242 4242`（期限は未来、CVCは任意）。
 3. 戻ってきて「プレミアムへようこそ」が出て、マイページが「購読中」になる。
 4. プレミアム画面の「解約手続き」→ Stripe の画面で解約 → 更新日まではプレミアムのまま。Stripe でサブスクを即時キャンセルすると「未登録」に戻る。
