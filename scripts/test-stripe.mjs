@@ -71,6 +71,18 @@ test('checkout creates a subscription session tied to the account', async () => 
   assert.equal(params.success_url, 'https://www.tsuki-to-ren.com/result?mn=a&premium=success');
 });
 
+test('a preview build sends the member back to the preview', async () => {
+  let params;
+  const stripe = { checkout: { sessions: { create: async (p) => { params = p; return { url: 'https://checkout.stripe.com/x' }; } } } };
+  Object.assign(process.env, { VERCEL_ENV: 'preview', VERCEL_BRANCH_URL: 'app-git-x.vercel.app' });
+  try {
+    await checkout(signedIn({ body: { returnPath: '/' } }), mockRes(), { auth, db: mockDb(), stripe, priceId: 'price_1' });
+  } finally {
+    delete process.env.VERCEL_ENV; delete process.env.VERCEL_BRANCH_URL;
+  }
+  assert.equal(params.success_url, 'https://app-git-x.vercel.app/?premium=success');
+});
+
 test('checkout refuses an account that is already Premium', async () => {
   const res = mockRes();
   await checkout(signedIn(), res, { auth, db: mockDb({ 'premium/u1': { active: true, livemode: false } }), stripe: {}, priceId: 'price_1', live: false });

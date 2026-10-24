@@ -40,8 +40,14 @@ export function safeReturnPath(raw) {
   return path;
 }
 
+// Previews come back to their own branch URL (VERCEL_BRANCH_URL, listed in Firebase's authorized domains), production to SITE
+const returnOrigin = () => {
+  const branch = process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_BRANCH_URL;
+  return branch ? `https://${branch}` : SITE;
+};
+
 export function withParam(path, key, value) {
-  const url = new URL(path, SITE);
+  const url = new URL(path, returnOrigin());
   url.searchParams.set(key, value);
   return url.toString();
 }
