@@ -489,27 +489,6 @@ const homeSemanticHtml = `
       </ul>
     </section>
 
-    <!-- Popular Combinations & Quick Links -->
-    <section style="margin-bottom: 2rem;">
-      <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.75rem; text-align: center;">人気の16タイプ（MBTI）恋愛相性診断</h2>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
-        <a href="/compatibility/infp-enfj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">INFP × ENFJ</a>
-        <a href="/compatibility/enfp-intj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ENFP × INTJ</a>
-        <a href="/compatibility/infj-entp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">INFJ × ENTP</a>
-        <a href="/compatibility/intp-entj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">INTP × ENTJ</a>
-        <a href="/compatibility/isfj-esfp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ISFJ × ESFP</a>
-        <a href="/compatibility/isfp-esfj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ISFP × ESFJ</a>
-        <a href="/compatibility/istj-estp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ISTJ × ESTP</a>
-        <a href="/compatibility/istp-estj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ISTP × ESTJ</a>
-        <a href="/compatibility/enfp-infj" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ENFP × INFJ</a>
-        <a href="/compatibility/intj-infp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">INTJ × INFP</a>
-        <a href="/compatibility/enfj-istp" style="font-size: 0.75rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 6px; text-decoration: none;">ENFJ × ISTP</a>
-      </div>
-      <p style="text-align: center; margin-top: 0.75rem;">
-        <a href="/compatibility" style="font-size: 0.8rem; color: #e2c074; font-weight: bold; text-decoration: underline;">全256通りの16タイプ相性一覧を見る →</a>
-      </p>
-    </section>
-
     <!-- Column Quick Links -->
     <section style="margin-bottom: 2rem;">
       <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.75rem; text-align: center;">恋愛開運・相性コラム</h2>
@@ -524,7 +503,6 @@ const homeSemanticHtml = `
       <nav style="display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; justify-content: center; margin-bottom: 1rem;">
         <a href="/" style="color: #cbd5e1; text-decoration: none;">恋愛診断ホーム</a>
         <a href="/column" style="color: #cbd5e1; text-decoration: none;">開運コラム</a>
-        <a href="/compatibility" style="color: #cbd5e1; text-decoration: none;">16タイプ相性一覧</a>
         <a href="/about" style="color: #cbd5e1; text-decoration: none;">占い解説</a>
         <a href="/terms" style="color: #9ca3af; text-decoration: none;">利用規約</a>
         <a href="/privacy" style="color: #9ca3af; text-decoration: none;">プライバシーポリシー</a>
