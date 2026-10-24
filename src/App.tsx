@@ -757,7 +757,7 @@ function App() {
           setSettingsSubView('profile');
         });
       } else if (!isSubscribed) {
-        showConfirm(`無料会員の保存上限（2人）に達しています。\n月額500円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+        showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
           setActiveTab('profile');
           setSettingsSubView('main');
@@ -2388,7 +2388,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>販売価格</span>
-                  <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額500円 (税込)</span>
+                  <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額980円 (税込)</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>契約期間・自動更新</span>

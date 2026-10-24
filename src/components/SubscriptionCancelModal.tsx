@@ -23,7 +23,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
   const cancelReasonOptions = [
     { id: 'satisfied', label: '占い結果・鑑定内容に十分満足したため' },
     { id: 'less_frequent', label: '利用する機会が減った・一時的に休止したいため' },
-    { id: 'price', label: '月額料金（500円）が高く感じたため' },
+    { id: 'price', label: '月額料金（980円）が高く感じたため' },
     { id: 'missing_features', label: '期待していた機能がなかったため' },
     { id: 'hard_to_use', label: '使い方がよく分からなかったため' },
     { id: 'other', label: 'その他（下記に詳細をご記入ください）' }

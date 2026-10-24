@@ -411,7 +411,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                 lineHeight: '1.4',
                 marginBottom: '1rem'
               }}>
-                月額500円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
+                月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
               </p>
 
               {/* Feature Checklist Box */}
@@ -468,7 +468,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                   gap: '0.35rem'
                 }}
               >
-                <span>🔒</span> プレミアム登録して全解禁 (月額500円)
+                <span>🔒</span> プレミアム登録して全解禁 (月額980円)
               </button>
 
               {/* Close Link */}

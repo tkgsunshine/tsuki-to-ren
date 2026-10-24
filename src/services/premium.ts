@@ -1,6 +1,6 @@
 import { getFirebaseAuth } from './firebase';
 
-// Premium (月額500円) through Stripe: the app sends the member to Stripe's pages for paying and cancelling,
+// Premium (月額980円) through Stripe: the app sends the member to Stripe's pages for paying and cancelling,
 // and reads the membership the webhook recorded (api/stripe/*).
 
 export interface PremiumStatus {

@@ -401,12 +401,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.25rem' }}>
                 <span className="font-serif gold-text" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>
-                  ¥500
+                  ¥980
                 </span>
                 <span style={{ fontSize: '0.82rem', color: '#d8d2c6' }}>/ 月（税込）</span>
               </div>
               <div style={{ fontSize: '0.72rem', color: '#d8d2c6', marginTop: '0.25rem' }}>
-                1日あたり約16円
+                1日あたり約33円
               </div>
             </div>
             <div style={{ marginTop: '0.8rem' }}>
@@ -582,7 +582,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               ) : (
                 <>
                   <Moon size={18} style={{ fill: 'currentColor' }} />
-                  <span>月額500円ではじめる</span>
+                  <span>月額980円ではじめる</span>
                   <ArrowRight size={18} />
                 </>
               )}

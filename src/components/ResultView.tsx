@@ -1731,7 +1731,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   if (ok) handleScrollToRegister();
                 });
               } else if (!isSubscribed) {
-                showConfirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+                showConfirm('毎朝8時の運勢通知機能は、月額980円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
                   if (ok) handleScrollToSub();
                 });
               } else {
@@ -2375,7 +2375,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
                     <p style={{ fontSize: '0.72rem', color: '#e2d9ee', lineHeight: '1.6', margin: 0 }}>
-                      月額500円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
+                      月額980円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
                     </p>
                   </div>
                 </div>
@@ -2432,7 +2432,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       letterSpacing: '0.02em'
                     }}
                   >
-                    🔒 プレミアム登録して全解禁 (月額500円)
+                    🔒 プレミアム登録して全解禁 (月額980円)
                   </button>
                 </div>
               </div>
@@ -2704,7 +2704,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {hasOpponent ? '二人の未来予測スケジュールをすべて解禁' : 'あなたの未来予測スケジュールをすべて解禁'}
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.4', margin: 0 }}>
-                  月額500円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
+                  月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
                 </p>
               </div>
 
@@ -2761,7 +2761,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       letterSpacing: '0.02em'
                     }}
                   >
-                    🔒 プレミアム登録して全解禁 (月額500円)
+                    🔒 プレミアム登録して全解禁 (月額980円)
                   </button>
                 </div>
               )}

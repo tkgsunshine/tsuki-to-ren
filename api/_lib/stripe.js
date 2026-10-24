@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 
-// Premium (月額500円) billing through Stripe. Server-side only.
+// Premium (月額980円) billing through Stripe. Server-side only.
 // Vercel env: STRIPE_SECRET_KEY (sk_live_… / sk_test_…), STRIPE_PRICE_ID (price_…), STRIPE_WEBHOOK_SECRET (whsec_…).
 // Membership lives in Firestore premium/{uid}; only the webhook writes it, and the signed-in owner may read it.
 export const PREMIUM = 'premium';
