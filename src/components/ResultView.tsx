@@ -875,41 +875,101 @@ export const ResultView: React.FC<ResultViewProps> = ({
           約7,465万通りの組み合わせから読み解く鑑定
         </div>
         
-        {/* Luxury Score Pods Side-by-Side */}
-        <div style={{ display: 'grid', gridTemplateColumns: hasOpponent ? '1fr 1fr' : '1fr', gap: '0.75rem', margin: '0.2rem 0' }}>
-          {hasOpponent && (
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(226,192,116,0.12) 0%, rgba(176, 125, 43,0.04) 100%)',
-              border: '1px solid rgba(226,192,116,0.35)',
-              borderRadius: '16px',
-              padding: '0.85rem 0.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'inset 0 0 15px rgba(226,192,116,0.08)'
-            }}>
-              <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>基本相性</span>
-              <div className="font-serif" style={{
-                fontSize: '2.5rem',
-                fontWeight: '800',
-                color: '#f2e2b3',
-                lineHeight: 1,
-                textShadow: '0 0 15px rgba(242, 226, 179, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '2px'
-              }}>
-                {activeResult.baseScore}<span style={{ fontSize: '1rem', fontWeight: 'bold' }}>点</span>
+        {/* Score Pods: 基本相性と今日の相性を1本のものさしで比べる */}
+        {hasOpponent ? (() => {
+          const base = activeResult.baseScore;
+          const daily = activeResult.dailyScore;
+          const diff = daily - base;
+          const todayColor = selectedChar === 'ren' ? '#9cc6d8' : '#e2d9ee';
+          const todayGlow = selectedChar === 'ren' ? 'rgba(156, 198, 216, 0.6)' : 'rgba(226, 217, 238, 0.6)';
+          const now = new Date();
+          const todayLabel = `${now.getMonth() + 1}/${now.getDate()} 今日`;
+          const diffColor = diff > 0 ? '#8fd3ae' : diff < 0 ? '#e0a9a0' : '#d8cfb8';
+          const diffText = diff > 0
+            ? `今日はいつもより +${diff}点 好調`
+            : diff < 0
+              ? `今日はいつもより ${diff}点 控えめ`
+              : '今日はいつも通りの相性';
+          const clamp = (v: number) => Math.max(0, Math.min(100, v));
+          const lo = clamp(Math.min(base, daily));
+          const hi = clamp(Math.max(base, daily));
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', margin: '0.2rem 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>基本相性</div>
+                  <div className="font-serif" style={{
+                    fontSize: '2.2rem',
+                    fontWeight: '800',
+                    color: '#f2e2b3',
+                    lineHeight: 1,
+                    textShadow: '0 0 15px rgba(242, 226, 179, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    justifyContent: 'center',
+                    gap: '2px'
+                  }}>
+                    {base}<span style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>点</span>
+                  </div>
+                  <div style={{ fontSize: '0.62rem', color: '#a9a293', marginTop: '0.25rem' }}>ずっと変わらない</div>
+                </div>
+                <div aria-hidden="true" style={{ fontSize: '1.3rem', color: diffColor, paddingBottom: '1.1rem' }}>→</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>{todayLabel}</div>
+                  <div className="font-serif" style={{
+                    fontSize: '2.75rem',
+                    fontWeight: '800',
+                    color: todayColor,
+                    lineHeight: 1,
+                    textShadow: `0 0 15px ${todayGlow}, 0 2px 4px rgba(0,0,0,0.5)`,
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    justifyContent: 'center',
+                    gap: '2px'
+                  }}>
+                    {daily}<span style={{ fontSize: '1rem', fontWeight: 'bold' }}>点</span>
+                  </div>
+                  <div style={{ fontSize: '0.62rem', color: '#a9a293', marginTop: '0.25rem' }}>毎日変わる</div>
+                </div>
+              </div>
+
+              {/* ものさし（0〜100点）: 基本の印は線の下、今日の印は線の上にラベルを出して重なりを避ける */}
+              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: '1.5rem 0.5rem 1.6rem' }}>
+                <div style={{ position: 'relative', height: '10px', borderRadius: '5px', background: 'rgba(255,255,255,0.09)' }}>
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${clamp(base)}%`, borderRadius: '5px', background: 'linear-gradient(90deg, rgba(226,192,116,0.3) 0%, #e2c074 100%)' }} />
+                  {diff !== 0 && (
+                    <div style={{ position: 'absolute', top: '50%', left: `${lo}%`, width: `${hi - lo}%`, height: '4px', transform: 'translateY(-50%)', background: `repeating-linear-gradient(90deg, ${diffColor} 0 5px, transparent 5px 9px)` }} />
+                  )}
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#e2c074', border: '3px solid #151827' }} />
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: todayColor, border: '3px solid #151827', boxShadow: `0 0 10px ${todayGlow}` }} />
+                </div>
+                <div style={{ position: 'absolute', bottom: '16px', left: `${clamp(daily)}%`, transform: 'translateX(-50%)', fontSize: '0.62rem', color: todayColor, whiteSpace: 'nowrap', fontWeight: 600 }}>今日</div>
+                <div style={{ position: 'absolute', top: '16px', left: `${clamp(base)}%`, transform: 'translateX(-50%)', fontSize: '0.62rem', color: '#f2e2b3', whiteSpace: 'nowrap', fontWeight: 600 }}>基本</div>
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                <span style={{
+                  display: 'inline-block',
+                  fontSize: '0.72rem',
+                  fontWeight: 'bold',
+                  padding: '0.15rem 0.7rem',
+                  borderRadius: '10px',
+                  color: diffColor,
+                  background: diff > 0 ? 'rgba(111, 176, 143, 0.16)' : diff < 0 ? 'rgba(224, 169, 160, 0.14)' : 'rgba(255,255,255,0.06)',
+                  border: `1px solid ${diff > 0 ? 'rgba(111, 176, 143, 0.45)' : diff < 0 ? 'rgba(224, 169, 160, 0.4)' : 'rgba(255,255,255,0.15)'}`
+                }}>
+                  {diffText}
+                </span>
               </div>
             </div>
-          )}
-
+          );
+        })() : (
           <div style={{
             background: 'linear-gradient(135deg, rgba(159, 134, 192,0.14) 0%, rgba(58, 134, 171,0.05) 100%)',
             border: '1px solid rgba(159, 134, 192,0.4)',
             borderRadius: '16px',
             padding: '0.85rem 0.5rem',
+            margin: '0.2rem 0',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -917,7 +977,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             boxShadow: 'inset 0 0 15px rgba(159, 134, 192,0.08)'
           }}>
             <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>
-              {hasOpponent ? '今日の日次相性' : '今日の総合運気'}
+              今日の総合運気
             </span>
             <div className="font-serif" style={{
               fontSize: '2.5rem',
@@ -934,7 +994,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {activeResult.dailyScore}<span style={{ fontSize: '1rem', fontWeight: 'bold' }}>点</span>
             </div>
           </div>
-        </div>
+        )}
 
         {/* One Liner Message Ribbon */}
         {activeResult.oneLiner && activeResult.oneLiner.trim() !== '' && (
@@ -949,6 +1009,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
             border: '1px solid rgba(226,192,116,0.25)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
           }}>
+            {hasOpponent && (
+              <span style={{ display: 'block', fontSize: '0.66rem', color: '#c9b98e', marginBottom: '0.25rem', letterSpacing: '0.05em' }}>
+                二人の相性ひとこと
+              </span>
+            )}
             “{activeResult.oneLiner}”
           </div>
         )}
