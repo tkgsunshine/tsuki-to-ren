@@ -296,7 +296,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               }}
             >
               <span style={{ fontSize: '1rem' }}>🔓</span>
-              <span>プレミアム登録して全解禁（月額500円）</span>
+              <span>プレミアム登録して全解禁（月額980円）</span>
             </button>
 
             <button
