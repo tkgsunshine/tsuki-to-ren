@@ -1491,6 +1491,19 @@ function getTenGodsCategory(myStem, todayStem) {
     };
     return categories[diff] || '比劫';
 }
+export function getScoreMood(baseScore, dailyScore) {
+    const diff = dailyScore - baseScore;
+    const sign = diff > 0 ? `+${diff}点` : diff < 0 ? `−${-diff}点` : '±0点';
+    if (diff >= 20)
+        return { phase: 'full', title: '今日は絶好調', diff, sign, trend: 'up' };
+    if (diff >= 5)
+        return { phase: 'gibbous', title: '今日は追い風', diff, sign, trend: 'up' };
+    if (diff > -5)
+        return { phase: 'half', title: '今日はいつも通り', diff, sign, trend: 'flat' };
+    if (diff > -20)
+        return { phase: 'crescent', title: '今日はひと休み', diff, sign, trend: 'down' };
+    return { phase: 'thin', title: '今日は充電の日', diff, sign, trend: 'down' };
+}
 export function generateFortuneResult(input, character) {
     const myNickname = input.myName || 'あなた';
     const oppNickname = input.opponentName || 'お相手';

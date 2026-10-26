@@ -1668,6 +1668,28 @@ function getTenGodsCategory(myStem: string, todayStem: string): '比劫' | '食�
   return categories[diff] || '比劫';
 }
 
+// 今日の相性が基本相性からどれだけ動いたかを、5段階の「今日の流れ」に言い換える（表示用。点数の計算には使わない）。
+// 鑑定結果画面と毎朝のメールで同じ区切りを使うため、エンジンと一緒に api/_lib へ書き出される場所に置く。
+// 区切りは 2026-10 時点の点差の分布（今日−基本: 中央値 +11、±4 以内が約15%、+20 以上が約31%、−20 以下が約5%）を見て決めた。
+export type ScoreMoodPhase = 'full' | 'gibbous' | 'half' | 'crescent' | 'thin';
+export interface ScoreMood {
+  phase: ScoreMoodPhase;
+  title: string;
+  diff: number;
+  sign: string;
+  trend: 'up' | 'flat' | 'down';
+}
+
+export function getScoreMood(baseScore: number, dailyScore: number): ScoreMood {
+  const diff = dailyScore - baseScore;
+  const sign = diff > 0 ? `+${diff}点` : diff < 0 ? `−${-diff}点` : '±0点';
+  if (diff >= 20) return { phase: 'full', title: '今日は絶好調', diff, sign, trend: 'up' };
+  if (diff >= 5) return { phase: 'gibbous', title: '今日は追い風', diff, sign, trend: 'up' };
+  if (diff > -5) return { phase: 'half', title: '今日はいつも通り', diff, sign, trend: 'flat' };
+  if (diff > -20) return { phase: 'crescent', title: '今日はひと休み', diff, sign, trend: 'down' };
+  return { phase: 'thin', title: '今日は充電の日', diff, sign, trend: 'down' };
+}
+
 export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 'tsuki'): FortuneResult {
   const myNickname = input.myName || 'あなた';
   const oppNickname = input.opponentName || 'お相手';

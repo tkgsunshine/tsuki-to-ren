@@ -51,10 +51,10 @@ export const PillarsMark: React.FC<BrandIconProps> = ({ size = 24, strokeWidth =
 );
 
 // 光る月（満ち欠けつき）。鑑定結果の「今日の相性」と、基本との差の表示に使う。
-// phase: full = 満月（上向きの日）/ half = 半月（いつも通り）/ crescent = 三日月（ひと休みの日）
+// phase: full = 満月 / gibbous = 十三夜 / half = 半月 / crescent = 三日月 / thin = 細い月（上がった日ほど満ちる）
 interface MoonPhaseMarkProps {
   size?: number;
-  phase?: 'full' | 'half' | 'crescent';
+  phase?: 'full' | 'gibbous' | 'half' | 'crescent' | 'thin';
   tint?: 'gold' | 'blue';
   style?: React.CSSProperties;
 }
@@ -75,6 +75,8 @@ export const MoonPhaseMark: React.FC<MoonPhaseMarkProps> = ({ size = 28, phase =
           <circle cx="16" cy="16" r="11" fill="#fff" />
           {phase === 'crescent' && <circle cx="11" cy="13" r="10" fill="#000" />}
           {phase === 'half' && <rect x="0" y="0" width="16" height="32" fill="#000" />}
+          {phase === 'gibbous' && <circle cx="1" cy="16" r="10" fill="#000" />}
+          {phase === 'thin' && <circle cx="13" cy="14.5" r="10.5" fill="#000" />}
         </mask>
       </defs>
       {/* 欠けた部分（影）はうっすら見せる */}
