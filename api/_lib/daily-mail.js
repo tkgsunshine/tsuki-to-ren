@@ -84,15 +84,19 @@ export function resultUrlFor(sub, hasOpponent) {
   return `${SITE}/?${params.toString()}`; // "/" like the share links: the loading screen, then the result
 }
 
-// 二人の相性の点数ブロック: 鑑定結果画面と同じ「基本相性（小）と今日の相性（大）の丸いメーター」と「今日の流れ」。
+// 点数ブロック: 鑑定結果画面と同じ「基本（小）と今日（大）の丸いメーター」と「今日の流れ」。
+// 二人の相性は「基本相性／今日の相性」、一人で占う人は「基本運勢／今日の運勢」（画像の種類 -solo）。
 // メールでは SVG もアニメーションも使えないため、点数ごとの画像（scripts/build-mail-score-images.mjs で作成）を並べる。
 const clampScore = (v) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
 const MOOD_COLORS = { up: '#8fd3ae', flat: '#d8cfb8', down: '#e0a9a0' };
 
-export function renderMatchScore(baseScore, dailyScore) {
+export function renderScoreRings(baseScore, dailyScore, hasOpponent) {
   const base = clampScore(baseScore);
   const daily = clampScore(dailyScore);
   const mood = getScoreMood(base, daily);
+  const suffix = hasOpponent ? '' : '-solo';
+  const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+  const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
   const img = (file, w, alt) => `<img src="${SITE}/assets/mail/score/${file}" width="${w}" height="${w}" alt="${alt}" style="display: block; width: ${w}px; height: ${w}px; border: 0; color: #f6e6c2; font-size: 14px;">`;
   return `<tr>
             <td style="padding: 10px 25px 12px;">
@@ -101,8 +105,8 @@ export function renderMatchScore(baseScore, dailyScore) {
                   <td align="center" style="padding: 14px 8px 18px; text-align: center;">
                     <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto;">
                       <tr>
-                        <td valign="middle" style="padding: 0 2px;">${img(`base-${base}.png`, 116, `基本相性 ${base}点`)}</td>
-                        <td valign="middle" style="padding: 0 2px;">${img(`today-${daily}.png`, 156, `今日の相性 ${daily}点`)}</td>
+                        <td valign="middle" style="padding: 0 2px;">${img(`base${suffix}-${base}.png`, 116, `${baseLabel} ${base}点`)}</td>
+                        <td valign="middle" style="padding: 0 2px;">${img(`today${suffix}-${daily}.png`, 156, `${todayLabel} ${daily}点`)}</td>
                       </tr>
                     </table>
                     <div style="line-height: 0; font-size: 0; margin-top: 6px;">
@@ -110,7 +114,7 @@ export function renderMatchScore(baseScore, dailyScore) {
                     </div>
                     <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(mood.title)}</div>
                     <div style="font-size: 12px; color: #a9a293; letter-spacing: 0.05em; margin-top: 4px;">
-                      基本相性より <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
+                      ${baseLabel}より <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
                     </div>
                   </td>
                 </tr>
@@ -206,7 +210,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           </tr>
 
           <!-- Score -->
-          ${content.hasOpponent && Number.isFinite(Number(baseScore)) ? renderMatchScore(Number(baseScore), Number(score)) : `<tr>
+          ${Number.isFinite(Number(baseScore)) ? renderScoreRings(Number(baseScore), Number(score), content.hasOpponent) : `<tr>
             <td style="padding: 14px 25px 12px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
                 <tr>
