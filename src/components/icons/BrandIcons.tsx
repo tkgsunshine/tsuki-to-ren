@@ -61,8 +61,8 @@ interface MoonPhaseMarkProps {
 
 export const MoonPhaseMark: React.FC<MoonPhaseMarkProps> = ({ size = 28, phase = 'full', tint = 'gold', style }) => {
   const uid = React.useId().replace(/:/g, '');
-  const light = tint === 'blue' ? ['#f2fbff', '#b9e2ff', '#6fb6f5'] : ['#fffaf0', '#f8e1ad', '#e2a85f'];
-  const glow = tint === 'blue' ? 'rgba(130, 200, 255, 0.75)' : 'rgba(255, 214, 140, 0.75)';
+  const light = tint === 'blue' ? ['#f2f8fb', '#bcdbe8', '#5f9fbf'] : ['#fffaf0', '#f8e1ad', '#e2a85f'];
+  const glow = tint === 'blue' ? 'rgba(156, 198, 216, 0.75)' : 'rgba(255, 214, 140, 0.75)';
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" style={{ overflow: 'visible', filter: `drop-shadow(0 0 ${size * 0.18}px ${glow})`, ...style }} aria-hidden="true">
       <defs>

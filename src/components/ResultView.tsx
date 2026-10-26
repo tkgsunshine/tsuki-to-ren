@@ -948,43 +948,42 @@ export const ResultView: React.FC<ResultViewProps> = ({
           };
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', margin: '0.2rem 0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.15rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
                 {renderRing({
                   size: 116,
                   score: base,
                   gradId: 'ringBaseGrad',
-                  from: '#e98bb8',
-                  to: '#f2c98a',
-                  glow: 'rgba(242, 201, 138, 0.45)',
-                  icon: <Heart size={13} style={{ fill: '#f0a9c4', color: '#f0a9c4' }} />,
+                  from: '#9f86c0',
+                  to: '#e2c074',
+                  glow: 'rgba(226, 192, 116, 0.45)',
+                  icon: <Heart size={13} style={{ fill: '#cdbfe2', color: '#cdbfe2' }} />,
                   label: '基本相性',
                   caption: '',
                   numColor: '#f6e6c2'
                 })}
-                <Heart size={18} aria-hidden="true" style={{ color: '#f0a9c4', flexShrink: 0, filter: 'drop-shadow(0 0 6px rgba(240,169,196,0.6))' }} />
                 {renderRing({
                   size: 156,
                   score: daily,
                   gradId: 'ringTodayGrad',
-                  from: '#9fd8ff',
-                  to: '#4f8ff0',
-                  glow: 'rgba(120, 190, 255, 0.55)',
+                  from: '#9cc6d8',
+                  to: '#3a86ab',
+                  glow: 'rgba(156, 198, 216, 0.55)',
                   icon: <MoonPhaseMark size={18} tint="blue" />,
                   label: '今日の相性',
                   caption: '毎日変わる',
-                  numColor: '#e6f4ff'
+                  numColor: '#e8f3f8'
                 })}
               </div>
 
               {/* 基本→今日 のバー */}
               <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
-                <div style={{ position: 'relative', height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #e98bb8 0%, #f2d79a 50%, #6fb6f5 100%)', opacity: 0.85 }}>
+                <div style={{ position: 'relative', height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #9f86c0 0%, #e2c074 50%, #3a86ab 100%)', opacity: 0.85 }}>
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#f6e6c2', border: '3px solid #151827' }} />
-                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9fd8ff', border: '3px solid #151827', boxShadow: '0 0 10px rgba(120,190,255,0.8)' }} />
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9cc6d8', border: '3px solid #151827', boxShadow: '0 0 10px rgba(156,198,216,0.8)' }} />
                 </div>
                 <div style={{ position: 'absolute', bottom: '14px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
-                  <div style={{ fontSize: '0.62rem', color: '#cfe8ff' }}>今日の相性</div>
-                  <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9fd8ff' }}>{daily}<span style={{ fontSize: '0.65rem' }}>点</span></div>
+                  <div style={{ fontSize: '0.62rem', color: '#d6e8f0' }}>今日の相性</div>
+                  <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9cc6d8' }}>{daily}<span style={{ fontSize: '0.65rem' }}>点</span></div>
                 </div>
                 <div style={{ position: 'absolute', ...(labelsCollide ? { top: '14px' } : { bottom: '14px' }), left: `${labelPos(base)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
                   <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>基本相性</div>
@@ -997,13 +996,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', width: '100%' }}>
                   <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226,192,116,0.5))' }} />
                   <MoonPhaseMark size={34} phase={mood.phase} />
-                  <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(111,182,245,0.5), transparent)' }} />
+                  <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(58,134,171,0.6), transparent)' }} />
                 </div>
                 <div className="font-serif" style={{
                   fontSize: '1.2rem',
                   fontWeight: 800,
                   letterSpacing: '0.12em',
-                  background: 'linear-gradient(90deg, #f6e6c2 0%, #f2c98a 45%, #9fd8ff 100%)',
+                  background: 'linear-gradient(90deg, #f6e6c2 0%, #e2c074 45%, #9cc6d8 100%)',
                   WebkitBackgroundClip: 'text',
                   backgroundClip: 'text',
                   color: 'transparent',
