@@ -90,14 +90,14 @@ export const PremiumWelcomeModal: React.FC<PremiumWelcomeModalProps> = ({ isOpen
 
         <img
           className="pw-anim"
-          src="/assets/tsuki.webp"
+          src="/assets/tsuki-smile.webp"
           alt="月"
           style={{
             width: '108px',
             height: '108px',
             borderRadius: '50%',
             objectFit: 'cover',
-            objectPosition: '50% 12%',
+            objectPosition: '50% 30%',
             display: 'block',
             margin: '0 auto',
             animation: 'pw-glow 3s ease-in-out infinite'
