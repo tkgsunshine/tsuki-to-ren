@@ -886,11 +886,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const todayLabel = `${now.getMonth() + 1}/${now.getDate()} 今日`;
           const diffColor = diff > 0 ? '#8fd3ae' : diff < 0 ? '#e0a9a0' : '#d8cfb8';
           const diffText = diff > 0
-            ? `今日はいつもより +${diff}点 好調`
+            ? `▲ 今日は${diff}点アップ`
             : diff < 0
-              ? `今日はいつもより ${diff}点 控えめ`
-              : '今日はいつも通りの相性';
+              ? `▼ 今日は${-diff}点ダウン`
+              : '＝ 今日はいつも通り';
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
+          // 両端でラベルがカードからはみ出さないよう、ラベルの位置だけ内側に寄せる
+          const labelPos = (v: number) => Math.max(8, Math.min(92, v));
           const lo = clamp(Math.min(base, daily));
           const hi = clamp(Math.max(base, daily));
           return (
@@ -934,7 +936,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
 
               {/* ものさし（0〜100点）: 基本の印は線の下、今日の印は線の上にラベルを出して重なりを避ける */}
-              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: '1.5rem 0.5rem 1.6rem' }}>
+              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: '1.9rem 0.5rem 2rem' }}>
                 <div style={{ position: 'relative', height: '10px', borderRadius: '5px', background: 'rgba(255,255,255,0.09)' }}>
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${clamp(base)}%`, borderRadius: '5px', background: 'linear-gradient(90deg, rgba(226,192,116,0.3) 0%, #e2c074 100%)' }} />
                   {diff !== 0 && (
@@ -943,16 +945,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#e2c074', border: '3px solid #151827' }} />
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: todayColor, border: '3px solid #151827', boxShadow: `0 0 10px ${todayGlow}` }} />
                 </div>
-                <div style={{ position: 'absolute', bottom: '16px', left: `${clamp(daily)}%`, transform: 'translateX(-50%)', fontSize: '0.62rem', color: todayColor, whiteSpace: 'nowrap', fontWeight: 600 }}>今日</div>
-                <div style={{ position: 'absolute', top: '16px', left: `${clamp(base)}%`, transform: 'translateX(-50%)', fontSize: '0.62rem', color: '#f2e2b3', whiteSpace: 'nowrap', fontWeight: 600 }}>基本</div>
+                <div style={{ position: 'absolute', bottom: '16px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', fontSize: '0.7rem', color: todayColor, whiteSpace: 'nowrap', fontWeight: 600 }}>今日 <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 800 }}>{daily}</span></div>
+                <div style={{ position: 'absolute', top: '16px', left: `${labelPos(base)}%`, transform: 'translateX(-50%)', fontSize: '0.7rem', color: '#f2e2b3', whiteSpace: 'nowrap', fontWeight: 600 }}>基本 <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 800 }}>{base}</span></div>
               </div>
 
               <div style={{ textAlign: 'center' }}>
                 <span style={{
                   display: 'inline-block',
-                  fontSize: '0.72rem',
+                  fontSize: '0.85rem',
                   fontWeight: 'bold',
-                  padding: '0.15rem 0.7rem',
+                  padding: '0.25rem 0.9rem',
                   borderRadius: '10px',
                   color: diffColor,
                   background: diff > 0 ? 'rgba(111, 176, 143, 0.16)' : diff < 0 ? 'rgba(224, 169, 160, 0.14)' : 'rgba(255,255,255,0.06)',
