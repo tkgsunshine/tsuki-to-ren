@@ -31,6 +31,7 @@ import { ColumnDetailView } from './components/ColumnDetailView';
 import { trackFortune } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm } from './components/AppDialog';
+import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 
 const formatBirthDate = (val: string): string => {
@@ -278,6 +279,7 @@ function App() {
   });
   // Set when the member has cancelled: the date Premium ends (Stripe stops renewal at the period end)
   const [premiumEndsOn, setPremiumEndsOn] = useState<string | null>(null);
+  const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
   const premiumUidRef = useRef<string | null>(null);
   useEffect(() => {
     const uid = currentUser?.uid || null;
@@ -306,7 +308,7 @@ function App() {
           setPremiumEndsOn(status.active && status.cancelAtPeriodEnd ? status.currentPeriodEnd : null);
         }
         if (status?.active) {
-          if (back === 'success') showAlert('🌙 プレミアムへようこそ。\nすべての機能が使えるようになりました。これから毎日、そばで見守らせてくださいね。');
+          if (back === 'success') setShowPremiumWelcome(true);
           return;
         }
         if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
@@ -2776,6 +2778,8 @@ function App() {
           </div>
         </div>
       )}
+
+      <PremiumWelcomeModal isOpen={showPremiumWelcome} onClose={() => setShowPremiumWelcome(false)} />
 
       {/* Premium LP Modal / Landing Page */}
       <PremiumLPModal
