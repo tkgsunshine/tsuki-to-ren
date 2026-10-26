@@ -197,7 +197,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
         '@type': 'Article',
         'headline': article.title,
         'description': article.metaDescription,
-        'image': article.thumbnailUrl,
+        'image': article.thumbnailUrl.startsWith('/') ? `https://www.tsuki-to-ren.com${article.thumbnailUrl}` : article.thumbnailUrl,
         'datePublished': article.publishedAt,
         'dateModified': article.publishedAt,
         'mainEntityOfPage': {

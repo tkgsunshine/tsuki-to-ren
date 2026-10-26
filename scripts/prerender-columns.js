@@ -74,14 +74,15 @@ for (const article of columns) {
   const articleTitle = `${article.title} | 月と蓮`;
   const articleDesc = article.metaDescription;
   const articleCanonical = `${BASE_URL}/column/${article.slug}`;
-  const articleImage = article.thumbnailUrl;
+  // Local thumbnails are stored as /assets/... paths; OGP and JSON-LD need absolute URLs.
+  const articleImage = article.thumbnailUrl.startsWith('/') ? `${BASE_URL}${article.thumbnailUrl}` : article.thumbnailUrl;
 
   const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     'headline': article.title,
     'description': article.metaDescription,
-    'image': article.thumbnailUrl,
+    'image': articleImage,
     'datePublished': article.publishedAt,
     'dateModified': article.publishedAt,
     'mainEntityOfPage': {

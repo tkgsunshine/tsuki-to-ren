@@ -29,7 +29,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-26T15:06:39.489Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=alone-time-and-together-time-balance-couple",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -94,7 +94,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-26T01:05:56.882Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=ready-for-new-love-after-breakup-signs",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -159,7 +159,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-25T13:08:46.369Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=how-to-compliment-partner-naturally-by-type",
+    "thumbnailUrl": "/assets/columns/love-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -224,7 +224,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-25T01:02:41.407Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80&topic=ex-partner-contact-how-to-respond-guide",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -289,7 +289,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-24T12:36:47.397Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80&topic=phone-call-or-text-preference-couple-balance",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -354,7 +354,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-24T01:30:01.201Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=sns-posting-rules-for-couples-talk",
+    "thumbnailUrl": "/assets/columns/love-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -419,7 +419,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-23T13:19:06.417Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=christmas-plans-before-and-after-confession-tips",
+    "thumbnailUrl": "/assets/columns/calm-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -484,7 +484,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-23T01:25:49.544Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=1200&q=80&topic=how-to-apologize-sincerely-to-partner",
+    "thumbnailUrl": "/assets/columns/daily-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -549,7 +549,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-22T13:42:41.350Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&topic=low-budget-date-ideas-for-couples",
+    "thumbnailUrl": "/assets/columns/elements-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -614,7 +614,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-22T01:26:34.053Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=date-expenses-money-values-talk-tips",
+    "thumbnailUrl": "/assets/columns/love-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -679,7 +679,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-21T13:41:15.632Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80&topic=how-to-turn-down-confession-kindly",
+    "thumbnailUrl": "/assets/columns/calm-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -744,7 +744,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-21T01:29:09.583Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80&topic=lukewarm-after-date-reply-slower-how-to-act",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -809,7 +809,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-20T13:30:53.253Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80&topic=matching-app-before-first-meeting-checklist",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -874,7 +874,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-20T01:43:14.091Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=age-gap-romance-communication-tips",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -953,7 +953,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-19T15:30:53.493Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=living-together-before-talk-checklist",
+    "thumbnailUrl": "/assets/columns/marriage-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1032,7 +1032,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-19T01:07:11.239Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=workplace-romance-approach-tips",
+    "thumbnailUrl": "/assets/columns/work-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1111,7 +1111,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-18T12:34:37.605Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=busy-partner-missed-time-how-to-cope",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1190,7 +1190,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-18T00:54:15.024Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=partner-flaws-annoying-how-to-handle",
+    "thumbnailUrl": "/assets/columns/daily-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1269,7 +1269,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-17T12:06:48.009Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=date-thank-you-message-after-first-date",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1348,7 +1348,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-17T01:15:07.590Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=healthy-distance-avoid-emotional-dependence",
+    "thumbnailUrl": "/assets/columns/calm-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1422,7 +1422,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-16T13:10:59.560Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=anniversary-surprise-gift-ideas-by-partner",
+    "thumbnailUrl": "/assets/columns/love-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1491,7 +1491,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-16T01:12:34.906Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=introduce-partner-to-friends-family-timing",
+    "thumbnailUrl": "/assets/columns/marriage-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1560,7 +1560,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-15T13:19:12.070Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=how-to-bring-up-future-plans-with-partner",
+    "thumbnailUrl": "/assets/columns/marriage-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1629,7 +1629,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-15T01:24:34.944Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=low-self-esteem-romance-confidence-tips",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1698,7 +1698,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-14T13:35:30.612Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=heartbreak-recovery-steps-move-forward",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1767,7 +1767,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-14T01:49:06.011Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=values-to-check-before-dating-seriously",
+    "thumbnailUrl": "/assets/columns/calm-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1831,7 +1831,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-13T15:51:39.814Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=avoid-relationship-rut-ideas-for-couples",
+    "thumbnailUrl": "/assets/columns/love-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1895,7 +1895,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-13T03:30:10.860Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=express-honest-feelings-to-partner-by-type",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1959,7 +1959,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-12T17:43:53.337Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=shy-first-message-how-to-start-chat",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2023,7 +2023,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-12T02:17:47.917Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=friends-to-lovers-turning-point-tips",
+    "thumbnailUrl": "/assets/columns/work-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2087,7 +2087,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-11T14:52:14.483Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=unrequited-love-heart-organizing-tips",
+    "thumbnailUrl": "/assets/columns/love-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2156,7 +2156,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-11T01:48:24.600Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=long-distance-relationship-contact-and-meeting-tips",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2216,7 +2216,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-10T14:25:36.397Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=how-to-read-their-true-feelings-without-guessing",
+    "thumbnailUrl": "/assets/columns/calm-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2276,7 +2276,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-10T02:15:48.194Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=how-to-handle-jealousy-in-relationship",
+    "thumbnailUrl": "/assets/columns/daily-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2336,7 +2336,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-09T15:12:51.510Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=reconcile-after-argument-tips-by-type",
+    "thumbnailUrl": "/assets/columns/calm-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2396,7 +2396,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-09T02:54:42.501Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=how-to-say-i-want-to-see-you-without-being-heavy",
+    "thumbnailUrl": "/assets/columns/love-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2456,7 +2456,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-08T15:30:31.057Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=first-impression-conversation-tips-by-type",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2516,7 +2516,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-08T02:39:12.120Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80&topic=first-date-impression-tips-personality",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2576,7 +2576,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-10-07T15:29:11.134Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80&topic=date-conversation-topics-by-personality",
+    "thumbnailUrl": "/assets/columns/love-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2636,7 +2636,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "ツインレイ・運命の絆",
     "publishedAt": "2026-10-07T02:16:41.070Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=1200&q=80&topic=twinray-vs-soulmate-differences",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2696,7 +2696,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "復縁・引き寄せ",
     "publishedAt": "2026-10-06T15:00:36.824Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80&topic=fukuen-ng-actions-and-heart-reset",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2756,7 +2756,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・アプローチ",
     "publishedAt": "2026-10-06T02:54:23.343Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80&topic=confession-timing-line-message-guide",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2816,7 +2816,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・16タイプ",
     "publishedAt": "2026-10-05T17:04:49.531Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=line-date-invitation-examples-by-type",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2876,7 +2876,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "未来予測・結婚運",
     "publishedAt": "2026-10-05T01:52:17.136Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=marriage-compatibility-traits-long-lasting",
+    "thumbnailUrl": "/assets/columns/marriage-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2936,7 +2936,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "未来予測・結婚運",
     "publishedAt": "2026-10-04T13:53:39.828Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&topic=marriage-fortune-timing-signs-guide",
+    "thumbnailUrl": "/assets/columns/marriage-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2996,7 +2996,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命入門",
     "publishedAt": "2026-10-04T02:31:54.574Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80&topic=gogyo-five-elements-personality-love-types",
+    "thumbnailUrl": "/assets/columns/fourpillars-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3056,7 +3056,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命入門",
     "publishedAt": "2026-10-03T13:17:08.749Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=shichutsuimei-beginner-four-pillars-basics",
+    "thumbnailUrl": "/assets/columns/fourpillars-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3116,7 +3116,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-10-03T01:52:41.725Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=istj-esfp-stability-and-spark",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3176,7 +3176,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-10-02T14:41:07.847Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80&topic=isfj-estp-opposites-attract-balance",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3236,7 +3236,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-10-02T02:09:11.642Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=entj-intp-power-couple-communication",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3296,7 +3296,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-10-01T15:22:41.069Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=enfp-infj-deep-connection-romance",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3356,7 +3356,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命入門",
     "publishedAt": "2026-09-30T14:51:38.143Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80&topic=gogyo-harmony",
+    "thumbnailUrl": "/assets/columns/elements-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3402,7 +3402,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-27T13:30:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=intj-infp",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3457,7 +3457,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-28T01:30:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80&topic=shichu-kainichi",
+    "thumbnailUrl": "/assets/columns/fourpillars-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3517,7 +3517,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・アプローチ",
     "publishedAt": "2026-09-28T13:30:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1200&q=80&topic=line-psychology",
+    "thumbnailUrl": "/assets/columns/love-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3572,7 +3572,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "ツインレイ・運命の絆",
     "publishedAt": "2026-09-29T01:30:00.000Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=twinray-integration",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3627,7 +3627,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-29T13:30:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=enfj-istp",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3682,7 +3682,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・アプローチ",
     "publishedAt": "2026-09-27T01:20:17.511Z",
     "readTimeMinutes": 6,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/calm-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3741,7 +3741,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-26T12:58:23.711Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516726817505-f5ed825624d8?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3787,7 +3787,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-25T13:36:51.651Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/fourpillars-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3833,7 +3833,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-24T13:29:53.547Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3879,7 +3879,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命入門",
     "publishedAt": "2026-09-23T13:34:28.307Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/marriage-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3925,7 +3925,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-23T01:25:59.975Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=entp-intj-intellectual-chemistry",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3971,7 +3971,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "復縁・引き寄せ",
     "publishedAt": "2026-09-22T13:21:12.316Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&topic=fukuen-mindset-law-of-attraction",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4017,7 +4017,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-09-21T15:03:17.753Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=unrequited-love-psychology-mbti",
+    "thumbnailUrl": "/assets/columns/elements-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4063,7 +4063,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-21T01:01:16.069Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/fourpillars-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4109,7 +4109,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "ツインレイ・運命の絆",
     "publishedAt": "2026-09-20T13:00:39.057Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4155,7 +4155,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・16タイプ",
     "publishedAt": "2026-09-20T01:00:06.684Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4201,7 +4201,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-19T01:07:23.382Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80&topic=istp-estp-realist-attraction",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4247,7 +4247,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-18T12:58:10.615Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=shichutsuimei-kango-fukugo-destiny-partner",
+    "thumbnailUrl": "/assets/columns/marriage-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4293,7 +4293,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-17T13:21:35.919Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=infp-enfj-soul-mate-romance",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4339,7 +4339,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "九星気学・バイオリズム",
     "publishedAt": "2026-09-16T13:25:07.773Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/daily-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4385,7 +4385,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-16T01:20:35.603Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4431,7 +4431,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "復縁・引き寄せ",
     "publishedAt": "2026-09-15T13:25:58.468Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4482,7 +4482,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-15T01:23:02.388Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/elements-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4528,7 +4528,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "ツインレイ・運命の絆",
     "publishedAt": "2026-09-14T14:58:29.157Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/daily-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4574,7 +4574,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・16タイプ",
     "publishedAt": "2026-09-13T17:34:06.033Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4620,7 +4620,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-13T17:34:02.247Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/calm-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4675,7 +4675,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "ツインレイ・運命の絆",
     "publishedAt": "2026-09-14T02:00:00.000Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4730,7 +4730,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-13T18:00:00.000Z",
     "readTimeMinutes": 10,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/fourpillars-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4780,7 +4780,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-13T08:00:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4835,7 +4835,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "九星気学・バイオリズム",
     "publishedAt": "2026-09-12T12:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1532693322450-2cb5c511067d?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/marriage-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4890,7 +4890,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・16タイプ",
     "publishedAt": "2026-09-12T08:00:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4945,7 +4945,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-11T12:00:00.000Z",
     "readTimeMinutes": 9,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/fourpillars-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5000,7 +5000,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-10T00:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/fourpillars-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5069,7 +5069,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-09T12:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5124,7 +5124,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-08T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5179,7 +5179,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "LINE攻略・アプローチ",
     "publishedAt": "2026-09-08T00:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/daily-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5234,7 +5234,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "ツインレイ・運命の絆",
     "publishedAt": "2026-09-07T12:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/fourpillars-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5289,7 +5289,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "復縁・引き寄せ",
     "publishedAt": "2026-09-06T12:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5344,7 +5344,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-05T12:00:00.000Z",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5395,7 +5395,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "恋愛アプローチ・トリセツ",
     "publishedAt": "2026-09-04T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/love-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5446,7 +5446,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-09-03T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/elements-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5491,7 +5491,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "16タイプ・MBTI相性",
     "publishedAt": "2026-09-02T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5537,7 +5537,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "九星気学・バイオリズム",
     "publishedAt": "2026-09-01T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/daily-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -5583,7 +5583,7 @@ export const COLUMNS_DATA: ColumnArticle[] = [
     "category": "四柱推命・特殊星",
     "publishedAt": "2026-08-31T12:00:00.000Z",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1200&q=80",
+    "thumbnailUrl": "/assets/columns/fourpillars-01.webp",
     "toc": [
       {
         "id": "section-1",
