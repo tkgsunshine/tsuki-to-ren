@@ -1148,67 +1148,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 background: 'rgba(255,255,255,0.01)',
                 border: (activeResult.isKaigo || activeResult.isRare) ? 'none' : '1px solid rgba(226, 192, 116, 0.15)',
                 borderRadius: '24px',
-                padding: '1.5rem 1.25rem',
+                padding: '0 1.25rem 1.5rem',
                 textAlign: 'center',
                 position: 'relative',
                 overflow: 'hidden'
               }}
             >
-              {/* Dynamic Glowing Aura Background */}
-              <div style={{
-                position: 'absolute',
-                width: '180px',
-                height: '180px',
-                borderRadius: '50%',
-                background: colors.primary,
-                filter: 'blur(70px)',
-                opacity: 0.12,
-                top: '-20px',
-                zIndex: 0
-              }} />
-
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                marginBottom: '0.75rem',
-                zIndex: 1
-              }}>
-                <span className="font-serif" style={{
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  color: '#f2e2b3',
-                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.05em'
-                }}>
-                  ✦ あなたの守護獣 ✦
-                </span>
-              </div>
-
-              {/* Centered large avatar with constrained size */}
+              {/* 守護獣画像をカード上部いっぱいに敷き、下へ溶かす。見出しと称号は画像の上に重ねる */}
               <div 
-                className={activeResult.isKaigo ? 'kaigo-border' : (activeResult.isRare ? 'rare-rainbow-border' : '')}
-                style={{
-                  width: '240px',
-                  aspectRatio: '3 / 4',
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  boxShadow: activeResult.isKaigo ? '0 0 25px rgba(184, 74, 55, 0.45)' : (activeResult.isRare ? '0 0 20px rgba(232, 169, 58, 0.4)' : `0 0 15px ${colors.shadow}`),
-                  border: (activeResult.isKaigo || activeResult.isRare) ? 'none' : `2px solid ${colors.primary}`,
-                  marginBottom: '0.85rem',
-                  zIndex: 1,
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease-in-out',
-                  position: 'relative',
-                  marginLeft: 'auto',
-                  marginRight: 'auto'
-                }}
+                className="guardian-hero"
                 onClick={() => setZoomedImg({ 
                   src: activeResult.myAvatarUrl || '', 
                   headerTitle: '✦ あなたの守護獣 ✦',
@@ -1222,26 +1170,52 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   branchPersonality: activeResult.myBranchPersonality || '策士',
                   astrologyColor: activeResult.myAstrologyColor || '銀・白'
                 })}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <img 
-                  src={activeResult.myAvatarUrl} 
-                  alt={activeResult.myAstrologyName} 
-                  className={activeResult.isKaigo ? 'kaigo-img-glow' : (activeResult.isRare ? 'rare-holographic-img' : '')}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-                {(activeResult.isKaigo || activeResult.isRare) && (
-                  <>
-                    <div className="avatar-shimmer-overlay" />
-                    <div className="avatar-halo-spotlight" />
-                  </>
-                )}
+                <div className="guardian-hero-media">
+                  <img 
+                    src={activeResult.myAvatarUrl} 
+                    alt={activeResult.myAstrologyName} 
+                    className={activeResult.isKaigo ? 'kaigo-img-glow' : (activeResult.isRare ? 'rare-holographic-img' : '')}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                  />
+                  {(activeResult.isKaigo || activeResult.isRare) && (
+                    <>
+                      <div className="avatar-shimmer-overlay" />
+                      <div className="avatar-halo-spotlight" />
+                    </>
+                  )}
+                </div>
+                <div className="guardian-hero-header" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  padding: '0.35rem 1.1rem',
+                  background: 'linear-gradient(135deg, rgba(48, 36, 12, 0.55) 0%, rgba(159, 134, 192, 0.14) 100%)',
+                  border: '1.5px solid rgba(226, 192, 116, 0.45)',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
+                  backdropFilter: 'blur(4px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  whiteSpace: 'nowrap'
+                }}>
+                  <span className="font-serif" style={{
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
+                    color: '#f2e2b3',
+                    textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                    letterSpacing: '0.05em'
+                  }}>
+                    ✦ あなたの守護獣 ✦
+                  </span>
+                </div>
+
                 {/* Subtle Glass Save Badge */}
                 <div style={{
                   position: 'absolute',
-                  bottom: '8px',
-                  right: '8px',
+                  top: '12px',
+                  right: '12px',
+                  zIndex: 3,
                   background: 'rgba(0, 0, 0, 0.65)',
                   border: '1px solid rgba(226, 192, 116, 0.4)',
                   borderRadius: '12px',
@@ -1259,6 +1233,30 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <Download size={10} />
                   <span>保存</span>
                 </div>
+                <div className="guardian-hero-caption">
+                  {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
+                    <span className="astro-title-badge font-serif">
+                      {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+                    <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
+                      {activeResult.myAstrologyName}
+                    </span>
+                    <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
+                      fontSize: '0.72rem',
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
+                      color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
+                      border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
+                    }}>
+                      {activeResult.isKaigo ? '魁罡' : (activeResult.isRare ? '選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Sub-text explaining tap to save */}
@@ -1269,35 +1267,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '-0.35rem',
-                marginBottom: '0.65rem',
+                marginTop: '0.6rem',
+                marginBottom: '0.75rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
-
-              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
-              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.5rem' }}>
-                <span className="astro-title-badge font-serif">
-                  {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
-                  {activeResult.myAstrologyName}
-                </span>
-                <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
-                  fontSize: '0.72rem',
-                  padding: '2px 7px',
-                  borderRadius: '4px',
-                  background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
-                  color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
-                  border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
-                }}>
-                  {activeResult.isKaigo ? '魁罡' : (activeResult.isRare ? '選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
-                </span>
               </div>
 
               {/* Dynamic Attributes Grid */}
@@ -1445,67 +1420,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 background: 'rgba(255,255,255,0.01)',
                 border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? 'none' : '1px solid rgba(226, 192, 116, 0.15)',
                 borderRadius: '24px',
-                padding: '1.5rem 1.25rem',
+                padding: '0 1.25rem 1.5rem',
                 textAlign: 'center',
                 position: 'relative',
                 overflow: 'hidden'
               }}
             >
-              {/* Dynamic Glowing Aura Background */}
-              <div style={{
-                position: 'absolute',
-                width: '180px',
-                height: '180px',
-                borderRadius: '50%',
-                background: colors.primary,
-                filter: 'blur(70px)',
-                opacity: 0.12,
-                top: '-20px',
-                zIndex: 0
-              }} />
-
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                marginBottom: '0.75rem',
-                zIndex: 1
-              }}>
-                <span className="font-serif" style={{
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  color: '#f2e2b3',
-                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.05em'
-                }}>
-                  ✦ お相手の守護獣 ✦
-                </span>
-              </div>
-
-              {/* Centered large avatar with constrained size */}
+              {/* 守護獣画像をカード上部いっぱいに敷き、下へ溶かす。見出しと称号は画像の上に重ねる */}
               <div 
-                className={activeResult.opponentIsKaigo ? 'kaigo-border' : (activeResult.opponentIsRare ? 'rare-rainbow-border' : '')}
-                style={{
-                  width: '240px',
-                  aspectRatio: '3 / 4',
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  boxShadow: activeResult.opponentIsKaigo ? '0 0 25px rgba(184, 74, 55, 0.45)' : (activeResult.opponentIsRare ? '0 0 20px rgba(232, 169, 58, 0.4)' : `0 0 15px ${colors.shadow}`),
-                  border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? 'none' : `2px solid ${colors.primary}`,
-                  marginBottom: '0.85rem',
-                  zIndex: 1,
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease-in-out',
-                  position: 'relative',
-                  marginLeft: 'auto',
-                  marginRight: 'auto'
-                }}
+                className="guardian-hero"
                 onClick={() => setZoomedImg({ 
                   src: activeResult.opponentAvatarUrl || '', 
                   headerTitle: '✦ お相手の守護獣 ✦',
@@ -1519,26 +1442,52 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   branchPersonality: activeResult.opponentBranchPersonality || '策士',
                   astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
                 })}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <img 
-                  src={activeResult.opponentAvatarUrl} 
-                  alt={activeResult.opponentAstrologyName} 
-                  className={activeResult.opponentIsKaigo ? 'kaigo-img-glow' : (activeResult.opponentIsRare ? 'rare-holographic-img' : '')}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-                {(activeResult.opponentIsKaigo || activeResult.opponentIsRare) && (
-                  <>
-                    <div className="avatar-shimmer-overlay" />
-                    <div className="avatar-halo-spotlight" />
-                  </>
-                )}
+                <div className="guardian-hero-media">
+                  <img 
+                    src={activeResult.opponentAvatarUrl} 
+                    alt={activeResult.opponentAstrologyName} 
+                    className={activeResult.opponentIsKaigo ? 'kaigo-img-glow' : (activeResult.opponentIsRare ? 'rare-holographic-img' : '')}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                  />
+                  {(activeResult.opponentIsKaigo || activeResult.opponentIsRare) && (
+                    <>
+                      <div className="avatar-shimmer-overlay" />
+                      <div className="avatar-halo-spotlight" />
+                    </>
+                  )}
+                </div>
+                <div className="guardian-hero-header" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  padding: '0.35rem 1.1rem',
+                  background: 'linear-gradient(135deg, rgba(48, 36, 12, 0.55) 0%, rgba(58, 134, 171, 0.14) 100%)',
+                  border: '1.5px solid rgba(226, 192, 116, 0.45)',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
+                  backdropFilter: 'blur(4px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  whiteSpace: 'nowrap'
+                }}>
+                  <span className="font-serif" style={{
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
+                    color: '#f2e2b3',
+                    textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                    letterSpacing: '0.05em'
+                  }}>
+                    ✦ お相手の守護獣 ✦
+                  </span>
+                </div>
+
                 {/* Subtle Glass Save Badge */}
                 <div style={{
                   position: 'absolute',
-                  bottom: '8px',
-                  right: '8px',
+                  top: '12px',
+                  right: '12px',
+                  zIndex: 3,
                   background: 'rgba(0, 0, 0, 0.65)',
                   border: '1px solid rgba(226, 192, 116, 0.4)',
                   borderRadius: '12px',
@@ -1556,6 +1505,30 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <Download size={10} />
                   <span>保存</span>
                 </div>
+                <div className="guardian-hero-caption">
+                  {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
+                    <span className="astro-title-badge font-serif">
+                      {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+                    <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
+                      {activeResult.opponentAstrologyName}
+                    </span>
+                    <span className={activeResult.opponentIsKaigo ? 'kaigo-badge' : (activeResult.opponentIsRare ? 'rare-badge' : '')} style={{
+                      fontSize: '0.72rem',
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      background: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
+                      color: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
+                      border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
+                    }}>
+                      {activeResult.opponentIsKaigo ? '魁罡' : (activeResult.opponentIsRare ? '選ばれし極星' : (activeResult.opponentGender === 'female' ? '女性' : '男性'))}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Sub-text explaining tap to save */}
@@ -1566,35 +1539,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '-0.35rem',
-                marginBottom: '0.65rem',
+                marginTop: '0.6rem',
+                marginBottom: '0.75rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
-
-              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
-              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.5rem' }}>
-                <span className="astro-title-badge font-serif">
-                  {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
-                  {activeResult.opponentAstrologyName}
-                </span>
-                <span className={activeResult.opponentIsKaigo ? 'kaigo-badge' : (activeResult.opponentIsRare ? 'rare-badge' : '')} style={{
-                  fontSize: '0.72rem',
-                  padding: '2px 7px',
-                  borderRadius: '4px',
-                  background: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
-                  color: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
-                  border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
-                }}>
-                  {activeResult.opponentIsKaigo ? '魁罡' : (activeResult.opponentIsRare ? '選ばれし極星' : (activeResult.opponentGender === 'female' ? '女性' : '男性'))}
-                </span>
               </div>
 
               {/* Dynamic Attributes Grid */}
