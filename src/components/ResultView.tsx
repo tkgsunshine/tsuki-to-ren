@@ -875,78 +875,100 @@ export const ResultView: React.FC<ResultViewProps> = ({
           約7,465万通りの組み合わせから読み解く鑑定
         </div>
         
-        {/* Score Pods: 基本相性と今日の相性を1本のものさしで比べる */}
+        {/* Score Rings: 基本相性（小）と今日の相性（大）を2つの丸いメーターで比べる */}
         {hasOpponent ? (() => {
           const base = activeResult.baseScore;
           const daily = activeResult.dailyScore;
           const diff = daily - base;
-          const todayColor = selectedChar === 'ren' ? '#9cc6d8' : '#e2d9ee';
-          const todayGlow = selectedChar === 'ren' ? 'rgba(156, 198, 216, 0.6)' : 'rgba(226, 217, 238, 0.6)';
-          const now = new Date();
-          const todayLabel = `${now.getMonth() + 1}/${now.getDate()} 今日`;
-          const diffColor = diff > 0 ? '#8fd3ae' : diff < 0 ? '#e0a9a0' : '#d8cfb8';
-          const diffText = diff > 0
-            ? `▲ 今日は${diff}点アップ`
-            : diff < 0
-              ? `▼ 今日は${-diff}点ダウン`
-              : '＝ 今日はいつも通り';
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
-          // 両端でラベルがカードからはみ出さないよう、ラベルの位置だけ内側に寄せる
-          const labelPos = (v: number) => Math.max(8, Math.min(92, v));
-          const lo = clamp(Math.min(base, daily));
-          const hi = clamp(Math.max(base, daily));
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', margin: '0.2rem 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>基本相性</div>
+          const diffText = diff > 0
+            ? `☀️ 今日は追い風（基本より +${diff}点）`
+            : diff < 0
+              ? `☁️ 今日はひと休み（基本より −${-diff}点）`
+              : '🌙 今日はいつも通り（基本と同じ点）';
+          // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
+          const labelsCollide = Math.abs(diff) < 28;
+          const labelPos = (v: number) => Math.max(14, Math.min(86, v));
+          const renderRing = (opts: { size: number; score: number; gradId: string; from: string; to: string; glow: string; icon: React.ReactNode; label: string; caption: string; numColor: string }) => {
+            const stroke = opts.size * 0.055;
+            const r = (opts.size - stroke) / 2 - 2;
+            const c = 2 * Math.PI * r;
+            return (
+              <div style={{ position: 'relative', width: opts.size, height: opts.size, flexShrink: 0 }}>
+                <svg width={opts.size} height={opts.size} style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)', filter: `drop-shadow(0 0 6px ${opts.glow})` }} aria-hidden="true">
+                  <defs>
+                    <linearGradient id={opts.gradId} x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor={opts.from} />
+                      <stop offset="100%" stopColor={opts.to} />
+                    </linearGradient>
+                  </defs>
+                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="rgba(10,12,28,0.55)" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
+                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="none" stroke={`url(#${opts.gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * clamp(opts.score)) / 100} ${c}`} />
+                </svg>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  {opts.icon}
+                  <span style={{ fontSize: opts.size > 130 ? '0.74rem' : '0.66rem', color: '#e8e3d8', fontWeight: 600, marginTop: '0.1rem' }}>{opts.label}</span>
                   <div className="font-serif" style={{
-                    fontSize: '2.2rem',
-                    fontWeight: '800',
-                    color: '#f2e2b3',
-                    lineHeight: 1,
-                    textShadow: '0 0 15px rgba(242, 226, 179, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
+                    fontSize: `${opts.size * 0.3}px`,
+                    fontWeight: 800,
+                    color: opts.numColor,
+                    lineHeight: 1.05,
+                    textShadow: `0 0 14px ${opts.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
                     display: 'flex',
                     alignItems: 'baseline',
-                    justifyContent: 'center',
-                    gap: '2px'
+                    gap: '1px'
                   }}>
-                    {base}<span style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>点</span>
+                    {opts.score}<span style={{ fontSize: `${opts.size * 0.1}px`, fontWeight: 'bold' }}>点</span>
                   </div>
-                  <div style={{ fontSize: '0.62rem', color: '#a9a293', marginTop: '0.25rem' }}>ずっと変わらない</div>
-                </div>
-                <div aria-hidden="true" style={{ fontSize: '1.3rem', color: diffColor, paddingBottom: '1.1rem' }}>→</div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>{todayLabel}</div>
-                  <div className="font-serif" style={{
-                    fontSize: '2.75rem',
-                    fontWeight: '800',
-                    color: todayColor,
-                    lineHeight: 1,
-                    textShadow: `0 0 15px ${todayGlow}, 0 2px 4px rgba(0,0,0,0.5)`,
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    justifyContent: 'center',
-                    gap: '2px'
-                  }}>
-                    {daily}<span style={{ fontSize: '1rem', fontWeight: 'bold' }}>点</span>
-                  </div>
-                  <div style={{ fontSize: '0.62rem', color: '#a9a293', marginTop: '0.25rem' }}>毎日変わる</div>
+                  <span style={{ fontSize: `${Math.round(opts.size * 0.072)}px`, color: '#a9a293', marginTop: '0.15rem' }}>{opts.caption}</span>
                 </div>
               </div>
+            );
+          };
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', margin: '0.2rem 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.15rem' }}>
+                {renderRing({
+                  size: 116,
+                  score: base,
+                  gradId: 'ringBaseGrad',
+                  from: '#e98bb8',
+                  to: '#f2c98a',
+                  glow: 'rgba(242, 201, 138, 0.45)',
+                  icon: <Heart size={13} style={{ fill: '#f0a9c4', color: '#f0a9c4' }} />,
+                  label: '基本相性',
+                  caption: 'ずっと変わらない',
+                  numColor: '#f6e6c2'
+                })}
+                <Heart size={18} aria-hidden="true" style={{ color: '#f0a9c4', flexShrink: 0, filter: 'drop-shadow(0 0 6px rgba(240,169,196,0.6))' }} />
+                {renderRing({
+                  size: 156,
+                  score: daily,
+                  gradId: 'ringTodayGrad',
+                  from: '#9fd8ff',
+                  to: '#4f8ff0',
+                  glow: 'rgba(120, 190, 255, 0.55)',
+                  icon: <span aria-hidden="true" style={{ fontSize: '0.95rem', lineHeight: 1 }}>☀️</span>,
+                  label: '今日の相性',
+                  caption: '毎日変わる',
+                  numColor: '#e6f4ff'
+                })}
+              </div>
 
-              {/* ものさし（0〜100点）: 基本の印は線の下、今日の印は線の上にラベルを出して重なりを避ける */}
-              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: '1.9rem 0.5rem 2rem' }}>
-                <div style={{ position: 'relative', height: '10px', borderRadius: '5px', background: 'rgba(255,255,255,0.09)' }}>
-                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${clamp(base)}%`, borderRadius: '5px', background: 'linear-gradient(90deg, rgba(226,192,116,0.3) 0%, #e2c074 100%)' }} />
-                  {diff !== 0 && (
-                    <div style={{ position: 'absolute', top: '50%', left: `${lo}%`, width: `${hi - lo}%`, height: '4px', transform: 'translateY(-50%)', background: `repeating-linear-gradient(90deg, ${diffColor} 0 5px, transparent 5px 9px)` }} />
-                  )}
-                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#e2c074', border: '3px solid #151827' }} />
-                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: todayColor, border: '3px solid #151827', boxShadow: `0 0 10px ${todayGlow}` }} />
+              {/* 基本→今日 のバー */}
+              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
+                <div style={{ position: 'relative', height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #e98bb8 0%, #f2d79a 50%, #6fb6f5 100%)', opacity: 0.85 }}>
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#f6e6c2', border: '3px solid #151827' }} />
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9fd8ff', border: '3px solid #151827', boxShadow: '0 0 10px rgba(120,190,255,0.8)' }} />
                 </div>
-                <div style={{ position: 'absolute', bottom: '16px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', fontSize: '0.7rem', color: todayColor, whiteSpace: 'nowrap', fontWeight: 600 }}>今日 <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 800 }}>{daily}</span></div>
-                <div style={{ position: 'absolute', top: '16px', left: `${labelPos(base)}%`, transform: 'translateX(-50%)', fontSize: '0.7rem', color: '#f2e2b3', whiteSpace: 'nowrap', fontWeight: 600 }}>基本 <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 800 }}>{base}</span></div>
+                <div style={{ position: 'absolute', bottom: '14px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                  <div style={{ fontSize: '0.62rem', color: '#cfe8ff' }}>今日の相性</div>
+                  <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9fd8ff' }}>{daily}<span style={{ fontSize: '0.65rem' }}>点</span></div>
+                </div>
+                <div style={{ position: 'absolute', ...(labelsCollide ? { top: '14px' } : { bottom: '14px' }), left: `${labelPos(base)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                  <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>基本相性</div>
+                  <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f6e6c2' }}>{base}<span style={{ fontSize: '0.65rem' }}>点</span></div>
+                </div>
               </div>
 
               <div style={{ textAlign: 'center' }}>
@@ -954,11 +976,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   display: 'inline-block',
                   fontSize: '0.85rem',
                   fontWeight: 'bold',
-                  padding: '0.25rem 0.9rem',
-                  borderRadius: '10px',
-                  color: diffColor,
-                  background: diff > 0 ? 'rgba(111, 176, 143, 0.16)' : diff < 0 ? 'rgba(224, 169, 160, 0.14)' : 'rgba(255,255,255,0.06)',
-                  border: `1px solid ${diff > 0 ? 'rgba(111, 176, 143, 0.45)' : diff < 0 ? 'rgba(224, 169, 160, 0.4)' : 'rgba(255,255,255,0.15)'}`
+                  padding: '0.35rem 1rem',
+                  borderRadius: '14px',
+                  color: '#f6e6c2',
+                  background: 'rgba(226, 192, 116, 0.08)',
+                  border: '1px solid rgba(226, 192, 116, 0.55)',
+                  boxShadow: '0 0 12px rgba(226, 192, 116, 0.15)'
                 }}>
                   {diffText}
                 </span>
