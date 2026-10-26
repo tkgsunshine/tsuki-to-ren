@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
-import { MoonMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
+import { getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { InstallGuideModal } from './InstallGuideModal';
@@ -163,6 +164,18 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
     </React.Fragment>
   ));
 };
+
+// 見られない人には、ぼかす文章として本物の代わりにダミー文を渡す。
+// ぼかしは見た目だけで、ブラウザの「検証」を開くと下の文字が読めてしまうため。
+const LOCKED_FILLER = 'ここはプレミアム会員の方だけが読める鑑定文です。登録すると、二人に合わせた本文が表示されます。';
+const lockedText = (text: string | undefined, locked: boolean): string => {
+  if (!locked) return text ?? '';
+  const n = Math.max(24, (text ?? '').length);
+  return LOCKED_FILLER.repeat(Math.ceil(n / LOCKED_FILLER.length)).slice(0, n);
+};
+// 7日間・月次・年次の点数も、見られない人にはダミーの値で描く（本物の点数を画面に置かない）
+const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
+const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
 
 const getMbtiColor = (mbtiCode: string) => {
   const code = (mbtiCode || '').toUpperCase();
@@ -487,6 +500,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
     try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
   });
   const myAstrologyRef = useRef<HTMLDivElement>(null);
+
+  // 最上部の丸いメーター: 表示時・点数が変わったときに 0 から点数まで伸ばす（0〜1）
+  const [ringProgress, setRingProgress] = useState(0);
+  useEffect(() => {
+    let reduceMotion = false;
+    try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { /* 古いブラウザ */ }
+    if (reduceMotion) { setRingProgress(1); return; }
+    const duration = 1400;
+    let start: number | null = null;
+    let frame = 0;
+    const tick = (now: number) => {
+      if (start === null) start = now;
+      const t = Math.min(1, (now - start) / duration);
+      setRingProgress(1 - Math.pow(1 - t, 3));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    setRingProgress(0);
+    // 画面のフェードインが終わってから伸ばし始める
+    const delay = window.setTimeout(() => { frame = requestAnimationFrame(tick); }, 350);
+    return () => { window.clearTimeout(delay); cancelAnimationFrame(frame); };
+  }, [activeResult.baseScore, activeResult.dailyScore]);
 
   useEffect(() => {
     const mainEl = document.querySelector('.main-content');
@@ -875,41 +909,130 @@ export const ResultView: React.FC<ResultViewProps> = ({
           約7,465万通りの組み合わせから読み解く鑑定
         </div>
         
-        {/* Luxury Score Pods Side-by-Side */}
-        <div style={{ display: 'grid', gridTemplateColumns: hasOpponent ? '1fr 1fr' : '1fr', gap: '0.75rem', margin: '0.2rem 0' }}>
-          {hasOpponent && (
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(226,192,116,0.12) 0%, rgba(176, 125, 43,0.04) 100%)',
-              border: '1px solid rgba(226,192,116,0.35)',
-              borderRadius: '16px',
-              padding: '0.85rem 0.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'inset 0 0 15px rgba(226,192,116,0.08)'
-            }}>
-              <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>基本相性</span>
-              <div className="font-serif" style={{
-                fontSize: '2.5rem',
-                fontWeight: '800',
-                color: '#f2e2b3',
-                lineHeight: 1,
-                textShadow: '0 0 15px rgba(242, 226, 179, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '2px'
-              }}>
-                {activeResult.baseScore}<span style={{ fontSize: '1rem', fontWeight: 'bold' }}>点</span>
+        {/* Score Rings: 基本相性（小）と今日の相性（大）を2つの丸いメーターで比べる */}
+        {hasOpponent ? (() => {
+          const base = activeResult.baseScore;
+          const daily = activeResult.dailyScore;
+          const diff = daily - base;
+          const clamp = (v: number) => Math.max(0, Math.min(100, v));
+          const scoreMood = getScoreMood(base, daily);
+          const mood = { ...scoreMood, color: scoreMood.trend === 'up' ? '#8fd3ae' : scoreMood.trend === 'down' ? '#e0a9a0' : '#d8cfb8' };
+          // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
+          const labelsCollide = Math.abs(diff) < 28;
+          const labelPos = (v: number) => Math.max(14, Math.min(86, v));
+          const renderRing = (opts: { size: number; score: number; gradId: string; from: string; to: string; glow: string; icon: React.ReactNode; label: string; caption: string; numColor: string }) => {
+            const stroke = opts.size * 0.055;
+            const r = (opts.size - stroke) / 2 - 2;
+            const c = 2 * Math.PI * r;
+            return (
+              <div style={{ position: 'relative', width: opts.size, height: opts.size, flexShrink: 0 }}>
+                <svg width={opts.size} height={opts.size} style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)', filter: `drop-shadow(0 0 6px ${opts.glow})` }} aria-hidden="true">
+                  <defs>
+                    <linearGradient id={opts.gradId} x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor={opts.from} />
+                      <stop offset="100%" stopColor={opts.to} />
+                    </linearGradient>
+                  </defs>
+                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="rgba(10,12,28,0.55)" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
+                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="none" stroke={`url(#${opts.gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * clamp(opts.score) * ringProgress) / 100} ${c}`} style={{ opacity: ringProgress > 0 ? 1 : 0 }} />
+                </svg>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  {opts.icon}
+                  <span style={{ fontSize: opts.size > 130 ? '0.74rem' : '0.66rem', color: '#e8e3d8', fontWeight: 600, marginTop: '0.1rem' }}>{opts.label}</span>
+                  <div className="font-serif" style={{
+                    fontSize: `${opts.size * 0.3}px`,
+                    fontWeight: 800,
+                    color: opts.numColor,
+                    lineHeight: 1.05,
+                    textShadow: `0 0 14px ${opts.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '1px'
+                  }}>
+                    {Math.round(opts.score * ringProgress)}<span style={{ fontSize: `${opts.size * 0.1}px`, fontWeight: 'bold' }}>点</span>
+                  </div>
+                  {opts.caption && <span style={{ fontSize: `${Math.round(opts.size * 0.072)}px`, color: '#a9a293', marginTop: '0.15rem' }}>{opts.caption}</span>}
+                </div>
+              </div>
+            );
+          };
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', margin: '0.2rem 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+                {renderRing({
+                  size: 116,
+                  score: base,
+                  gradId: 'ringBaseGrad',
+                  from: '#9f86c0',
+                  to: '#e2c074',
+                  glow: 'rgba(226, 192, 116, 0.45)',
+                  icon: <Heart size={13} style={{ fill: '#cdbfe2', color: '#cdbfe2' }} />,
+                  label: '基本相性',
+                  caption: '',
+                  numColor: '#f6e6c2'
+                })}
+                {renderRing({
+                  size: 156,
+                  score: daily,
+                  gradId: 'ringTodayGrad',
+                  from: '#9cc6d8',
+                  to: '#3a86ab',
+                  glow: 'rgba(156, 198, 216, 0.55)',
+                  icon: <MoonPhaseMark size={18} tint="blue" />,
+                  label: '今日の相性',
+                  caption: '毎日変わる',
+                  numColor: '#e8f3f8'
+                })}
+              </div>
+
+              {/* 基本→今日 のバー */}
+              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
+                <div style={{ position: 'relative', height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #9f86c0 0%, #e2c074 50%, #3a86ab 100%)', opacity: 0.85 }}>
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#f6e6c2', border: '3px solid #151827' }} />
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9cc6d8', border: '3px solid #151827', boxShadow: '0 0 10px rgba(156,198,216,0.8)' }} />
+                </div>
+                <div style={{ position: 'absolute', bottom: '14px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                  <div style={{ fontSize: '0.62rem', color: '#d6e8f0' }}>今日の相性</div>
+                  <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9cc6d8' }}>{daily}<span style={{ fontSize: '0.65rem' }}>点</span></div>
+                </div>
+                <div style={{ position: 'absolute', ...(labelsCollide ? { top: '14px' } : { bottom: '14px' }), left: `${labelPos(base)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                  <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>基本相性</div>
+                  <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f6e6c2' }}>{base}<span style={{ fontSize: '0.65rem' }}>点</span></div>
+                </div>
+              </div>
+
+              {/* 今日の流れ: 枠で囲まず、光る天気アイコン＋グラデーション文字で見せる */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', marginTop: '0.1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', width: '100%' }}>
+                  <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226,192,116,0.5))' }} />
+                  <MoonPhaseMark size={34} phase={mood.phase} />
+                  <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(58,134,171,0.6), transparent)' }} />
+                </div>
+                <div className="font-serif" style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.12em',
+                  background: 'linear-gradient(90deg, #f6e6c2 0%, #e2c074 45%, #9cc6d8 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  {mood.title}
+                </div>
+                <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
+                  基本相性より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
+                </div>
               </div>
             </div>
-          )}
-
+          );
+        })() : (
           <div style={{
             background: 'linear-gradient(135deg, rgba(159, 134, 192,0.14) 0%, rgba(58, 134, 171,0.05) 100%)',
             border: '1px solid rgba(159, 134, 192,0.4)',
             borderRadius: '16px',
             padding: '0.85rem 0.5rem',
+            margin: '0.2rem 0',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -917,7 +1040,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             boxShadow: 'inset 0 0 15px rgba(159, 134, 192,0.08)'
           }}>
             <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>
-              {hasOpponent ? '今日の日次相性' : '今日の総合運気'}
+              今日の総合運気
             </span>
             <div className="font-serif" style={{
               fontSize: '2.5rem',
@@ -934,7 +1057,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {activeResult.dailyScore}<span style={{ fontSize: '1rem', fontWeight: 'bold' }}>点</span>
             </div>
           </div>
-        </div>
+        )}
 
         {/* One Liner Message Ribbon */}
         {activeResult.oneLiner && activeResult.oneLiner.trim() !== '' && (
@@ -949,6 +1072,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
             border: '1px solid rgba(226,192,116,0.25)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
           }}>
+            {hasOpponent && (
+              <span style={{ display: 'block', fontSize: '0.66rem', color: '#c9b98e', marginBottom: '0.25rem', letterSpacing: '0.05em' }}>
+                二人の相性ひとこと
+              </span>
+            )}
             “{activeResult.oneLiner}”
           </div>
         )}
@@ -1030,67 +1158,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 background: 'rgba(255,255,255,0.01)',
                 border: (activeResult.isKaigo || activeResult.isRare) ? 'none' : '1px solid rgba(226, 192, 116, 0.15)',
                 borderRadius: '24px',
-                padding: '1.5rem 1.25rem',
+                padding: '0 1.25rem 1.5rem',
                 textAlign: 'center',
                 position: 'relative',
                 overflow: 'hidden'
               }}
             >
-              {/* Dynamic Glowing Aura Background */}
-              <div style={{
-                position: 'absolute',
-                width: '180px',
-                height: '180px',
-                borderRadius: '50%',
-                background: colors.primary,
-                filter: 'blur(70px)',
-                opacity: 0.12,
-                top: '-20px',
-                zIndex: 0
-              }} />
-
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                marginBottom: '0.75rem',
-                zIndex: 1
-              }}>
-                <span className="font-serif" style={{
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  color: '#f2e2b3',
-                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.05em'
-                }}>
-                  ✦ あなたの守護獣 ✦
-                </span>
-              </div>
-
-              {/* Centered large avatar with constrained size */}
+              {/* 守護獣画像をカード上部いっぱいに敷き、下へ溶かす。見出しと称号は画像の上に重ねる */}
               <div 
-                className={activeResult.isKaigo ? 'kaigo-border' : (activeResult.isRare ? 'rare-rainbow-border' : '')}
-                style={{
-                  width: '240px',
-                  aspectRatio: '3 / 4',
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  boxShadow: activeResult.isKaigo ? '0 0 25px rgba(184, 74, 55, 0.45)' : (activeResult.isRare ? '0 0 20px rgba(232, 169, 58, 0.4)' : `0 0 15px ${colors.shadow}`),
-                  border: (activeResult.isKaigo || activeResult.isRare) ? 'none' : `2px solid ${colors.primary}`,
-                  marginBottom: '0.85rem',
-                  zIndex: 1,
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease-in-out',
-                  position: 'relative',
-                  marginLeft: 'auto',
-                  marginRight: 'auto'
-                }}
+                className="guardian-hero"
                 onClick={() => setZoomedImg({ 
                   src: activeResult.myAvatarUrl || '', 
                   headerTitle: '✦ あなたの守護獣 ✦',
@@ -1104,26 +1180,52 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   branchPersonality: activeResult.myBranchPersonality || '策士',
                   astrologyColor: activeResult.myAstrologyColor || '銀・白'
                 })}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <img 
-                  src={activeResult.myAvatarUrl} 
-                  alt={activeResult.myAstrologyName} 
-                  className={activeResult.isKaigo ? 'kaigo-img-glow' : (activeResult.isRare ? 'rare-holographic-img' : '')}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-                {(activeResult.isKaigo || activeResult.isRare) && (
-                  <>
-                    <div className="avatar-shimmer-overlay" />
-                    <div className="avatar-halo-spotlight" />
-                  </>
-                )}
+                <div className="guardian-hero-media">
+                  <img 
+                    src={activeResult.myAvatarUrl} 
+                    alt={activeResult.myAstrologyName} 
+                    className={activeResult.isKaigo ? 'kaigo-img-glow' : (activeResult.isRare ? 'rare-holographic-img' : '')}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                  />
+                  {(activeResult.isKaigo || activeResult.isRare) && (
+                    <>
+                      <div className="avatar-shimmer-overlay" />
+                      <div className="avatar-halo-spotlight" />
+                    </>
+                  )}
+                </div>
+                <div className="guardian-hero-header" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  padding: '0.35rem 1.1rem',
+                  background: 'linear-gradient(135deg, rgba(48, 36, 12, 0.55) 0%, rgba(159, 134, 192, 0.14) 100%)',
+                  border: '1.5px solid rgba(226, 192, 116, 0.45)',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
+                  backdropFilter: 'blur(4px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  whiteSpace: 'nowrap'
+                }}>
+                  <span className="font-serif" style={{
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
+                    color: '#f2e2b3',
+                    textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                    letterSpacing: '0.05em'
+                  }}>
+                    ✦ あなたの守護獣 ✦
+                  </span>
+                </div>
+
                 {/* Subtle Glass Save Badge */}
                 <div style={{
                   position: 'absolute',
-                  bottom: '8px',
-                  right: '8px',
+                  top: '12px',
+                  right: '12px',
+                  zIndex: 3,
                   background: 'rgba(0, 0, 0, 0.65)',
                   border: '1px solid rgba(226, 192, 116, 0.4)',
                   borderRadius: '12px',
@@ -1141,6 +1243,30 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <Download size={10} />
                   <span>保存</span>
                 </div>
+                <div className="guardian-hero-caption">
+                  {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
+                    <span className="astro-title-badge font-serif">
+                      {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+                    <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
+                      {activeResult.myAstrologyName}
+                    </span>
+                    <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
+                      fontSize: '0.72rem',
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
+                      color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
+                      border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
+                    }}>
+                      {activeResult.isKaigo ? '魁罡' : (activeResult.isRare ? '選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Sub-text explaining tap to save */}
@@ -1151,35 +1277,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '-0.35rem',
-                marginBottom: '0.65rem',
+                marginTop: '0.6rem',
+                marginBottom: '0.75rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
-
-              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
-              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.5rem' }}>
-                <span className="astro-title-badge font-serif">
-                  {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
-                  {activeResult.myAstrologyName}
-                </span>
-                <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
-                  fontSize: '0.72rem',
-                  padding: '2px 7px',
-                  borderRadius: '4px',
-                  background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
-                  color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
-                  border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
-                }}>
-                  {activeResult.isKaigo ? '魁罡' : (activeResult.isRare ? '選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
-                </span>
               </div>
 
               {/* Dynamic Attributes Grid */}
@@ -1327,67 +1430,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 background: 'rgba(255,255,255,0.01)',
                 border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? 'none' : '1px solid rgba(226, 192, 116, 0.15)',
                 borderRadius: '24px',
-                padding: '1.5rem 1.25rem',
+                padding: '0 1.25rem 1.5rem',
                 textAlign: 'center',
                 position: 'relative',
                 overflow: 'hidden'
               }}
             >
-              {/* Dynamic Glowing Aura Background */}
-              <div style={{
-                position: 'absolute',
-                width: '180px',
-                height: '180px',
-                borderRadius: '50%',
-                background: colors.primary,
-                filter: 'blur(70px)',
-                opacity: 0.12,
-                top: '-20px',
-                zIndex: 0
-              }} />
-
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                marginBottom: '0.75rem',
-                zIndex: 1
-              }}>
-                <span className="font-serif" style={{
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  color: '#f2e2b3',
-                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.05em'
-                }}>
-                  ✦ お相手の守護獣 ✦
-                </span>
-              </div>
-
-              {/* Centered large avatar with constrained size */}
+              {/* 守護獣画像をカード上部いっぱいに敷き、下へ溶かす。見出しと称号は画像の上に重ねる */}
               <div 
-                className={activeResult.opponentIsKaigo ? 'kaigo-border' : (activeResult.opponentIsRare ? 'rare-rainbow-border' : '')}
-                style={{
-                  width: '240px',
-                  aspectRatio: '3 / 4',
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  boxShadow: activeResult.opponentIsKaigo ? '0 0 25px rgba(184, 74, 55, 0.45)' : (activeResult.opponentIsRare ? '0 0 20px rgba(232, 169, 58, 0.4)' : `0 0 15px ${colors.shadow}`),
-                  border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? 'none' : `2px solid ${colors.primary}`,
-                  marginBottom: '0.85rem',
-                  zIndex: 1,
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease-in-out',
-                  position: 'relative',
-                  marginLeft: 'auto',
-                  marginRight: 'auto'
-                }}
+                className="guardian-hero"
                 onClick={() => setZoomedImg({ 
                   src: activeResult.opponentAvatarUrl || '', 
                   headerTitle: '✦ お相手の守護獣 ✦',
@@ -1401,26 +1452,52 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   branchPersonality: activeResult.opponentBranchPersonality || '策士',
                   astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
                 })}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <img 
-                  src={activeResult.opponentAvatarUrl} 
-                  alt={activeResult.opponentAstrologyName} 
-                  className={activeResult.opponentIsKaigo ? 'kaigo-img-glow' : (activeResult.opponentIsRare ? 'rare-holographic-img' : '')}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-                {(activeResult.opponentIsKaigo || activeResult.opponentIsRare) && (
-                  <>
-                    <div className="avatar-shimmer-overlay" />
-                    <div className="avatar-halo-spotlight" />
-                  </>
-                )}
+                <div className="guardian-hero-media">
+                  <img 
+                    src={activeResult.opponentAvatarUrl} 
+                    alt={activeResult.opponentAstrologyName} 
+                    className={activeResult.opponentIsKaigo ? 'kaigo-img-glow' : (activeResult.opponentIsRare ? 'rare-holographic-img' : '')}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                  />
+                  {(activeResult.opponentIsKaigo || activeResult.opponentIsRare) && (
+                    <>
+                      <div className="avatar-shimmer-overlay" />
+                      <div className="avatar-halo-spotlight" />
+                    </>
+                  )}
+                </div>
+                <div className="guardian-hero-header" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  padding: '0.35rem 1.1rem',
+                  background: 'linear-gradient(135deg, rgba(48, 36, 12, 0.55) 0%, rgba(58, 134, 171, 0.14) 100%)',
+                  border: '1.5px solid rgba(226, 192, 116, 0.45)',
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
+                  backdropFilter: 'blur(4px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  whiteSpace: 'nowrap'
+                }}>
+                  <span className="font-serif" style={{
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
+                    color: '#f2e2b3',
+                    textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                    letterSpacing: '0.05em'
+                  }}>
+                    ✦ お相手の守護獣 ✦
+                  </span>
+                </div>
+
                 {/* Subtle Glass Save Badge */}
                 <div style={{
                   position: 'absolute',
-                  bottom: '8px',
-                  right: '8px',
+                  top: '12px',
+                  right: '12px',
+                  zIndex: 3,
                   background: 'rgba(0, 0, 0, 0.65)',
                   border: '1px solid rgba(226, 192, 116, 0.4)',
                   borderRadius: '12px',
@@ -1438,6 +1515,30 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <Download size={10} />
                   <span>保存</span>
                 </div>
+                <div className="guardian-hero-caption">
+                  {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
+                    <span className="astro-title-badge font-serif">
+                      {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+                    <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
+                      {activeResult.opponentAstrologyName}
+                    </span>
+                    <span className={activeResult.opponentIsKaigo ? 'kaigo-badge' : (activeResult.opponentIsRare ? 'rare-badge' : '')} style={{
+                      fontSize: '0.72rem',
+                      padding: '2px 7px',
+                      borderRadius: '4px',
+                      background: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
+                      color: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
+                      border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
+                    }}>
+                      {activeResult.opponentIsKaigo ? '魁罡' : (activeResult.opponentIsRare ? '選ばれし極星' : (activeResult.opponentGender === 'female' ? '女性' : '男性'))}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Sub-text explaining tap to save */}
@@ -1448,35 +1549,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '-0.35rem',
-                marginBottom: '0.65rem',
+                marginTop: '0.6rem',
+                marginBottom: '0.75rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
-
-              {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
-              <div style={{ display: 'flex', justifyContent: 'center', zIndex: 1, marginBottom: '0.5rem' }}>
-                <span className="astro-title-badge font-serif">
-                  {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center', zIndex: 1, marginBottom: '0.9rem' }}>
-                <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
-                  {activeResult.opponentAstrologyName}
-                </span>
-                <span className={activeResult.opponentIsKaigo ? 'kaigo-badge' : (activeResult.opponentIsRare ? 'rare-badge' : '')} style={{
-                  fontSize: '0.72rem',
-                  padding: '2px 7px',
-                  borderRadius: '4px',
-                  background: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
-                  color: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
-                  border: (activeResult.opponentIsKaigo || activeResult.opponentIsRare) ? undefined : (activeResult.opponentGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
-                }}>
-                  {activeResult.opponentIsKaigo ? '魁罡' : (activeResult.opponentIsRare ? '選ばれし極星' : (activeResult.opponentGender === 'female' ? '女性' : '男性'))}
-                </span>
               </div>
 
               {/* Dynamic Attributes Grid */}
@@ -1698,42 +1776,52 @@ export const ResultView: React.FC<ResultViewProps> = ({
             {(() => {
               const parts = activeResult.dailyActionAdviceParts?.length ? activeResult.dailyActionAdviceParts : [activeResult.dailyActionAdvice || ''];
               const tips = activeResult.lineTips;
-              // 2段落目以降と「二人のLINEのコツ」。非会員にはぼかして見せ、無料会員登録で開く。
-              const more = (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {parts.slice(1).map((p, i) => (
-                    <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{p}</div>
-                  ))}
-                  {tips && (
-                    <div style={{ marginTop: '0.35rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ</div>
-                      <div style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{tips.intro}</div>
-                      {tips.items.map((it, i) => (
-                        <div key={i} style={{ lineHeight: '1.65' }}>
-                          <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
-                          <div style={{ color: '#e8e3d8' }}>{it.text}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              // 2段落目以降と「二人のLINEのコツ」の本文はプレミアム限定。見出しは誰にでも見せ、本文だけぼかす。
+              const locked = !isSubscribed;
+              const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
+              const lockButton = (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.3rem' }}>
+                  <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                    <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  </button>
                 </div>
               );
-              const hasMore = parts.length > 1 || !!tips;
               return (
                 <>
                   <div style={{ color: '#e8e3d8', lineHeight: '1.55' }}>{parts[0]}</div>
-                  {hasMore && (isRegistered ? (
-                    <div style={{ marginTop: '0.35rem' }}>{more}</div>
-                  ) : (
-                    <div className="premium-blur-container" style={{ maxHeight: '140px', minHeight: '120px', cursor: 'pointer', borderRadius: '8px', marginTop: '0.2rem' }} onClick={handleLockTagClick}>
-                      <div className="mosaic-blurred-text" style={{ display: 'block' }}>{more}</div>
-                      <div className="premium-lock-overlay">
-                        <button className="premium-lock-tag" onClick={handleLockTagClick}>
-                          <Lock size={11} /> 無料会員登録で続きを読む
-                        </button>
-                      </div>
+                  {parts.length > 1 && (
+                    <div
+                      style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined }}
+                      onClick={locked ? handleLockTagClick : undefined}
+                    >
+                      {parts.slice(1).map((p, i) => (
+                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, locked)}</div>
+                      ))}
+                      {locked && (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
+                  {tips && (
+                    <div
+                      style={{ marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
+                      onClick={locked ? handleLockTagClick : undefined}
+                    >
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>(プレミアム限定)</span>}</div>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(tips.intro, locked)}</div>
+                      {tips.items.map((it, i) => (
+                        <div key={i} style={{ lineHeight: '1.65' }}>
+                          <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
+                          <div style={{ color: '#e8e3d8', ...blurred }}>{lockedText(it.text, locked)}</div>
+                        </div>
+                      ))}
+                      {locked && lockButton}
+                    </div>
+                  )}
                 </>
               );
             })()}
@@ -1770,7 +1858,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   if (ok) handleScrollToRegister();
                 });
               } else if (!isSubscribed) {
-                showConfirm('毎朝8時の運勢通知機能は、月額500円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+                showConfirm('毎朝8時の運勢通知機能は、月額980円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
                   if (ok) handleScrollToSub();
                 });
               } else {
@@ -1824,7 +1912,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </p>
                   <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleLockTagClick}>
                     <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
-                      {formatAppraisalText(`${topic.detail} ${topic.detail}`)}
+                      {lockedText(`${topic.detail} ${topic.detail}`, true)}
                     </p>
                     
                     {/* Glowing Lock Overlay */}
@@ -2037,7 +2125,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 {activeResult.opponentTorisetsu.killingWords.slice(1).map((word, idx) => (
                   <li key={idx + 1} style={{ marginBottom: '0.2rem' }}>
-                    {word.replace(/〇〇/g, oppNickname || 'お相手')}
+                    {lockedText(word.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                   </li>
                 ))}
               </ul>
@@ -2090,7 +2178,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 {activeResult.opponentTorisetsu.ngBehaviors.slice(1).map((ng, idx) => (
                   <li key={idx} style={{ marginBottom: '0.2rem' }}>
-                    {ng.replace(/〇〇/g, oppNickname || 'お相手')}
+                    {lockedText(ng.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                   </li>
                 ))}
               </ul>
@@ -2139,7 +2227,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     filter: !isSubscribed ? 'blur(4.5px)' : 'none',
                     userSelect: !isSubscribed ? 'none' : 'auto',
                     opacity: !isSubscribed ? 0.65 : 1
-                  }}><strong>【送るべき神返信】</strong> {activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
+                  }}><strong>【送るべき神返信】</strong> {lockedText(activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</p>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2180,8 +2268,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>Lv.1 (初期):</strong> {activeResult.opponentTorisetsu.greenFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手')}</div>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.3 (ゾッコン):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手')}</div>
+                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
+                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.3 (ゾッコン):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2222,7 +2310,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>【危険サイン】</strong> {activeResult.opponentTorisetsu.redFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>【逆転挽回策】</strong> {(activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手')}</div>
+                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>【逆転挽回策】</strong> {lockedText((activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2269,7 +2357,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}>
                     <div style={{ marginTop: '0.2rem' }}><strong>【距離を縮める質問テンプレ】</strong></div>
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                      {(activeResult.opponentTorisetsu.lineTemplateTopic || '「休みの日って何してる時がいちばん癒される？」').replace(/〇〇/g, oppNickname || 'お相手')}
+                      {lockedText((activeResult.opponentTorisetsu.lineTemplateTopic || '「休みの日って何してる時がいちばん癒される？」').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                     </div>
                   </div>
                   {!isSubscribed && (
@@ -2312,7 +2400,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   userSelect: !isSubscribed ? 'none' : 'auto',
                   opacity: !isSubscribed ? 0.65 : 1
                 }}>
-                  {(activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手')}
+                  {lockedText((activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                 </p>
                 {!isSubscribed && (
               <div style={{
@@ -2353,7 +2441,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   userSelect: !isSubscribed ? 'none' : 'auto',
                   opacity: !isSubscribed ? 0.65 : 1
                 }}>
-                  {activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手')}
+                  {lockedText(activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                 </p>
                 {!isSubscribed && (
               <div style={{
@@ -2414,7 +2502,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
                     <p style={{ fontSize: '0.72rem', color: '#e2d9ee', lineHeight: '1.6', margin: 0 }}>
-                      月額500円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
+                      月額980円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
                     </p>
                   </div>
                 </div>
@@ -2471,7 +2559,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       letterSpacing: '0.02em'
                     }}
                   >
-                    🔒 プレミアム登録して全解禁 (月額500円)
+                    🔒 プレミアム登録して全解禁 (月額980円)
                   </button>
                 </div>
               </div>
@@ -2523,15 +2611,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}
               >
                 {activeResult.weeklyScores.map((day, index) => {
-                  const visuals = getScoreVisuals(day.score);
+                  const score = lockedScore(day.score, index, !isSubscribed);
+                  const visuals = getScoreVisuals(score);
                   return (
                     <div key={day.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                       <span style={{ fontSize: '0.7rem', color: visuals.textColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                        {day.score}点
+                        {score}点
                       </span>
                       <div style={{
                         width: '100%',
-                        height: `${day.score * 0.5}px`,
+                        height: `${score * 0.5}px`,
                         background: visuals.barColor,
                         borderRadius: '4px 4px 0 0',
                         boxShadow: visuals.shadow,
@@ -2567,8 +2656,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 flexDirection: 'column',
                 gap: '0.65rem'
               }}>
-                {activeResult.monthlyPreviews.map(m => {
-                  const visuals = getScoreVisuals(m.score);
+                {activeResult.monthlyPreviews.map((m, index) => {
+                  const score = lockedScore(m.score, index + 2, !isSubscribed);
+                  const visuals = getScoreVisuals(score);
                   return (
                     <div key={m.month} style={{ 
                       display: 'flex', 
@@ -2586,7 +2676,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             color: visuals.textColor,
                             filter: isSubscribed ? 'none' : 'blur(4.5px)',
                             userSelect: isSubscribed ? 'auto' : 'none'
-                          }}>{m.label}</span>
+                          }}>{isSubscribed ? m.label : '★★★'}</span>
                         </span>
                         <span style={{
                           color: visuals.textColor,
@@ -2600,7 +2690,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           filter: isSubscribed ? 'none' : 'blur(4px)',
                           userSelect: isSubscribed ? 'auto' : 'none'
                         }}>
-                          {m.score}点
+                          {score}点
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
@@ -2614,7 +2704,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         userSelect: isSubscribed ? 'auto' : 'none',
                         pointerEvents: isSubscribed ? 'auto' : 'none'
                       }}>
-                        {m.text}
+                        {lockedText(m.text, !isSubscribed)}
                       </p>
                       {!isSubscribed && (
                         <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
@@ -2645,8 +2735,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 flexDirection: 'column',
                 gap: '0.65rem'
               }}>
-                {activeResult.yearlyPreviews.map(y => {
-                  const visuals = getScoreVisuals(y.score);
+                {activeResult.yearlyPreviews.map((y, index) => {
+                  const score = lockedScore(y.score, index + 2, !isSubscribed);
+                  const visuals = getScoreVisuals(score);
                   return (
                     <div key={y.year} style={{ 
                       display: 'flex', 
@@ -2664,7 +2755,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             color: visuals.textColor,
                             filter: isSubscribed ? 'none' : 'blur(4.5px)',
                             userSelect: isSubscribed ? 'auto' : 'none'
-                          }}>{y.label}</span>
+                          }}>{isSubscribed ? y.label : '★★★'}</span>
                         </span>
                         <span style={{
                           color: visuals.textColor,
@@ -2678,7 +2769,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           filter: isSubscribed ? 'none' : 'blur(4px)',
                           userSelect: isSubscribed ? 'auto' : 'none'
                         }}>
-                          {y.score}点
+                          {score}点
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
@@ -2692,7 +2783,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         userSelect: isSubscribed ? 'auto' : 'none',
                         pointerEvents: isSubscribed ? 'auto' : 'none'
                       }}>
-                        {y.text}
+                        {lockedText(y.text, !isSubscribed)}
                       </p>
                       {!isSubscribed && (
                         <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
@@ -2743,7 +2834,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {hasOpponent ? '二人の未来予測スケジュールをすべて解禁' : 'あなたの未来予測スケジュールをすべて解禁'}
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.4', margin: 0 }}>
-                  月額500円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
+                  月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
                 </p>
               </div>
 
@@ -2800,7 +2891,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       letterSpacing: '0.02em'
                     }}
                   >
-                    🔒 プレミアム登録して全解禁 (月額500円)
+                    🔒 プレミアム登録して全解禁 (月額980円)
                   </button>
                 </div>
               )}
@@ -2853,10 +2944,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               zIndex: 100000,
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'center',
               alignItems: 'center',
               gap: '1.25rem',
-              padding: '1.5rem 1.25rem calc(6.5rem + var(--safe-bottom, 0px))',
+              padding: 'calc(1rem + env(safe-area-inset-top, 0px)) 1.25rem calc(2.5rem + var(--safe-bottom, 0px))',
               overflowY: 'auto',
               animation: 'fadeIn 0.2s ease'
             }}
@@ -2867,10 +2957,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 position: 'relative',
                 width: '100%',
                 maxWidth: '380px',
+                // 上下の auto で中央に寄せる（justifyContent: center だと、画面より高いとき上端が切れて✖が見えなくなる）
+                margin: 'auto 0',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '1rem'
+                gap: '0.75rem'
               }}
             >
               {/* Close Button */}
@@ -2879,9 +2971,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 aria-label="閉じる"
                 onClick={() => setZoomedImg(null)}
                 style={{
-                  position: 'absolute',
-                  top: '-3.2rem',
-                  right: 0,
+                  // カードの上に並べる（absolute で上へはみ出させると、iPhone で画面上端に隠れてカードと重なるため）
+                  alignSelf: 'flex-end',
+                  flexShrink: 0,
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',

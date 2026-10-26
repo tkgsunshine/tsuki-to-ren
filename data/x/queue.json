@@ -3529,7 +3529,25 @@
     "createdAt": "2026-10-09T08:54:32.927Z",
     "postedAt": "2026-10-23T08:57:54.000Z",
     "tweetId": "2113555501791551741",
-    "manual": true
+    "manual": true,
+    "metrics": {
+      "at": "2026-10-25T22:48:04.297Z",
+      "impressions": 18,
+      "likes": 1,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-24T22:43:35.844Z",
+      "impressions": 18,
+      "likes": 1,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-18-chara-1",
@@ -4230,8 +4248,29 @@
     "kind": "value",
     "text": "❤️🔮10月25日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：癸羊（深海の術師×ひつじ）\n【本命星】：八白土星\n\n-結果-\n【今日の点数】：66点\n【今日の空気】心身を調和させ、自分らしさを輝かせる日\n【LINEのおすすめ時間】12:00〜14:00\n\n（解説はリプ欄へ）",
     "image": "public/assets/astrology_sheep_sample.jpg",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T06:27:33.114Z"
+    "status": "posted",
+    "createdAt": "2026-10-22T06:27:33.114Z",
+    "postedAt": "2026-10-24T15:45:22.000Z",
+    "tweetId": "2114020434014547977",
+    "manual": true,
+    "metrics": {
+      "at": "2026-10-25T22:48:04.297Z",
+      "impressions": 23,
+      "likes": 1,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-25T22:48:04.297Z",
+      "impressions": 23,
+      "likes": 1,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-25-chara-1-reply",

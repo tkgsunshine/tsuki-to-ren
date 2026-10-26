@@ -1234,3 +1234,51 @@ h1, h2, h3, h4, button, label {
   height: max(100%, 44px);
   transform: translate(-50%, -50%);
 }
+
+/* 鑑定結果の守護獣カード: 画像をカード上部いっぱいに敷き、下へ溶かす（カードの padding-top は 0 にしている） */
+.guardian-hero {
+  position: relative;
+  width: calc(100% + 2.5rem);
+  margin: 0 -1.25rem;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.guardian-hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+}
+
+/* 見出しと称号の読みやすさのため、上端と下側をうっすら暗くする */
+.guardian-hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(8, 11, 16, 0.55) 0%, rgba(8, 11, 16, 0) 22%, rgba(8, 11, 16, 0) 50%, rgba(8, 11, 16, 0.75) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.guardian-hero-header {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.guardian-hero-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1rem;
+  z-index: 3;
+}

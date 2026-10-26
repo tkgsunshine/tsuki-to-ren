@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
-import { showAlert, showConfirm } from './AppDialog';
+import { formatMonthDay } from '../services/premium';
+import { showConfirm } from './AppDialog';
 
 const worries = [
   '既読のまま返事がこなくて、なかなか眠れない夜',
@@ -104,13 +105,15 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
 interface PremiumLPModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubscribe: () => void;
+  /** Stripe の決済画面へ移動する（戻ってきたときの完了のお知らせは App が出す） */
+  onSubscribe: () => void | Promise<void>;
   isSubscribed: boolean;
   isRegistered: boolean;
   onRegisterFirst: () => void;
-  onCancelSubscription?: () => void;
-  /** 鑑定結果が表示中なら完了のお知らせは結果の先頭に出すので、alert は出さない */
-  isResultVisible?: boolean;
+  /** 解約理由を添えて、Stripe の解約・お支払い画面へ移動する */
+  onCancelSubscription?: (reasons: string[], note: string) => void | Promise<void>;
+  /** 解約済み（更新日で終了）のとき、その終了日（ISO）。この場合は解約アンケートを出さず、お支払い画面へ直接進む */
+  premiumEndsOn?: string | null;
 }
 
 export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
@@ -121,7 +124,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   isRegistered,
   onRegisterFirst,
   onCancelSubscription,
-  isResultVisible = false
+  premiumEndsOn
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -140,16 +143,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       return;
     }
 
+    // Stripe の決済画面へ移動する。開けなかったときは App がお知らせを出し、ボタンを元に戻す
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      onClose();
-      onSubscribe();
-      // 鑑定結果の表示中は、ResultView がトリセツ（無いときは結果の先頭）へ移動して完了のお知らせを出す
-      if (!isResultVisible) {
-        showAlert('🌙 プレミアムへようこそ。\nすべての機能が使えるようになりました。これから毎日、そばで見守らせてくださいね。');
-      }
-    }, 1200);
+    void Promise.resolve(onSubscribe()).finally(() => setIsProcessing(false));
   };
 
   const faqs = [
@@ -423,12 +419,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.25rem' }}>
                 <span className="font-serif gold-text" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>
-                  ¥500
+                  ¥980
                 </span>
                 <span style={{ fontSize: '0.82rem', color: '#d8d2c6' }}>/ 月（税込）</span>
               </div>
               <div style={{ fontSize: '0.72rem', color: '#d8d2c6', marginTop: '0.25rem' }}>
-                1日あたり約16円
+                1日あたり約33円
               </div>
               {!isSubscribed && (
                 <span style={{
@@ -578,11 +574,13 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
                 boxSizing: 'border-box'
               }}>
-                ✓ あなたは現在プレミアム会員です
+                {premiumEndsOn
+                  ? `解約済みです。${formatMonthDay(premiumEndsOn)}までプレミアムを使えます`
+                  : '✓ あなたは現在プレミアム会員です'}
               </div>
               <button
                 type="button"
-                onClick={() => setShowCancelModal(true)}
+                onClick={() => (premiumEndsOn ? onCancelSubscription?.([], '') : setShowCancelModal(true))}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -596,7 +594,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#e6a99c')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = '#a9a49a')}
               >
-                プレミアム会員の解約手続きはこちら
+                {premiumEndsOn ? '解約の取り消し・お支払いの確認はこちら' : 'プレミアム会員の解約手続きはこちら'}
               </button>
             </div>
           ) : (
@@ -625,11 +623,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               }}
             >
               {isProcessing ? (
-                <span>登録処理中...</span>
+                <span>決済画面へ移動しています...</span>
               ) : (
                 <>
                   <Moon size={18} style={{ fill: 'currentColor' }} />
-                  <span>月額500円ではじめる</span>
+                  <span>月額980円ではじめる</span>
                   <ArrowRight size={18} />
                 </>
               )}
@@ -693,11 +691,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       <SubscriptionCancelModal
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
-        onConfirmCancel={() => {
-          setShowCancelModal(false);
-          onCancelSubscription?.();
-          onClose();
-        }}
+        onConfirmCancel={(reasons, note) => onCancelSubscription?.(reasons, note)}
       />
     </div>
   );

@@ -83,5 +83,15 @@
     "date": "2026-10-24",
     "followers": 40,
     "tweets": 239
+  },
+  {
+    "date": "2026-10-25",
+    "followers": 41,
+    "tweets": 244
+  },
+  {
+    "date": "2026-10-26",
+    "followers": 44,
+    "tweets": 268
   }
 ]

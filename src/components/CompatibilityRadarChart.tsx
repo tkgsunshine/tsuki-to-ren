@@ -3,6 +3,8 @@ import { Lock } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import type { CompatibilityRadarScores } from '../utils/fortuneEngine';
 
+const IS_PRODUCTION_SITE = typeof window !== 'undefined' && window.location.hostname.endsWith('tsuki-to-ren.com');
+
 interface CompatibilityRadarChartProps {
   scores: CompatibilityRadarScores;
   isUnlocked?: boolean;
@@ -296,9 +298,11 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               }}
             >
               <span style={{ fontSize: '1rem' }}>🔓</span>
-              <span>プレミアム登録して全解禁（月額500円）</span>
+              <span>プレミアム登録して全解禁（月額980円）</span>
             </button>
 
+            {/* 本番では出さない（押すだけで本物の点数が見えてしまうため）。プレビューと手元では使える */}
+            {!IS_PRODUCTION_SITE && (
             <button
               onClick={() => setDemoUnlocked(true)}
               style={{
@@ -313,6 +317,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
             >
               デモ表示（プレビュー確認）
             </button>
+            )}
           </div>
         )}
       </div>
@@ -360,7 +365,8 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
                         display: 'inline-block',
                         opacity: 0.85
                       }}>
-                        {axis.val}
+                        {/* 本物の点数は画面に置かない（ぼかしは見た目だけなので） */}
+                        {[72, 85, 64, 90, 78, 68][i]}
                       </span>
                       <span style={{ color: themeColor, fontSize: '0.75rem', fontWeight: 'bold' }}>点</span>
                     </>
