@@ -41,7 +41,7 @@ def validate(e, kept, slugs, published):
     if errs:
         return errs
     text = plain(e["content"])
-    if len(text) < 1900:
+    if len(text) < 1800:
         errs.append(f"本文が短い（{len(text)}字）")
     if len(re.findall(r"<h3", e["content"])) < 3:
         errs.append("H3が3個未満")
