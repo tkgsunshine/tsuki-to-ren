@@ -1093,59 +1093,6 @@ function App() {
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', zIndex: 1, position: 'relative' }}>
-              {/* Ren Lobby Card */}
-              <div className="glass-panel" style={{
-                display: 'flex',
-                padding: '1.25rem 1rem',
-                alignItems: 'center',
-                gap: '1rem',
-                cursor: 'pointer',
-                border: '1px solid rgba(58, 134, 171,0.15)',
-                transition: 'all 0.3s ease',
-                opacity: isRegistered ? 1 : 0.85
-              }} onClick={() => {
-                if (!isRegistered) {
-                  setShowAuthModal(true);
-                } else {
-                  setSelectedCharacter('ren');
-                  setIsChatOpen(true);
-                }
-              }}>
-                <div style={{ position: 'relative' }}>
-                  <img src="/assets/ren.jpg" alt="蓮" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-ren)', boxShadow: 'var(--shadow-ren)', filter: isRegistered ? 'none' : 'grayscale(25%) blur(0.3px)' }} />
-                  {!isRegistered && (
-                    <div style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'rgba(0,0,0,0.45)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'var(--color-gold)'
-                    }}>
-                      <Lock size={16} />
-                    </div>
-                  )}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#9cc6d8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    蓮の書斎 {!isRegistered && <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', border: '1px solid rgba(226,192,116,0.3)', padding: '1px 4px', borderRadius: '4px', background: 'rgba(226,192,116,0.05)' }}>要登録</span>}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
-                </div>
-                {isRegistered ? (
-                  <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
-                    待機中
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
-                    無料登録して開放
-                  </span>
-                )}
-              </div>
-
               {/* Tsuki Lobby Card */}
               <div className="glass-panel" style={{
                 display: 'flex',
@@ -1186,6 +1133,59 @@ function App() {
                     月の温室 (🌙) {!isRegistered && <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', border: '1px solid rgba(226,192,116,0.3)', padding: '1px 4px', borderRadius: '4px', background: 'rgba(226,192,116,0.05)' }}>要登録</span>}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「不安な気持ち、そのまま話してくださいね。ちゃんと受けとめますよ。」</div>
+                </div>
+                {isRegistered ? (
+                  <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
+                    待機中
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
+                    無料登録して開放
+                  </span>
+                )}
+              </div>
+
+              {/* Ren Lobby Card */}
+              <div className="glass-panel" style={{
+                display: 'flex',
+                padding: '1.25rem 1rem',
+                alignItems: 'center',
+                gap: '1rem',
+                cursor: 'pointer',
+                border: '1px solid rgba(58, 134, 171,0.15)',
+                transition: 'all 0.3s ease',
+                opacity: isRegistered ? 1 : 0.85
+              }} onClick={() => {
+                if (!isRegistered) {
+                  setShowAuthModal(true);
+                } else {
+                  setSelectedCharacter('ren');
+                  setIsChatOpen(true);
+                }
+              }}>
+                <div style={{ position: 'relative' }}>
+                  <img src="/assets/ren.jpg" alt="蓮" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-ren)', boxShadow: 'var(--shadow-ren)', filter: isRegistered ? 'none' : 'grayscale(25%) blur(0.3px)' }} />
+                  {!isRegistered && (
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'rgba(0,0,0,0.45)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--color-gold)'
+                    }}>
+                      <Lock size={16} />
+                    </div>
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#9cc6d8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    蓮の書斎 {!isRegistered && <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', border: '1px solid rgba(226,192,116,0.3)', padding: '1px 4px', borderRadius: '4px', background: 'rgba(226,192,116,0.05)' }}>要登録</span>}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
                 </div>
                 {isRegistered ? (
                   <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>

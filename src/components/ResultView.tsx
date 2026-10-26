@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
-import { MoonMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { InstallGuideModal } from './InstallGuideModal';
@@ -488,6 +488,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
   });
   const myAstrologyRef = useRef<HTMLDivElement>(null);
 
+  // 最上部の丸いメーター: 表示時・点数が変わったときに 0 から点数まで伸ばす（0〜1）
+  const [ringProgress, setRingProgress] = useState(0);
+  useEffect(() => {
+    let reduceMotion = false;
+    try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { /* 古いブラウザ */ }
+    if (reduceMotion) { setRingProgress(1); return; }
+    const duration = 1400;
+    let start: number | null = null;
+    let frame = 0;
+    const tick = (now: number) => {
+      if (start === null) start = now;
+      const t = Math.min(1, (now - start) / duration);
+      setRingProgress(1 - Math.pow(1 - t, 3));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    setRingProgress(0);
+    // 画面のフェードインが終わってから伸ばし始める
+    const delay = window.setTimeout(() => { frame = requestAnimationFrame(tick); }, 350);
+    return () => { window.clearTimeout(delay); cancelAnimationFrame(frame); };
+  }, [activeResult.baseScore, activeResult.dailyScore]);
+
   useEffect(() => {
     const mainEl = document.querySelector('.main-content');
     if (!mainEl) return;
@@ -875,93 +896,123 @@ export const ResultView: React.FC<ResultViewProps> = ({
           約7,465万通りの組み合わせから読み解く鑑定
         </div>
         
-        {/* Score Pods: 基本相性と今日の相性を1本のものさしで比べる */}
+        {/* Score Rings: 基本相性（小）と今日の相性（大）を2つの丸いメーターで比べる */}
         {hasOpponent ? (() => {
           const base = activeResult.baseScore;
           const daily = activeResult.dailyScore;
           const diff = daily - base;
-          const todayColor = selectedChar === 'ren' ? '#9cc6d8' : '#e2d9ee';
-          const todayGlow = selectedChar === 'ren' ? 'rgba(156, 198, 216, 0.6)' : 'rgba(226, 217, 238, 0.6)';
-          const now = new Date();
-          const todayLabel = `${now.getMonth() + 1}/${now.getDate()} 今日`;
-          const diffColor = diff > 0 ? '#8fd3ae' : diff < 0 ? '#e0a9a0' : '#d8cfb8';
-          const diffText = diff > 0
-            ? `▲ 今日は${diff}点アップ`
-            : diff < 0
-              ? `▼ 今日は${-diff}点ダウン`
-              : '＝ 今日はいつも通り';
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
-          // 両端でラベルがカードからはみ出さないよう、ラベルの位置だけ内側に寄せる
-          const labelPos = (v: number) => Math.max(8, Math.min(92, v));
-          const lo = clamp(Math.min(base, daily));
-          const hi = clamp(Math.max(base, daily));
+          const mood = diff > 0
+            ? { phase: 'full' as const, title: '今日は追い風', sign: `+${diff}点`, color: '#8fd3ae' }
+            : diff < 0
+              ? { phase: 'crescent' as const, title: '今日はひと休み', sign: `−${-diff}点`, color: '#e0a9a0' }
+              : { phase: 'half' as const, title: '今日はいつも通り', sign: '±0点', color: '#d8cfb8' };
+          // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
+          const labelsCollide = Math.abs(diff) < 28;
+          const labelPos = (v: number) => Math.max(14, Math.min(86, v));
+          const renderRing = (opts: { size: number; score: number; gradId: string; from: string; to: string; glow: string; icon: React.ReactNode; label: string; caption: string; numColor: string }) => {
+            const stroke = opts.size * 0.055;
+            const r = (opts.size - stroke) / 2 - 2;
+            const c = 2 * Math.PI * r;
+            return (
+              <div style={{ position: 'relative', width: opts.size, height: opts.size, flexShrink: 0 }}>
+                <svg width={opts.size} height={opts.size} style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)', filter: `drop-shadow(0 0 6px ${opts.glow})` }} aria-hidden="true">
+                  <defs>
+                    <linearGradient id={opts.gradId} x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor={opts.from} />
+                      <stop offset="100%" stopColor={opts.to} />
+                    </linearGradient>
+                  </defs>
+                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="rgba(10,12,28,0.55)" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
+                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="none" stroke={`url(#${opts.gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * clamp(opts.score) * ringProgress) / 100} ${c}`} style={{ opacity: ringProgress > 0 ? 1 : 0 }} />
+                </svg>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  {opts.icon}
+                  <span style={{ fontSize: opts.size > 130 ? '0.74rem' : '0.66rem', color: '#e8e3d8', fontWeight: 600, marginTop: '0.1rem' }}>{opts.label}</span>
+                  <div className="font-serif" style={{
+                    fontSize: `${opts.size * 0.3}px`,
+                    fontWeight: 800,
+                    color: opts.numColor,
+                    lineHeight: 1.05,
+                    textShadow: `0 0 14px ${opts.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '1px'
+                  }}>
+                    {Math.round(opts.score * ringProgress)}<span style={{ fontSize: `${opts.size * 0.1}px`, fontWeight: 'bold' }}>点</span>
+                  </div>
+                  {opts.caption && <span style={{ fontSize: `${Math.round(opts.size * 0.072)}px`, color: '#a9a293', marginTop: '0.15rem' }}>{opts.caption}</span>}
+                </div>
+              </div>
+            );
+          };
           return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', margin: '0.2rem 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>基本相性</div>
-                  <div className="font-serif" style={{
-                    fontSize: '2.2rem',
-                    fontWeight: '800',
-                    color: '#f2e2b3',
-                    lineHeight: 1,
-                    textShadow: '0 0 15px rgba(242, 226, 179, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    justifyContent: 'center',
-                    gap: '2px'
-                  }}>
-                    {base}<span style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>点</span>
-                  </div>
-                  <div style={{ fontSize: '0.62rem', color: '#a9a293', marginTop: '0.25rem' }}>ずっと変わらない</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', margin: '0.2rem 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+                {renderRing({
+                  size: 116,
+                  score: base,
+                  gradId: 'ringBaseGrad',
+                  from: '#9f86c0',
+                  to: '#e2c074',
+                  glow: 'rgba(226, 192, 116, 0.45)',
+                  icon: <Heart size={13} style={{ fill: '#cdbfe2', color: '#cdbfe2' }} />,
+                  label: '基本相性',
+                  caption: '',
+                  numColor: '#f6e6c2'
+                })}
+                {renderRing({
+                  size: 156,
+                  score: daily,
+                  gradId: 'ringTodayGrad',
+                  from: '#9cc6d8',
+                  to: '#3a86ab',
+                  glow: 'rgba(156, 198, 216, 0.55)',
+                  icon: <MoonPhaseMark size={18} tint="blue" />,
+                  label: '今日の相性',
+                  caption: '毎日変わる',
+                  numColor: '#e8f3f8'
+                })}
+              </div>
+
+              {/* 基本→今日 のバー */}
+              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
+                <div style={{ position: 'relative', height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #9f86c0 0%, #e2c074 50%, #3a86ab 100%)', opacity: 0.85 }}>
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#f6e6c2', border: '3px solid #151827' }} />
+                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9cc6d8', border: '3px solid #151827', boxShadow: '0 0 10px rgba(156,198,216,0.8)' }} />
                 </div>
-                <div aria-hidden="true" style={{ fontSize: '1.3rem', color: diffColor, paddingBottom: '1.1rem' }}>→</div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>{todayLabel}</div>
-                  <div className="font-serif" style={{
-                    fontSize: '2.75rem',
-                    fontWeight: '800',
-                    color: todayColor,
-                    lineHeight: 1,
-                    textShadow: `0 0 15px ${todayGlow}, 0 2px 4px rgba(0,0,0,0.5)`,
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    justifyContent: 'center',
-                    gap: '2px'
-                  }}>
-                    {daily}<span style={{ fontSize: '1rem', fontWeight: 'bold' }}>点</span>
-                  </div>
-                  <div style={{ fontSize: '0.62rem', color: '#a9a293', marginTop: '0.25rem' }}>毎日変わる</div>
+                <div style={{ position: 'absolute', bottom: '14px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                  <div style={{ fontSize: '0.62rem', color: '#d6e8f0' }}>今日の相性</div>
+                  <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9cc6d8' }}>{daily}<span style={{ fontSize: '0.65rem' }}>点</span></div>
+                </div>
+                <div style={{ position: 'absolute', ...(labelsCollide ? { top: '14px' } : { bottom: '14px' }), left: `${labelPos(base)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                  <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>基本相性</div>
+                  <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f6e6c2' }}>{base}<span style={{ fontSize: '0.65rem' }}>点</span></div>
                 </div>
               </div>
 
-              {/* ものさし（0〜100点）: 基本の印は線の下、今日の印は線の上にラベルを出して重なりを避ける */}
-              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: '1.9rem 0.5rem 2rem' }}>
-                <div style={{ position: 'relative', height: '10px', borderRadius: '5px', background: 'rgba(255,255,255,0.09)' }}>
-                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${clamp(base)}%`, borderRadius: '5px', background: 'linear-gradient(90deg, rgba(226,192,116,0.3) 0%, #e2c074 100%)' }} />
-                  {diff !== 0 && (
-                    <div style={{ position: 'absolute', top: '50%', left: `${lo}%`, width: `${hi - lo}%`, height: '4px', transform: 'translateY(-50%)', background: `repeating-linear-gradient(90deg, ${diffColor} 0 5px, transparent 5px 9px)` }} />
-                  )}
-                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#e2c074', border: '3px solid #151827' }} />
-                  <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: todayColor, border: '3px solid #151827', boxShadow: `0 0 10px ${todayGlow}` }} />
+              {/* 今日の流れ: 枠で囲まず、光る天気アイコン＋グラデーション文字で見せる */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', marginTop: '0.1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', width: '100%' }}>
+                  <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226,192,116,0.5))' }} />
+                  <MoonPhaseMark size={34} phase={mood.phase} />
+                  <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(58,134,171,0.6), transparent)' }} />
                 </div>
-                <div style={{ position: 'absolute', bottom: '16px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', fontSize: '0.7rem', color: todayColor, whiteSpace: 'nowrap', fontWeight: 600 }}>今日 <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 800 }}>{daily}</span></div>
-                <div style={{ position: 'absolute', top: '16px', left: `${labelPos(base)}%`, transform: 'translateX(-50%)', fontSize: '0.7rem', color: '#f2e2b3', whiteSpace: 'nowrap', fontWeight: 600 }}>基本 <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 800 }}>{base}</span></div>
-              </div>
-
-              <div style={{ textAlign: 'center' }}>
-                <span style={{
-                  display: 'inline-block',
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  padding: '0.25rem 0.9rem',
-                  borderRadius: '10px',
-                  color: diffColor,
-                  background: diff > 0 ? 'rgba(111, 176, 143, 0.16)' : diff < 0 ? 'rgba(224, 169, 160, 0.14)' : 'rgba(255,255,255,0.06)',
-                  border: `1px solid ${diff > 0 ? 'rgba(111, 176, 143, 0.45)' : diff < 0 ? 'rgba(224, 169, 160, 0.4)' : 'rgba(255,255,255,0.15)'}`
+                <div className="font-serif" style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.12em',
+                  background: 'linear-gradient(90deg, #f6e6c2 0%, #e2c074 45%, #9cc6d8 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  WebkitTextFillColor: 'transparent'
                 }}>
-                  {diffText}
-                </span>
+                  {mood.title}
+                </div>
+                <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
+                  基本相性より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
+                </div>
               </div>
             </div>
           );
