@@ -299,7 +299,9 @@ function App() {
     }
     let cancelled = false;
     (async () => {
-      const tries = back === 'success' ? 8 : 1;
+      // After the payment page, wait for the webhook to make the account Premium; after the billing page
+      // (cancel, undo cancel), the change also arrives by webhook a few seconds later, so read it again a few times.
+      const tries = back === 'success' ? 8 : back === 'portal' ? 5 : 1;
       for (let i = 0; i < tries; i++) {
         const status = await fetchPremiumStatus();
         if (cancelled) return;
@@ -307,7 +309,7 @@ function App() {
           setIsSubscribed(status.active);
           setPremiumEndsOn(status.active && status.cancelAtPeriodEnd ? status.currentPeriodEnd : null);
         }
-        if (status?.active) {
+        if (status?.active && back !== 'portal') {
           if (back === 'success') setShowPremiumWelcome(true);
           return;
         }
