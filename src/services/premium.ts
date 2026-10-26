@@ -11,6 +11,13 @@ export interface PremiumStatus {
   hasBilling: boolean;
 }
 
+/** "11/26" for an ISO date, in Japan time */
+export const formatMonthDay = (iso: string): string => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Tokyo' });
+};
+
 const CACHE_KEY = 'hasu_tsuki_premium';
 
 // Last known membership per account, so a member's screen does not flash back to the free version on each visit
