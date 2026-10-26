@@ -1765,42 +1765,52 @@ export const ResultView: React.FC<ResultViewProps> = ({
             {(() => {
               const parts = activeResult.dailyActionAdviceParts?.length ? activeResult.dailyActionAdviceParts : [activeResult.dailyActionAdvice || ''];
               const tips = activeResult.lineTips;
-              // 2段落目以降と「二人のLINEのコツ」。非会員にはぼかして見せ、無料会員登録で開く。
-              const more = (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {parts.slice(1).map((p, i) => (
-                    <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{p}</div>
-                  ))}
-                  {tips && (
-                    <div style={{ marginTop: '0.35rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ</div>
-                      <div style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{tips.intro}</div>
-                      {tips.items.map((it, i) => (
-                        <div key={i} style={{ lineHeight: '1.65' }}>
-                          <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
-                          <div style={{ color: '#e8e3d8' }}>{it.text}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              // 2段落目以降と「二人のLINEのコツ」の本文はプレミアム限定。見出しは誰にでも見せ、本文だけぼかす。
+              const locked = !isSubscribed;
+              const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
+              const lockButton = (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.3rem' }}>
+                  <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                    <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  </button>
                 </div>
               );
-              const hasMore = parts.length > 1 || !!tips;
               return (
                 <>
                   <div style={{ color: '#e8e3d8', lineHeight: '1.55' }}>{parts[0]}</div>
-                  {hasMore && (isRegistered ? (
-                    <div style={{ marginTop: '0.35rem' }}>{more}</div>
-                  ) : (
-                    <div className="premium-blur-container" style={{ maxHeight: '140px', minHeight: '120px', cursor: 'pointer', borderRadius: '8px', marginTop: '0.2rem' }} onClick={handleLockTagClick}>
-                      <div className="mosaic-blurred-text" style={{ display: 'block' }}>{more}</div>
-                      <div className="premium-lock-overlay">
-                        <button className="premium-lock-tag" onClick={handleLockTagClick}>
-                          <Lock size={11} /> 無料会員登録で続きを読む
-                        </button>
-                      </div>
+                  {parts.length > 1 && (
+                    <div
+                      style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined }}
+                      onClick={locked ? handleLockTagClick : undefined}
+                    >
+                      {parts.slice(1).map((p, i) => (
+                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{p}</div>
+                      ))}
+                      {locked && (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
+                  {tips && (
+                    <div
+                      style={{ marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
+                      onClick={locked ? handleLockTagClick : undefined}
+                    >
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>(プレミアム限定)</span>}</div>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{tips.intro}</div>
+                      {tips.items.map((it, i) => (
+                        <div key={i} style={{ lineHeight: '1.65' }}>
+                          <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
+                          <div style={{ color: '#e8e3d8', ...blurred }}>{it.text}</div>
+                        </div>
+                      ))}
+                      {locked && lockButton}
+                    </div>
+                  )}
                 </>
               );
             })()}
