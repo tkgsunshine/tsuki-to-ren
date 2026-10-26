@@ -2921,10 +2921,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               zIndex: 100000,
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'center',
               alignItems: 'center',
               gap: '1.25rem',
-              padding: '1.5rem 1.25rem calc(6.5rem + var(--safe-bottom, 0px))',
+              padding: 'calc(1rem + env(safe-area-inset-top, 0px)) 1.25rem calc(2.5rem + var(--safe-bottom, 0px))',
               overflowY: 'auto',
               animation: 'fadeIn 0.2s ease'
             }}
@@ -2935,10 +2934,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 position: 'relative',
                 width: '100%',
                 maxWidth: '380px',
+                // 上下の auto で中央に寄せる（justifyContent: center だと、画面より高いとき上端が切れて✖が見えなくなる）
+                margin: 'auto 0',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '1rem'
+                gap: '0.75rem'
               }}
             >
               {/* Close Button */}
@@ -2947,9 +2948,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 aria-label="閉じる"
                 onClick={() => setZoomedImg(null)}
                 style={{
-                  position: 'absolute',
-                  top: '-3.2rem',
-                  right: 0,
+                  // カードの上に並べる（absolute で上へはみ出させると、iPhone で画面上端に隠れてカードと重なるため）
+                  alignSelf: 'flex-end',
+                  flexShrink: 0,
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
