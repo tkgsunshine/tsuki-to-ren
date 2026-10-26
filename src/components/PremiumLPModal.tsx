@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
+import { formatMonthDay } from '../services/premium';
 import { showConfirm } from './AppDialog';
 
 const worries = [
@@ -111,6 +112,8 @@ interface PremiumLPModalProps {
   onRegisterFirst: () => void;
   /** 解約理由を添えて、Stripe の解約・お支払い画面へ移動する */
   onCancelSubscription?: (reasons: string[], note: string) => void | Promise<void>;
+  /** 解約済み（更新日で終了）のとき、その終了日（ISO）。この場合は解約アンケートを出さず、お支払い画面へ直接進む */
+  premiumEndsOn?: string | null;
 }
 
 export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
@@ -120,7 +123,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   isSubscribed,
   isRegistered,
   onRegisterFirst,
-  onCancelSubscription
+  onCancelSubscription,
+  premiumEndsOn
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -570,11 +574,13 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
                 boxSizing: 'border-box'
               }}>
-                ✓ あなたは現在プレミアム会員です
+                {premiumEndsOn
+                  ? `解約済みです。${formatMonthDay(premiumEndsOn)}までプレミアムを使えます`
+                  : '✓ あなたは現在プレミアム会員です'}
               </div>
               <button
                 type="button"
-                onClick={() => setShowCancelModal(true)}
+                onClick={() => (premiumEndsOn ? onCancelSubscription?.([], '') : setShowCancelModal(true))}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -588,7 +594,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#e6a99c')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = '#a9a49a')}
               >
-                プレミアム会員の解約手続きはこちら
+                {premiumEndsOn ? '解約の取り消し・お支払いの確認はこちら' : 'プレミアム会員の解約手続きはこちら'}
               </button>
             </div>
           ) : (

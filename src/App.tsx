@@ -31,7 +31,7 @@ import { ColumnDetailView } from './components/ColumnDetailView';
 import { trackFortune } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm } from './components/AppDialog';
-import { fetchPremiumStatus, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
+import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -276,11 +276,13 @@ function App() {
   const [isSubscribed, setIsSubscribed] = useState(() => {
     try { return readCachedPremium(JSON.parse(localStorage.getItem('hasu_tsuki_user') || 'null')?.uid); } catch { return false; }
   });
+  // Set when the member has cancelled: the date Premium ends (Stripe stops renewal at the period end)
+  const [premiumEndsOn, setPremiumEndsOn] = useState<string | null>(null);
   const premiumUidRef = useRef<string | null>(null);
   useEffect(() => {
     const uid = currentUser?.uid || null;
     if (!uid) {
-      if (premiumUidRef.current) setIsSubscribed(false); // signed out
+      if (premiumUidRef.current) { setIsSubscribed(false); setPremiumEndsOn(null); } // signed out
       premiumUidRef.current = null;
       return;
     }
@@ -299,7 +301,10 @@ function App() {
       for (let i = 0; i < tries; i++) {
         const status = await fetchPremiumStatus();
         if (cancelled) return;
-        if (status) setIsSubscribed(status.active);
+        if (status) {
+          setIsSubscribed(status.active);
+          setPremiumEndsOn(status.active && status.cancelAtPeriodEnd ? status.currentPeriodEnd : null);
+        }
         if (status?.active) {
           if (back === 'success') showAlert('🌙 プレミアムへようこそ。\nすべての機能が使えるようになりました。これから毎日、そばで見守らせてくださいね。');
           return;
@@ -1372,7 +1377,7 @@ function App() {
                           borderRadius: '6px',
                           fontWeight: 'bold'
                         }}>
-                          {isSubscribed ? '購読中' : '未登録'}
+                          {isSubscribed ? (premiumEndsOn ? `${formatMonthDay(premiumEndsOn)}まで` : '購読中') : '未登録'}
                         </span>
                       </div>
                     </div>
@@ -2779,6 +2784,7 @@ function App() {
         onSubscribe={handleStartCheckout}
         onCancelSubscription={handleOpenBillingPortal}
         isSubscribed={isSubscribed}
+        premiumEndsOn={premiumEndsOn}
         isRegistered={isRegistered}
         onRegisterFirst={() => setShowAuthModal(true)}
       />
