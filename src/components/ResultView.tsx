@@ -3,6 +3,7 @@ import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
 import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
+import { getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { InstallGuideModal } from './InstallGuideModal';
@@ -914,11 +915,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const daily = activeResult.dailyScore;
           const diff = daily - base;
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
-          const mood = diff > 0
-            ? { phase: 'full' as const, title: '今日は追い風', sign: `+${diff}点`, color: '#8fd3ae' }
-            : diff < 0
-              ? { phase: 'crescent' as const, title: '今日はひと休み', sign: `−${-diff}点`, color: '#e0a9a0' }
-              : { phase: 'half' as const, title: '今日はいつも通り', sign: '±0点', color: '#d8cfb8' };
+          const scoreMood = getScoreMood(base, daily);
+          const mood = { ...scoreMood, color: scoreMood.trend === 'up' ? '#8fd3ae' : scoreMood.trend === 'down' ? '#e0a9a0' : '#d8cfb8' };
           // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
           const labelsCollide = Math.abs(diff) < 28;
           const labelPos = (v: number) => Math.max(14, Math.min(86, v));

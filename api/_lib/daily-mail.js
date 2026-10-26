@@ -1,4 +1,4 @@
-import { generateFortuneResult } from './fortuneEngine.js';
+import { generateFortuneResult, getScoreMood } from './fortuneEngine.js';
 
 export const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -31,6 +31,7 @@ export function buildDailyContent(sub) {
   return {
     hasOpponent: isMatch,
     score: result.dailyScore,
+    baseScore: result.baseScore,
     mbtiCode: result.myMbtiCode && result.myMbtiCode !== 'UNKNOWN' ? result.myMbtiCode : '',
     mbtiName: result.myMbtiName && result.myMbtiName !== '未選択' ? result.myMbtiName : '',
     hourMain: hour.split(/[（(]/)[0].trim(),
@@ -83,10 +84,45 @@ export function resultUrlFor(sub, hasOpponent) {
   return `${SITE}/?${params.toString()}`; // "/" like the share links: the loading screen, then the result
 }
 
+// 二人の相性の点数ブロック: 鑑定結果画面と同じ「基本相性（小）と今日の相性（大）の丸いメーター」と「今日の流れ」。
+// メールでは SVG もアニメーションも使えないため、点数ごとの画像（scripts/build-mail-score-images.mjs で作成）を並べる。
+const clampScore = (v) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
+const MOOD_COLORS = { up: '#8fd3ae', flat: '#d8cfb8', down: '#e0a9a0' };
+
+export function renderMatchScore(baseScore, dailyScore) {
+  const base = clampScore(baseScore);
+  const daily = clampScore(dailyScore);
+  const mood = getScoreMood(base, daily);
+  const img = (file, w, alt) => `<img src="${SITE}/assets/mail/score/${file}" width="${w}" height="${w}" alt="${alt}" style="display: block; width: ${w}px; height: ${w}px; border: 0; color: #f6e6c2; font-size: 14px;">`;
+  return `<tr>
+            <td style="padding: 10px 25px 12px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
+                <tr>
+                  <td align="center" style="padding: 14px 8px 18px; text-align: center;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto;">
+                      <tr>
+                        <td valign="middle" style="padding: 0 2px;">${img(`base-${base}.png`, 116, `基本相性 ${base}点`)}</td>
+                        <td valign="middle" style="padding: 0 2px;">${img(`today-${daily}.png`, 156, `今日の相性 ${daily}点`)}</td>
+                      </tr>
+                    </table>
+                    <div style="line-height: 0; font-size: 0; margin-top: 6px;">
+                      <img src="${SITE}/assets/mail/score/moon-${mood.phase}.png" width="48" height="48" alt="" style="display: inline-block; width: 48px; height: 48px; border: 0;">
+                    </div>
+                    <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(mood.title)}</div>
+                    <div style="font-size: 12px; color: #a9a293; letter-spacing: 0.05em; margin-top: 4px;">
+                      基本相性より <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`;
+}
+
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
   const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
-  const { score, hourMain, hourNote, adviceParts = [], mbtiCode, mbtiName, profile = {} } = content;
+  const { score, baseScore, hourMain, hourNote, adviceParts = [], mbtiCode, mbtiName, profile = {} } = content;
   const facts = [
     profile.star && ['本命星', esc(profile.star)],
     profile.color && ['守護カラー', esc(profile.color)],
@@ -170,7 +206,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           </tr>
 
           <!-- Score -->
-          <tr>
+          ${content.hasOpponent && Number.isFinite(Number(baseScore)) ? renderMatchScore(Number(baseScore), Number(score)) : `<tr>
             <td style="padding: 14px 25px 12px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
                 <tr>
@@ -189,7 +225,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                 </tr>
               </table>
             </td>
-          </tr>
+          </tr>`}
 
           <!-- LINE golden hour (LINE green when it is the LINE time; gold card in single mode) -->
           <tr>
