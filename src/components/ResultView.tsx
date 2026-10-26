@@ -488,6 +488,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
   });
   const myAstrologyRef = useRef<HTMLDivElement>(null);
 
+  // 最上部の丸いメーター: 表示時・点数が変わったときに 0 から点数まで伸ばす（0〜1）
+  const [ringProgress, setRingProgress] = useState(0);
+  useEffect(() => {
+    let reduceMotion = false;
+    try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { /* 古いブラウザ */ }
+    if (reduceMotion) { setRingProgress(1); return; }
+    const duration = 1400;
+    let start: number | null = null;
+    let frame = 0;
+    const tick = (now: number) => {
+      if (start === null) start = now;
+      const t = Math.min(1, (now - start) / duration);
+      setRingProgress(1 - Math.pow(1 - t, 3));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    setRingProgress(0);
+    // 画面のフェードインが終わってから伸ばし始める
+    const delay = window.setTimeout(() => { frame = requestAnimationFrame(tick); }, 350);
+    return () => { window.clearTimeout(delay); cancelAnimationFrame(frame); };
+  }, [activeResult.baseScore, activeResult.dailyScore]);
+
   useEffect(() => {
     const mainEl = document.querySelector('.main-content');
     if (!mainEl) return;
@@ -903,7 +924,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </linearGradient>
                   </defs>
                   <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="rgba(10,12,28,0.55)" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
-                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="none" stroke={`url(#${opts.gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * clamp(opts.score)) / 100} ${c}`} />
+                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="none" stroke={`url(#${opts.gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * clamp(opts.score) * ringProgress) / 100} ${c}`} style={{ opacity: ringProgress > 0 ? 1 : 0 }} />
                 </svg>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   {opts.icon}
@@ -918,7 +939,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     alignItems: 'baseline',
                     gap: '1px'
                   }}>
-                    {opts.score}<span style={{ fontSize: `${opts.size * 0.1}px`, fontWeight: 'bold' }}>点</span>
+                    {Math.round(opts.score * ringProgress)}<span style={{ fontSize: `${opts.size * 0.1}px`, fontWeight: 'bold' }}>点</span>
                   </div>
                   <span style={{ fontSize: `${Math.round(opts.size * 0.072)}px`, color: '#a9a293', marginTop: '0.15rem' }}>{opts.caption}</span>
                 </div>
