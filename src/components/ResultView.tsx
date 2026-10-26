@@ -164,6 +164,18 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
   ));
 };
 
+// 見られない人には、ぼかす文章として本物の代わりにダミー文を渡す。
+// ぼかしは見た目だけで、ブラウザの「検証」を開くと下の文字が読めてしまうため。
+const LOCKED_FILLER = 'ここはプレミアム会員の方だけが読める鑑定文です。登録すると、二人に合わせた本文が表示されます。';
+const lockedText = (text: string | undefined, locked: boolean): string => {
+  if (!locked) return text ?? '';
+  const n = Math.max(24, (text ?? '').length);
+  return LOCKED_FILLER.repeat(Math.ceil(n / LOCKED_FILLER.length)).slice(0, n);
+};
+// 7日間・月次・年次の点数も、見られない人にはダミーの値で描く（本物の点数を画面に置かない）
+const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
+const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
+
 const getMbtiColor = (mbtiCode: string) => {
   const code = (mbtiCode || '').toUpperCase();
   if (code.includes('N') && code.includes('F')) return '#6fb08f'; // Emerald Green
@@ -1784,7 +1796,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       {parts.slice(1).map((p, i) => (
-                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{p}</div>
+                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, locked)}</div>
                       ))}
                       {locked && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1801,11 +1813,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>(プレミアム限定)</span>}</div>
-                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{tips.intro}</div>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(tips.intro, locked)}</div>
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
-                          <div style={{ color: '#e8e3d8', ...blurred }}>{it.text}</div>
+                          <div style={{ color: '#e8e3d8', ...blurred }}>{lockedText(it.text, locked)}</div>
                         </div>
                       ))}
                       {locked && lockButton}
@@ -1901,7 +1913,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </p>
                   <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleLockTagClick}>
                     <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
-                      {formatAppraisalText(`${topic.detail} ${topic.detail}`)}
+                      {lockedText(`${topic.detail} ${topic.detail}`, true)}
                     </p>
                     
                     {/* Glowing Lock Overlay */}
@@ -2114,7 +2126,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 {activeResult.opponentTorisetsu.killingWords.slice(1).map((word, idx) => (
                   <li key={idx + 1} style={{ marginBottom: '0.2rem' }}>
-                    {word.replace(/〇〇/g, oppNickname || 'お相手')}
+                    {lockedText(word.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                   </li>
                 ))}
               </ul>
@@ -2167,7 +2179,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 {activeResult.opponentTorisetsu.ngBehaviors.slice(1).map((ng, idx) => (
                   <li key={idx} style={{ marginBottom: '0.2rem' }}>
-                    {ng.replace(/〇〇/g, oppNickname || 'お相手')}
+                    {lockedText(ng.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                   </li>
                 ))}
               </ul>
@@ -2216,7 +2228,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     filter: !isSubscribed ? 'blur(4.5px)' : 'none',
                     userSelect: !isSubscribed ? 'none' : 'auto',
                     opacity: !isSubscribed ? 0.65 : 1
-                  }}><strong>【送るべき神返信】</strong> {activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
+                  }}><strong>【送るべき神返信】</strong> {lockedText(activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</p>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2257,8 +2269,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>Lv.1 (初期):</strong> {activeResult.opponentTorisetsu.greenFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手')}</div>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.3 (ゾッコン):</strong> {(activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手')}</div>
+                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
+                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.3 (ゾッコン):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2299,7 +2311,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>【危険サイン】</strong> {activeResult.opponentTorisetsu.redFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>【逆転挽回策】</strong> {(activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手')}</div>
+                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>【逆転挽回策】</strong> {lockedText((activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2346,7 +2358,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}>
                     <div style={{ marginTop: '0.2rem' }}><strong>【距離を縮める質問テンプレ】</strong></div>
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                      {(activeResult.opponentTorisetsu.lineTemplateTopic || '「休みの日って何してる時がいちばん癒される？」').replace(/〇〇/g, oppNickname || 'お相手')}
+                      {lockedText((activeResult.opponentTorisetsu.lineTemplateTopic || '「休みの日って何してる時がいちばん癒される？」').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                     </div>
                   </div>
                   {!isSubscribed && (
@@ -2389,7 +2401,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   userSelect: !isSubscribed ? 'none' : 'auto',
                   opacity: !isSubscribed ? 0.65 : 1
                 }}>
-                  {(activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手')}
+                  {lockedText((activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                 </p>
                 {!isSubscribed && (
               <div style={{
@@ -2430,7 +2442,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   userSelect: !isSubscribed ? 'none' : 'auto',
                   opacity: !isSubscribed ? 0.65 : 1
                 }}>
-                  {activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手')}
+                  {lockedText(activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
                 </p>
                 {!isSubscribed && (
               <div style={{
@@ -2600,15 +2612,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}
               >
                 {activeResult.weeklyScores.map((day, index) => {
-                  const visuals = getScoreVisuals(day.score);
+                  const score = lockedScore(day.score, index, !isSubscribed);
+                  const visuals = getScoreVisuals(score);
                   return (
                     <div key={day.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                       <span style={{ fontSize: '0.7rem', color: visuals.textColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                        {day.score}点
+                        {score}点
                       </span>
                       <div style={{
                         width: '100%',
-                        height: `${day.score * 0.5}px`,
+                        height: `${score * 0.5}px`,
                         background: visuals.barColor,
                         borderRadius: '4px 4px 0 0',
                         boxShadow: visuals.shadow,
@@ -2644,8 +2657,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 flexDirection: 'column',
                 gap: '0.65rem'
               }}>
-                {activeResult.monthlyPreviews.map(m => {
-                  const visuals = getScoreVisuals(m.score);
+                {activeResult.monthlyPreviews.map((m, index) => {
+                  const score = lockedScore(m.score, index + 2, !isSubscribed);
+                  const visuals = getScoreVisuals(score);
                   return (
                     <div key={m.month} style={{ 
                       display: 'flex', 
@@ -2663,7 +2677,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             color: visuals.textColor,
                             filter: isSubscribed ? 'none' : 'blur(4.5px)',
                             userSelect: isSubscribed ? 'auto' : 'none'
-                          }}>{m.label}</span>
+                          }}>{isSubscribed ? m.label : '★★★'}</span>
                         </span>
                         <span style={{
                           color: visuals.textColor,
@@ -2677,7 +2691,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           filter: isSubscribed ? 'none' : 'blur(4px)',
                           userSelect: isSubscribed ? 'auto' : 'none'
                         }}>
-                          {m.score}点
+                          {score}点
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
@@ -2691,7 +2705,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         userSelect: isSubscribed ? 'auto' : 'none',
                         pointerEvents: isSubscribed ? 'auto' : 'none'
                       }}>
-                        {m.text}
+                        {lockedText(m.text, !isSubscribed)}
                       </p>
                       {!isSubscribed && (
                         <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
@@ -2722,8 +2736,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 flexDirection: 'column',
                 gap: '0.65rem'
               }}>
-                {activeResult.yearlyPreviews.map(y => {
-                  const visuals = getScoreVisuals(y.score);
+                {activeResult.yearlyPreviews.map((y, index) => {
+                  const score = lockedScore(y.score, index + 2, !isSubscribed);
+                  const visuals = getScoreVisuals(score);
                   return (
                     <div key={y.year} style={{ 
                       display: 'flex', 
@@ -2741,7 +2756,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             color: visuals.textColor,
                             filter: isSubscribed ? 'none' : 'blur(4.5px)',
                             userSelect: isSubscribed ? 'auto' : 'none'
-                          }}>{y.label}</span>
+                          }}>{isSubscribed ? y.label : '★★★'}</span>
                         </span>
                         <span style={{
                           color: visuals.textColor,
@@ -2755,7 +2770,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           filter: isSubscribed ? 'none' : 'blur(4px)',
                           userSelect: isSubscribed ? 'auto' : 'none'
                         }}>
-                          {y.score}点
+                          {score}点
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
@@ -2769,7 +2784,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         userSelect: isSubscribed ? 'auto' : 'none',
                         pointerEvents: isSubscribed ? 'auto' : 'none'
                       }}>
-                        {y.text}
+                        {lockedText(y.text, !isSubscribed)}
                       </p>
                       {!isSubscribed && (
                         <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
