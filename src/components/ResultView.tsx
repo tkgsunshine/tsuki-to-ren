@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
-import { MoonMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { InstallGuideModal } from './InstallGuideModal';
@@ -902,11 +902,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const daily = activeResult.dailyScore;
           const diff = daily - base;
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
-          const diffText = diff > 0
-            ? `☀️ 今日は追い風（基本より +${diff}点）`
+          const mood = diff > 0
+            ? { phase: 'full' as const, title: '今日は追い風', sign: `+${diff}点`, color: '#8fd3ae' }
             : diff < 0
-              ? `☁️ 今日はひと休み（基本より −${-diff}点）`
-              : '🌙 今日はいつも通り（基本と同じ点）';
+              ? { phase: 'crescent' as const, title: '今日はひと休み', sign: `−${-diff}点`, color: '#e0a9a0' }
+              : { phase: 'half' as const, title: '今日はいつも通り', sign: '±0点', color: '#d8cfb8' };
           // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
           const labelsCollide = Math.abs(diff) < 28;
           const labelPos = (v: number) => Math.max(14, Math.min(86, v));
@@ -941,7 +941,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}>
                     {Math.round(opts.score * ringProgress)}<span style={{ fontSize: `${opts.size * 0.1}px`, fontWeight: 'bold' }}>点</span>
                   </div>
-                  <span style={{ fontSize: `${Math.round(opts.size * 0.072)}px`, color: '#a9a293', marginTop: '0.15rem' }}>{opts.caption}</span>
+                  {opts.caption && <span style={{ fontSize: `${Math.round(opts.size * 0.072)}px`, color: '#a9a293', marginTop: '0.15rem' }}>{opts.caption}</span>}
                 </div>
               </div>
             );
@@ -958,7 +958,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   glow: 'rgba(242, 201, 138, 0.45)',
                   icon: <Heart size={13} style={{ fill: '#f0a9c4', color: '#f0a9c4' }} />,
                   label: '基本相性',
-                  caption: 'ずっと変わらない',
+                  caption: '',
                   numColor: '#f6e6c2'
                 })}
                 <Heart size={18} aria-hidden="true" style={{ color: '#f0a9c4', flexShrink: 0, filter: 'drop-shadow(0 0 6px rgba(240,169,196,0.6))' }} />
@@ -969,7 +969,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   from: '#9fd8ff',
                   to: '#4f8ff0',
                   glow: 'rgba(120, 190, 255, 0.55)',
-                  icon: <span aria-hidden="true" style={{ fontSize: '0.95rem', lineHeight: 1 }}>☀️</span>,
+                  icon: <MoonPhaseMark size={18} tint="blue" />,
                   label: '今日の相性',
                   caption: '毎日変わる',
                   numColor: '#e6f4ff'
@@ -992,20 +992,28 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
 
-              <div style={{ textAlign: 'center' }}>
-                <span style={{
-                  display: 'inline-block',
-                  fontSize: '0.85rem',
-                  fontWeight: 'bold',
-                  padding: '0.35rem 1rem',
-                  borderRadius: '14px',
-                  color: '#f6e6c2',
-                  background: 'rgba(226, 192, 116, 0.08)',
-                  border: '1px solid rgba(226, 192, 116, 0.55)',
-                  boxShadow: '0 0 12px rgba(226, 192, 116, 0.15)'
+              {/* 今日の流れ: 枠で囲まず、光る天気アイコン＋グラデーション文字で見せる */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', marginTop: '0.1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', width: '100%' }}>
+                  <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226,192,116,0.5))' }} />
+                  <MoonPhaseMark size={34} phase={mood.phase} />
+                  <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(111,182,245,0.5), transparent)' }} />
+                </div>
+                <div className="font-serif" style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.12em',
+                  background: 'linear-gradient(90deg, #f6e6c2 0%, #f2c98a 45%, #9fd8ff 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  WebkitTextFillColor: 'transparent'
                 }}>
-                  {diffText}
-                </span>
+                  {mood.title}
+                </div>
+                <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
+                  基本より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
+                </div>
               </div>
             </div>
           );
