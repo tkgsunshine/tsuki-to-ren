@@ -203,6 +203,7 @@ function App() {
   // Characters
   const [selectedCharacter, setSelectedCharacter] = useState<'ren' | 'tsuki'>('tsuki');
   const [isChatOpen, setIsChatOpen] = useState(false); // Standalone chat simulator in Chat tab
+  const [chatInitialQuestion, setChatInitialQuestion] = useState<string | undefined>(undefined); // 鑑定結果の質問ボタンから開いたときの最初の質問
   
   // Firebase Auth State
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -1025,6 +1026,10 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                onOpenChat={(question) => {
+                  setChatInitialQuestion(question);
+                  setIsChatOpen(true);
+                }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
                   window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
@@ -1056,6 +1061,10 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                onOpenChat={(question) => {
+                  setChatInitialQuestion(question);
+                  setIsChatOpen(true);
+                }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
                   window.history.pushState({ tab: 'fortune', legal: true }, '', '/terms');
@@ -2513,9 +2522,10 @@ function App() {
           setChatCount={setChatCount}
           onRegister={handleRegister}
           onSubscribe={handleStartCheckout}
-          onClose={() => setIsChatOpen(false)}
+          onClose={() => { setIsChatOpen(false); setChatInitialQuestion(undefined); }}
           result={activeResult}
           opponentName={mode === 'match' ? oppName : undefined}
+          initialQuestion={chatInitialQuestion}
         />
       )}
 

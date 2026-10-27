@@ -622,6 +622,10 @@ h1, h2, h3, h4, button, label {
 }
 
 /* Chat Modal Styles */
+body.chat-open .result-floating-bar {
+  display: none !important;
+}
+
 .chat-overlay {
   position: absolute;
   inset: 0;

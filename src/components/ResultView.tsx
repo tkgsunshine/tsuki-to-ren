@@ -247,6 +247,8 @@ interface ResultViewProps {
   onSavePartner?: () => void;
   isPartnerSaved?: boolean;
   onShowLegal?: () => void;
+  // チャット相談を開く。質問ボタンから開いたときは、その質問を最初に送る
+  onOpenChat?: (question?: string) => void;
 }
 
 export const ResultView: React.FC<ResultViewProps> = ({
@@ -266,7 +268,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onReset,
   onSavePartner = () => {},
   isPartnerSaved = false,
-  onShowLegal
+  onShowLegal,
+  onOpenChat
 }) => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -1888,6 +1891,78 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </div>
       </div>
 
+        {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ */}
+        {onOpenChat && (() => {
+          const isRen = selectedChar === 'ren';
+          const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
+          const oppLabel = hasOpponent ? (oppNickname === 'お相手' ? 'お相手' : `${oppNickname}さん`) : '';
+          const lead = hasOpponent
+            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考える。` : `今日のこと、もう少し一緒に考えましょうか？${oppLabel}に送る一言も、いっしょに選べますよ。`)
+            : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
+          const questions = hasOpponent
+            ? [`${oppLabel}に今日なんて送ればいい？`, `${oppLabel}の本音や脈ありサインは？`]
+            : ['今日の恋愛運をもっと活かすには？', '出会いを増やすにはどう動けばいい？'];
+          return (
+            <div className="glass-panel" style={{
+              padding: '1rem',
+              border: `1.5px solid rgba(${charColor}, 0.35)`,
+              background: `linear-gradient(135deg, rgba(${charColor}, 0.1) 0%, rgba(12, 16, 23, 0.85) 100%)`
+            }}>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                <img
+                  src={isRen ? '/assets/ren.webp' : '/assets/tsuki.webp'}
+                  alt={isRen ? '蓮' : '月'}
+                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid var(${isRen ? '--color-ren' : '--color-tsuki'})`, flexShrink: 0 }}
+                />
+                <div style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px 12px 12px 12px', padding: '0.5rem 0.65rem', fontSize: '0.76rem', color: '#e8e3d8', lineHeight: '1.6' }}>
+                  <div style={{ color: isRen ? '#9cc6d8' : '#cdbfe2', fontWeight: 'bold', fontSize: '0.7rem', marginBottom: '2px' }}>{isRen ? '蓮' : '月'}</div>
+                  {lead}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', margin: '0.65rem 0 0.6rem' }}>
+                {questions.map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => onOpenChat(q)}
+                    style={{
+                      fontSize: '0.74rem',
+                      color: isRen ? '#cfe6f0' : '#e4d8f2',
+                      border: `1px solid rgba(${charColor}, 0.45)`,
+                      borderRadius: '999px',
+                      padding: '0.45rem 0.8rem',
+                      background: `rgba(${charColor}, 0.1)`,
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    💬 {q}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="font-serif"
+                onClick={() => onOpenChat()}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '0.7rem',
+                  borderRadius: '999px',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem',
+                  color: isRen ? '#0f1a22' : '#1b1626',
+                  background: isRen ? 'linear-gradient(90deg, #8cc3dc, #3a86ab)' : 'linear-gradient(90deg, #c9b3e6, #9f86c0)',
+                  cursor: 'pointer'
+                }}
+              >
+                {isRen ? '📖 蓮の書斎で相談する' : '🌙 月の温室で相談する'}
+              </button>
+            </div>
+          );
+        })()}
+
         {/* 5 Detailed Appraisal Topics */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={18} />
@@ -3220,7 +3295,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       </div>
       {/* Floating Sticky Bottom A2HS Prompt Banner (Above Share CTA) */}
       {showA2hsBanner && !isA2hsDismissed && (
-        <div style={{
+        <div className="result-floating-bar" style={{
           position: 'fixed',
           bottom: 'calc(8.6rem + var(--safe-bottom, 0px))',
           left: '50%',
@@ -3310,7 +3385,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
       {/* Floating Sticky Bottom Share CTA Bar */}
       {SHOW_SHARE_BUTTON && !isShareDismissed && (
-      <div style={{
+      <div className="result-floating-bar" style={{
         position: 'fixed',
         bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
         left: '50%',

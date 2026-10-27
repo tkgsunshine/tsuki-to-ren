@@ -17,6 +17,8 @@ interface ChatModalProps {
   onClose: () => void;
   result?: FortuneResult | null;
   opponentName?: string;
+  // 鑑定結果の質問ボタンから開いたとき、その質問を最初に送る
+  initialQuestion?: string;
 }
 
 interface Message {
@@ -35,7 +37,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   onSubscribe,
   onClose,
   result,
-  opponentName
+  opponentName,
+  initialQuestion
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -44,6 +47,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const [showSubscribeOverlay, setShowSubscribeOverlay] = useState(false);
   const [emailSentChat, setEmailSentChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const initialQuestionSentRef = useRef(false);
 
   const characterName = character === 'ren' ? '蓮' : '月';
   const characterAvatar = character === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp';
@@ -58,6 +62,21 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       { id: '1', sender: 'bot', text: greetingText }
     ]);
   }, [character]);
+
+  // 鑑定結果の質問ボタンから開いたときは、あいさつの後にその質問を送る（StrictMode の二重実行でも1回だけ）
+  useEffect(() => {
+    if (!initialQuestion || initialQuestionSentRef.current || messages.length === 0) return;
+    initialQuestionSentRef.current = true;
+    // ログイン前は登録の案内が出るので、登録後にそのまま送れるよう入力欄にも入れておく
+    if (!isRegistered) setInputText(initialQuestion);
+    handleSend(initialQuestion);
+  }, [initialQuestion, messages.length]);
+
+  // 結果画面の下に浮かぶバー（シェア・ホーム追加）が入力欄に重ならないよう、開いている間は隠す
+  useEffect(() => {
+    document.body.classList.add('chat-open');
+    return () => document.body.classList.remove('chat-open');
+  }, []);
 
   // Scroll to bottom
   useEffect(() => {
