@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { getPillarWithReading } from '../utils/fortuneEngine';
 import { showAlert } from './AppDialog';
+import { trackShare } from '../services/analytics';
 
 interface ShareCardModalProps {
   selectedChar: 'ren' | 'tsuki';
@@ -161,6 +162,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
     const targetEl = captureRef.current || cardRef.current;
     if (!targetEl || isSaving) return;
     setIsSaving(true);
+    trackShare('image');
     try {
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
@@ -229,6 +231,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   };
 
   const handleCopyLink = async () => {
+    trackShare('link');
     try {
       await navigator.clipboard.writeText(targetShareUrl);
       setCopied(true);
@@ -261,6 +264,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
     for (let n = chars.length - 1; n > 0 && xTextWeight(text) > X_MAX_WEIGHT; n--) {
       text = build(chars.slice(0, n).join('') + '…');
     }
+    trackShare('x');
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
   };
 
@@ -268,6 +272,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
     const text = showOpponent
       ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断結果はこちら👇\n${targetShareUrl}`
       : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n本格恋愛鑑定結果はこちら👇\n${targetShareUrl}`;
+    trackShare('line');
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`);
   };
 

@@ -29,7 +29,7 @@ import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
-import { trackFortune } from './services/analytics';
+import { trackFortune, trackPremiumStep } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
@@ -314,6 +314,7 @@ function App() {
       setShowAuthModal(true);
       return;
     }
+    trackPremiumStep('checkout');
     try {
       await startPremiumCheckout();
     } catch (e) {
@@ -1110,6 +1111,11 @@ function App() {
       requestAnimationFrame(() => requestAnimationFrame(() => scrollMainTo(top)));
     }
   };
+
+  // プレミアム案内を開いた回数（管理画面の集計用）
+  useEffect(() => {
+    if (showPremiumLP) trackPremiumStep('premium_view');
+  }, [showPremiumLP]);
 
   // チャット・プレミアム案内などの重ね表示を開いたら履歴を1件積み、閉じたら外す（戻るスワイプで閉じられるように）
   useEffect(() => {
