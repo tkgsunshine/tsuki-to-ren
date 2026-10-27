@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
+import { PremiumUnlockButton } from './PremiumUnlockButton';
 import type { CompatibilityRadarScores } from '../utils/fortuneEngine';
 
 const IS_PRODUCTION_SITE = typeof window !== 'undefined' && window.location.hostname.endsWith('tsuki-to-ren.com');
@@ -275,31 +276,14 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               🔒 6軸詳細相性を全解禁
             </span>
 
-            <button
+            <PremiumUnlockButton
               onClick={() => {
                 if (onOpenPremiumLP) onOpenPremiumLP();
                 else if (onOpenAuth) onOpenAuth();
                 else setDemoUnlocked(true);
               }}
-              style={{
-                background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
-                color: '#000000',
-                border: 'none',
-                padding: '0.7rem 1.25rem',
-                borderRadius: '9999px',
-                fontSize: '0.85rem',
-                fontWeight: '800',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                boxShadow: '0 4px 18px rgba(217, 164, 65, 0.45)',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <span style={{ fontSize: '1rem' }}>🔓</span>
-              <span>プレミアム登録で全解放（月額980円）</span>
-            </button>
+              style={{ width: 'auto', padding: '0.75rem 1.25rem', marginTop: 0 }}
+            />
 
             {/* 本番では出さない（押すだけで本物の点数が見えてしまうため）。プレビューと手元では使える */}
             {!IS_PRODUCTION_SITE && (

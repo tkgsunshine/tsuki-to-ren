@@ -6,6 +6,7 @@ import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMa
 import { getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
+import { PremiumUnlockButton } from './PremiumUnlockButton';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm } from './AppDialog';
@@ -2546,8 +2547,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
-                  <button
-                    type="button"
+                  <PremiumUnlockButton
                     onClick={() => {
                       if (!isRegistered) {
                         handleScrollToRegister();
@@ -2558,19 +2558,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         setSubSuccess(true);
                       }
                     }}
-                    className="consult-btn font-serif"
-                    style={{
-                      fontSize: '0.85rem',
-                      padding: '0.75rem',
-                      fontWeight: 'bold',
-                      width: '100%',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(242, 226, 179,0.3)',
-                      letterSpacing: '0.02em'
-                    }}
-                  >
-                    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />プレミアム登録で全解放 (月額980円)</span>
-                  </button>
+                  />
                 </div>
               </div>
             )}
@@ -2878,8 +2866,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
-                  <button
-                    type="button"
+                  <PremiumUnlockButton
                     onClick={() => {
                       if (!isRegistered) {
                         handleScrollToRegister();
@@ -2890,19 +2877,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         setSubSuccess(true);
                       }
                     }}
-                    className="consult-btn"
-                    style={{
-                      fontSize: '0.85rem',
-                      padding: '0.75rem',
-                      fontWeight: 'bold',
-                      width: '100%',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(242, 226, 179,0.3)',
-                      letterSpacing: '0.02em'
-                    }}
-                  >
-                    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />プレミアム登録で全解放 (月額980円)</span>
-                  </button>
+                  />
                 </div>
               )}
             </div>
