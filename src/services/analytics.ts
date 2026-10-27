@@ -97,6 +97,20 @@ export const optOutAdminBrowser = () => {
   try { if (local()?.getItem(OPT_OUT_KEY) === null) setTrackingOptOut(true); } catch {}
 };
 
+/** Signed in with an admin account (ADMIN_EMAILS) → this browser / home-screen app leaves the counts. Asked once per account per browser. */
+export const optOutIfAdmin = async (user: User) => {
+  const checked = `hasu_admin_checked_${user.uid}`;
+  try {
+    if (local()?.getItem(OPT_OUT_KEY) !== null || local()?.getItem(checked)) return;
+  } catch { return; }
+  try {
+    const token = await user.getIdToken();
+    const res = await fetch('/api/admin?check=1', { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) setTrackingOptOut(true);
+    if (res.ok || res.status === 403) write(local(), checked, '1');
+  } catch {}
+};
+
 const isAutomated = () => typeof navigator !== 'undefined' && (navigator as Navigator & { webdriver?: boolean }).webdriver === true;
 
 const send = (payload: Record<string, string>, token?: string) => {

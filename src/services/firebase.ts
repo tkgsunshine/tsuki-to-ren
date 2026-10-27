@@ -16,7 +16,7 @@ import {
 } from 'firebase/auth';
 
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { trackSignupIfNew } from './analytics';
+import { optOutIfAdmin, trackSignupIfNew } from './analytics';
 import { clearAllChatHistory } from '../utils/chatHistory';
 
 declare global {
@@ -348,6 +348,7 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
     }
 
     void trackSignupIfNew(user);
+    void optOutIfAdmin(user);
 
     const rawProvider = user.providerData[0]?.providerId || '';
     let providerId: 'google.com' | 'twitter.com' | 'email' = 'google.com';
