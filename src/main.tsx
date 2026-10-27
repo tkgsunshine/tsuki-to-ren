@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { AppDialogHost } from './components/AppDialog'
-import { installStandaloneBottomGapFix } from './utils/pwaHelper'
+import { installPageScrollReset, installStandaloneBottomGapFix } from './utils/pwaHelper'
 import { initAttribution } from './services/analytics'
 
 const AdminView = lazy(() => import('./components/AdminView'))
@@ -11,6 +11,7 @@ const isAdminPage = /^\/admin\/?$/.test(window.location.pathname)
 
 installStandaloneBottomGapFix()
 if (!isAdminPage) initAttribution()
+if (!isAdminPage) installPageScrollReset()
 
 // index.html の起動スプラッシュを、アプリが描画されたあとにフェードアウトして外す
 function BootSplashRemover() {
