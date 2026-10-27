@@ -2843,21 +2843,27 @@ function App() {
 
       {/* Email Notification Setup Modal */}
       {showNotifyEmailModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
+        // お相手が増えると中身が画面より高くなる。中央寄せのままだと上（✕）と下（保存ボタン）が画面外に出て
+        // 操作できなくなるため、外枠の中でスクロールさせ、下メニュー（z-index 99999）より上に出す。
+        <div className="notify-modal-overlay" style={{
           background: 'rgba(2, 3, 4, 0.85)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          zIndex: 200,
+          zIndex: 100000,
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center',
-          padding: '1.25rem'
+          alignItems: 'flex-start',
+          overflowY: 'auto',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
+          padding: 'calc(1.25rem + env(safe-area-inset-top, 0px)) 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px))',
+          boxSizing: 'border-box'
         }}>
           <div className="glass-panel" style={{
             width: '100%',
             maxWidth: '420px',
+            margin: 'auto 0',
+            flexShrink: 0,
             background: 'linear-gradient(180deg, rgba(17, 24, 35, 0.98) 0%, rgba(9, 13, 19, 0.99) 100%)',
             border: '1px solid rgba(226, 192, 116, 0.3)',
             borderRadius: '24px',

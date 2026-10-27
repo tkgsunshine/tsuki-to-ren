@@ -123,7 +123,8 @@ html:has(.app-container) body {
 /* プレミアム案内（PremiumLPModal）の外枠。iOS Safari では 100vh・inset:0 がツールバーの裏まで
    含むことがあり、下の固定ボタンや一番下が隠れるため、ツールバーを除いた見える高さ（100dvh）に合わせる。
    ホーム画面アプリでは 100dvh が実際の表示領域とずれるので、上の .app-container と同じく上下0に固定する。 */
-.premium-lp-overlay {
+.premium-lp-overlay,
+.notify-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -132,13 +133,15 @@ html:has(.app-container) body {
 }
 
 @supports (height: 100dvh) {
-  .premium-lp-overlay {
+  .premium-lp-overlay,
+  .notify-modal-overlay {
     bottom: auto;
     height: 100dvh;
   }
 }
 
-html.ios-standalone .premium-lp-overlay {
+html.ios-standalone .premium-lp-overlay,
+html.ios-standalone .notify-modal-overlay {
   bottom: 0;
   height: auto;
 }
