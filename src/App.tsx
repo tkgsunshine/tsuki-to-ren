@@ -366,6 +366,12 @@ function App() {
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact'>(initialRoute.settingsSubView);
+  // マイページの各ページ（お問い合わせ等）は、開いたら一番上から見せる（スクロールするのは .main-content）
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const mainEl = document.querySelector('.main-content');
+    if (mainEl) mainEl.scrollTop = 0;
+  }, [settingsSubView]);
 
   // My Info (Step 1)
   const [userProfile] = useState(() => {
