@@ -591,6 +591,9 @@ function App() {
     if (activeResult) {
       params.set('bs', String(activeResult.baseScore));
       if (!dailyScoreHidden) params.set('ds', String(activeResult.dailyScore)); // 無料の日数を使い切った日は「??点」
+      // 共有カード画像（api/og.js）に載せる、ひとことと相性の名前
+      if (activeResult.oneLiner) params.set('ol', activeResult.oneLiner.slice(0, 40));
+      if (mode === 'match' && activeResult.compatibilityTitle) params.set('t', activeResult.compatibilityTitle.slice(0, 30));
     }
     return `${baseUrl}?${params.toString()}`;
   };

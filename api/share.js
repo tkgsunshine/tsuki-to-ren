@@ -21,8 +21,12 @@ export default function handler(req, res) {
   const rawTitle = get('t', 'title') || '';
   const cleanTitle = rawTitle.replace(/^[【\s]+|[】\s]+$/g, '').trim();
 
-  // X and LINE do not show SVG card images (api/og.js returns SVG), so the card uses the site's JPG
-  const ogImageUrl = `https://${req.headers.host}/ogp-image.jpg`;
+  // Card image (PNG, api/og.js): pass only what the card shows, never the birth dates
+  const ogImageParams = new URLSearchParams();
+  for (const key of ['mn', 'on', 'bs', 'ds', 'mode', 'ol', 't']) {
+    if (params.get(key)) ogImageParams.set(key, params.get(key));
+  }
+  const ogImageUrl = `https://${req.headers.host}/api/og?${ogImageParams.toString()}`;
 
   const hasOpponent = !!oName && params.get('mode') !== 'single' && params.get('mode') !== 's';
 
