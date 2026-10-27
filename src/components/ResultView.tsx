@@ -173,6 +173,18 @@ const lockedText = (text: string | undefined, locked: boolean): string => {
   const n = Math.max(24, (text ?? '').length);
   return LOCKED_FILLER.repeat(Math.ceil(n / LOCKED_FILLER.length)).slice(0, n);
 };
+// 無料会員には、ぼかす前に冒頭（約半分・最大2行ほど）だけ本物を見せる。続きはダミー文にしてぼかす。
+// 区切りがよいように、読点・句点の直後で切れるならそこで切る。
+const TEASER_MAX_CHARS = 50;
+const splitTeaser = (text: string | undefined): { head: string; restLength: number } => {
+  const t = text ?? '';
+  const limit = Math.min(TEASER_MAX_CHARS, Math.ceil(t.length * 0.5));
+  let cut = limit;
+  for (let i = limit; i >= Math.floor(limit * 0.6); i--) {
+    if ('、。！？'.includes(t[i - 1])) { cut = i; break; }
+  }
+  return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
+};
 // 7日間・月次・年次の点数も、見られない人にはダミーの値で描く（本物の点数を画面に置かない）
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
@@ -1780,7 +1792,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const tips = activeResult.lineTips;
               // 2段落目以降と「二人のLINEのコツ」の本文はプレミアム限定。見出しは誰にでも見せ、本文だけぼかす。
               const locked = !isSubscribed;
+              // 無料会員（登録済み・未課金）は、各本文の冒頭だけ読める。未登録の人は全部ぼかしのまま。
+              const preview = locked && isRegistered;
               const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
+              const lockedBody = (text: string | undefined) => {
+                if (!preview) return lockedText(text, locked);
+                const { head, restLength } = splitTeaser(text);
+                return (
+                  <>
+                    {head}
+                    <span style={{ ...blurred, display: 'inline' }}>{lockedText(' '.repeat(restLength), true)}</span>
+                  </>
+                );
+              };
               const lockButton = (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.3rem' }}>
                   <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
@@ -1797,9 +1821,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       {parts.slice(1).map((p, i) => (
-                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, locked)}</div>
+                        preview && i === 0
+                          ? <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{lockedBody(p)}</div>
+                          : <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, locked)}</div>
                       ))}
-                      {locked && (
+                      {preview && lockButton}
+                      {locked && !preview && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
                             <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
@@ -1813,12 +1840,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       style={{ marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
-                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>(プレミアム限定)</span>}</div>
-                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(tips.intro, locked)}</div>
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>{preview ? '(続きはプレミアム限定)' : '(プレミアム限定)'}</span>}</div>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...(preview ? {} : blurred) }}>{lockedBody(tips.intro)}</div>
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
-                          <div style={{ color: '#e8e3d8', ...blurred }}>{lockedText(it.text, locked)}</div>
+                          <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>
                         </div>
                       ))}
                       {locked && lockButton}
