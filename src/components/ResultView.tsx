@@ -517,6 +517,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const activeResult = selectedChar === 'ren' ? renResult : tsukiResult;
   const oppNickname = opponentName || 'お相手';
   const [isPastGuardian, setIsPastGuardian] = useState(false);
+  const [isShareDismissed, setIsShareDismissed] = useState(() => {
+    try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
+  });
   const myAstrologyRef = useRef<HTMLDivElement>(null);
 
   // 最上部の丸いメーター: 表示時・点数が変わったときに 0 から点数まで伸ばす（0〜1）
@@ -3416,7 +3419,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       )}
 
       {/* Floating Sticky Bottom Share CTA Bar */}
-      {SHOW_SHARE_BUTTON && (
+      {SHOW_SHARE_BUTTON && !isShareDismissed && (
       <div className="result-floating-bar" style={{
         position: 'fixed',
         bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
@@ -3457,6 +3460,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </span>
           <span>鑑定結果をシェアする</span>
           <LineLogoIcon size={20} />
+        </button>
+        <button
+          type="button"
+          aria-label="シェアボタンを閉じる"
+          onClick={() => {
+            setIsShareDismissed(true);
+            try { sessionStorage.setItem('shareBtnDismissed', '1'); } catch { /* ignore */ }
+          }}
+          style={{
+            position: 'absolute',
+            top: '-10px',
+            right: '-6px',
+            width: '24px',
+            height: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            borderRadius: '9999px',
+            border: '1px solid rgba(255,255,255,0.25)',
+            background: 'rgba(0,0,0,0.75)',
+            color: '#ffffff',
+            cursor: 'pointer'
+          }}
+        >
+          <X size={14} />
         </button>
       </div>
       )}
