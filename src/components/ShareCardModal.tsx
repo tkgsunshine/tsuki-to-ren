@@ -992,9 +992,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 boxShadow: '0 4px 12px rgba(6, 199, 85, 0.3)'
               }}
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 5.82 2 10.53c0 4.22 3.6 7.76 8.46 8.43.33.07.78.22.89.5.1.26.07.67.03.93-.05.32-.24 1.25-.27 1.52-.05.42-.25 1.63 1.43.89 1.68-.74 4.54-2.67 6.19-4.57C20.67 16.27 22 13.56 22 10.53 22 5.82 17.52 2 12 2z"/>
-              </svg>
+              <img src="/line-logo.png" alt="" aria-hidden="true" width={20} height={20} draggable={false} style={{ flexShrink: 0, width: '20px', height: '20px' }} />
               <span>LINEでシェア</span>
             </button>
           </div>
