@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { showConfirm } from './AppDialog';
@@ -11,6 +11,14 @@ const worries = [
 ];
 
 const benefits = [
+  {
+    Icon: Send,
+    color: '#06c755',
+    title: '今日のLINEの送り方と、二人のLINEのコツ',
+    shot: '/assets/premium/line.webp',
+    shotAlt: '本日のLINE吉時間とアプローチ助言、二人のLINEのコツの画面',
+    body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。あの人のLINEのくせ、返信が遅いときの理由、気持ちが伝わるコツも、二人に合わせてお伝えしますね。'
+  },
   {
     Icon: Calendar,
     color: '#5d9fc0',
