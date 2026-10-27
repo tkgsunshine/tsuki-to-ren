@@ -1235,7 +1235,7 @@ h1, h2, h3, h4, button, label {
   transform: translate(-50%, -50%);
 }
 
-/* 鑑定結果の守護獣カード: 画像をカード上部いっぱいに敷き、下へ溶かす（カードの padding-top は 0 にしている） */
+/* 鑑定結果の守護獣カード: 画像をカード幅いっぱいに敷き、上下をカードへ溶かす */
 .guardian-hero {
   position: relative;
   width: calc(100% + 2.5rem);
@@ -1249,26 +1249,18 @@ h1, h2, h3, h4, button, label {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 10%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 10%, #000 62%, transparent 100%);
 }
 
-/* 見出しと称号の読みやすさのため、上端と下側をうっすら暗くする */
+/* 称号の読みやすさのため、下側をうっすら暗くする */
 .guardian-hero-media::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(8, 11, 16, 0.55) 0%, rgba(8, 11, 16, 0) 22%, rgba(8, 11, 16, 0) 50%, rgba(8, 11, 16, 0.75) 100%);
+  background: linear-gradient(to bottom, rgba(8, 11, 16, 0) 50%, rgba(8, 11, 16, 0.75) 100%);
   pointer-events: none;
   z-index: 2;
-}
-
-.guardian-hero-header {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
 }
 
 .guardian-hero-caption {

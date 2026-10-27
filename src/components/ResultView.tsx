@@ -1164,7 +1164,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 overflow: 'hidden'
               }}
             >
-              {/* 守護獣画像をカード上部いっぱいに敷き、下へ溶かす。見出しと称号は画像の上に重ねる */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                padding: '0.35rem 1.1rem',
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%)',
+                border: '1.5px solid rgba(226, 192, 116, 0.45)',
+                borderRadius: '20px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
+                margin: '1.25rem 0 0.85rem',
+                whiteSpace: 'nowrap',
+                zIndex: 1
+              }}>
+                <span className="font-serif" style={{
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  color: '#f2e2b3',
+                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                  letterSpacing: '0.05em'
+                }}>
+                  ✦ あなたの守護獣 ✦
+                </span>
+              </div>
+
+              {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
               <div 
                 className="guardian-hero"
                 onClick={() => setZoomedImg({ 
@@ -1194,30 +1219,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       <div className="avatar-halo-spotlight" />
                     </>
                   )}
-                </div>
-                <div className="guardian-hero-header" style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  padding: '0.35rem 1.1rem',
-                  background: 'linear-gradient(135deg, rgba(48, 36, 12, 0.55) 0%, rgba(159, 134, 192, 0.14) 100%)',
-                  border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                  borderRadius: '20px',
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                  backdropFilter: 'blur(4px)',
-                  WebkitBackdropFilter: 'blur(4px)',
-                  whiteSpace: 'nowrap'
-                }}>
-                  <span className="font-serif" style={{
-                    fontSize: '1rem',
-                    fontWeight: 'bold',
-                    color: '#f2e2b3',
-                    textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                    letterSpacing: '0.05em'
-                  }}>
-                    ✦ あなたの守護獣 ✦
-                  </span>
                 </div>
 
                 {/* Subtle Glass Save Badge */}
@@ -1436,7 +1437,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 overflow: 'hidden'
               }}
             >
-              {/* 守護獣画像をカード上部いっぱいに敷き、下へ溶かす。見出しと称号は画像の上に重ねる */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                padding: '0.35rem 1.1rem',
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%)',
+                border: '1.5px solid rgba(226, 192, 116, 0.45)',
+                borderRadius: '20px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
+                margin: '1.25rem 0 0.85rem',
+                whiteSpace: 'nowrap',
+                zIndex: 1
+              }}>
+                <span className="font-serif" style={{
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  color: '#f2e2b3',
+                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                  letterSpacing: '0.05em'
+                }}>
+                  ✦ お相手の守護獣 ✦
+                </span>
+              </div>
+
+              {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
               <div 
                 className="guardian-hero"
                 onClick={() => setZoomedImg({ 
@@ -1466,30 +1492,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       <div className="avatar-halo-spotlight" />
                     </>
                   )}
-                </div>
-                <div className="guardian-hero-header" style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  padding: '0.35rem 1.1rem',
-                  background: 'linear-gradient(135deg, rgba(48, 36, 12, 0.55) 0%, rgba(58, 134, 171, 0.14) 100%)',
-                  border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                  borderRadius: '20px',
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                  backdropFilter: 'blur(4px)',
-                  WebkitBackdropFilter: 'blur(4px)',
-                  whiteSpace: 'nowrap'
-                }}>
-                  <span className="font-serif" style={{
-                    fontSize: '1rem',
-                    fontWeight: 'bold',
-                    color: '#f2e2b3',
-                    textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                    letterSpacing: '0.05em'
-                  }}>
-                    ✦ お相手の守護獣 ✦
-                  </span>
                 </div>
 
                 {/* Subtle Glass Save Badge */}
