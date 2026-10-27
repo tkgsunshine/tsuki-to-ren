@@ -111,6 +111,29 @@ html.ios-standalone .app-container {
   margin: 0 auto;
 }
 
+/* プレミアム案内（PremiumLPModal）の外枠。iOS Safari では 100vh・inset:0 がツールバーの裏まで
+   含むことがあり、下の固定ボタンや一番下が隠れるため、ツールバーを除いた見える高さ（100dvh）に合わせる。
+   ホーム画面アプリでは 100dvh が実際の表示領域とずれるので、上の .app-container と同じく上下0に固定する。 */
+.premium-lp-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+@supports (height: 100dvh) {
+  .premium-lp-overlay {
+    bottom: auto;
+    height: 100dvh;
+  }
+}
+
+html.ios-standalone .premium-lp-overlay {
+  bottom: 0;
+  height: auto;
+}
+
 /* 見出し・ボタンは文節単位で改行し、行の長さを揃える（1〜2文字だけ次の行に落ちるのを防ぐ。対応ブラウザのみ） */
 h1, h2, h3, h4, button, label {
   word-break: auto-phrase;
