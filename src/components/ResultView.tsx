@@ -517,9 +517,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const oppNickname = opponentName || 'お相手';
   const [isNotified, setIsNotified] = useState(false);
   const [isPastGuardian, setIsPastGuardian] = useState(false);
-  const [isShareDismissed, setIsShareDismissed] = useState(() => {
-    try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
-  });
   const myAstrologyRef = useRef<HTMLDivElement>(null);
 
   // 最上部の丸いメーター: 表示時・点数が変わったときに 0 から点数まで伸ばす（0〜1）
@@ -3433,15 +3430,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
       )}
 
       {/* Floating Sticky Bottom Share CTA Bar */}
-      {SHOW_SHARE_BUTTON && !isShareDismissed && (
+      {SHOW_SHARE_BUTTON && (
       <div className="result-floating-bar" style={{
         position: 'fixed',
         bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
         left: '50%',
-        transform: isPastGuardian ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(24px)',
-        opacity: isPastGuardian ? 1 : 0,
-        pointerEvents: isPastGuardian ? 'auto' : 'none',
-        transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: 'translateX(-50%)',
         width: 'calc(100% - 2rem)',
         maxWidth: '320px',
         zIndex: 9990,
@@ -3470,34 +3464,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
             transition: 'all 0.2s ease'
           }}
         >
-          <MoonMark size={15} style={{ color: '#000000' }} />
+          <span aria-hidden="true" style={{ width: '20px', height: '20px', flexShrink: 0, borderRadius: '9999px', background: '#000000', color: '#ffffff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </span>
           <span>鑑定結果をシェアする</span>
-        </button>
-        <button
-          type="button"
-          aria-label="シェアボタンを閉じる"
-          onClick={() => {
-            setIsShareDismissed(true);
-            try { sessionStorage.setItem('shareBtnDismissed', '1'); } catch { /* ignore */ }
-          }}
-          style={{
-            position: 'absolute',
-            top: '-10px',
-            right: '-6px',
-            width: '24px',
-            height: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 0,
-            borderRadius: '9999px',
-            border: '1px solid rgba(255,255,255,0.25)',
-            background: 'rgba(0,0,0,0.75)',
-            color: '#ffffff',
-            cursor: 'pointer'
-          }}
-        >
-          <X size={14} />
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <rect width="24" height="24" rx="5.5" fill="#06C755"/>
+            <path d="M12 4.6c-4.6 0-8.3 2.95-8.3 6.6 0 3.25 2.9 5.97 6.85 6.5.27.06.63.18.72.4.08.2.05.52.03.72l-.12.7c-.04.2-.16.8.72.43.88-.37 4.72-2.78 6.44-4.76 1.19-1.3 1.76-2.62 1.76-4 0-3.64-3.7-6.6-8.1-6.6z" fill="#FFFFFF"/>
+            <text x="12" y="12.9" textAnchor="middle" fontSize="4.6" fontWeight="900" fontFamily="Arial, Helvetica, sans-serif" fill="#06C755">LINE</text>
+          </svg>
         </button>
       </div>
       )}
