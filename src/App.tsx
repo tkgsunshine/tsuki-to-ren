@@ -37,6 +37,7 @@ import { SharedResultBanner, readSharedTeaser } from './components/SharedResultB
 import { shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
+import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFromPath, type NavState, type OverlayName, type PageFields, type SettingsSubView } from './utils/navHistory';
 import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
 import { decideSync, sameProfile, samePartners, type SyncProfile } from './utils/userDataSync';
 import type { PartnerLock } from './components/ResultView';
@@ -127,86 +128,49 @@ function App() {
   const [activeTab, setActiveTab] = useState(initialRoute.tab);
   const [selectedColumnSlug, setSelectedColumnSlug] = useState<string | null>(initialRoute.slug);
 
+  // 戻る・進む（iPhoneの戻るスワイプを含む）で、履歴に残した画面をそのまま再現する。中身は下の applyNav（毎回最新の state を使うため ref 経由）
+  const applyNavRef = useRef<(nav: NavState) => void>(() => {});
+  const overlayBackPendingRef = useRef(false);
   useEffect(() => {
+    // 最初に開いたページの履歴に、画面の情報を入れておく（重ね表示は閉じた状態で始まる）
+    const cur = readNav();
+    replaceNav({ ...routeFromPath(window.location.pathname), overlays: [], idx: cur.idx, scroll: undefined });
+
     const handlePopState = () => {
-      const route = getInitialRoute();
-      setActiveTab(route.tab);
-      setSelectedColumnSlug(route.slug);
-      setShowLegalPage(route.legal);
-      if (route.settingsSubView) setSettingsSubView(route.settingsSubView);
-      if (route.compatibilityPair) {
-        setMyMbti(route.compatibilityPair.myMbti);
-        setOppMbti(route.compatibilityPair.oppMbti);
-        setMode('match');
-      }
-      if (route.tab === 'home') {
-        setFlowStep('input');
-        setLoadedPartner(null);
-        window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-        requestAnimationFrame(() => {
-          const mainEl = document.querySelector('.main-content');
-          if (mainEl) mainEl.scrollTop = 0;
-          window.scrollTo(0, 0);
-        });
-      }
+      overlayBackPendingRef.current = false;
+      applyNavRef.current(readNav());
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  const scrollMainTo = (top: number) => {
+    window.scrollTo(0, top);
+    document.documentElement.scrollTop = top;
+    document.body.scrollTop = top;
+    const mainEl = document.querySelector('.main-content');
+    if (mainEl) mainEl.scrollTop = top;
+  };
+
   const handleTabChange = (tab: string) => {
+    const cur = readNav();
+    const next: PageFields = { tab, slug: null, subView: 'main', legal: false, flowStep: tab === 'home' ? 'input' : cur.flowStep };
+    if (pageKey(next) !== pageKey(cur)) pushNav(next);
+
     setActiveTab(tab);
     setIsChatOpen(false);
     setShowPremiumLP(false);
     setShowAuthModal(false);
     setShowLegalPage(false);
     setShowShareCard(false);
+    setSelectedColumnSlug(null);
+    setSettingsSubView('main');
 
     if (tab === 'home') {
       setFlowStep('input');
       setLoadedPartner(null);
-      setSelectedColumnSlug(null);
-      if (window.location.pathname !== '/') {
-        window.history.pushState({ tab: 'home', slug: null }, '', '/');
-      }
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
-    } else if (tab === 'fortune') {
-      if (window.location.pathname !== '/result') {
-        window.history.pushState({ tab: 'fortune', slug: null }, '', '/result');
-      }
-      window.scrollTo(0, 0);
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
-    } else if (tab === 'column') {
-      setSelectedColumnSlug(null);
-      if (window.location.pathname !== '/column') {
-        window.history.pushState({ tab: 'column', slug: null }, '', '/column');
-      }
-      window.scrollTo(0, 0);
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
-    } else if (tab === 'chat') {
-      if (window.location.pathname !== '/chat') {
-        window.history.pushState({ tab: 'chat', slug: null }, '', '/chat');
-      }
-      window.scrollTo(0, 0);
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
-    } else if (tab === 'profile') {
-      setSettingsSubView('main');
-      if (window.location.pathname !== '/mypage') {
-        window.history.pushState({ tab: 'profile', slug: null }, '', '/mypage');
-      }
-      window.scrollTo(0, 0);
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
     }
+    scrollMainTo(0);
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
   // 共有リンクから来た人に見せる、共有した人の結果の要約（URLは読んだあと消す）
@@ -507,20 +471,6 @@ function App() {
 
   // Handle browser back / forward navigation (popstate) & Parse share link query parameters
   useEffect(() => {
-    if (!window.history.state || !window.history.state.flowStep) {
-      window.history.replaceState({ flowStep: 'input' }, '');
-    }
-
-    const handlePopState = (e: PopStateEvent) => {
-      const targetStep = e.state?.flowStep || 'input';
-      setFlowStep(targetStep);
-      if (targetStep === 'input') {
-        setActiveTab('home');
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
     // Helper to decode 1-char relationship codes & short params
     const decodeRel = (val: string | null) => {
       if (!val) return '片思い中';
@@ -652,26 +602,22 @@ function App() {
         console.error('Failed to restore last diagnosis input:', e);
       }
     }
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
   }, []);
 
   const handleResetFlow = () => {
     try {
       localStorage.removeItem('hasu_last_diagnosis_input');
     } catch (e) {}
+    const cur = readNav();
+    if (cur.tab !== 'home' || cur.flowStep !== 'input') {
+      pushNav({ tab: 'home', slug: null, subView: 'main', legal: false, flowStep: 'input' });
+    }
     setFlowStep('input');
     setActiveTab('home');
     setLoadedPartner(null);
-    if (window.history.state?.flowStep === 'result') {
-      try {
-        window.history.pushState({ flowStep: 'input' }, '');
-      } catch (err) {
-        console.error(err);
-      }
-    }
+    // 入力ページを一番上から見せる（結果ページのスクロール位置が残らないよう、描画のあとにも戻す）
+    scrollMainTo(0);
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollMainTo(0)));
   };
 
   const generateShareUrl = () => {
@@ -917,14 +863,12 @@ function App() {
       if (!isRegistered) {
         showConfirm(`非会員の保存上限（1人）に達しています。\n無料会員登録を行うと最大2人まで保存できます。無料登録しますか？`, { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
-          setActiveTab('profile');
-          setSettingsSubView('profile');
+          openSubView('profile');
         });
       } else if (!isSubscribed) {
         showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
-          setActiveTab('profile');
-          setSettingsSubView('main');
+          handleTabChange('profile');
         });
       } else {
         showAlert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
@@ -1107,14 +1051,11 @@ function App() {
       // On /result (e.g. a reload of the 鑑定結果 tab), stay on that tab so the bottom menu matches the screen.
       const onResultPath = getInitialRoute().tab === 'fortune';
       setActiveTab(onResultPath ? 'fortune' : 'home');
-      try {
-        if (skipLoading && onResultPath) {
-          window.history.replaceState({ ...window.history.state, flowStep: 'result' }, '');
-        } else {
-          window.history.pushState({ flowStep: 'result' }, '');
-        }
-      } catch (e) {
-        console.error(e);
+      if (skipLoading && onResultPath) {
+        replaceNav({ tab: 'fortune', flowStep: 'result' });
+      } else {
+        // URL（共有リンクの値など）はそのまま、結果の画面を1件積む
+        pushNav({ tab: onResultPath ? 'fortune' : 'home', slug: null, subView: 'main', legal: false, flowStep: 'result' }, window.location.pathname + window.location.search);
       }
     };
 
@@ -1125,6 +1066,61 @@ function App() {
       setTimeout(execute, 3000);
     }
   };
+
+  // マイページの中のページ（プロフィール編集・運営会社など）を開く。1件積むので、戻るでマイページ一覧に戻る
+  const openSubView = (view: SettingsSubView) => {
+    pushNav({ tab: 'profile', subView: view, legal: false });
+    setActiveTab('profile');
+    setSettingsSubView(view);
+    scrollMainTo(0);
+  };
+  // 画面内の戻るボタン。戻るスワイプと同じく一つ前（マイページ一覧）に戻す
+  const closeSubView = () => {
+    if (!goBackOr({ subView: 'main' })) {
+      setSettingsSubView('main');
+      scrollMainTo(0);
+    }
+  };
+
+  const currentPageKey = pageKey({ tab: activeTab, slug: selectedColumnSlug, subView: settingsSubView, legal: showLegalPage, flowStep: flowStep === 'result' ? 'result' : 'input' });
+  applyNavRef.current = (nav: NavState) => {
+    const flow = nav.flowStep === 'result' && renResult && tsukiResult ? 'result' : 'input';
+    const pageChanged = pageKey({ ...nav, flowStep: flow }) !== currentPageKey;
+    setActiveTab(nav.tab);
+    setSelectedColumnSlug(nav.slug);
+    setSettingsSubView(nav.subView);
+    setShowLegalPage(nav.legal);
+    setFlowStep(flow);
+    if (nav.tab === 'home' && flow === 'input' && pageChanged) setLoadedPartner(null);
+    const has = (name: OverlayName) => nav.overlays.includes(name);
+    setIsChatOpen(has('chat'));
+    if (!has('chat')) { setChatInitialQuestion(undefined); setChatTarget(null); }
+    setShowPremiumLP(has('premiumLP'));
+    setShowAuthModal(has('auth'));
+    setShowShareCard(has('shareCard'));
+    setShowNotifyEmailModal(has('notify'));
+    setShowInstallGuideModal(has('installGuide'));
+    setShowPremiumWelcome(has('premiumWelcome'));
+    // 別の画面に戻ったときは、その画面を離れたときのスクロール位置へ（描画のあとに）
+    if (pageChanged) {
+      const top = nav.scroll ?? 0;
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollMainTo(top)));
+    }
+  };
+
+  // チャット・プレミアム案内などの重ね表示を開いたら履歴を1件積み、閉じたら外す（戻るスワイプで閉じられるように）
+  useEffect(() => {
+    if (overlayBackPendingRef.current) return;
+    const open = new Set<OverlayName>();
+    if (isChatOpen) open.add('chat');
+    if (showPremiumLP) open.add('premiumLP');
+    if (showAuthModal) open.add('auth');
+    if (showShareCard) open.add('shareCard');
+    if (showNotifyEmailModal) open.add('notify');
+    if (showInstallGuideModal) open.add('installGuide');
+    if (showPremiumWelcome) open.add('premiumWelcome');
+    if (syncOverlays(open) === 'back') overlayBackPendingRef.current = true;
+  }, [isChatOpen, showPremiumLP, showAuthModal, showShareCard, showNotifyEmailModal, showInstallGuideModal, showPremiumWelcome]);
 
   const handleRegister = async (email: string) => {
     console.log(`Sending registration email link to: ${email}`);
@@ -1260,7 +1256,7 @@ function App() {
                 }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
-                  window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
+                  pushNav({ legal: true });
                 }}
               />
             )}
@@ -1303,7 +1299,7 @@ function App() {
                 }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
-                  window.history.pushState({ tab: 'fortune', legal: true }, '', '/terms');
+                  pushNav({ legal: true });
                 }}
               />
             ) : (
@@ -1319,7 +1315,7 @@ function App() {
                 </p>
                 <button 
                   className="consult-btn font-serif" 
-                  onClick={() => { setActiveTab('home'); setFlowStep('input'); }}
+                  onClick={() => handleTabChange('home')}
                   style={{ marginTop: '0.5rem', padding: '0.9rem 2rem', fontSize: '0.95rem', fontWeight: 'bold' }}
                 >
                   今すぐ相性を占う
@@ -1467,29 +1463,25 @@ function App() {
               <ColumnDetailView
                 slug={selectedColumnSlug}
                 onBackToList={() => {
-                  setSelectedColumnSlug(null);
-                  window.history.pushState({ tab: 'column', slug: null }, '', '/column');
-                  window.scrollTo(0, 0);
-                  const mainContentEl = document.querySelector('.main-content');
-                  if (mainContentEl) mainContentEl.scrollTop = 0;
+                  // 一覧から開いた記事なら、戻ると同じ（一覧のスクロール位置も戻る）。直接開いた記事なら一覧に置き換える
+                  if (!goBackOr({ slug: null })) {
+                    setSelectedColumnSlug(null);
+                    scrollMainTo(0);
+                  }
                 }}
                 onNavigateHome={() => handleTabChange('home')}
                 onSelectArticle={(slug) => {
+                  pushNav({ tab: 'column', slug });
                   setSelectedColumnSlug(slug);
-                  window.history.pushState({ tab: 'column', slug }, '', `/column/${slug}`);
-                  window.scrollTo(0, 0);
-                  const mainContentEl = document.querySelector('.main-content');
-                  if (mainContentEl) mainContentEl.scrollTop = 0;
+                  scrollMainTo(0);
                 }}
               />
             ) : (
               <ColumnListView
                 onSelectArticle={(slug) => {
+                  pushNav({ tab: 'column', slug });
                   setSelectedColumnSlug(slug);
-                  window.history.pushState({ tab: 'column', slug }, '', `/column/${slug}`);
-                  window.scrollTo(0, 0);
-                  const mainContentEl = document.querySelector('.main-content');
-                  if (mainContentEl) mainContentEl.scrollTop = 0;
+                  scrollMainTo(0);
                 }}
                 onNavigateHome={() => handleTabChange('home')}
               />
@@ -1504,10 +1496,7 @@ function App() {
             {settingsSubView !== 'main' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <button
-                  onClick={() => {
-                    setSettingsSubView('main');
-                    window.history.pushState({ tab: 'profile', subView: 'main' }, '', '/mypage');
-                  }}
+                  onClick={closeSubView}
                   style={{
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -1638,7 +1627,7 @@ function App() {
                 </div>
 
                 <div 
-                  onClick={() => setSettingsSubView('profile')}
+                  onClick={() => openSubView('profile')}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -1663,7 +1652,7 @@ function App() {
                 </div>
 
                 <div 
-                  onClick={() => setSettingsSubView('partners')}
+                  onClick={() => openSubView('partners')}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -1802,8 +1791,7 @@ function App() {
 
                 <div 
                   onClick={() => {
-                    setSettingsSubView('about');
-                    window.history.pushState({ tab: 'profile', subView: 'about' }, '', '/about');
+                    openSubView('about');
                   }}
                   className="glass-panel" 
                   style={{
@@ -1830,8 +1818,7 @@ function App() {
 
                 <div 
                   onClick={() => {
-                    setSettingsSubView('contact');
-                    window.history.pushState({ tab: 'profile', subView: 'contact' }, '', '/contact');
+                    openSubView('contact');
                     window.scrollTo(0, 0);
                   }}
                   className="glass-panel" 
@@ -1859,8 +1846,7 @@ function App() {
 
                 <div 
                   onClick={() => {
-                    setSettingsSubView('tokushoho');
-                    window.history.pushState({ tab: 'profile', subView: 'tokushoho' }, '', '/tokushoho');
+                    openSubView('tokushoho');
                   }}
                   className="glass-panel" 
                   style={{
@@ -1888,7 +1874,7 @@ function App() {
                 <div 
                   onClick={() => {
                     setShowLegalPage(true);
-                    window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
+                    pushNav({ legal: true });
                   }}
                   className="glass-panel" 
                   style={{
@@ -1915,8 +1901,7 @@ function App() {
 
                 <div 
                   onClick={() => {
-                    setSettingsSubView('company');
-                    window.history.pushState({ tab: 'profile', subView: 'company' }, '', '/company');
+                    openSubView('company');
                   }}
                   className="glass-panel" 
                   style={{
@@ -1946,11 +1931,7 @@ function App() {
             {settingsSubView === 'contact' && (
               <ContactForm
                 defaultEmail={currentUser?.email}
-                onBack={() => {
-                  setSettingsSubView('main');
-                  window.history.pushState({ tab: 'profile', subView: 'main' }, '', '/mypage');
-                  window.scrollTo(0, 0);
-                }}
+                onBack={closeSubView}
               />
             )}
 
@@ -2079,12 +2060,12 @@ function App() {
                       const synced = await updateEmailSubscriptionProfile({ myName: myName || 'あなた', myBirth, myGender, myMbti });
                       if (!synced) {
                         showAlert('プロフィールは保存しましたが、毎朝のメールへの反映に失敗しました。ログインし直してから、もう一度保存してください。');
-                        setSettingsSubView('main');
+                        closeSubView();
                         return;
                       }
                     }
                     showAlert('プロフィール変更を保存しました！');
-                    setSettingsSubView('main');
+                    closeSubView();
                   }}
                   style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem', fontSize: '0.9rem', fontWeight: 'bold' }}
                 >
@@ -2856,9 +2837,7 @@ function App() {
       {/* Legal Page (利用規約・プライバシーポリシー) */}
       {showLegalPage && (
         <LegalPage onClose={() => {
-          setShowLegalPage(false);
-          const fallbackPath = activeTab === 'profile' ? '/mypage' : (activeTab === 'fortune' ? '/result' : (activeTab === 'column' ? '/column' : (activeTab === 'chat' ? '/chat' : '/')));
-          window.history.pushState({ tab: activeTab, slug: null }, '', fallbackPath);
+          if (!goBackOr({ legal: false })) setShowLegalPage(false);
         }} />
       )}
 
@@ -3018,8 +2997,7 @@ function App() {
                 onClick={() => {
                   // Opens the saved-partner form; saving it comes back here with the new partner chosen
                   setShowNotifyEmailModal(false);
-                  setActiveTab('profile');
-                  setSettingsSubView('partners');
+                  openSubView('partners');
                   if (startNewPartner()) setNotifyAfterPartnerAdd(true);
                 }}
                 style={{
