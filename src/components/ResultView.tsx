@@ -523,6 +523,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const activeResult = selectedChar === 'ren' ? renResult : tsukiResult;
   const oppNickname = opponentName || 'お相手';
   const [isPastGuardian, setIsPastGuardian] = useState(false);
+  const [isShareDismissed, setIsShareDismissed] = useState(() => {
+    try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
+  });
   const myAstrologyRef = useRef<HTMLDivElement>(null);
 
   // 最上部の丸いメーター: 表示時・点数が変わったときに 0 から点数まで伸ばす（0〜1）
@@ -3422,7 +3425,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       )}
 
       {/* Floating Sticky Bottom Share CTA Bar */}
-      {SHOW_SHARE_BUTTON && (
+      {SHOW_SHARE_BUTTON && !isShareDismissed && (
       <div className="result-floating-bar" style={{
         position: 'fixed',
         bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
@@ -3467,6 +3470,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <path d="M12 4.6c-4.6 0-8.3 2.95-8.3 6.6 0 3.25 2.9 5.97 6.85 6.5.27.06.63.18.72.4.08.2.05.52.03.72l-.12.7c-.04.2-.16.8.72.43.88-.37 4.72-2.78 6.44-4.76 1.19-1.3 1.76-2.62 1.76-4 0-3.64-3.7-6.6-8.1-6.6z" fill="#FFFFFF"/>
             <text x="12" y="12.9" textAnchor="middle" fontSize="4.6" fontWeight="900" fontFamily="Arial, Helvetica, sans-serif" fill="#06C755">LINE</text>
           </svg>
+        </button>
+        <button
+          type="button"
+          aria-label="シェアボタンを閉じる"
+          onClick={() => {
+            setIsShareDismissed(true);
+            try { sessionStorage.setItem('shareBtnDismissed', '1'); } catch { /* ignore */ }
+          }}
+          style={{
+            position: 'absolute',
+            top: '-10px',
+            right: '-6px',
+            width: '24px',
+            height: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            borderRadius: '9999px',
+            border: '1px solid rgba(255,255,255,0.25)',
+            background: 'rgba(0,0,0,0.75)',
+            color: '#ffffff',
+            cursor: 'pointer'
+          }}
+        >
+          <X size={14} />
         </button>
       </div>
       )}
