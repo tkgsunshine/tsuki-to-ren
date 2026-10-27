@@ -34,6 +34,7 @@ import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, 
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
+import { shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
 import type { PartnerLock } from './components/ResultView';
@@ -595,9 +596,18 @@ function App() {
     if (activeResult) {
       params.set('bs', String(activeResult.baseScore));
       if (!dailyScoreHidden) params.set('ds', String(activeResult.dailyScore)); // 無料の日数を使い切った日は「??点」
-      // 共有カード画像（api/og.js）に載せる、ひとことと相性の名前
-      if (activeResult.oneLiner) params.set('ol', activeResult.oneLiner.slice(0, 40));
-      if (mode === 'match' && activeResult.compatibilityTitle) params.set('t', activeResult.compatibilityTitle.slice(0, 30));
+      // ひとことや相性の名前は入れない。日本語はURLで1字9文字になり、Xに貼ると長すぎる（カード画像は名前と点数で作る）
+      // カード画像の背景に出す守護獣（/assets/astrology_ox_sample_male.jpg → ox_sample_male）
+      const avatarKey = (url?: string) => /\/astrology_([a-z_]+)\.jpg$/.exec(url || '')?.[1];
+      const ma = avatarKey(activeResult.myAvatarUrl);
+      if (ma) params.set('ma', ma);
+      const oa = mode === 'match' ? avatarKey(activeResult.opponentAvatarUrl) : undefined;
+      if (oa) params.set('oa', oa);
+      // カードの説明の文は番号で渡す（api/_lib/share-card-text.js）
+      const c = mode === 'match' ? shareTitleCode(activeResult.compatibilityTitle) : -1;
+      if (c >= 0) params.set('c', String(c));
+      const l = shareLineCode(activeResult.oneLiner);
+      if (l >= 0) params.set('l', String(l));
     }
     return `${baseUrl}?${params.toString()}`;
   };
