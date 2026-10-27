@@ -17,6 +17,7 @@ import {
 
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { trackSignupIfNew } from './analytics';
+import { clearAllChatHistory } from '../utils/chatHistory';
 
 declare global {
   interface Window {
@@ -310,6 +311,8 @@ export const logOutUser = async (): Promise<void> => {
   safeRemoveItem('hasu_to_tsuki_registered');
   safeRemoveItem('emailForSignIn');
   try { sessionStorage.clear(); } catch {}
+  // 端末に残したチャットの会話も消す（端末を共有していても次の人に見えないように）
+  clearAllChatHistory();
   document.cookie = "emailForSignIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   try {
     await signOut(auth);

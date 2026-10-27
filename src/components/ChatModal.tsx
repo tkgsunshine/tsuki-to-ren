@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, X } from 'lucide-react';
+import { Send, X, RotateCcw } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
-import { showAlert } from './AppDialog';
+import { showAlert, showConfirm } from './AppDialog';
+import { chatHistoryKey, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chatHistory';
 import type { SavedPartner } from '../App';
 
 interface ChatModalProps {
@@ -22,6 +23,8 @@ interface ChatModalProps {
   initialQuestion?: string;
   /** 無料の日数を使い切ったお相手: 今日の点数をAIにも渡さない */
   hideDailyScore?: boolean;
+  /** 会話を端末に残すときの、お相手の見分け方（'self' = 自分のこと）。未指定なら残さない */
+  historyKey?: string;
   /** チャット画面（対話ロビー）から開いたとき: 相談を始める前に、誰について相談するかを選んでもらう */
   partnerPicker?: {
     partners: SavedPartner[];
@@ -53,9 +56,18 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   opponentName,
   initialQuestion,
   hideDailyScore = false,
+  historyKey,
   partnerPicker
 }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  // 会話はこの端末にだけ残す（src/utils/chatHistory.ts）。ログイン中のアカウント・キャラクター・お相手ごとに分ける
+  const uid = getFirebaseAuth().currentUser?.uid;
+  const storageKey = isRegistered && uid && historyKey && !partnerPicker
+    ? chatHistoryKey(uid, character, historyKey)
+    : null;
+  const [messages, setMessages] = useState<Message[]>(() => loadChatHistory(storageKey) || []);
+  // いま表示している会話がどのキーのものか。お相手を切り替えた瞬間に、前の会話を新しいお相手の分として保存しないため
+  const [messagesKey, setMessagesKey] = useState<string | null>(storageKey);
+  const loadedKeyRef = useRef<string | null | undefined>(undefined);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showRegisterOverlay, setShowRegisterOverlay] = useState(false);
@@ -77,18 +89,49 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
   // Initial greeting（質問ボタンから開いたときは、あいさつを出さずにその質問から始める）
   // お相手を選び直したら、そのお相手の名前であいさつし直す（まだ何も送っていないときだけ）
-  useEffect(() => {
-    if (initialQuestion && isRegistered) return;
-    if (partnerPicker) return;
+  const greetingText = () => {
     const about = hasOpponent ? `${oppDisplayName}のことですね。` : '';
-    const greetingText = character === 'ren'
+    return character === 'ren'
       ? `私は蓮。理性と導きを司る者。${about ? `今日は${about}` : ''}あなたの心境を整理し、進むべき道を論理的に紐解きましょう。今、どのようなことに迷っていますか？`
       : `私は月。直感と優しさを司る者。${about ? `今日は${about}` : ''}あなたの心の声に耳を傾け、優しく寄り添います。今、どんな想いを抱えていますか？`;
-    
-    setMessages(prev => (prev.some(m => m.sender === 'user') ? prev : [
-      { id: '1', sender: 'bot', text: greetingText }
+  };
+
+  // 前回の会話がこの端末に残っていれば、あいさつの代わりにそれを出す
+  useEffect(() => {
+    if (partnerPicker) return;
+    const keyChanged = loadedKeyRef.current !== storageKey;
+    loadedKeyRef.current = storageKey;
+    if (keyChanged) {
+      setMessagesKey(storageKey);
+      const saved = loadChatHistory(storageKey);
+      if (saved) {
+        setMessages(saved);
+        return;
+      }
+    }
+    if (initialQuestion && isRegistered) return;
+    setMessages(prev => (!keyChanged && prev.some(m => m.sender === 'user') ? prev : [
+      { id: '1', sender: 'bot', text: greetingText() }
     ]));
-  }, [character, !!partnerPicker, oppDisplayName]);
+  }, [character, !!partnerPicker, oppDisplayName, storageKey]);
+
+  // 送るたび・返事が来るたびに保存する（あいさつだけのときは保存しない）
+  useEffect(() => {
+    if (!storageKey || messagesKey !== storageKey) return;
+    if (!messages.some(m => m.sender === 'user')) return;
+    saveChatHistory(storageKey, messages);
+  }, [messages, storageKey, messagesKey]);
+
+  const hasHistory = messages.some(m => m.sender === 'user');
+  const startNewConsultation = async () => {
+    if (isTyping) return;
+    const ok = await showConfirm('今の会話を消して、新しい相談をはじめますか？', { okLabel: 'はじめる', cancelLabel: 'やめる' });
+    if (!ok) return;
+    clearChatHistory(storageKey);
+    loadedKeyRef.current = storageKey;
+    setMessagesKey(storageKey);
+    setMessages([{ id: Date.now().toString(), sender: 'bot', text: greetingText() }]);
+  };
 
   // 鑑定結果の質問ボタンから開いたときは、開いた瞬間にその質問を送る（StrictMode の二重実行でも1回だけ）
   useEffect(() => {
@@ -192,7 +235,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     setIsTyping(true);
 
     try {
-      const history = messages.map(m => ({
+      // サーバーも直近10件しか使わない（api/chat.js MAX_HISTORY）。端末に残した古い会話まで送らない
+      const history = messages.slice(-10).map(m => ({
         role: m.sender === 'user' ? 'user' : 'model',
         text: m.text
       }));
@@ -577,9 +621,17 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               </span>
             </div>
           </div>
+          <div className="chat-header-actions">
+          {storageKey && hasHistory && (
+            <button className="chat-new-btn tap-target" onClick={startNewConsultation} disabled={isTyping}>
+              <RotateCcw size={13} />
+              新しい相談
+            </button>
+          )}
           <button className="chat-close-btn tap-target" aria-label="閉じる" onClick={onClose}>
             <X size={18} />
           </button>
+          </div>
         </div>
 
         {/* 誰について相談するか（対話ロビーから開いたとき） */}
