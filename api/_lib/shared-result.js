@@ -7,14 +7,13 @@ import { clientIp } from './inquiry.js';
 // (both characters' versions) when the share card opens, and it is kept here as it was on that day.
 // Nothing that holds a birth date is saved: the result objects carry no birth dates, and keys named like one are dropped anyway.
 // Served by api/share.js (no serverless function of its own): POST /api/share saves, GET /api/share?id=… reads.
-//   sharedResults/{id}            { json, date, createdAt, expireAt }  expireAt: Firestore's TTL policy deletes it after 90 days
+//   sharedResults/{id}            { json, date, createdAt }  kept with no expiry (TAKASHI's choice, 2026-10-27), so old links keep working
 //   sharedResultLimits/{day_key}  { count, day }  new saves per IP per JST day, and the whole site's total under day_all
 // Saving needs no sign-in (sharing does not), so per-sender and site-wide daily caps keep it from being flooded.
 // Over a cap the app just shares the link without a saved result.
 export const SHARED_RESULTS = 'sharedResults';
 export const SHARED_LIMITS = 'sharedResultLimits';
 export const MAX_BYTES = 400 * 1024;
-export const KEEP_DAYS = 90;
 export const PER_SENDER_DAILY = 30;
 export const SITE_DAILY = 2000;
 const ID_RE = /^[A-Za-z0-9_-]{12}$/;
@@ -78,8 +77,6 @@ export async function consumeShare(db, senderKey, now) {
   });
 }
 
-const millis = (t) => (t instanceof Date ? t.getTime() : typeof t?.toMillis === 'function' ? t.toMillis() : NaN);
-
 export async function saveShared(req, res, deps = {}) {
   res.setHeader('Cache-Control', 'no-store');
   const data = cleanShared(parseBody(req.body));
@@ -91,7 +88,7 @@ export async function saveShared(req, res, deps = {}) {
     const ref = db.collection(SHARED_RESULTS).doc(id);
     // Sharing the same result again reuses the saved one and does not count
     const existing = await ref.get();
-    if (existing.exists && millis(existing.data().expireAt) > now) return res.status(200).json({ id });
+    if (existing.exists) return res.status(200).json({ id });
     if (!(await consumeShare(db, hashIp(clientIp(req) || 'unknown'), now))) {
       return res.status(429).json({ status: 'error', message: 'Too many shares today' });
     }
@@ -100,7 +97,6 @@ export async function saveShared(req, res, deps = {}) {
       json: JSON.stringify(data),
       date: jstDate(now),
       createdAt: new Date(now).toISOString(),
-      expireAt: new Date(now + KEEP_DAYS * 86400 * 1000),
     });
     return res.status(200).json({ id });
   } catch (e) {
@@ -114,8 +110,6 @@ export async function readShared(id, deps = {}) {
   const snap = await (deps.db || getDb()).collection(SHARED_RESULTS).doc(id).get();
   if (!snap.exists) return null;
   const doc = snap.data();
-  // The TTL policy deletes expired documents some time after expireAt, so an expired one may still be there
-  if (millis(doc.expireAt) <= (deps.now ?? Date.now())) return null;
   return { ...JSON.parse(doc.json), date: doc.date };
 }
 

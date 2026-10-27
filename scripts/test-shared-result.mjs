@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import share from '../api/share.js';
-import { cleanShared, KEEP_DAYS, MAX_BYTES, PER_SENDER_DAILY } from '../api/_lib/shared-result.js';
+import { cleanShared, MAX_BYTES, PER_SENDER_DAILY } from '../api/_lib/shared-result.js';
 import { generateFortuneResult } from '../src/utils/fortuneEngine.ts';
 
 const mockRes = () => {
@@ -84,7 +84,7 @@ test('a share link with a saved result opens it in the app; others keep the summ
   assert.match(without.location, /\/\?from=share&sn=a&sp=b&sb=70&sd=80/);
 });
 
-test('new saves are capped per sender per day, and saved results expire after 90 days', async () => {
+test('new saves are capped per sender per day, and the same result again does not count', async () => {
   const db = mockDb();
   const now = Date.UTC(2026, 9, 27, 3);
   for (let i = 0; i < PER_SENDER_DAILY; i++) {
@@ -102,11 +102,9 @@ test('new saves are capped per sender per day, and saved results expire after 90
   await share({ method: 'POST', url: '/api/share', headers: { ...host, 'x-forwarded-for': '198.51.100.9' }, body: body() }, other, { db, now });
   assert.equal(other.code, 200);
 
-  const id = other.body.id;
-  const fresh = mockRes();
-  await share({ method: 'GET', url: `/api/share?id=${id}`, headers: host }, fresh, { db, now: now + (KEEP_DAYS - 1) * 86400e3 });
-  assert.equal(fresh.code, 200);
-  const old = mockRes();
-  await share({ method: 'GET', url: `/api/share?id=${id}`, headers: host }, old, { db, now: now + KEEP_DAYS * 86400e3 });
-  assert.equal(old.code, 404);
+  // Sharing an already saved result again still works for the capped sender
+  const again = mockRes();
+  await share({ method: 'POST', url: '/api/share', headers: host, body: body() }, again, { db, now });
+  assert.equal(again.code, 200);
+  assert.equal(again.body.id, other.body.id);
 });
