@@ -36,6 +36,8 @@ import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
+import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
+import { decideSync, sameProfile, samePartners, type SyncProfile } from './utils/userDataSync';
 import type { PartnerLock } from './components/ResultView';
 
 const formatBirthDate = (val: string): string => {
@@ -404,6 +406,96 @@ function App() {
     try {
       localStorage.setItem('hasu_saved_partners', JSON.stringify(savedPartners));
     } catch (e) {}
+  }, [savedPartners]);
+
+  // Members: the profile and saved partners follow the account (api/_lib/user-data.js), not only this device.
+  // On iPhone the home-screen app and Safari keep separate storage, so device-only data looked like another account.
+  const [inputViewKey, setInputViewKey] = useState(0); // remounts the input form when the account's profile arrives
+  const savedPartnersRef = useRef(savedPartners);
+  savedPartnersRef.current = savedPartners;
+  const syncUidRef = useRef<string | null>(null); // the account the screen is synced with (null = not yet / signed out)
+  const syncedProfileRef = useRef('');
+  const syncedPartnersRef = useRef('');
+  const lastPullRef = useRef(0);
+  const partnerPushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const readLocalProfile = (): SyncProfile | null => {
+    try {
+      const stored = localStorage.getItem('hasu_user_profile');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const applySyncedProfile = (profile: SyncProfile | null) => {
+    try {
+      if (profile) localStorage.setItem('hasu_user_profile', JSON.stringify(profile));
+      else localStorage.removeItem('hasu_user_profile');
+    } catch {}
+    setMyName(profile?.name || 'あなた');
+    setMyBirth(profile?.birth || '');
+    setMyMbti(profile?.mbti || 'UNKNOWN');
+    setMyGender(profile?.gender || 'female');
+    setInputViewKey((k) => k + 1);
+  };
+
+  const pullUserData = async (uid: string) => {
+    lastPullRef.current = Date.now();
+    const remote = await fetchUserData(uid);
+    if (!remote || currentUidRef.current !== uid) return;
+    const localProfile = readLocalProfile();
+    const decision = decideSync({ profile: localProfile, partners: savedPartnersRef.current }, remote, readSyncOwner(), uid);
+    // Data from before syncing is only treated as merged once the account has it
+    if (decision.push && !(await saveUserData(uid, decision.push))) return;
+    if (currentUidRef.current !== uid) return;
+    writeSyncOwner(uid);
+    if (!sameProfile(localProfile, decision.profile)) applySyncedProfile(decision.profile);
+    if (!samePartners(savedPartnersRef.current, decision.partners)) setSavedPartners(decision.partners as SavedPartner[]);
+    syncedProfileRef.current = JSON.stringify(decision.profile);
+    syncedPartnersRef.current = JSON.stringify(decision.partners);
+    syncUidRef.current = uid;
+  };
+
+  // Sends the profile saved on this device (after the profile edit or a reading) to the account
+  const pushProfile = () => {
+    const uid = syncUidRef.current;
+    const profile = readLocalProfile();
+    if (!uid || !profile || JSON.stringify(profile) === syncedProfileRef.current) return;
+    syncedProfileRef.current = JSON.stringify(profile);
+    saveUserData(uid, { profile }).then((ok) => { if (!ok) syncedProfileRef.current = ''; });
+  };
+
+  const currentUidRef = useRef<string | null>(null);
+  useEffect(() => {
+    const uid = currentUser?.uid || null;
+    currentUidRef.current = uid;
+    syncUidRef.current = null;
+    if (!uid) return;
+    void pullUserData(uid);
+    // Coming back to the app (e.g. after editing on the other device): read the account again, at most once a minute
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || partnerPushTimerRef.current) return;
+      if (Date.now() - lastPullRef.current < 60_000) return;
+      void pullUserData(uid);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [currentUser?.uid]);
+
+  // Saved partners changed on this device (added, edited, deleted): send them to the account
+  useEffect(() => {
+    const uid = syncUidRef.current;
+    const json = JSON.stringify(savedPartners);
+    if (!uid || json === syncedPartnersRef.current) return;
+    if (partnerPushTimerRef.current) clearTimeout(partnerPushTimerRef.current);
+    partnerPushTimerRef.current = setTimeout(() => {
+      partnerPushTimerRef.current = null;
+      const partners = savedPartnersRef.current;
+      const sent = JSON.stringify(partners);
+      syncedPartnersRef.current = sent;
+      saveUserData(uid, { partners }).then((ok) => { if (!ok && syncedPartnersRef.current === sent) syncedPartnersRef.current = ''; });
+    }, 800);
   }, [savedPartners]);
 
   // Handle browser back / forward navigation (popstate) & Parse share link query parameters
@@ -919,6 +1011,7 @@ function App() {
     setOppGender(data.oppGender);
     setRelationship(data.relationship);
     setMode(data.mode);
+    pushProfile(); // the input form has just saved the profile on this device
     trackFortune();
 
     startDiagnosis(
@@ -1101,6 +1194,7 @@ function App() {
                 <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />
                 {sharedTeaser && <SharedResultBanner teaser={sharedTeaser} onClose={() => setSharedTeaser(null)} />}
                 <UnifiedInputView
+                  key={inputViewKey}
                   selectedCharacter={selectedCharacter}
                   setSelectedCharacter={setSelectedCharacter}
                   onSubmit={handleDiagnosisSubmit}
@@ -1963,6 +2057,7 @@ function App() {
                         gender: myGender
                       }));
                     } catch (e) {}
+                    pushProfile();
                     // Keep the daily email in step with the edited profile
                     if (notifyDailyLuck && currentUser) {
                       const synced = await updateEmailSubscriptionProfile({ myName: myName || 'あなた', myBirth, myGender, myMbti });
