@@ -517,6 +517,9 @@ function App() {
     setFlowStep('input');
     setActiveTab('home');
     setLoadedPartner(null);
+    // 入力ページを一番上から見せる（結果ページのスクロール位置が残らないよう、描画のあとにも戻す）
+    scrollMainTo(0);
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollMainTo(0)));
   };
 
   const generateShareUrl = () => {
