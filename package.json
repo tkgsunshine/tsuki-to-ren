@@ -13,7 +13,8 @@
     "test:stripe": "node --test scripts/test-stripe.mjs scripts/test-partner-days.mjs",
     "test:userdata": "node --experimental-strip-types --test scripts/test-user-data.mjs",
     "test:chat": "node --test scripts/test-chat-limit.mjs",
-    "test:inquiry": "node --test scripts/test-inquiry.mjs"
+    "test:inquiry": "node --test scripts/test-inquiry.mjs",
+    "test:share": "node --experimental-strip-types --test scripts/test-shared-result.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

@@ -33,7 +33,7 @@ import { trackFortune, trackPremiumStep } from './services/analytics';
 import { subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
-import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
+import { SharedResultView, readSharedResult } from './components/SharedResultView';
 import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
@@ -122,6 +122,18 @@ const getInitialRoute = (): InitialRoute => {
   return { tab: 'home', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
 };
 
+// 共有リンクのために保存した鑑定結果（api/_lib/shared-result.js）
+interface SharedResultData {
+  mode: 'single' | 'match';
+  myName: string;
+  oppName: string;
+  character: 'ren' | 'tsuki';
+  tsuki: FortuneResult;
+  ren: FortuneResult;
+  date: string;
+}
+type SharedView = { status: 'loading'; id: string } | { status: 'ready'; data: SharedResultData } | null;
+
 function App() {
   // Navigation & Flow with URL Routing Sync
   const initialRoute = getInitialRoute();
@@ -173,10 +185,37 @@ function App() {
     scrollMainTo(0);
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
-  // 共有リンクから来た人に見せる、共有した人の結果の要約（URLは読んだあと消す）
-  const [sharedTeaser, setSharedTeaser] = useState(() => readSharedTeaser(window.location.search));
+  // 共有リンクから来た人に見せる、共有した人の鑑定結果（URLは読んだあと消す）。
+  // 保存した結果のID（?shared=…）があれば普段の結果画面で、なければリンクの値だけで作った要約（SharedResultView）で見せる
+  const [sharedTeaser, setSharedTeaser] = useState(() => readSharedResult(window.location.search));
+  const [sharedView, setSharedView] = useState<SharedView>(() => {
+    const id = new URLSearchParams(window.location.search).get('shared');
+    return id && /^[A-Za-z0-9_-]{12}$/.test(id) ? { status: 'loading', id } : null;
+  });
   useEffect(() => {
-    if (!sharedTeaser) return;
+    if (sharedView?.status !== 'loading') return;
+    let active = true;
+    fetch(`/api/share?id=${sharedView.id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: SharedResultData | null) => {
+        if (!active) return;
+        if (d && d.tsuki && d.ren) {
+          setSelectedCharacter(d.character === 'ren' ? 'ren' : 'tsuki');
+          setSharedView({ status: 'ready', data: d });
+        } else {
+          setSharedView(null);
+          showAlert('共有された鑑定結果が見つかりませんでした。');
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setSharedView(null);
+        showAlert('共有された鑑定結果を読み込めませんでした。通信環境を確認して、もう一度開いてください。');
+      });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    if (!sharedTeaser && !sharedView) return;
     try {
       window.history.replaceState(window.history.state, '', window.location.pathname);
     } catch (e) {
@@ -648,6 +687,8 @@ function App() {
     }
 
     // 共有リンクは誰でも見られるので、名前（ニックネーム）と点数だけを入れ、生年月日などは入れない（開いた人には api/share.js が要約を見せる）
+    // 保存した鑑定結果のID。開いた人は普段の結果画面で見られる
+    if (savedShare && savedShare.result === tsukiResult) params.set('r', savedShare.id);
     if (myName && myName !== 'あなた') params.set('mn', myName.slice(0, 8));
     if (mode === 'match') {
       if (oppName && oppName !== 'お相手') params.set('on', oppName.slice(0, 8));
@@ -1157,6 +1198,24 @@ function App() {
   // Helper to get active result based on chosen character tab
   const activeResult = selectedCharacter === 'ren' ? renResult : tsukiResult;
 
+  // 共有リンクを開いた人に同じ鑑定結果を見せるため、シェアカードを開いたときに結果を保存する（api/share.js → sharedResults）。
+  // 保存が終わるまでと、保存できなかったときのリンクは、保存なしの形（カードの値だけ）になる。
+  // 今日の点数を隠している日（無料の日数を使い切ったお相手）は、隠した点数や助言が見えてしまうので保存しない
+  const [savedShare, setSavedShare] = useState<{ id: string; result: FortuneResult } | null>(null);
+  useEffect(() => {
+    if (!showShareCard || !renResult || !tsukiResult || dailyScoreHidden || savedShare?.result === tsukiResult) return;
+    let active = true;
+    fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode, myName, oppName: mode === 'match' ? oppName : '', character: selectedCharacter, tsuki: tsukiResult, ren: renResult }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (active && d && typeof d.id === 'string') setSavedShare({ id: d.id, result: tsukiResult }); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [showShareCard, renResult, tsukiResult]);
+
   // 対話ロビーで選んだお相手（または自分だけ）の鑑定を、チャット用にその場で出す。点数の出し方は鑑定と同じ generateFortuneResult
   const chatResult = useMemo(() => {
     if (chatTarget === null) return activeResult;
@@ -1224,13 +1283,48 @@ function App() {
       {/* Scrollable Main Area */}
       <main className="main-content no-scrollbar">
         
+        {/* 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。「あなたも無料で鑑定する」で自分の入力画面へ */}
+        {activeTab === 'home' && sharedView?.status === 'loading' && <LoadingScreen />}
+        {activeTab === 'home' && sharedView?.status === 'ready' && (() => {
+          const d = sharedView.data;
+          const leave = () => { setSharedView(null); setFlowStep('input'); scrollMainTo(0); };
+          return (
+            <ResultView
+              result={selectedCharacter === 'ren' ? d.ren : d.tsuki}
+              renResult={d.ren}
+              tsukiResult={d.tsuki}
+              selectedChar={selectedCharacter}
+              setSelectedChar={setSelectedCharacter}
+              isRegistered={isRegistered}
+              onRegister={handleRegister}
+              isSubscribed={isSubscribed}
+              onSubscribe={handleStartCheckout}
+              onOpenPremiumLP={() => setShowPremiumLP(true)}
+              onOpenShareCard={() => {}}
+              myName={d.myName}
+              opponentName={d.mode === 'match' ? d.oppName : undefined}
+              hasOpponent={d.mode === 'match'}
+              onReset={leave}
+              onShowLegal={() => {
+                setShowLegalPage(true);
+                pushNav({ legal: true });
+              }}
+              sharedBy={{ name: d.myName, date: `${Number(d.date.slice(5, 7))}月${Number(d.date.slice(8, 10))}日` }}
+            />
+          );
+        })()}
+
         {/* Tab 1: HOME (Includes Diagnosis Flow) */}
-        {activeTab === 'home' && (
+        {activeTab === 'home' && !sharedView && (
           <>
             {flowStep === 'input' && (
               <div className="home-input-flow" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', flexShrink: 0 }}>
+                {/* 共有リンクから来た人には、まず共有された鑑定結果を見せる（「あなたも無料で鑑定する」で入力画面へ） */}
+                {sharedTeaser ? (
+                  <SharedResultView shared={sharedTeaser} onStart={() => { setSharedTeaser(null); scrollMainTo(0); }} />
+                ) : (
+                <>
                 <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />
-                {sharedTeaser && <SharedResultBanner teaser={sharedTeaser} onClose={() => setSharedTeaser(null)} />}
                 <UnifiedInputView
                   key={inputViewKey}
                   selectedCharacter={selectedCharacter}
@@ -1243,6 +1337,8 @@ function App() {
                   isRegistered={isRegistered}
                   isSubscribed={isSubscribed}
                 />
+                </>
+                )}
                 <SeoFooterSection />
               </div>
             )}
