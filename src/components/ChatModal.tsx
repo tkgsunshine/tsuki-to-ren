@@ -17,6 +17,8 @@ interface ChatModalProps {
   onClose: () => void;
   result?: FortuneResult | null;
   opponentName?: string;
+  // 鑑定結果の質問ボタンから開いたとき、その質問を最初に送る
+  initialQuestion?: string;
   /** 無料の日数を使い切ったお相手: 今日の点数をAIにも渡さない */
   hideDailyScore?: boolean;
 }
@@ -38,6 +40,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   onClose,
   result,
   opponentName,
+  initialQuestion,
   hideDailyScore = false
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -47,12 +50,14 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const [showSubscribeOverlay, setShowSubscribeOverlay] = useState(false);
   const [emailSentChat, setEmailSentChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const initialQuestionSentRef = useRef(false);
 
   const characterName = character === 'ren' ? '蓮' : '月';
   const characterAvatar = character === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp';
 
-  // Initial greeting
+  // Initial greeting（質問ボタンから開いたときは、あいさつを出さずにその質問から始める）
   useEffect(() => {
+    if (initialQuestion && isRegistered) return;
     const greetingText = character === 'ren'
       ? '私は蓮。理性と導きを司る者。あなたの心境を整理し、進むべき道を論理的に紐解きましょう。今、どのようなことに迷っていますか？'
       : '私は月。直感と優しさを司る者。あなたの心の声に耳を傾け、優しく寄り添います。今、どんな想いを抱えていますか？';
@@ -61,6 +66,25 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       { id: '1', sender: 'bot', text: greetingText }
     ]);
   }, [character]);
+
+  // 鑑定結果の質問ボタンから開いたときは、開いた瞬間にその質問を送る（StrictMode の二重実行でも1回だけ）
+  useEffect(() => {
+    if (!initialQuestion || initialQuestionSentRef.current) return;
+    initialQuestionSentRef.current = true;
+    if (!isRegistered) {
+      // ログイン前は登録の案内を出し、登録後にそのまま送れるよう入力欄に入れておく
+      setInputText(initialQuestion);
+      setShowRegisterOverlay(true);
+      return;
+    }
+    handleSend(initialQuestion);
+  }, [initialQuestion]);
+
+  // 結果画面の下に浮かぶバー（シェア・ホーム追加）が入力欄に重ならないよう、開いている間は隠す
+  useEffect(() => {
+    document.body.classList.add('chat-open');
+    return () => document.body.classList.remove('chat-open');
+  }, []);
 
   // Scroll to bottom
   useEffect(() => {
