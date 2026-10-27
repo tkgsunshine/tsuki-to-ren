@@ -23,7 +23,7 @@ export default function handler(req, res) {
 
   // Card image (PNG, api/og.js): pass only what the card shows, never the birth dates
   const ogImageParams = new URLSearchParams();
-  for (const key of ['mn', 'on', 'bs', 'ds', 'mode', 'ol', 't']) {
+  for (const key of ['mn', 'on', 'bs', 'ds', 'mode', 'ma', 'oa']) {
     if (params.get(key)) ogImageParams.set(key, params.get(key));
   }
   const ogImageUrl = `https://${req.headers.host}/api/og?${ogImageParams.toString()}`;

@@ -16,6 +16,21 @@ interface ShareCardModalProps {
   onClose: () => void;
 }
 
+// Xの投稿の文字数（twitter-text の重み付き文字数）。ASCII・ラテン文字などは1、日本語や絵文字は2、URLは長さによらず23
+const X_MAX_WEIGHT = 280;
+const xTextWeight = (text: string) => {
+  let weight = 0;
+  for (const part of text.split(/(https?:\/\/\S+)/)) {
+    if (/^https?:\/\//.test(part)) { weight += 23; continue; }
+    for (const ch of part) {
+      const cp = ch.codePointAt(0) ?? 0;
+      const light = cp <= 0x10ff || (cp >= 0x2000 && cp <= 0x200d) || (cp >= 0x2010 && cp <= 0x201f) || (cp >= 0x2032 && cp <= 0x2037);
+      weight += light ? 1 : 2;
+    }
+  }
+  return weight;
+};
+
 export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   selectedChar,
   result,
@@ -237,9 +252,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   };
 
   const handleXShare = () => {
-    const text = showOpponent
-      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #相性診断 #16タイプ相性 #四柱推命 #ツインレイ`
-      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n四柱推命×九星気学の本気の恋愛鑑定はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #本日の運勢 #四柱推命 #16タイプ診断`;
+    const build = (oneLiner: string) => showOpponent
+      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${dailyScoreLabel}点】✨\n「${oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #相性診断`
+      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${dailyScoreLabel}点】✨\n「${oneLiner}」\n\n四柱推命×九星気学の本気の恋愛鑑定はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #本日の運勢`;
+    // Xは日本語を1字2として280まで。長いひとことは末尾を「…」で切って収める
+    const chars = [...result.oneLiner];
+    let text = build(result.oneLiner);
+    for (let n = chars.length - 1; n > 0 && xTextWeight(text) > X_MAX_WEIGHT; n--) {
+      text = build(chars.slice(0, n).join('') + '…');
+    }
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
   };
 

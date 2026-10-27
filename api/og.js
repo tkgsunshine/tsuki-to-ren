@@ -15,6 +15,16 @@ const H = 630;
 let fontData;
 let emblemUri;
 let wasmReady;
+const PUBLIC_ASSETS = path.join(process.cwd(), 'public/assets');
+// 守護獣のキャラ画像（public/assets/astrology_*.jpg。鑑定結果の保存画像と同じ絵）。
+// URLではファイル名の「astrology_」と「.jpg」を除いた部分を渡す（例: ox_sample_male。卯は sample / sample_male）
+const imageUris = {};
+const jpgUri = (file) => (imageUris[file] ??= `data:image/jpeg;base64,${fs.readFileSync(path.join(PUBLIC_ASSETS, file)).toString('base64')}`);
+const guardianFile = (key) => {
+  if (!/^([a-z]+_)?sample(_male)?$/.test(String(key || ''))) return null;
+  const file = `astrology_${key}.jpg`;
+  return fs.existsSync(path.join(PUBLIC_ASSETS, file)) ? file : null;
+};
 const font = () => (fontData ??= fs.readFileSync(path.join(ASSETS, 'ShipporiMincho-Bold.ttf')));
 const emblem = () => (emblemUri ??= `data:image/png;base64,${fs.readFileSync(path.join(ASSETS, 'emblem.png')).toString('base64')}`);
 
@@ -36,7 +46,7 @@ function scoreBox(label, value, color) {
   ]);
 }
 
-export async function renderShareCard(params) {
+export async function renderShareCard(params, { background = 'guardian' } = {}) {
   const get = (k1, k2) => params.get(k1) || params.get(k2) || '';
   const mName = clip(get('mn', 'mName') || 'あなた', 8);
   const oName = clip(get('on', 'oName'), 8);
@@ -44,8 +54,6 @@ export async function renderShareCard(params) {
   const hasOpponent = !!oName && rawMode !== 'single' && rawMode !== 's';
   const baseScore = score(get('bs', 'baseScore'));
   const dailyScore = score(get('ds', 'dailyScore'));
-  const oneLiner = clip(get('ol', 'oneLiner'), 34);
-  const title = clip(get('t', 'title').replace(/^[【\s]+|[】\s]+$/g, ''), 20);
 
   const heading = hasOpponent
     ? el('div', { alignItems: 'center', fontSize: 60, color: '#ffffff' }, [
@@ -59,31 +67,55 @@ export async function renderShareCard(params) {
     ? [scoreBox('基本の相性', baseScore, '#e2c074'), el('div', { width: 1, height: 120, background: 'rgba(255,255,255,0.18)' }, []), scoreBox('今日の相性', dailyScore, '#93c5fd')]
     : [scoreBox('今日の運勢', dailyScore, '#93c5fd')];
 
+  // 背景のキャラ: 左右の端に置き、中央は暗くして文字を読みやすくする。
+  // 'guardian' は二人の守護獣（お相手なしは本人のみ右側）、'tsuki-ren' は月（左）と蓮（右）
+  const left = background === 'tsuki-ren' ? 'tsuki.jpg' : hasOpponent ? guardianFile(params.get('ma')) : null;
+  const right = background === 'tsuki-ren' ? 'ren.jpg' : guardianFile(hasOpponent ? params.get('oa') : params.get('ma'));
+  // 画像の内側の端は背景色へなじませる（左の画像は右へ、右の画像は左へ向かって暗くなる）
+  const SIDE = 470;
+  const side = (file, pos) =>
+    file
+      ? el('div', { position: 'absolute', top: 0, [pos]: 0, width: SIDE, height: H }, [
+          el('img', { width: SIDE, height: H, objectFit: 'cover' }, [], { src: jpgUri(file), width: SIDE, height: H }),
+          el('div', { position: 'absolute', top: 0, left: 0, width: SIDE, height: H, backgroundImage: `linear-gradient(${pos === 'left' ? 90 : 270}deg, rgba(5,5,12,0.25) 0%, rgba(5,5,12,0.55) 45%, rgba(5,5,12,1) 100%)` }, []),
+        ])
+      : null;
+
   const tree = el(
     'div',
     {
       width: W,
       height: H,
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '40px 60px 34px',
+      position: 'relative',
       fontFamily: 'Mincho',
       color: '#f4efe6',
       backgroundColor: '#05050c',
-      backgroundImage: 'radial-gradient(circle at 18% 22%, rgba(147,51,234,0.38), rgba(5,5,12,0) 55%), radial-gradient(circle at 85% 80%, rgba(59,130,246,0.34), rgba(5,5,12,0) 55%)',
+      // キャラのない側にだけ、紫・青の光を置く
+      ...(left && right
+        ? {}
+        : {
+            backgroundImage: [
+              left ? null : 'radial-gradient(circle at 18% 22%, rgba(147,51,234,0.38), rgba(5,5,12,0) 45%)',
+              right ? null : 'radial-gradient(circle at 85% 80%, rgba(59,130,246,0.34), rgba(5,5,12,0) 45%)',
+            ].filter(Boolean).join(', '),
+          }),
     },
     [
-      el('div', { alignItems: 'center' }, [
-        el('img', { width: 64, height: 64, marginRight: 14 }, [], { src: emblem(), width: 64, height: 64 }),
-        el('div', { fontSize: 34, color: '#e2c074', letterSpacing: 8 }, '月と蓮'),
-        title && hasOpponent ? el('div', { marginLeft: 26, fontSize: 26, color: '#fef08a', padding: '6px 22px', border: '1.5px solid rgba(226,192,116,0.5)', borderRadius: 30 }, `【${title}】`) : null,
-      ].filter(Boolean)),
-      heading,
-      el('div', { alignItems: 'center', padding: '18px 10px', borderRadius: 24, background: 'rgba(10,10,22,0.6)', border: '1px solid rgba(255,255,255,0.14)' }, scores),
-      oneLiner ? el('div', { fontSize: 30, color: '#ffffff' }, `「${oneLiner}」`) : el('div', {}, []),
-      el('div', { fontSize: 22, color: '#a8b0c0', letterSpacing: 2 }, '四柱推命 × 九星気学 × 16タイプの恋愛占い　tsuki-to-ren.com'),
-    ],
+      side(left, 'left'),
+      side(right, 'right'),
+      el(
+        'div',
+        { position: 'absolute', top: 0, left: 0, width: W, height: H, flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '44px 60px 120px' },
+        [
+          el('div', { alignItems: 'center' }, [
+            el('img', { width: 64, height: 64, marginRight: 14 }, [], { src: emblem(), width: 64, height: 64 }),
+            el('div', { fontSize: 34, color: '#e2c074', letterSpacing: 8 }, '月と蓮'),
+          ]),
+          heading,
+          el('div', { alignItems: 'center', padding: '18px 10px', borderRadius: 24, background: 'rgba(10,10,22,0.7)', border: '1px solid rgba(255,255,255,0.16)' }, scores),
+        ],
+      ),
+    ].filter(Boolean),
   );
 
   const svg = await satori(tree, { width: W, height: H, fonts: [{ name: 'Mincho', data: font(), weight: 700, style: 'normal' }] });

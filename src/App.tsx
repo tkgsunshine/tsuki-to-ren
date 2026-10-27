@@ -591,9 +591,13 @@ function App() {
     if (activeResult) {
       params.set('bs', String(activeResult.baseScore));
       if (!dailyScoreHidden) params.set('ds', String(activeResult.dailyScore)); // 無料の日数を使い切った日は「??点」
-      // 共有カード画像（api/og.js）に載せる、ひとことと相性の名前
-      if (activeResult.oneLiner) params.set('ol', activeResult.oneLiner.slice(0, 40));
-      if (mode === 'match' && activeResult.compatibilityTitle) params.set('t', activeResult.compatibilityTitle.slice(0, 30));
+      // ひとことや相性の名前は入れない。日本語はURLで1字9文字になり、Xに貼ると長すぎる（カード画像は名前と点数で作る）
+      // カード画像の背景に出す守護獣（/assets/astrology_ox_sample_male.jpg → ox_sample_male）
+      const avatarKey = (url?: string) => /\/astrology_([a-z_]+)\.jpg$/.exec(url || '')?.[1];
+      const ma = avatarKey(activeResult.myAvatarUrl);
+      if (ma) params.set('ma', ma);
+      const oa = mode === 'match' ? avatarKey(activeResult.opponentAvatarUrl) : undefined;
+      if (oa) params.set('oa', oa);
     }
     return `${baseUrl}?${params.toString()}`;
   };
