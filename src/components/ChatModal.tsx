@@ -4,7 +4,7 @@ import { MoonMark } from './icons/BrandIcons';
 import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
-import { showAlert, showConfirm } from './AppDialog';
+import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { chatHistoryKey, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chatHistory';
 import type { SavedPartner } from '../App';
 
@@ -348,9 +348,10 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             ) : (
               <form onSubmit={async (e) => {
                 e.preventDefault();
-                const emailInput = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value.trim().toLowerCase();
+                const emailField = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
+                const emailInput = emailField.value.trim().toLowerCase();
                 if (!emailInput || !emailInput.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', emailField);
                   return;
                 }
                 try {

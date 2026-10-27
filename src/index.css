@@ -1353,3 +1353,20 @@ body.chat-open .result-floating-bar {
   padding: 0 1rem;
   z-index: 3;
 }
+
+/* 入力エラーのとき、該当の入力欄を赤枠で示す（AppDialog の showFieldError） */
+.field-invalid {
+  border-color: #e0604a !important;
+  box-shadow: 0 0 0 3px rgba(224, 96, 74, 0.28) !important;
+  animation: fieldInvalidShake 0.32s ease-in-out;
+}
+
+@keyframes fieldInvalidShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-invalid { animation: none; }
+}
