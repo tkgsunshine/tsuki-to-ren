@@ -31,6 +31,17 @@ interface ChatDay {
   inputTokens: number;
   outputTokens: number;
 }
+interface Inquiry {
+  id: string;
+  category: string;
+  message: string;
+  email: string | null;
+  uid: string | null;
+  page: string | null;
+  status: 'new' | 'done';
+  notified: string | null;
+  createdAt: string | null;
+}
 interface AdminData {
   from: string;
   to: string;
@@ -38,7 +49,13 @@ interface AdminData {
   chat?: ChatDay[];
   users: Member[];
   truncated: boolean;
+  inquiries?: Inquiry[];
 }
+
+const INQUIRY_CATEGORIES: Record<string, string> = {
+  bug: '不具合・使い方', fortune: '鑑定・占いの内容', premium: 'プレミアム・お支払い',
+  account: 'アカウント・ログイン・メール配信', feedback: 'ご意見・ご要望', other: 'その他',
+};
 
 const SOURCE_LABELS: Record<string, string> = {
   direct: '直接・不明', google: 'Google検索', yahoo: 'Yahoo!検索', bing: 'Bing検索', x: 'X', instagram: 'Instagram',
@@ -157,6 +174,43 @@ function ChatCost({ days }: { days: ChatDay[] }) {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+// Contact-form messages (/contact). Marking one as handled only changes its label here.
+function Inquiries({ items, members, onStatus }: { items: Inquiry[]; members: Member[]; onStatus: (id: string, status: Inquiry['status']) => Promise<void> }) {
+  const [showDone, setShowDone] = useState(false);
+  const [busy, setBusy] = useState('');
+  const open = items.filter((i) => i.status !== 'done').length;
+  const shown = showDone ? items : items.filter((i) => i.status !== 'done');
+  const memberEmail = new Map(members.map((m) => [m.uid, m.email]));
+  return (
+    <div style={c.card}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <h2 style={{ ...c.h2, margin: 0, marginRight: 'auto' }}>お問い合わせ・ご意見（未対応 {open} 件）</h2>
+        <button style={{ ...c.btn, ...(showDone ? c.btnOn : {}) }} onClick={() => setShowDone((v) => !v)}>対応済みも表示</button>
+      </div>
+      {shown.length === 0 ? (
+        <div style={c.muted}>{items.length ? '未対応のものはありません' : 'まだ届いていません'}</div>
+      ) : shown.map((i) => (
+        <div key={i.id} style={{ borderTop: '1px solid #2a2545', padding: '10px 0', opacity: i.status === 'done' ? 0.55 : 1 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{ fontWeight: 700 }}>{INQUIRY_CATEGORIES[i.category] || i.category}</span>
+            <span style={c.muted}>{jst(i.createdAt)}</span>
+            <span style={c.muted}>{i.uid ? `会員 ${memberEmail.get(i.uid) || ''}` : 'ゲスト'}</span>
+            {i.notified === 'failed' && <span style={{ color: '#fca5a5', fontSize: 12 }}>通知メール失敗</span>}
+            <button style={{ ...c.btn, marginLeft: 'auto' }} disabled={busy === i.id}
+              onClick={() => { setBusy(i.id); void onStatus(i.id, i.status === 'done' ? 'new' : 'done').finally(() => setBusy('')); }}>
+              {i.status === 'done' ? '未対応に戻す' : '対応済みにする'}
+            </button>
+          </div>
+          <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', marginBottom: 6 }}>{i.message}</div>
+          <div style={c.muted}>
+            返信先: {i.email ? <a href={`mailto:${i.email}`} style={{ color: '#e2c074' }}>{i.email}</a> : '（未記入）'}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -284,6 +338,23 @@ export default function AdminView() {
   ), [daily]);
 
   const members = useMemo(() => data?.users || [], [data]);
+
+  const setInquiryStatus = async (id: string, status: Inquiry['status']) => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      const r = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'inquiryStatus', id, status }),
+      });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.message || `更新に失敗しました（${r.status}）`);
+      setData((d) => (d ? { ...d, inquiries: (d.inquiries || []).map((i) => (i.id === id ? { ...i, status } : i)) } : d));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '更新に失敗しました');
+    }
+  };
   const newMembers = useMemo(() => (data ? members.filter((m) => jstDay(m.createdAt) >= data.from).length : 0), [data, members]);
   const mailOn = members.filter((m) => m.dailyMail).length;
   const filtered = useMemo(() => {
@@ -353,6 +424,8 @@ export default function AdminView() {
               <h2 style={c.h2}>日ごとの訪問と鑑定</h2>
               <DailyChart days={daily} />
             </div>
+
+            <Inquiries items={data.inquiries || []} members={members} onStatus={setInquiryStatus} />
 
             <ChatCost days={data.chat || []} />
 

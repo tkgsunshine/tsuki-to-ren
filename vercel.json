@@ -92,6 +92,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/contact",
+      "destination": "/index.html"
+    },
+    {
       "source": "/compatibility",
       "destination": "/index.html"
     },

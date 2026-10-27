@@ -2,10 +2,13 @@ import { FieldPath } from 'firebase-admin/firestore';
 import { getDb, getAdminAuth } from './_lib/firestore.js';
 import { ATTRIBUTION, DAILY, jstDate } from './_lib/analytics.js';
 import { USAGE_DAILY } from './_lib/chat-limit.js';
+import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
 
 // Data for the admin page (/admin): daily counters, and the member list.
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
+// POST { action: 'inquiryStatus', id, status } marks a contact-form message as handled (or back to new).
 const MAX_USER_PAGES = 20; // 20 x 1000 accounts
+const MAX_INQUIRIES = 200; // newest first
 
 export const parseAdminEmails = (raw) =>
   String(raw || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
@@ -38,7 +41,7 @@ const providerLabel = (user) => {
 export default async function handler(req, res, deps = {}) {
   res.setHeader('Cache-Control', 'no-store, private');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-  if (req.method !== 'GET') return res.status(405).json({ status: 'error', message: 'Method not allowed' });
+  if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).json({ status: 'error', message: 'Method not allowed' });
 
   try {
     const auth = deps.auth || getAdminAuth();
@@ -46,14 +49,24 @@ export default async function handler(req, res, deps = {}) {
     if (denied) return res.status(denied.status).json({ status: 'error', message: denied.message });
 
     const db = deps.db || getDb();
+    if (req.method === 'POST') {
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const id = String(body.id || '');
+      if (body.action !== 'inquiryStatus' || !/^[A-Za-z0-9]{1,40}$/.test(id) || !STATUSES.includes(body.status)) {
+        return res.status(400).json({ status: 'error', message: '不正なリクエストです' });
+      }
+      await db.collection(INQUIRIES).doc(id).update({ status: body.status, statusAt: new Date().toISOString() });
+      return res.status(200).json({ status: 'success' });
+    }
     const days = Math.min(Math.max(parseInt(req.query?.days, 10) || 30, 1), 180);
     const from = jstDate(new Date(Date.now() - (days - 1) * 86400 * 1000));
 
-    const [dailySnap, subsSnap, attribSnap, chatSnap] = await Promise.all([
+    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection('subscriptions').get(),
       db.collection(ATTRIBUTION).get(),
-      db.collection(USAGE_DAILY).where(FieldPath.documentId(), '>=', from).get()
+      db.collection(USAGE_DAILY).where(FieldPath.documentId(), '>=', from).get(),
+      db.collection(INQUIRIES).orderBy('createdAt', 'desc').limit(MAX_INQUIRIES).get()
     ]);
 
     const subs = new Map(subsSnap.docs.map((d) => [d.id, d.data()]));
@@ -95,7 +108,12 @@ export default async function handler(req, res, deps = {}) {
         return { date: d.id, aiCalls: v.aiCalls || 0, premiumCalls: v.premiumCalls || 0, inputTokens: v.inputTokens || 0, outputTokens: v.outputTokens || 0 };
       }).sort((a, b) => a.date.localeCompare(b.date)),
       users,
-      truncated: Boolean(pageToken)
+      truncated: Boolean(pageToken),
+      // Contact-form messages (all of them, not limited to the period)
+      inquiries: inquirySnap.docs.map((d) => {
+        const v = d.data();
+        return { id: d.id, category: v.category, message: v.message, email: v.email || null, uid: v.uid || null, page: v.page || null, status: v.status || 'new', notified: v.notified || null, createdAt: v.createdAt || null };
+      })
     });
   } catch (e) {
     console.error('❌ Admin data failed:', e?.message);

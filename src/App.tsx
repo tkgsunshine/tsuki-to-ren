@@ -18,9 +18,10 @@ import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
-import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
+import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, MessageCircle, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
 import { MoonMark } from './components/icons/BrandIcons';
 import { CustomDatePicker } from './components/CustomDatePicker';
+import { ContactForm } from './components/ContactForm';
 import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
@@ -59,7 +60,7 @@ interface InitialRoute {
   tab: string;
   slug: string | null;
   legal: boolean;
-  settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company';
+  settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact';
   compatibilityPair: { myMbti: string; oppMbti: string } | null;
 }
 
@@ -85,6 +86,9 @@ const getInitialRoute = (): InitialRoute => {
   }
   if (path === '/company' || path === '/company/') {
     return { tab: 'profile', slug: null, legal: false, settingsSubView: 'company', compatibilityPair: null };
+  }
+  if (path === '/contact' || path === '/contact/') {
+    return { tab: 'profile', slug: null, legal: false, settingsSubView: 'contact', compatibilityPair: null };
   }
   if (path === '/about' || path === '/about/') {
     return { tab: 'profile', slug: null, legal: false, settingsSubView: 'about', compatibilityPair: null };
@@ -360,7 +364,7 @@ function App() {
   const [showPremiumLP, setShowPremiumLP] = useState(false);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
-  const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company'>(initialRoute.settingsSubView);
+  const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact'>(initialRoute.settingsSubView);
 
   // My Info (Step 1)
   const [userProfile] = useState(() => {
@@ -1411,6 +1415,7 @@ function App() {
                   {settingsSubView === 'tokushoho' && '特定商取引法に基づく表記'}
                   {settingsSubView === 'privacy' && 'プライバシーポリシー'}
                   {settingsSubView === 'company' && '運営会社情報'}
+                  {settingsSubView === 'contact' && 'お問い合わせ・ご意見'}
                 </span>
               </div>
             ) : (
@@ -1710,6 +1715,35 @@ function App() {
 
                 <div 
                   onClick={() => {
+                    setSettingsSubView('contact');
+                    window.history.pushState({ tab: 'profile', subView: 'contact' }, '', '/contact');
+                    window.scrollTo(0, 0);
+                  }}
+                  className="glass-panel" 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '16px',
+                    color: '#f3efe6',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
+                    <MessageCircle size={20} style={{ color: '#e2c074' }} />
+                    <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>お問い合わせ・ご意見</span>
+                  </div>
+                  <ChevronRight size={18} style={{ color: '#a9a49a' }} />
+                </div>
+
+                <div 
+                  onClick={() => {
                     setSettingsSubView('tokushoho');
                     window.history.pushState({ tab: 'profile', subView: 'tokushoho' }, '', '/tokushoho');
                   }}
@@ -1792,6 +1826,17 @@ function App() {
                   <ChevronRight size={18} style={{ color: '#a9a49a' }} />
                 </div>
               </div>
+            )}
+
+            {settingsSubView === 'contact' && (
+              <ContactForm
+                defaultEmail={currentUser?.email}
+                onBack={() => {
+                  setSettingsSubView('main');
+                  window.history.pushState({ tab: 'profile', subView: 'main' }, '', '/mypage');
+                  window.scrollTo(0, 0);
+                }}
+              />
             )}
 
             {/* Sub-View: PROFILE EDIT */}
