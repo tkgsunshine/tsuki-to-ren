@@ -1805,9 +1805,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </>
                 );
               };
+              // ボタンは「気持ちが伝わるコツ」の本文の上下中央に重ねる（末尾に置くと見落とされやすいため）。
+              // その項目がないときは「二人のLINEのコツ」全体の中央に置く。
+              const lockAt = tips ? tips.items.findIndex(it => it.label.startsWith('💡')) : -1;
               const lockButton = (
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.3rem' }}>
-                  <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                  <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={handleLockTagClick}>
                     <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                   </button>
                 </div>
@@ -1837,7 +1840,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   )}
                   {tips && (
                     <div
-                      style={{ marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
+                      style={{ position: 'relative', marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>{preview ? '(続きはプレミアム限定)' : '(プレミアム限定)'}</span>}</div>
@@ -1845,10 +1848,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
-                          <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>
+                          <div style={{ position: 'relative' }}>
+                            <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>
+                            {locked && i === lockAt && lockButton}
+                          </div>
                         </div>
                       ))}
-                      {locked && lockButton}
+                      {locked && lockAt < 0 && lockButton}
                     </div>
                   )}
                 </>
