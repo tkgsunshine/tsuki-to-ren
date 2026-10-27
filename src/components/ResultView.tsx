@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
-import { Lock, Calendar, Download, X, Heart, Bell, Smartphone } from 'lucide-react';
+import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
 import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, LoveLetterMark, GiftMark, RoadmapMark } from './icons/BrandIcons';
 import { getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
@@ -750,9 +750,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* プレミアム登録完了のお知らせ（トリセツが無い鑑定では、結果の先頭に出す） */}
       {!activeResult.opponentTorisetsu && welcomePremiumBanner}
       
-      {/* Top Back Navigation Button */}
-      {onReset && (
-        <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '-0.3rem', paddingLeft: '0.25rem' }}>
+      {/* Top Back Navigation Button ＋ 右上のシェア（下のシェアバナーを閉じたあとでもシェアできるように常設） */}
+      {(onReset || SHOW_SHARE_BUTTON) && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '-0.3rem', paddingLeft: '0.25rem', paddingRight: '0.25rem' }}>
+          {onReset ? (
           <button
             type="button"
             onClick={onReset}
@@ -775,6 +776,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
           >
             <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>←</span> もう一度鑑定する
           </button>
+          ) : <span />}
+          {SHOW_SHARE_BUTTON && (
+            <button
+              type="button"
+              onClick={onOpenShareCard}
+              aria-label="鑑定結果をシェアする"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                padding: '0.4rem 0.85rem',
+                borderRadius: '9999px',
+                border: '1px solid rgba(226, 192, 116, 0.55)',
+                background: 'rgba(226, 192, 116, 0.12)',
+                color: '#f2e2b3',
+                fontSize: '0.8rem',
+                fontWeight: '700',
+                letterSpacing: '0.04em',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              <Share size={15} strokeWidth={2.2} aria-hidden="true" />
+              <span>シェア</span>
+            </button>
+          )}
         </div>
       )}
 
