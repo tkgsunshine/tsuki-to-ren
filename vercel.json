@@ -35,6 +35,10 @@
       "destination": "https://tsuki-to-ren-dba8c.firebaseapp.com/__/auth/:path*"
     },
     {
+      "source": "/share/card",
+      "destination": "/api/share"
+    },
+    {
       "source": "/admin",
       "destination": "/index.html"
     },

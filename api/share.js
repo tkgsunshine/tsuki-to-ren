@@ -21,17 +21,8 @@ export default function handler(req, res) {
   const rawTitle = get('t', 'title') || '';
   const cleanTitle = rawTitle.replace(/^[【\s]+|[】\s]+$/g, '').trim();
 
-  // Reconstruct the OGP image URL: place protection bypass FIRST so Vercel always recognizes it
-  const ogImageParams = new URLSearchParams();
-  ogImageParams.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
-  for (const [key, value] of params.entries()) {
-    if (key !== 'x-vercel-protection-bypass') {
-      ogImageParams.set(key, value);
-    }
-  }
-  
-  // Unescaped image URL for Twitterbot image parser
-  const ogImageUrl = `https://${req.headers.host}/og/card.png?${ogImageParams.toString()}`;
+  // X and LINE do not show SVG card images (api/og.js returns SVG), so the card uses the site's JPG
+  const ogImageUrl = `https://${req.headers.host}/ogp-image.jpg`;
 
   // Build the redirect URL for normal users
   const appUrl = `https://${req.headers.host}/?${params.toString()}`;
@@ -43,8 +34,8 @@ export default function handler(req, res) {
   if (isCrawler) {
     const hasOpponent = !!oName && params.get('mode') !== 'single';
     const rawOgTitle = hasOpponent
-      ? `${mName} × ${oName} の相性鑑定結果 | 蓮と月`
-      : `${mName} の恋愛運 | 蓮と月`;
+      ? `${mName} × ${oName} の相性鑑定結果 | 月と蓮`
+      : `${mName} の恋愛運 | 月と蓮`;
     const rawOgDescription = cleanTitle 
       ? `【${cleanTitle}】今日の相性は${dailyScore}点✨ 「${oneLiner}」`
       : `今日の相性は${dailyScore}点✨ 「${oneLiner}」`;
@@ -67,7 +58,7 @@ export default function handler(req, res) {
   <meta property="og:image" content="${ogImageUrl}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:site_name" content="蓮と月 | 恋愛相性占い" />
+  <meta property="og:site_name" content="月と蓮 | 恋愛相性占い" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${ogTitle}" />
   <meta name="twitter:description" content="${ogDescription}" />

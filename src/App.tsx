@@ -562,7 +562,7 @@ function App() {
 
   const generateShareUrl = () => {
     const isLocal = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
-    const baseUrl = isLocal ? window.location.origin + '/share/card' : 'https://tsuki-to-ren.com/share/card';
+    const baseUrl = isLocal ? window.location.origin + '/share/card' : 'https://www.tsuki-to-ren.com/share/card';
     const params = new URLSearchParams();
     
     if (!isLocal && window.location.hostname.includes('vercel.app')) {
