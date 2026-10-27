@@ -111,6 +111,15 @@ html.ios-standalone .app-container {
   margin: 0 auto;
 }
 
+/* アプリは外枠（.app-container）の中だけでスクロールし、ページ全体は動かさない。iOS Safari では
+   ページ全体がスワイプで上下に動き、外枠ごと下メニューが持ち上がって下に空白が出るため、止める。
+   外枠のない /admin は対象外。 */
+html:has(.app-container),
+html:has(.app-container) body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 /* プレミアム案内（PremiumLPModal）の外枠。iOS Safari では 100vh・inset:0 がツールバーの裏まで
    含むことがあり、下の固定ボタンや一番下が隠れるため、ツールバーを除いた見える高さ（100dvh）に合わせる。
    ホーム画面アプリでは 100dvh が実際の表示領域とずれるので、上の .app-container と同じく上下0に固定する。 */

@@ -96,3 +96,19 @@ export const installStandaloneBottomGapFix = (): void => {
   window.addEventListener('orientationchange', () => window.setTimeout(update, 300));
   window.addEventListener('pageshow', update);
 };
+
+// iOS Safari では、入力欄でキーボードを出すとページ全体が上へずらされ、キーボードを閉じても
+// 戻らないことがある。アプリは外枠（.app-container）の中だけでスクロールし、ページ全体は動かない作りなので、
+// ずれたままだと外枠が上へ押し上げられ、下メニューの下に空白が出る。キーボードが閉じたら位置を0に戻す。
+export const installPageScrollReset = (): void => {
+  if (typeof window === 'undefined') return;
+  const vv = window.visualViewport;
+  const reset = () => {
+    // キーボード表示中（見えている高さが大きく縮んでいる）は、入力欄を見せるためのずれなので戻さない
+    if (vv && window.innerHeight - vv.height > 120) return;
+    if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
+  };
+  vv?.addEventListener('resize', reset);
+  window.addEventListener('focusout', () => window.setTimeout(reset, 300));
+  window.addEventListener('pageshow', reset);
+};
