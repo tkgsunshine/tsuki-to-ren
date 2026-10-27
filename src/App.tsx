@@ -30,7 +30,7 @@ import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { trackFortune, trackPremiumStep } from './services/analytics';
-import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
@@ -441,9 +441,26 @@ function App() {
   const currentUidRef = useRef<string | null>(null);
   useEffect(() => {
     const uid = currentUser?.uid || null;
+    const wasSignedIn = !!currentUidRef.current;
     currentUidRef.current = uid;
     syncUidRef.current = null;
-    if (!uid) return;
+    if (!uid) {
+      // Signed out: the member's profile and partners stay in the account, so the screen starts empty
+      // (logOutUser has already removed them from this device's storage)
+      if (wasSignedIn) {
+        if (partnerPushTimerRef.current) clearTimeout(partnerPushTimerRef.current);
+        partnerPushTimerRef.current = null;
+        syncedProfileRef.current = '';
+        syncedPartnersRef.current = '';
+        clearAccountDataOnDevice();
+        applySyncedProfile(null);
+        setSavedPartners([]);
+        setLoadedPartner(null);
+        setNotifyDailyLuck(false);
+        setNotifyEmail('');
+      }
+      return;
+    }
     void pullUserData(uid);
     // Coming back to the app (e.g. after editing on the other device): read the account again, at most once a minute
     const onVisible = () => {

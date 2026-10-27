@@ -305,6 +305,12 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
   return { success: false };
 };
 
+// Keys holding the signed-in member's own data on this device (the account copy is in userData/{uid} and subscriptions/{uid})
+export const ACCOUNT_DEVICE_KEYS = ['hasu_user_profile', 'hasu_saved_partners', 'hasu_user_data_uid', 'hasu_notify_email', 'hasu_notify_daily_luck', 'hasu_last_diagnosis_input'];
+export const clearAccountDataOnDevice = () => {
+  ACCOUNT_DEVICE_KEYS.forEach(safeRemoveItem);
+};
+
 export const logOutUser = async (): Promise<void> => {
   safeRemoveItem('hasu_tsuki_user');
   safeRemoveItem('hasu_to_tsuki_user');
@@ -313,6 +319,8 @@ export const logOutUser = async (): Promise<void> => {
   try { sessionStorage.clear(); } catch {}
   // 端末に残したチャットの会話も消す（端末を共有していても次の人に見えないように）
   clearAllChatHistory();
+  // プロフィール・保存したお相手・通知先メールもアカウントに保存してあるので、端末からは消す（次にログインした人に混ざらないように）
+  clearAccountDataOnDevice();
   document.cookie = "emailForSignIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   try {
     await signOut(auth);
