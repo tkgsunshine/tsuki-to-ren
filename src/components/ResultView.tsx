@@ -20,15 +20,9 @@ const GoogleIcon = () => (
   </svg>
 );
 
+// LINE公式アイコン（LINEヤフー配布のブランド素材そのまま。改変・トリミング・再着色はしない）
 const LineLogoIcon = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, display: 'inline-block', verticalAlign: 'middle' }}>
-    <rect width="24" height="24" rx="5.5" fill="#06C755"/>
-    <path d="M12 4.5C7.306 4.5 3.5 7.783 3.5 11.833c0 2.973 2.036 5.54 5.03 6.634.22.047.52.146.597.334.069.168.045.433.022.604-.05.376-.324 1.47-.355 1.78-.04.389.179.385.376.255 1.554-1.018 4.2-2.93 5.73-5.016 1.428-1.228 1.6-1.583 1.6-4.588C18.5 7.783 14.694 4.5 12 4.5z" fill="#FFFFFF"/>
-    <path d="M7.2 9.5v5h2.8v-1.1H8.4V9.5H7.2z" fill="#06C755"/>
-    <path d="M10.7 9.5v5h1.2v-5h-1.2z" fill="#06C755"/>
-    <path d="M12.6 9.5v5h1.1l1.9-3.2v3.2h1.2v-5h-1.1l-1.9 3.2V9.5h-1.2z" fill="#06C755"/>
-    <path d="M17.5 9.5v5h3v-1.1h-1.8v-.85h1.6V11.4h-1.6v-.8h1.8V9.5h-3z" fill="#06C755"/>
-  </svg>
+  <img src="/line-logo.png" alt="LINE" width={size} height={size} draggable={false} style={{ flexShrink: 0, display: 'inline-block', verticalAlign: 'middle', width: `${size}px`, height: `${size}px` }} />
 );
 
 const XIcon = () => (
@@ -3462,11 +3456,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </svg>
           </span>
           <span>鑑定結果をシェアする</span>
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-            <rect width="24" height="24" rx="5.5" fill="#06C755"/>
-            <path d="M12 4.6c-4.6 0-8.3 2.95-8.3 6.6 0 3.25 2.9 5.97 6.85 6.5.27.06.63.18.72.4.08.2.05.52.03.72l-.12.7c-.04.2-.16.8.72.43.88-.37 4.72-2.78 6.44-4.76 1.19-1.3 1.76-2.62 1.76-4 0-3.64-3.7-6.6-8.1-6.6z" fill="#FFFFFF"/>
-            <text x="12" y="12.9" textAnchor="middle" fontSize="4.6" fontWeight="900" fontFamily="Arial, Helvetica, sans-serif" fill="#06C755">LINE</text>
-          </svg>
+          <LineLogoIcon size={20} />
         </button>
       </div>
       )}
