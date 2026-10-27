@@ -24,10 +24,18 @@ interface Member {
   source: string | null;
   landing: string | null;
 }
+interface ChatDay {
+  date: string;
+  aiCalls: number;
+  premiumCalls: number;
+  inputTokens: number;
+  outputTokens: number;
+}
 interface AdminData {
   from: string;
   to: string;
   daily: DailyDoc[];
+  chat?: ChatDay[];
   users: Member[];
   truncated: boolean;
 }
@@ -98,6 +106,60 @@ const c = {
   td: { padding: '6px 8px', borderBottom: '1px solid #201c36', verticalAlign: 'top' } as React.CSSProperties,
   num: { textAlign: 'right', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' } as React.CSSProperties,
 };
+
+// Chat cost in yen: Claude Opus 5.5 is $4 per million input tokens and $20 per million output tokens (thinking included)
+const YEN_PER_DOLLAR = 150;
+const chatYen = (input: number, output: number) => ((input * 4 + output * 20) / 1e6) * YEN_PER_DOLLAR;
+const yen = (v: number) => `${v < 10 ? v.toFixed(1) : Math.round(v).toLocaleString()}円`;
+
+function ChatCost({ days }: { days: ChatDay[] }) {
+  const t = days.reduce((a, d) => ({
+    calls: a.calls + d.aiCalls, premium: a.premium + d.premiumCalls, input: a.input + d.inputTokens, output: a.output + d.outputTokens
+  }), { calls: 0, premium: 0, input: 0, output: 0 });
+  const total = chatYen(t.input, t.output);
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>チャット（AIの費用）</h2>
+      {t.calls === 0 ? (
+        <div style={c.muted}>まだデータがありません（AIが答えたチャットから記録されます）</div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
+            <Tile label="AIが答えた回数" value={t.calls} sub={`うちプレミアム ${t.premium} 回`} />
+            <Tile label="費用の目安" value={yen(total)} sub={`1ドル${YEN_PER_DOLLAR}円で計算`} />
+            <Tile label="1回あたり" value={yen(total / t.calls)} sub={`入力 ${Math.round(t.input / t.calls)}・出力 ${Math.round(t.output / t.calls)} トークン`} />
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={c.table}>
+              <thead>
+                <tr>
+                  <th style={c.th}>日付</th>
+                  <th style={{ ...c.th, ...c.num }}>回数</th>
+                  <th style={{ ...c.th, ...c.num }}>プレミアム</th>
+                  <th style={{ ...c.th, ...c.num }}>入力トークン</th>
+                  <th style={{ ...c.th, ...c.num }}>出力トークン</th>
+                  <th style={{ ...c.th, ...c.num }}>費用の目安</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...days].reverse().map((d) => (
+                  <tr key={d.date}>
+                    <td style={c.td}>{d.date}</td>
+                    <td style={{ ...c.td, ...c.num }}>{d.aiCalls}</td>
+                    <td style={{ ...c.td, ...c.num }}>{d.premiumCalls}</td>
+                    <td style={{ ...c.td, ...c.num }}>{d.inputTokens.toLocaleString()}</td>
+                    <td style={{ ...c.td, ...c.num }}>{d.outputTokens.toLocaleString()}</td>
+                    <td style={{ ...c.td, ...c.num }}>{yen(chatYen(d.inputTokens, d.outputTokens))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 function Tile({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -291,6 +353,8 @@ export default function AdminView() {
               <h2 style={c.h2}>日ごとの訪問と鑑定</h2>
               <DailyChart days={daily} />
             </div>
+
+            <ChatCost days={data.chat || []} />
 
             <BreakdownTable title="流入元" rows={sumBy(data.daily, 'bySource')} label={sourceLabel} />
             <BreakdownTable title="入口ページ（最初に開いたページ）" rows={sumBy(data.daily, 'byLanding')} label={landingLabel} />

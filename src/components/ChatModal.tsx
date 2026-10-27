@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, X } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
-import { signInWithGoogle, signInWithX } from '../services/firebase';
+import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
 import { showAlert } from './AppDialog';
@@ -150,10 +150,13 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         text: m.text
       }));
 
+      // The server counts each account's chats (api/_lib/chat-limit.js), so it needs to know who is asking
+      const idToken = await getFirebaseAuth().currentUser?.getIdToken().catch(() => undefined);
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
         },
         body: JSON.stringify({
           message: text,
@@ -163,12 +166,33 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         })
       });
       
+      if (response.status === 401) {
+        setIsTyping(false);
+        setShowRegisterOverlay(true);
+        return;
+      }
+      // A limit was reached: the server's message is shown as the reply, not a made-up answer
+      if (response.status === 429) {
+        const limited = await response.json().catch(() => ({}));
+        setIsTyping(false);
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          sender: 'bot',
+          text: limited.reply || '少し時間をおいてから、もう一度送ってくださいね。'
+        }]);
+        if (limited.reason === 'free_daily') {
+          setChatCount(2);
+          setShowSubscribeOverlay(true);
+        }
+        return;
+      }
       if (!response.ok) {
         throw new Error(`Chat API HTTP ${response.status}`);
       }
       
       const data = await response.json();
       setIsTyping(false);
+      if (typeof data.remainingFree === 'number') setChatCount(Math.max(0, 2 - data.remainingFree));
       
       const replyText = data.reply && !data.debug?.includes('API Key is missing') && !data.debug?.includes('Error')
         ? data.reply
