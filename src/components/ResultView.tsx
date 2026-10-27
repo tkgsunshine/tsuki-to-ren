@@ -1784,7 +1784,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const lockButton = (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.3rem' }}>
                   <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                    <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                    <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                   </button>
                 </div>
               );
@@ -1802,7 +1802,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                           </button>
                         </div>
                       )}
@@ -1920,7 +1920,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
                       <button className="premium-lock-tag" onClick={handleLockTagClick}>
-                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                       </button>
                     </div>
                   </div>
@@ -2149,7 +2149,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleLockTagClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                 </button>
               </div>
             )}
@@ -2203,7 +2203,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleLockTagClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                 </button>
               </div>
             )}
@@ -2250,7 +2250,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleLockTagClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                 </button>
               </div>
             )}
@@ -2293,7 +2293,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleLockTagClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                 </button>
               </div>
             )}
@@ -2335,7 +2335,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleLockTagClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                 </button>
               </div>
             )}
@@ -2385,7 +2385,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleLockTagClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                 </button>
               </div>
             )}
@@ -2428,7 +2428,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleLockTagClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                 </button>
               </div>
             )}
@@ -2470,7 +2470,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleLockTagClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                 </button>
               </div>
             )}
@@ -2569,7 +2569,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       letterSpacing: '0.02em'
                     }}
                   >
-                    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />プレミアム登録して全解禁 (月額980円)</span>
+                    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />プレミアム登録で全解放 (月額980円)</span>
                   </button>
                 </div>
               </div>
@@ -2650,7 +2650,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     className="premium-lock-tag" 
                     onClick={handleLockTagClick}
                   >
-                    <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で開封'}
+                    <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                   </button>
                 </div>
               )}
@@ -2723,7 +2723,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" 
                             onClick={handleLockTagClick}
                           >
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で開封'}
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                           </button>
                         </div>
                       )}
@@ -2802,7 +2802,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" 
                             onClick={handleLockTagClick}
                           >
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で開封'}
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                           </button>
                         </div>
                       )}
@@ -2901,7 +2901,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       letterSpacing: '0.02em'
                     }}
                   >
-                    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />プレミアム登録して全解禁 (月額980円)</span>
+                    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />プレミアム登録で全解放 (月額980円)</span>
                   </button>
                 </div>
               )}

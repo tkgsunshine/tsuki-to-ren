@@ -468,7 +468,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                   gap: '0.35rem'
                 }}
               >
-                <span>🔒</span> プレミアム登録して全解禁 (月額980円)
+                <span>🔒</span> プレミアム登録で全解放 (月額980円)
               </button>
 
               {/* Close Link */}
