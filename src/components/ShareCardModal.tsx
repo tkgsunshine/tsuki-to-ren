@@ -97,6 +97,51 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
   const targetShareUrl = getShareUrlForTab();
 
+  // カードの背景（守護獣の画像）。保存用画像とプレビューで共通。
+  // 正方形の画像を余白なしで敷き詰めるため、背景画像の cover で切り抜く（html2canvasは object-fit 非対応のため）。
+  const coverImage = (src: string, position: string): React.CSSProperties => ({
+    backgroundImage: src ? `url(${src})` : 'none',
+    backgroundSize: 'cover',
+    backgroundPosition: position,
+    backgroundRepeat: 'no-repeat'
+  });
+
+  const renderCardBackground = () => (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 1, backgroundColor: '#05080d', overflow: 'hidden' }}>
+      {showOpponent && result.opponentAvatarUrl ? (
+        <>
+          {/* 上半分: 自分（頭が切れないよう上端合わせ） / 下半分: お相手（中央合わせ） */}
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '50%', ...coverImage(myAvatarBase64, 'center top') }} />
+          <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', bottom: 0, ...coverImage(oppAvatarBase64, 'center center') }} />
+          {/* 2枚の継ぎ目をぼかし、二つ名と名前ラベルを読みやすくする */}
+          <div style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: '43%',
+            height: '14%',
+            background: 'linear-gradient(to bottom, rgba(5, 8, 13, 0) 0%, rgba(5, 8, 13, 0.6) 50%, rgba(5, 8, 13, 0) 100%)'
+          }} />
+        </>
+      ) : (
+        <div style={{ position: 'absolute', top: 0, left: '-10%', width: '120%', aspectRatio: '1 / 1', ...coverImage(myAvatarBase64, 'center') }}>
+          {/* 画像の下端を背景色へなじませる */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to bottom, rgba(5, 8, 13, 0) 0%, rgba(5, 8, 13, 0) 72%, #05080d 100%)'
+          }} />
+        </div>
+      )}
+      {/* 下部テキストを読みやすくする暗いグラデーション */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 66%, rgba(5, 7, 10, 0.7) 100%)'
+      }} />
+    </div>
+  );
+
   const handleDownload = async () => {
     const targetEl = captureRef.current || cardRef.current;
     if (!targetEl || isSaving) return;
@@ -231,7 +276,6 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           width: '800px',
           height: '1240px',
           backgroundColor: '#05080d',
-          borderRadius: '36px',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -242,28 +286,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           zIndex: -9999
         }}
       >
-        {/* Background Base64 Images (Vertical stacked avatars with extended height) */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 1, backgroundColor: '#05080d' }}>
-          {showOpponent && result.opponentAvatarUrl ? (
-            <>
-              <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '32px' }}>
-                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain', transform: 'translateY(12px)' }} />
-              </div>
-              <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
-              </div>
-            </>
-          ) : (
-            <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '56px' }}>
-              <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain', transform: 'translateY(16px)' }} />
-            </div>
-          )}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 7, 10, 0.55) 100%)'
-          }} />
-        </div>
+        {renderCardBackground()}
 
         {/* Offscreen Card Top */}
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', width: '100%' }}>
@@ -363,18 +386,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         {/* Offscreen Card Middle (Boundary: 二つ名, Lower Character Top: Left Opponent Name & Right Today Score) */}
         {showOpponent && (
           <div style={{
-            position: 'relative',
+            position: 'absolute',
             zIndex: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            gap: '16px',
-            margin: '10px 0',
-            transform: 'translateY(24px)'
+            left: '40px',
+            right: '40px',
+            top: '50%'
           }}>
-            {/* Boundary Line Level: 二つ名 (Center) */}
+            {/* Boundary Line Level: 二つ名 (継ぎ目の真上に中央揃え) */}
             {result.compatibilityTitle && (
-              <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%', transform: 'translateY(-50%)' }}>
                 <div style={{
                   fontSize: '18px',
                   color: '#f2e2b3',
@@ -396,7 +416,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             )}
 
             {/* Lower Character Top Level: Opponent Name on Left & Today Score on Right */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <div style={{ position: 'absolute', top: '38px', left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {/* Left: Opponent Name (相手のキャラの左上) */}
               <div style={{
                 background: 'rgba(6, 8, 12, 0.75)',
@@ -464,6 +484,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 textAlign: 'center',
                 fontWeight: 'bold',
                 letterSpacing: '0.02em',
+                textWrap: 'balance',
                 textShadow: '0 2px 12px rgba(0,0,0,0.98), 0 0 20px rgba(0,0,0,0.95)'
               }}>
                 「{result.oneLiner}」
@@ -616,36 +637,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             overflow: 'hidden'
           }}
         >
-          {/* Background Images Layer (Vertical 2-tier stacked avatars with clean dark base) */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: '#05080d'
-          }}>
-            {showOpponent && result.opponentAvatarUrl ? (
-              <>
-                <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '20px' }}>
-                  <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain', transform: 'translateY(8px)' }} />
-                </div>
-                <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
-                </div>
-              </>
-            ) : (
-              <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '36px' }}>
-                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain', transform: 'translateY(10px)' }} />
-              </div>
-            )}
-            {/* Dark overlay gradient for readability */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 7, 10, 0.55) 100%)'
-            }} />
-          </div>
+          {renderCardBackground()}
           {/* Card Top */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 2, width: '100%' }}>
             {showOpponent ? (
@@ -756,18 +748,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           {/* Card Middle (Boundary: 二つ名, Lower Character Top: 相手の名前 on Left, 今日の相性 on Right) */}
           {showOpponent && (
             <div style={{
-              position: 'relative',
+              position: 'absolute',
               zIndex: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: '0.4rem',
-              margin: '0.2rem 0',
-              transform: 'translateY(24px)'
+              left: '1.5rem',
+              right: '1.5rem',
+              top: '50%'
             }}>
-              {/* Boundary Line Level: 二つ名 (Center) */}
+              {/* Boundary Line Level: 二つ名 (継ぎ目の真上に中央揃え) */}
               {result.compatibilityTitle && (
-                <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', width: '100%', transform: 'translateY(-50%)' }}>
                   <div style={{
                     fontSize: '0.62rem',
                     color: '#f2e2b3',
@@ -790,7 +779,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               )}
 
               {/* Lower Character Top Level: 相手の名前 on Left & 今日の相性 on Right */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <div style={{ position: 'absolute', top: '16px', left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 {/* Left: 相手の名前 (相手のキャラ画像の左上) */}
                 <div style={{
                   background: 'rgba(6, 8, 12, 0.72)',
@@ -862,6 +851,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   textAlign: 'center',
                   fontWeight: 'bold',
                   letterSpacing: '0.02em',
+                  textWrap: 'balance',
                   textShadow: '0 2px 10px rgba(0,0,0,0.98), 0 0 15px rgba(0,0,0,0.95)'
                 }}>
                   「{result.oneLiner}」
