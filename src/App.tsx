@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 export interface SavedPartner {
   id: string;
@@ -206,6 +206,8 @@ function App() {
   const [selectedCharacter, setSelectedCharacter] = useState<'ren' | 'tsuki'>('tsuki');
   const [isChatOpen, setIsChatOpen] = useState(false); // Standalone chat simulator in Chat tab
   const [chatInitialQuestion, setChatInitialQuestion] = useState<string | undefined>(undefined); // 鑑定結果の質問ボタンから開いたときの最初の質問
+  // 対話ロビーから開いたときは、相談の前に誰について相談するか選ぶ。'pick' = まだ選んでいない、null = 今の鑑定結果のまま（鑑定結果から開いたとき）
+  const [chatTarget, setChatTarget] = useState<'pick' | 'self' | SavedPartner | null>(null);
   
   // Firebase Auth State
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -782,7 +784,8 @@ function App() {
     return true;
   };
 
-  const handleSavePartner = () => {
+  // Returns the saved partner, or undefined when nothing was saved
+  const handleSavePartner = (): SavedPartner | undefined => {
     if (!oppBirth) {
       showAlert('保存するお相手の情報がありません。');
       return;
@@ -805,6 +808,7 @@ function App() {
 
     setSavedPartners([...savedPartners, newPartner]);
     showAlert(`${newPartner.name}様の情報を保存しました。`);
+    return newPartner;
   };
 
   const handleDeletePartner = (id: string) => {
@@ -980,6 +984,42 @@ function App() {
   // Helper to get active result based on chosen character tab
   const activeResult = selectedCharacter === 'ren' ? renResult : tsukiResult;
 
+  // 対話ロビーで選んだお相手（または自分だけ）の鑑定を、チャット用にその場で出す。点数の出し方は鑑定と同じ generateFortuneResult
+  const chatResult = useMemo(() => {
+    if (chatTarget === null) return activeResult;
+    if (chatTarget === 'pick' || !myBirth) return null;
+    const partner = chatTarget === 'self' ? null : chatTarget;
+    // 保存時と同じく、お相手の性別は自分と逆にそろえる（handleSelectPartner と同じ）
+    const partnerGender = partner && partner.gender === myGender ? (myGender === 'female' ? 'male' : 'female') : partner?.gender;
+    try {
+      return generateFortuneResult({
+        myName,
+        myBirth,
+        myMbti,
+        myGender,
+        opponentName: partner?.name,
+        opponentBirth: partner?.birth,
+        opponentMbti: partner?.mbti,
+        opponentGender: partnerGender,
+        relationship: partner?.relationship || '片思い中'
+      }, selectedCharacter);
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }, [chatTarget, activeResult, myName, myBirth, myMbti, myGender, selectedCharacter]);
+  const chatOpponentName = chatTarget === null
+    ? (mode === 'match' ? oppName : undefined)
+    : (chatTarget !== 'pick' && chatTarget !== 'self' ? chatTarget.name : undefined);
+  // 今日の相性は、無料だとお相手ごとに見られる日数が決まっている。今の鑑定結果と同じお相手ならその判定を使い、
+  // 別のお相手はチャットのために「見た日」を数えないよう、プレミアム以外では点数をAIに渡さない
+  const chatHideDailyScore = chatTarget === null
+    ? dailyScoreHidden
+    : (chatTarget !== 'pick' && chatTarget !== 'self' && !isSubscribed
+      && !(chatTarget.birth === oppBirth && mode === 'match' && flowStep === 'result' && !dailyScoreHidden));
+  const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
+    && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
+
   return (
     <div className={`app-container${activeTab === 'home' && flowStep !== 'result' ? ' bg-cosmos' : ''}`} style={{
       '--color-theme': selectedCharacter === 'tsuki' ? '#cdbfe2' : '#9cc6d8',
@@ -1051,6 +1091,7 @@ function App() {
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
+                  setChatTarget(null);
                   setIsChatOpen(true);
                 }}
                 onShowLegal={() => {
@@ -1087,6 +1128,7 @@ function App() {
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
+                  setChatTarget(null);
                   setIsChatOpen(true);
                 }}
                 onShowLegal={() => {
@@ -1143,6 +1185,7 @@ function App() {
                   setShowAuthModal(true);
                 } else {
                   setSelectedCharacter('tsuki');
+                  setChatTarget('pick');
                   setIsChatOpen(true);
                 }
               }}>
@@ -1196,6 +1239,7 @@ function App() {
                   setShowAuthModal(true);
                 } else {
                   setSelectedCharacter('ren');
+                  setChatTarget('pick');
                   setIsChatOpen(true);
                 }
               }}>
@@ -2546,11 +2590,27 @@ function App() {
           setChatCount={setChatCount}
           onRegister={handleRegister}
           onSubscribe={handleStartCheckout}
-          onClose={() => { setIsChatOpen(false); setChatInitialQuestion(undefined); }}
-          result={activeResult}
-          opponentName={mode === 'match' ? oppName : undefined}
+          onClose={() => { setIsChatOpen(false); setChatInitialQuestion(undefined); setChatTarget(null); }}
+          result={chatResult}
+          opponentName={chatOpponentName}
           initialQuestion={chatInitialQuestion}
-          hideDailyScore={dailyScoreHidden}
+          hideDailyScore={chatHideDailyScore}
+          partnerPicker={chatTarget === 'pick' ? {
+            partners: savedPartners,
+            unsavedCurrentName: currentUnsaved ? (oppName || 'お相手') : undefined,
+            onPick: (partner) => setChatTarget(partner),
+            onPickSelf: () => setChatTarget('self'),
+            onSaveCurrent: () => {
+              const saved = handleSavePartner();
+              if (saved) setChatTarget(saved);
+            },
+            onAddNew: () => {
+              // 恋愛診断の入力画面へ。結果画面の「お相手を保存」から保存できる
+              setIsChatOpen(false);
+              setChatTarget(null);
+              handleTabChange('home');
+            }
+          } : undefined}
         />
       )}
 
