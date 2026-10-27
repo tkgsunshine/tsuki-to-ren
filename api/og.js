@@ -6,6 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import satori from 'satori';
 import { Resvg, initWasm } from '@resvg/resvg-wasm';
+import { SHARE_LINES, SHARE_TITLES } from './_lib/share-card-text.js';
 
 const require = createRequire(import.meta.url);
 const ASSETS = path.join(process.cwd(), 'scripts/x/assets');
@@ -38,10 +39,10 @@ const score = (v) => (/^\d{1,3}$/.test(String(v || '')) ? String(v) : '??');
 
 function scoreBox(label, value, color) {
   return el('div', { flexDirection: 'column', alignItems: 'center', padding: '0 44px' }, [
-    el('div', { fontSize: 26, color: '#cbd5e1', marginBottom: 6 }, label),
+    el('div', { fontSize: 24, color: '#cbd5e1', marginBottom: 4 }, label),
     el('div', { alignItems: 'flex-end' }, [
-      el('span', { fontSize: 96, color, lineHeight: 1 }, value),
-      el('span', { fontSize: 34, color, marginLeft: 6, marginBottom: 10 }, '点'),
+      el('span', { fontSize: 80, color, lineHeight: 1 }, value),
+      el('span', { fontSize: 30, color, marginLeft: 6, marginBottom: 8 }, '点'),
     ]),
   ]);
 }
@@ -53,15 +54,18 @@ export async function renderShareCard(params, { background = 'guardian' } = {}) 
   const rawMode = params.get('mode');
   const hasOpponent = !!oName && rawMode !== 'single' && rawMode !== 's';
   const baseScore = score(get('bs', 'baseScore'));
+  // 説明の文は番号で受け取る（api/_lib/share-card-text.js）
+  const titlePair = hasOpponent ? SHARE_TITLES[Number(params.get('c'))] : undefined;
+  const line = SHARE_LINES[Number(params.get('l'))];
   const dailyScore = score(get('ds', 'dailyScore'));
 
   const heading = hasOpponent
-    ? el('div', { alignItems: 'center', fontSize: 60, color: '#ffffff' }, [
+    ? el('div', { alignItems: 'center', fontSize: 56, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, [
         el('span', {}, mName),
         el('span', { color: '#e2c074', fontSize: 44, margin: '0 26px' }, '×'),
         el('span', {}, oName),
       ])
-    : el('div', { fontSize: 60, color: '#ffffff' }, `${mName} の今日の恋愛運`);
+    : el('div', { fontSize: 56, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, `${mName} の今日の恋愛運`);
 
   const scores = hasOpponent
     ? [scoreBox('基本の相性', baseScore, '#e2c074'), el('div', { width: 1, height: 120, background: 'rgba(255,255,255,0.18)' }, []), scoreBox('今日の相性', dailyScore, '#93c5fd')]
@@ -105,15 +109,27 @@ export async function renderShareCard(params, { background = 'guardian' } = {}) 
       side(right, 'right'),
       el(
         'div',
-        { position: 'absolute', top: 0, left: 0, width: W, height: H, flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '44px 60px 120px' },
+        // 下の約90pxは、Xがタイトルを重ねて表示するので空ける
+        { position: 'absolute', top: 0, left: 0, width: W, height: H, flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '34px 60px 92px' },
         [
           el('div', { alignItems: 'center' }, [
-            el('img', { width: 64, height: 64, marginRight: 14 }, [], { src: emblem(), width: 64, height: 64 }),
-            el('div', { fontSize: 34, color: '#e2c074', letterSpacing: 8 }, '月と蓮'),
+            el('img', { width: 56, height: 56, marginRight: 12 }, [], { src: emblem(), width: 56, height: 56 }),
+            el('div', { fontSize: 30, color: '#e2c074', letterSpacing: 8 }, '月と蓮'),
           ]),
+          titlePair
+            ? el('div', { fontSize: 26, color: '#fef08a', padding: '6px 26px', borderRadius: 30, background: 'rgba(10,10,22,0.72)', border: '1.5px solid rgba(226,192,116,0.55)' }, `【${titlePair[0]}】${titlePair[1]}`)
+            : null,
           heading,
-          el('div', { alignItems: 'center', padding: '18px 10px', borderRadius: 24, background: 'rgba(10,10,22,0.7)', border: '1px solid rgba(255,255,255,0.16)' }, scores),
-        ],
+          el('div', { alignItems: 'center', padding: '14px 10px', borderRadius: 24, background: 'rgba(10,10,22,0.72)', border: '1px solid rgba(255,255,255,0.16)' }, scores),
+          line
+            ? el(
+                'div',
+                { flexDirection: 'column', alignItems: 'center', fontSize: 26, lineHeight: 1.45, color: '#ffffff', textShadow: '0 2px 8px rgba(0,0,0,0.9)' },
+                // 文ごとに改行する（途中で折り返すと読みにくい）
+                line.split(/(?<=。)/).map((t) => el('div', {}, t)),
+              )
+            : null,
+        ].filter(Boolean),
       ),
     ].filter(Boolean),
   );

@@ -1,3 +1,5 @@
+import { SHARE_LINES } from './_lib/share-card-text.js';
+
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
@@ -23,7 +25,7 @@ export default function handler(req, res) {
 
   // Card image (PNG, api/og.js): pass only what the card shows, never the birth dates
   const ogImageParams = new URLSearchParams();
-  for (const key of ['mn', 'on', 'bs', 'ds', 'mode', 'ma', 'oa']) {
+  for (const key of ['mn', 'on', 'bs', 'ds', 'mode', 'ma', 'oa', 'c', 'l']) {
     if (params.get(key)) ogImageParams.set(key, params.get(key));
   }
   const ogImageUrl = `https://${req.headers.host}/api/og?${ogImageParams.toString()}`;
@@ -41,7 +43,8 @@ export default function handler(req, res) {
     if (get('mn', 'mName')) teaser.set('sn', get('mn', 'mName'));
     if (hasOpponent) teaser.set('sp', oName);
     if (/^\d{1,3}$/.test(dailyScore)) teaser.set('sd', dailyScore);
-    if (params.get('ol')) teaser.set('sl', params.get('ol'));
+    const line = SHARE_LINES[Number(params.get('l'))];
+    if (line) teaser.set('sl', line);
     appUrl = `https://${req.headers.host}/?${teaser.toString()}`;
   }
 

@@ -33,6 +33,7 @@ import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, 
 import { showAlert, showConfirm } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
+import { shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
 import type { PartnerLock } from './components/ResultView';
@@ -598,6 +599,11 @@ function App() {
       if (ma) params.set('ma', ma);
       const oa = mode === 'match' ? avatarKey(activeResult.opponentAvatarUrl) : undefined;
       if (oa) params.set('oa', oa);
+      // カードの説明の文は番号で渡す（api/_lib/share-card-text.js）
+      const c = mode === 'match' ? shareTitleCode(activeResult.compatibilityTitle) : -1;
+      if (c >= 0) params.set('c', String(c));
+      const l = shareLineCode(activeResult.oneLiner);
+      if (l >= 0) params.set('l', String(l));
     }
     return `${baseUrl}?${params.toString()}`;
   };
