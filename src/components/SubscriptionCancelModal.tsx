@@ -141,7 +141,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
             }}>
               <li>7日間の相性バイオリズム ＆ 月次・10年運命年表の閲覧</li>
               <li>お相手の「取扱説明書（トリセツ）」＆ 6軸相性詳細分析（Lv.2/Lv.3サイン・逆転策等）</li>
-              <li>毎朝届く「恋愛運とLINE吉時間」のメール</li>
+              <li>毎朝届く「運勢とLINE吉時間」のメール</li>
               <li>お相手の保存枠（最大10人 → 無料枠2人 / ゲスト1人へ縮小）</li>
               <li>AI守護キャラクター「月・蓮」無制限相談（無料会員は1日2回までに制限）</li>
             </ul>

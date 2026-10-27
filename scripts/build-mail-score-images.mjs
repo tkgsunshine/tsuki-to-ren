@@ -3,7 +3,7 @@
 // api/_lib/daily-mail.js から https://www.tsuki-to-ren.com/assets/mail/score/... を参照する。
 // 文字も画像に焼き込む（Gmail のダークモードは文字色を反転するが画像はそのままなので、読めなくならない）。
 //
-// 使い方: node scripts/build-mail-score-images.mjs   （Playwright と Python3 + Pillow が必要。デザインを変えたときだけ実行して画像をコミット）
+// 使い方: node scripts/build-mail-score-images.mjs [種類...]   （Playwright と Python3 + Pillow が必要。デザインを変えたときだけ実行して画像をコミット）
 // 色・大きさは src/components/ResultView.tsx の Score Rings と src/components/icons/BrandIcons.tsx の MoonPhaseMark に合わせている。
 import { createRequire } from 'module';
 import { execFileSync } from 'child_process';
@@ -60,8 +60,13 @@ const ring = ({ size, score, from, to, glow, icon, label, caption, numColor, id 
 
 const SETS = {
   base: (score) => ring({ size: 116, score, id: 'b', from: '#9f86c0', to: '#e2c074', glow: 'rgba(226, 192, 116, 0.45)', icon: heartSvg, label: '基本相性', caption: '', numColor: '#f6e6c2' }),
-  today: (score) => ring({ size: 156, score, id: 't', from: '#9cc6d8', to: '#3a86ab', glow: 'rgba(156, 198, 216, 0.55)', icon: moonSvg(18, 'full', 'blue'), label: '今日の相性', caption: '毎日変わる', numColor: '#e8f3f8' })
+  today: (score) => ring({ size: 156, score, id: 't', from: '#9cc6d8', to: '#3a86ab', glow: 'rgba(156, 198, 216, 0.55)', icon: moonSvg(18, 'full', 'blue'), label: '今日の相性', caption: '毎日変わる', numColor: '#e8f3f8' }),
+  // 一人で占う人のメール用（ラベルだけ違う）
+  'base-solo': (score) => ring({ size: 116, score, id: 'b', from: '#9f86c0', to: '#e2c074', glow: 'rgba(226, 192, 116, 0.45)', icon: heartSvg, label: '基本運勢', caption: '', numColor: '#f6e6c2' }),
+  'today-solo': (score) => ring({ size: 156, score, id: 't', from: '#9cc6d8', to: '#3a86ab', glow: 'rgba(156, 198, 216, 0.55)', icon: moonSvg(18, 'full', 'blue'), label: '今日の運勢', caption: '毎日変わる', numColor: '#e8f3f8' })
 };
+// 引数で作る種類を絞れる（例: node scripts/build-mail-score-images.mjs base-solo today-solo）。なしなら全部
+const only = process.argv.slice(2);
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ deviceScaleFactor: 2 });
@@ -71,6 +76,7 @@ const shell = (body) => `<!doctype html><html><head><meta charset="utf-8">
 
 const written = [];
 for (const [name, render] of Object.entries(SETS)) {
+  if (only.length && !only.includes(name)) continue;
   for (let score = 0; score <= 100; score++) {
     await page.setContent(shell(render(score)), { waitUntil: 'networkidle' });
     await page.evaluate(() => document.fonts.ready);
@@ -79,7 +85,7 @@ for (const [name, render] of Object.entries(SETS)) {
     written.push(file);
   }
 }
-for (const phase of ['full', 'gibbous', 'half', 'crescent', 'thin']) {
+for (const phase of only.length && !only.includes('moon') ? [] : ['full', 'gibbous', 'half', 'crescent', 'thin']) {
   await page.setContent(shell(`<div class="moon" style="display:inline-block;padding:12px">${moonSvg(34, phase, 'gold')}</div>`), { waitUntil: 'networkidle' });
   const file = path.join(outDir, `moon-${phase}.png`);
   await page.locator('.moon').screenshot({ path: file, omitBackground: true });

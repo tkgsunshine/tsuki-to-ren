@@ -938,8 +938,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
           約7,465万通りの組み合わせから読み解く鑑定
         </div>
         
-        {/* Score Rings: 基本相性（小）と今日の相性（大）を2つの丸いメーターで比べる */}
-        {hasOpponent ? (() => {
+        {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}
+        {(() => {
+          const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+          const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
           const base = activeResult.baseScore;
           const realDaily = activeResult.dailyScore;
           const daily = lockedScore(realDaily, 3, dailyHidden);
@@ -998,7 +1000,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   to: '#e2c074',
                   glow: 'rgba(226, 192, 116, 0.45)',
                   icon: <Heart size={13} style={{ fill: '#cdbfe2', color: '#cdbfe2' }} />,
-                  label: '基本相性',
+                  label: baseLabel,
                   caption: '',
                   numColor: '#f6e6c2'
                 })}
@@ -1010,7 +1012,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   to: '#3a86ab',
                   glow: 'rgba(156, 198, 216, 0.55)',
                   icon: <MoonPhaseMark size={18} tint="blue" />,
-                  label: '今日の相性',
+                  label: todayLabel,
                   caption: dailyLocked ? 'プレミアム限定' : '毎日変わる',
                   numColor: '#e8f3f8',
                   hidden: dailyHidden
@@ -1018,17 +1020,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
 
               {/* 基本→今日 のバー */}
-              {!dailyHidden && <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
+              {!dailyHidden && <div role="img" aria-label={`${baseLabel}${base}点、${todayLabel}${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
                 <div style={{ position: 'relative', height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #9f86c0 0%, #e2c074 50%, #3a86ab 100%)', opacity: 0.85 }}>
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#f6e6c2', border: '3px solid #151827' }} />
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9cc6d8', border: '3px solid #151827', boxShadow: '0 0 10px rgba(156,198,216,0.8)' }} />
                 </div>
                 <div style={{ position: 'absolute', bottom: '14px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
-                  <div style={{ fontSize: '0.62rem', color: '#d6e8f0' }}>今日の相性</div>
+                  <div style={{ fontSize: '0.62rem', color: '#d6e8f0' }}>{todayLabel}</div>
                   <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9cc6d8' }}>{daily}<span style={{ fontSize: '0.65rem' }}>点</span></div>
                 </div>
                 <div style={{ position: 'absolute', ...(labelsCollide ? { top: '14px' } : { bottom: '14px' }), left: `${labelPos(base)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
-                  <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>基本相性</div>
+                  <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>{baseLabel}</div>
                   <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f6e6c2' }}>{base}<span style={{ fontSize: '0.65rem' }}>点</span></div>
                 </div>
               </div>}
@@ -1054,7 +1056,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
                 {!dailyHidden && (
                 <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
-                  基本相性より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
+                  {baseLabel}より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
                 </div>
                 )}
               </div>
@@ -1083,38 +1085,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               )}
             </div>
           );
-        })() : (
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(159, 134, 192,0.14) 0%, rgba(58, 134, 171,0.05) 100%)',
-            border: '1px solid rgba(159, 134, 192,0.4)',
-            borderRadius: '16px',
-            padding: '0.85rem 0.5rem',
-            margin: '0.2rem 0',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: 'inset 0 0 15px rgba(159, 134, 192,0.08)'
-          }}>
-            <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: '500', marginBottom: '0.2rem' }}>
-              今日の総合運気
-            </span>
-            <div className="font-serif" style={{
-              fontSize: '2.5rem',
-              fontWeight: '800',
-              color: selectedChar === 'ren' ? '#9cc6d8' : '#e2d9ee',
-              lineHeight: 1,
-              textShadow: selectedChar === 'ren'
-                ? '0 0 15px rgba(156, 198, 216, 0.6), 0 2px 4px rgba(0,0,0,0.5)'
-                : '0 0 15px rgba(226, 217, 238, 0.6), 0 2px 4px rgba(0,0,0,0.5)',
-              display: 'flex',
-              alignItems: 'baseline',
-              gap: '2px'
-            }}>
-              {activeResult.dailyScore}<span style={{ fontSize: '1rem', fontWeight: 'bold' }}>点</span>
-            </div>
-          </div>
-        )}
+        })()}
 
         {/* One Liner Message Ribbon */}
         {activeResult.oneLiner && activeResult.oneLiner.trim() !== '' && (
