@@ -14,6 +14,7 @@ const SESSION_KEY = 'hasu_attrib';       // this browser session's source / land
 const FIRST_KEY = 'hasu_first_attrib';   // the very first visit's, used for the sign-up
 const SIGNUP_KEY = 'hasu_signup_tracked';
 const SIGNUP_WINDOW_MS = 48 * 3600 * 1000;
+const OPT_OUT_KEY = 'hasu_no_track';     // '1' = this browser is the owner's and is left out of the counts, '0' = counted on purpose
 
 const read = (store: Storage | undefined, key: string): Attribution | null => {
   try {
@@ -85,10 +86,21 @@ const currentDevice = () => {
   return deviceFrom(navigator.userAgent, navigator.maxTouchPoints || 0, Boolean(standalone));
 };
 
+/** Whether this browser is left out of the counts (the owner's own phone / PC). */
+export const isTrackingOptedOut = () => {
+  try { return local()?.getItem(OPT_OUT_KEY) === '1'; } catch { return false; }
+};
+/** Leaves this browser out of the counts, or counts it again. */
+export const setTrackingOptOut = (on: boolean) => write(local(), OPT_OUT_KEY, on ? '1' : '0');
+/** On the admin page: leaves this browser out unless it was set to be counted on purpose. */
+export const optOutAdminBrowser = () => {
+  try { if (local()?.getItem(OPT_OUT_KEY) === null) setTrackingOptOut(true); } catch {}
+};
+
 const isAutomated = () => typeof navigator !== 'undefined' && (navigator as Navigator & { webdriver?: boolean }).webdriver === true;
 
 const send = (payload: Record<string, string>, token?: string) => {
-  if (isAutomated()) return Promise.resolve();
+  if (isAutomated() || isTrackingOptedOut()) return Promise.resolve();
   return fetch('/api/track', {
     method: 'POST',
     keepalive: true,

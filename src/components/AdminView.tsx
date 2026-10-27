@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, signInWithGoogle, logOutUser } from '../services/firebase';
 import { COLUMNS_DATA } from '../data/columnsData';
+import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../services/analytics';
 
 // Admin page (/admin): visits, fortunes, sign-ups, shares and premium (page → payment page → paid) per day,
 // broken down by source / landing page / device, and the member list.
@@ -418,6 +419,7 @@ export default function AdminView() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
+  const [optedOut, setOptedOut] = useState(isTrackingOptedOut);
 
   useEffect(() => {
     document.title = '管理画面 | 月と蓮';
@@ -440,7 +442,13 @@ export default function AdminView() {
         if (!r.ok) throw new Error(body.message || `読み込みに失敗しました（${r.status}）`);
         return body as AdminData;
       })
-      .then((d) => { if (!cancelled) setData(d); })
+      .then((d) => {
+        if (cancelled) return;
+        setData(d);
+        // The owner's own browsers are left out of the counts once they have opened this page
+        optOutAdminBrowser();
+        setOptedOut(isTrackingOptedOut());
+      })
       .catch((e) => { if (!cancelled) { setData(null); setError(e.message); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -531,6 +539,14 @@ export default function AdminView() {
           <button style={c.btn} onClick={() => { void logOutUser().then(() => setData(null)); }}>ログアウト</button>
         </div>
         <div style={{ ...c.muted, marginBottom: 12 }}>ログイン中: {user.email}　{data && `期間 ${data.from} 〜 ${data.to}（日本時間）`}</div>
+        {data && (
+          <div style={{ ...c.muted, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span>{optedOut ? 'このブラウザでの操作は集計に入りません。' : 'このブラウザでの操作も集計に入っています。'}</span>
+            <button style={c.btn} onClick={() => { setTrackingOptOut(!optedOut); setOptedOut(!optedOut); }}>
+              {optedOut ? '集計に入れる' : '集計から外す'}
+            </button>
+          </div>
+        )}
 
         {error && <div style={{ ...c.card, borderColor: '#7f1d1d', color: '#fca5a5' }}>{error}</div>}
         {loading && !data && <div style={c.muted}>読み込み中…</div>}
@@ -618,6 +634,7 @@ export default function AdminView() {
               鑑定は入力フォームから鑑定した回数で、共有リンクや毎朝メールのリンクから結果を開いた回数は含みません。
               共有・プレミアム案内・支払い画面・課金・端末・共有リンクの入口は、今回の計測を追加した日（2026年10月下旬）から数えています。
               課金はStripeの本番決済だけで、テスト決済は数えません。AIチャットは、AIが答えた回数です。
+              この管理画面を開いたブラウザは、自動で集計から外れます（外す前の分は残ります）。iPhoneのホーム画面に追加したアプリはSafariとは別扱いなので、アプリでも一度この画面を開いてください。
             </p>
           </>
         )}
