@@ -164,9 +164,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   ];
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
+    <div className="premium-lp-overlay" style={{
       background: 'rgba(5, 7, 10, 0.92)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
@@ -176,10 +174,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       alignItems: 'center',
       padding: 'calc(1.25rem + env(safe-area-inset-top, 28px)) 0.75rem calc(1.5rem + env(safe-area-inset-bottom, 20px))'
     }}>
+      {/* 高さの上限は外枠（実際に見えている範囲）に合わせる。90vh だと iOS Safari ではツールバーを
+          除いた見える高さより大きくなり、上下がツールバーの裏に隠れていた */}
       <div style={{
         width: '100%',
         maxWidth: '440px',
-        maxHeight: '90vh',
+        maxHeight: '100%',
         height: '760px',
         background: 'linear-gradient(180deg, #111823 0%, #080c11 100%)',
         border: '1.5px solid rgba(226, 192, 116, 0.35)',
