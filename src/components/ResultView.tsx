@@ -9,7 +9,7 @@ import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
-import { showAlert, showConfirm } from './AppDialog';
+import { showAlert, showConfirm, showFieldError } from './AppDialog';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -694,11 +694,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
     registerCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
+  const registerEmailRef = useRef<HTMLInputElement>(null);
+
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !cleanEmail.includes('@')) {
-      showAlert('有効なメールアドレスを入力してください。');
+      showFieldError('有効なメールアドレスを入力してください。', registerEmailRef.current);
       return;
     }
     setRegisteringEmail(true);
@@ -2108,6 +2110,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 ) : (
                   <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <input
+                      ref={registerEmailRef}
                       type="email"
                       required
                       placeholder="メールアドレスを入力..."

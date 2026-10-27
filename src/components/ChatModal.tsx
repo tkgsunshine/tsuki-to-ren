@@ -4,7 +4,7 @@ import { MoonMark } from './icons/BrandIcons';
 import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
-import { showAlert, showConfirm } from './AppDialog';
+import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { chatHistoryKey, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chatHistory';
 import type { SavedPartner } from '../App';
 
@@ -150,6 +150,30 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   useEffect(() => {
     document.body.classList.add('chat-open');
     return () => document.body.classList.remove('chat-open');
+  }, []);
+
+  // 全画面のチャットを、見えている範囲（iOS Safari ではキーボード表示中に縮み、ページもずれる）に合わせる。
+  // ヘッダーが画面の上へ押し出されたり、入力欄がキーボードに隠れたりしないようにするため
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement;
+    const update = () => {
+      root.style.setProperty('--chat-vv-top', `${vv.offsetTop}px`);
+      root.style.setProperty('--chat-vv-height', `${vv.height}px`);
+      // 見えている高さが画面より大きく縮んでいればキーボードが出ている
+      document.body.classList.toggle('chat-keyboard-open', root.clientHeight - vv.height > 120);
+    };
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      root.style.removeProperty('--chat-vv-top');
+      root.style.removeProperty('--chat-vv-height');
+      document.body.classList.remove('chat-keyboard-open');
+    };
   }, []);
 
   // Scroll to bottom
@@ -348,9 +372,10 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             ) : (
               <form onSubmit={async (e) => {
                 e.preventDefault();
-                const emailInput = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value.trim().toLowerCase();
+                const emailField = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
+                const emailInput = emailField.value.trim().toLowerCase();
                 if (!emailInput || !emailInput.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', emailField);
                   return;
                 }
                 try {

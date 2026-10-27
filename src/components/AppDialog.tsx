@@ -9,6 +9,8 @@ type DialogOptions = {
   cancelLabel?: string;
   // 削除など取り消せない操作のとき、決定ボタンを赤系にする
   danger?: boolean;
+  // 入力エラーのとき、閉じた直後にこの入力欄を赤枠にして、スクロール・フォーカスする
+  field?: HTMLElement | null;
 };
 
 type DialogRequest = DialogOptions & {
@@ -33,6 +35,29 @@ const enqueue = (req: Omit<DialogRequest, 'id' | 'resolve'>) =>
 export const showAlert = (message: string, options: DialogOptions = {}) =>
   enqueue({ kind: 'alert', message, ...options }).then(() => undefined);
 
+// 入力エラーを知らせ、OKのあと該当の入力欄へ誘導する
+export const showFieldError = (message: string, field: HTMLElement | null | undefined) =>
+  showAlert(message, { field });
+
+// 入力欄を赤枠にして画面の中央へスクロールし、カーソルを置く。赤枠は入力し直すと消える。
+// iOS Safari はユーザー操作の中で focus() しないとキーボードを出さないため、OKのタップ処理の中から同期で呼ぶ。
+const guideToField = (field: HTMLElement) => {
+  field.classList.add('field-invalid');
+  field.setAttribute('aria-invalid', 'true');
+  const clear = () => {
+    field.classList.remove('field-invalid');
+    field.removeAttribute('aria-invalid');
+    field.removeEventListener('input', clear);
+  };
+  field.addEventListener('input', clear);
+  try {
+    field.focus({ preventScroll: true });
+  } catch {
+    field.focus();
+  }
+  field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
 export const showConfirm = (message: string, options: DialogOptions = {}) =>
   enqueue({ kind: 'confirm', message, ...options });
 
@@ -50,6 +75,7 @@ export function AppDialogHost() {
     if (!current) return;
     queue = queue.filter(q => q.id !== current.id);
     emit();
+    if (current.field && current.field.isConnected) guideToField(current.field);
     current.resolve(ok);
   };
 

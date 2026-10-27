@@ -111,6 +111,29 @@ html.ios-standalone .app-container {
   margin: 0 auto;
 }
 
+/* プレミアム案内（PremiumLPModal）の外枠。iOS Safari では 100vh・inset:0 がツールバーの裏まで
+   含むことがあり、下の固定ボタンや一番下が隠れるため、ツールバーを除いた見える高さ（100dvh）に合わせる。
+   ホーム画面アプリでは 100dvh が実際の表示領域とずれるので、上の .app-container と同じく上下0に固定する。 */
+.premium-lp-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+@supports (height: 100dvh) {
+  .premium-lp-overlay {
+    bottom: auto;
+    height: 100dvh;
+  }
+}
+
+html.ios-standalone .premium-lp-overlay {
+  bottom: 0;
+  height: auto;
+}
+
 /* 見出し・ボタンは文節単位で改行し、行の長さを揃える（1〜2文字だけ次の行に落ちるのを防ぐ。対応ブラウザのみ） */
 h1, h2, h3, h4, button, label {
   word-break: auto-phrase;
@@ -626,28 +649,42 @@ body.chat-open .result-floating-bar {
   display: none !important;
 }
 
+/* チャットは画面の最上部から下端までの全画面。高さと位置は、キーボード表示中も見えている範囲
+   （visualViewport）に合わせる。値は ChatModal.tsx が --chat-vv-top / --chat-vv-height に入れる */
 .chat-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(2, 3, 4, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  position: fixed;
+  top: var(--chat-vv-top, 0px);
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
+  height: var(--chat-vv-height, 100dvh);
+  max-width: 480px;
+  margin: 0 auto;
+  background: #0c1017;
   z-index: 20;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
+  align-items: stretch;
 }
 
 .chat-window {
   width: 100%;
-  height: 85%;
+  height: 100%;
   background: #0c1017;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 30px 30px 0 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* キーボード表示中は下メニューがキーボードの裏に隠れるので、メニュー分の余白を外して入力欄をキーボードの真上に置く */
+body.chat-keyboard-open .navbar-container {
+  display: none !important;
+}
+
+body.chat-keyboard-open .chat-input-area,
+body.chat-keyboard-open .chat-partner-picker {
+  padding-bottom: 0.85rem;
 }
 
 .chat-header {
@@ -1352,4 +1389,21 @@ body.chat-open .result-floating-bar {
   align-items: center;
   padding: 0 1rem;
   z-index: 3;
+}
+
+/* 入力エラーのとき、該当の入力欄を赤枠で示す（AppDialog の showFieldError） */
+.field-invalid {
+  border-color: #e0604a !important;
+  box-shadow: 0 0 0 3px rgba(224, 96, 74, 0.28) !important;
+  animation: fieldInvalidShake 0.32s ease-in-out;
+}
+
+@keyframes fieldInvalidShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-invalid { animation: none; }
 }

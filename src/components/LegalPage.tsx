@@ -211,10 +211,9 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
               <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <strong>【個人情報苦情・相談窓口】</strong><br />
                 ・運営事業者：Ill株式会社<br />
-                ・所在地：東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702<br />
-                ・代表責任者：山下 高志<br />
-                ・メールアドレス：support@tsuki-to-ren.com<br />
-                ・電話番号：08053565283（受付時間：平日 10:00〜18:00）
+                ・所在地：東京都渋谷区代々木２丁目２４−８<br />
+                ・代表責任者：須藤 涼弥<br />
+                ・メールアドレス：support@tsuki-to-ren.com
               </div>
             </Article>
 
@@ -257,19 +256,15 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>所在地</td>
-                  <td style={{ color: '#e7e1d5' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</td>
+                  <td style={{ color: '#e7e1d5' }}>東京都渋谷区代々木２丁目２４−８</td>
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>お問合せ</td>
                   <td style={{ color: '#e7e1d5' }}>support@tsuki-to-ren.com</td>
                 </tr>
                 <tr>
-                  <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>電話番号</td>
-                  <td style={{ color: '#e7e1d5' }}>08053565283</td>
-                </tr>
-                <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
-                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年10月23日）</td>
+                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年10月27日）</td>
                 </tr>
               </tbody>
             </table>

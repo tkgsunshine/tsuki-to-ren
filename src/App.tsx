@@ -31,9 +31,10 @@ import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { trackFortune } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
-import { showAlert, showConfirm } from './components/AppDialog';
+import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
+import { shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
 import type { PartnerLock } from './components/ResultView';
@@ -595,9 +596,18 @@ function App() {
     if (activeResult) {
       params.set('bs', String(activeResult.baseScore));
       if (!dailyScoreHidden) params.set('ds', String(activeResult.dailyScore)); // 無料の日数を使い切った日は「??点」
-      // 共有カード画像（api/og.js）に載せる、ひとことと相性の名前
-      if (activeResult.oneLiner) params.set('ol', activeResult.oneLiner.slice(0, 40));
-      if (mode === 'match' && activeResult.compatibilityTitle) params.set('t', activeResult.compatibilityTitle.slice(0, 30));
+      // ひとことや相性の名前は入れない。日本語はURLで1字9文字になり、Xに貼ると長すぎる（カード画像は名前と点数で作る）
+      // カード画像の背景に出す守護獣（/assets/astrology_ox_sample_male.jpg → ox_sample_male）
+      const avatarKey = (url?: string) => /\/astrology_([a-z_]+)\.jpg$/.exec(url || '')?.[1];
+      const ma = avatarKey(activeResult.myAvatarUrl);
+      if (ma) params.set('ma', ma);
+      const oa = mode === 'match' ? avatarKey(activeResult.opponentAvatarUrl) : undefined;
+      if (oa) params.set('oa', oa);
+      // カードの説明の文は番号で渡す（api/_lib/share-card-text.js）
+      const c = mode === 'match' ? shareTitleCode(activeResult.compatibilityTitle) : -1;
+      if (c >= 0) params.set('c', String(c));
+      const l = shareLineCode(activeResult.oneLiner);
+      if (l >= 0) params.set('l', String(l));
     }
     return `${baseUrl}?${params.toString()}`;
   };
@@ -620,6 +630,11 @@ function App() {
   });
   const [showNotifyEmailModal, setShowNotifyEmailModal] = useState(false);
   const [notifyEmailInput, setNotifyEmailInput] = useState('');
+  // 入力エラーのとき、OKのあと該当の入力欄へ誘導するための参照
+  const profileBirthRef = useRef<HTMLInputElement>(null);
+  const editPartnerBirthRef = useRef<HTMLInputElement>(null);
+  const notifyEmailRef = useRef<HTMLInputElement>(null);
+  const promptEmailRef = useRef<HTMLInputElement>(null);
 
   // Whose fortune the daily mail is about: 'self', a saved partner's id, or 'keep' (the partner already in the
   // subscription but not saved on this device). The subscription in Firestore is the truth the 8:00 mail uses.
@@ -763,7 +778,7 @@ function App() {
   const saveEditPartner = () => {
     if (!editingPartnerId) return;
     if (!editPartnerBirth || editPartnerBirth.length < 10) {
-      showAlert('生年月日は「19950401」のように数字8桁で入力してください。');
+      showFieldError('生年月日は「19950401」のように数字8桁で入力してください。', editPartnerBirthRef.current);
       return;
     }
     const fields = {
@@ -1858,6 +1873,7 @@ function App() {
                   <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                     <input
+                      ref={profileBirthRef}
                       type="text"
                       inputMode="numeric"
                       maxLength={10}
@@ -1946,7 +1962,7 @@ function App() {
                   className="consult-btn"
                   onClick={async () => {
                     if (!isValidBirthDate(myBirth)) {
-                      showAlert('生年月日を「19950401」のように8桁で正しく入力してください。');
+                      showFieldError('生年月日を「19950401」のように8桁で正しく入力してください。', profileBirthRef.current);
                       return;
                     }
                     try {
@@ -2100,7 +2116,9 @@ function App() {
                               <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input
+                                  ref={editPartnerBirthRef}
                                   type="text"
+                                  inputMode="numeric"
                                   value={editPartnerBirth}
                                   onChange={(e) => setEditPartnerBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
                                   placeholder="例: 19950125"
@@ -2555,11 +2573,11 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>運営責任者</span>
-                  <span style={{ color: 'white' }}>山下 高志</span>
+                  <span style={{ color: 'white' }}>須藤 涼弥</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</span>
+                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
@@ -2567,7 +2585,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>電話番号</span>
-                  <span style={{ color: 'white' }}>08053565283</span>
+                  <span style={{ color: 'white' }}>請求があった場合は遅滞なく開示します</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>販売価格</span>
@@ -2632,9 +2650,9 @@ function App() {
                 <div>
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>5. 苦情・相談対応体制</h4>
                   <p>個人情報の取扱いに関するご質問、苦情、相談等は下記窓口までお申し出ください。<br/>
-                  【苦情・相談窓口】Ill株式会社（担当：山下 高志）<br/>
-                  所在地：東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702<br/>
-                  連絡先：support@tsuki-to-ren.com / 08053565283（平日10:00〜18:00）</p>
+                  【苦情・相談窓口】Ill株式会社（担当：須藤 涼弥）<br/>
+                  所在地：東京都渋谷区代々木２丁目２４−８<br/>
+                  連絡先：support@tsuki-to-ren.com</p>
                 </div>
               </div>
             )}
@@ -2648,7 +2666,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>代表取締役</span>
-                  <span style={{ color: 'white' }}>山下 高志</span>
+                  <span style={{ color: 'white' }}>須藤 涼弥</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>設立</span>
@@ -2656,11 +2674,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</span>
-                </div>
-                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#a9a49a' }}>電話番号</span>
-                  <span style={{ color: 'white' }}>08053565283</span>
+                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
@@ -2852,6 +2866,7 @@ function App() {
                 直接入力 / 変更:
               </label>
               <input
+                ref={notifyEmailRef}
                 type="email"
                 placeholder="example@email.com"
                 value={notifyEmailInput}
@@ -2925,7 +2940,7 @@ function App() {
               type="button"
               onClick={async () => {
                 if (!notifyEmailInput || !notifyEmailInput.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', notifyEmailRef.current);
                   return;
                 }
                 if (!isValidBirthDate(myBirth)) {
@@ -2939,7 +2954,7 @@ function App() {
                   return;
                 }
                 if (cleanEmail !== accountEmail) {
-                  showAlert('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。');
+                  showFieldError('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。', notifyEmailRef.current);
                   return;
                 }
 
@@ -3001,6 +3016,7 @@ function App() {
               完了するため、ご入力されたメールアドレスを入力してください。
             </p>
             <input
+              ref={promptEmailRef}
               type="email"
               placeholder="例: user@example.com"
               value={promptEmailInput}
@@ -3011,7 +3027,7 @@ function App() {
               onClick={async () => {
                 const clean = promptEmailInput.trim().toLowerCase();
                 if (!clean || !clean.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', promptEmailRef.current);
                   return;
                 }
                 const res = await completeEmailMagicLinkSignIn(clean);

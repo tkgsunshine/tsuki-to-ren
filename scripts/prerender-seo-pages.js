@@ -86,7 +86,7 @@ writePage(
           <h2 style="font-size: 1.1rem; color: #e2c074;">第5条（有料サブスクリプションサービス）</h2>
           <p>本サービスでは、月額980円（税込）等の有料サブスクリプション機能を提供しています。お申し込み日を起算日として1か月ごとに自動更新され、更新日に決済が行われます（無料お試し期間はありません）。更新日までに解約手続き（自動更新停止）を行えば、次回以降の課金は発生しません。デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。プラン解約は設定画面よりいつでも即時可能です。</p>
           <h2 style="font-size: 1.1rem; color: #e2c074;">第6条（運営会社）</h2>
-          <p>運営会社：Ill株式会社 / お問合せ：support@tsuki-to-ren.com / 電話番号：08053565283</p>
+          <p>運営会社：Ill株式会社 / お問合せ：support@tsuki-to-ren.com</p>
         </section>
         <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
       </article>
@@ -131,9 +131,9 @@ writePage(
           <p>Google Firebaseの暗号化セキュアクラウド環境にて厳重に管理されます。有料プランの決済は決済代行会社 Stripe を通じて行い、クレジットカード情報は当社のサーバーに保存されません。</p>
           <h2 style="font-size: 1.1rem; color: #86efac;">6. 苦情・相談対応体制</h2>
           <p>個人情報の取扱いに関する苦情・相談は、下記窓口までお申し出ください。<br/>
-          運営会社：Ill株式会社（個人情報管理責任者：山下 高志）<br/>
-          所在地：東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702<br/>
-          連絡先：support@tsuki-to-ren.com / 08053565283（平日10:00〜18:00）</p>
+          運営会社：Ill株式会社（個人情報管理責任者：須藤 涼弥）<br/>
+          所在地：東京都渋谷区代々木２丁目２４−８<br/>
+          連絡先：support@tsuki-to-ren.com</p>
         </section>
         <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
       </article>
@@ -168,9 +168,9 @@ writePage(
         <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem;">
           <tbody>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af; width: 140px;">販売事業者</th><td style="padding: 0.75rem 0;">Ill株式会社</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">運営責任者</th><td style="padding: 0.75rem 0;">山下 高志</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">08053565283</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">運営責任者</th><td style="padding: 0.75rem 0;">須藤 涼弥</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">請求があった場合は遅滞なく開示します</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">販売価格</th><td style="padding: 0.75rem 0;">プレミアムプラン: 月額980円（税込）</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">契約期間・自動更新</th><td style="padding: 0.75rem 0;">1か月ごとの自動更新のサブスクリプション（初回はお申し込み時、2回目以降は毎月の更新日に決済）。更新日までに解約手続き（自動更新の停止）を行わない限り、同一条件で1か月ごとに自動的に契約が更新され、継続課金が発生します。無料お試し期間はありません。</td></tr>
@@ -214,10 +214,9 @@ writePage(
         <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem;">
           <tbody>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af; width: 140px;">社名</th><td style="padding: 0.75rem 0; font-weight: bold;">Ill株式会社</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">代表取締役</th><td style="padding: 0.75rem 0;">山下 高志</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">代表取締役</th><td style="padding: 0.75rem 0;">須藤 涼弥</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">設立</th><td style="padding: 0.75rem 0;">2022年6月1日</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">08053565283</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">事業内容</th><td style="padding: 0.75rem 0;">AI占いコンテンツ開発、次世代マッチングプラットフォーム『月と蓮』の企画運営・システム提供。</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
           </tbody>
