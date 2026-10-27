@@ -7,9 +7,18 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-export default function handler(req, res) {
+const SHARED_ID_RE = /^[A-Za-z0-9_-]{12}$/;
+
+export default async function handler(req, res, deps = {}) {
   const url = new URL(req.url, `https://${req.headers.host}`);
   const params = url.searchParams;
+
+  // Saved results (api/_lib/shared-result.js): POST saves one, GET ?id= reads one. Loaded only here so the card path stays light
+  if (req.method === 'POST' || params.get('id')) {
+    const shared = await import('./_lib/shared-result.js');
+    if (req.method === 'POST') return shared.saveShared(req, res, deps);
+    return shared.sendShared(params.get('id'), res, deps);
+  }
 
   const get = (k1, k2) => params.get(k1) || params.get(k2);
 
@@ -33,9 +42,12 @@ export default function handler(req, res) {
   // Build the redirect URL for normal users.
   // Links made before birth dates were taken out of them (they carry mb) still open the full result as before.
   // Newer links carry only what the card shows: the app shows the sharer's result from those values and invites the visitor to their own diagnosis.
+  // Links with a saved result (r) open the usual result screen with it.
   let appUrl;
   if (params.get('mb') || params.get('mBirth')) {
     appUrl = `https://${req.headers.host}/?${params.toString()}`;
+  } else if (SHARED_ID_RE.test(params.get('r') || '')) {
+    appUrl = `https://${req.headers.host}/?shared=${params.get('r')}`;
   } else {
     // App: src/components/SharedResultView.tsx (keys are prefixed so the app's own diagnosis params are not triggered)
     const teaser = new URLSearchParams({ from: 'share' });

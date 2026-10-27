@@ -102,6 +102,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       const u = new URL(shareUrl);
       if (!showOpponent) {
         u.searchParams.set('mode', 'single');
+        // 保存した結果（r）は二人の相性なので、「自分だけ」のカードのリンクには付けない
+        if (hasOpponent) u.searchParams.delete('r');
       } else {
         u.searchParams.delete('mode');
       }

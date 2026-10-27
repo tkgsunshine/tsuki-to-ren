@@ -264,6 +264,8 @@ interface ResultViewProps {
   notifyStatus?: { on: boolean; targetLabel: string; isCurrentReading: boolean };
   onOpenNotifySettings?: () => void;
   onSwitchNotifyToCurrent?: () => void;
+  // 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。保存・通知・チャット・シェアは出さず、onReset は「自分も鑑定する」になる
+  sharedBy?: { name: string; date: string };
 }
 
 export const ResultView: React.FC<ResultViewProps> = ({
@@ -288,7 +290,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onOpenChat,
   notifyStatus,
   onOpenNotifySettings,
-  onSwitchNotifyToCurrent
+  onSwitchNotifyToCurrent,
+  sharedBy
 }) => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -750,8 +753,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* プレミアム登録完了のお知らせ（トリセツが無い鑑定では、結果の先頭に出す） */}
       {!activeResult.opponentTorisetsu && welcomePremiumBanner}
       
+      {/* 共有リンクから開いたとき: だれの、いつの結果かを出し、自分の鑑定へ誘う */}
+      {sharedBy && (
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.55rem', padding: '0.9rem 1rem', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.16) 0%, rgba(59, 130, 246, 0.12) 100%)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+          <div style={{ fontSize: '0.82rem', color: '#e2c074', fontWeight: 700, letterSpacing: '0.04em' }}>
+            🔮 {sharedBy.name === 'あなた' ? 'お友だち' : `${sharedBy.name}さん`}が共有した鑑定結果
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>{sharedBy.date}の鑑定です（今日の相性・運勢はその日のもの）</div>
+          {onReset && (
+            <button type="button" className="consult-btn font-serif" onClick={onReset} style={{ width: '100%', maxWidth: '320px' }}>
+              あなたも無料で鑑定する
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Top Back Navigation Button ＋ 右上のシェア（下のシェアバナーを閉じたあとでもシェアできるように常設） */}
-      {(onReset || SHOW_SHARE_BUTTON) && (
+      {!sharedBy && (onReset || SHOW_SHARE_BUTTON) && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', marginBottom: '-0.3rem', paddingLeft: '0.25rem', paddingRight: '0.25rem' }}>
           {onReset ? (
           <button
@@ -1135,7 +1153,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         )}
 
-        {hasOpponent && (
+        {hasOpponent && !sharedBy && (
           <button
             onClick={onSavePartner}
             style={{
@@ -1909,7 +1927,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </div>
 
         {/* Daily Notification Prompt: マイページの「毎朝8時の運勢・吉時間通知」と同じ設定を表示する */}
-        {(() => {
+        {!sharedBy && (() => {
           const notifyOn = !!notifyStatus?.on;
           const isCurrent = notifyOn && notifyStatus!.isCurrentReading;
           const currentLabel = hasOpponent ? `${oppNickname === 'お相手' ? 'お相手' : `${oppNickname}さん`}との相性` : 'あなたの運勢';
@@ -1982,7 +2000,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       </div>
 
         {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ */}
-        {onOpenChat && (() => {
+        {onOpenChat && !sharedBy && (() => {
           const isRen = selectedChar === 'ren';
           const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
           const oppLabel = hasOpponent ? (oppNickname === 'お相手' ? 'お相手' : `${oppNickname}さん`) : '';
@@ -3075,7 +3093,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
               }}
             >
-              もう一度占う
+              {sharedBy ? 'あなたも無料で鑑定する' : 'もう一度占う'}
             </button>
           </div>
         )}
@@ -3449,7 +3467,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       )}
 
       {/* Floating Sticky Bottom Share CTA Bar */}
-      {SHOW_SHARE_BUTTON && !isShareDismissed && (
+      {SHOW_SHARE_BUTTON && !isShareDismissed && !sharedBy && (
       <div className="result-floating-bar" style={{
         position: 'fixed',
         bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
