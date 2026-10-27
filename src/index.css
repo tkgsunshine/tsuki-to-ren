@@ -793,6 +793,54 @@ body.chat-open .result-floating-bar {
   transform: translateX(2px);
 }
 
+.chat-partner-picker {
+  gap: 0.6rem;
+  padding-bottom: calc(5.5rem + var(--safe-bottom, 0px));
+}
+
+.chat-partner-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.chat-partner-name {
+  font-weight: 600;
+}
+
+.chat-partner-rel {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: #c9b98f;
+  border: 1px solid rgba(226, 192, 116, 0.3);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.chat-partner-save {
+  border-style: dashed;
+  border-color: rgba(226, 192, 116, 0.35);
+}
+
+.chat-partner-add {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.8rem;
+  font-size: 0.88rem;
+  font-weight: bold;
+}
+
+.chat-partner-link {
+  background: transparent;
+  border: none;
+  color: #a9a49a;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.4rem;
+}
+
 .chat-input-area {
   padding: 0.85rem 1.25rem calc(5.5rem + var(--safe-bottom, 0px));
   border-top: 1px solid rgba(255, 255, 255, 0.08);
