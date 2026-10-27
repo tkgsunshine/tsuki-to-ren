@@ -298,7 +298,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
               }}
             >
               <span style={{ fontSize: '1rem' }}>🔓</span>
-              <span>プレミアム登録して全解禁（月額980円）</span>
+              <span>プレミアム登録で全解放（月額980円）</span>
             </button>
 
             {/* 本番では出さない（押すだけで本物の点数が見えてしまうため）。プレビューと手元では使える */}
