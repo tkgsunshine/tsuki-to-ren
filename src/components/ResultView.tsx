@@ -1781,7 +1781,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               // 2段落目以降と「二人のLINEのコツ」の本文はプレミアム限定。見出しは誰にでも見せ、本文だけぼかす。
               const locked = !isSubscribed;
               const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
-              // ぼかした本文の上下中央に重ねる（末尾に置くと見落とされやすいため）
+              // ボタンは「気持ちが伝わるコツ」の本文の上下中央に重ねる（末尾に置くと見落とされやすいため）。
+              // その項目がないときは「二人のLINEのコツ」全体の中央に置く。
+              const lockAt = tips ? tips.items.findIndex(it => it.label.startsWith('💡')) : -1;
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                   <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={handleLockTagClick}>
@@ -1819,10 +1821,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
-                          <div style={{ color: '#e8e3d8', ...blurred }}>{lockedText(it.text, locked)}</div>
+                          <div style={{ position: 'relative' }}>
+                            <div style={{ color: '#e8e3d8', ...blurred }}>{lockedText(it.text, locked)}</div>
+                            {locked && i === lockAt && lockButton}
+                          </div>
                         </div>
                       ))}
-                      {locked && lockButton}
+                      {locked && lockAt < 0 && lockButton}
                     </div>
                   )}
                 </>
