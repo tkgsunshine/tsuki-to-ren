@@ -1047,16 +1047,16 @@ function App() {
       setTsukiResult(resTsuki);
       
       setFlowStep('result');
-      // Transition active view automatically to result detail and push history entry for browser back.
-      // On /result (e.g. a reload of the 鑑定結果 tab), stay on that tab so the bottom menu matches the screen.
+      // 結果はいつも「鑑定結果」タブ（/result）で見せ、下のメニューと表示中の画面をそろえる。
+      // 診断の入力画面からは1件積むので、戻ると入力画面に戻る。/result を開き直したときは積まずに置き換える
+      setActiveTab('fortune');
       const onResultPath = getInitialRoute().tab === 'fortune';
-      setActiveTab(onResultPath ? 'fortune' : 'home');
       if (skipLoading && onResultPath) {
         replaceNav({ tab: 'fortune', flowStep: 'result' });
       } else {
-        // URL（共有リンクの値など）はそのまま、結果の画面を1件積む
-        pushNav({ tab: onResultPath ? 'fortune' : 'home', slug: null, subView: 'main', legal: false, flowStep: 'result' }, window.location.pathname + window.location.search);
+        pushNav({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' }, '/result' + window.location.search);
       }
+      scrollMainTo(0);
     };
 
     if (skipLoading) {
