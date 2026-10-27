@@ -4512,7 +4512,25 @@
     "createdAt": "2026-10-22T13:47:38.895Z",
     "postedAt": "2026-10-26T04:34:06.000Z",
     "tweetId": "2114576280503095557",
-    "manual": true
+    "manual": true,
+    "metrics": {
+      "at": "2026-10-27T23:59:31.801Z",
+      "impressions": 35,
+      "likes": 2,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    },
+    "metrics24": {
+      "at": "2026-10-27T23:59:31.801Z",
+      "impressions": 35,
+      "likes": 2,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "bookmarks": 0
+    }
   },
   {
     "id": "2026-10-26-night",
