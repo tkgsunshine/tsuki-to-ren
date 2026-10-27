@@ -1,9 +1,11 @@
+import { FieldValue } from 'firebase-admin/firestore';
 import { PREMIUM, isLiveKey } from './stripe.js';
 
 // Server-side limits for the chat (api/chat.js), so neither a bot nor a looping script can run up the Claude API bill.
 // Counters live in Firestore (Admin SDK only; clients cannot read or write them):
 //   chatUsage/{uid}        { day, dayCount, month, monthCount, recent: [ms timestamps within the last hour] }
-//   chatUsageDaily/{day}   { count }  calls made by everyone that day (a ceiling on the whole site's daily cost)
+//   chatUsageDaily/{day}   { count, aiCalls, premiumCalls, inputTokens, outputTokens }  everyone's use that day:
+//                          count is a ceiling on the whole site's daily cost, the rest is shown on /admin to work out the real cost
 // Every number can be changed from Vercel's environment variables without a deploy of new code.
 export const USAGE = 'chatUsage';
 export const USAGE_DAILY = 'chatUsageDaily';
@@ -82,4 +84,14 @@ export async function consume(db, uid, { premium, now = Date.now(), lim = limits
     }
     return { ...result, globalCount: globalCount + (result.allowed ? 1 : 0) };
   });
+}
+
+// Adds one answered call's tokens to the day's totals (the admin page turns them into yen)
+export async function recordTokens(db, { now = Date.now(), premium, usage }) {
+  await db.collection(USAGE_DAILY).doc(jstDay(now)).set({
+    aiCalls: FieldValue.increment(1),
+    premiumCalls: FieldValue.increment(premium ? 1 : 0),
+    inputTokens: FieldValue.increment(usage?.input_tokens || 0),
+    outputTokens: FieldValue.increment(usage?.output_tokens || 0)
+  }, { merge: true });
 }

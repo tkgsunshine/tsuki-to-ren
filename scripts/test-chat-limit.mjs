@@ -13,7 +13,11 @@ const mockRes = () => {
 
 // Firestore stand-in with transactions: docs keyed "collection/id"
 const mockDb = (docs = {}) => {
-  const ref = (name, id) => ({ key: `${name}/${id}`, get: async () => ({ data: () => docs[`${name}/${id}`] }) });
+  const ref = (name, id) => ({
+    key: `${name}/${id}`,
+    get: async () => ({ data: () => docs[`${name}/${id}`] }),
+    set: async (data) => { docs[`${name}/${id}`] = { ...docs[`${name}/${id}`], ...data }; }
+  });
   return {
     docs,
     collection: (name) => ({ doc: (id) => ref(name, id) }),
@@ -111,7 +115,9 @@ test('chat lets premium members keep going, and slows a burst down', async () =>
   assert.equal(res.code, 429);
   assert.equal(res.body.reason, 'per_minute');
   assert.equal(calls.length, 6);
-  assert.equal(db.docs[`chatUsageDaily/${jstDay(NOW)}`].count, 6);
+  const day = db.docs[`chatUsageDaily/${jstDay(NOW)}`];
+  assert.equal(day.count, 6);
+  assert.ok(day.inputTokens, 'tokens are added to the day for the admin page');
 });
 
 test('a test-mode membership does not count as premium on the live site', async () => {
