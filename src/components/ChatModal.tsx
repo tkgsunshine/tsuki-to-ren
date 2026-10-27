@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, X } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
-import { signInWithGoogle, signInWithX } from '../services/firebase';
+import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
 import { showAlert } from './AppDialog';
@@ -17,6 +17,10 @@ interface ChatModalProps {
   onClose: () => void;
   result?: FortuneResult | null;
   opponentName?: string;
+  // 鑑定結果の質問ボタンから開いたとき、その質問を最初に送る
+  initialQuestion?: string;
+  /** 無料の日数を使い切ったお相手: 今日の点数をAIにも渡さない */
+  hideDailyScore?: boolean;
 }
 
 interface Message {
@@ -35,7 +39,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   onSubscribe,
   onClose,
   result,
-  opponentName
+  opponentName,
+  initialQuestion,
+  hideDailyScore = false
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -44,12 +50,14 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const [showSubscribeOverlay, setShowSubscribeOverlay] = useState(false);
   const [emailSentChat, setEmailSentChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const initialQuestionSentRef = useRef(false);
 
   const characterName = character === 'ren' ? '蓮' : '月';
   const characterAvatar = character === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp';
 
-  // Initial greeting
+  // Initial greeting（質問ボタンから開いたときは、あいさつを出さずにその質問から始める）
   useEffect(() => {
+    if (initialQuestion && isRegistered) return;
     const greetingText = character === 'ren'
       ? '私は蓮。理性と導きを司る者。あなたの心境を整理し、進むべき道を論理的に紐解きましょう。今、どのようなことに迷っていますか？'
       : '私は月。直感と優しさを司る者。あなたの心の声に耳を傾け、優しく寄り添います。今、どんな想いを抱えていますか？';
@@ -58,6 +66,25 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       { id: '1', sender: 'bot', text: greetingText }
     ]);
   }, [character]);
+
+  // 鑑定結果の質問ボタンから開いたときは、開いた瞬間にその質問を送る（StrictMode の二重実行でも1回だけ）
+  useEffect(() => {
+    if (!initialQuestion || initialQuestionSentRef.current) return;
+    initialQuestionSentRef.current = true;
+    if (!isRegistered) {
+      // ログイン前は登録の案内を出し、登録後にそのまま送れるよう入力欄に入れておく
+      setInputText(initialQuestion);
+      setShowRegisterOverlay(true);
+      return;
+    }
+    handleSend(initialQuestion);
+  }, [initialQuestion]);
+
+  // 結果画面の下に浮かぶバー（シェア・ホーム追加）が入力欄に重ならないよう、開いている間は隠す
+  useEffect(() => {
+    document.body.classList.add('chat-open');
+    return () => document.body.classList.remove('chat-open');
+  }, []);
 
   // Scroll to bottom
   useEffect(() => {
@@ -106,7 +133,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
 【現在の二人の相性】
 基本相性値: ${result.baseScore}点
-今日のバイオリズム相性値: ${result.dailyScore}点
+今日のバイオリズム相性値: ${hideDailyScore ? '非公開（プレミアム限定。点数は答えないこと）' : `${result.dailyScore}点`}
 二人の相性一言要約: "${result.oneLiner}"`;
     }
     
@@ -147,10 +174,13 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         text: m.text
       }));
 
+      // The server counts each account's chats (api/_lib/chat-limit.js), so it needs to know who is asking
+      const idToken = await getFirebaseAuth().currentUser?.getIdToken().catch(() => undefined);
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
         },
         body: JSON.stringify({
           message: text,
@@ -160,12 +190,33 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         })
       });
       
+      if (response.status === 401) {
+        setIsTyping(false);
+        setShowRegisterOverlay(true);
+        return;
+      }
+      // A limit was reached: the server's message is shown as the reply, not a made-up answer
+      if (response.status === 429) {
+        const limited = await response.json().catch(() => ({}));
+        setIsTyping(false);
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          sender: 'bot',
+          text: limited.reply || '少し時間をおいてから、もう一度送ってくださいね。'
+        }]);
+        if (limited.reason === 'free_daily') {
+          setChatCount(2);
+          setShowSubscribeOverlay(true);
+        }
+        return;
+      }
       if (!response.ok) {
         throw new Error(`Chat API HTTP ${response.status}`);
       }
       
       const data = await response.json();
       setIsTyping(false);
+      if (typeof data.remainingFree === 'number') setChatCount(Math.max(0, 2 - data.remainingFree));
       
       const replyText = data.reply && !data.debug?.includes('API Key is missing') && !data.debug?.includes('Error')
         ? data.reply
@@ -468,7 +519,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                   gap: '0.35rem'
                 }}
               >
-                <span>🔒</span> プレミアム登録して全解禁 (月額980円)
+                <span>🔒</span> プレミアム登録で全解放 (月額980円)
               </button>
 
               {/* Close Link */}

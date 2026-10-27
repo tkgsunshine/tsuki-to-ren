@@ -33,6 +33,8 @@ import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, 
 import { showAlert, showConfirm } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
+import { fetchPartnerAccess } from './services/partnerDays';
+import type { PartnerLock } from './components/ResultView';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -203,6 +205,7 @@ function App() {
   // Characters
   const [selectedCharacter, setSelectedCharacter] = useState<'ren' | 'tsuki'>('tsuki');
   const [isChatOpen, setIsChatOpen] = useState(false); // Standalone chat simulator in Chat tab
+  const [chatInitialQuestion, setChatInitialQuestion] = useState<string | undefined>(undefined); // 鑑定結果の質問ボタンから開いたときの最初の質問
   
   // Firebase Auth State
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -590,7 +593,7 @@ function App() {
 
     if (activeResult) {
       params.set('bs', String(activeResult.baseScore));
-      params.set('ds', String(activeResult.dailyScore));
+      if (!dailyScoreHidden) params.set('ds', String(activeResult.dailyScore)); // 無料の日数を使い切った日は「??点」
     }
     return `${baseUrl}?${params.toString()}`;
   };
@@ -828,6 +831,26 @@ function App() {
   const [renResult, setRenResult] = useState<FortuneResult | null>(null);
   const [tsukiResult, setTsukiResult] = useState<FortuneResult | null>(null);
 
+  // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
+  // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
+  const [partnerLock, setPartnerLock] = useState<PartnerLock>(null);
+  const signedInUid = currentUser?.uid;
+  useEffect(() => {
+    if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || isSubscribed) {
+      setPartnerLock(null);
+      return;
+    }
+    let cancelled = false;
+    setPartnerLock({ status: 'checking', daysLeft: 0, guest: !signedInUid });
+    fetchPartnerAccess(oppBirth).then((access) => {
+      if (cancelled) return;
+      if (!access || access.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
+      else setPartnerLock({ status: access.locked ? 'locked' : 'free', daysLeft: access.daysLeft, guest: access.guest });
+    });
+    return () => { cancelled = true; };
+  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid]);
+  const dailyScoreHidden = partnerLock !== null && partnerLock.status !== 'free';
+
   // Form submits
   const handleDiagnosisSubmit = (data: {
     myName: string;
@@ -1016,6 +1039,7 @@ function App() {
                 isRegistered={isRegistered}
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
+                partnerLock={partnerLock}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -1025,6 +1049,10 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                onOpenChat={(question) => {
+                  setChatInitialQuestion(question);
+                  setIsChatOpen(true);
+                }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
                   window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
@@ -1047,6 +1075,7 @@ function App() {
                 isRegistered={isRegistered}
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
+                partnerLock={partnerLock}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -1056,6 +1085,10 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                onOpenChat={(question) => {
+                  setChatInitialQuestion(question);
+                  setIsChatOpen(true);
+                }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
                   window.history.pushState({ tab: 'fortune', legal: true }, '', '/terms');
@@ -2513,9 +2546,11 @@ function App() {
           setChatCount={setChatCount}
           onRegister={handleRegister}
           onSubscribe={handleStartCheckout}
-          onClose={() => setIsChatOpen(false)}
+          onClose={() => { setIsChatOpen(false); setChatInitialQuestion(undefined); }}
           result={activeResult}
           opponentName={mode === 'match' ? oppName : undefined}
+          initialQuestion={chatInitialQuestion}
+          hideDailyScore={dailyScoreHidden}
         />
       )}
 
@@ -2527,6 +2562,7 @@ function App() {
           myName={myName}
           opponentName={mode === 'match' ? oppName : undefined}
           hasOpponent={mode === 'match'}
+          hideDailyScore={dailyScoreHidden}
           shareUrl={generateShareUrl()}
           onClose={() => setShowShareCard(false)}
         />
