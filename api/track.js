@@ -1,9 +1,11 @@
 import { getDb, getAdminAuth } from './_lib/firestore.js';
 import { ATTRIBUTION, BOT_RE, METRICS, jstDate, normalizeLanding, normalizeSource, recordEvent } from './_lib/analytics.js';
+import { handleInquiry } from './_lib/inquiry.js';
 
 // Receives the site's own counters: a visit (once per browser session), a fortune (each time the form is submitted)
 // and a sign-up (once per new account). Counts only; no names, birth dates or emails are sent here.
 // A sign-up must carry the new account's sign-in token, so sign-up counts cannot be forged from outside.
+// The contact form (type 'inquiry') is handled here too, so it needs no serverless function of its own: _lib/inquiry.js
 const SIGNUP_WINDOW_MS = 48 * 3600 * 1000;
 
 const parseBody = (body) => {
@@ -20,6 +22,7 @@ export default async function handler(req, res, deps = {}) {
 
   const body = parseBody(req.body);
   const type = String(body.type || '');
+  if (type === 'inquiry') return handleInquiry(req, res, body, { getDb, getAdminAuth, ...deps });
   if (!METRICS[type]) return res.status(400).json({ status: 'error', message: 'Unknown type' });
   const source = normalizeSource(body.source);
   const landing = normalizeLanding(body.landing);
