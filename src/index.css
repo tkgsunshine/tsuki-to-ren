@@ -682,6 +682,11 @@ body.chat-keyboard-open .navbar-container {
   display: none !important;
 }
 
+/* キーボード表示中は「よくあるお悩み」を隠して、会話が見える高さを残す */
+body.chat-keyboard-open .chat-options-container {
+  display: none;
+}
+
 body.chat-keyboard-open .chat-input-area,
 body.chat-keyboard-open .chat-partner-picker {
   padding-bottom: 0.85rem;

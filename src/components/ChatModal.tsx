@@ -73,6 +73,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const [showRegisterOverlay, setShowRegisterOverlay] = useState(false);
   const [showSubscribeOverlay, setShowSubscribeOverlay] = useState(false);
   const [emailSentChat, setEmailSentChat] = useState(false);
+  // 一時的な計測表示（プレビューのみ）。iPhoneのキーボード表示中に入力欄が切れる原因を調べるため
+  const [vvDebug, setVvDebug] = useState('');
+  const showVvDebug = typeof window !== 'undefined' && !window.location.hostname.endsWith('tsuki-to-ren.com');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const initialQuestionSentRef = useRef(false);
 
@@ -163,6 +166,13 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       root.style.setProperty('--chat-vv-height', `${vv.height}px`);
       // 見えている高さが画面より大きく縮んでいればキーボードが出ている
       document.body.classList.toggle('chat-keyboard-open', root.clientHeight - vv.height > 120);
+      if (showVvDebug) {
+        requestAnimationFrame(() => {
+          const input = document.querySelector('.chat-input-area')?.getBoundingClientRect();
+          const overlay = document.querySelector('.chat-overlay')?.getBoundingClientRect();
+          setVvDebug(`vv ${Math.round(vv.offsetTop)}+${Math.round(vv.height)} inner ${window.innerHeight} client ${root.clientHeight} screen ${window.screen.height} scrollY ${Math.round(window.scrollY)} overlay ${overlay ? `${Math.round(overlay.top)}-${Math.round(overlay.bottom)}` : '-'} input ${input ? `${Math.round(input.top)}-${Math.round(input.bottom)}` : '-'} gap ${getComputedStyle(root).getPropertyValue('--pwa-bottom-gap') || '-'}`);
+        });
+      }
     };
     update();
     vv.addEventListener('resize', update);
@@ -634,6 +644,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         )}
 
         {/* Header */}
+        {showVvDebug && vvDebug && (
+          <div style={{ position: 'absolute', top: 'calc(var(--safe-top, 0px) + 2px)', left: 4, right: 4, zIndex: 50, fontSize: '10px', lineHeight: 1.3, color: '#7CFC9A', background: 'rgba(0,0,0,0.75)', padding: '2px 4px', pointerEvents: 'none' }}>{vvDebug}</div>
+        )}
         <div className="chat-header">
           <div className="chat-header-user">
             <div className="chat-header-avatar">
