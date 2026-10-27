@@ -49,7 +49,7 @@ export function buildDailyContent(sub) {
   };
 }
 
-export const subjectFor = (date) => `🌙【月と蓮】本日の恋愛運＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
+export const subjectFor = (date) => `🌙【月と蓮】本日の運勢＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
 
 // Luxury Dark & Gold HTML email template.
 // Images are referenced by absolute production URL (email clients cannot load relative paths).
@@ -153,7 +153,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
-  <title>本日の恋愛運・吉時間 | 月と蓮</title>
+  <title>本日の運勢・吉時間 | 月と蓮</title>
   <!--
     Dark mode: Gmail's apps invert every text and background COLOR in dark mode (dark purple becomes pale lavender,
     light text becomes dark) but never touch background IMAGES. Text over an image therefore turns dark on a still-dark
@@ -186,7 +186,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <tr>
             <td align="center" style="padding: 20px 25px 4px; text-align: center;">
               <span style="display: inline-block; padding: 5px 16px; background-color: #201a36; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 15px; color: ${GOLD}; font-size: 12px; font-weight: bold; letter-spacing: 0.04em;">
-                ${date.year}年${date.month}月${date.day}日（本日）の恋愛運
+                ${date.year}年${date.month}月${date.day}日（本日）の${content.hasOpponent ? '相性' : '運勢'}
               </span>
             </td>
           </tr>
@@ -202,7 +202,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   <td valign="top" style="font-size: 14px; line-height: 1.7; color: #e2e8f0;">
                     <div style="font-size: 11px; font-weight: bold; color: ${accent}; letter-spacing: 0.1em; margin-bottom: 2px;">${charName}より</div>
                     ${esc(name)} 様${oppLabel}<br>
-                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、月と蓮より、本日のあなたの恋愛運をお届けします。
+                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、月と蓮より、${content.hasOpponent ? '本日のお二人の相性' : '本日のあなたの運勢'}をお届けします。
                   </td>
                 </tr>
               </table>
@@ -215,7 +215,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
                 <tr>
                   <td align="center" style="padding: 20px 18px 18px; text-align: center;">
-                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.1em;">本日の恋愛運スコア</div>
+                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.1em;">本日の${content.hasOpponent ? '相性' : '運勢'}スコア</div>
                     <div style="font-size: 52px; line-height: 1.15; font-weight: bold; color: #fef08a; margin: 6px 0 12px;">
                       ${esc(score)}<span style="font-size: 20px; color: ${GOLD};"> 点</span>
                     </div>
@@ -304,7 +304,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding: 16px 20px 24px; text-align: center; border-top: 1px solid #2a2342; font-size: 10px; color: #8b8aa0; line-height: 1.6;">
-              本メールは『月と蓮』にて毎朝の恋愛運通知を有効化された方へお送りしています。<br>
+              本メールは『月と蓮』にて毎朝の運勢通知を有効化された方へお送りしています。<br>
               運営会社: Ill株式会社 | <a href="${esc(stopUrl)}" style="color: #b4b3c8;">通知の停止はこちら</a>
             </td>
           </tr>

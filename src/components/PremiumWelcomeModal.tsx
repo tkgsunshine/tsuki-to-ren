@@ -6,7 +6,7 @@ import { Crown, LineChart, BookHeart, Mail, Users, MessageCircleHeart } from 'lu
 const UNLOCKED = [
   { icon: LineChart, text: '7日間の相性バイオリズムと、月ごと・10年の運勢の流れ' },
   { icon: BookHeart, text: 'お相手の「取扱説明書」と6軸の詳しい相性' },
-  { icon: Mail, text: '毎朝届く「恋愛運とLINEの吉時間」のメール' },
+  { icon: Mail, text: '毎朝届く「運勢とLINEの吉時間」のメール' },
   { icon: Users, text: 'お相手を最大10人まで保存' },
   { icon: MessageCircleHeart, text: '月・蓮への相談が無制限に' }
 ];
