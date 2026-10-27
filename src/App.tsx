@@ -1052,6 +1052,11 @@ function App() {
     ? dailyScoreHidden
     : (chatTarget !== 'pick' && chatTarget !== 'self' && !isSubscribed
       && !(chatTarget.birth === oppBirth && mode === 'match' && flowStep === 'result' && !dailyScoreHidden));
+  // チャットの会話を端末に残すときの、お相手の見分け方。保存したお相手と、いま占った同じお相手は同じ会話になる
+  const chatHistoryPartnerKey = chatTarget === 'pick' ? undefined
+    : chatTarget === 'self' ? 'self'
+    : chatTarget !== null ? `p:${chatTarget.birth}:${chatTarget.name}`
+    : (mode === 'match' && oppBirth ? `p:${oppBirth}:${oppName}` : 'self');
   const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
     && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
 
@@ -2643,6 +2648,7 @@ function App() {
           opponentName={chatOpponentName}
           initialQuestion={chatInitialQuestion}
           hideDailyScore={chatHideDailyScore}
+          historyKey={chatHistoryPartnerKey}
           partnerPicker={chatTarget === 'pick' ? {
             partners: savedPartners,
             unsavedCurrentName: currentUnsaved ? (oppName || 'お相手') : undefined,

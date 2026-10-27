@@ -721,6 +721,33 @@ body.chat-open .result-floating-bar {
   transition: all 0.2s ease;
 }
 
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 端末に残した会話を消して、あいさつからやり直す */
+.chat-new-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d6d1c6;
+  height: 32px;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chat-new-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .chat-close-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
