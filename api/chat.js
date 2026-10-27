@@ -1,4 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { getDb, getAdminAuth } from './_lib/firestore.js';
+import { verifyUser } from './_lib/stripe.js';
+import { LIMIT_MESSAGES, consume, isPremium } from './_lib/chat-limit.js';
 
 // 使用モデルは環境変数 ANTHROPIC_MODEL で切り替え可能（未設定時は claude-opus-5-5）
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
@@ -33,7 +36,8 @@ const MAX_MESSAGE = 500;
 const MAX_DIAGNOSED = 2000;
 const MAX_HISTORY = 10;
 const MAX_HISTORY_TEXT = 500;
-const RATE_LIMIT = 20; // requests per IP per minute (best effort, per serverless instance)
+const MAX_TOKENS = 2000; // a reply is 200〜350 characters; this only caps a runaway answer
+const RATE_LIMIT = 20; // requests per IP per minute (best effort, per serverless instance). Per-account limits: _lib/chat-limit.js
 const hits = new Map();
 
 function isAllowedOrigin(req) {
@@ -57,7 +61,7 @@ function rateLimited(req) {
   return recent.length > RATE_LIMIT;
 }
 
-export default async function handler(req, res) {
+export default async function handler(req, res, deps = {}) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -65,7 +69,19 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'Forbidden' });
   }
   if (rateLimited(req)) {
-    return res.status(429).json({ error: 'Too Many Requests' });
+    console.warn(JSON.stringify({ event: 'chat_limit', reason: 'ip_per_minute' }));
+    return res.status(429).json({ error: 'Too Many Requests', reply: LIMIT_MESSAGES.per_minute });
+  }
+  // Only signed-in accounts may talk to Claude (the app asks guests to register first)
+  let user;
+  try {
+    user = await verifyUser(req, deps.auth || getAdminAuth());
+  } catch (e) {
+    console.error('❌ Chat could not check the sign-in:', e?.message);
+    return res.status(503).json({ error: 'Unavailable' });
+  }
+  if (user.error) {
+    return res.status(401).json({ error: 'login_required' });
   }
 
   const body = req.body && typeof req.body === 'object' ? req.body : {};
@@ -81,13 +97,37 @@ export default async function handler(req, res) {
         text: typeof (h && h.text) === 'string' ? h.text.slice(0, MAX_HISTORY_TEXT) : ''
       }))
     : [];
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = deps.apiKey ?? process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
     return res.status(200).json({ 
       reply: getOfflineResponse(message, character, diagnosedData),
       debug: "API Key is missing from process.env"
     });
+  }
+
+  // Count the call before spending on it. If the counters cannot be read, answer offline rather than call Claude unmetered.
+  let usage;
+  let premium = false;
+  try {
+    const db = deps.db || getDb();
+    premium = await isPremium(db, user.uid, deps.live);
+    usage = await consume(db, user.uid, { premium, now: deps.now });
+  } catch (e) {
+    console.error('❌ Chat usage could not be counted:', e?.message);
+    return res.status(200).json({ reply: getOfflineResponse(message, character, diagnosedData), debug: 'Error' });
+  }
+  const who = user.uid.slice(0, 8); // enough to find the account in Firestore, without logging the email
+  if (!usage.allowed) {
+    if (usage.reason === 'global_daily') {
+      // The whole site's daily ceiling: keep the chat working with the fixed replies until midnight
+      console.error(JSON.stringify({ event: 'chat_limit', reason: 'global_daily', count: usage.globalCount }));
+      return res.status(200).json({ reply: getOfflineResponse(message, character, diagnosedData), debug: 'Error' });
+    }
+    if (usage.reason !== 'free_daily') {
+      console.warn(JSON.stringify({ event: 'chat_limit', reason: usage.reason, uid: who, premium, dayCount: usage.dayCount }));
+    }
+    return res.status(429).json({ error: 'limit', reason: usage.reason, reply: LIMIT_MESSAGES[usage.reason], remainingFree: usage.remainingFree });
   }
 
   try {
@@ -112,10 +152,10 @@ ${personaDescription}
 【相談者の鑑定結果】
 ${diagnosedData || '特になし'}`;
 
-    const client = new Anthropic({ apiKey });
+    const client = deps.anthropic || new Anthropic({ apiKey });
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 4000,
+      max_tokens: MAX_TOKENS,
       system: systemInstruction,
       output_config: { effort: 'low' },
       messages: buildMessages(history, message),
@@ -135,8 +175,15 @@ ${diagnosedData || '特になし'}`;
       throw new Error('Empty response from Claude');
     }
 
+    // One line per call, so Vercel's logs show who is using how much (and what it costs)
+    console.log(JSON.stringify({
+      event: 'chat_usage', uid: who, premium, dayCount: usage.dayCount, siteCount: usage.globalCount,
+      inputTokens: response.usage?.input_tokens, outputTokens: response.usage?.output_tokens
+    }));
+
     return res.status(200).json({
       reply,
+      remainingFree: usage.remainingFree,
       debug: `Success calling ${response.model}`
     });
   } catch (err) {
