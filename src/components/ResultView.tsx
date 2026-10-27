@@ -3342,6 +3342,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
         >
           <MoonMark size={15} style={{ color: '#000000' }} />
           <span>鑑定結果をシェアする</span>
+          <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginLeft: '0.15rem' }}>
+            <span style={{ width: '20px', height: '20px', borderRadius: '9999px', background: '#000000', color: '#ffffff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </span>
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+              <rect width="24" height="24" rx="5.5" fill="#06C755"/>
+              <path d="M12 4.6c-4.6 0-8.3 2.95-8.3 6.6 0 3.25 2.9 5.97 6.85 6.5.27.06.63.18.72.4.08.2.05.52.03.72l-.12.7c-.04.2-.16.8.72.43.88-.37 4.72-2.78 6.44-4.76 1.19-1.3 1.76-2.62 1.76-4 0-3.64-3.7-6.6-8.1-6.6z" fill="#FFFFFF"/>
+              <text x="12" y="12.9" textAnchor="middle" fontSize="4.6" fontWeight="900" fontFamily="Arial, Helvetica, sans-serif" fill="#06C755">LINE</text>
+            </svg>
+          </span>
         </button>
       </div>
       )}
