@@ -1,17 +1,20 @@
 import type { User } from 'firebase/auth';
 
-// The site's own counters for the admin page (/admin): where a visit came from, which page it landed on,
-// how many fortunes were run and how many accounts were created. Sends no names, birth dates or emails.
+// The site's own counters for the admin page (/admin): where a visit came from, which page it landed on, on what device,
+// how many fortunes were run, accounts created, results shared, and how often the premium page and the payment page were opened.
+// Sends no names, birth dates or emails.
 
 interface Attribution {
   source: string;
   landing: string;
+  device?: string;
 }
 
 const SESSION_KEY = 'hasu_attrib';       // this browser session's source / landing page
 const FIRST_KEY = 'hasu_first_attrib';   // the very first visit's, used for the sign-up
 const SIGNUP_KEY = 'hasu_signup_tracked';
 const SIGNUP_WINDOW_MS = 48 * 3600 * 1000;
+const OPT_OUT_KEY = 'hasu_no_track';     // '1' = this browser is the owner's and is left out of the counts, '0' = counted on purpose
 
 const read = (store: Storage | undefined, key: string): Attribution | null => {
   try {
@@ -59,6 +62,7 @@ export const landingFrom = (pathname: string, search: string): string => {
   const path = pathname.replace(/\/+$/, '') || '/';
   const params = new URLSearchParams(search);
   if ((params.get('mb') || params.get('mBirth')) && (path === '/' || path === '/result' || path === '/fortune')) return 'result_link';
+  if (params.get('from') === 'share' && path === '/') return 'share_link'; // /share/card sends visitors to /?from=share
   if (path === '/') return 'home';
   if (path === '/column') return 'column_list';
   const col = /^\/column\/([a-z0-9-]{1,100})$/i.exec(path);
@@ -69,10 +73,34 @@ export const landingFrom = (pathname: string, search: string): string => {
   return 'other';
 };
 
+/** phone / tablet / pc, and whether it was opened as the app added to the home screen (PWA) */
+export const deviceFrom = (ua: string, maxTouchPoints: number, standalone: boolean): string => {
+  const tablet = /iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (/Macintosh/i.test(ua) && maxTouchPoints > 1);
+  const kind = tablet ? 'tablet' : /iPhone|iPod|Android|Mobile/i.test(ua) ? 'mobile' : 'pc';
+  return `${kind}_${standalone ? 'app' : 'browser'}`;
+};
+
+const currentDevice = () => {
+  if (typeof window === 'undefined') return 'unknown';
+  const standalone = window.matchMedia?.('(display-mode: standalone)').matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+  return deviceFrom(navigator.userAgent, navigator.maxTouchPoints || 0, Boolean(standalone));
+};
+
+/** Whether this browser is left out of the counts (the owner's own phone / PC). */
+export const isTrackingOptedOut = () => {
+  try { return local()?.getItem(OPT_OUT_KEY) === '1'; } catch { return false; }
+};
+/** Leaves this browser out of the counts, or counts it again. */
+export const setTrackingOptOut = (on: boolean) => write(local(), OPT_OUT_KEY, on ? '1' : '0');
+/** On the admin page: leaves this browser out unless it was set to be counted on purpose. */
+export const optOutAdminBrowser = () => {
+  try { if (local()?.getItem(OPT_OUT_KEY) === null) setTrackingOptOut(true); } catch {}
+};
+
 const isAutomated = () => typeof navigator !== 'undefined' && (navigator as Navigator & { webdriver?: boolean }).webdriver === true;
 
 const send = (payload: Record<string, string>, token?: string) => {
-  if (isAutomated()) return Promise.resolve();
+  if (isAutomated() || isTrackingOptedOut()) return Promise.resolve();
   return fetch('/api/track', {
     method: 'POST',
     keepalive: true,
@@ -87,17 +115,30 @@ export const initAttribution = () => {
   const attrib: Attribution = {
     source: sourceFrom(window.location.search, document.referrer, window.location.hostname),
     landing: landingFrom(window.location.pathname, window.location.search),
+    device: currentDevice(),
   };
   write(session(), SESSION_KEY, attrib);
   if (!read(local(), FIRST_KEY)) write(local(), FIRST_KEY, attrib);
   void send({ type: 'visit', ...attrib });
 };
 
-const current = (): Attribution => read(session(), SESSION_KEY) || { source: 'direct', landing: 'other' };
+const current = (): Attribution => ({ source: 'direct', landing: 'other', ...read(session(), SESSION_KEY), device: currentDevice() });
 
 /** One fortune run from the input form. */
 export const trackFortune = () => {
   void send({ type: 'fortune', ...current() });
+};
+
+export type ShareChannel = 'x' | 'line' | 'link' | 'image';
+
+/** A result shared: posted to X / LINE, link copied, or card image saved. */
+export const trackShare = (channel: ShareChannel) => {
+  void send({ type: 'share', channel, ...current() });
+};
+
+/** The premium page opened (premium_view), or the button to Stripe's payment page pressed (checkout). */
+export const trackPremiumStep = (type: 'premium_view' | 'checkout') => {
+  void send({ type, ...current() });
 };
 
 /** Counts a newly created account once, with the source of its first visit. */
@@ -109,7 +150,7 @@ export const trackSignupIfNew = async (user: User) => {
   } catch {}
   try {
     const token = await user.getIdToken();
-    await send({ type: 'signup', ...(read(local(), FIRST_KEY) || current()) }, token);
+    await send({ type: 'signup', ...current(), ...read(local(), FIRST_KEY) }, token);
     write(local(), `${SIGNUP_KEY}_${user.uid}`, '1');
   } catch {}
 };

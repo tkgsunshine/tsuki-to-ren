@@ -2,15 +2,27 @@ import { useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, signInWithGoogle, logOutUser } from '../services/firebase';
 import { COLUMNS_DATA } from '../data/columnsData';
+import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../services/analytics';
 
-// Admin page (/admin): visits by source / landing page, fortunes, sign-ups, and the member list.
+// Admin page (/admin): visits, fortunes, sign-ups, shares and premium (page → payment page → paid) per day,
+// broken down by source / landing page / device, and the member list.
 // The data comes from /api/admin, which only answers accounts listed in ADMIN_EMAILS (Vercel env).
 
-type Counts = { visits?: number; fortunes?: number; signups?: number };
+const METRIC_KEYS = ['visits', 'fortunes', 'signups', 'shares', 'premiumViews', 'checkouts', 'premiums'] as const;
+type Metric = typeof METRIC_KEYS[number];
+type Counts = Partial<Record<Metric, number>>;
+type FullCounts = Record<Metric, number>;
+type BreakdownKey = 'bySource' | 'byLanding' | 'byDevice';
 interface DailyDoc extends Counts {
   date: string;
   bySource?: Record<string, Counts>;
   byLanding?: Record<string, Counts>;
+  byDevice?: Record<string, Counts>;
+  byShare?: Record<string, number>;
+}
+interface DayRow extends FullCounts {
+  date: string;
+  aiCalls: number;
 }
 interface Member {
   uid: string;
@@ -23,6 +35,8 @@ interface Member {
   mbti: string | null;
   source: string | null;
   landing: string | null;
+  device: string | null;
+  premium: 'live' | 'test' | null;
 }
 interface ChatDay {
   date: string;
@@ -63,9 +77,16 @@ const SOURCE_LABELS: Record<string, string> = {
   email: 'メール', other: 'その他のサイト',
 };
 const LANDING_LABELS: Record<string, string> = {
-  home: 'トップ', column_list: 'コラム一覧', compat: '16タイプ相性ページ', result_link: '鑑定結果リンク（共有・毎朝メール）',
+  home: 'トップ', share_link: '共有リンク（/share/card）', column_list: 'コラム一覧', compat: '16タイプ相性ページ', result_link: '鑑定結果リンク（共有・毎朝メール）',
   chat: 'チャット', mypage: 'マイページ', other: 'その他',
 };
+const DEVICE_LABELS: Record<string, string> = {
+  mobile_browser: 'スマホ（ブラウザ）', mobile_app: 'スマホ（ホーム画面のアプリ）',
+  tablet_browser: 'タブレット（ブラウザ）', tablet_app: 'タブレット（ホーム画面のアプリ）',
+  pc_browser: 'パソコン（ブラウザ）', pc_app: 'パソコン（アプリ）', unknown: '不明',
+};
+const SHARE_LABELS: Record<string, string> = { x: 'Xに投稿', line: 'LINEで送る', link: 'リンクをコピー', image: '画像で保存', other: 'その他' };
+const deviceLabel = (d: string) => DEVICE_LABELS[d] || d;
 const PROVIDER_LABELS: Record<string, string> = { google: 'Google', x: 'X', email: 'メール' };
 const COLUMN_TITLES = new Map(COLUMNS_DATA.map((c) => [c.slug, c.title]));
 
@@ -84,28 +105,36 @@ const jst = (iso: string | null) => {
   return d.toISOString().slice(0, 16).replace('T', ' ');
 };
 const jstDay = (iso: string | null) => (iso ? jst(iso).slice(0, 10) : '');
+const premiumLabel = (p: Member['premium']) => (p === 'live' ? '有料' : p === 'test' ? 'テスト' : '');
 const pct = (num: number, den: number) => (den ? `${((num / den) * 100).toFixed(1)}%` : '—');
 
-const sumBy = (docs: DailyDoc[], key: 'bySource' | 'byLanding') => {
-  const out = new Map<string, Required<Counts>>();
+const zero = (): FullCounts => ({ visits: 0, fortunes: 0, signups: 0, shares: 0, premiumViews: 0, checkouts: 0, premiums: 0 });
+const addCounts = (a: FullCounts, v: Counts) => {
+  for (const m of METRIC_KEYS) a[m] += v[m] || 0;
+  return a;
+};
+
+const sumBy = (docs: DailyDoc[], key: BreakdownKey) => {
+  const out = new Map<string, FullCounts>();
   for (const d of docs) {
-    for (const [k, v] of Object.entries(d[key] || {})) {
-      const cur = out.get(k) || { visits: 0, fortunes: 0, signups: 0 };
-      cur.visits += v.visits || 0;
-      cur.fortunes += v.fortunes || 0;
-      cur.signups += v.signups || 0;
-      out.set(k, cur);
-    }
+    for (const [k, v] of Object.entries(d[key] || {})) out.set(k, addCounts(out.get(k) || zero(), v));
   }
   return [...out.entries()].sort((a, b) => b[1].visits - a[1].visits || b[1].fortunes - a[1].fortunes);
 };
 
+const sumShares = (docs: DailyDoc[]) => {
+  const out = new Map<string, number>();
+  for (const d of docs) for (const [k, v] of Object.entries(d.byShare || {})) out.set(k, (out.get(k) || 0) + (v || 0));
+  return [...out.entries()].sort((a, b) => b[1] - a[1]);
+};
+
 const toCsv = (rows: Member[]) => {
-  const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', '流入元', '入口ページ'];
+  const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', 'プレミアム', '流入元', '入口ページ', '端末'];
   const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
   const lines = rows.map((m) => [
     jst(m.createdAt), m.email || '', m.name || '', PROVIDER_LABELS[m.provider] || m.provider, jst(m.lastSignInAt),
-    m.dailyMail ? 'ON' : 'OFF', m.mbti || '', m.source ? sourceLabel(m.source) : '', m.landing ? landingLabel(m.landing) : '',
+    m.dailyMail ? 'ON' : 'OFF', m.mbti || '', premiumLabel(m.premium), m.source ? sourceLabel(m.source) : '', m.landing ? landingLabel(m.landing) : '',
+    m.device ? deviceLabel(m.device) : '',
   ].map(esc).join(','));
   return '﻿' + [head.map(esc).join(','), ...lines].join('\n');
 };
@@ -225,10 +254,11 @@ function Tile({ label, value, sub }: { label: string; value: string | number; su
   );
 }
 
-function BreakdownTable({ title, rows, label }: { title: string; rows: [string, Required<Counts>][]; label: (k: string) => string }) {
+function BreakdownTable({ title, rows, label, note }: { title: string; rows: [string, FullCounts][]; label: (k: string) => string; note?: string }) {
   return (
     <div style={c.card}>
       <h2 style={c.h2}>{title}</h2>
+      {note && <div style={{ ...c.muted, marginTop: -6, marginBottom: 8 }}>{note}</div>}
       {rows.length === 0 ? (
         <div style={c.muted}>まだデータがありません</div>
       ) : (
@@ -241,16 +271,22 @@ function BreakdownTable({ title, rows, label }: { title: string; rows: [string, 
                 <th style={{ ...c.th, ...c.num }}>鑑定</th>
                 <th style={{ ...c.th, ...c.num }}>鑑定/訪問</th>
                 <th style={{ ...c.th, ...c.num }}>会員登録</th>
+                <th style={{ ...c.th, ...c.num }}>共有</th>
+                <th style={{ ...c.th, ...c.num }}>プレミアム案内</th>
+                <th style={{ ...c.th, ...c.num }}>課金</th>
               </tr>
             </thead>
             <tbody>
               {rows.map(([k, v]) => (
                 <tr key={k}>
-                  <td style={c.td}>{label(k)}</td>
+                  <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{label(k)}</td>
                   <td style={{ ...c.td, ...c.num }}>{v.visits}</td>
                   <td style={{ ...c.td, ...c.num }}>{v.fortunes}</td>
                   <td style={{ ...c.td, ...c.num }}>{pct(v.fortunes, v.visits)}</td>
                   <td style={{ ...c.td, ...c.num }}>{v.signups}</td>
+                  <td style={{ ...c.td, ...c.num }}>{v.shares}</td>
+                  <td style={{ ...c.td, ...c.num }}>{v.premiumViews}</td>
+                  <td style={{ ...c.td, ...c.num }}>{v.premiums}</td>
                 </tr>
               ))}
             </tbody>
@@ -261,7 +297,7 @@ function BreakdownTable({ title, rows, label }: { title: string; rows: [string, 
   );
 }
 
-function DailyChart({ days }: { days: { date: string; visits: number; fortunes: number; signups: number }[] }) {
+function DailyChart({ days }: { days: DayRow[] }) {
   const max = Math.max(1, ...days.map((d) => d.visits), ...days.map((d) => d.fortunes));
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -285,6 +321,97 @@ function DailyChart({ days }: { days: { date: string; visits: number; fortunes: 
   );
 }
 
+// Visit → fortune → sign-up → premium page → payment page → paid, over the selected period
+function Funnel({ t }: { t: FullCounts }) {
+  const steps: [string, number][] = [
+    ['訪問', t.visits], ['鑑定', t.fortunes], ['会員登録', t.signups],
+    ['プレミアム案内を開いた', t.premiumViews], ['支払い画面へ進んだ', t.checkouts], ['課金', t.premiums],
+  ];
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>訪問から課金までの流れ</h2>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={c.table}>
+          <thead>
+            <tr>
+              <th style={c.th}></th>
+              <th style={{ ...c.th, ...c.num }}>数</th>
+              <th style={{ ...c.th, ...c.num }}>前の段から</th>
+              <th style={{ ...c.th, ...c.num }}>訪問から</th>
+            </tr>
+          </thead>
+          <tbody>
+            {steps.map(([label, n], i) => (
+              <tr key={label}>
+                <td style={c.td}>{label}</td>
+                <td style={{ ...c.td, ...c.num }}>{n}</td>
+                <td style={{ ...c.td, ...c.num }}>{i ? pct(n, steps[i - 1][1]) : ''}</td>
+                <td style={{ ...c.td, ...c.num }}>{i ? pct(n, t.visits) : ''}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        別々に数えた回数どうしの割合です（同じ人を追いかけてはいません）。鑑定は1人が何度もできるので、100%を超えることがあります。
+      </div>
+    </div>
+  );
+}
+
+function DailyTable({ days }: { days: DayRow[] }) {
+  const cols: [keyof DayRow, string][] = [
+    ['visits', '訪問'], ['fortunes', '鑑定'], ['signups', '会員登録'], ['shares', '共有'],
+    ['premiumViews', 'プレミアム案内'], ['checkouts', '支払い画面'], ['premiums', '課金'], ['aiCalls', 'AIチャット'],
+  ];
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>日ごとの数字</h2>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ ...c.table, minWidth: 640 }}>
+          <thead>
+            <tr>
+              <th style={c.th}>日付</th>
+              {cols.map(([k, label]) => <th key={k} style={{ ...c.th, ...c.num }}>{label}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {[...days].reverse().map((d) => (
+              <tr key={d.date}>
+                <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{d.date}</td>
+                {cols.map(([k]) => <td key={k} style={{ ...c.td, ...c.num }}>{d[k]}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function ShareTable({ rows, total }: { rows: [string, number][]; total: number }) {
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>共有の方法（合計 {total} 回）</h2>
+      {rows.length === 0 ? (
+        <div style={c.muted}>まだデータがありません</div>
+      ) : (
+        <table style={c.table}>
+          <tbody>
+            {rows.map(([k, n]) => (
+              <tr key={k}>
+                <td style={c.td}>{SHARE_LABELS[k] || k}</td>
+                <td style={{ ...c.td, ...c.num }}>{n}</td>
+                <td style={{ ...c.td, ...c.num }}>{pct(n, total)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
 export default function AdminView() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [days, setDays] = useState(30);
@@ -292,6 +419,7 @@ export default function AdminView() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
+  const [optedOut, setOptedOut] = useState(isTrackingOptedOut);
 
   useEffect(() => {
     document.title = '管理画面 | 月と蓮';
@@ -314,7 +442,13 @@ export default function AdminView() {
         if (!r.ok) throw new Error(body.message || `読み込みに失敗しました（${r.status}）`);
         return body as AdminData;
       })
-      .then((d) => { if (!cancelled) setData(d); })
+      .then((d) => {
+        if (cancelled) return;
+        setData(d);
+        // The owner's own browsers are left out of the counts once they have opened this page
+        optOutAdminBrowser();
+        setOptedOut(isTrackingOptedOut());
+      })
       .catch((e) => { if (!cancelled) { setData(null); setError(e.message); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -323,19 +457,16 @@ export default function AdminView() {
   const daily = useMemo(() => {
     if (!data) return [];
     const byDate = new Map(data.daily.map((d) => [d.date, d]));
-    const out: { date: string; visits: number; fortunes: number; signups: number }[] = [];
+    const chat = new Map((data.chat || []).map((d) => [d.date, d.aiCalls]));
+    const out: DayRow[] = [];
     for (let t = Date.parse(`${data.from}T00:00:00Z`); t <= Date.parse(`${data.to}T00:00:00Z`); t += 86400000) {
       const date = new Date(t).toISOString().slice(0, 10);
-      const d = byDate.get(date);
-      out.push({ date, visits: d?.visits || 0, fortunes: d?.fortunes || 0, signups: d?.signups || 0 });
+      out.push({ date, ...addCounts(zero(), byDate.get(date) || {}), aiCalls: chat.get(date) || 0 });
     }
     return out;
   }, [data]);
 
-  const totals = useMemo(() => daily.reduce(
-    (a, d) => ({ visits: a.visits + d.visits, fortunes: a.fortunes + d.fortunes, signups: a.signups + d.signups }),
-    { visits: 0, fortunes: 0, signups: 0 },
-  ), [daily]);
+  const totals = useMemo(() => daily.reduce((a, d) => addCounts(a, d), zero()), [daily]);
 
   const members = useMemo(() => data?.users || [], [data]);
 
@@ -357,6 +488,7 @@ export default function AdminView() {
   };
   const newMembers = useMemo(() => (data ? members.filter((m) => jstDay(m.createdAt) >= data.from).length : 0), [data, members]);
   const mailOn = members.filter((m) => m.dailyMail).length;
+  const paying = members.filter((m) => m.premium === 'live').length;
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return members;
@@ -401,12 +533,20 @@ export default function AdminView() {
       <div style={c.wrap}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <h1 style={{ fontSize: 18, fontWeight: 700, marginRight: 'auto' }}>月と蓮 管理画面</h1>
-          {[7, 30, 90].map((n) => (
-            <button key={n} style={{ ...c.btn, ...(days === n ? c.btnOn : {}) }} onClick={() => setDays(n)}>{n}日</button>
+          {[1, 7, 30, 90].map((n) => (
+            <button key={n} style={{ ...c.btn, ...(days === n ? c.btnOn : {}) }} onClick={() => setDays(n)}>{n === 1 ? '今日' : `${n}日`}</button>
           ))}
           <button style={c.btn} onClick={() => { void logOutUser().then(() => setData(null)); }}>ログアウト</button>
         </div>
         <div style={{ ...c.muted, marginBottom: 12 }}>ログイン中: {user.email}　{data && `期間 ${data.from} 〜 ${data.to}（日本時間）`}</div>
+        {data && (
+          <div style={{ ...c.muted, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span>{optedOut ? 'このブラウザでの操作は集計に入りません。' : 'このブラウザでの操作も集計に入っています。'}</span>
+            <button style={c.btn} onClick={() => { setTrackingOptOut(!optedOut); setOptedOut(!optedOut); }}>
+              {optedOut ? '集計に入れる' : '集計から外す'}
+            </button>
+          </div>
+        )}
 
         {error && <div style={{ ...c.card, borderColor: '#7f1d1d', color: '#fca5a5' }}>{error}</div>}
         {loading && !data && <div style={c.muted}>読み込み中…</div>}
@@ -417,20 +557,33 @@ export default function AdminView() {
               <Tile label="訪問" value={totals.visits} sub="ブラウザのセッション単位" />
               <Tile label="鑑定" value={totals.fortunes} sub={`訪問あたり ${pct(totals.fortunes, totals.visits)}`} />
               <Tile label="会員登録（期間内）" value={newMembers} sub={`計測分 ${totals.signups} 件`} />
+              <Tile label="共有" value={totals.shares} sub="X・LINE・リンク・画像" />
+              <Tile label="課金（期間内）" value={totals.premiums} sub={`支払い画面へ ${totals.checkouts} 回`} />
               <Tile label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
+              <Tile label="有料会員" value={paying} sub={`会員の ${pct(paying, members.length)}`} />
             </div>
 
-            <div style={c.card}>
-              <h2 style={c.h2}>日ごとの訪問と鑑定</h2>
-              <DailyChart days={daily} />
-            </div>
+            {days > 1 && (
+              <div style={c.card}>
+                <h2 style={c.h2}>日ごとの訪問と鑑定</h2>
+                <DailyChart days={daily} />
+              </div>
+            )}
+
+            <DailyTable days={daily} />
+
+            <Funnel t={totals} />
 
             <Inquiries items={data.inquiries || []} members={members} onStatus={setInquiryStatus} />
 
             <ChatCost days={data.chat || []} />
 
-            <BreakdownTable title="流入元" rows={sumBy(data.daily, 'bySource')} label={sourceLabel} />
+            <BreakdownTable title="流入元" rows={sumBy(data.daily, 'bySource')} label={sourceLabel}
+              note="訪問はそのときの流入元、会員登録と課金はその人が最初に来たときの流入元で数えています" />
             <BreakdownTable title="入口ページ（最初に開いたページ）" rows={sumBy(data.daily, 'byLanding')} label={landingLabel} />
+            <BreakdownTable title="端末" rows={sumBy(data.daily, 'byDevice')} label={deviceLabel}
+              note="「ホーム画面のアプリ」は、ホーム画面に追加した月と蓮から開いたもの" />
+            <ShareTable rows={sumShares(data.daily)} total={totals.shares} />
 
             <div style={c.card}>
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -441,7 +594,7 @@ export default function AdminView() {
               </div>
               {data.truncated && <div style={{ ...c.muted, marginBottom: 8 }}>人数が多いため、先頭の20,000人だけを表示しています。</div>}
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ ...c.table, minWidth: 920 }}>
+                <table style={{ ...c.table, minWidth: 1000 }}>
                   <thead>
                     <tr>
                       <th style={c.th}>登録日時</th>
@@ -451,7 +604,8 @@ export default function AdminView() {
                       <th style={c.th}>最終ログイン</th>
                       <th style={c.th}>毎朝メール</th>
                       <th style={c.th}>タイプ</th>
-                      <th style={c.th}>流入元 / 入口</th>
+                      <th style={c.th}>プレミアム</th>
+                      <th style={c.th}>流入元 / 入口 / 端末</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -464,8 +618,9 @@ export default function AdminView() {
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{jst(m.lastSignInAt)}</td>
                         <td style={c.td}>{m.dailyMail ? 'ON' : '—'}</td>
                         <td style={c.td}>{m.mbti || '—'}</td>
+                        <td style={{ ...c.td, ...(m.premium === 'live' ? { color: '#e2c074', fontWeight: 700 } : c.muted) }}>{premiumLabel(m.premium) || '—'}</td>
                         <td style={{ ...c.td, ...c.muted, minWidth: 240 }}>
-                          {m.source ? `${sourceLabel(m.source)} / ${landingLabel(m.landing || 'other')}` : '計測前'}
+                          {m.source ? [sourceLabel(m.source), landingLabel(m.landing || 'other'), ...(m.device ? [deviceLabel(m.device)] : [])].join(' / ') : '計測前'}
                         </td>
                       </tr>
                     ))}
@@ -477,6 +632,9 @@ export default function AdminView() {
             <p style={c.muted}>
               訪問・鑑定・流入元は、この計測を入れた日から数えています（それより前の分はありません）。会員リストは、これまでに登録した全員です。
               鑑定は入力フォームから鑑定した回数で、共有リンクや毎朝メールのリンクから結果を開いた回数は含みません。
+              共有・プレミアム案内・支払い画面・課金・端末・共有リンクの入口は、今回の計測を追加した日（2026年10月下旬）から数えています。
+              課金はStripeの本番決済だけで、テスト決済は数えません。AIチャットは、AIが答えた回数です。
+              この管理画面を開いたブラウザは、自動で集計から外れます（外す前の分は残ります）。iPhoneのホーム画面に追加したアプリはSafariとは別扱いなので、アプリでも一度この画面を開いてください。
             </p>
           </>
         )}

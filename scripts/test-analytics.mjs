@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeSource, normalizeLanding, jstDate } from '../api/_lib/analytics.js';
+import { normalizeSource, normalizeLanding, normalizeDevice, jstDate, countPremium } from '../api/_lib/analytics.js';
 import track from '../api/track.js';
 import admin, { authorizeAdmin, parseAdminEmails } from '../api/admin.js';
-import { sourceFrom, landingFrom } from '../src/services/analytics.ts';
+import { sourceFrom, landingFrom, deviceFrom } from '../src/services/analytics.ts';
 
 const mockRes = () => {
   const r = { code: 0, body: null, headers: {} };
@@ -15,12 +15,13 @@ const mockRes = () => {
 };
 
 // Firestore stand-in that records set()/create() calls
-const mockDb = (existing = new Set()) => {
+const mockDb = (existing = new Set(), docs = {}) => {
   const writes = [];
   return {
     writes,
     collection: (name) => ({
       doc: (id) => ({
+        get: async () => ({ data: () => docs[`${name}/${id}`] }),
         set: async (data, opts) => { writes.push({ name, id, data, opts }); },
         create: async (data) => {
           if (existing.has(`${name}/${id}`)) { const e = new Error('6 ALREADY_EXISTS: already exists'); e.code = 6; throw e; }
@@ -55,6 +56,42 @@ test('client source / landing detection', () => {
   assert.equal(landingFrom('/', '?mb=20000101&c=t'), 'result_link');
   assert.equal(landingFrom('/compatibility/infp-entj', ''), 'compat');
   assert.equal(landingFrom('/', ''), 'home');
+  assert.equal(landingFrom('/', '?from=share&sn=a'), 'share_link');
+  assert.equal(deviceFrom('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile', 5, true), 'mobile_app');
+  assert.equal(deviceFrom('Mozilla/5.0 (Linux; Android 14; Pixel 8) Mobile', 5, false), 'mobile_browser');
+  assert.equal(deviceFrom('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 5, false), 'tablet_browser'); // iPadOS reports a Mac
+  assert.equal(deviceFrom('Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 0, false), 'pc_browser');
+  assert.equal(normalizeDevice('mobile_app'), 'mobile_app');
+  assert.equal(normalizeDevice('evil.key'), 'unknown');
+});
+
+test('track: a share is counted with its channel and device; premium cannot be sent from outside', async () => {
+  const db = mockDb();
+  let res = mockRes();
+  await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'share', channel: 'x', source: 'x', landing: 'share_link', device: 'mobile_app' } }, res, { db });
+  assert.equal(res.code, 204);
+  const data = db.writes[0].data;
+  assert.ok(data.shares);
+  assert.deepEqual(Object.keys(data.byShare), ['x']);
+  assert.deepEqual(Object.keys(data.byDevice), ['mobile_app']);
+  assert.deepEqual(Object.keys(data.byLanding), ['share_link']);
+
+  res = mockRes();
+  await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'premium', source: 'x' } }, res, { db });
+  assert.equal(res.code, 400);
+  assert.equal(db.writes.length, 1);
+});
+
+test('countPremium: counted once per live subscription, under the member\'s first source', async () => {
+  const db = mockDb(new Set(), { 'memberAttribution/u1': { source: 'x', landing: 'share_link', device: 'mobile_browser' } });
+  assert.equal(await countPremium(db, { uid: 'u1', subscriptionId: 'sub_1', livemode: true }), true);
+  assert.equal(await countPremium(db, { uid: 'u1', subscriptionId: 'sub_1', livemode: true }), false, 'a retried webhook is not counted again');
+  assert.equal(await countPremium(db, { uid: 'u2', subscriptionId: 'sub_2', livemode: false }), false, 'test-mode payments are not counted');
+  const daily = db.writes.filter((w) => w.name === 'analyticsDaily');
+  assert.equal(daily.length, 1);
+  assert.ok(daily[0].data.premiums);
+  assert.deepEqual(Object.keys(daily[0].data.bySource), ['x']);
+  assert.deepEqual(Object.keys(daily[0].data.byDevice), ['mobile_browser']);
 });
 
 test('track: visit increments the day document; bots and bad types are ignored', async () => {

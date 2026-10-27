@@ -4,7 +4,7 @@ import { ATTRIBUTION, DAILY, jstDate } from './_lib/analytics.js';
 import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
 
-// Data for the admin page (/admin): daily counters, and the member list.
+// Data for the admin page (/admin): daily counters, and the member list (with each member's premium state).
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
 // POST { action: 'inquiryStatus', id, status } marks a contact-form message as handled (or back to new).
 const MAX_USER_PAGES = 20; // 20 x 1000 accounts
@@ -61,16 +61,18 @@ export default async function handler(req, res, deps = {}) {
     const days = Math.min(Math.max(parseInt(req.query?.days, 10) || 30, 1), 180);
     const from = jstDate(new Date(Date.now() - (days - 1) * 86400 * 1000));
 
-    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap] = await Promise.all([
+    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection('subscriptions').get(),
       db.collection(ATTRIBUTION).get(),
       db.collection(USAGE_DAILY).where(FieldPath.documentId(), '>=', from).get(),
-      db.collection(INQUIRIES).orderBy('createdAt', 'desc').limit(MAX_INQUIRIES).get()
+      db.collection(INQUIRIES).orderBy('createdAt', 'desc').limit(MAX_INQUIRIES).get(),
+      db.collection('premium').get() // _lib/stripe.js PREMIUM (not imported, to keep the Stripe library out of this function)
     ]);
 
     const subs = new Map(subsSnap.docs.map((d) => [d.id, d.data()]));
     const attrib = new Map(attribSnap.docs.map((d) => [d.id, d.data()]));
+    const premium = new Map(premiumSnap.docs.map((d) => [d.id, d.data()]));
 
     const users = [];
     let pageToken;
@@ -79,6 +81,7 @@ export default async function handler(req, res, deps = {}) {
       for (const u of page.users) {
         const sub = subs.get(u.uid);
         const at = attrib.get(u.uid);
+        const p = premium.get(u.uid);
         users.push({
           uid: u.uid,
           email: u.email || (u.providerData || []).find((p) => p.email)?.email || null,
@@ -89,7 +92,10 @@ export default async function handler(req, res, deps = {}) {
           dailyMail: sub ? sub.enabled === true : false,
           mbti: sub?.myMbti && sub.myMbti !== 'UNKNOWN' ? sub.myMbti : null,
           source: at?.source || null,
-          landing: at?.landing || null
+          landing: at?.landing || null,
+          device: at?.device || null,
+          // 'live' = paying now, 'test' = a Stripe test-mode membership (not real money)
+          premium: p?.active ? (p.livemode ? 'live' : 'test') : null
         });
       }
       pageToken = page.pageToken;
