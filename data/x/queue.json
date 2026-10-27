@@ -4820,5 +4820,124 @@
       "expression": "moonlit"
     },
     "image": "data/x/cards/2026-10-28-night.png"
+  },
+  {
+    "id": "2026-10-29-chara-1",
+    "date": "2026-10-29",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月29日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：壬犬（海王、嵐使い×いぬ）\n【本命星】：九紫火星\n\n-結果-\n【今日の点数】：86点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_dog_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:23.967Z"
+  },
+  {
+    "id": "2026-10-29-chara-1-reply",
+    "date": "2026-10-29",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【月からのひとこと】\n\n好きな人の前だと、いつもの自分を隠してない？今日は、海をかける犬みたいに、はしゃぐあなたのままで会いに行っていい日だよ。\n人が惹かれるのは、完璧な顔じゃなくて、楽しそうな顔。\n-月-",
+    "replyTo": "2026-10-29-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:23.967Z"
+  },
+  {
+    "id": "2026-10-29-chara-1-reply2",
+    "date": "2026-10-29",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n20時〜22時に、気になる人へ「今日これ見て笑った」と、出かけた先の写真を1枚だけ送ってみて。\n楽しい気分は、文字より写真のほうがまっすぐ届くの。\n今日のあなたなら、それだけで十分だよ。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-29-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:23.967Z"
+  },
+  {
+    "id": "2026-10-29-am",
+    "date": "2026-10-29",
+    "slot": "am",
+    "kind": "value",
+    "text": "送信ボタンの前で、指が止まっちゃう人へ。\n迷う気持ち、すごくわかるよ。\n・16タイプ（MBTI）別のおすすめ時間帯\n・返信しやすくなる一言の例文\n・送る前に避けたいNGメッセージ\n-月-\n▼好きな人にLINEを送るタイミングと言葉選び\nhttps://www.tsuki-to-ren.com/column/mbti-16type-line-approach-timing?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "mbti-16type-line-approach-timing",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:47.095Z"
+  },
+  {
+    "id": "2026-10-29-noon",
+    "date": "2026-10-29",
+    "slot": "noon",
+    "kind": "value",
+    "text": "好きな人に嫉妬したとき、やっていいこと・やめること\n〇 30分スマホを置く／モヤモヤをメモに3行／ひと晩おく\n× 夜中に長文を送る／「誰といたの？」と聞く／いいねを数える\n理由：嫉妬は夜ほどふくらみやすいから、朝の言葉のほうがやさしいの。\nそのまま使える一言は、リプ欄に\n-月-",
+    "format": "howto",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:47.095Z"
+  },
+  {
+    "id": "2026-10-29-noon-reply",
+    "date": "2026-10-29",
+    "slot": "noon",
+    "kind": "value",
+    "text": "【一言例】\n「さっきの、ちょっと気になっちゃった。今度話せる？」\n「最近会えてなくて、さみしかったんだ」\n使うのは、ひと晩おいて落ち着いた朝に。\n責めずに気持ちだけ渡すと、相手も身構えにくいの。\n嫉妬は、隠すものじゃなくて、やさしく渡すもの。\n-月-",
+    "replyTo": "2026-10-29-noon",
+    "format": "howto_reply",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:47.095Z"
+  },
+  {
+    "id": "2026-10-29-pm",
+    "date": "2026-10-29",
+    "slot": "pm",
+    "kind": "value",
+    "text": "欠けていく月も、ちゃんと月のまま。\n今日の月は、握っていたものを少しゆるめる番。\n恋で手に力が入りすぎたときも、同じなのかもしれない。\n今夜は、そのぎゅっとした指をひとつずつひらいてみて。\n空いた手のほうが、届いたものを受けとめやすいよ。\n-月-",
+    "format": "maxim_spirit",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:47.095Z"
+  },
+  {
+    "id": "2026-10-29-evening",
+    "date": "2026-10-29",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ENFPの恋愛】\n好きになると：会うたび新しい遊びを提案する\n愛情表現：「これ見て！」とすぐ共有する\n惹かれる人：自分の話をおもしろがってくれる人\nつまずき：熱が急に冷めたと誤解される\nコツ：静かな日も「好き」を言葉にする\nあなたのまわりのENFPは、当てはまる？\n-月-",
+    "format": "mbti_love",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:47.095Z"
+  },
+  {
+    "id": "2026-10-29-evening-reply",
+    "date": "2026-10-29",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【ENFPの恋愛】詳細\n楽しいことは、まず好きな人に送りたい人。\n返事が短いと不安になりがちだから、送る前にひと呼吸してね。\nときめきは、追いかけるものじゃなくて育てるもの。\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-29-evening",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:47.095Z"
+  },
+  {
+    "id": "2026-10-29-night",
+    "date": "2026-10-29",
+    "slot": "night",
+    "kind": "value",
+    "text": "好きがバレそうな時、16タイプ（MBTI）別\nENTJ：話題を強引に変えて、会議みたいに仕切りだす\nINFP：顔に出たのに気づいて、帰り道ずっと反省会をする\nENTP：「逆に好きって言ったら？」と冗談にして逃げる\nESTJ：「別に普通」と言いつつ、次の予定だけ押さえる\nあなたは？友達にも見せてね\n-月-",
+    "format": "mbti_habit",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-27T17:54:47.095Z"
   }
 ]
