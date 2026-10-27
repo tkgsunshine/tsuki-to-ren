@@ -32,6 +32,7 @@ import { trackFortune } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
+import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
 import type { PartnerLock } from './components/ResultView';
@@ -201,6 +202,16 @@ function App() {
     }
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
+  // 共有リンクから来た人に見せる、共有した人の結果の要約（URLは読んだあと消す）
+  const [sharedTeaser, setSharedTeaser] = useState(() => readSharedTeaser(window.location.search));
+  useEffect(() => {
+    if (!sharedTeaser) return;
+    try {
+      window.history.replaceState(window.history.state, '', window.location.pathname);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
   
   // Characters
   const [selectedCharacter, setSelectedCharacter] = useState<'ren' | 'tsuki'>('tsuki');
@@ -569,26 +580,10 @@ function App() {
       params.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
     }
 
+    // 共有リンクは誰でも見られるので、名前（ニックネーム）と点数だけを入れ、生年月日などは入れない（開いた人には api/share.js が要約を見せる）
     if (myName && myName !== 'あなた') params.set('mn', myName.slice(0, 8));
-    if (myBirth) params.set('mb', myBirth.replace(/-/g, ''));
-    if (myMbti) params.set('mm', myMbti);
-    params.set('mg', myGender === 'male' ? 'm' : 'f');
-
     if (mode === 'match') {
       if (oppName && oppName !== 'お相手') params.set('on', oppName.slice(0, 8));
-      if (oppBirth) params.set('ob', oppBirth.replace(/-/g, ''));
-      if (oppMbti) params.set('om', oppMbti);
-      params.set('og', oppGender === 'male' ? 'm' : 'f');
-
-      const relMap: Record<string, string> = {
-        '片思い中': 'k',
-        '両思い・交際中': 'r',
-        '交際中': 'r',
-        '復縁したい': 'f',
-        '結婚・夫婦': 'm',
-        '複雑愛・秘密の恋': 'c'
-      };
-      params.set('r', relMap[relationship] || 'k');
     } else {
       params.set('mode', 's');
     }
@@ -1095,6 +1090,7 @@ function App() {
             {flowStep === 'input' && (
               <div className="home-input-flow" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', flexShrink: 0 }}>
                 <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />
+                {sharedTeaser && <SharedResultBanner teaser={sharedTeaser} onClose={() => setSharedTeaser(null)} />}
                 <UnifiedInputView
                   selectedCharacter={selectedCharacter}
                   setSelectedCharacter={setSelectedCharacter}
