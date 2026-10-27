@@ -1,13 +1,22 @@
 import crypto from 'node:crypto';
 import { getDb } from './firestore.js';
+import { clientIp } from './inquiry.js';
 
 // Saved results behind share links (/share/card?r=<id>), so the person who opens a link sees the usual result screen.
 // The link has no birth dates, so the result cannot be recalculated there: the sharer's app sends the finished result
 // (both characters' versions) when the share card opens, and it is kept here as it was on that day.
 // Nothing that holds a birth date is saved: the result objects carry no birth dates, and keys named like one are dropped anyway.
 // Served by api/share.js (no serverless function of its own): POST /api/share saves, GET /api/share?id=… reads.
+//   sharedResults/{id}            { json, date, createdAt, expireAt }  expireAt: Firestore's TTL policy deletes it after 90 days
+//   sharedResultLimits/{day_key}  { count, day }  new saves per IP per JST day, and the whole site's total under day_all
+// Saving needs no sign-in (sharing does not), so per-sender and site-wide daily caps keep it from being flooded.
+// Over a cap the app just shares the link without a saved result.
 export const SHARED_RESULTS = 'sharedResults';
+export const SHARED_LIMITS = 'sharedResultLimits';
 export const MAX_BYTES = 400 * 1024;
+export const KEEP_DAYS = 90;
+export const PER_SENDER_DAILY = 30;
+export const SITE_DAILY = 2000;
 const ID_RE = /^[A-Za-z0-9_-]{12}$/;
 
 const parseBody = (body) => {
@@ -51,6 +60,26 @@ export function cleanShared(body) {
 // The same result shared twice gets the same id, so opening the share card again does not add a copy
 export const sharedId = (data) => crypto.createHash('sha256').update(JSON.stringify(data)).digest('base64url').slice(0, 12);
 
+const hashIp = (ip) => crypto.createHash('sha256').update(`share:${ip}`).digest('hex').slice(0, 24);
+
+// Counts a new save for the sender and for the whole site in one transaction. Returns false when a cap is reached.
+export async function consumeShare(db, senderKey, now) {
+  const day = jstDate(now);
+  const senderRef = db.collection(SHARED_LIMITS).doc(`${day}_${senderKey}`);
+  const siteRef = db.collection(SHARED_LIMITS).doc(`${day}_all`);
+  return db.runTransaction(async (tx) => {
+    const [s, all] = await Promise.all([tx.get(senderRef), tx.get(siteRef)]);
+    const mine = s.data()?.count || 0;
+    const total = all.data()?.count || 0;
+    if (mine >= PER_SENDER_DAILY || total >= SITE_DAILY) return false;
+    tx.set(senderRef, { count: mine + 1, day });
+    tx.set(siteRef, { count: total + 1, day });
+    return true;
+  });
+}
+
+const millis = (t) => (t instanceof Date ? t.getTime() : typeof t?.toMillis === 'function' ? t.toMillis() : NaN);
+
 export async function saveShared(req, res, deps = {}) {
   res.setHeader('Cache-Control', 'no-store');
   const data = cleanShared(parseBody(req.body));
@@ -58,11 +87,20 @@ export async function saveShared(req, res, deps = {}) {
   const id = sharedId(data);
   const now = deps.now ?? Date.now();
   try {
+    const db = deps.db || getDb();
+    const ref = db.collection(SHARED_RESULTS).doc(id);
+    // Sharing the same result again reuses the saved one and does not count
+    const existing = await ref.get();
+    if (existing.exists && millis(existing.data().expireAt) > now) return res.status(200).json({ id });
+    if (!(await consumeShare(db, hashIp(clientIp(req) || 'unknown'), now))) {
+      return res.status(429).json({ status: 'error', message: 'Too many shares today' });
+    }
     // Stored as JSON text: Firestore cannot hold every shape a result has (arrays in arrays), and nothing queries inside it
-    await (deps.db || getDb()).collection(SHARED_RESULTS).doc(id).set({
+    await ref.set({
       json: JSON.stringify(data),
       date: jstDate(now),
       createdAt: new Date(now).toISOString(),
+      expireAt: new Date(now + KEEP_DAYS * 86400 * 1000),
     });
     return res.status(200).json({ id });
   } catch (e) {
@@ -76,6 +114,8 @@ export async function readShared(id, deps = {}) {
   const snap = await (deps.db || getDb()).collection(SHARED_RESULTS).doc(id).get();
   if (!snap.exists) return null;
   const doc = snap.data();
+  // The TTL policy deletes expired documents some time after expireAt, so an expired one may still be there
+  if (millis(doc.expireAt) <= (deps.now ?? Date.now())) return null;
   return { ...JSON.parse(doc.json), date: doc.date };
 }
 
