@@ -38,8 +38,8 @@ const MAX_HISTORY = 10;
 const MAX_HISTORY_TEXT = 500;
 // The fixed reply to questions that are not about love or relationships (the system prompt tells Claude to return it as is)
 const OFF_TOPIC_REPLY = {
-  tsuki: 'ごめんなさい、それは私にはお答えできないの。ここは恋や人間関係の相談室だから、気になる人のことや、心のもやもやを聞かせてくださいね。',
-  ren: '申し訳ないですが、それは僕からはお答えできません。ここは恋愛や人間関係の相談の場です。気になる人のことや、いま悩んでいることを聞かせてください。'
+  tsuki: 'ふふ、それは私の星読みではお力になれないみたい…ごめんなさいね。でも、あなたの心のことなら、どんな小さなことでも聞かせてほしいな。気になる人のこと、最近ちょっと寂しいこと、なんでも待っていますね。',
+  ren: 'それは僕の星読みでは力になれない分野ですね。その代わり、あなたの気持ちや人との関係のことなら、とことん付き合います。いま気になっている人のこと、よかったら聞かせてください。'
 };
 const MAX_TOKENS = 2000; // a reply is 200〜350 characters; this only caps a runaway answer
 const RATE_LIMIT = 20; // requests per IP per minute (best effort, per serverless instance). Per-account limits: _lib/chat-limit.js
