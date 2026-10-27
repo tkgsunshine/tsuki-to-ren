@@ -19,6 +19,8 @@ interface ChatModalProps {
   opponentName?: string;
   // 鑑定結果の質問ボタンから開いたとき、その質問を最初に送る
   initialQuestion?: string;
+  /** 無料の日数を使い切ったお相手: 今日の点数をAIにも渡さない */
+  hideDailyScore?: boolean;
 }
 
 interface Message {
@@ -38,7 +40,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   onClose,
   result,
   opponentName,
-  initialQuestion
+  initialQuestion,
+  hideDailyScore = false
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -52,8 +55,9 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const characterName = character === 'ren' ? '蓮' : '月';
   const characterAvatar = character === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp';
 
-  // Initial greeting
+  // Initial greeting（質問ボタンから開いたときは、あいさつを出さずにその質問から始める）
   useEffect(() => {
+    if (initialQuestion && isRegistered) return;
     const greetingText = character === 'ren'
       ? '私は蓮。理性と導きを司る者。あなたの心境を整理し、進むべき道を論理的に紐解きましょう。今、どのようなことに迷っていますか？'
       : '私は月。直感と優しさを司る者。あなたの心の声に耳を傾け、優しく寄り添います。今、どんな想いを抱えていますか？';
@@ -63,14 +67,18 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     ]);
   }, [character]);
 
-  // 鑑定結果の質問ボタンから開いたときは、あいさつの後にその質問を送る（StrictMode の二重実行でも1回だけ）
+  // 鑑定結果の質問ボタンから開いたときは、開いた瞬間にその質問を送る（StrictMode の二重実行でも1回だけ）
   useEffect(() => {
-    if (!initialQuestion || initialQuestionSentRef.current || messages.length === 0) return;
+    if (!initialQuestion || initialQuestionSentRef.current) return;
     initialQuestionSentRef.current = true;
-    // ログイン前は登録の案内が出るので、登録後にそのまま送れるよう入力欄にも入れておく
-    if (!isRegistered) setInputText(initialQuestion);
+    if (!isRegistered) {
+      // ログイン前は登録の案内を出し、登録後にそのまま送れるよう入力欄に入れておく
+      setInputText(initialQuestion);
+      setShowRegisterOverlay(true);
+      return;
+    }
     handleSend(initialQuestion);
-  }, [initialQuestion, messages.length]);
+  }, [initialQuestion]);
 
   // 結果画面の下に浮かぶバー（シェア・ホーム追加）が入力欄に重ならないよう、開いている間は隠す
   useEffect(() => {
@@ -125,7 +133,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
 【現在の二人の相性】
 基本相性値: ${result.baseScore}点
-今日のバイオリズム相性値: ${result.dailyScore}点
+今日のバイオリズム相性値: ${hideDailyScore ? '非公開（プレミアム限定。点数は答えないこと）' : `${result.dailyScore}点`}
 二人の相性一言要約: "${result.oneLiner}"`;
     }
     

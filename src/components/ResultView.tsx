@@ -6,6 +6,7 @@ import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMa
 import { getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
+import { PremiumUnlockButton } from './PremiumUnlockButton';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm } from './AppDialog';
@@ -173,6 +174,18 @@ const lockedText = (text: string | undefined, locked: boolean): string => {
   const n = Math.max(24, (text ?? '').length);
   return LOCKED_FILLER.repeat(Math.ceil(n / LOCKED_FILLER.length)).slice(0, n);
 };
+// 無料会員には、ぼかす前に冒頭（約半分・最大2行ほど）だけ本物を見せる。続きはダミー文にしてぼかす。
+// 区切りがよいように、読点・句点の直後で切れるならそこで切る。
+const TEASER_MAX_CHARS = 50;
+const splitTeaser = (text: string | undefined): { head: string; restLength: number } => {
+  const t = text ?? '';
+  const limit = Math.min(TEASER_MAX_CHARS, Math.ceil(t.length * 0.5));
+  let cut = limit;
+  for (let i = limit; i >= Math.floor(limit * 0.6); i--) {
+    if ('、。！？'.includes(t[i - 1])) { cut = i; break; }
+  }
+  return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
+};
 // 7日間・月次・年次の点数も、見られない人にはダミーの値で描く（本物の点数を画面に置かない）
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
@@ -228,6 +241,9 @@ const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
   );
 };
 
+// 同じお相手との「今日の相性」を無料で見られる日数の状態（App.tsx が api/stripe/partner で数える）。null = 制限なし。
+export type PartnerLock = { status: 'checking' | 'free' | 'locked'; daysLeft: number; guest: boolean } | null;
+
 interface ResultViewProps {
   result: FortuneResult;
   renResult: FortuneResult;
@@ -235,6 +251,7 @@ interface ResultViewProps {
   isRegistered: boolean;
   onRegister: (email: string) => void;
   isSubscribed: boolean;
+  partnerLock?: PartnerLock;
   onSubscribe: () => void;
   onOpenPremiumLP?: () => void;
   selectedChar: 'ren' | 'tsuki';
@@ -257,6 +274,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   isRegistered,
   onRegister,
   isSubscribed,
+  partnerLock = null,
   onSubscribe,
   onOpenPremiumLP,
   selectedChar,
@@ -558,6 +576,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
       handleScrollToSub();
     }
   };
+
+  // 無料の日数を使い切ったお相手（または確認中）: 今日の点数と助言はダミーで描く。今日の流れ（月の形と一言）は見せる。
+  const dailyHidden = hasOpponent && !isSubscribed && partnerLock !== null && partnerLock.status !== 'free';
+  const dailyLocked = dailyHidden && partnerLock?.status === 'locked';
+  const partnerCall = opponentName && opponentName !== 'お相手' ? `${opponentName}さん` : 'お相手';
 
   const detailedTopics = activeResult?.detailedTopics || [
     {
@@ -915,15 +938,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {/* Score Rings: 基本相性（小）と今日の相性（大）を2つの丸いメーターで比べる */}
         {hasOpponent ? (() => {
           const base = activeResult.baseScore;
-          const daily = activeResult.dailyScore;
+          const realDaily = activeResult.dailyScore;
+          const daily = lockedScore(realDaily, 3, dailyHidden);
           const diff = daily - base;
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
-          const scoreMood = getScoreMood(base, daily);
+          const scoreMood = getScoreMood(base, realDaily);
           const mood = { ...scoreMood, color: scoreMood.trend === 'up' ? '#8fd3ae' : scoreMood.trend === 'down' ? '#e0a9a0' : '#d8cfb8' };
           // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
           const labelsCollide = Math.abs(diff) < 28;
           const labelPos = (v: number) => Math.max(14, Math.min(86, v));
-          const renderRing = (opts: { size: number; score: number; gradId: string; from: string; to: string; glow: string; icon: React.ReactNode; label: string; caption: string; numColor: string }) => {
+          const renderRing = (opts: { size: number; score: number; gradId: string; from: string; to: string; glow: string; icon: React.ReactNode; label: string; caption: string; numColor: string; hidden?: boolean }) => {
             const stroke = opts.size * 0.055;
             const r = (opts.size - stroke) / 2 - 2;
             const c = 2 * Math.PI * r;
@@ -948,6 +972,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     color: opts.numColor,
                     lineHeight: 1.05,
                     textShadow: `0 0 14px ${opts.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
+                    ...(opts.hidden ? { filter: 'blur(6px)', userSelect: 'none' as const } : {}),
                     display: 'flex',
                     alignItems: 'baseline',
                     gap: '1px'
@@ -983,13 +1008,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   glow: 'rgba(156, 198, 216, 0.55)',
                   icon: <MoonPhaseMark size={18} tint="blue" />,
                   label: '今日の相性',
-                  caption: '毎日変わる',
-                  numColor: '#e8f3f8'
+                  caption: dailyLocked ? 'プレミアム限定' : '毎日変わる',
+                  numColor: '#e8f3f8',
+                  hidden: dailyHidden
                 })}
               </div>
 
               {/* 基本→今日 のバー */}
-              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
+              {!dailyHidden && <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
                 <div style={{ position: 'relative', height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #9f86c0 0%, #e2c074 50%, #3a86ab 100%)', opacity: 0.85 }}>
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#f6e6c2', border: '3px solid #151827' }} />
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9cc6d8', border: '3px solid #151827', boxShadow: '0 0 10px rgba(156,198,216,0.8)' }} />
@@ -1002,7 +1028,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>基本相性</div>
                   <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f6e6c2' }}>{base}<span style={{ fontSize: '0.65rem' }}>点</span></div>
                 </div>
-              </div>
+              </div>}
 
               {/* 今日の流れ: 枠で囲まず、光る天気アイコン＋グラデーション文字で見せる */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', marginTop: '0.1rem' }}>
@@ -1023,10 +1049,35 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}>
                   {mood.title}
                 </div>
+                {!dailyHidden && (
                 <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
                   基本相性より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
                 </div>
+                )}
               </div>
+
+              {/* 同じお相手の「今日の相性」: 無料の残り日数、使い切った日はプレミアム（ログインなしは無料登録）へ */}
+              {partnerLock?.status === 'free' && (
+                <div style={{ textAlign: 'center', fontSize: '0.74rem', color: '#cfc8b8', lineHeight: 1.6 }}>
+                  {partnerLock.guest
+                    ? <>{partnerCall}との今日の相性を明日も見るには、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください（登録すると、あと6日無料）</>
+                    : partnerLock.daysLeft > 0
+                      ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見られます</>
+                      : <>{partnerCall}との今日の相性を無料で見られるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見られます</>}
+                </div>
+              )}
+              {dailyLocked && partnerLock && (
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#e8e3d8', lineHeight: 1.65 }}>
+                    {partnerLock.guest
+                      ? <>{partnerCall}との今日の相性を続けて見るには、無料会員登録をしてください。登録すると、あと6日無料で見られます。</>
+                      : <>{partnerCall}との無料の期間が終わりました。<br />二人の毎日の点数と助言は、プレミアム（月額980円）でずっと見られます。</>}
+                  </div>
+                  <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                    <Lock size={11} /> {partnerLock.guest ? '無料会員登録' : 'プレミアムで今日の相性を見る'}
+                  </button>
+                </div>
+              )}
             </div>
           );
         })() : (
@@ -1783,26 +1834,47 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const tips = activeResult.lineTips;
               // 2段落目以降と「二人のLINEのコツ」の本文はプレミアム限定。見出しは誰にでも見せ、本文だけぼかす。
               const locked = !isSubscribed;
+              // 無料会員（登録済み・未課金）は、各本文の冒頭だけ読める。未登録の人は全部ぼかしのまま。
+              const preview = locked && isRegistered;
               const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
+              const lockedBody = (text: string | undefined) => {
+                if (!preview) return lockedText(text, locked);
+                const { head, restLength } = splitTeaser(text);
+                return (
+                  <>
+                    {head}
+                    <span style={{ ...blurred, display: 'inline' }}>{lockedText(' '.repeat(restLength), true)}</span>
+                  </>
+                );
+              };
+              // ボタンは「気持ちが伝わるコツ」の本文の上下中央に重ねる（末尾に置くと見落とされやすいため）。
+              // その項目がないときは「二人のLINEのコツ」全体の中央に置く。
+              const lockAt = tips ? tips.items.findIndex(it => it.label.startsWith('💡')) : -1;
               const lockButton = (
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.3rem' }}>
-                  <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                  <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={handleLockTagClick}>
                     <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
                   </button>
                 </div>
               );
               return (
                 <>
-                  <div style={{ color: '#e8e3d8', lineHeight: '1.55' }}>{parts[0]}</div>
+                  <div
+                    style={{ color: '#e8e3d8', lineHeight: '1.55', ...(dailyHidden ? { filter: 'blur(4.5px)', userSelect: 'none' as const, opacity: 0.65, cursor: 'pointer' } : {}) }}
+                    onClick={dailyHidden ? handleLockTagClick : undefined}
+                  >{lockedText(parts[0], dailyHidden)}</div>
                   {parts.length > 1 && (
                     <div
                       style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       {parts.slice(1).map((p, i) => (
-                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, locked)}</div>
+                        preview && i === 0
+                          ? <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{lockedBody(p)}</div>
+                          : <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, locked)}</div>
                       ))}
-                      {locked && (
+                      {preview && lockButton}
+                      {locked && !preview && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
                             <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
@@ -1813,18 +1885,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   )}
                   {tips && (
                     <div
-                      style={{ marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
+                      style={{ position: 'relative', marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
-                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>(プレミアム限定)</span>}</div>
-                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(tips.intro, locked)}</div>
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>{preview ? '(続きはプレミアム限定)' : '(プレミアム限定)'}</span>}</div>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...(preview ? {} : blurred) }}>{lockedBody(tips.intro)}</div>
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
-                          <div style={{ color: '#e8e3d8', ...blurred }}>{lockedText(it.text, locked)}</div>
+                          <div style={{ position: 'relative' }}>
+                            <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>
+                            {locked && i === lockAt && lockButton}
+                          </div>
                         </div>
                       ))}
-                      {locked && lockButton}
+                      {locked && lockAt < 0 && lockButton}
                     </div>
                   )}
                 </>
@@ -2621,8 +2696,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
-                  <button
-                    type="button"
+                  <PremiumUnlockButton
                     onClick={() => {
                       if (!isRegistered) {
                         handleScrollToRegister();
@@ -2633,19 +2707,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         setSubSuccess(true);
                       }
                     }}
-                    className="consult-btn font-serif"
-                    style={{
-                      fontSize: '0.85rem',
-                      padding: '0.75rem',
-                      fontWeight: 'bold',
-                      width: '100%',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(242, 226, 179,0.3)',
-                      letterSpacing: '0.02em'
-                    }}
-                  >
-                    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />プレミアム登録で全解放 (月額980円)</span>
-                  </button>
+                  />
                 </div>
               </div>
             )}
@@ -2953,8 +3015,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
-                  <button
-                    type="button"
+                  <PremiumUnlockButton
                     onClick={() => {
                       if (!isRegistered) {
                         handleScrollToRegister();
@@ -2965,19 +3026,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         setSubSuccess(true);
                       }
                     }}
-                    className="consult-btn"
-                    style={{
-                      fontSize: '0.85rem',
-                      padding: '0.75rem',
-                      fontWeight: 'bold',
-                      width: '100%',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(226,192,116,0.5), 0 0 10px rgba(242, 226, 179,0.3)',
-                      letterSpacing: '0.02em'
-                    }}
-                  >
-                    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />プレミアム登録で全解放 (月額980円)</span>
-                  </button>
+                  />
                 </div>
               )}
             </div>
