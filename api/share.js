@@ -1,5 +1,3 @@
-import { SHARE_LINES } from './_lib/share-card-text.js';
-
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
@@ -34,17 +32,19 @@ export default function handler(req, res) {
 
   // Build the redirect URL for normal users.
   // Links made before birth dates were taken out of them (they carry mb) still open the full result as before.
-  // Newer links carry only names and scores: the app shows the sharer's summary and invites the visitor to their own diagnosis.
+  // Newer links carry only what the card shows: the app shows the sharer's result from those values and invites the visitor to their own diagnosis.
   let appUrl;
   if (params.get('mb') || params.get('mBirth')) {
     appUrl = `https://${req.headers.host}/?${params.toString()}`;
   } else {
+    // App: src/components/SharedResultView.tsx (keys are prefixed so the app's own diagnosis params are not triggered)
     const teaser = new URLSearchParams({ from: 'share' });
     if (get('mn', 'mName')) teaser.set('sn', get('mn', 'mName'));
     if (hasOpponent) teaser.set('sp', oName);
-    if (/^\d{1,3}$/.test(dailyScore)) teaser.set('sd', dailyScore);
-    const line = SHARE_LINES[Number(params.get('l'))];
-    if (line) teaser.set('sl', line);
+    const shareKeys = { bs: 'sb', ds: 'sd', ma: 'sa', l: 'sl', mm: 'smm', ...(hasOpponent ? { oa: 'so', c: 'sc', om: 'som' } : {}) };
+    for (const [from, to] of Object.entries(shareKeys)) {
+      if (params.get(from)) teaser.set(to, params.get(from));
+    }
     appUrl = `https://${req.headers.host}/?${teaser.toString()}`;
   }
 

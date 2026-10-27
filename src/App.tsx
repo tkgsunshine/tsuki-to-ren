@@ -33,7 +33,7 @@ import { trackFortune, trackPremiumStep } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
-import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
+import { SharedResultView, readSharedResult } from './components/SharedResultView';
 import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
@@ -173,8 +173,8 @@ function App() {
     scrollMainTo(0);
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
-  // 共有リンクから来た人に見せる、共有した人の結果の要約（URLは読んだあと消す）
-  const [sharedTeaser, setSharedTeaser] = useState(() => readSharedTeaser(window.location.search));
+  // 共有リンクから来た人に見せる、共有した人の鑑定結果（URLは読んだあと消す）
+  const [sharedTeaser, setSharedTeaser] = useState(() => readSharedResult(window.location.search));
   useEffect(() => {
     if (!sharedTeaser) return;
     try {
@@ -1212,8 +1212,12 @@ function App() {
           <>
             {flowStep === 'input' && (
               <div className="home-input-flow" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', flexShrink: 0 }}>
+                {/* 共有リンクから来た人には、まず共有された鑑定結果を見せる（「あなたも無料で鑑定する」で入力画面へ） */}
+                {sharedTeaser ? (
+                  <SharedResultView shared={sharedTeaser} onStart={() => { setSharedTeaser(null); scrollMainTo(0); }} />
+                ) : (
+                <>
                 <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />
-                {sharedTeaser && <SharedResultBanner teaser={sharedTeaser} onClose={() => setSharedTeaser(null)} />}
                 <UnifiedInputView
                   key={inputViewKey}
                   selectedCharacter={selectedCharacter}
@@ -1226,6 +1230,8 @@ function App() {
                   isRegistered={isRegistered}
                   isSubscribed={isSubscribed}
                 />
+                </>
+                )}
                 <SeoFooterSection />
               </div>
             )}
