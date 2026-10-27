@@ -240,6 +240,9 @@ const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
   );
 };
 
+// 同じお相手との「今日の相性」を無料で見られる日数の状態（App.tsx が api/stripe/partner で数える）。null = 制限なし。
+export type PartnerLock = { status: 'checking' | 'free' | 'locked'; daysLeft: number; guest: boolean } | null;
+
 interface ResultViewProps {
   result: FortuneResult;
   renResult: FortuneResult;
@@ -247,6 +250,7 @@ interface ResultViewProps {
   isRegistered: boolean;
   onRegister: (email: string) => void;
   isSubscribed: boolean;
+  partnerLock?: PartnerLock;
   onSubscribe: () => void;
   onOpenPremiumLP?: () => void;
   selectedChar: 'ren' | 'tsuki';
@@ -267,6 +271,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   isRegistered,
   onRegister,
   isSubscribed,
+  partnerLock = null,
   onSubscribe,
   onOpenPremiumLP,
   selectedChar,
@@ -567,6 +572,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
       handleScrollToSub();
     }
   };
+
+  // 無料の日数を使い切ったお相手（または確認中）: 今日の点数と助言はダミーで描く。今日の流れ（月の形と一言）は見せる。
+  const dailyHidden = hasOpponent && !isSubscribed && partnerLock !== null && partnerLock.status !== 'free';
+  const dailyLocked = dailyHidden && partnerLock?.status === 'locked';
+  const partnerCall = opponentName && opponentName !== 'お相手' ? `${opponentName}さん` : 'お相手';
 
   const detailedTopics = activeResult?.detailedTopics || [
     {
@@ -924,15 +934,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {/* Score Rings: 基本相性（小）と今日の相性（大）を2つの丸いメーターで比べる */}
         {hasOpponent ? (() => {
           const base = activeResult.baseScore;
-          const daily = activeResult.dailyScore;
+          const realDaily = activeResult.dailyScore;
+          const daily = lockedScore(realDaily, 3, dailyHidden);
           const diff = daily - base;
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
-          const scoreMood = getScoreMood(base, daily);
+          const scoreMood = getScoreMood(base, realDaily);
           const mood = { ...scoreMood, color: scoreMood.trend === 'up' ? '#8fd3ae' : scoreMood.trend === 'down' ? '#e0a9a0' : '#d8cfb8' };
           // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
           const labelsCollide = Math.abs(diff) < 28;
           const labelPos = (v: number) => Math.max(14, Math.min(86, v));
-          const renderRing = (opts: { size: number; score: number; gradId: string; from: string; to: string; glow: string; icon: React.ReactNode; label: string; caption: string; numColor: string }) => {
+          const renderRing = (opts: { size: number; score: number; gradId: string; from: string; to: string; glow: string; icon: React.ReactNode; label: string; caption: string; numColor: string; hidden?: boolean }) => {
             const stroke = opts.size * 0.055;
             const r = (opts.size - stroke) / 2 - 2;
             const c = 2 * Math.PI * r;
@@ -957,6 +968,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     color: opts.numColor,
                     lineHeight: 1.05,
                     textShadow: `0 0 14px ${opts.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
+                    ...(opts.hidden ? { filter: 'blur(6px)', userSelect: 'none' as const } : {}),
                     display: 'flex',
                     alignItems: 'baseline',
                     gap: '1px'
@@ -992,13 +1004,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   glow: 'rgba(156, 198, 216, 0.55)',
                   icon: <MoonPhaseMark size={18} tint="blue" />,
                   label: '今日の相性',
-                  caption: '毎日変わる',
-                  numColor: '#e8f3f8'
+                  caption: dailyLocked ? 'プレミアム限定' : '毎日変わる',
+                  numColor: '#e8f3f8',
+                  hidden: dailyHidden
                 })}
               </div>
 
               {/* 基本→今日 のバー */}
-              <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
+              {!dailyHidden && <div role="img" aria-label={`基本相性${base}点、今日の相性${daily}点`} style={{ position: 'relative', margin: `2.4rem 0.4rem ${labelsCollide ? '2.3rem' : '0.4rem'}` }}>
                 <div style={{ position: 'relative', height: '8px', borderRadius: '4px', background: 'linear-gradient(90deg, #9f86c0 0%, #e2c074 50%, #3a86ab 100%)', opacity: 0.85 }}>
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(base)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#f6e6c2', border: '3px solid #151827' }} />
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9cc6d8', border: '3px solid #151827', boxShadow: '0 0 10px rgba(156,198,216,0.8)' }} />
@@ -1011,7 +1024,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>基本相性</div>
                   <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f6e6c2' }}>{base}<span style={{ fontSize: '0.65rem' }}>点</span></div>
                 </div>
-              </div>
+              </div>}
 
               {/* 今日の流れ: 枠で囲まず、光る天気アイコン＋グラデーション文字で見せる */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', marginTop: '0.1rem' }}>
@@ -1032,10 +1045,35 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}>
                   {mood.title}
                 </div>
+                {!dailyHidden && (
                 <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
                   基本相性より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
                 </div>
+                )}
               </div>
+
+              {/* 同じお相手の「今日の相性」: 無料の残り日数、使い切った日はプレミアム（ログインなしは無料登録）へ */}
+              {partnerLock?.status === 'free' && (
+                <div style={{ textAlign: 'center', fontSize: '0.74rem', color: '#cfc8b8', lineHeight: 1.6 }}>
+                  {partnerLock.guest
+                    ? <>{partnerCall}との今日の相性を明日も見るには、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください（登録すると、あと6日無料）</>
+                    : partnerLock.daysLeft > 0
+                      ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見られます</>
+                      : <>{partnerCall}との今日の相性を無料で見られるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見られます</>}
+                </div>
+              )}
+              {dailyLocked && partnerLock && (
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#e8e3d8', lineHeight: 1.65 }}>
+                    {partnerLock.guest
+                      ? <>{partnerCall}との今日の相性を続けて見るには、無料会員登録をしてください。登録すると、あと6日無料で見られます。</>
+                      : <>{partnerCall}との無料の期間が終わりました。<br />二人の毎日の点数と助言は、プレミアム（月額980円）でずっと見られます。</>}
+                  </div>
+                  <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                    <Lock size={11} /> {partnerLock.guest ? '無料会員登録' : 'プレミアムで今日の相性を見る'}
+                  </button>
+                </div>
+              )}
             </div>
           );
         })() : (
@@ -1817,7 +1855,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               );
               return (
                 <>
-                  <div style={{ color: '#e8e3d8', lineHeight: '1.55' }}>{parts[0]}</div>
+                  <div
+                    style={{ color: '#e8e3d8', lineHeight: '1.55', ...(dailyHidden ? { filter: 'blur(4.5px)', userSelect: 'none' as const, opacity: 0.65, cursor: 'pointer' } : {}) }}
+                    onClick={dailyHidden ? handleLockTagClick : undefined}
+                  >{lockedText(parts[0], dailyHidden)}</div>
                   {parts.length > 1 && (
                     <div
                       style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined }}
