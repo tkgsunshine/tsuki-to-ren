@@ -1,5 +1,10 @@
 {
   "outputDirectory": "dist",
+  "functions": {
+    "api/og.js": {
+      "includeFiles": "{scripts/x/assets/ShipporiMincho-Bold.ttf,scripts/x/assets/emblem.png,node_modules/@resvg/resvg-wasm/index_bg.wasm}"
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/daily-luck",
