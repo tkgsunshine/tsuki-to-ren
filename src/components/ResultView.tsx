@@ -1781,9 +1781,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               // 2段落目以降と「二人のLINEのコツ」の本文はプレミアム限定。見出しは誰にでも見せ、本文だけぼかす。
               const locked = !isSubscribed;
               const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
+              // ぼかした本文の上下中央に重ねる（末尾に置くと見落とされやすいため）
               const lockButton = (
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.3rem' }}>
-                  <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                  <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={handleLockTagClick}>
                     <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で解禁'}
                   </button>
                 </div>
@@ -1810,7 +1811,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   )}
                   {tips && (
                     <div
-                      style={{ marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
+                      style={{ position: 'relative', marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>(プレミアム限定)</span>}</div>
