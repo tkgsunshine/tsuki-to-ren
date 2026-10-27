@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 export interface SavedPartner {
   id: string;
@@ -33,6 +33,8 @@ import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, 
 import { showAlert, showConfirm } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
+import { fetchPartnerAccess } from './services/partnerDays';
+import type { PartnerLock } from './components/ResultView';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -203,6 +205,9 @@ function App() {
   // Characters
   const [selectedCharacter, setSelectedCharacter] = useState<'ren' | 'tsuki'>('tsuki');
   const [isChatOpen, setIsChatOpen] = useState(false); // Standalone chat simulator in Chat tab
+  const [chatInitialQuestion, setChatInitialQuestion] = useState<string | undefined>(undefined); // 鑑定結果の質問ボタンから開いたときの最初の質問
+  // 対話ロビーから開いたときは、相談の前に誰について相談するか選ぶ。'pick' = まだ選んでいない、null = 今の鑑定結果のまま（鑑定結果から開いたとき）
+  const [chatTarget, setChatTarget] = useState<'pick' | 'self' | SavedPartner | null>(null);
   
   // Firebase Auth State
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -299,7 +304,9 @@ function App() {
     }
     let cancelled = false;
     (async () => {
-      const tries = back === 'success' ? 8 : 1;
+      // After the payment page, wait for the webhook to make the account Premium; after the billing page
+      // (cancel, undo cancel), the change also arrives by webhook a few seconds later, so read it again a few times.
+      const tries = back === 'success' ? 8 : back === 'portal' ? 5 : 1;
       for (let i = 0; i < tries; i++) {
         const status = await fetchPremiumStatus();
         if (cancelled) return;
@@ -307,7 +314,7 @@ function App() {
           setIsSubscribed(status.active);
           setPremiumEndsOn(status.active && status.cancelAtPeriodEnd ? status.currentPeriodEnd : null);
         }
-        if (status?.active) {
+        if (status?.active && back !== 'portal') {
           if (back === 'success') setShowPremiumWelcome(true);
           return;
         }
@@ -588,7 +595,7 @@ function App() {
 
     if (activeResult) {
       params.set('bs', String(activeResult.baseScore));
-      params.set('ds', String(activeResult.dailyScore));
+      if (!dailyScoreHidden) params.set('ds', String(activeResult.dailyScore)); // 無料の日数を使い切った日は「??点」
     }
     return `${baseUrl}?${params.toString()}`;
   };
@@ -625,7 +632,10 @@ function App() {
     }
     let cancelled = false;
     getEmailSubscription().then((sub) => {
-      if (!cancelled) setNotifySub(sub);
+      if (cancelled) return;
+      setNotifySub(sub);
+      // The subscription in Firestore decides delivery, so the ON/OFF shown here follows it (e.g. set on another device)
+      if (sub) setNotifyDailyLuck(!!sub.enabled);
     });
     return () => {
       cancelled = true;
@@ -637,6 +647,10 @@ function App() {
   const isSubPartner = (p: SavedPartner) => subHasPartner && p.name === notifySub?.oppName && p.birth.replace(/\//g, '-') === notifySub?.oppBirth;
   const showKeepTarget = subHasPartner && !savedPartners.some(isSubPartner);
   const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${notifySub.oppName || 'お相手'}さんとの相性` : 'あなたの運勢');
+  // Whether the reading on screen (the partner now, or the solo reading) is the one the daily mail is about
+  const notifyIsCurrentReading = !!notifySub && (mode === 'match'
+    ? subHasPartner && notifySub.oppName === oppName && notifySub.oppBirth === oppBirth.replace(/\//g, '-')
+    : !subHasPartner);
 
   const openNotifyModal = (target?: string) => {
     setNotifyEmailInput(notifyEmail || currentUser?.email || '');
@@ -670,6 +684,34 @@ function App() {
     const saved = await saveEmailSubscriptionData(data);
     if (saved) setNotifySub(data);
     return saved;
+  };
+
+  // From the result screen: makes the daily mail about the reading on screen, keeping the address
+  const switchNotifyToCurrentReading = async () => {
+    const email = (notifySub?.email || currentUser?.email || '').toLowerCase();
+    if (!email) {
+      showAlert('メール通知には、メールアドレス付きのアカウントでのログインが必要です。');
+      return;
+    }
+    if (!isValidBirthDate(myBirth)) {
+      showAlert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
+      return;
+    }
+    const target = mode === 'match' ? `${oppName || 'お相手'}さんとの相性` : 'あなたの運勢';
+    const ok = await showConfirm(`毎朝8時の通知を「${target}」に切り替えますか？`, { okLabel: '切り替える', cancelLabel: 'やめる' });
+    if (!ok) return;
+    const partner: SavedPartner | null = mode === 'match'
+      ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)
+        || { id: 'current', name: oppName || 'お相手', birth: oppBirth, mbti: oppMbti, gender: oppGender, relationship }
+      : null;
+    const saved = await saveNotifySubscription(email, partner);
+    if (!saved) {
+      showAlert('通知の切り替えに失敗しました。ログインし直してから、もう一度お試しください。');
+      return;
+    }
+    setNotifyEmail(email);
+    setNotifyDailyLuck(true);
+    showAlert(`🔔 明日の朝から「${target}」をお届けします。`);
   };
 
   useEffect(() => {
@@ -777,7 +819,8 @@ function App() {
     return true;
   };
 
-  const handleSavePartner = () => {
+  // Returns the saved partner, or undefined when nothing was saved
+  const handleSavePartner = (): SavedPartner | undefined => {
     if (!oppBirth) {
       showAlert('保存するお相手の情報がありません。');
       return;
@@ -800,6 +843,7 @@ function App() {
 
     setSavedPartners([...savedPartners, newPartner]);
     showAlert(`${newPartner.name}様の情報を保存しました。`);
+    return newPartner;
   };
 
   const handleDeletePartner = (id: string) => {
@@ -825,6 +869,26 @@ function App() {
   // Diagnostic Results Cache
   const [renResult, setRenResult] = useState<FortuneResult | null>(null);
   const [tsukiResult, setTsukiResult] = useState<FortuneResult | null>(null);
+
+  // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
+  // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
+  const [partnerLock, setPartnerLock] = useState<PartnerLock>(null);
+  const signedInUid = currentUser?.uid;
+  useEffect(() => {
+    if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || isSubscribed) {
+      setPartnerLock(null);
+      return;
+    }
+    let cancelled = false;
+    setPartnerLock({ status: 'checking', daysLeft: 0, guest: !signedInUid });
+    fetchPartnerAccess(oppBirth).then((access) => {
+      if (cancelled) return;
+      if (!access || access.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
+      else setPartnerLock({ status: access.locked ? 'locked' : 'free', daysLeft: access.daysLeft, guest: access.guest });
+    });
+    return () => { cancelled = true; };
+  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid]);
+  const dailyScoreHidden = partnerLock !== null && partnerLock.status !== 'free';
 
   // Form submits
   const handleDiagnosisSubmit = (data: {
@@ -955,6 +1019,42 @@ function App() {
   // Helper to get active result based on chosen character tab
   const activeResult = selectedCharacter === 'ren' ? renResult : tsukiResult;
 
+  // 対話ロビーで選んだお相手（または自分だけ）の鑑定を、チャット用にその場で出す。点数の出し方は鑑定と同じ generateFortuneResult
+  const chatResult = useMemo(() => {
+    if (chatTarget === null) return activeResult;
+    if (chatTarget === 'pick' || !myBirth) return null;
+    const partner = chatTarget === 'self' ? null : chatTarget;
+    // 保存時と同じく、お相手の性別は自分と逆にそろえる（handleSelectPartner と同じ）
+    const partnerGender = partner && partner.gender === myGender ? (myGender === 'female' ? 'male' : 'female') : partner?.gender;
+    try {
+      return generateFortuneResult({
+        myName,
+        myBirth,
+        myMbti,
+        myGender,
+        opponentName: partner?.name,
+        opponentBirth: partner?.birth,
+        opponentMbti: partner?.mbti,
+        opponentGender: partnerGender,
+        relationship: partner?.relationship || '片思い中'
+      }, selectedCharacter);
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }, [chatTarget, activeResult, myName, myBirth, myMbti, myGender, selectedCharacter]);
+  const chatOpponentName = chatTarget === null
+    ? (mode === 'match' ? oppName : undefined)
+    : (chatTarget !== 'pick' && chatTarget !== 'self' ? chatTarget.name : undefined);
+  // 今日の相性は、無料だとお相手ごとに見られる日数が決まっている。今の鑑定結果と同じお相手ならその判定を使い、
+  // 別のお相手はチャットのために「見た日」を数えないよう、プレミアム以外では点数をAIに渡さない
+  const chatHideDailyScore = chatTarget === null
+    ? dailyScoreHidden
+    : (chatTarget !== 'pick' && chatTarget !== 'self' && !isSubscribed
+      && !(chatTarget.birth === oppBirth && mode === 'match' && flowStep === 'result' && !dailyScoreHidden));
+  const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
+    && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
+
   return (
     <div className={`app-container${activeTab === 'home' && flowStep !== 'result' ? ' bg-cosmos' : ''}`} style={{
       '--color-theme': selectedCharacter === 'tsuki' ? '#cdbfe2' : '#9cc6d8',
@@ -1014,6 +1114,7 @@ function App() {
                 isRegistered={isRegistered}
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
+                partnerLock={partnerLock}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -1023,6 +1124,17 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                notifyStatus={{ on: notifyDailyLuck && !!notifySub?.enabled, targetLabel: notifyTargetLabel, isCurrentReading: notifyIsCurrentReading }}
+                onOpenNotifySettings={() => {
+                  if (!currentUser) { setShowAuthModal(true); return; }
+                  openNotifyModal(mode === 'match' ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)?.id : 'self');
+                }}
+                onSwitchNotifyToCurrent={switchNotifyToCurrentReading}
+                onOpenChat={(question) => {
+                  setChatInitialQuestion(question);
+                  setChatTarget(null);
+                  setIsChatOpen(true);
+                }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
                   window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
@@ -1045,6 +1157,7 @@ function App() {
                 isRegistered={isRegistered}
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
+                partnerLock={partnerLock}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -1054,6 +1167,17 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                notifyStatus={{ on: notifyDailyLuck && !!notifySub?.enabled, targetLabel: notifyTargetLabel, isCurrentReading: notifyIsCurrentReading }}
+                onOpenNotifySettings={() => {
+                  if (!currentUser) { setShowAuthModal(true); return; }
+                  openNotifyModal(mode === 'match' ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)?.id : 'self');
+                }}
+                onSwitchNotifyToCurrent={switchNotifyToCurrentReading}
+                onOpenChat={(question) => {
+                  setChatInitialQuestion(question);
+                  setChatTarget(null);
+                  setIsChatOpen(true);
+                }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
                   window.history.pushState({ tab: 'fortune', legal: true }, '', '/terms');
@@ -1108,6 +1232,7 @@ function App() {
                   setShowAuthModal(true);
                 } else {
                   setSelectedCharacter('tsuki');
+                  setChatTarget('pick');
                   setIsChatOpen(true);
                 }
               }}>
@@ -1161,6 +1286,7 @@ function App() {
                   setShowAuthModal(true);
                 } else {
                   setSelectedCharacter('ren');
+                  setChatTarget('pick');
                   setIsChatOpen(true);
                 }
               }}>
@@ -1482,6 +1608,7 @@ function App() {
                         setNotifyDailyLuck(false);
                         const ok = await unsubscribeEmailSubscription();
                         if (ok) {
+                          setNotifySub(prev => (prev ? { ...prev, enabled: false } : prev));
                           showAlert('🔕 毎朝8時の運勢通知をOFFにしました。');
                         } else {
                           setNotifyDailyLuck(true);
@@ -2511,9 +2638,27 @@ function App() {
           setChatCount={setChatCount}
           onRegister={handleRegister}
           onSubscribe={handleStartCheckout}
-          onClose={() => setIsChatOpen(false)}
-          result={activeResult}
-          opponentName={mode === 'match' ? oppName : undefined}
+          onClose={() => { setIsChatOpen(false); setChatInitialQuestion(undefined); setChatTarget(null); }}
+          result={chatResult}
+          opponentName={chatOpponentName}
+          initialQuestion={chatInitialQuestion}
+          hideDailyScore={chatHideDailyScore}
+          partnerPicker={chatTarget === 'pick' ? {
+            partners: savedPartners,
+            unsavedCurrentName: currentUnsaved ? (oppName || 'お相手') : undefined,
+            onPick: (partner) => setChatTarget(partner),
+            onPickSelf: () => setChatTarget('self'),
+            onSaveCurrent: () => {
+              const saved = handleSavePartner();
+              if (saved) setChatTarget(saved);
+            },
+            onAddNew: () => {
+              // 恋愛診断の入力画面へ。結果画面の「お相手を保存」から保存できる
+              setIsChatOpen(false);
+              setChatTarget(null);
+              handleTabChange('home');
+            }
+          } : undefined}
         />
       )}
 
@@ -2525,6 +2670,7 @@ function App() {
           myName={myName}
           opponentName={mode === 'match' ? oppName : undefined}
           hasOpponent={mode === 'match'}
+          hideDailyScore={dailyScoreHidden}
           shareUrl={generateShareUrl()}
           onClose={() => setShowShareCard(false)}
         />

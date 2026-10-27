@@ -4254,8 +4254,8 @@
     "tweetId": "2114020434014547977",
     "manual": true,
     "metrics": {
-      "at": "2026-10-25T22:48:04.297Z",
-      "impressions": 23,
+      "at": "2026-10-27T00:04:21.487Z",
+      "impressions": 28,
       "likes": 1,
       "replies": 1,
       "reposts": 0,
@@ -4508,8 +4508,11 @@
     "format": "coined_feeling",
     "system": "psychology",
     "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-22T13:47:38.895Z"
+    "status": "posted",
+    "createdAt": "2026-10-22T13:47:38.895Z",
+    "postedAt": "2026-10-26T04:34:06.000Z",
+    "tweetId": "2114576280503095557",
+    "manual": true
   },
   {
     "id": "2026-10-26-night",
@@ -4704,5 +4707,118 @@
     "format": "beast_daily_reply2",
     "status": "scheduled",
     "createdAt": "2026-10-23T08:51:47.369Z"
+  },
+  {
+    "id": "2026-10-28-chara-1",
+    "date": "2026-10-28",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月28日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：丙龍（太陽の英雄×たつ）\n【本命星】：五黄土星\n\n-結果-\n【今日の点数】：86点\n【今日の空気】魅力と自信が溢れ、幸運が味方する最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_dragon_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:38:44.147Z"
+  },
+  {
+    "id": "2026-10-28-chara-1-reply",
+    "date": "2026-10-28",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【月からのひとこと】\n\n誘いの返事を打ちかけて、手が止まってない？今日のあなたは、龍が空へ昇るみたいに輝ける日。迷ったら「行く」でいいよ。\n恋のチャンスは、待つ場所じゃなくて、出かけた先で見つかる。\n-月-",
+    "replyTo": "2026-10-28-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:38:44.147Z"
+  },
+  {
+    "id": "2026-10-28-chara-1-reply2",
+    "date": "2026-10-28",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n20時〜22時に、気になる人か久しぶりの友だちへ「元気？ふと思い出したよ」と1通だけ送ってみて。\n「思い出した」は理由がいらないから、送る手が軽くなるの。\n自信を持っていい日だよ。送っちゃおう。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-28-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:38:44.147Z"
+  },
+  {
+    "id": "2026-10-28-am",
+    "date": "2026-10-28",
+    "slot": "am",
+    "kind": "value",
+    "text": "送ったあと、スマホばかり見ちゃう人へ。\n返事って、相手が開いた瞬間の気分でも変わることがあるんだよ。\n・返信が来やすいとされる3つの時間帯\n・送るのは避けたい時間\n・既読スルーされたときの待ち方\n-月-\n▼返信が来やすい時間帯と、送り方のコツ\nhttps://www.tsuki-to-ren.com/column/line-best-time-response-rate?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "line-best-time-response-rate",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:39:09.267Z"
+  },
+  {
+    "id": "2026-10-28-noon",
+    "date": "2026-10-28",
+    "slot": "noon",
+    "kind": "value",
+    "text": "「誘い文句の冷凍保存」って、あると思う。\n「今度ごはん行かない？」をメモに書いたまま、もう3週間。\n会いたい気持ちは本物なのに、送るボタンだけが遠いの。\n断られたら、今の距離まで消えちゃいそうで怖いんだよね。\nでも冷凍なら、傷んでないよ。解凍する日は、あなたが選んでいい。\n-月-",
+    "format": "coined_feeling",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:39:09.267Z"
+  },
+  {
+    "id": "2026-10-28-pm",
+    "date": "2026-10-28",
+    "slot": "pm",
+    "kind": "value",
+    "text": "誘うのに必要なのは、勇気より逃げ道。\n「無理なら全然いいよ」を一言そえるだけで、送る指は軽くなるの。\n相手も断りやすいぶん、本音で返してくれやすい。\n怖いままでいい。逃げ道をつくれるあなたは、ちゃんとやさしいよ。\n-月-",
+    "format": "maxim",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:39:09.267Z"
+  },
+  {
+    "id": "2026-10-28-evening",
+    "date": "2026-10-28",
+    "slot": "evening",
+    "kind": "value",
+    "text": "見た目は控えめ、恋愛はいちばん積極的な16タイプ（MBTI）\n\n4位 INFP 仲介者\n5位 ISTP 巨匠\n6位 INTJ 建築家\n7位 ISTJ 管理者\n8位 INTP 論理学者\n9位 ESFJ 領事官\n10位 ENFJ 主人公\n11位 ESTJ 幹部\n\n1位〜3位と12位〜16位は、リプ欄に。あなたは何位？\n-月-",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:39:09.267Z"
+  },
+  {
+    "id": "2026-10-28-evening-reply",
+    "date": "2026-10-28",
+    "slot": "evening",
+    "kind": "value",
+    "text": "1位 INFJ 提唱者\n2位 ISFP 冒険家\n3位 ISFJ 擁護者\n\n12位 ENTJ 指揮官\n13位 ENFP 運動家\n14位 ENTP 討論者\n15位 ESTP 起業家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-28-evening",
+    "format": "gap_rank_reply",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:39:09.267Z"
+  },
+  {
+    "id": "2026-10-28-night",
+    "date": "2026-10-28",
+    "slot": "night",
+    "kind": "value",
+    "text": "眠れない夜のために、保存しておいてね。\n#恋愛 #片思い\n-月-",
+    "format": "card_voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-26T18:39:09.267Z",
+    "card": {
+      "text": "眠れないほど|想えるのは、|[ちゃんと好き]|だからだよ。",
+      "who": "月",
+      "style": "portrait",
+      "expression": "moonlit"
+    },
+    "image": "data/x/cards/2026-10-28-night.png"
   }
 ]

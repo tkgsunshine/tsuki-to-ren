@@ -1,6 +1,7 @@
 import { FieldPath } from 'firebase-admin/firestore';
 import { getDb, getAdminAuth } from './_lib/firestore.js';
 import { ATTRIBUTION, DAILY, jstDate } from './_lib/analytics.js';
+import { USAGE_DAILY } from './_lib/chat-limit.js';
 
 // Data for the admin page (/admin): daily counters, and the member list.
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
@@ -48,10 +49,11 @@ export default async function handler(req, res, deps = {}) {
     const days = Math.min(Math.max(parseInt(req.query?.days, 10) || 30, 1), 180);
     const from = jstDate(new Date(Date.now() - (days - 1) * 86400 * 1000));
 
-    const [dailySnap, subsSnap, attribSnap] = await Promise.all([
+    const [dailySnap, subsSnap, attribSnap, chatSnap] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection('subscriptions').get(),
-      db.collection(ATTRIBUTION).get()
+      db.collection(ATTRIBUTION).get(),
+      db.collection(USAGE_DAILY).where(FieldPath.documentId(), '>=', from).get()
     ]);
 
     const subs = new Map(subsSnap.docs.map((d) => [d.id, d.data()]));
@@ -87,6 +89,11 @@ export default async function handler(req, res, deps = {}) {
       from,
       to: jstDate(),
       daily: dailySnap.docs.map((d) => d.data()).sort((a, b) => a.date.localeCompare(b.date)),
+      // Chat (Claude API) use per day: calls answered by Claude and their tokens
+      chat: chatSnap.docs.map((d) => {
+        const v = d.data();
+        return { date: d.id, aiCalls: v.aiCalls || 0, premiumCalls: v.premiumCalls || 0, inputTokens: v.inputTokens || 0, outputTokens: v.outputTokens || 0 };
+      }).sort((a, b) => a.date.localeCompare(b.date)),
       users,
       truncated: Boolean(pageToken)
     });

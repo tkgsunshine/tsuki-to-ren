@@ -19,25 +19,35 @@ const buildInput = (sub, isMatch) => ({
  * Today's fortune for one subscriber, computed by the SAME engine as the site (generateFortuneResult),
  * so the mail matches the result screen: score, LINE golden hour (+ one-liner) and approach advice.
  * The engine reads "today" from the process clock, so the caller must run with TZ=Asia/Tokyo.
+ *
+ * access (from api/_lib/partner-days.js; leave it out for the full Premium mail):
+ * - premium: false → only the advice's first paragraph, like the result screen for free members
+ * - daysLeft: free days left with this partner after today (shown in the mail)
+ * - locked: the partner's free days are used up → the member's own fortune, plus a short teaser
+ *   about the partner (today's flow only, no score) that links to the partner's result screen
  */
-export function buildDailyContent(sub) {
+export function buildDailyContent(sub, access = { premium: true }) {
   // "match" without a partner birth date (saved by older app versions) cannot be computed: send the solo fortune instead of nothing.
   const isMatch = !!sub.oppBirth && (sub.mode ? sub.mode === 'match' : true);
   const character = sub.character === 'ren' ? 'ren' : 'tsuki';
-  const result = generateFortuneResult(buildInput(sub, isMatch), character);
+  const locked = isMatch && access.premium !== true && access.locked === true;
+  const result = generateFortuneResult(buildInput(sub, isMatch && !locked), character);
 
   const hour = result.bestContactHour || '7:30 〜 8:30';
   const note = hour.match(/[（(](.*?)[）)]/);
-  return {
-    hasOpponent: isMatch,
+  const allAdvice = result.dailyActionAdviceParts?.length ? result.dailyActionAdviceParts : [result.dailyActionAdvice || ''];
+  const free = access.premium !== true;
+  const content = {
+    hasOpponent: isMatch && !locked,
     score: result.dailyScore,
     baseScore: result.baseScore,
     mbtiCode: result.myMbtiCode && result.myMbtiCode !== 'UNKNOWN' ? result.myMbtiCode : '',
     mbtiName: result.myMbtiName && result.myMbtiName !== '未選択' ? result.myMbtiName : '',
     hourMain: hour.split(/[（(]/)[0].trim(),
     hourNote: note ? note[1] : '',
-    // Paragraphs of the approach advice (the result screen shows the same paragraphs).
-    adviceParts: result.dailyActionAdviceParts?.length ? result.dailyActionAdviceParts : [result.dailyActionAdvice || ''],
+    // Paragraphs of the approach advice (the result screen shows the same paragraphs; free members see the first one).
+    adviceParts: free ? allAdvice.slice(0, 1) : allAdvice,
+    adviceMore: free && allAdvice.length > 1,
     // The user's own profile card from the result screen (never the partner's: the mail stays about "you").
     profile: {
       title: (result.myAstrologyTheme || '').replace(/[【】]/g, ''),
@@ -47,6 +57,14 @@ export function buildDailyContent(sub) {
       color: result.myAstrologyColor || ''
     }
   };
+  if (isMatch && free && !locked && Number.isFinite(access.daysLeft)) content.freeDaysLeft = access.daysLeft;
+  if (locked) {
+    // Only today's flow (the weather word and moon) — the same thing the locked result screen still shows
+    const match = generateFortuneResult(buildInput(sub, true), character);
+    const mood = getScoreMood(match.baseScore, match.dailyScore);
+    content.partnerTeaser = { title: mood.title, phase: mood.phase };
+  }
+  return content;
 }
 
 export const subjectFor = (date) => `🌙【月と蓮】本日の運勢＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
@@ -115,6 +133,42 @@ export function renderScoreRings(baseScore, dailyScore, hasOpponent) {
                     <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(mood.title)}</div>
                     <div style="font-size: 12px; color: #a9a293; letter-spacing: 0.05em; margin-top: 4px;">
                       ${baseLabel}より <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`;
+}
+
+// 無料の日数の案内（お相手ありの無料会員）。最終日は「明日からはプレミアム」と先に伝える。
+export const partnerCall = (sub) => (sub.oppName && sub.oppName !== 'お相手' ? `${sub.oppName}さん` : 'お相手');
+
+export function renderFreeDaysNote(sub, daysLeft) {
+  const who = esc(partnerCall(sub));
+  const text = daysLeft > 0
+    ? `${who}との今日の相性は、無料であと<strong style="color: #fef08a;">${esc(daysLeft)}日</strong>見られます。`
+    : `${who}との今日の相性を無料で見られるのは、<strong style="color: #fef08a;">今日が最後</strong>です。明日からはプレミアム（月額980円）で見られます。`;
+  return `<tr>
+            <td align="center" style="padding: 0 25px 14px; text-align: center; font-size: 12px; line-height: 1.7; color: #cbd5e1;">${text}</td>
+          </tr>`;
+}
+
+// 無料の日数を使い切ったお相手: 点数は出さず、今日の流れ（月の形と一言）だけ見せ、点数と助言はプレミアムだと先に書く。
+export function renderPartnerTeaser(sub, teaser) {
+  const who = esc(partnerCall(sub));
+  return `<tr>
+            <td style="padding: 0 25px 14px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
+                <tr>
+                  <td align="center" style="padding: 16px 18px 18px; text-align: center;">
+                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.08em;">${who}との今日の流れ</div>
+                    <div style="line-height: 0; font-size: 0; margin-top: 8px;">
+                      <img src="${SITE}/assets/mail/score/moon-${esc(teaser.phase)}.png" width="48" height="48" alt="" style="display: inline-block; width: 48px; height: 48px; border: 0;">
+                    </div>
+                    <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(teaser.title)}</div>
+                    <div style="font-size: 12px; color: #a9a293; line-height: 1.7; margin-top: 8px;">
+                      ${who}との無料の期間が終わりました。<br>二人の今日の点数と助言は、プレミアム（月額980円）で見られます。
                     </div>
                   </td>
                 </tr>
@@ -231,6 +285,9 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
             </td>
           </tr>`}
 
+          ${Number.isFinite(content.freeDaysLeft) ? renderFreeDaysNote(sub, content.freeDaysLeft) : ''}
+          ${content.partnerTeaser ? renderPartnerTeaser(sub, content.partnerTeaser) : ''}
+
           <!-- LINE golden hour (LINE green when it is the LINE time; gold card in single mode) -->
           <tr>
             <td style="padding: 0 25px 14px;">
@@ -255,6 +312,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   <td style="padding: 4px 0 4px 14px; font-size: 13px; line-height: 1.8; color: #cbd5e1;">
                     <strong style="color: #fef08a; letter-spacing: 0.06em;">本日のアプローチ助言</strong><br>
                     ${adviceParts.map(esc).join('<br><br>')}
+                    ${content.adviceMore ? `<br><br><span style="color: #a8a3bd;">続きの助言は、アプリのプレミアム（月額980円）で読めます。</span>` : ''}
                   </td>
                 </tr>
               </table>
@@ -295,8 +353,8 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- CTA -->
           <tr>
             <td align="center" style="padding: 22px 25px 28px; text-align: center;">
-              <a href="${esc(resultUrlFor(sub, content.hasOpponent))}" class="cta-grad" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
-                本日の詳細鑑定を見る &#10132;
+              <a href="${esc(resultUrlFor(sub, content.hasOpponent || Boolean(content.partnerTeaser)))}" class="cta-grad" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
+                ${content.partnerTeaser ? `${esc(partnerCall(sub))}との今日の相性を見る` : '本日の詳細鑑定を見る'} &#10132;
               </a>
             </td>
           </tr>
