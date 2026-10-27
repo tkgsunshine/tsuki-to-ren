@@ -4,7 +4,7 @@ import { MoonMark } from './icons/BrandIcons';
 import type { SavedPartner } from '../App';
 import { CustomDatePicker } from './CustomDatePicker';
 import { mbtiOptions } from '../constants/mbti';
-import { showAlert, showConfirm } from './AppDialog';
+import { showFieldError, showConfirm } from './AppDialog';
 export { mbtiOptions };
 
 interface UnifiedInputViewProps {
@@ -142,6 +142,10 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     }
   }, [loadedPartner, myGender]);
 
+  const myBirthRef = React.useRef<HTMLInputElement>(null);
+  const oppNameRef = React.useRef<HTMLInputElement>(null);
+  const oppBirthRef = React.useRef<HTMLInputElement>(null);
+
   const [showMyDatePicker, setShowMyDatePicker] = useState(false);
   const [showOpponentDatePicker, setShowOpponentDatePicker] = useState(false);
 
@@ -166,16 +170,16 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!myBirth || myBirth.length < 10) {
-      showAlert('あなたの生年月日は「19950401」のように数字8桁で入力してください。');
+      showFieldError('あなたの生年月日は「19950401」のように数字8桁で入力してください。', myBirthRef.current);
       return;
     }
     if (mode === 'match') {
       if (!oppName || !oppName.trim()) {
-        showAlert('お相手のニックネームを入力してください。');
+        showFieldError('お相手のニックネームを入力してください。', oppNameRef.current);
         return;
       }
       if (!oppBirth || oppBirth.length < 10) {
-        showAlert('お相手の生年月日は「19951221」のように数字8桁で入力してください。');
+        showFieldError('お相手の生年月日は「19951221」のように数字8桁で入力してください。', oppBirthRef.current);
         return;
       }
     }
@@ -288,7 +292,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       </div>
 
       {/* Main Integrated Form */}
-      <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box' }}>
+      <form onSubmit={handleFormSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box' }}>
         
         {urlPair && (
           <div style={{
@@ -333,6 +337,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
             <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
               <input
+                ref={myBirthRef}
                 type="text"
                 inputMode="numeric"
                 maxLength={10}
@@ -543,6 +548,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手のニックネーム (任意)</label>
               <input
+                ref={oppNameRef}
                 type="text"
                 maxLength={8}
                 placeholder="お相手 (最大8文字)"
@@ -556,6 +562,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
               <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
               <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                 <input
+                  ref={oppBirthRef}
                   type="text"
                   inputMode="numeric"
                   maxLength={10}

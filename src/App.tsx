@@ -31,7 +31,7 @@ import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { trackFortune } from './services/analytics';
 import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
-import { showAlert, showConfirm } from './components/AppDialog';
+import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
@@ -620,6 +620,11 @@ function App() {
   });
   const [showNotifyEmailModal, setShowNotifyEmailModal] = useState(false);
   const [notifyEmailInput, setNotifyEmailInput] = useState('');
+  // 入力エラーのとき、OKのあと該当の入力欄へ誘導するための参照
+  const profileBirthRef = useRef<HTMLInputElement>(null);
+  const editPartnerBirthRef = useRef<HTMLInputElement>(null);
+  const notifyEmailRef = useRef<HTMLInputElement>(null);
+  const promptEmailRef = useRef<HTMLInputElement>(null);
 
   // Whose fortune the daily mail is about: 'self', a saved partner's id, or 'keep' (the partner already in the
   // subscription but not saved on this device). The subscription in Firestore is the truth the 8:00 mail uses.
@@ -763,7 +768,7 @@ function App() {
   const saveEditPartner = () => {
     if (!editingPartnerId) return;
     if (!editPartnerBirth || editPartnerBirth.length < 10) {
-      showAlert('生年月日は「19950401」のように数字8桁で入力してください。');
+      showFieldError('生年月日は「19950401」のように数字8桁で入力してください。', editPartnerBirthRef.current);
       return;
     }
     const fields = {
@@ -1858,6 +1863,7 @@ function App() {
                   <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                     <input
+                      ref={profileBirthRef}
                       type="text"
                       inputMode="numeric"
                       maxLength={10}
@@ -1946,7 +1952,7 @@ function App() {
                   className="consult-btn"
                   onClick={async () => {
                     if (!isValidBirthDate(myBirth)) {
-                      showAlert('生年月日を「19950401」のように8桁で正しく入力してください。');
+                      showFieldError('生年月日を「19950401」のように8桁で正しく入力してください。', profileBirthRef.current);
                       return;
                     }
                     try {
@@ -2100,7 +2106,9 @@ function App() {
                               <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input
+                                  ref={editPartnerBirthRef}
                                   type="text"
+                                  inputMode="numeric"
                                   value={editPartnerBirth}
                                   onChange={(e) => setEditPartnerBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
                                   placeholder="例: 19950125"
@@ -2848,6 +2856,7 @@ function App() {
                 直接入力 / 変更:
               </label>
               <input
+                ref={notifyEmailRef}
                 type="email"
                 placeholder="example@email.com"
                 value={notifyEmailInput}
@@ -2921,7 +2930,7 @@ function App() {
               type="button"
               onClick={async () => {
                 if (!notifyEmailInput || !notifyEmailInput.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', notifyEmailRef.current);
                   return;
                 }
                 if (!isValidBirthDate(myBirth)) {
@@ -2935,7 +2944,7 @@ function App() {
                   return;
                 }
                 if (cleanEmail !== accountEmail) {
-                  showAlert('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。');
+                  showFieldError('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。', notifyEmailRef.current);
                   return;
                 }
 
@@ -2997,6 +3006,7 @@ function App() {
               完了するため、ご入力されたメールアドレスを入力してください。
             </p>
             <input
+              ref={promptEmailRef}
               type="email"
               placeholder="例: user@example.com"
               value={promptEmailInput}
@@ -3007,7 +3017,7 @@ function App() {
               onClick={async () => {
                 const clean = promptEmailInput.trim().toLowerCase();
                 if (!clean || !clean.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', promptEmailRef.current);
                   return;
                 }
                 const res = await completeEmailMagicLinkSignIn(clean);
