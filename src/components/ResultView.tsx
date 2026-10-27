@@ -266,6 +266,10 @@ interface ResultViewProps {
   onShowLegal?: () => void;
   // チャット相談を開く。質問ボタンから開いたときは、その質問を最初に送る
   onOpenChat?: (question?: string) => void;
+  // 毎朝8時のメール通知の実際の状態（マイページと同じ設定）。isCurrentReading: いま見ている鑑定が配信内容と同じ
+  notifyStatus?: { on: boolean; targetLabel: string; isCurrentReading: boolean };
+  onOpenNotifySettings?: () => void;
+  onSwitchNotifyToCurrent?: () => void;
 }
 
 export const ResultView: React.FC<ResultViewProps> = ({
@@ -287,7 +291,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onSavePartner = () => {},
   isPartnerSaved = false,
   onShowLegal,
-  onOpenChat
+  onOpenChat,
+  notifyStatus,
+  onOpenNotifySettings,
+  onSwitchNotifyToCurrent
 }) => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -515,7 +522,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   const activeResult = selectedChar === 'ren' ? renResult : tsukiResult;
   const oppNickname = opponentName || 'お相手';
-  const [isNotified, setIsNotified] = useState(false);
   const [isPastGuardian, setIsPastGuardian] = useState(false);
   const myAstrologyRef = useRef<HTMLDivElement>(null);
 
@@ -1905,62 +1911,77 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         </div>
 
-        {/* Daily Notification Prompt */}
-        <div style={{
-          marginTop: '0.25rem',
-          padding: '0.85rem',
-          background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.08) 0%, rgba(159, 134, 192, 0.08) 100%)',
-          border: '1px dashed rgba(226, 192, 116, 0.3)',
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.5rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
-            <Bell size={16} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
-            <div style={{ fontSize: '0.7rem', color: '#e8e3d8', lineHeight: '1.45', minWidth: 0 }}>
-              <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                毎朝8時に運勢＆LINE吉時間をお届け
+        {/* Daily Notification Prompt: マイページの「毎朝8時の運勢・吉時間通知」と同じ設定を表示する */}
+        {(() => {
+          const notifyOn = !!notifyStatus?.on;
+          const isCurrent = notifyOn && notifyStatus!.isCurrentReading;
+          const currentLabel = hasOpponent ? `${oppNickname === 'お相手' ? 'お相手' : `${oppNickname}さん`}との相性` : 'あなたの運勢';
+          const title = !notifyOn ? '毎朝8時に運勢＆LINE吉時間をお届け' : isCurrent ? '毎朝8時の通知はON' : `毎朝8時の通知：${notifyStatus!.targetLabel}`;
+          const sub = !notifyOn ? '相性と運気は毎日変化します' : isCurrent ? `${notifyStatus!.targetLabel}を配信中` : `${currentLabel}に切り替えられます`;
+          const buttonLabel = !notifyOn ? '通知を設定' : isCurrent ? '変更' : (hasOpponent ? 'この人に切替' : 'こちらに切替');
+          const quiet = isCurrent;
+          return (
+            <div style={{
+              marginTop: '0.25rem',
+              padding: '0.85rem',
+              background: isCurrent
+                ? 'linear-gradient(90deg, rgba(106, 169, 124, 0.1) 0%, rgba(106, 169, 124, 0.04) 100%)'
+                : 'linear-gradient(90deg, rgba(226, 192, 116, 0.08) 0%, rgba(159, 134, 192, 0.08) 100%)',
+              border: isCurrent ? '1px solid rgba(106, 169, 124, 0.35)' : '1px dashed rgba(226, 192, 116, 0.3)',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.5rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
+                <Bell size={16} style={{ color: isCurrent ? '#8fd0a0' : 'var(--color-gold)', flexShrink: 0 }} />
+                <div style={{ fontSize: '0.7rem', color: '#e8e3d8', lineHeight: '1.45', minWidth: 0 }}>
+                  <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                    {title}
+                  </div>
+                  <div style={{ color: isCurrent ? '#a8d3b0' : '#a9a49a', fontSize: '0.66rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                    {sub}
+                  </div>
+                </div>
               </div>
-              <div style={{ color: '#a9a49a', fontSize: '0.66rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                相性と運気は毎日変化します
-              </div>
+              <button
+                onClick={() => {
+                  if (notifyOn) {
+                    if (isCurrent) onOpenNotifySettings?.();
+                    else onSwitchNotifyToCurrent?.();
+                  } else if (!isRegistered) {
+                    showConfirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
+                      if (ok) handleScrollToRegister();
+                    });
+                  } else if (!isSubscribed) {
+                    showConfirm('毎朝8時の運勢通知機能は、月額980円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+                      if (ok) handleScrollToSub();
+                    });
+                  } else {
+                    onOpenNotifySettings?.();
+                  }
+                }}
+                style={{
+                  background: quiet ? 'transparent' : 'linear-gradient(135deg, #f2e2b3 0%, #e2c074 50%, #b8692d 100%)',
+                  border: quiet ? '1px solid rgba(168, 211, 176, 0.6)' : 'none',
+                  borderRadius: '20px',
+                  color: quiet ? '#a8d3b0' : '#0e141d',
+                  padding: '0.5rem 0.95rem',
+                  fontSize: '0.75rem',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  boxShadow: quiet ? 'none' : '0 4px 12px rgba(226,192,116,0.5)',
+                  letterSpacing: '0.02em'
+                }}
+              >
+                {buttonLabel}
+              </button>
             </div>
-          </div>
-          <button
-            onClick={() => {
-              if (!isRegistered) {
-                showConfirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
-                  if (ok) handleScrollToRegister();
-                });
-              } else if (!isSubscribed) {
-                showConfirm('毎朝8時の運勢通知機能は、月額980円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
-                  if (ok) handleScrollToSub();
-                });
-              } else {
-                setIsNotified(!isNotified);
-                showAlert(!isNotified ? '🔔 毎朝8時の運勢通知をONに設定しました。' : '🔕 デイリー通知をOFFに設定しました。');
-              }
-            }}
-            style={{
-              background: isNotified ? 'linear-gradient(135deg, #6aa97c 0%, #15803d 100%)' : 'linear-gradient(135deg, #f2e2b3 0%, #e2c074 50%, #b8692d 100%)',
-              border: 'none',
-              borderRadius: '20px',
-              color: isNotified ? '#ffffff' : '#0e141d',
-              padding: '0.5rem 0.95rem',
-              fontSize: '0.75rem',
-              fontWeight: '900',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(226,192,116,0.5)',
-              letterSpacing: '0.02em'
-            }}
-          >
-            {isNotified ? '通知ON' : '通知を設定'}
-          </button>
-        </div>
+          );
+        })()}
       </div>
 
         {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ */}

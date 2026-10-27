@@ -632,7 +632,10 @@ function App() {
     }
     let cancelled = false;
     getEmailSubscription().then((sub) => {
-      if (!cancelled) setNotifySub(sub);
+      if (cancelled) return;
+      setNotifySub(sub);
+      // The subscription in Firestore decides delivery, so the ON/OFF shown here follows it (e.g. set on another device)
+      if (sub) setNotifyDailyLuck(!!sub.enabled);
     });
     return () => {
       cancelled = true;
@@ -644,6 +647,10 @@ function App() {
   const isSubPartner = (p: SavedPartner) => subHasPartner && p.name === notifySub?.oppName && p.birth.replace(/\//g, '-') === notifySub?.oppBirth;
   const showKeepTarget = subHasPartner && !savedPartners.some(isSubPartner);
   const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${notifySub.oppName || 'お相手'}さんとの相性` : 'あなたの運勢');
+  // Whether the reading on screen (the partner now, or the solo reading) is the one the daily mail is about
+  const notifyIsCurrentReading = !!notifySub && (mode === 'match'
+    ? subHasPartner && notifySub.oppName === oppName && notifySub.oppBirth === oppBirth.replace(/\//g, '-')
+    : !subHasPartner);
 
   const openNotifyModal = (target?: string) => {
     setNotifyEmailInput(notifyEmail || currentUser?.email || '');
@@ -677,6 +684,34 @@ function App() {
     const saved = await saveEmailSubscriptionData(data);
     if (saved) setNotifySub(data);
     return saved;
+  };
+
+  // From the result screen: makes the daily mail about the reading on screen, keeping the address
+  const switchNotifyToCurrentReading = async () => {
+    const email = (notifySub?.email || currentUser?.email || '').toLowerCase();
+    if (!email) {
+      showAlert('メール通知には、メールアドレス付きのアカウントでのログインが必要です。');
+      return;
+    }
+    if (!isValidBirthDate(myBirth)) {
+      showAlert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
+      return;
+    }
+    const target = mode === 'match' ? `${oppName || 'お相手'}さんとの相性` : 'あなたの運勢';
+    const ok = await showConfirm(`毎朝8時の通知を「${target}」に切り替えますか？`, { okLabel: '切り替える', cancelLabel: 'やめる' });
+    if (!ok) return;
+    const partner: SavedPartner | null = mode === 'match'
+      ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)
+        || { id: 'current', name: oppName || 'お相手', birth: oppBirth, mbti: oppMbti, gender: oppGender, relationship }
+      : null;
+    const saved = await saveNotifySubscription(email, partner);
+    if (!saved) {
+      showAlert('通知の切り替えに失敗しました。ログインし直してから、もう一度お試しください。');
+      return;
+    }
+    setNotifyEmail(email);
+    setNotifyDailyLuck(true);
+    showAlert(`🔔 明日の朝から「${target}」をお届けします。`);
   };
 
   useEffect(() => {
@@ -1089,6 +1124,12 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                notifyStatus={{ on: notifyDailyLuck && !!notifySub?.enabled, targetLabel: notifyTargetLabel, isCurrentReading: notifyIsCurrentReading }}
+                onOpenNotifySettings={() => {
+                  if (!currentUser) { setShowAuthModal(true); return; }
+                  openNotifyModal(mode === 'match' ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)?.id : 'self');
+                }}
+                onSwitchNotifyToCurrent={switchNotifyToCurrentReading}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -1126,6 +1167,12 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                notifyStatus={{ on: notifyDailyLuck && !!notifySub?.enabled, targetLabel: notifyTargetLabel, isCurrentReading: notifyIsCurrentReading }}
+                onOpenNotifySettings={() => {
+                  if (!currentUser) { setShowAuthModal(true); return; }
+                  openNotifyModal(mode === 'match' ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)?.id : 'self');
+                }}
+                onSwitchNotifyToCurrent={switchNotifyToCurrentReading}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -1561,6 +1608,7 @@ function App() {
                         setNotifyDailyLuck(false);
                         const ok = await unsubscribeEmailSubscription();
                         if (ok) {
+                          setNotifySub(prev => (prev ? { ...prev, enabled: false } : prev));
                           showAlert('🔕 毎朝8時の運勢通知をOFFにしました。');
                         } else {
                           setNotifyDailyLuck(true);
