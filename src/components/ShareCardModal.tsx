@@ -125,9 +125,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
     <div style={{ position: 'absolute', inset: 0, zIndex: 1, backgroundColor: '#05080d', overflow: 'hidden' }}>
       {showOpponent && result.opponentAvatarUrl ? (
         <>
-          {/* 上半分: 自分（頭が切れないよう上端合わせ） / 下半分: お相手（中央合わせ） */}
+          {/* 上下とも上端合わせ。守護獣によっては顔が画像の上端近くにあり（例: 酉）、中央合わせだと顔が切れる */}
           <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '50%', ...coverImage(myAvatarBase64, 'center top') }} />
-          <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', bottom: 0, ...coverImage(oppAvatarBase64, 'center center') }} />
+          <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', bottom: 0, ...coverImage(oppAvatarBase64, 'center top') }} />
           {/* 2枚の継ぎ目をぼかし、二つ名と名前ラベルを読みやすくする */}
           <div style={{
             position: 'absolute',
@@ -542,7 +542,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             </span>
             <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
             <span style={{ fontSize: '16px', color: '#d8d2c6', letterSpacing: '0.08em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
-              恋愛鑑定アプリ - 蓮と月
+              恋愛鑑定アプリ - 月と蓮
             </span>
           </div>
         </div>
@@ -903,7 +903,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               </span>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.52rem' }}>|</span>
               <span style={{ fontSize: '0.58rem', color: '#d8d2c6', letterSpacing: '0.05em', textShadow: '0 1px 4px rgba(0,0,0,0.95)', fontWeight: '500' }}>
-                恋愛鑑定アプリ - 蓮と月
+                恋愛鑑定アプリ - 月と蓮
               </span>
             </div>
           </div>
