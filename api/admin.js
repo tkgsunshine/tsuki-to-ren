@@ -6,6 +6,7 @@ import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
 
 // Data for the admin page (/admin): daily counters, and the member list (with each member's premium state).
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
+// GET ?check=1 only confirms the account is an admin (used by the site to leave the owner's browsers out of the counts).
 // POST { action: 'inquiryStatus', id, status } marks a contact-form message as handled (or back to new).
 const MAX_USER_PAGES = 20; // 20 x 1000 accounts
 const MAX_INQUIRIES = 200; // newest first
@@ -47,6 +48,8 @@ export default async function handler(req, res, deps = {}) {
     const auth = deps.auth || getAdminAuth();
     const denied = await authorizeAdmin(req, auth, parseAdminEmails(deps.adminEmails ?? process.env.ADMIN_EMAILS));
     if (denied) return res.status(denied.status).json({ status: 'error', message: denied.message });
+    // ?check=1: only "is this the owner's account?", so the owner's own browsers / home-screen app can leave the counts
+    if (req.query?.check === '1') return res.status(200).json({ status: 'success', admin: true });
 
     const db = deps.db || getDb();
     if (req.method === 'POST') {

@@ -154,3 +154,15 @@ test('admin: only verified emails in ADMIN_EMAILS get through', async () => {
   assert.equal(res.code, 401);
   assert.equal(res.headers['Cache-Control'], 'no-store, private');
 });
+
+test('admin ?check=1 answers only whether the account is an admin, without reading data', async () => {
+  const auth = { verifyIdToken: async (t) => JSON.parse(t) };
+  const req = (claims) => ({ method: 'GET', headers: { authorization: `Bearer ${JSON.stringify(claims)}` }, query: { check: '1' } });
+  let res = mockRes();
+  await admin(req({ email: 'owner@example.com', email_verified: true }), res, { auth, adminEmails: 'owner@example.com', db: { collection: () => { throw new Error('should not read'); } } });
+  assert.equal(res.code, 200);
+  assert.equal(res.body.admin, true);
+  res = mockRes();
+  await admin(req({ email: 'other@example.com', email_verified: true }), res, { auth, adminEmails: 'owner@example.com' });
+  assert.equal(res.code, 403);
+});
