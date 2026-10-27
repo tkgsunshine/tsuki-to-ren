@@ -2,14 +2,15 @@ import checkout from '../_lib/stripe-checkout.js';
 import portal from '../_lib/stripe-portal.js';
 import status from '../_lib/stripe-status.js';
 import webhook from '../_lib/stripe-webhook.js';
+import partner from '../_lib/partner-days.js';
 
-// /api/stripe/checkout | portal | status | webhook in one function
+// /api/stripe/checkout | portal | status | webhook | partner in one function
 // (the Hobby plan allows at most 12 functions per deployment).
 // Body parsing is off because the webhook's signature is checked against the exact bytes Stripe sent;
 // the raw body is handed on as a Buffer, which the other handlers parse as JSON.
 export const config = { api: { bodyParser: false } };
 
-const HANDLERS = { checkout, portal, status, webhook };
+const HANDLERS = { checkout, portal, status, webhook, partner };
 
 const readRawBody = async (req) => {
   const chunks = [];

@@ -11,6 +11,8 @@ interface ShareCardModalProps {
   opponentName?: string;
   hasOpponent: boolean;
   shareUrl: string;
+  /** 無料の日数を使い切ったお相手: 今日の点数は「??」にする */
+  hideDailyScore?: boolean;
   onClose: () => void;
 }
 
@@ -21,9 +23,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   opponentName,
   hasOpponent,
   shareUrl,
+  hideDailyScore = false,
   onClose
 }) => {
   const oppNickname = opponentName || 'お相手';
+  const dailyScoreLabel = hideDailyScore ? '??' : String(result.dailyScore);
   const isRen = selectedChar === 'ren';
 
   const [activeTab, setActiveTab] = useState<'match' | 'single'>('match');
@@ -189,15 +193,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
   const handleXShare = () => {
     const text = showOpponent
-      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${result.dailyScore}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #相性診断 #16タイプ相性 #四柱推命 #ツインレイ`
-      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${result.dailyScore}点】✨\n「${result.oneLiner}」\n\n四柱推命×九星気学の本気の恋愛鑑定はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #本日の運勢 #四柱推命 #16タイプ診断`;
+      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #相性診断 #16タイプ相性 #四柱推命 #ツインレイ`
+      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n四柱推命×九星気学の本気の恋愛鑑定はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #本日の運勢 #四柱推命 #16タイプ診断`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
   };
 
   const handleLineShare = () => {
     const text = showOpponent
-      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${result.dailyScore}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断結果はこちら👇\n${targetShareUrl}`
-      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${result.dailyScore}点】✨\n「${result.oneLiner}」\n\n本格恋愛鑑定結果はこちら👇\n${targetShareUrl}`;
+      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断結果はこちら👇\n${targetShareUrl}`
+      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n本格恋愛鑑定結果はこちら👇\n${targetShareUrl}`;
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`);
   };
 
@@ -346,7 +350,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 <span style={{ fontSize: '18px', color: '#a39d91' }}>今日の運勢</span>
                 <span style={{ fontSize: '48px', fontWeight: 'bold', color: '#9cc6d8', lineHeight: '1.1' }}>
-                  {result.dailyScore}<span style={{ fontSize: '24px' }}>点</span>
+                  {dailyScoreLabel}<span style={{ fontSize: '24px' }}>点</span>
                 </span>
                 <span style={{ fontSize: '16px', color: '#736e65', marginTop: '4px' }}>
                   {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
@@ -430,7 +434,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 <span style={{ fontSize: '15px', color: '#d8d2c6' }}>今日の相性</span>
                 <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#9cc6d8', lineHeight: '1' }}>
-                  {result.dailyScore}<span style={{ fontSize: '16px' }}>点</span>
+                  {dailyScoreLabel}<span style={{ fontSize: '16px' }}>点</span>
                 </span>
               </div>
             </div>
@@ -739,7 +743,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 }}>
                   <span style={{ fontSize: '0.58rem', color: '#a39d91' }}>今日の運勢</span>
                   <span className="font-serif" style={{ fontSize: '1.4rem', color: '#9cc6d8', fontWeight: 'bold', lineHeight: '1.1' }}>
-                    {result.dailyScore}<span style={{ fontSize: '0.75rem' }}>点</span>
+                    {dailyScoreLabel}<span style={{ fontSize: '0.75rem' }}>点</span>
                   </span>
                   <span style={{ fontSize: '0.52rem', color: '#736e65', marginTop: '2px' }}>
                     {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
@@ -828,7 +832,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 }}>
                   <span style={{ fontSize: '0.55rem', color: '#d8d2c6' }}>今日の相性</span>
                   <span className="font-serif" style={{ fontSize: '0.9rem', color: '#9cc6d8', fontWeight: 'bold', lineHeight: '1' }}>
-                    {result.dailyScore}<span style={{ fontSize: '0.55rem' }}>点</span>
+                    {dailyScoreLabel}<span style={{ fontSize: '0.55rem' }}>点</span>
                   </span>
                 </div>
               </div>

@@ -17,6 +17,8 @@ interface ChatModalProps {
   onClose: () => void;
   result?: FortuneResult | null;
   opponentName?: string;
+  /** 無料の日数を使い切ったお相手: 今日の点数をAIにも渡さない */
+  hideDailyScore?: boolean;
 }
 
 interface Message {
@@ -35,7 +37,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   onSubscribe,
   onClose,
   result,
-  opponentName
+  opponentName,
+  hideDailyScore = false
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -106,7 +109,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
 【現在の二人の相性】
 基本相性値: ${result.baseScore}点
-今日のバイオリズム相性値: ${result.dailyScore}点
+今日のバイオリズム相性値: ${hideDailyScore ? '非公開（プレミアム限定。点数は答えないこと）' : `${result.dailyScore}点`}
 二人の相性一言要約: "${result.oneLiner}"`;
     }
     
