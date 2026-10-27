@@ -181,6 +181,9 @@ function App() {
     if (tab === 'home') {
       setFlowStep('input');
       setLoadedPartner(null);
+      // 共有リンクの結果を見ていたときも、「恋愛診断」で自分の鑑定の入力画面へ
+      setSharedView(null);
+      setSharedTeaser(null);
     }
     scrollMainTo(0);
   };
@@ -1287,7 +1290,7 @@ function App() {
         {activeTab === 'home' && sharedView?.status === 'loading' && <LoadingScreen />}
         {activeTab === 'home' && sharedView?.status === 'ready' && (() => {
           const d = sharedView.data;
-          const leave = () => { setSharedView(null); setFlowStep('input'); scrollMainTo(0); };
+          const leave = () => handleTabChange('home');
           return (
             <ResultView
               result={selectedCharacter === 'ren' ? d.ren : d.tsuki}
@@ -1309,7 +1312,7 @@ function App() {
                 setShowLegalPage(true);
                 pushNav({ legal: true });
               }}
-              sharedBy={{ name: d.myName, date: `${Number(d.date.slice(5, 7))}月${Number(d.date.slice(8, 10))}日` }}
+              sharedBy={{ name: d.myName }}
             />
           );
         })()}
@@ -1321,7 +1324,7 @@ function App() {
               <div className="home-input-flow" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', flexShrink: 0 }}>
                 {/* 共有リンクから来た人には、まず共有された鑑定結果を見せる（「あなたも無料で鑑定する」で入力画面へ） */}
                 {sharedTeaser ? (
-                  <SharedResultView shared={sharedTeaser} onStart={() => { setSharedTeaser(null); scrollMainTo(0); }} />
+                  <SharedResultView shared={sharedTeaser} onStart={() => handleTabChange('home')} />
                 ) : (
                 <>
                 <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />
