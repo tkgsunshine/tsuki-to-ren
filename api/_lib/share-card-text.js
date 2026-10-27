@@ -36,6 +36,14 @@ export const SHARE_LINES = [
   '判断ノイズが増加する静観日。無駄なアプローチを凍結してください。',
 ];
 
+// 16タイプの愛称（fortuneEngine.ts の mbtiNames と同じ）。URLには4文字のタイプ（mm / om）だけを入れる
+export const SHARE_MBTI_NAMES = {
+  INFJ: '提唱者', INFP: '仲介者', ENFJ: '主人公', ENFP: '運動家',
+  INTJ: '建築家', INTP: '論理学者', ENTJ: '指揮官', ENTP: '討論者',
+  ISFJ: '擁護者', ISFP: '冒険家', ESFJ: '領事官', ESFP: 'エンターテイナー',
+  ISTJ: '管理者', ISTP: '巨匠', ESTJ: '幹部', ESTP: '起業家',
+};
+
 /** 鑑定結果の文から番号を探す。見つからなければ -1 */
 export function shareTitleCode(title) {
   const head = /^【([^】]+)】/.exec(String(title || ''))?.[1];

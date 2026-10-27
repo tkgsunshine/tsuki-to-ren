@@ -34,7 +34,7 @@ import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, 
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultBanner, readSharedTeaser } from './components/SharedResultBanner';
-import { shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
+import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
 import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFromPath, type NavState, type OverlayName, type PageFields, type SettingsSubView } from './utils/navHistory';
@@ -647,6 +647,9 @@ function App() {
       if (ma) params.set('ma', ma);
       const oa = mode === 'match' ? avatarKey(activeResult.opponentAvatarUrl) : undefined;
       if (oa) params.set('oa', oa);
+      // カードに出す16タイプ（4文字だけ。未選択は入れない）
+      if (SHARE_MBTI_NAMES[myMbti]) params.set('mm', myMbti);
+      if (mode === 'match' && SHARE_MBTI_NAMES[oppMbti]) params.set('om', oppMbti);
       // カードの説明の文は番号で渡す（api/_lib/share-card-text.js）
       const c = mode === 'match' ? shareTitleCode(activeResult.compatibilityTitle) : -1;
       if (c >= 0) params.set('c', String(c));

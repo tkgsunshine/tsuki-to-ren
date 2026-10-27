@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import satori from 'satori';
 import { Resvg, initWasm } from '@resvg/resvg-wasm';
-import { SHARE_LINES, SHARE_TITLES } from './_lib/share-card-text.js';
+import { SHARE_LINES, SHARE_MBTI_NAMES, SHARE_TITLES } from './_lib/share-card-text.js';
 
 const require = createRequire(import.meta.url);
 const ASSETS = path.join(process.cwd(), 'scripts/x/assets');
@@ -41,7 +41,7 @@ function scoreBox(label, value, color) {
   return el('div', { flexDirection: 'column', alignItems: 'center', padding: '0 44px' }, [
     el('div', { fontSize: 24, color: '#cbd5e1', marginBottom: 4 }, label),
     el('div', { alignItems: 'flex-end' }, [
-      el('span', { fontSize: 80, color, lineHeight: 1 }, value),
+      el('span', { fontSize: 72, color, lineHeight: 1 }, value),
       el('span', { fontSize: 30, color, marginLeft: 6, marginBottom: 8 }, '点'),
     ]),
   ]);
@@ -59,13 +59,23 @@ export async function renderShareCard(params, { background = 'guardian' } = {}) 
   const line = SHARE_LINES[Number(params.get('l'))];
   const dailyScore = score(get('ds', 'dailyScore'));
 
+  // 名前の下に16タイプ（例: INTJ・建築家）。タイプが未選択の人は出さない
+  const mbtiTag = (key) => {
+    const code = String(params.get(key) || '').toUpperCase();
+    return SHARE_MBTI_NAMES[code]
+      ? el('div', { marginTop: 4, fontSize: 21, color: '#e9d5ff', padding: '3px 16px', borderRadius: 20, background: 'rgba(10,10,22,0.72)', border: '1px solid rgba(192,132,252,0.5)' }, `${code}・${SHARE_MBTI_NAMES[code]}`)
+      : null;
+  };
+  // お相手ありのときは左右の幅をそろえ、「×」が真ん中に来るようにする
+  const person = (name, key, suffix = '', width) =>
+    el('div', { flexDirection: 'column', alignItems: 'center', ...(width ? { width } : {}) }, [el('div', {}, `${name}${suffix}`), mbtiTag(key)].filter(Boolean));
   const heading = hasOpponent
-    ? el('div', { alignItems: 'center', fontSize: 56, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, [
-        el('span', {}, mName),
-        el('span', { color: '#e2c074', fontSize: 44, margin: '0 26px' }, '×'),
-        el('span', {}, oName),
+    ? el('div', { alignItems: 'flex-start', fontSize: 52, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, [
+        person(mName, 'mm', '', 340),
+        el('span', { color: '#e2c074', fontSize: 40, margin: '8px 10px 0' }, '×'),
+        person(oName, 'om', '', 340),
       ])
-    : el('div', { fontSize: 56, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, `${mName} の今日の恋愛運`);
+    : el('div', { fontSize: 52, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, [person(mName, 'mm', ' の今日の恋愛運')]);
 
   const scores = hasOpponent
     ? [scoreBox('基本の相性', baseScore, '#e2c074'), el('div', { width: 1, height: 120, background: 'rgba(255,255,255,0.18)' }, []), scoreBox('今日の相性', dailyScore, '#93c5fd')]
@@ -120,7 +130,7 @@ export async function renderShareCard(params, { background = 'guardian' } = {}) 
             ? el('div', { fontSize: 26, color: '#fef08a', padding: '6px 26px', borderRadius: 30, background: 'rgba(10,10,22,0.72)', border: '1.5px solid rgba(226,192,116,0.55)' }, `【${titlePair[0]}】${titlePair[1]}`)
             : null,
           heading,
-          el('div', { alignItems: 'center', padding: '14px 10px', borderRadius: 24, background: 'rgba(10,10,22,0.72)', border: '1px solid rgba(255,255,255,0.16)' }, scores),
+          el('div', { alignItems: 'center', padding: '8px 10px', borderRadius: 24, background: 'rgba(10,10,22,0.72)', border: '1px solid rgba(255,255,255,0.16)' }, scores),
           line
             ? el(
                 'div',
