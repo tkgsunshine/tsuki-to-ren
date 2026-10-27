@@ -24,15 +24,28 @@ export default function handler(req, res) {
   // X and LINE do not show SVG card images (api/og.js returns SVG), so the card uses the site's JPG
   const ogImageUrl = `https://${req.headers.host}/ogp-image.jpg`;
 
-  // Build the redirect URL for normal users
-  const appUrl = `https://${req.headers.host}/?${params.toString()}`;
+  const hasOpponent = !!oName && params.get('mode') !== 'single' && params.get('mode') !== 's';
+
+  // Build the redirect URL for normal users.
+  // Links made before birth dates were taken out of them (they carry mb) still open the full result as before.
+  // Newer links carry only names and scores: the app shows the sharer's summary and invites the visitor to their own diagnosis.
+  let appUrl;
+  if (params.get('mb') || params.get('mBirth')) {
+    appUrl = `https://${req.headers.host}/?${params.toString()}`;
+  } else {
+    const teaser = new URLSearchParams({ from: 'share' });
+    if (get('mn', 'mName')) teaser.set('sn', get('mn', 'mName'));
+    if (hasOpponent) teaser.set('sp', oName);
+    if (/^\d{1,3}$/.test(dailyScore)) teaser.set('sd', dailyScore);
+    if (params.get('ol')) teaser.set('sl', params.get('ol'));
+    appUrl = `https://${req.headers.host}/?${teaser.toString()}`;
+  }
 
   // Detect crawlers
   const ua = (req.headers['user-agent'] || '').toLowerCase();
   const isCrawler = /twitterbot|facebookexternalhit|linebot|linkedin|discord|slackbot|telegrambot|whatsapp|applebot|bingbot|googlebot/i.test(ua);
 
   if (isCrawler) {
-    const hasOpponent = !!oName && params.get('mode') !== 'single';
     const rawOgTitle = hasOpponent
       ? `${mName} × ${oName} の相性鑑定結果 | 月と蓮`
       : `${mName} の恋愛運 | 月と蓮`;
@@ -63,7 +76,7 @@ export default function handler(req, res) {
   <meta name="twitter:title" content="${ogTitle}" />
   <meta name="twitter:description" content="${ogDescription}" />
   <meta name="twitter:image" content="${ogImageUrl}" />
-  <link rel="canonical" href="${canonicalUrl}" />
+  <link rel="canonical" href="https://${escapeHtml(req.headers.host)}/" />
 </head>
 <body>
   <p>Redirecting...</p>
