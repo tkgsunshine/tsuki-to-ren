@@ -166,3 +166,28 @@ test('admin ?check=1 answers only whether the account is an admin, without readi
   await admin(req({ email: 'other@example.com', email_verified: true }), res, { auth, adminEmails: 'owner@example.com' });
   assert.equal(res.code, 403);
 });
+
+test('admin: the owner\'s accounts are flagged (ADMIN_EMAILS with +aliases, and marked uids)', async () => {
+  const { baseEmail } = await import('../api/admin.js');
+  assert.equal(baseEmail('Owner+1@Example.com'), 'owner@example.com');
+  const auth = {
+    verifyIdToken: async () => ({ email: 'owner@example.com', email_verified: true }),
+    listUsers: async () => ({ users: [
+      { uid: 'a', email: 'owner@example.com', providerData: [], metadata: {} },
+      { uid: 'b', email: 'owner+1@example.com', providerData: [], metadata: {} },
+      { uid: 'c', email: null, providerData: [], metadata: {} },
+      { uid: 'd', email: 'someone@example.com', providerData: [], metadata: {} },
+    ] }),
+  };
+  const empty = { docs: [] };
+  const query = { get: async () => empty, orderBy: () => ({ limit: () => ({ get: async () => empty }) }) };
+  const db = { collection: (name) => ({
+    where: () => query, get: async () => empty, orderBy: query.orderBy,
+    doc: () => ({ get: async () => ({ data: () => (name === 'adminSettings' ? { uids: ['c'] } : undefined) }) }),
+  }) };
+  const res = mockRes();
+  await admin({ method: 'GET', headers: { authorization: 'Bearer x' }, query: {} }, res, { auth, db, adminEmails: 'owner@example.com' });
+  assert.equal(res.code, 200);
+  const owner = Object.fromEntries(res.body.users.map((u) => [u.uid, u.owner]));
+  assert.deepEqual(owner, { a: 'auto', b: 'auto', c: 'marked', d: null });
+});

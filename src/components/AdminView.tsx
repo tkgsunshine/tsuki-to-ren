@@ -37,6 +37,7 @@ interface Member {
   landing: string | null;
   device: string | null;
   premium: 'live' | 'test' | null;
+  owner: 'auto' | 'marked' | null; // the owner's own account, left out of the member counts
 }
 interface ChatDay {
   date: string;
@@ -420,6 +421,7 @@ export default function AdminView() {
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [optedOut, setOptedOut] = useState(isTrackingOptedOut);
+  const [showOwners, setShowOwners] = useState(false);
 
   useEffect(() => {
     document.title = '管理画面 | 月と蓮';
@@ -468,7 +470,27 @@ export default function AdminView() {
 
   const totals = useMemo(() => daily.reduce((a, d) => addCounts(a, d), zero()), [daily]);
 
-  const members = useMemo(() => data?.users || [], [data]);
+  const allMembers = useMemo(() => data?.users || [], [data]);
+  // Counts and the list leave out the owner's own accounts
+  const members = useMemo(() => allMembers.filter((m) => !m.owner), [allMembers]);
+  const ownerCount = allMembers.length - members.length;
+
+  const setOwnerMark = async (uid: string, owner: boolean) => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      const r = await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'ownerMark', uid, owner }),
+      });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.message || `更新に失敗しました（${r.status}）`);
+      setData((d) => (d ? { ...d, users: d.users.map((m) => (m.uid === uid ? { ...m, owner: owner ? 'marked' : null } : m)) } : d));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '更新に失敗しました');
+    }
+  };
 
   const setInquiryStatus = async (id: string, status: Inquiry['status']) => {
     if (!user) return;
@@ -491,9 +513,10 @@ export default function AdminView() {
   const paying = members.filter((m) => m.premium === 'live').length;
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return members;
-    return members.filter((m) => [m.email, m.name, m.mbti].some((v) => v?.toLowerCase().includes(q)));
-  }, [members, query]);
+    const list = showOwners ? allMembers : members;
+    if (!q) return list;
+    return list.filter((m) => [m.email, m.name, m.mbti].some((v) => v?.toLowerCase().includes(q)));
+  }, [allMembers, members, showOwners, query]);
 
   const downloadCsv = () => {
     const blob = new Blob([toCsv(filtered)], { type: 'text/csv;charset=utf-8' });
@@ -574,7 +597,7 @@ export default function AdminView() {
 
             <Funnel t={totals} />
 
-            <Inquiries items={data.inquiries || []} members={members} onStatus={setInquiryStatus} />
+            <Inquiries items={data.inquiries || []} members={allMembers} onStatus={setInquiryStatus} />
 
             <ChatCost days={data.chat || []} />
 
@@ -590,7 +613,11 @@ export default function AdminView() {
                 <h2 style={{ ...c.h2, margin: 0, marginRight: 'auto' }}>会員リスト（{filtered.length}人）</h2>
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="メール・名前・タイプで検索"
                   style={{ background: '#0d0b19', color: '#ece8f6', border: '1px solid #3a3460', borderRadius: 8, padding: '6px 10px', fontSize: 13, minWidth: 0, flex: '0 1 220px' }} />
+                <button style={{ ...c.btn, ...(showOwners ? c.btnOn : {}) }} onClick={() => setShowOwners((v) => !v)}>自分のアカウントも表示（{ownerCount}）</button>
                 <button style={c.btn} onClick={downloadCsv}>CSVで保存</button>
+              </div>
+              <div style={{ ...c.muted, marginBottom: 8 }}>
+                自分のアカウントは、会員数・会員リストに入れていません。管理者のメール（+付きの別名も）は自動で、それ以外は右端の「自分」ボタンで外せます。
               </div>
               {data.truncated && <div style={{ ...c.muted, marginBottom: 8 }}>人数が多いため、先頭の20,000人だけを表示しています。</div>}
               <div style={{ overflowX: 'auto' }}>
@@ -606,11 +633,12 @@ export default function AdminView() {
                       <th style={c.th}>タイプ</th>
                       <th style={c.th}>プレミアム</th>
                       <th style={c.th}>流入元 / 入口 / 端末</th>
+                      <th style={c.th}></th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.map((m) => (
-                      <tr key={m.uid}>
+                      <tr key={m.uid} style={m.owner ? { opacity: 0.55 } : undefined}>
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{jst(m.createdAt)}</td>
                         <td style={c.td}>{m.email || '—'}</td>
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{m.name || '—'}</td>
@@ -622,6 +650,15 @@ export default function AdminView() {
                         <td style={{ ...c.td, ...c.muted, minWidth: 240 }}>
                           {m.source ? [sourceLabel(m.source), landingLabel(m.landing || 'other'), ...(m.device ? [deviceLabel(m.device)] : [])].join(' / ') : '計測前'}
                         </td>
+                        <td style={{ ...c.td, whiteSpace: 'nowrap' }}>
+                          {m.owner === 'auto' ? (
+                            <span style={c.muted}>自分（管理者）</span>
+                          ) : (
+                            <button style={{ ...c.btn, ...(m.owner ? c.btnOn : {}) }} onClick={() => { void setOwnerMark(m.uid, !m.owner); }}>
+                              {m.owner ? '自分 ✓' : '自分'}
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -630,7 +667,7 @@ export default function AdminView() {
             </div>
 
             <p style={c.muted}>
-              訪問・鑑定・流入元は、この計測を入れた日から数えています（それより前の分はありません）。会員リストは、これまでに登録した全員です。
+              訪問・鑑定・流入元は、この計測を入れた日から数えています（それより前の分はありません）。会員リストは、これまでに登録した全員です（自分のアカウントを除く）。
               鑑定は入力フォームから鑑定した回数で、共有リンクや毎朝メールのリンクから結果を開いた回数は含みません。
               共有・プレミアム案内・支払い画面・課金・端末・共有リンクの入口は、今回の計測を追加した日（2026年10月下旬）から数えています。
               課金はStripeの本番決済だけで、テスト決済は数えません。AIチャットは、AIが答えた回数です。
