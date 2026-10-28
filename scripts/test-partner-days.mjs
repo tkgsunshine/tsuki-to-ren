@@ -96,3 +96,12 @@ test('Premium members are not counted (only memberships from the Stripe mode in 
   await partner(ask('2000-01-01'), res2, { auth, db: testMode, live: true, today: day(1) });
   assert.equal(res2.body.premium, false);
 });
+
+test('an email in PREMIUM_OVERRIDE_EMAILS is not counted', async () => {
+  const owner = { verifyIdToken: async () => ({ uid: 'u1', email: 'owner@example.com', email_verified: true }) };
+  const db = mockDb();
+  const res = mockRes();
+  await partner(ask('2000-01-01'), res, { auth: owner, db, live: true, today: day(1), premiumEmails: 'owner@example.com' });
+  assert.equal(res.body.premium, true);
+  assert.equal(db.docs['partnerDays/u1'], undefined);
+});

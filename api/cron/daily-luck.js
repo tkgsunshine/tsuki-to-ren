@@ -6,6 +6,7 @@ import { recordRun } from '../_lib/cron-run.js';
 import { buildDailyContent, renderEmailHtml, subjectFor } from '../_lib/daily-mail.js';
 import { PREMIUM } from '../_lib/stripe.js';
 import { isPremiumRecord, countPartnerDay } from '../_lib/partner-days.js';
+import { isOverrideEmail } from '../_lib/premium-override.js';
 
 const SITE = 'https://www.tsuki-to-ren.com';
 const BATCH_SIZE = 100; // Resend batch limit
@@ -115,11 +116,12 @@ export default async function handler(req, res) {
   for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
     const chunk = subscribers.slice(i, i + BATCH_SIZE);
     const premium = await readPremium(db, chunk);
+    // PREMIUM_OVERRIDE_EMAILS is matched on the address the mail goes to, so the full version only reaches that inbox
     const emails = [];
     for (const sub of chunk) {
       let content;
       try {
-        content = buildDailyContent(sub, await accessFor(db, sub, premium.has(sub.uid), dateStr));
+        content = buildDailyContent(sub, await accessFor(db, sub, premium.has(sub.uid) || isOverrideEmail(sub.email), dateStr));
       } catch (e) {
         skipped += 1; // bad saved data (e.g. an invalid birth date): skip this person, keep sending to the rest
         console.error('⚠️ Could not build the fortune for a subscriber:', e?.message);

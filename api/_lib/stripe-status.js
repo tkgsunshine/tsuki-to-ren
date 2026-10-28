@@ -1,5 +1,6 @@
 import { getDb, getAdminAuth } from './firestore.js';
 import { PREMIUM, isLiveKey, verifyUser } from './stripe.js';
+import { isOverrideEmail } from './premium-override.js';
 
 // The signed-in account's Premium membership, as the webhook last recorded it.
 export default async function handler(req, res, deps = {}) {
@@ -15,7 +16,7 @@ export default async function handler(req, res, deps = {}) {
     if (p && (p.livemode === true) !== (deps.live ?? isLiveKey())) p = undefined;
     return res.status(200).json({
       status: 'ok',
-      active: p?.active === true,
+      active: p?.active === true || isOverrideEmail(user.email, deps.premiumEmails),
       subscriptionStatus: p?.status || null,
       currentPeriodEnd: p?.currentPeriodEnd || null,
       cancelAtPeriodEnd: p?.cancelAtPeriodEnd === true,
