@@ -149,3 +149,15 @@ test('if the counters cannot be read, Claude is not called', async () => {
   assert.equal(res.code, 200);
   assert.equal(calls.length, 0);
 });
+
+test('an email in PREMIUM_OVERRIDE_EMAILS gets the premium limits without a payment', async () => {
+  const calls = [];
+  const owner = { verifyIdToken: async () => ({ uid: 'u1', email: 'owner@example.com', email_verified: true }) };
+  const db = mockDb();
+  for (let i = 0; i < 3; i++) {
+    const res = mockRes();
+    await chat(request(), res, { auth: owner, db, anthropic: claude(calls), apiKey: 'k', live: true, now: NOW + i * 1000, premiumEmails: 'owner@example.com' });
+    assert.equal(res.code, 200);
+  }
+  assert.equal(calls.length, 3);
+});

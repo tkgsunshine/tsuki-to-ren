@@ -172,3 +172,19 @@ test('a test-mode membership does not count on the live site', async () => {
   await status({ method: 'GET', headers: { authorization: 'Bearer good' } }, res, { auth, db: mockDb({ 'premium/u1': { active: true, livemode: false, customerId: 'cus_t' } }), live: true });
   assert.equal(res.body.active, false);
 });
+
+test('an email in PREMIUM_OVERRIDE_EMAILS counts as Premium without a payment (verified email only)', async () => {
+  const res = mockRes();
+  await status({ method: 'GET', headers: { authorization: 'Bearer good' } }, res, { auth, db: mockDb({}), live: true, premiumEmails: 'x@example.com, A@example.com' });
+  assert.equal(res.body.active, true);
+  assert.equal(res.body.hasBilling, false);
+
+  const other = mockRes();
+  await status({ method: 'GET', headers: { authorization: 'Bearer good' } }, other, { auth, db: mockDb({}), live: true, premiumEmails: 'x@example.com' });
+  assert.equal(other.body.active, false);
+
+  const unverified = { verifyIdToken: async () => ({ uid: 'u1', email: 'a@example.com', email_verified: false }) };
+  const res3 = mockRes();
+  await status({ method: 'GET', headers: { authorization: 'Bearer good' } }, res3, { auth: unverified, db: mockDb({}), live: true, premiumEmails: 'a@example.com' });
+  assert.equal(res3.body.active, false);
+});

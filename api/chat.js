@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getDb, getAdminAuth } from './_lib/firestore.js';
 import { verifyUser } from './_lib/stripe.js';
+import { isOverrideEmail } from './_lib/premium-override.js';
 import { LIMIT_MESSAGES, consume, isPremium, recordTokens } from './_lib/chat-limit.js';
 
 // 使用モデルは環境変数 ANTHROPIC_MODEL で切り替え可能（未設定時は claude-opus-5-5）
@@ -117,7 +118,7 @@ export default async function handler(req, res, deps = {}) {
   let db;
   try {
     db = deps.db || getDb();
-    premium = await isPremium(db, user.uid, deps.live);
+    premium = isOverrideEmail(user.email, deps.premiumEmails) || await isPremium(db, user.uid, deps.live);
     usage = await consume(db, user.uid, { premium, now: deps.now });
   } catch (e) {
     console.error('❌ Chat usage could not be counted:', e?.message);

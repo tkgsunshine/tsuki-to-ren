@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { getDb, getAdminAuth } from './firestore.js';
 import { PREMIUM, isLiveKey, parseBody, verifyUser } from './stripe.js';
+import { isOverrideEmail } from './premium-override.js';
 
 // 同じお相手（同じ誕生日）との「今日の相性」は、無料では FREE_PARTNER_DAYS 日分まで。
 // 数えるのは「見た日」（日本時間）で、同じ日に何度開いても1日。朝のメールが届いた日も1日に数える。
@@ -60,7 +61,7 @@ export default async function handler(req, res, deps = {}) {
 
     const db = deps.db || getDb();
     const p = (await db.collection(PREMIUM).doc(user.uid).get()).data();
-    if (isPremiumRecord(p, deps.live ?? isLiveKey())) {
+    if (isPremiumRecord(p, deps.live ?? isLiveKey()) || isOverrideEmail(user.email, deps.premiumEmails)) {
       return res.status(200).json({ status: 'ok', premium: true, locked: false, daysLeft: null, limit: FREE_PARTNER_DAYS });
     }
     const r = await countPartnerDay(db, user.uid, birth, deps.today || jstToday());
