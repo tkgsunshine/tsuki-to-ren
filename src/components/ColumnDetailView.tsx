@@ -3,6 +3,7 @@ import { ArrowLeft, Clock, Calendar, Share2, BookOpen, ChevronRight, HelpCircle 
 import { MoonMark } from './icons/BrandIcons';
 import { COLUMNS_DATA } from '../data/columnsData';
 import { pickRelatedColumns } from '../utils/relatedColumns';
+import { columnAnswer, columnModified } from '../utils/columnAnswer';
 import { showAlert } from './AppDialog';
 
 interface ColumnDetailViewProps {
@@ -190,7 +191,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
       document.head.appendChild(script);
     }
 
-    const canonicalUrl = `https://tsuki-to-ren.com/column/${article.slug}`;
+    const canonicalUrl = `https://www.tsuki-to-ren.com/column/${article.slug}`;
 
     const jsonLdData = [
       {
@@ -200,21 +201,23 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
         'description': article.metaDescription,
         'image': article.thumbnailUrl.startsWith('/') ? `https://www.tsuki-to-ren.com${article.thumbnailUrl}` : article.thumbnailUrl,
         'datePublished': article.publishedAt,
-        'dateModified': article.publishedAt,
+        'dateModified': columnModified(article),
+        'abstract': columnAnswer(article),
         'mainEntityOfPage': {
           '@type': 'WebPage',
           '@id': canonicalUrl
         },
         'author': {
           '@type': 'Organization',
-          'name': '月と蓮 占い編集部'
+          'name': '月と蓮 占い編集部',
+          'url': 'https://www.tsuki-to-ren.com/'
         },
         'publisher': {
           '@type': 'Organization',
           'name': '月と蓮',
           'logo': {
             '@type': 'ImageObject',
-            'url': 'https://tsuki-to-ren.com/favicon.ico'
+            'url': 'https://www.tsuki-to-ren.com/favicon.ico'
           }
         }
       },
@@ -226,7 +229,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
             '@type': 'ListItem',
             'position': 1,
             'name': 'ホーム',
-            'item': 'https://tsuki-to-ren.com/'
+            'item': 'https://www.tsuki-to-ren.com/'
           },
           {
             '@type': 'ListItem',
@@ -397,6 +400,18 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </div>
+
+        {/* 結論（AI検索・検索結果の要約に引用されやすいよう、目次より先に置く） */}
+        <section aria-label="この記事の結論" style={{
+          background: 'rgba(226, 192, 116, 0.08)',
+          border: '1px solid rgba(226, 192, 116, 0.35)',
+          borderRadius: '14px',
+          padding: '0.9rem 1.1rem',
+          marginBottom: '1.25rem'
+        }}>
+          <div style={{ color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.8rem', marginBottom: '0.4rem' }}>この記事の結論</div>
+          <p style={{ margin: 0, color: '#f3efe6', fontSize: '0.9rem', lineHeight: 1.75 }}>{columnAnswer(article)}</p>
+        </section>
 
         {/* Table of Contents (TOC) Component (Regulated 2-level numbering) */}
         {article.toc && article.toc.length > 0 && (
