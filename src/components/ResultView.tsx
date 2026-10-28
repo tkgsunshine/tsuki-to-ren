@@ -116,6 +116,9 @@ export const formatAppraisalText = (text: string | undefined | null): string => 
   return formatted.replace(/\n{2,}/g, '\n').trim();
 };
 
+// 共有リンクから開いたときに上に出し続けるバーの高さ
+const SHARED_BAR_HEIGHT = '3rem';
+
 // 「🌙 月から〜」「🔮 蓮から〜」の見出しの絵文字を、キャラの小さな丸アイコンに置き換える
 const CHAR_HEADING_RE = /^(🌙|🔮)\s*((月|蓮)から.*)$/u;
 
@@ -265,7 +268,7 @@ interface ResultViewProps {
   onOpenNotifySettings?: () => void;
   onSwitchNotifyToCurrent?: () => void;
   // 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。保存・通知・チャット・シェアは出さず、onReset は「自分も鑑定する」になる
-  sharedBy?: { name: string; date: string };
+  sharedBy?: { name: string };
 }
 
 export const ResultView: React.FC<ResultViewProps> = ({
@@ -753,16 +756,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* プレミアム登録完了のお知らせ（トリセツが無い鑑定では、結果の先頭に出す） */}
       {!activeResult.opponentTorisetsu && welcomePremiumBanner}
       
-      {/* 共有リンクから開いたとき: だれの、いつの結果かを出し、自分の鑑定へ誘う */}
+      {/* 共有リンクから開いたとき: だれの結果かを出し、自分の鑑定へ誘う。スクロールしても上に出し続ける */}
       {sharedBy && (
-        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.55rem', padding: '0.9rem 1rem', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.16) 0%, rgba(59, 130, 246, 0.12) 100%)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
-          <div style={{ fontSize: '0.82rem', color: '#e2c074', fontWeight: 700, letterSpacing: '0.04em' }}>
+        <div style={{
+          position: 'sticky',
+          top: '-0.75rem',
+          zIndex: 60,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.6rem',
+          height: SHARED_BAR_HEIGHT,
+          boxSizing: 'border-box',
+          padding: '0 0.5rem 0 0.9rem',
+          borderRadius: '9999px',
+          background: 'rgba(11, 15, 21, 0.92)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(226, 192, 116, 0.4)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.55)'
+        }}>
+          <span style={{ fontSize: '0.76rem', color: '#e2c074', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
             🔮 {sharedBy.name === 'あなた' ? 'お友だち' : `${sharedBy.name}さん`}が共有した鑑定結果
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>{sharedBy.date}の鑑定です（今日の相性・運勢はその日のもの）</div>
+          </span>
           {onReset && (
-            <button type="button" className="consult-btn font-serif" onClick={onReset} style={{ width: '100%', maxWidth: '320px' }}>
-              あなたも無料で鑑定する
+            <button type="button" className="consult-btn font-serif" onClick={onReset} style={{ flexShrink: 0, width: 'auto', padding: '0.5rem 1rem', fontSize: '0.8rem', margin: 0 }}>
+              あなたも鑑定する
             </button>
           )}
         </div>
@@ -829,7 +848,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
         flexDirection: 'column',
         alignItems: 'center',
         position: 'sticky',
-        top: '-0.75rem',
+        // 共有リンクから開いたときは、上に出し続けるバーの下に並べる
+        top: sharedBy ? `calc(-0.75rem + ${SHARED_BAR_HEIGHT} + 0.4rem)` : '-0.75rem',
         zIndex: 50,
         width: '100%',
         maxWidth: '360px',
@@ -3093,7 +3113,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
               }}
             >
-              {sharedBy ? 'あなたも無料で鑑定する' : 'もう一度占う'}
+              {sharedBy ? 'あなたも鑑定する' : 'もう一度占う'}
             </button>
           </div>
         )}
