@@ -10,7 +10,11 @@
     "preview": "vite preview",
     "test:engine": "node --experimental-strip-types --test scripts/test-fortune-engine.mjs scripts/test-solar-terms.mjs",
     "test:analytics": "node --experimental-strip-types --test scripts/test-analytics.mjs",
-    "test:stripe": "node --test scripts/test-stripe.mjs"
+    "test:stripe": "node --test scripts/test-stripe.mjs scripts/test-partner-days.mjs",
+    "test:userdata": "node --experimental-strip-types --test scripts/test-user-data.mjs",
+    "test:chat": "node --test scripts/test-chat-limit.mjs",
+    "test:inquiry": "node --test scripts/test-inquiry.mjs",
+    "test:share": "node --experimental-strip-types --test scripts/test-shared-result.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

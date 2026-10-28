@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 export interface SavedPartner {
   id: string;
@@ -18,9 +18,10 @@ import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
-import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
+import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, MessageCircle, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
 import { MoonMark } from './components/icons/BrandIcons';
 import { CustomDatePicker } from './components/CustomDatePicker';
+import { ContactForm } from './components/ContactForm';
 import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
@@ -28,11 +29,18 @@ import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
-import { trackFortune } from './services/analytics';
-import { subscribeAuthChange, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
-import { showAlert, showConfirm } from './components/AppDialog';
+import { trackFortune, trackPremiumStep } from './services/analytics';
+import { subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
+import { SharedResultView, readSharedResult } from './components/SharedResultView';
+import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
+import { fetchPartnerAccess } from './services/partnerDays';
+import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFromPath, type NavState, type OverlayName, type PageFields, type SettingsSubView } from './utils/navHistory';
+import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
+import { decideSync, sameProfile, samePartners, type SyncProfile } from './utils/userDataSync';
+import type { PartnerLock } from './components/ResultView';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -56,7 +64,7 @@ interface InitialRoute {
   tab: string;
   slug: string | null;
   legal: boolean;
-  settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company';
+  settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact';
   compatibilityPair: { myMbti: string; oppMbti: string } | null;
 }
 
@@ -82,6 +90,9 @@ const getInitialRoute = (): InitialRoute => {
   }
   if (path === '/company' || path === '/company/') {
     return { tab: 'profile', slug: null, legal: false, settingsSubView: 'company', compatibilityPair: null };
+  }
+  if (path === '/contact' || path === '/contact/') {
+    return { tab: 'profile', slug: null, legal: false, settingsSubView: 'contact', compatibilityPair: null };
   }
   if (path === '/about' || path === '/about/') {
     return { tab: 'profile', slug: null, legal: false, settingsSubView: 'about', compatibilityPair: null };
@@ -111,98 +122,116 @@ const getInitialRoute = (): InitialRoute => {
   return { tab: 'home', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
 };
 
+// 共有リンクのために保存した鑑定結果（api/_lib/shared-result.js）
+interface SharedResultData {
+  mode: 'single' | 'match';
+  myName: string;
+  oppName: string;
+  character: 'ren' | 'tsuki';
+  tsuki: FortuneResult;
+  ren: FortuneResult;
+  date: string;
+}
+type SharedView = { status: 'loading'; id: string } | { status: 'ready'; data: SharedResultData } | null;
+
 function App() {
   // Navigation & Flow with URL Routing Sync
   const initialRoute = getInitialRoute();
   const [activeTab, setActiveTab] = useState(initialRoute.tab);
   const [selectedColumnSlug, setSelectedColumnSlug] = useState<string | null>(initialRoute.slug);
 
+  // 戻る・進む（iPhoneの戻るスワイプを含む）で、履歴に残した画面をそのまま再現する。中身は下の applyNav（毎回最新の state を使うため ref 経由）
+  const applyNavRef = useRef<(nav: NavState) => void>(() => {});
+  const overlayBackPendingRef = useRef(false);
   useEffect(() => {
+    // 最初に開いたページの履歴に、画面の情報を入れておく（重ね表示は閉じた状態で始まる）
+    const cur = readNav();
+    replaceNav({ ...routeFromPath(window.location.pathname), overlays: [], idx: cur.idx, scroll: undefined });
+
     const handlePopState = () => {
-      const route = getInitialRoute();
-      setActiveTab(route.tab);
-      setSelectedColumnSlug(route.slug);
-      setShowLegalPage(route.legal);
-      if (route.settingsSubView) setSettingsSubView(route.settingsSubView);
-      if (route.compatibilityPair) {
-        setMyMbti(route.compatibilityPair.myMbti);
-        setOppMbti(route.compatibilityPair.oppMbti);
-        setMode('match');
-      }
-      if (route.tab === 'home') {
-        setFlowStep('input');
-        setLoadedPartner(null);
-        window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-        requestAnimationFrame(() => {
-          const mainEl = document.querySelector('.main-content');
-          if (mainEl) mainEl.scrollTop = 0;
-          window.scrollTo(0, 0);
-        });
-      }
+      overlayBackPendingRef.current = false;
+      applyNavRef.current(readNav());
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  const scrollMainTo = (top: number) => {
+    window.scrollTo(0, top);
+    document.documentElement.scrollTop = top;
+    document.body.scrollTop = top;
+    const mainEl = document.querySelector('.main-content');
+    if (mainEl) mainEl.scrollTop = top;
+  };
+
   const handleTabChange = (tab: string) => {
+    const cur = readNav();
+    const next: PageFields = { tab, slug: null, subView: 'main', legal: false, flowStep: tab === 'home' ? 'input' : cur.flowStep };
+    if (pageKey(next) !== pageKey(cur)) pushNav(next);
+
     setActiveTab(tab);
     setIsChatOpen(false);
     setShowPremiumLP(false);
     setShowAuthModal(false);
     setShowLegalPage(false);
     setShowShareCard(false);
+    setSelectedColumnSlug(null);
+    setSettingsSubView('main');
 
     if (tab === 'home') {
       setFlowStep('input');
       setLoadedPartner(null);
-      setSelectedColumnSlug(null);
-      if (window.location.pathname !== '/') {
-        window.history.pushState({ tab: 'home', slug: null }, '', '/');
-      }
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
-    } else if (tab === 'fortune') {
-      if (window.location.pathname !== '/result') {
-        window.history.pushState({ tab: 'fortune', slug: null }, '', '/result');
-      }
-      window.scrollTo(0, 0);
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
-    } else if (tab === 'column') {
-      setSelectedColumnSlug(null);
-      if (window.location.pathname !== '/column') {
-        window.history.pushState({ tab: 'column', slug: null }, '', '/column');
-      }
-      window.scrollTo(0, 0);
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
-    } else if (tab === 'chat') {
-      if (window.location.pathname !== '/chat') {
-        window.history.pushState({ tab: 'chat', slug: null }, '', '/chat');
-      }
-      window.scrollTo(0, 0);
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
-    } else if (tab === 'profile') {
-      setSettingsSubView('main');
-      if (window.location.pathname !== '/mypage') {
-        window.history.pushState({ tab: 'profile', slug: null }, '', '/mypage');
-      }
-      window.scrollTo(0, 0);
-      const mainEl = document.querySelector('.main-content');
-      if (mainEl) mainEl.scrollTop = 0;
+      // 共有リンクの結果を見ていたときも、「恋愛診断」で自分の鑑定の入力画面へ
+      setSharedView(null);
+      setSharedTeaser(null);
     }
+    scrollMainTo(0);
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
+  // 共有リンクから来た人に見せる、共有した人の鑑定結果（URLは読んだあと消す）。
+  // 保存した結果のID（?shared=…）があれば普段の結果画面で、なければリンクの値だけで作った要約（SharedResultView）で見せる
+  const [sharedTeaser, setSharedTeaser] = useState(() => readSharedResult(window.location.search));
+  const [sharedView, setSharedView] = useState<SharedView>(() => {
+    const id = new URLSearchParams(window.location.search).get('shared');
+    return id && /^[A-Za-z0-9_-]{12}$/.test(id) ? { status: 'loading', id } : null;
+  });
+  useEffect(() => {
+    if (sharedView?.status !== 'loading') return;
+    let active = true;
+    fetch(`/api/share?id=${sharedView.id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: SharedResultData | null) => {
+        if (!active) return;
+        if (d && d.tsuki && d.ren) {
+          setSelectedCharacter(d.character === 'ren' ? 'ren' : 'tsuki');
+          setSharedView({ status: 'ready', data: d });
+        } else {
+          setSharedView(null);
+          showAlert('共有された鑑定結果が見つかりませんでした。');
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setSharedView(null);
+        showAlert('共有された鑑定結果を読み込めませんでした。通信環境を確認して、もう一度開いてください。');
+      });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    if (!sharedTeaser && !sharedView) return;
+    try {
+      window.history.replaceState(window.history.state, '', window.location.pathname);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
   
   // Characters
   const [selectedCharacter, setSelectedCharacter] = useState<'ren' | 'tsuki'>('tsuki');
   const [isChatOpen, setIsChatOpen] = useState(false); // Standalone chat simulator in Chat tab
+  const [chatInitialQuestion, setChatInitialQuestion] = useState<string | undefined>(undefined); // 鑑定結果の質問ボタンから開いたときの最初の質問
+  // 対話ロビーから開いたときは、相談の前に誰について相談するか選ぶ。'pick' = まだ選んでいない、null = 今の鑑定結果のまま（鑑定結果から開いたとき）
+  const [chatTarget, setChatTarget] = useState<'pick' | 'self' | SavedPartner | null>(null);
   
   // Firebase Auth State
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -327,6 +356,7 @@ function App() {
       setShowAuthModal(true);
       return;
     }
+    trackPremiumStep('checkout');
     try {
       await startPremiumCheckout();
     } catch (e) {
@@ -344,7 +374,13 @@ function App() {
   const [showPremiumLP, setShowPremiumLP] = useState(false);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
-  const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company'>(initialRoute.settingsSubView);
+  const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact'>(initialRoute.settingsSubView);
+  // マイページの各ページ（お問い合わせ等）は、開いたら一番上から見せる（スクロールするのは .main-content）
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const mainEl = document.querySelector('.main-content');
+    if (mainEl) mainEl.scrollTop = 0;
+  }, [settingsSubView]);
 
   // My Info (Step 1)
   const [userProfile] = useState(() => {
@@ -386,22 +422,115 @@ function App() {
     } catch (e) {}
   }, [savedPartners]);
 
+  // Members: the profile and saved partners follow the account (api/_lib/user-data.js), not only this device.
+  // On iPhone the home-screen app and Safari keep separate storage, so device-only data looked like another account.
+  const [inputViewKey, setInputViewKey] = useState(0); // remounts the input form when the account's profile arrives
+  const savedPartnersRef = useRef(savedPartners);
+  savedPartnersRef.current = savedPartners;
+  const syncUidRef = useRef<string | null>(null); // the account the screen is synced with (null = not yet / signed out)
+  const syncedProfileRef = useRef('');
+  const syncedPartnersRef = useRef('');
+  const lastPullRef = useRef(0);
+  const partnerPushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const readLocalProfile = (): SyncProfile | null => {
+    try {
+      const stored = localStorage.getItem('hasu_user_profile');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const applySyncedProfile = (profile: SyncProfile | null) => {
+    try {
+      if (profile) localStorage.setItem('hasu_user_profile', JSON.stringify(profile));
+      else localStorage.removeItem('hasu_user_profile');
+    } catch {}
+    setMyName(profile?.name || 'あなた');
+    setMyBirth(profile?.birth || '');
+    setMyMbti(profile?.mbti || 'UNKNOWN');
+    setMyGender(profile?.gender || 'female');
+    setInputViewKey((k) => k + 1);
+  };
+
+  const pullUserData = async (uid: string) => {
+    lastPullRef.current = Date.now();
+    const remote = await fetchUserData(uid);
+    if (!remote || currentUidRef.current !== uid) return;
+    const localProfile = readLocalProfile();
+    const decision = decideSync({ profile: localProfile, partners: savedPartnersRef.current }, remote, readSyncOwner(), uid);
+    // Data from before syncing is only treated as merged once the account has it
+    if (decision.push && !(await saveUserData(uid, decision.push))) return;
+    if (currentUidRef.current !== uid) return;
+    writeSyncOwner(uid);
+    if (!sameProfile(localProfile, decision.profile)) applySyncedProfile(decision.profile);
+    if (!samePartners(savedPartnersRef.current, decision.partners)) setSavedPartners(decision.partners as SavedPartner[]);
+    syncedProfileRef.current = JSON.stringify(decision.profile);
+    syncedPartnersRef.current = JSON.stringify(decision.partners);
+    syncUidRef.current = uid;
+  };
+
+  // Sends the profile saved on this device (after the profile edit or a reading) to the account
+  const pushProfile = () => {
+    const uid = syncUidRef.current;
+    const profile = readLocalProfile();
+    if (!uid || !profile || JSON.stringify(profile) === syncedProfileRef.current) return;
+    syncedProfileRef.current = JSON.stringify(profile);
+    saveUserData(uid, { profile }).then((ok) => { if (!ok) syncedProfileRef.current = ''; });
+  };
+
+  const currentUidRef = useRef<string | null>(null);
+  useEffect(() => {
+    const uid = currentUser?.uid || null;
+    const wasSignedIn = !!currentUidRef.current;
+    currentUidRef.current = uid;
+    syncUidRef.current = null;
+    if (!uid) {
+      // Signed out: the member's profile and partners stay in the account, so the screen starts empty
+      // (logOutUser has already removed them from this device's storage)
+      if (wasSignedIn) {
+        if (partnerPushTimerRef.current) clearTimeout(partnerPushTimerRef.current);
+        partnerPushTimerRef.current = null;
+        syncedProfileRef.current = '';
+        syncedPartnersRef.current = '';
+        clearAccountDataOnDevice();
+        applySyncedProfile(null);
+        setSavedPartners([]);
+        setLoadedPartner(null);
+        setNotifyDailyLuck(false);
+        setNotifyEmail('');
+      }
+      return;
+    }
+    void pullUserData(uid);
+    // Coming back to the app (e.g. after editing on the other device): read the account again, at most once a minute
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || partnerPushTimerRef.current) return;
+      if (Date.now() - lastPullRef.current < 60_000) return;
+      void pullUserData(uid);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [currentUser?.uid]);
+
+  // Saved partners changed on this device (added, edited, deleted): send them to the account
+  useEffect(() => {
+    const uid = syncUidRef.current;
+    const json = JSON.stringify(savedPartners);
+    if (!uid || json === syncedPartnersRef.current) return;
+    if (partnerPushTimerRef.current) clearTimeout(partnerPushTimerRef.current);
+    partnerPushTimerRef.current = setTimeout(() => {
+      partnerPushTimerRef.current = null;
+      const partners = savedPartnersRef.current;
+      const sent = JSON.stringify(partners);
+      syncedPartnersRef.current = sent;
+      saveUserData(uid, { partners }).then((ok) => { if (!ok && syncedPartnersRef.current === sent) syncedPartnersRef.current = ''; });
+    }, 800);
+  }, [savedPartners]);
+
   // Handle browser back / forward navigation (popstate) & Parse share link query parameters
   useEffect(() => {
-    if (!window.history.state || !window.history.state.flowStep) {
-      window.history.replaceState({ flowStep: 'input' }, '');
-    }
-
-    const handlePopState = (e: PopStateEvent) => {
-      const targetStep = e.state?.flowStep || 'input';
-      setFlowStep(targetStep);
-      if (targetStep === 'input') {
-        setActiveTab('home');
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
     // Helper to decode 1-char relationship codes & short params
     const decodeRel = (val: string | null) => {
       if (!val) return '片思い中';
@@ -533,64 +662,61 @@ function App() {
         console.error('Failed to restore last diagnosis input:', e);
       }
     }
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
   }, []);
 
   const handleResetFlow = () => {
     try {
       localStorage.removeItem('hasu_last_diagnosis_input');
     } catch (e) {}
+    const cur = readNav();
+    if (cur.tab !== 'home' || cur.flowStep !== 'input') {
+      pushNav({ tab: 'home', slug: null, subView: 'main', legal: false, flowStep: 'input' });
+    }
     setFlowStep('input');
     setActiveTab('home');
     setLoadedPartner(null);
-    if (window.history.state?.flowStep === 'result') {
-      try {
-        window.history.pushState({ flowStep: 'input' }, '');
-      } catch (err) {
-        console.error(err);
-      }
-    }
+    // 入力ページを一番上から見せる（結果ページのスクロール位置が残らないよう、描画のあとにも戻す）
+    scrollMainTo(0);
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollMainTo(0)));
   };
 
   const generateShareUrl = () => {
     const isLocal = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
-    const baseUrl = isLocal ? window.location.origin + '/share/card' : 'https://tsuki-to-ren.com/share/card';
+    const baseUrl = isLocal ? window.location.origin + '/share/card' : 'https://www.tsuki-to-ren.com/share/card';
     const params = new URLSearchParams();
     
     if (!isLocal && window.location.hostname.includes('vercel.app')) {
       params.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
     }
 
+    // 共有リンクは誰でも見られるので、名前（ニックネーム）と点数だけを入れ、生年月日などは入れない（開いた人には api/share.js が要約を見せる）
+    // 保存した鑑定結果のID。開いた人は普段の結果画面で見られる
+    if (savedShare && savedShare.result === tsukiResult) params.set('r', savedShare.id);
     if (myName && myName !== 'あなた') params.set('mn', myName.slice(0, 8));
-    if (myBirth) params.set('mb', myBirth.replace(/-/g, ''));
-    if (myMbti) params.set('mm', myMbti);
-    params.set('mg', myGender === 'male' ? 'm' : 'f');
-
     if (mode === 'match') {
       if (oppName && oppName !== 'お相手') params.set('on', oppName.slice(0, 8));
-      if (oppBirth) params.set('ob', oppBirth.replace(/-/g, ''));
-      if (oppMbti) params.set('om', oppMbti);
-      params.set('og', oppGender === 'male' ? 'm' : 'f');
-
-      const relMap: Record<string, string> = {
-        '片思い中': 'k',
-        '両思い・交際中': 'r',
-        '交際中': 'r',
-        '復縁したい': 'f',
-        '結婚・夫婦': 'm',
-        '複雑愛・秘密の恋': 'c'
-      };
-      params.set('r', relMap[relationship] || 'k');
     } else {
       params.set('mode', 's');
     }
 
     if (activeResult) {
       params.set('bs', String(activeResult.baseScore));
-      params.set('ds', String(activeResult.dailyScore));
+      if (!dailyScoreHidden) params.set('ds', String(activeResult.dailyScore)); // 無料の日数を使い切った日は「??点」
+      // ひとことや相性の名前は入れない。日本語はURLで1字9文字になり、Xに貼ると長すぎる（カード画像は名前と点数で作る）
+      // カード画像の背景に出す守護獣（/assets/astrology_ox_sample_male.jpg → ox_sample_male）
+      const avatarKey = (url?: string) => /\/astrology_([a-z_]+)\.jpg$/.exec(url || '')?.[1];
+      const ma = avatarKey(activeResult.myAvatarUrl);
+      if (ma) params.set('ma', ma);
+      const oa = mode === 'match' ? avatarKey(activeResult.opponentAvatarUrl) : undefined;
+      if (oa) params.set('oa', oa);
+      // カードに出す16タイプ（4文字だけ。未選択は入れない）
+      if (SHARE_MBTI_NAMES[myMbti]) params.set('mm', myMbti);
+      if (mode === 'match' && SHARE_MBTI_NAMES[oppMbti]) params.set('om', oppMbti);
+      // カードの説明の文は番号で渡す（api/_lib/share-card-text.js）
+      const c = mode === 'match' ? shareTitleCode(activeResult.compatibilityTitle) : -1;
+      if (c >= 0) params.set('c', String(c));
+      const l = shareLineCode(activeResult.oneLiner);
+      if (l >= 0) params.set('l', String(l));
     }
     return `${baseUrl}?${params.toString()}`;
   };
@@ -613,6 +739,11 @@ function App() {
   });
   const [showNotifyEmailModal, setShowNotifyEmailModal] = useState(false);
   const [notifyEmailInput, setNotifyEmailInput] = useState('');
+  // 入力エラーのとき、OKのあと該当の入力欄へ誘導するための参照
+  const profileBirthRef = useRef<HTMLInputElement>(null);
+  const editPartnerBirthRef = useRef<HTMLInputElement>(null);
+  const notifyEmailRef = useRef<HTMLInputElement>(null);
+  const promptEmailRef = useRef<HTMLInputElement>(null);
 
   // Whose fortune the daily mail is about: 'self', a saved partner's id, or 'keep' (the partner already in the
   // subscription but not saved on this device). The subscription in Firestore is the truth the 8:00 mail uses.
@@ -627,7 +758,10 @@ function App() {
     }
     let cancelled = false;
     getEmailSubscription().then((sub) => {
-      if (!cancelled) setNotifySub(sub);
+      if (cancelled) return;
+      setNotifySub(sub);
+      // The subscription in Firestore decides delivery, so the ON/OFF shown here follows it (e.g. set on another device)
+      if (sub) setNotifyDailyLuck(!!sub.enabled);
     });
     return () => {
       cancelled = true;
@@ -639,6 +773,10 @@ function App() {
   const isSubPartner = (p: SavedPartner) => subHasPartner && p.name === notifySub?.oppName && p.birth.replace(/\//g, '-') === notifySub?.oppBirth;
   const showKeepTarget = subHasPartner && !savedPartners.some(isSubPartner);
   const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${notifySub.oppName || 'お相手'}さんとの相性` : 'あなたの運勢');
+  // Whether the reading on screen (the partner now, or the solo reading) is the one the daily mail is about
+  const notifyIsCurrentReading = !!notifySub && (mode === 'match'
+    ? subHasPartner && notifySub.oppName === oppName && notifySub.oppBirth === oppBirth.replace(/\//g, '-')
+    : !subHasPartner);
 
   const openNotifyModal = (target?: string) => {
     setNotifyEmailInput(notifyEmail || currentUser?.email || '');
@@ -672,6 +810,34 @@ function App() {
     const saved = await saveEmailSubscriptionData(data);
     if (saved) setNotifySub(data);
     return saved;
+  };
+
+  // From the result screen: makes the daily mail about the reading on screen, keeping the address
+  const switchNotifyToCurrentReading = async () => {
+    const email = (notifySub?.email || currentUser?.email || '').toLowerCase();
+    if (!email) {
+      showAlert('メール通知には、メールアドレス付きのアカウントでのログインが必要です。');
+      return;
+    }
+    if (!isValidBirthDate(myBirth)) {
+      showAlert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
+      return;
+    }
+    const target = mode === 'match' ? `${oppName || 'お相手'}さんとの相性` : 'あなたの運勢';
+    const ok = await showConfirm(`毎朝8時の通知を「${target}」に切り替えますか？`, { okLabel: '切り替える', cancelLabel: 'やめる' });
+    if (!ok) return;
+    const partner: SavedPartner | null = mode === 'match'
+      ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)
+        || { id: 'current', name: oppName || 'お相手', birth: oppBirth, mbti: oppMbti, gender: oppGender, relationship }
+      : null;
+    const saved = await saveNotifySubscription(email, partner);
+    if (!saved) {
+      showAlert('通知の切り替えに失敗しました。ログインし直してから、もう一度お試しください。');
+      return;
+    }
+    setNotifyEmail(email);
+    setNotifyDailyLuck(true);
+    showAlert(`🔔 明日の朝から「${target}」をお届けします。`);
   };
 
   useEffect(() => {
@@ -721,7 +887,7 @@ function App() {
   const saveEditPartner = () => {
     if (!editingPartnerId) return;
     if (!editPartnerBirth || editPartnerBirth.length < 10) {
-      showAlert('生年月日は「19950401」のように数字8桁で入力してください。');
+      showFieldError('生年月日は「19950401」のように数字8桁で入力してください。', editPartnerBirthRef.current);
       return;
     }
     const fields = {
@@ -762,14 +928,12 @@ function App() {
       if (!isRegistered) {
         showConfirm(`非会員の保存上限（1人）に達しています。\n無料会員登録を行うと最大2人まで保存できます。無料登録しますか？`, { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
-          setActiveTab('profile');
-          setSettingsSubView('profile');
+          openSubView('profile');
         });
       } else if (!isSubscribed) {
         showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
-          setActiveTab('profile');
-          setSettingsSubView('main');
+          handleTabChange('profile');
         });
       } else {
         showAlert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
@@ -779,7 +943,8 @@ function App() {
     return true;
   };
 
-  const handleSavePartner = () => {
+  // Returns the saved partner, or undefined when nothing was saved
+  const handleSavePartner = (): SavedPartner | undefined => {
     if (!oppBirth) {
       showAlert('保存するお相手の情報がありません。');
       return;
@@ -802,6 +967,7 @@ function App() {
 
     setSavedPartners([...savedPartners, newPartner]);
     showAlert(`${newPartner.name}様の情報を保存しました。`);
+    return newPartner;
   };
 
   const handleDeletePartner = (id: string) => {
@@ -828,6 +994,26 @@ function App() {
   const [renResult, setRenResult] = useState<FortuneResult | null>(null);
   const [tsukiResult, setTsukiResult] = useState<FortuneResult | null>(null);
 
+  // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
+  // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
+  const [partnerLock, setPartnerLock] = useState<PartnerLock>(null);
+  const signedInUid = currentUser?.uid;
+  useEffect(() => {
+    if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || isSubscribed) {
+      setPartnerLock(null);
+      return;
+    }
+    let cancelled = false;
+    setPartnerLock({ status: 'checking', daysLeft: 0, guest: !signedInUid });
+    fetchPartnerAccess(oppBirth).then((access) => {
+      if (cancelled) return;
+      if (!access || access.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
+      else setPartnerLock({ status: access.locked ? 'locked' : 'free', daysLeft: access.daysLeft, guest: access.guest });
+    });
+    return () => { cancelled = true; };
+  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid]);
+  const dailyScoreHidden = partnerLock !== null && partnerLock.status !== 'free';
+
   // Form submits
   const handleDiagnosisSubmit = (data: {
     myName: string;
@@ -850,6 +1036,7 @@ function App() {
     setOppGender(data.oppGender);
     setRelationship(data.relationship);
     setMode(data.mode);
+    pushProfile(); // the input form has just saved the profile on this device
     trackFortune();
 
     startDiagnosis(
@@ -925,19 +1112,16 @@ function App() {
       setTsukiResult(resTsuki);
       
       setFlowStep('result');
-      // Transition active view automatically to result detail and push history entry for browser back.
-      // On /result (e.g. a reload of the 鑑定結果 tab), stay on that tab so the bottom menu matches the screen.
+      // 結果はいつも「鑑定結果」タブ（/result）で見せ、下のメニューと表示中の画面をそろえる。
+      // 診断の入力画面からは1件積むので、戻ると入力画面に戻る。/result を開き直したときは積まずに置き換える
+      setActiveTab('fortune');
       const onResultPath = getInitialRoute().tab === 'fortune';
-      setActiveTab(onResultPath ? 'fortune' : 'home');
-      try {
-        if (skipLoading && onResultPath) {
-          window.history.replaceState({ ...window.history.state, flowStep: 'result' }, '');
-        } else {
-          window.history.pushState({ flowStep: 'result' }, '');
-        }
-      } catch (e) {
-        console.error(e);
+      if (skipLoading && onResultPath) {
+        replaceNav({ tab: 'fortune', flowStep: 'result' });
+      } else {
+        pushNav({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' }, '/result' + window.location.search);
       }
+      scrollMainTo(0);
     };
 
     if (skipLoading) {
@@ -948,6 +1132,66 @@ function App() {
     }
   };
 
+  // マイページの中のページ（プロフィール編集・運営会社など）を開く。1件積むので、戻るでマイページ一覧に戻る
+  const openSubView = (view: SettingsSubView) => {
+    pushNav({ tab: 'profile', subView: view, legal: false });
+    setActiveTab('profile');
+    setSettingsSubView(view);
+    scrollMainTo(0);
+  };
+  // 画面内の戻るボタン。戻るスワイプと同じく一つ前（マイページ一覧）に戻す
+  const closeSubView = () => {
+    if (!goBackOr({ subView: 'main' })) {
+      setSettingsSubView('main');
+      scrollMainTo(0);
+    }
+  };
+
+  const currentPageKey = pageKey({ tab: activeTab, slug: selectedColumnSlug, subView: settingsSubView, legal: showLegalPage, flowStep: flowStep === 'result' ? 'result' : 'input' });
+  applyNavRef.current = (nav: NavState) => {
+    const flow = nav.flowStep === 'result' && renResult && tsukiResult ? 'result' : 'input';
+    const pageChanged = pageKey({ ...nav, flowStep: flow }) !== currentPageKey;
+    setActiveTab(nav.tab);
+    setSelectedColumnSlug(nav.slug);
+    setSettingsSubView(nav.subView);
+    setShowLegalPage(nav.legal);
+    setFlowStep(flow);
+    if (nav.tab === 'home' && flow === 'input' && pageChanged) setLoadedPartner(null);
+    const has = (name: OverlayName) => nav.overlays.includes(name);
+    setIsChatOpen(has('chat'));
+    if (!has('chat')) { setChatInitialQuestion(undefined); setChatTarget(null); }
+    setShowPremiumLP(has('premiumLP'));
+    setShowAuthModal(has('auth'));
+    setShowShareCard(has('shareCard'));
+    setShowNotifyEmailModal(has('notify'));
+    setShowInstallGuideModal(has('installGuide'));
+    setShowPremiumWelcome(has('premiumWelcome'));
+    // 別の画面に戻ったときは、その画面を離れたときのスクロール位置へ（描画のあとに）
+    if (pageChanged) {
+      const top = nav.scroll ?? 0;
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollMainTo(top)));
+    }
+  };
+
+  // プレミアム案内を開いた回数（管理画面の集計用）
+  useEffect(() => {
+    if (showPremiumLP) trackPremiumStep('premium_view');
+  }, [showPremiumLP]);
+
+  // チャット・プレミアム案内などの重ね表示を開いたら履歴を1件積み、閉じたら外す（戻るスワイプで閉じられるように）
+  useEffect(() => {
+    if (overlayBackPendingRef.current) return;
+    const open = new Set<OverlayName>();
+    if (isChatOpen) open.add('chat');
+    if (showPremiumLP) open.add('premiumLP');
+    if (showAuthModal) open.add('auth');
+    if (showShareCard) open.add('shareCard');
+    if (showNotifyEmailModal) open.add('notify');
+    if (showInstallGuideModal) open.add('installGuide');
+    if (showPremiumWelcome) open.add('premiumWelcome');
+    if (syncOverlays(open) === 'back') overlayBackPendingRef.current = true;
+  }, [isChatOpen, showPremiumLP, showAuthModal, showShareCard, showNotifyEmailModal, showInstallGuideModal, showPremiumWelcome]);
+
   const handleRegister = async (email: string) => {
     console.log(`Sending registration email link to: ${email}`);
     const cleanEmail = email.trim().toLowerCase();
@@ -956,6 +1200,65 @@ function App() {
 
   // Helper to get active result based on chosen character tab
   const activeResult = selectedCharacter === 'ren' ? renResult : tsukiResult;
+
+  // 共有リンクを開いた人に同じ鑑定結果を見せるため、シェアカードを開いたときに結果を保存する（api/share.js → sharedResults）。
+  // 保存が終わるまでと、保存できなかったときのリンクは、保存なしの形（カードの値だけ）になる。
+  // 今日の点数を隠している日（無料の日数を使い切ったお相手）は、隠した点数や助言が見えてしまうので保存しない
+  const [savedShare, setSavedShare] = useState<{ id: string; result: FortuneResult } | null>(null);
+  useEffect(() => {
+    if (!showShareCard || !renResult || !tsukiResult || dailyScoreHidden || savedShare?.result === tsukiResult) return;
+    let active = true;
+    fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode, myName, oppName: mode === 'match' ? oppName : '', character: selectedCharacter, tsuki: tsukiResult, ren: renResult }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (active && d && typeof d.id === 'string') setSavedShare({ id: d.id, result: tsukiResult }); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [showShareCard, renResult, tsukiResult]);
+
+  // 対話ロビーで選んだお相手（または自分だけ）の鑑定を、チャット用にその場で出す。点数の出し方は鑑定と同じ generateFortuneResult
+  const chatResult = useMemo(() => {
+    if (chatTarget === null) return activeResult;
+    if (chatTarget === 'pick' || !myBirth) return null;
+    const partner = chatTarget === 'self' ? null : chatTarget;
+    // 保存時と同じく、お相手の性別は自分と逆にそろえる（handleSelectPartner と同じ）
+    const partnerGender = partner && partner.gender === myGender ? (myGender === 'female' ? 'male' : 'female') : partner?.gender;
+    try {
+      return generateFortuneResult({
+        myName,
+        myBirth,
+        myMbti,
+        myGender,
+        opponentName: partner?.name,
+        opponentBirth: partner?.birth,
+        opponentMbti: partner?.mbti,
+        opponentGender: partnerGender,
+        relationship: partner?.relationship || '片思い中'
+      }, selectedCharacter);
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }, [chatTarget, activeResult, myName, myBirth, myMbti, myGender, selectedCharacter]);
+  const chatOpponentName = chatTarget === null
+    ? (mode === 'match' ? oppName : undefined)
+    : (chatTarget !== 'pick' && chatTarget !== 'self' ? chatTarget.name : undefined);
+  // 今日の相性は、無料だとお相手ごとに見られる日数が決まっている。今の鑑定結果と同じお相手ならその判定を使い、
+  // 別のお相手はチャットのために「見た日」を数えないよう、プレミアム以外では点数をAIに渡さない
+  const chatHideDailyScore = chatTarget === null
+    ? dailyScoreHidden
+    : (chatTarget !== 'pick' && chatTarget !== 'self' && !isSubscribed
+      && !(chatTarget.birth === oppBirth && mode === 'match' && flowStep === 'result' && !dailyScoreHidden));
+  // チャットの会話を端末に残すときの、お相手の見分け方。保存したお相手と、いま占った同じお相手は同じ会話になる
+  const chatHistoryPartnerKey = chatTarget === 'pick' ? undefined
+    : chatTarget === 'self' ? 'self'
+    : chatTarget !== null ? `p:${chatTarget.birth}:${chatTarget.name}`
+    : (mode === 'match' && oppBirth ? `p:${oppBirth}:${oppName}` : 'self');
+  const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
+    && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
 
   return (
     <div className={`app-container${activeTab === 'home' && flowStep !== 'result' ? ' bg-cosmos' : ''}`} style={{
@@ -983,13 +1286,50 @@ function App() {
       {/* Scrollable Main Area */}
       <main className="main-content no-scrollbar">
         
+        {/* 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。「あなたも無料で鑑定する」で自分の入力画面へ */}
+        {activeTab === 'home' && sharedView?.status === 'loading' && <LoadingScreen />}
+        {activeTab === 'home' && sharedView?.status === 'ready' && (() => {
+          const d = sharedView.data;
+          const leave = () => handleTabChange('home');
+          return (
+            <ResultView
+              result={selectedCharacter === 'ren' ? d.ren : d.tsuki}
+              renResult={d.ren}
+              tsukiResult={d.tsuki}
+              selectedChar={selectedCharacter}
+              setSelectedChar={setSelectedCharacter}
+              isRegistered={isRegistered}
+              onRegister={handleRegister}
+              isSubscribed={isSubscribed}
+              onSubscribe={handleStartCheckout}
+              onOpenPremiumLP={() => setShowPremiumLP(true)}
+              onOpenShareCard={() => {}}
+              myName={d.myName}
+              opponentName={d.mode === 'match' ? d.oppName : undefined}
+              hasOpponent={d.mode === 'match'}
+              onReset={leave}
+              onShowLegal={() => {
+                setShowLegalPage(true);
+                pushNav({ legal: true });
+              }}
+              sharedBy={{ name: d.myName }}
+            />
+          );
+        })()}
+
         {/* Tab 1: HOME (Includes Diagnosis Flow) */}
-        {activeTab === 'home' && (
+        {activeTab === 'home' && !sharedView && (
           <>
             {flowStep === 'input' && (
               <div className="home-input-flow" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', flexShrink: 0 }}>
+                {/* 共有リンクから来た人には、まず共有された鑑定結果を見せる（「あなたも無料で鑑定する」で入力画面へ） */}
+                {sharedTeaser ? (
+                  <SharedResultView shared={sharedTeaser} onStart={() => handleTabChange('home')} />
+                ) : (
+                <>
                 <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />
                 <UnifiedInputView
+                  key={inputViewKey}
                   selectedCharacter={selectedCharacter}
                   setSelectedCharacter={setSelectedCharacter}
                   onSubmit={handleDiagnosisSubmit}
@@ -1000,6 +1340,8 @@ function App() {
                   isRegistered={isRegistered}
                   isSubscribed={isSubscribed}
                 />
+                </>
+                )}
                 <SeoFooterSection />
               </div>
             )}
@@ -1016,6 +1358,7 @@ function App() {
                 isRegistered={isRegistered}
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
+                partnerLock={partnerLock}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -1025,9 +1368,20 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                notifyStatus={{ on: notifyDailyLuck && !!notifySub?.enabled, targetLabel: notifyTargetLabel, isCurrentReading: notifyIsCurrentReading }}
+                onOpenNotifySettings={() => {
+                  if (!currentUser) { setShowAuthModal(true); return; }
+                  openNotifyModal(mode === 'match' ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)?.id : 'self');
+                }}
+                onSwitchNotifyToCurrent={switchNotifyToCurrentReading}
+                onOpenChat={(question) => {
+                  setChatInitialQuestion(question);
+                  setChatTarget(null);
+                  setIsChatOpen(true);
+                }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
-                  window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
+                  pushNav({ legal: true });
                 }}
               />
             )}
@@ -1047,6 +1401,7 @@ function App() {
                 isRegistered={isRegistered}
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
+                partnerLock={partnerLock}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -1056,9 +1411,20 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                notifyStatus={{ on: notifyDailyLuck && !!notifySub?.enabled, targetLabel: notifyTargetLabel, isCurrentReading: notifyIsCurrentReading }}
+                onOpenNotifySettings={() => {
+                  if (!currentUser) { setShowAuthModal(true); return; }
+                  openNotifyModal(mode === 'match' ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)?.id : 'self');
+                }}
+                onSwitchNotifyToCurrent={switchNotifyToCurrentReading}
+                onOpenChat={(question) => {
+                  setChatInitialQuestion(question);
+                  setChatTarget(null);
+                  setIsChatOpen(true);
+                }}
                 onShowLegal={() => {
                   setShowLegalPage(true);
-                  window.history.pushState({ tab: 'fortune', legal: true }, '', '/terms');
+                  pushNav({ legal: true });
                 }}
               />
             ) : (
@@ -1074,7 +1440,7 @@ function App() {
                 </p>
                 <button 
                   className="consult-btn font-serif" 
-                  onClick={() => { setActiveTab('home'); setFlowStep('input'); }}
+                  onClick={() => handleTabChange('home')}
                   style={{ marginTop: '0.5rem', padding: '0.9rem 2rem', fontSize: '0.95rem', fontWeight: 'bold' }}
                 >
                   今すぐ相性を占う
@@ -1110,6 +1476,7 @@ function App() {
                   setShowAuthModal(true);
                 } else {
                   setSelectedCharacter('tsuki');
+                  setChatTarget('pick');
                   setIsChatOpen(true);
                 }
               }}>
@@ -1163,6 +1530,7 @@ function App() {
                   setShowAuthModal(true);
                 } else {
                   setSelectedCharacter('ren');
+                  setChatTarget('pick');
                   setIsChatOpen(true);
                 }
               }}>
@@ -1220,29 +1588,25 @@ function App() {
               <ColumnDetailView
                 slug={selectedColumnSlug}
                 onBackToList={() => {
-                  setSelectedColumnSlug(null);
-                  window.history.pushState({ tab: 'column', slug: null }, '', '/column');
-                  window.scrollTo(0, 0);
-                  const mainContentEl = document.querySelector('.main-content');
-                  if (mainContentEl) mainContentEl.scrollTop = 0;
+                  // 一覧から開いた記事なら、戻ると同じ（一覧のスクロール位置も戻る）。直接開いた記事なら一覧に置き換える
+                  if (!goBackOr({ slug: null })) {
+                    setSelectedColumnSlug(null);
+                    scrollMainTo(0);
+                  }
                 }}
                 onNavigateHome={() => handleTabChange('home')}
                 onSelectArticle={(slug) => {
+                  pushNav({ tab: 'column', slug });
                   setSelectedColumnSlug(slug);
-                  window.history.pushState({ tab: 'column', slug }, '', `/column/${slug}`);
-                  window.scrollTo(0, 0);
-                  const mainContentEl = document.querySelector('.main-content');
-                  if (mainContentEl) mainContentEl.scrollTop = 0;
+                  scrollMainTo(0);
                 }}
               />
             ) : (
               <ColumnListView
                 onSelectArticle={(slug) => {
+                  pushNav({ tab: 'column', slug });
                   setSelectedColumnSlug(slug);
-                  window.history.pushState({ tab: 'column', slug }, '', `/column/${slug}`);
-                  window.scrollTo(0, 0);
-                  const mainContentEl = document.querySelector('.main-content');
-                  if (mainContentEl) mainContentEl.scrollTop = 0;
+                  scrollMainTo(0);
                 }}
                 onNavigateHome={() => handleTabChange('home')}
               />
@@ -1257,10 +1621,7 @@ function App() {
             {settingsSubView !== 'main' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                 <button
-                  onClick={() => {
-                    setSettingsSubView('main');
-                    window.history.pushState({ tab: 'profile', subView: 'main' }, '', '/mypage');
-                  }}
+                  onClick={closeSubView}
                   style={{
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -1283,6 +1644,7 @@ function App() {
                   {settingsSubView === 'tokushoho' && '特定商取引法に基づく表記'}
                   {settingsSubView === 'privacy' && 'プライバシーポリシー'}
                   {settingsSubView === 'company' && '運営会社情報'}
+                  {settingsSubView === 'contact' && 'お問い合わせ・ご意見'}
                 </span>
               </div>
             ) : (
@@ -1390,7 +1752,7 @@ function App() {
                 </div>
 
                 <div 
-                  onClick={() => setSettingsSubView('profile')}
+                  onClick={() => openSubView('profile')}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -1415,7 +1777,7 @@ function App() {
                 </div>
 
                 <div 
-                  onClick={() => setSettingsSubView('partners')}
+                  onClick={() => openSubView('partners')}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -1484,6 +1846,7 @@ function App() {
                         setNotifyDailyLuck(false);
                         const ok = await unsubscribeEmailSubscription();
                         if (ok) {
+                          setNotifySub(prev => (prev ? { ...prev, enabled: false } : prev));
                           showAlert('🔕 毎朝8時の運勢通知をOFFにしました。');
                         } else {
                           setNotifyDailyLuck(true);
@@ -1553,8 +1916,7 @@ function App() {
 
                 <div 
                   onClick={() => {
-                    setSettingsSubView('about');
-                    window.history.pushState({ tab: 'profile', subView: 'about' }, '', '/about');
+                    openSubView('about');
                   }}
                   className="glass-panel" 
                   style={{
@@ -1581,8 +1943,35 @@ function App() {
 
                 <div 
                   onClick={() => {
-                    setSettingsSubView('tokushoho');
-                    window.history.pushState({ tab: 'profile', subView: 'tokushoho' }, '', '/tokushoho');
+                    openSubView('contact');
+                    window.scrollTo(0, 0);
+                  }}
+                  className="glass-panel" 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '1.25rem 1.4rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '16px',
+                    color: '#f3efe6',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
+                    <MessageCircle size={20} style={{ color: '#e2c074' }} />
+                    <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>お問い合わせ・ご意見</span>
+                  </div>
+                  <ChevronRight size={18} style={{ color: '#a9a49a' }} />
+                </div>
+
+                <div 
+                  onClick={() => {
+                    openSubView('tokushoho');
                   }}
                   className="glass-panel" 
                   style={{
@@ -1610,7 +1999,7 @@ function App() {
                 <div 
                   onClick={() => {
                     setShowLegalPage(true);
-                    window.history.pushState({ tab: 'home', legal: true }, '', '/terms');
+                    pushNav({ legal: true });
                   }}
                   className="glass-panel" 
                   style={{
@@ -1637,8 +2026,7 @@ function App() {
 
                 <div 
                   onClick={() => {
-                    setSettingsSubView('company');
-                    window.history.pushState({ tab: 'profile', subView: 'company' }, '', '/company');
+                    openSubView('company');
                   }}
                   className="glass-panel" 
                   style={{
@@ -1665,6 +2053,13 @@ function App() {
               </div>
             )}
 
+            {settingsSubView === 'contact' && (
+              <ContactForm
+                defaultEmail={currentUser?.email}
+                onBack={closeSubView}
+              />
+            )}
+
             {/* Sub-View: PROFILE EDIT */}
             {settingsSubView === 'profile' && (
               <div className="glass-panel" style={{ padding: '1.5rem 1.25rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '1.4rem', width: '100%', borderRadius: '20px', boxSizing: 'border-box' }}>
@@ -1684,6 +2079,7 @@ function App() {
                   <label style={{ fontSize: '0.85rem', color: '#e2c074', fontWeight: 'bold' }}>生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
                   <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
                     <input
+                      ref={profileBirthRef}
                       type="text"
                       inputMode="numeric"
                       maxLength={10}
@@ -1772,7 +2168,7 @@ function App() {
                   className="consult-btn"
                   onClick={async () => {
                     if (!isValidBirthDate(myBirth)) {
-                      showAlert('生年月日を「19950401」のように8桁で正しく入力してください。');
+                      showFieldError('生年月日を「19950401」のように8桁で正しく入力してください。', profileBirthRef.current);
                       return;
                     }
                     try {
@@ -1783,17 +2179,18 @@ function App() {
                         gender: myGender
                       }));
                     } catch (e) {}
+                    pushProfile();
                     // Keep the daily email in step with the edited profile
                     if (notifyDailyLuck && currentUser) {
                       const synced = await updateEmailSubscriptionProfile({ myName: myName || 'あなた', myBirth, myGender, myMbti });
                       if (!synced) {
                         showAlert('プロフィールは保存しましたが、毎朝のメールへの反映に失敗しました。ログインし直してから、もう一度保存してください。');
-                        setSettingsSubView('main');
+                        closeSubView();
                         return;
                       }
                     }
                     showAlert('プロフィール変更を保存しました！');
-                    setSettingsSubView('main');
+                    closeSubView();
                   }}
                   style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem', fontSize: '0.9rem', fontWeight: 'bold' }}
                 >
@@ -1926,7 +2323,9 @@ function App() {
                               <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input
+                                  ref={editPartnerBirthRef}
                                   type="text"
+                                  inputMode="numeric"
                                   value={editPartnerBirth}
                                   onChange={(e) => setEditPartnerBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
                                   placeholder="例: 19950125"
@@ -2381,11 +2780,11 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>運営責任者</span>
-                  <span style={{ color: 'white' }}>山下 高志</span>
+                  <span style={{ color: 'white' }}>須藤 涼弥</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</span>
+                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
@@ -2393,7 +2792,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>電話番号</span>
-                  <span style={{ color: 'white' }}>08053565283</span>
+                  <span style={{ color: 'white' }}>請求があった場合は遅滞なく開示します</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>販売価格</span>
@@ -2458,9 +2857,9 @@ function App() {
                 <div>
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>5. 苦情・相談対応体制</h4>
                   <p>個人情報の取扱いに関するご質問、苦情、相談等は下記窓口までお申し出ください。<br/>
-                  【苦情・相談窓口】Ill株式会社（担当：山下 高志）<br/>
-                  所在地：東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702<br/>
-                  連絡先：support@tsuki-to-ren.com / 08053565283（平日10:00〜18:00）</p>
+                  【苦情・相談窓口】Ill株式会社（担当：須藤 涼弥）<br/>
+                  所在地：東京都渋谷区代々木２丁目２４−８<br/>
+                  連絡先：support@tsuki-to-ren.com</p>
                 </div>
               </div>
             )}
@@ -2474,7 +2873,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>代表取締役</span>
-                  <span style={{ color: 'white' }}>山下 高志</span>
+                  <span style={{ color: 'white' }}>須藤 涼弥</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>設立</span>
@@ -2482,11 +2881,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８ミオカステーロ代々木702</span>
-                </div>
-                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#a9a49a' }}>電話番号</span>
-                  <span style={{ color: 'white' }}>08053565283</span>
+                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
@@ -2513,9 +2908,28 @@ function App() {
           setChatCount={setChatCount}
           onRegister={handleRegister}
           onSubscribe={handleStartCheckout}
-          onClose={() => setIsChatOpen(false)}
-          result={activeResult}
-          opponentName={mode === 'match' ? oppName : undefined}
+          onClose={() => { setIsChatOpen(false); setChatInitialQuestion(undefined); setChatTarget(null); }}
+          result={chatResult}
+          opponentName={chatOpponentName}
+          initialQuestion={chatInitialQuestion}
+          hideDailyScore={chatHideDailyScore}
+          historyKey={chatHistoryPartnerKey}
+          partnerPicker={chatTarget === 'pick' ? {
+            partners: savedPartners,
+            unsavedCurrentName: currentUnsaved ? (oppName || 'お相手') : undefined,
+            onPick: (partner) => setChatTarget(partner),
+            onPickSelf: () => setChatTarget('self'),
+            onSaveCurrent: () => {
+              const saved = handleSavePartner();
+              if (saved) setChatTarget(saved);
+            },
+            onAddNew: () => {
+              // 恋愛診断の入力画面へ。結果画面の「お相手を保存」から保存できる
+              setIsChatOpen(false);
+              setChatTarget(null);
+              handleTabChange('home');
+            }
+          } : undefined}
         />
       )}
 
@@ -2527,6 +2941,7 @@ function App() {
           myName={myName}
           opponentName={mode === 'match' ? oppName : undefined}
           hasOpponent={mode === 'match'}
+          hideDailyScore={dailyScoreHidden}
           shareUrl={generateShareUrl()}
           onClose={() => setShowShareCard(false)}
         />
@@ -2547,29 +2962,33 @@ function App() {
       {/* Legal Page (利用規約・プライバシーポリシー) */}
       {showLegalPage && (
         <LegalPage onClose={() => {
-          setShowLegalPage(false);
-          const fallbackPath = activeTab === 'profile' ? '/mypage' : (activeTab === 'fortune' ? '/result' : (activeTab === 'column' ? '/column' : (activeTab === 'chat' ? '/chat' : '/')));
-          window.history.pushState({ tab: activeTab, slug: null }, '', fallbackPath);
+          if (!goBackOr({ legal: false })) setShowLegalPage(false);
         }} />
       )}
 
       {/* Email Notification Setup Modal */}
       {showNotifyEmailModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
+        // お相手が増えると中身が画面より高くなる。中央寄せのままだと上（✕）と下（保存ボタン）が画面外に出て
+        // 操作できなくなるため、外枠の中でスクロールさせ、下メニュー（z-index 99999）より上に出す。
+        <div className="notify-modal-overlay" style={{
           background: 'rgba(2, 3, 4, 0.85)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          zIndex: 200,
+          zIndex: 100000,
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center',
-          padding: '1.25rem'
+          alignItems: 'flex-start',
+          overflowY: 'auto',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
+          padding: 'calc(1.25rem + env(safe-area-inset-top, 0px)) 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px))',
+          boxSizing: 'border-box'
         }}>
           <div className="glass-panel" style={{
             width: '100%',
             maxWidth: '420px',
+            margin: 'auto 0',
+            flexShrink: 0,
             background: 'linear-gradient(180deg, rgba(17, 24, 35, 0.98) 0%, rgba(9, 13, 19, 0.99) 100%)',
             border: '1px solid rgba(226, 192, 116, 0.3)',
             borderRadius: '24px',
@@ -2658,6 +3077,7 @@ function App() {
                 直接入力 / 変更:
               </label>
               <input
+                ref={notifyEmailRef}
                 type="email"
                 placeholder="example@email.com"
                 value={notifyEmailInput}
@@ -2708,8 +3128,7 @@ function App() {
                 onClick={() => {
                   // Opens the saved-partner form; saving it comes back here with the new partner chosen
                   setShowNotifyEmailModal(false);
-                  setActiveTab('profile');
-                  setSettingsSubView('partners');
+                  openSubView('partners');
                   if (startNewPartner()) setNotifyAfterPartnerAdd(true);
                 }}
                 style={{
@@ -2731,7 +3150,7 @@ function App() {
               type="button"
               onClick={async () => {
                 if (!notifyEmailInput || !notifyEmailInput.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', notifyEmailRef.current);
                   return;
                 }
                 if (!isValidBirthDate(myBirth)) {
@@ -2745,7 +3164,7 @@ function App() {
                   return;
                 }
                 if (cleanEmail !== accountEmail) {
-                  showAlert('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。');
+                  showFieldError('通知は、ログイン中のアカウントのメールアドレスにのみ送れます。', notifyEmailRef.current);
                   return;
                 }
 
@@ -2807,6 +3226,7 @@ function App() {
               完了するため、ご入力されたメールアドレスを入力してください。
             </p>
             <input
+              ref={promptEmailRef}
               type="email"
               placeholder="例: user@example.com"
               value={promptEmailInput}
@@ -2817,7 +3237,7 @@ function App() {
               onClick={async () => {
                 const clean = promptEmailInput.trim().toLowerCase();
                 if (!clean || !clean.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', promptEmailRef.current);
                   return;
                 }
                 const res = await completeEmailMagicLinkSignIn(clean);

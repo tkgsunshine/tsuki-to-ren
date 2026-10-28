@@ -1,164 +1,165 @@
-export default function handler(req, res) {
+// 共有リンク（/share/card）の X・LINE 用カード画像（1200×630 の PNG）。
+// X・LINE は SVG のカード画像を表示しないので、satori（SVG化）＋ @resvg/resvg-wasm（PNG化）で PNG にする（scripts/x/lib/card.mjs と同じ方式）。
+// フォントは scripts/x/assets の Shippori Mincho Bold（SIL OFL）、ロゴは月と蓮のエンブレム。vercel.json の includeFiles で関数に同梱する
+import fs from 'node:fs';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+import satori from 'satori';
+import { Resvg, initWasm } from '@resvg/resvg-wasm';
+import { SHARE_LINES, SHARE_MBTI_NAMES, SHARE_TITLES } from './_lib/share-card-text.js';
+
+const require = createRequire(import.meta.url);
+const ASSETS = path.join(process.cwd(), 'scripts/x/assets');
+const W = 1200;
+const H = 630;
+
+let fontData;
+let emblemUri;
+let wasmReady;
+const PUBLIC_ASSETS = path.join(process.cwd(), 'public/assets');
+// 守護獣のキャラ画像（public/assets/astrology_*.jpg。鑑定結果の保存画像と同じ絵）。
+// URLではファイル名の「astrology_」と「.jpg」を除いた部分を渡す（例: ox_sample_male。卯は sample / sample_male）
+const imageUris = {};
+const jpgUri = (file) => (imageUris[file] ??= `data:image/jpeg;base64,${fs.readFileSync(path.join(PUBLIC_ASSETS, file)).toString('base64')}`);
+const guardianFile = (key) => {
+  if (!/^([a-z]+_)?sample(_male)?$/.test(String(key || ''))) return null;
+  const file = `astrology_${key}.jpg`;
+  return fs.existsSync(path.join(PUBLIC_ASSETS, file)) ? file : null;
+};
+const font = () => (fontData ??= fs.readFileSync(path.join(ASSETS, 'ShipporiMincho-Bold.ttf')));
+const emblem = () => (emblemUri ??= `data:image/png;base64,${fs.readFileSync(path.join(ASSETS, 'emblem.png')).toString('base64')}`);
+
+const el = (type, style, children, extra = {}) => ({ type, props: { style: { display: 'flex', ...style }, children, ...extra } });
+const clip = (s, n) => {
+  const chars = [...String(s || '').trim()];
+  return chars.length > n ? chars.slice(0, n - 1).join('') + '…' : chars.join('');
+};
+// 点数は数字だけ通す（無料の日数を使い切った日などは「??」）
+const score = (v) => (/^\d{1,3}$/.test(String(v || '')) ? String(v) : '??');
+
+function scoreBox(label, value, color) {
+  return el('div', { flexDirection: 'column', alignItems: 'center', padding: '0 44px' }, [
+    el('div', { fontSize: 24, color: '#cbd5e1', marginBottom: 4 }, label),
+    el('div', { alignItems: 'flex-end' }, [
+      el('span', { fontSize: 72, color, lineHeight: 1 }, value),
+      el('span', { fontSize: 30, color, marginLeft: 6, marginBottom: 8 }, '点'),
+    ]),
+  ]);
+}
+
+export async function renderShareCard(params, { background = 'guardian' } = {}) {
+  const get = (k1, k2) => params.get(k1) || params.get(k2) || '';
+  const mName = clip(get('mn', 'mName') || 'あなた', 8);
+  const oName = clip(get('on', 'oName'), 8);
+  const rawMode = params.get('mode');
+  const hasOpponent = !!oName && rawMode !== 'single' && rawMode !== 's';
+  const baseScore = score(get('bs', 'baseScore'));
+  // 説明の文は番号で受け取る（api/_lib/share-card-text.js）
+  const titlePair = hasOpponent ? SHARE_TITLES[Number(params.get('c'))] : undefined;
+  const line = SHARE_LINES[Number(params.get('l'))];
+  const dailyScore = score(get('ds', 'dailyScore'));
+
+  // 名前の下に16タイプ（例: INTJ・建築家）。タイプが未選択の人は出さない
+  const mbtiTag = (key) => {
+    const code = String(params.get(key) || '').toUpperCase();
+    return SHARE_MBTI_NAMES[code]
+      ? el('div', { marginTop: 4, fontSize: 21, color: '#e9d5ff', padding: '3px 16px', borderRadius: 20, background: 'rgba(10,10,22,0.72)', border: '1px solid rgba(192,132,252,0.5)' }, `${code}・${SHARE_MBTI_NAMES[code]}`)
+      : null;
+  };
+  // お相手ありのときは左右の幅をそろえ、「×」が真ん中に来るようにする
+  const person = (name, key, suffix = '', width) =>
+    el('div', { flexDirection: 'column', alignItems: 'center', ...(width ? { width } : {}) }, [el('div', {}, `${name}${suffix}`), mbtiTag(key)].filter(Boolean));
+  const heading = hasOpponent
+    ? el('div', { alignItems: 'flex-start', fontSize: 52, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, [
+        person(mName, 'mm', '', 340),
+        el('span', { color: '#e2c074', fontSize: 40, margin: '8px 10px 0' }, '×'),
+        person(oName, 'om', '', 340),
+      ])
+    : el('div', { fontSize: 52, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, [person(mName, 'mm', ' の今日の恋愛運')]);
+
+  const scores = hasOpponent
+    ? [scoreBox('基本の相性', baseScore, '#e2c074'), el('div', { width: 1, height: 120, background: 'rgba(255,255,255,0.18)' }, []), scoreBox('今日の相性', dailyScore, '#93c5fd')]
+    : [scoreBox('今日の運勢', dailyScore, '#93c5fd')];
+
+  // 背景のキャラ: 左右の端に置き、中央は暗くして文字を読みやすくする。
+  // 'guardian' は二人の守護獣（お相手なしは本人のみ右側）、'tsuki-ren' は月（左）と蓮（右）
+  const left = background === 'tsuki-ren' ? 'tsuki.jpg' : hasOpponent ? guardianFile(params.get('ma')) : null;
+  const right = background === 'tsuki-ren' ? 'ren.jpg' : guardianFile(hasOpponent ? params.get('oa') : params.get('ma'));
+  // 画像の内側の端は背景色へなじませる（左の画像は右へ、右の画像は左へ向かって暗くなる）
+  const SIDE = 470;
+  const side = (file, pos) =>
+    file
+      ? el('div', { position: 'absolute', top: 0, [pos]: 0, width: SIDE, height: H }, [
+          el('img', { width: SIDE, height: H, objectFit: 'cover' }, [], { src: jpgUri(file), width: SIDE, height: H }),
+          el('div', { position: 'absolute', top: 0, left: 0, width: SIDE, height: H, backgroundImage: `linear-gradient(${pos === 'left' ? 90 : 270}deg, rgba(5,5,12,0.25) 0%, rgba(5,5,12,0.55) 45%, rgba(5,5,12,1) 100%)` }, []),
+        ])
+      : null;
+
+  const tree = el(
+    'div',
+    {
+      width: W,
+      height: H,
+      position: 'relative',
+      fontFamily: 'Mincho',
+      color: '#f4efe6',
+      backgroundColor: '#05050c',
+      // キャラのない側にだけ、紫・青の光を置く
+      ...(left && right
+        ? {}
+        : {
+            backgroundImage: [
+              left ? null : 'radial-gradient(circle at 18% 22%, rgba(147,51,234,0.38), rgba(5,5,12,0) 45%)',
+              right ? null : 'radial-gradient(circle at 85% 80%, rgba(59,130,246,0.34), rgba(5,5,12,0) 45%)',
+            ].filter(Boolean).join(', '),
+          }),
+    },
+    [
+      side(left, 'left'),
+      side(right, 'right'),
+      el(
+        'div',
+        // 下の約90pxは、Xがタイトルを重ねて表示するので空ける
+        { position: 'absolute', top: 0, left: 0, width: W, height: H, flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '34px 60px 92px' },
+        [
+          el('div', { alignItems: 'center' }, [
+            el('img', { width: 56, height: 56, marginRight: 12 }, [], { src: emblem(), width: 56, height: 56 }),
+            el('div', { fontSize: 30, color: '#e2c074', letterSpacing: 8 }, '月と蓮'),
+          ]),
+          titlePair
+            ? el('div', { fontSize: 26, color: '#fef08a', padding: '6px 26px', borderRadius: 30, background: 'rgba(10,10,22,0.72)', border: '1.5px solid rgba(226,192,116,0.55)' }, `【${titlePair[0]}】${titlePair[1]}`)
+            : null,
+          heading,
+          el('div', { alignItems: 'center', padding: '8px 10px', borderRadius: 24, background: 'rgba(10,10,22,0.72)', border: '1px solid rgba(255,255,255,0.16)' }, scores),
+          line
+            ? el(
+                'div',
+                { flexDirection: 'column', alignItems: 'center', fontSize: 26, lineHeight: 1.45, color: '#ffffff', textShadow: '0 2px 8px rgba(0,0,0,0.9)' },
+                // 文ごとに改行する（途中で折り返すと読みにくい）
+                line.split(/(?<=。)/).map((t) => el('div', {}, t)),
+              )
+            : null,
+        ].filter(Boolean),
+      ),
+    ].filter(Boolean),
+  );
+
+  const svg = await satori(tree, { width: W, height: H, fonts: [{ name: 'Mincho', data: font(), weight: 700, style: 'normal' }] });
+  wasmReady ??= initWasm(fs.readFileSync(path.join(path.dirname(require.resolve('@resvg/resvg-wasm')), 'index_bg.wasm')));
+  await wasmReady;
+  return Buffer.from(new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render());
+}
+
+export default async function handler(req, res) {
   try {
-    const host = req.headers.host || 'tsuki-to-ren.vercel.app';
-    const url = new URL(req.url, `https://${host}`);
-    const searchParams = url.searchParams;
-
-    const get = (k1, k2) => searchParams.get(k1) || searchParams.get(k2);
-
-    const mName = get('mn', 'mName') || 'あなた';
-    const mGender = get('mg', 'mGender') || 'male';
-    const oName = get('on', 'oName') || '';
-
-    const baseScore = get('bs', 'baseScore') || '??';
-    const dailyScore = get('ds', 'dailyScore') || '??';
-    const oneLiner = get('ol', 'oneLiner') || '二人の運命を占いましょう';
-    const rawTitle = get('t', 'title') || '';
-    const cleanTitle = rawTitle.replace(/^[【\s]+|[】\s]+$/g, '').trim();
-
-    const myPillar = searchParams.get('myPillar') || '';
-    const myStar = searchParams.get('myStar') || '';
-    const mMbtiText = searchParams.get('mMbtiText') || '';
-
-    const oppPillar = searchParams.get('oppPillar') || '';
-    const oppStar = searchParams.get('oppStar') || '';
-    const oMbtiText = searchParams.get('oMbtiText') || '';
-
-    const hasOpponent = !!oName && searchParams.get('mode') !== 'single';
-    const fmtName = (n) => (n.length > 8 ? n.substring(0, 7) + '…' : n);
-    const todayStr = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/');
-
-    const isRen = mGender === 'male';
-    const myTagColor = isRen ? '#93c5fd' : '#d8b4fe';
-    const myTagBg = isRen ? 'rgba(59, 130, 246, 0.15)' : 'rgba(168, 85, 247, 0.15)';
-    const myTagBorder = isRen ? 'rgba(59, 130, 246, 0.4)' : 'rgba(168, 85, 247, 0.4)';
-
-    const oppTagColor = isRen ? '#d8b4fe' : '#93c5fd';
-    const oppTagBg = isRen ? 'rgba(168, 85, 247, 0.15)' : 'rgba(59, 130, 246, 0.15)';
-    const oppTagBorder = isRen ? 'rgba(168, 85, 247, 0.4)' : 'rgba(59, 130, 246, 0.4)';
-
-    const escapeSvg = (str) => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-    const titleBadgeSvg = (hasOpponent && cleanTitle) ? `
-      <g transform="translate(600, 75)">
-        <rect x="-240" y="-22" width="480" height="42" rx="21" fill="rgba(15, 10, 25, 0.85)" stroke="rgba(226, 192, 116, 0.4)" stroke-width="1.5" />
-        <text x="0" y="5" font-family="'Hiragino Mincho ProN', 'Yu Mincho', 'Shippori Mincho', serif, sans-serif" font-size="20" font-weight="bold" fill="#fef08a" text-anchor="middle" letter-spacing="1.5">【${escapeSvg(cleanTitle)}】</text>
-      </g>
-    ` : '';
-
-    const namesSvg = hasOpponent ? `
-      <text x="600" y="145" font-family="'Hiragino Mincho ProN', 'Yu Mincho', 'Shippori Mincho', serif, sans-serif" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="middle" letter-spacing="2">
-        <tspan fill="#ffffff">${escapeSvg(fmtName(mName))}</tspan>
-        <tspan fill="#fbbf24" font-size="34">  ×  </tspan>
-        <tspan fill="#ffffff">${escapeSvg(fmtName(oName))}</tspan>
-      </text>
-    ` : `
-      <text x="600" y="145" font-family="'Hiragino Mincho ProN', 'Yu Mincho', 'Shippori Mincho', serif, sans-serif" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="middle" letter-spacing="2">${escapeSvg(fmtName(mName))} の恋愛運</text>
-    `;
-
-    const scoreBoxWidth = hasOpponent ? 460 : 280;
-    const scoreBoxX = 600 - (scoreBoxWidth / 2);
-
-    const scoreContentSvg = hasOpponent ? `
-      <g transform="translate(${scoreBoxX + 115}, 265)">
-        <text x="0" y="0" font-family="sans-serif" font-size="18" fill="#cbd5e1" text-anchor="middle">基本相性</text>
-        <text x="-12" y="52" font-family="'Hiragino Mincho ProN', 'Yu Mincho', serif, sans-serif" font-size="46" font-weight="bold" fill="#e2c074" text-anchor="middle">${escapeSvg(baseScore)}</text>
-        <text x="30" y="48" font-family="sans-serif" font-size="20" fill="#e2c074" text-anchor="start">点</text>
-      </g>
-      <g transform="translate(${scoreBoxX + 345}, 265)">
-        <text x="0" y="0" font-family="sans-serif" font-size="18" fill="#cbd5e1" text-anchor="middle">今日の相性</text>
-        <text x="-12" y="52" font-family="'Hiragino Mincho ProN', 'Yu Mincho', serif, sans-serif" font-size="46" font-weight="bold" fill="#93c5fd" text-anchor="middle">${escapeSvg(dailyScore)}</text>
-        <text x="30" y="48" font-family="sans-serif" font-size="20" fill="#93c5fd" text-anchor="start">点</text>
-      </g>
-    ` : `
-      <g transform="translate(600, 265)">
-        <text x="0" y="0" font-family="sans-serif" font-size="18" fill="#cbd5e1" text-anchor="middle">今日の運勢</text>
-        <text x="-12" y="52" font-family="'Hiragino Mincho ProN', 'Yu Mincho', serif, sans-serif" font-size="46" font-weight="bold" fill="#93c5fd" text-anchor="middle">${escapeSvg(dailyScore)}</text>
-        <text x="30" y="48" font-family="sans-serif" font-size="20" fill="#93c5fd" text-anchor="start">点</text>
-      </g>
-    `;
-
-    const myTagText = `あなた：${myPillar} / ${myStar}${mMbtiText ? ' / ' + mMbtiText.split(' ')[0] : ''}`;
-    const oppTagText = `相手：${oppPillar} / ${oppStar}${oMbtiText ? ' / ' + oMbtiText.split(' ')[0] : ''}`;
-
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-      <defs>
-        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#0a0a19" stop-opacity="0.95" />
-          <stop offset="50%" stop-color="#05050a" stop-opacity="0.98" />
-          <stop offset="100%" stop-color="#020205" stop-opacity="1.0" />
-        </linearGradient>
-        <radialGradient id="purpleGlow" cx="20%" cy="30%" r="60%">
-          <stop offset="0%" stop-color="#9333ea" stop-opacity="0.3" />
-          <stop offset="100%" stop-color="#9333ea" stop-opacity="0" />
-        </radialGradient>
-        <radialGradient id="blueGlow" cx="80%" cy="70%" r="60%">
-          <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3" />
-          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
-        </radialGradient>
-        <linearGradient id="quoteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="rgba(10, 10, 20, 0.9)" />
-          <stop offset="100%" stop-color="rgba(59, 130, 246, 0.15)" />
-        </linearGradient>
-      </defs>
-
-      <!-- Backgrounds -->
-      <rect width="1200" height="630" fill="#030308" />
-      <rect width="1200" height="630" fill="url(#purpleGlow)" />
-      <rect width="1200" height="630" fill="url(#blueGlow)" />
-      <rect width="1200" height="630" fill="url(#bgGrad)" />
-
-      <!-- Outer Glow Frame -->
-      <rect x="20" y="20" width="1160" height="590" rx="20" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
-
-      <!-- Title Badge -->
-      ${titleBadgeSvg}
-
-      <!-- Names -->
-      ${namesSvg}
-      <line x1="200" y1="165" x2="1000" y2="165" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
-
-      <!-- Date -->
-      <g transform="translate(600, 198)">
-        <rect x="-80" y="-14" width="160" height="28" rx="14" fill="rgba(15, 10, 25, 0.82)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
-        <text x="0" y="4" font-family="sans-serif" font-size="14" fill="#cbd5e1" text-anchor="middle" letter-spacing="1">鑑定日: ${escapeSvg(todayStr)}</text>
-      </g>
-
-      <!-- Score Box Container -->
-      <rect x="${scoreBoxX}" y="235" width="${scoreBoxWidth}" height="105" rx="18" fill="rgba(10, 10, 20, 0.65)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" />
-      ${scoreContentSvg}
-
-      <!-- Quote Box -->
-      <g transform="translate(600, 395)">
-        <rect x="-480" y="-28" width="960" height="56" rx="14" fill="url(#quoteGrad)" stroke="rgba(59, 130, 246, 0.35)" stroke-width="1" />
-        <text x="0" y="6" font-family="'Hiragino Mincho ProN', 'Yu Mincho', serif, sans-serif" font-size="20" font-weight="500" fill="#ffffff" text-anchor="middle">「${escapeSvg(oneLiner)}」</text>
-      </g>
-
-      <!-- Tag Pills -->
-      ${myPillar ? `
-      <g transform="translate(600, 475)">
-        <rect x="-480" y="-18" width="960" height="36" rx="8" fill="${myTagBg}" stroke="${myTagBorder}" stroke-width="1" />
-        <text x="-460" y="6" font-family="sans-serif" font-size="14" font-weight="500" fill="${myTagColor}">${escapeSvg(myTagText)}</text>
-      </g>
-      ` : ''}
-
-      ${(hasOpponent && oppPillar) ? `
-      <g transform="translate(600, 520)">
-        <rect x="-480" y="-18" width="960" height="36" rx="8" fill="${oppTagBg}" stroke="${oppTagBorder}" stroke-width="1" />
-        <text x="-460" y="6" font-family="sans-serif" font-size="14" font-weight="500" fill="${oppTagColor}">${escapeSvg(oppTagText)}</text>
-      </g>
-      ` : ''}
-
-      <!-- Footer -->
-      <line x1="200" y1="565" x2="1000" y2="565" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" />
-      <text x="600" y="592" font-family="sans-serif" font-size="15" fill="#cbd5e1" text-anchor="middle" letter-spacing="1">恋愛鑑定アプリ - 蓮と月</text>
-    </svg>`;
-
-    res.setHeader('Content-Type', 'image/svg+xml');
-    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
-    return res.status(200).send(svg);
+    const url = new URL(req.url, `https://${req.headers.host || 'www.tsuki-to-ren.com'}`);
+    const png = await renderShareCard(url.searchParams);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    return res.status(200).send(png);
   } catch (err) {
     console.error('OGP Generation Error:', err);
-    return res.status(500).send(err.stack || err.message);
+    // 画像が作れなくても、カードが空にならないようサイト共通の画像へ
+    return res.redirect(302, '/ogp-image.jpg');
   }
 }

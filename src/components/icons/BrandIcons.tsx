@@ -95,3 +95,102 @@ export const MoonPhaseMark: React.FC<MoonPhaseMarkProps> = ({ size = 28, phase =
     </svg>
   );
 };
+
+// 線画アイコンの共通の枠（24×24、線の色は文字色に合わせる）
+const LineIcon: React.FC<BrandIconProps & { children: React.ReactNode }> = ({ size = 24, strokeWidth = 1.6, style, className, children }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={strokeWidth}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ flexShrink: 0, ...style }}
+    className={className}
+    aria-hidden="true"
+  >
+    {children}
+  </svg>
+);
+
+// ── お相手のトリセツ（取扱説明書）の見出し用 ──
+
+// 開いた本に三日月。トリセツ全体の見出し。
+export const TorisetsuBookMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5c-3.5-.5-6.5 0-8.5 1.5Z" />
+    <path d="M12 6.5v13" />
+    <path d="M16.2 7.6a2.9 2.9 0 1 0 2.6 4.5 2.4 2.4 0 0 1-2.6-4.5Z" fill="currentColor" stroke="none" />
+  </LineIcon>
+);
+
+// 矢が通ったハート。刺さる言葉。
+export const PiercedHeartMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M12 20s-7-4.3-7-9.5a3.8 3.8 0 0 1 7-2.2 3.8 3.8 0 0 1 7 2.2C19 15.7 12 20 12 20Z" />
+    <path d="M3.5 20.5 8 16.5M15.5 9.8l5-4.3" />
+    <path d="M20.5 5.5h-3.2M20.5 5.5v3.2" />
+  </LineIcon>
+);
+
+// 角の丸いひし形に「!」。してはいけないこと。
+export const CautionMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M12 3.2 20.8 12 12 20.8 3.2 12Z" />
+    <path d="M12 8.2v4.8" />
+    <circle cx="12" cy="16" r="0.95" fill="currentColor" stroke="none" />
+  </LineIcon>
+);
+
+// 吹き出しに三日月（夜に返事を待つ）。返信が遅いとき。
+export const ReplyMoonMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M5.5 4h13a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H11l-4.5 3.5v-3.5h-1a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+    <path d="M12.4 6.3a3.8 3.8 0 1 0 3.4 6 3.1 3.1 0 0 1-3.4-6Z" fill="currentColor" stroke="none" />
+  </LineIcon>
+);
+
+// 高く打つ脈。脈ありサイン。
+export const PulseUpMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M2.5 14.5h4l2-4 3 7.5 3-12 2.2 8.5H21.5" />
+  </LineIcon>
+);
+
+// 下がってから上へ折り返す線。脈なしからの逆転。
+export const ReversalMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M3.5 6 9 13c1.4 1.7 2.9 2.5 4.4 2.5 2.9 0 5.1-2.4 5.1-6V5" />
+    <path d="M16 7.5 18.5 5 21 7.5" />
+  </LineIcon>
+);
+
+// ハートの封がされた手紙。そのまま送れるメッセージ。
+export const LoveLetterMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <rect x="3.5" y="6" width="17" height="12.5" rx="2" />
+    <path d="M4 7l8 5.5L20 7" />
+    <path d="M12 17s-2.3-1.3-2.3-2.9a1.15 1.15 0 0 1 2.3-.3 1.15 1.15 0 0 1 2.3.3C14.3 15.7 12 17 12 17Z" fill="currentColor" stroke="none" />
+  </LineIcon>
+);
+
+// リボンの贈り物。デートとプレゼント。
+export const GiftMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <rect x="4.5" y="10.5" width="15" height="9.5" rx="1.5" />
+    <rect x="3.5" y="7.5" width="17" height="3" rx="1" />
+    <path d="M12 7.5V20" />
+    <path d="M12 7.5c-1.2-2.8-4.8-3.4-4.8-1.2 0 1.2 2 1.2 4.8 1.2ZM12 7.5c1.2-2.8 4.8-3.4 4.8-1.2 0 1.2-2 1.2-4.8 1.2Z" />
+  </LineIcon>
+);
+
+// 点線の道の先に星。これからの進め方。
+export const RoadmapMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <circle cx="5" cy="19" r="1.6" />
+    <path d="M7.2 19H14a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h3.5" strokeDasharray="2 2.2" />
+    <path d="M18.5 3.6l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9Z" fill="currentColor" />
+  </LineIcon>
+);

@@ -1,5 +1,10 @@
 {
   "outputDirectory": "dist",
+  "functions": {
+    "api/og.js": {
+      "includeFiles": "{scripts/x/assets/ShipporiMincho-Bold.ttf,scripts/x/assets/emblem.png,node_modules/@resvg/resvg-wasm/index_bg.wasm,public/assets/astrology_*.jpg,public/assets/tsuki.jpg,public/assets/ren.jpg}"
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/daily-luck",
@@ -33,6 +38,10 @@
     {
       "source": "/__/auth/:path*",
       "destination": "https://tsuki-to-ren-dba8c.firebaseapp.com/__/auth/:path*"
+    },
+    {
+      "source": "/share/card",
+      "destination": "/api/share"
     },
     {
       "source": "/admin",
@@ -80,6 +89,10 @@
     },
     {
       "source": "/about",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/contact",
       "destination": "/index.html"
     },
     {

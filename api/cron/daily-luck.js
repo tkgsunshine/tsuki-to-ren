@@ -4,6 +4,9 @@ import { getDb } from '../_lib/firestore.js';
 import { signUid } from '../_lib/unsubscribe-token.js';
 import { recordRun } from '../_lib/cron-run.js';
 import { buildDailyContent, renderEmailHtml, subjectFor } from '../_lib/daily-mail.js';
+import { PREMIUM } from '../_lib/stripe.js';
+import { isPremiumRecord, countPartnerDay } from '../_lib/partner-days.js';
+import { isOverrideEmail } from '../_lib/premium-override.js';
 
 const SITE = 'https://www.tsuki-to-ren.com';
 const BATCH_SIZE = 100; // Resend batch limit
@@ -15,6 +18,33 @@ const isAuthorized = (req, secret) => {
   const given = Buffer.from(String(req.headers.authorization || ''));
   const expected = Buffer.from(`Bearer ${secret}`);
   return given.length === expected.length && timingSafeEqual(given, expected);
+};
+
+// Which of these subscribers are Premium (same rule as /api/stripe/status). If it cannot be read, nobody is
+// treated as Premium for this run, so paid content is never sent to the wrong person.
+const readPremium = async (db, subs) => {
+  try {
+    const snaps = await db.getAll(...subs.map((s) => db.collection(PREMIUM).doc(s.uid)));
+    return new Set(snaps.filter((d) => isPremiumRecord(d.data())).map((d) => d.id));
+  } catch (e) {
+    console.error('⚠️ Could not read premium memberships:', e?.message);
+    return new Set();
+  }
+};
+
+const isMatchSub = (sub) => !!sub.oppBirth && (sub.mode ? sub.mode === 'match' : true);
+
+const accessFor = async (db, sub, isPremium, today) => {
+  if (isPremium) return { premium: true };
+  if (!isMatchSub(sub) || !/^\d{4}-\d{2}-\d{2}$/.test(String(sub.oppBirth))) return { premium: false };
+  try {
+    const r = await countPartnerDay(db, sub.uid, sub.oppBirth, today);
+    return { premium: false, locked: r.locked, daysLeft: r.daysLeft };
+  } catch (e) {
+    // Counting failed: our fault, so this day is not held against the member (sent as a free day, uncounted)
+    console.error('⚠️ Could not count the partner day:', e?.message);
+    return { premium: false };
+  }
 };
 
 export default async function handler(req, res) {
@@ -77,16 +107,21 @@ export default async function handler(req, res) {
   }
 
   // 4. Send in batches, checking every result (the Resend SDK returns errors instead of throwing)
+  // Free members get what the result screen shows them: the advice's first paragraph, and a partner's
+  // daily compatibility only for the free days (the mail counts as that day's view, see partner-days.js).
+  const db = getDb();
   let sent = 0;
   let failed = 0;
   let skipped = 0;
   for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
     const chunk = subscribers.slice(i, i + BATCH_SIZE);
+    const premium = await readPremium(db, chunk);
+    // PREMIUM_OVERRIDE_EMAILS is matched on the address the mail goes to, so the full version only reaches that inbox
     const emails = [];
     for (const sub of chunk) {
       let content;
       try {
-        content = buildDailyContent(sub);
+        content = buildDailyContent(sub, await accessFor(db, sub, premium.has(sub.uid) || isOverrideEmail(sub.email), dateStr));
       } catch (e) {
         skipped += 1; // bad saved data (e.g. an invalid birth date): skip this person, keep sending to the rest
         console.error('⚠️ Could not build the fortune for a subscriber:', e?.message);

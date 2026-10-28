@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, X } from 'lucide-react';
+import { Send, X, RotateCcw } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
-import { signInWithGoogle, signInWithX } from '../services/firebase';
+import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
-import { showAlert } from './AppDialog';
+import { showAlert, showConfirm, showFieldError } from './AppDialog';
+import { chatHistoryKey, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chatHistory';
+import type { SavedPartner } from '../App';
 
 interface ChatModalProps {
   character: 'ren' | 'tsuki';
@@ -17,6 +19,22 @@ interface ChatModalProps {
   onClose: () => void;
   result?: FortuneResult | null;
   opponentName?: string;
+  // 鑑定結果の質問ボタンから開いたとき、その質問を最初に送る
+  initialQuestion?: string;
+  /** 無料の日数を使い切ったお相手: 今日の点数をAIにも渡さない */
+  hideDailyScore?: boolean;
+  /** 会話を端末に残すときの、お相手の見分け方（'self' = 自分のこと）。未指定なら残さない */
+  historyKey?: string;
+  /** チャット画面（対話ロビー）から開いたとき: 相談を始める前に、誰について相談するかを選んでもらう */
+  partnerPicker?: {
+    partners: SavedPartner[];
+    /** さっき占ったけれど、まだ保存していないお相手の呼び名 */
+    unsavedCurrentName?: string;
+    onPick: (partner: SavedPartner) => void;
+    onPickSelf: () => void;
+    onSaveCurrent: () => void;
+    onAddNew: () => void;
+  };
 }
 
 interface Message {
@@ -35,34 +53,31 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   onSubscribe,
   onClose,
   result,
-  opponentName
+  opponentName,
+  initialQuestion,
+  hideDailyScore = false,
+  historyKey,
+  partnerPicker
 }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  // 会話はこの端末にだけ残す（src/utils/chatHistory.ts）。ログイン中のアカウント・キャラクター・お相手ごとに分ける
+  const uid = getFirebaseAuth().currentUser?.uid;
+  const storageKey = isRegistered && uid && historyKey && !partnerPicker
+    ? chatHistoryKey(uid, character, historyKey)
+    : null;
+  const [messages, setMessages] = useState<Message[]>(() => loadChatHistory(storageKey) || []);
+  // いま表示している会話がどのキーのものか。お相手を切り替えた瞬間に、前の会話を新しいお相手の分として保存しないため
+  const [messagesKey, setMessagesKey] = useState<string | null>(storageKey);
+  const loadedKeyRef = useRef<string | null | undefined>(undefined);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showRegisterOverlay, setShowRegisterOverlay] = useState(false);
   const [showSubscribeOverlay, setShowSubscribeOverlay] = useState(false);
   const [emailSentChat, setEmailSentChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const initialQuestionSentRef = useRef(false);
 
   const characterName = character === 'ren' ? '蓮' : '月';
   const characterAvatar = character === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp';
-
-  // Initial greeting
-  useEffect(() => {
-    const greetingText = character === 'ren'
-      ? '私は蓮。理性と導きを司る者。あなたの心境を整理し、進むべき道を論理的に紐解きましょう。今、どのようなことに迷っていますか？'
-      : '私は月。直感と優しさを司る者。あなたの心の声に耳を傾け、優しく寄り添います。今、どんな想いを抱えていますか？';
-    
-    setMessages([
-      { id: '1', sender: 'bot', text: greetingText }
-    ]);
-  }, [character]);
-
-  // Scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
 
   // 相手のニックネームが入力されていれば「〇〇さん」で出す。
   // 未入力なら、干支名（例: 辛蛇）は分かりにくいので結果画面の称号（例: 【宝石貴族 × 蛇】）を「お相手（宝石貴族×蛇）」の形で出す
@@ -70,11 +85,113 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const hasOppNickname = !!oppNickname && oppNickname !== 'お相手';
   const oppTitle = (result?.opponentAstrologyTheme || '').replace(/[【】]/g, '').replace(/\s*×\s*/g, '×').trim();
   const oppDisplayName = hasOppNickname ? `${oppNickname}さん` : (oppTitle ? `お相手（${oppTitle}）` : 'お相手');
+  const hasOpponent = !!result?.opponentPillar || hasOppNickname;
+
+  // Initial greeting（質問ボタンから開いたときは、あいさつを出さずにその質問から始める）
+  // お相手を選び直したら、そのお相手の名前であいさつし直す（まだ何も送っていないときだけ）
+  const greetingText = () => {
+    const about = hasOpponent ? `${oppDisplayName}のことですね。` : '';
+    return character === 'ren'
+      ? `私は蓮。理性と導きを司る者。${about ? `今日は${about}` : ''}あなたの心境を整理し、進むべき道を論理的に紐解きましょう。今、どのようなことに迷っていますか？`
+      : `私は月。直感と優しさを司る者。${about ? `今日は${about}` : ''}あなたの心の声に耳を傾け、優しく寄り添います。今、どんな想いを抱えていますか？`;
+  };
+
+  // 前回の会話がこの端末に残っていれば、あいさつの代わりにそれを出す
+  useEffect(() => {
+    if (partnerPicker) return;
+    const keyChanged = loadedKeyRef.current !== storageKey;
+    loadedKeyRef.current = storageKey;
+    if (keyChanged) {
+      setMessagesKey(storageKey);
+      const saved = loadChatHistory(storageKey);
+      if (saved) {
+        setMessages(saved);
+        return;
+      }
+    }
+    if (initialQuestion && isRegistered) return;
+    setMessages(prev => (!keyChanged && prev.some(m => m.sender === 'user') ? prev : [
+      { id: '1', sender: 'bot', text: greetingText() }
+    ]));
+  }, [character, !!partnerPicker, oppDisplayName, storageKey]);
+
+  // 送るたび・返事が来るたびに保存する（あいさつだけのときは保存しない）
+  useEffect(() => {
+    if (!storageKey || messagesKey !== storageKey) return;
+    if (!messages.some(m => m.sender === 'user')) return;
+    saveChatHistory(storageKey, messages);
+  }, [messages, storageKey, messagesKey]);
+
+  const hasHistory = messages.some(m => m.sender === 'user');
+  const startNewConsultation = async () => {
+    if (isTyping) return;
+    const ok = await showConfirm('今の会話を消して、新しい相談をはじめますか？', { okLabel: 'はじめる', cancelLabel: 'やめる' });
+    if (!ok) return;
+    clearChatHistory(storageKey);
+    loadedKeyRef.current = storageKey;
+    setMessagesKey(storageKey);
+    setMessages([{ id: Date.now().toString(), sender: 'bot', text: greetingText() }]);
+  };
+
+  // 鑑定結果の質問ボタンから開いたときは、開いた瞬間にその質問を送る（StrictMode の二重実行でも1回だけ）
+  useEffect(() => {
+    if (!initialQuestion || initialQuestionSentRef.current) return;
+    initialQuestionSentRef.current = true;
+    if (!isRegistered) {
+      // ログイン前は登録の案内を出し、登録後にそのまま送れるよう入力欄に入れておく
+      setInputText(initialQuestion);
+      setShowRegisterOverlay(true);
+      return;
+    }
+    handleSend(initialQuestion);
+  }, [initialQuestion]);
+
+  // 結果画面の下に浮かぶバー（シェア・ホーム追加）が入力欄に重ならないよう、開いている間は隠す
+  useEffect(() => {
+    document.body.classList.add('chat-open');
+    return () => document.body.classList.remove('chat-open');
+  }, []);
+
+  // 全画面のチャットを、見えている範囲（iOS Safari ではキーボード表示中に縮み、ページもずれる）に合わせる。
+  // ヘッダーが画面の上へ押し出されたり、入力欄がキーボードに隠れたりしないようにするため
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement;
+    const update = () => {
+      root.style.setProperty('--chat-vv-top', `${vv.offsetTop}px`);
+      root.style.setProperty('--chat-vv-height', `${vv.height}px`);
+      // 見えている高さが画面より大きく縮んでいればキーボードが出ている
+      document.body.classList.toggle('chat-keyboard-open', root.clientHeight - vv.height > 120);
+    };
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      root.style.removeProperty('--chat-vv-top');
+      root.style.removeProperty('--chat-vv-height');
+      document.body.classList.remove('chat-keyboard-open');
+    };
+  }, []);
+
+  // Scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
+
   const presetOptions = [
     { key: 'no_reply', text: `${oppDisplayName}から連絡が来ない理由と対策は？` },
     { key: 'unknown_feelings', text: `${oppDisplayName}の本音や脈ありサインを教えて` },
     { key: 'next_action', text: `次のデートやお誘いはどう切り出すべき？` },
     { key: 'torisetsu', text: `${oppDisplayName}の地雷（NG行為）と喜ぶツボは？` },
+  ];
+  // お相手を決めずに相談するとき（自分のこと）は、お相手の名前が入らない質問にする
+  const selfPresetOptions = [
+    { key: 'my_charm', text: '私の恋愛での魅力と、つまずきやすいところは？' },
+    { key: 'meet', text: 'これから素敵な出会いをつかむコツは？' },
+    { key: 'feelings', text: '最近モヤモヤしている気持ちを整理したい' },
   ];
 
   const getBotResponse = (userInput: string): string => {
@@ -106,7 +223,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
 【現在の二人の相性】
 基本相性値: ${result.baseScore}点
-今日のバイオリズム相性値: ${result.dailyScore}点
+今日のバイオリズム相性値: ${hideDailyScore ? '非公開（プレミアム限定。点数は答えないこと）' : `${result.dailyScore}点`}
 二人の相性一言要約: "${result.oneLiner}"`;
     }
     
@@ -142,15 +259,19 @@ export const ChatModal: React.FC<ChatModalProps> = ({
     setIsTyping(true);
 
     try {
-      const history = messages.map(m => ({
+      // サーバーも直近10件しか使わない（api/chat.js MAX_HISTORY）。端末に残した古い会話まで送らない
+      const history = messages.slice(-10).map(m => ({
         role: m.sender === 'user' ? 'user' : 'model',
         text: m.text
       }));
 
+      // The server counts each account's chats (api/_lib/chat-limit.js), so it needs to know who is asking
+      const idToken = await getFirebaseAuth().currentUser?.getIdToken().catch(() => undefined);
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
         },
         body: JSON.stringify({
           message: text,
@@ -160,12 +281,33 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         })
       });
       
+      if (response.status === 401) {
+        setIsTyping(false);
+        setShowRegisterOverlay(true);
+        return;
+      }
+      // A limit was reached: the server's message is shown as the reply, not a made-up answer
+      if (response.status === 429) {
+        const limited = await response.json().catch(() => ({}));
+        setIsTyping(false);
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          sender: 'bot',
+          text: limited.reply || '少し時間をおいてから、もう一度送ってくださいね。'
+        }]);
+        if (limited.reason === 'free_daily') {
+          setChatCount(2);
+          setShowSubscribeOverlay(true);
+        }
+        return;
+      }
       if (!response.ok) {
         throw new Error(`Chat API HTTP ${response.status}`);
       }
       
       const data = await response.json();
       setIsTyping(false);
+      if (typeof data.remainingFree === 'number') setChatCount(Math.max(0, 2 - data.remainingFree));
       
       const replyText = data.reply && !data.debug?.includes('API Key is missing') && !data.debug?.includes('Error')
         ? data.reply
@@ -230,9 +372,10 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             ) : (
               <form onSubmit={async (e) => {
                 e.preventDefault();
-                const emailInput = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value.trim().toLowerCase();
+                const emailField = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
+                const emailInput = emailField.value.trim().toLowerCase();
                 if (!emailInput || !emailInput.includes('@')) {
-                  showAlert('有効なメールアドレスを入力してください。');
+                  showFieldError('有効なメールアドレスを入力してください。', emailField);
                   return;
                 }
                 try {
@@ -468,7 +611,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                   gap: '0.35rem'
                 }}
               >
-                <span>🔒</span> プレミアム登録して全解禁 (月額980円)
+                <span>🔒</span> プレミアム登録で全解放 (月額980円)
               </button>
 
               {/* Close Link */}
@@ -503,11 +646,62 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               </span>
             </div>
           </div>
+          <div className="chat-header-actions">
+          {storageKey && hasHistory && (
+            <button className="chat-new-btn tap-target" onClick={startNewConsultation} disabled={isTyping}>
+              <RotateCcw size={13} />
+              新しい相談
+            </button>
+          )}
           <button className="chat-close-btn tap-target" aria-label="閉じる" onClick={onClose}>
             <X size={18} />
           </button>
+          </div>
         </div>
 
+        {/* 誰について相談するか（対話ロビーから開いたとき） */}
+        {partnerPicker && (
+          <div className="chat-messages chat-scrollbar chat-partner-picker">
+            <div className="chat-bubble bot">
+              {partnerPicker.partners.length > 0
+                ? '今日は、誰のことを相談しますか？'
+                : 'お相手を保存すると、二人の相性をふまえて、もっと具体的にお答えできます。'}
+            </div>
+
+            {partnerPicker.partners.length > 0 && (
+              <div className="chat-options-title" style={{ marginTop: '0.25rem' }}>保存したお相手</div>
+            )}
+            {partnerPicker.partners.map((p) => (
+              <button key={p.id} className="chat-option-btn chat-partner-btn" onClick={() => partnerPicker.onPick(p)}>
+                <span className="chat-partner-name">💞 {p.name || 'お相手'}さん</span>
+                {p.relationship && p.relationship !== 'single' && p.relationship !== 'partner' && (
+                  <span className="chat-partner-rel">{p.relationship}</span>
+                )}
+              </button>
+            ))}
+
+            {partnerPicker.unsavedCurrentName && (
+              <button className="chat-option-btn chat-partner-btn chat-partner-save" onClick={partnerPicker.onSaveCurrent}>
+                <span className="chat-partner-name">＋ さっき占った{partnerPicker.unsavedCurrentName}さんを保存して相談</span>
+              </button>
+            )}
+
+            {partnerPicker.partners.length === 0 && !partnerPicker.unsavedCurrentName && (
+              <button className="consult-btn chat-partner-add" onClick={partnerPicker.onAddNew}>
+                お相手を占って保存する
+              </button>
+            )}
+            {partnerPicker.partners.length > 0 && (
+              <button className="chat-partner-link" onClick={partnerPicker.onAddNew}>＋ 別のお相手を占って保存する</button>
+            )}
+
+            <button className="chat-partner-link" onClick={partnerPicker.onPickSelf}>
+              {partnerPicker.partners.length > 0 ? 'お相手を決めずに、自分のことを相談する' : '保存せずに、自分のことを相談する'}
+            </button>
+          </div>
+        )}
+
+        {!partnerPicker && (<>
         {/* Messages */}
         <div className="chat-messages chat-scrollbar">
           {messages.map((msg) => (
@@ -530,7 +724,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         {messages.length === 1 && !isTyping && (
           <div className="chat-options-container">
             <div className="chat-options-title">よくあるお悩み</div>
-            {presetOptions.map((opt) => (
+            {(hasOpponent ? presetOptions : selfPresetOptions).map((opt) => (
               <button
                 key={opt.key}
                 className="chat-option-btn"
@@ -555,6 +749,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             <Send size={18} />
           </button>
         </div>
+        </>)}
       </div>
     </div>
   );

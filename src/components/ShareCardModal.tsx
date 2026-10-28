@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { getPillarWithReading } from '../utils/fortuneEngine';
 import { showAlert } from './AppDialog';
+import { trackShare } from '../services/analytics';
 
 interface ShareCardModalProps {
   selectedChar: 'ren' | 'tsuki';
@@ -11,8 +12,25 @@ interface ShareCardModalProps {
   opponentName?: string;
   hasOpponent: boolean;
   shareUrl: string;
+  /** 無料の日数を使い切ったお相手: 今日の点数は「??」にする */
+  hideDailyScore?: boolean;
   onClose: () => void;
 }
+
+// Xの投稿の文字数（twitter-text の重み付き文字数）。ASCII・ラテン文字などは1、日本語や絵文字は2、URLは長さによらず23
+const X_MAX_WEIGHT = 280;
+const xTextWeight = (text: string) => {
+  let weight = 0;
+  for (const part of text.split(/(https?:\/\/\S+)/)) {
+    if (/^https?:\/\//.test(part)) { weight += 23; continue; }
+    for (const ch of part) {
+      const cp = ch.codePointAt(0) ?? 0;
+      const light = cp <= 0x10ff || (cp >= 0x2000 && cp <= 0x200d) || (cp >= 0x2010 && cp <= 0x201f) || (cp >= 0x2032 && cp <= 0x2037);
+      weight += light ? 1 : 2;
+    }
+  }
+  return weight;
+};
 
 export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   selectedChar,
@@ -21,9 +39,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   opponentName,
   hasOpponent,
   shareUrl,
+  hideDailyScore = false,
   onClose
 }) => {
   const oppNickname = opponentName || 'お相手';
+  const dailyScoreLabel = hideDailyScore ? '??' : String(result.dailyScore);
   const isRen = selectedChar === 'ren';
 
   const [activeTab, setActiveTab] = useState<'match' | 'single'>('match');
@@ -82,6 +102,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       const u = new URL(shareUrl);
       if (!showOpponent) {
         u.searchParams.set('mode', 'single');
+        // 保存した結果（r）は二人の相性なので、「自分だけ」のカードのリンクには付けない
+        if (hasOpponent) u.searchParams.delete('r');
       } else {
         u.searchParams.delete('mode');
       }
@@ -93,10 +115,56 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
   const targetShareUrl = getShareUrlForTab();
 
+  // カードの背景（守護獣の画像）。保存用画像とプレビューで共通。
+  // 正方形の画像を余白なしで敷き詰めるため、背景画像の cover で切り抜く（html2canvasは object-fit 非対応のため）。
+  const coverImage = (src: string, position: string): React.CSSProperties => ({
+    backgroundImage: src ? `url(${src})` : 'none',
+    backgroundSize: 'cover',
+    backgroundPosition: position,
+    backgroundRepeat: 'no-repeat'
+  });
+
+  const renderCardBackground = () => (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 1, backgroundColor: '#05080d', overflow: 'hidden' }}>
+      {showOpponent && result.opponentAvatarUrl ? (
+        <>
+          {/* 上下とも上端合わせ。守護獣によっては顔が画像の上端近くにあり（例: 酉）、中央合わせだと顔が切れる */}
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '50%', ...coverImage(myAvatarBase64, 'center top') }} />
+          <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', bottom: 0, ...coverImage(oppAvatarBase64, 'center top') }} />
+          {/* 2枚の継ぎ目をぼかし、二つ名と名前ラベルを読みやすくする */}
+          <div style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: '43%',
+            height: '14%',
+            background: 'linear-gradient(to bottom, rgba(5, 8, 13, 0) 0%, rgba(5, 8, 13, 0.6) 50%, rgba(5, 8, 13, 0) 100%)'
+          }} />
+        </>
+      ) : (
+        <div style={{ position: 'absolute', top: 0, left: '-10%', width: '120%', aspectRatio: '1 / 1', ...coverImage(myAvatarBase64, 'center') }}>
+          {/* 画像の下端を背景色へなじませる */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to bottom, rgba(5, 8, 13, 0) 0%, rgba(5, 8, 13, 0) 72%, #05080d 100%)'
+          }} />
+        </div>
+      )}
+      {/* 下部テキストを読みやすくする暗いグラデーション */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 66%, rgba(5, 7, 10, 0.7) 100%)'
+      }} />
+    </div>
+  );
+
   const handleDownload = async () => {
     const targetEl = captureRef.current || cardRef.current;
     if (!targetEl || isSaving) return;
     setIsSaving(true);
+    trackShare('image');
     try {
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
@@ -165,6 +233,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   };
 
   const handleCopyLink = async () => {
+    trackShare('link');
     try {
       await navigator.clipboard.writeText(targetShareUrl);
       setCopied(true);
@@ -188,16 +257,24 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   };
 
   const handleXShare = () => {
-    const text = showOpponent
-      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${result.dailyScore}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #相性診断 #16タイプ相性 #四柱推命 #ツインレイ`
-      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${result.dailyScore}点】✨\n「${result.oneLiner}」\n\n四柱推命×九星気学の本気の恋愛鑑定はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #本日の運勢 #四柱推命 #16タイプ診断`;
+    const build = (oneLiner: string) => showOpponent
+      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${dailyScoreLabel}点】✨\n「${oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #相性診断`
+      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${dailyScoreLabel}点】✨\n「${oneLiner}」\n\n四柱推命×九星気学の本気の恋愛鑑定はこちら👇\n${targetShareUrl}\n\n#月と蓮 #恋愛占い #本日の運勢`;
+    // Xは日本語を1字2として280まで。長いひとことは末尾を「…」で切って収める
+    const chars = [...result.oneLiner];
+    let text = build(result.oneLiner);
+    for (let n = chars.length - 1; n > 0 && xTextWeight(text) > X_MAX_WEIGHT; n--) {
+      text = build(chars.slice(0, n).join('') + '…');
+    }
+    trackShare('x');
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
   };
 
   const handleLineShare = () => {
     const text = showOpponent
-      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${result.dailyScore}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断結果はこちら👇\n${targetShareUrl}`
-      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${result.dailyScore}点】✨\n「${result.oneLiner}」\n\n本格恋愛鑑定結果はこちら👇\n${targetShareUrl}`;
+      ? `宿命を紡ぐ恋愛占い「月と蓮」で二人の相性を鑑定しました🔮\n\n今日の相性は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n四柱推命×16タイプで紐解く本格相性診断結果はこちら👇\n${targetShareUrl}`
+      : `宿命を紡ぐ恋愛占い「月と蓮」で本日の運勢を鑑定しました🔮\n\n今日の運勢は【${dailyScoreLabel}点】✨\n「${result.oneLiner}」\n\n本格恋愛鑑定結果はこちら👇\n${targetShareUrl}`;
+    trackShare('line');
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`);
   };
 
@@ -227,7 +304,6 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           width: '800px',
           height: '1240px',
           backgroundColor: '#05080d',
-          borderRadius: '36px',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -238,28 +314,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           zIndex: -9999
         }}
       >
-        {/* Background Base64 Images (Vertical stacked avatars with extended height) */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 1, backgroundColor: '#05080d' }}>
-          {showOpponent && result.opponentAvatarUrl ? (
-            <>
-              <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '32px' }}>
-                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain', transform: 'translateY(12px)' }} />
-              </div>
-              <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
-              </div>
-            </>
-          ) : (
-            <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '56px' }}>
-              <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain', transform: 'translateY(16px)' }} />
-            </div>
-          )}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 7, 10, 0.55) 100%)'
-          }} />
-        </div>
+        {renderCardBackground()}
 
         {/* Offscreen Card Top */}
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', width: '100%' }}>
@@ -346,7 +401,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 <span style={{ fontSize: '18px', color: '#a39d91' }}>今日の運勢</span>
                 <span style={{ fontSize: '48px', fontWeight: 'bold', color: '#9cc6d8', lineHeight: '1.1' }}>
-                  {result.dailyScore}<span style={{ fontSize: '24px' }}>点</span>
+                  {dailyScoreLabel}<span style={{ fontSize: '24px' }}>点</span>
                 </span>
                 <span style={{ fontSize: '16px', color: '#736e65', marginTop: '4px' }}>
                   {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
@@ -359,18 +414,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         {/* Offscreen Card Middle (Boundary: 二つ名, Lower Character Top: Left Opponent Name & Right Today Score) */}
         {showOpponent && (
           <div style={{
-            position: 'relative',
+            position: 'absolute',
             zIndex: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            gap: '16px',
-            margin: '10px 0',
-            transform: 'translateY(24px)'
+            left: '40px',
+            right: '40px',
+            top: '50%'
           }}>
-            {/* Boundary Line Level: 二つ名 (Center) */}
+            {/* Boundary Line Level: 二つ名 (継ぎ目の真上に中央揃え) */}
             {result.compatibilityTitle && (
-              <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%', transform: 'translateY(-50%)' }}>
                 <div style={{
                   fontSize: '18px',
                   color: '#f2e2b3',
@@ -392,7 +444,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             )}
 
             {/* Lower Character Top Level: Opponent Name on Left & Today Score on Right */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <div style={{ position: 'absolute', top: '38px', left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {/* Left: Opponent Name (相手のキャラの左上) */}
               <div style={{
                 background: 'rgba(6, 8, 12, 0.75)',
@@ -430,7 +482,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               }}>
                 <span style={{ fontSize: '15px', color: '#d8d2c6' }}>今日の相性</span>
                 <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#9cc6d8', lineHeight: '1' }}>
-                  {result.dailyScore}<span style={{ fontSize: '16px' }}>点</span>
+                  {dailyScoreLabel}<span style={{ fontSize: '16px' }}>点</span>
                 </span>
               </div>
             </div>
@@ -460,6 +512,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 textAlign: 'center',
                 fontWeight: 'bold',
                 letterSpacing: '0.02em',
+                textWrap: 'balance',
                 textShadow: '0 2px 12px rgba(0,0,0,0.98), 0 0 20px rgba(0,0,0,0.95)'
               }}>
                 「{result.oneLiner}」
@@ -496,7 +549,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             </span>
             <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
             <span style={{ fontSize: '16px', color: '#d8d2c6', letterSpacing: '0.08em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
-              恋愛鑑定アプリ - 蓮と月
+              恋愛鑑定アプリ - 月と蓮
             </span>
           </div>
         </div>
@@ -612,36 +665,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
             overflow: 'hidden'
           }}
         >
-          {/* Background Images Layer (Vertical 2-tier stacked avatars with clean dark base) */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: '#05080d'
-          }}>
-            {showOpponent && result.opponentAvatarUrl ? (
-              <>
-                <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '20px' }}>
-                  <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain', transform: 'translateY(8px)' }} />
-                </div>
-                <div style={{ flex: 1, width: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src={oppAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
-                </div>
-              </>
-            ) : (
-              <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '36px' }}>
-                <img src={myAvatarBase64} alt="" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain', transform: 'translateY(10px)' }} />
-              </div>
-            )}
-            {/* Dark overlay gradient for readability */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 70%, rgba(5, 7, 10, 0.55) 100%)'
-            }} />
-          </div>
+          {renderCardBackground()}
           {/* Card Top */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 2, width: '100%' }}>
             {showOpponent ? (
@@ -739,7 +763,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 }}>
                   <span style={{ fontSize: '0.58rem', color: '#a39d91' }}>今日の運勢</span>
                   <span className="font-serif" style={{ fontSize: '1.4rem', color: '#9cc6d8', fontWeight: 'bold', lineHeight: '1.1' }}>
-                    {result.dailyScore}<span style={{ fontSize: '0.75rem' }}>点</span>
+                    {dailyScoreLabel}<span style={{ fontSize: '0.75rem' }}>点</span>
                   </span>
                   <span style={{ fontSize: '0.52rem', color: '#736e65', marginTop: '2px' }}>
                     {new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/-/g, '/')}
@@ -752,18 +776,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           {/* Card Middle (Boundary: 二つ名, Lower Character Top: 相手の名前 on Left, 今日の相性 on Right) */}
           {showOpponent && (
             <div style={{
-              position: 'relative',
+              position: 'absolute',
               zIndex: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: '0.4rem',
-              margin: '0.2rem 0',
-              transform: 'translateY(24px)'
+              left: '1.5rem',
+              right: '1.5rem',
+              top: '50%'
             }}>
-              {/* Boundary Line Level: 二つ名 (Center) */}
+              {/* Boundary Line Level: 二つ名 (継ぎ目の真上に中央揃え) */}
               {result.compatibilityTitle && (
-                <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', width: '100%', transform: 'translateY(-50%)' }}>
                   <div style={{
                     fontSize: '0.62rem',
                     color: '#f2e2b3',
@@ -786,7 +807,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               )}
 
               {/* Lower Character Top Level: 相手の名前 on Left & 今日の相性 on Right */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <div style={{ position: 'absolute', top: '16px', left: 0, right: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 {/* Left: 相手の名前 (相手のキャラ画像の左上) */}
                 <div style={{
                   background: 'rgba(6, 8, 12, 0.72)',
@@ -828,7 +849,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 }}>
                   <span style={{ fontSize: '0.55rem', color: '#d8d2c6' }}>今日の相性</span>
                   <span className="font-serif" style={{ fontSize: '0.9rem', color: '#9cc6d8', fontWeight: 'bold', lineHeight: '1' }}>
-                    {result.dailyScore}<span style={{ fontSize: '0.55rem' }}>点</span>
+                    {dailyScoreLabel}<span style={{ fontSize: '0.55rem' }}>点</span>
                   </span>
                 </div>
               </div>
@@ -858,6 +879,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   textAlign: 'center',
                   fontWeight: 'bold',
                   letterSpacing: '0.02em',
+                  textWrap: 'balance',
                   textShadow: '0 2px 10px rgba(0,0,0,0.98), 0 0 15px rgba(0,0,0,0.95)'
                 }}>
                   「{result.oneLiner}」
@@ -888,7 +910,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               </span>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.52rem' }}>|</span>
               <span style={{ fontSize: '0.58rem', color: '#d8d2c6', letterSpacing: '0.05em', textShadow: '0 1px 4px rgba(0,0,0,0.95)', fontWeight: '500' }}>
-                恋愛鑑定アプリ - 蓮と月
+                恋愛鑑定アプリ - 月と蓮
               </span>
             </div>
           </div>
@@ -988,9 +1010,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 boxShadow: '0 4px 12px rgba(6, 199, 85, 0.3)'
               }}
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 5.82 2 10.53c0 4.22 3.6 7.76 8.46 8.43.33.07.78.22.89.5.1.26.07.67.03.93-.05.32-.24 1.25-.27 1.52-.05.42-.25 1.63 1.43.89 1.68-.74 4.54-2.67 6.19-4.57C20.67 16.27 22 13.56 22 10.53 22 5.82 17.52 2 12 2z"/>
-              </svg>
+              <img src="/line-logo.png" alt="" aria-hidden="true" width={20} height={20} draggable={false} style={{ flexShrink: 0, width: '20px', height: '20px' }} />
               <span>LINEでシェア</span>
             </button>
           </div>

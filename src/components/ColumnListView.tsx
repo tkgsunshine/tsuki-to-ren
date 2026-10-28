@@ -228,7 +228,18 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden'
                   }}>
-                    {article.title}
+                    <a
+                      href={`/column/${article.slug}`}
+                      onClick={(e) => {
+                        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onSelectArticle(article.slug);
+                      }}
+                      style={{ color: 'inherit', textDecoration: 'none' }}
+                    >
+                      {article.title}
+                    </a>
                   </h2>
                 </div>
 

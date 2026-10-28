@@ -60,8 +60,43 @@ let hubHtml = baseHtml
   .replace(/<meta name="twitter:title" content="[\s\S]*?" \/>/i, `<meta name="twitter:title" content="${escapeAttr(hubTitle)}" />`)
   .replace(/<meta name="twitter:description" content="[\s\S]*?" \/>/i, `<meta name="twitter:description" content="${escapeAttr(hubDesc)}" />`);
 
+// ハブページにも、全記事へのリンク一覧を静的HTMLで入れる（検索エンジンが記事をたどれるように）
+const nowForHub = new Date();
+const publishedForHub = columns.filter(a => new Date(a.publishedAt) <= nowForHub);
+const hubByCategory = {};
+for (const a of publishedForHub) {
+  (hubByCategory[a.category] = hubByCategory[a.category] || []).push(a);
+}
+const hubList = Object.entries(hubByCategory).map(([cat, list]) => `
+      <section>
+        <h2 style="font-size: 1.1rem; color: #fef08a; margin: 1.5rem 0 0.5rem;">${cat}</h2>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+${list.map(a => `          <li style="margin: 0.6rem 0;"><a href="/column/${a.slug}" style="color: #e2c074;">${a.title}</a><br /><span style="font-size: 0.8rem; color: #9ca3af;">${a.metaDescription}</span></li>`).join('\n')}
+        </ul>
+      </section>`).join('\n');
+hubHtml = hubHtml.replace('<div id="root"></div>', `<div id="root">
+    <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205;">
+      <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;"><a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>開運コラム</span></nav>
+      <h1 style="font-size: 1.5rem; color: #fef08a;">開運コラム＆恋愛解体新書</h1>
+      <p style="color: #e2e8f0; line-height: 1.8;">${hubDesc}</p>${hubList}
+    </div>
+  </div>`);
+
 fs.writeFileSync(path.join(columnHubDir, 'index.html'), hubHtml, 'utf-8');
 console.log('✅ Pre-rendered: /column/index.html');
+
+// 関連記事（同じカテゴリ・近いキーワード）。src/utils/relatedColumns.ts と同じ選び方
+function relatedColumnsFor(article, limit = 3) {
+  const split = (k) => k.split(/[\s\u3000]+/).filter(w => w.length >= 2);
+  const words = new Set(article.keywords.flatMap(split));
+  const now = new Date();
+  return columns
+    .filter(a => a.slug !== article.slug && new Date(a.publishedAt) <= now)
+    .map(a => ({ a, score: (a.category === article.category ? 3 : 0) + a.keywords.flatMap(split).filter(w => words.has(w)).length }))
+    .sort((x, y) => y.score - x.score || x.a.slug.localeCompare(y.a.slug))
+    .slice(0, limit)
+    .map(x => x.a);
+}
 
 // 2. Generate each /column/[slug]/index.html
 let count = 0;
@@ -169,6 +204,7 @@ for (const article of columns) {
   articleHtml = articleHtml.replace('</head>', `${schemaTags}\n</head>`);
 
   // Prerender semantic HTML directly into <div id="root"> for instant Googlebot indexation
+  const relatedForArticle = relatedColumnsFor(article);
   const semanticArticleContent = `
     <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205;">
       <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
@@ -183,6 +219,12 @@ for (const article of columns) {
           ${article.content}
         </div>
       </article>
+      <aside aria-label="関連コラム" style="margin-top: 2rem;">
+        <h2 style="font-size: 1rem; color: #fef08a;">おすすめの関連コラム</h2>
+        <ul style="padding-left: 1.2rem;">
+${relatedForArticle.map(r => `          <li style="margin: 0.4rem 0;"><a href="/column/${r.slug}" style="color: #e2c074;">${r.title}</a></li>`).join('\n')}
+        </ul>
+      </aside>
     </div>
   `;
 

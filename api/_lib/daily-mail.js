@@ -19,25 +19,35 @@ const buildInput = (sub, isMatch) => ({
  * Today's fortune for one subscriber, computed by the SAME engine as the site (generateFortuneResult),
  * so the mail matches the result screen: score, LINE golden hour (+ one-liner) and approach advice.
  * The engine reads "today" from the process clock, so the caller must run with TZ=Asia/Tokyo.
+ *
+ * access (from api/_lib/partner-days.js; leave it out for the full Premium mail):
+ * - premium: false → only the advice's first paragraph, like the result screen for free members
+ * - daysLeft: free days left with this partner after today (shown in the mail)
+ * - locked: the partner's free days are used up → the member's own fortune, plus a short teaser
+ *   about the partner (today's flow only, no score) that links to the partner's result screen
  */
-export function buildDailyContent(sub) {
+export function buildDailyContent(sub, access = { premium: true }) {
   // "match" without a partner birth date (saved by older app versions) cannot be computed: send the solo fortune instead of nothing.
   const isMatch = !!sub.oppBirth && (sub.mode ? sub.mode === 'match' : true);
   const character = sub.character === 'ren' ? 'ren' : 'tsuki';
-  const result = generateFortuneResult(buildInput(sub, isMatch), character);
+  const locked = isMatch && access.premium !== true && access.locked === true;
+  const result = generateFortuneResult(buildInput(sub, isMatch && !locked), character);
 
   const hour = result.bestContactHour || '7:30 〜 8:30';
   const note = hour.match(/[（(](.*?)[）)]/);
-  return {
-    hasOpponent: isMatch,
+  const allAdvice = result.dailyActionAdviceParts?.length ? result.dailyActionAdviceParts : [result.dailyActionAdvice || ''];
+  const free = access.premium !== true;
+  const content = {
+    hasOpponent: isMatch && !locked,
     score: result.dailyScore,
     baseScore: result.baseScore,
     mbtiCode: result.myMbtiCode && result.myMbtiCode !== 'UNKNOWN' ? result.myMbtiCode : '',
     mbtiName: result.myMbtiName && result.myMbtiName !== '未選択' ? result.myMbtiName : '',
     hourMain: hour.split(/[（(]/)[0].trim(),
     hourNote: note ? note[1] : '',
-    // Paragraphs of the approach advice (the result screen shows the same paragraphs).
-    adviceParts: result.dailyActionAdviceParts?.length ? result.dailyActionAdviceParts : [result.dailyActionAdvice || ''],
+    // Paragraphs of the approach advice (the result screen shows the same paragraphs; free members see the first one).
+    adviceParts: free ? allAdvice.slice(0, 1) : allAdvice,
+    adviceMore: free && allAdvice.length > 1,
     // The user's own profile card from the result screen (never the partner's: the mail stays about "you").
     profile: {
       title: (result.myAstrologyTheme || '').replace(/[【】]/g, ''),
@@ -47,9 +57,17 @@ export function buildDailyContent(sub) {
       color: result.myAstrologyColor || ''
     }
   };
+  if (isMatch && free && !locked && Number.isFinite(access.daysLeft)) content.freeDaysLeft = access.daysLeft;
+  if (locked) {
+    // Only today's flow (the weather word and moon) — the same thing the locked result screen still shows
+    const match = generateFortuneResult(buildInput(sub, true), character);
+    const mood = getScoreMood(match.baseScore, match.dailyScore);
+    content.partnerTeaser = { title: mood.title, phase: mood.phase };
+  }
+  return content;
 }
 
-export const subjectFor = (date) => `🌙【月と蓮】本日の恋愛運＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
+export const subjectFor = (date) => `🌙【月と蓮】本日の運勢＆LINE吉時間のお届け (${date.year}/${date.month}/${date.day})`;
 
 // Luxury Dark & Gold HTML email template.
 // Images are referenced by absolute production URL (email clients cannot load relative paths).
@@ -84,15 +102,19 @@ export function resultUrlFor(sub, hasOpponent) {
   return `${SITE}/?${params.toString()}`; // "/" like the share links: the loading screen, then the result
 }
 
-// 二人の相性の点数ブロック: 鑑定結果画面と同じ「基本相性（小）と今日の相性（大）の丸いメーター」と「今日の流れ」。
+// 点数ブロック: 鑑定結果画面と同じ「基本（小）と今日（大）の丸いメーター」と「今日の流れ」。
+// 二人の相性は「基本相性／今日の相性」、一人で占う人は「基本運勢／今日の運勢」（画像の種類 -solo）。
 // メールでは SVG もアニメーションも使えないため、点数ごとの画像（scripts/build-mail-score-images.mjs で作成）を並べる。
 const clampScore = (v) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
 const MOOD_COLORS = { up: '#8fd3ae', flat: '#d8cfb8', down: '#e0a9a0' };
 
-export function renderMatchScore(baseScore, dailyScore) {
+export function renderScoreRings(baseScore, dailyScore, hasOpponent) {
   const base = clampScore(baseScore);
   const daily = clampScore(dailyScore);
   const mood = getScoreMood(base, daily);
+  const suffix = hasOpponent ? '' : '-solo';
+  const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+  const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
   const img = (file, w, alt) => `<img src="${SITE}/assets/mail/score/${file}" width="${w}" height="${w}" alt="${alt}" style="display: block; width: ${w}px; height: ${w}px; border: 0; color: #f6e6c2; font-size: 14px;">`;
   return `<tr>
             <td style="padding: 10px 25px 12px;">
@@ -101,8 +123,8 @@ export function renderMatchScore(baseScore, dailyScore) {
                   <td align="center" style="padding: 14px 8px 18px; text-align: center;">
                     <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto;">
                       <tr>
-                        <td valign="middle" style="padding: 0 2px;">${img(`base-${base}.png`, 116, `基本相性 ${base}点`)}</td>
-                        <td valign="middle" style="padding: 0 2px;">${img(`today-${daily}.png`, 156, `今日の相性 ${daily}点`)}</td>
+                        <td valign="middle" style="padding: 0 2px;">${img(`base${suffix}-${base}.png`, 116, `${baseLabel} ${base}点`)}</td>
+                        <td valign="middle" style="padding: 0 2px;">${img(`today${suffix}-${daily}.png`, 156, `${todayLabel} ${daily}点`)}</td>
                       </tr>
                     </table>
                     <div style="line-height: 0; font-size: 0; margin-top: 6px;">
@@ -110,7 +132,43 @@ export function renderMatchScore(baseScore, dailyScore) {
                     </div>
                     <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(mood.title)}</div>
                     <div style="font-size: 12px; color: #a9a293; letter-spacing: 0.05em; margin-top: 4px;">
-                      基本相性より <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
+                      ${baseLabel}より <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`;
+}
+
+// 無料の日数の案内（お相手ありの無料会員）。最終日は「明日からはプレミアム」と先に伝える。
+export const partnerCall = (sub) => (sub.oppName && sub.oppName !== 'お相手' ? `${sub.oppName}さん` : 'お相手');
+
+export function renderFreeDaysNote(sub, daysLeft) {
+  const who = esc(partnerCall(sub));
+  const text = daysLeft > 0
+    ? `${who}との今日の相性は、無料であと<strong style="color: #fef08a;">${esc(daysLeft)}日</strong>見られます。`
+    : `${who}との今日の相性を無料で見られるのは、<strong style="color: #fef08a;">今日が最後</strong>です。明日からはプレミアム（月額980円）で見られます。`;
+  return `<tr>
+            <td align="center" style="padding: 0 25px 14px; text-align: center; font-size: 12px; line-height: 1.7; color: #cbd5e1;">${text}</td>
+          </tr>`;
+}
+
+// 無料の日数を使い切ったお相手: 点数は出さず、今日の流れ（月の形と一言）だけ見せ、点数と助言はプレミアムだと先に書く。
+export function renderPartnerTeaser(sub, teaser) {
+  const who = esc(partnerCall(sub));
+  return `<tr>
+            <td style="padding: 0 25px 14px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
+                <tr>
+                  <td align="center" style="padding: 16px 18px 18px; text-align: center;">
+                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.08em;">${who}との今日の流れ</div>
+                    <div style="line-height: 0; font-size: 0; margin-top: 8px;">
+                      <img src="${SITE}/assets/mail/score/moon-${esc(teaser.phase)}.png" width="48" height="48" alt="" style="display: inline-block; width: 48px; height: 48px; border: 0;">
+                    </div>
+                    <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(teaser.title)}</div>
+                    <div style="font-size: 12px; color: #a9a293; line-height: 1.7; margin-top: 8px;">
+                      ${who}との無料の期間が終わりました。<br>二人の今日の点数と助言は、プレミアム（月額980円）で見られます。
                     </div>
                   </td>
                 </tr>
@@ -149,7 +207,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
-  <title>本日の恋愛運・吉時間 | 月と蓮</title>
+  <title>本日の運勢・吉時間 | 月と蓮</title>
   <!--
     Dark mode: Gmail's apps invert every text and background COLOR in dark mode (dark purple becomes pale lavender,
     light text becomes dark) but never touch background IMAGES. Text over an image therefore turns dark on a still-dark
@@ -182,7 +240,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <tr>
             <td align="center" style="padding: 20px 25px 4px; text-align: center;">
               <span style="display: inline-block; padding: 5px 16px; background-color: #201a36; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 15px; color: ${GOLD}; font-size: 12px; font-weight: bold; letter-spacing: 0.04em;">
-                ${date.year}年${date.month}月${date.day}日（本日）の恋愛運
+                ${date.year}年${date.month}月${date.day}日（本日）の${content.hasOpponent ? '相性' : '運勢'}
               </span>
             </td>
           </tr>
@@ -198,7 +256,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   <td valign="top" style="font-size: 14px; line-height: 1.7; color: #e2e8f0;">
                     <div style="font-size: 11px; font-weight: bold; color: ${accent}; letter-spacing: 0.1em; margin-bottom: 2px;">${charName}より</div>
                     ${esc(name)} 様${oppLabel}<br>
-                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、月と蓮より、本日のあなたの恋愛運をお届けします。
+                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、月と蓮より、${content.hasOpponent ? '本日のお二人の相性' : '本日のあなたの運勢'}をお届けします。
                   </td>
                 </tr>
               </table>
@@ -206,12 +264,12 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           </tr>
 
           <!-- Score -->
-          ${content.hasOpponent && Number.isFinite(Number(baseScore)) ? renderMatchScore(Number(baseScore), Number(score)) : `<tr>
+          ${Number.isFinite(Number(baseScore)) ? renderScoreRings(Number(baseScore), Number(score), content.hasOpponent) : `<tr>
             <td style="padding: 14px 25px 12px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
                 <tr>
                   <td align="center" style="padding: 20px 18px 18px; text-align: center;">
-                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.1em;">本日の恋愛運スコア</div>
+                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.1em;">本日の${content.hasOpponent ? '相性' : '運勢'}スコア</div>
                     <div style="font-size: 52px; line-height: 1.15; font-weight: bold; color: #fef08a; margin: 6px 0 12px;">
                       ${esc(score)}<span style="font-size: 20px; color: ${GOLD};"> 点</span>
                     </div>
@@ -226,6 +284,9 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
               </table>
             </td>
           </tr>`}
+
+          ${Number.isFinite(content.freeDaysLeft) ? renderFreeDaysNote(sub, content.freeDaysLeft) : ''}
+          ${content.partnerTeaser ? renderPartnerTeaser(sub, content.partnerTeaser) : ''}
 
           <!-- LINE golden hour (LINE green when it is the LINE time; gold card in single mode) -->
           <tr>
@@ -251,6 +312,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   <td style="padding: 4px 0 4px 14px; font-size: 13px; line-height: 1.8; color: #cbd5e1;">
                     <strong style="color: #fef08a; letter-spacing: 0.06em;">本日のアプローチ助言</strong><br>
                     ${adviceParts.map(esc).join('<br><br>')}
+                    ${content.adviceMore ? `<br><br><span style="color: #a8a3bd;">続きの助言は、アプリのプレミアム（月額980円）で読めます。</span>` : ''}
                   </td>
                 </tr>
               </table>
@@ -291,8 +353,8 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- CTA -->
           <tr>
             <td align="center" style="padding: 22px 25px 28px; text-align: center;">
-              <a href="${esc(resultUrlFor(sub, content.hasOpponent))}" class="cta-grad" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
-                本日の詳細鑑定を見る &#10132;
+              <a href="${esc(resultUrlFor(sub, content.hasOpponent || Boolean(content.partnerTeaser)))}" class="cta-grad" style="display: inline-block; padding: 15px 30px; background-color: #fbbf24; color: #1a1100; font-size: 14px; font-weight: bold; text-decoration: none; border-radius: 28px; letter-spacing: 0.04em;">
+                ${content.partnerTeaser ? `${esc(partnerCall(sub))}との今日の相性を見る` : '本日の詳細鑑定を見る'} &#10132;
               </a>
             </td>
           </tr>
@@ -300,7 +362,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding: 16px 20px 24px; text-align: center; border-top: 1px solid #2a2342; font-size: 10px; color: #8b8aa0; line-height: 1.6;">
-              本メールは『月と蓮』にて毎朝の恋愛運通知を有効化された方へお送りしています。<br>
+              本メールは『月と蓮』にて毎朝の運勢通知を有効化された方へお送りしています。<br>
               運営会社: Ill株式会社 | <a href="${esc(stopUrl)}" style="color: #b4b3c8;">通知の停止はこちら</a>
             </td>
           </tr>

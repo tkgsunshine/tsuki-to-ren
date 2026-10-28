@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { ArrowLeft, Clock, Calendar, Share2, BookOpen, ChevronRight, HelpCircle } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import { COLUMNS_DATA } from '../data/columnsData';
+import { pickRelatedColumns } from '../utils/relatedColumns';
 import { showAlert } from './AppDialog';
 
 interface ColumnDetailViewProps {
@@ -268,7 +269,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
   }, [slug, article]);
 
   // Related Articles
-  const relatedArticles = COLUMNS_DATA.filter(a => a.slug !== slug && new Date(a.publishedAt) <= new Date()).slice(0, 3);
+  const relatedArticles = pickRelatedColumns(COLUMNS_DATA, slug, 3);
 
   // Split content at midpoint for midway CTA insertion
   const [firstContentPart, secondContentPart] = useMemo(() => {
@@ -512,9 +513,14 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {relatedArticles.map((rel) => (
-              <div
+              <a
                 key={rel.id}
-                onClick={() => onSelectArticle(rel.slug)}
+                href={`/column/${rel.slug}`}
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                  e.preventDefault();
+                  onSelectArticle(rel.slug);
+                }}
                 className="glass-panel"
                 style={{
                   padding: '0.85rem',
@@ -523,6 +529,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   cursor: 'pointer',
+                  textDecoration: 'none',
                   border: '1px solid rgba(255,255,255,0.06)',
                   background: 'rgba(255,255,255,0.02)'
                 }}
@@ -531,7 +538,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
                   {rel.title}
                 </div>
                 <ChevronRight size={16} style={{ color: '#f2e2b3', flexShrink: 0 }} />
-              </div>
+              </a>
             ))}
           </div>
         </div>

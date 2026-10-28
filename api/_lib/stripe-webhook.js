@@ -1,5 +1,6 @@
 import { getDb } from './firestore.js';
 import { PREMIUM, getStripe, premiumRecord } from './stripe.js';
+import { countPremium } from './analytics.js';
 
 // Stripe → app: keeps premium/{uid} in step with the subscription.
 // Register https://www.tsuki-to-ren.com/api/stripe/webhook in Stripe with the events below.
@@ -66,6 +67,10 @@ export default async function handler(req, res, deps = {}) {
       return res.status(200).json({ status: 'ignored' });
     }
     await ref.set({ ...record, uid });
+    if (event.type === 'checkout.session.completed' && record.active) {
+      // New paid member, for the admin page's counters
+      await countPremium(db, { uid, subscriptionId: sub.id, livemode: record.livemode }).catch((e) => console.error('⚠️ Could not count the new member:', e?.message));
+    }
     console.log(`💳 premium ${event.type}: status=${record.status} active=${record.active}`);
     return res.status(200).json({ status: 'ok' });
   } catch (e) {

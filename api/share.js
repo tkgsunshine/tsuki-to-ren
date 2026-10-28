@@ -7,9 +7,18 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-export default function handler(req, res) {
+const SHARED_ID_RE = /^[A-Za-z0-9_-]{12}$/;
+
+export default async function handler(req, res, deps = {}) {
   const url = new URL(req.url, `https://${req.headers.host}`);
   const params = url.searchParams;
+
+  // Saved results (api/_lib/shared-result.js): POST saves one, GET ?id= reads one. Loaded only here so the card path stays light
+  if (req.method === 'POST' || params.get('id')) {
+    const shared = await import('./_lib/shared-result.js');
+    if (req.method === 'POST') return shared.saveShared(req, res, deps);
+    return shared.sendShared(params.get('id'), res, deps);
+  }
 
   const get = (k1, k2) => params.get(k1) || params.get(k2);
 
@@ -21,30 +30,44 @@ export default function handler(req, res) {
   const rawTitle = get('t', 'title') || '';
   const cleanTitle = rawTitle.replace(/^[【\s]+|[】\s]+$/g, '').trim();
 
-  // Reconstruct the OGP image URL: place protection bypass FIRST so Vercel always recognizes it
+  // Card image (PNG, api/og.js): pass only what the card shows, never the birth dates
   const ogImageParams = new URLSearchParams();
-  ogImageParams.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
-  for (const [key, value] of params.entries()) {
-    if (key !== 'x-vercel-protection-bypass') {
-      ogImageParams.set(key, value);
-    }
+  for (const key of ['mn', 'on', 'bs', 'ds', 'mode', 'ma', 'oa', 'c', 'l', 'mm', 'om']) {
+    if (params.get(key)) ogImageParams.set(key, params.get(key));
   }
-  
-  // Unescaped image URL for Twitterbot image parser
-  const ogImageUrl = `https://${req.headers.host}/og/card.png?${ogImageParams.toString()}`;
+  const ogImageUrl = `https://${req.headers.host}/api/og?${ogImageParams.toString()}`;
 
-  // Build the redirect URL for normal users
-  const appUrl = `https://${req.headers.host}/?${params.toString()}`;
+  const hasOpponent = !!oName && params.get('mode') !== 'single' && params.get('mode') !== 's';
+
+  // Build the redirect URL for normal users.
+  // Links made before birth dates were taken out of them (they carry mb) still open the full result as before.
+  // Newer links carry only what the card shows: the app shows the sharer's result from those values and invites the visitor to their own diagnosis.
+  // Links with a saved result (r) open the usual result screen with it.
+  let appUrl;
+  if (params.get('mb') || params.get('mBirth')) {
+    appUrl = `https://${req.headers.host}/?${params.toString()}`;
+  } else if (SHARED_ID_RE.test(params.get('r') || '')) {
+    appUrl = `https://${req.headers.host}/?shared=${params.get('r')}`;
+  } else {
+    // App: src/components/SharedResultView.tsx (keys are prefixed so the app's own diagnosis params are not triggered)
+    const teaser = new URLSearchParams({ from: 'share' });
+    if (get('mn', 'mName')) teaser.set('sn', get('mn', 'mName'));
+    if (hasOpponent) teaser.set('sp', oName);
+    const shareKeys = { bs: 'sb', ds: 'sd', ma: 'sa', l: 'sl', mm: 'smm', ...(hasOpponent ? { oa: 'so', c: 'sc', om: 'som' } : {}) };
+    for (const [from, to] of Object.entries(shareKeys)) {
+      if (params.get(from)) teaser.set(to, params.get(from));
+    }
+    appUrl = `https://${req.headers.host}/?${teaser.toString()}`;
+  }
 
   // Detect crawlers
   const ua = (req.headers['user-agent'] || '').toLowerCase();
   const isCrawler = /twitterbot|facebookexternalhit|linebot|linkedin|discord|slackbot|telegrambot|whatsapp|applebot|bingbot|googlebot/i.test(ua);
 
   if (isCrawler) {
-    const hasOpponent = !!oName && params.get('mode') !== 'single';
     const rawOgTitle = hasOpponent
-      ? `${mName} × ${oName} の相性鑑定結果 | 蓮と月`
-      : `${mName} の恋愛運 | 蓮と月`;
+      ? `${mName} × ${oName} の相性鑑定結果 | 月と蓮`
+      : `${mName} の恋愛運 | 月と蓮`;
     const rawOgDescription = cleanTitle 
       ? `【${cleanTitle}】今日の相性は${dailyScore}点✨ 「${oneLiner}」`
       : `今日の相性は${dailyScore}点✨ 「${oneLiner}」`;
@@ -67,12 +90,12 @@ export default function handler(req, res) {
   <meta property="og:image" content="${ogImageUrl}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:site_name" content="蓮と月 | 恋愛相性占い" />
+  <meta property="og:site_name" content="月と蓮 | 恋愛相性占い" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${ogTitle}" />
   <meta name="twitter:description" content="${ogDescription}" />
   <meta name="twitter:image" content="${ogImageUrl}" />
-  <link rel="canonical" href="${canonicalUrl}" />
+  <link rel="canonical" href="https://${escapeHtml(req.headers.host)}/" />
 </head>
 <body>
   <p>Redirecting...</p>
