@@ -12,7 +12,7 @@
     ],
     "category": "16タイプ・MBTI相性",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=enfp-infj-deep-connection-romance",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -70,7 +70,7 @@
     ],
     "category": "16タイプ・MBTI相性",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=entj-intp-power-couple-communication",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -128,7 +128,7 @@
     ],
     "category": "16タイプ・MBTI相性",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80&topic=isfj-estp-opposites-attract-balance",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -186,7 +186,7 @@
     ],
     "category": "16タイプ・MBTI相性",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=istj-esfp-stability-and-spark",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -244,7 +244,7 @@
     ],
     "category": "四柱推命入門",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=shichutsuimei-beginner-four-pillars-basics",
+    "thumbnailUrl": "/assets/columns/fourpillars-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -302,7 +302,7 @@
     ],
     "category": "四柱推命入門",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80&topic=gogyo-five-elements-personality-love-types",
+    "thumbnailUrl": "/assets/columns/fourpillars-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -360,7 +360,7 @@
     ],
     "category": "未来予測・結婚運",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&topic=marriage-fortune-timing-signs-guide",
+    "thumbnailUrl": "/assets/columns/marriage-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -418,7 +418,7 @@
     ],
     "category": "未来予測・結婚運",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=marriage-compatibility-traits-long-lasting",
+    "thumbnailUrl": "/assets/columns/marriage-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -476,7 +476,7 @@
     ],
     "category": "LINE攻略・16タイプ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=line-date-invitation-examples-by-type",
+    "thumbnailUrl": "/assets/columns/mbti-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -534,7 +534,7 @@
     ],
     "category": "LINE攻略・アプローチ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80&topic=confession-timing-line-message-guide",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -592,7 +592,7 @@
     ],
     "category": "復縁・引き寄せ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80&topic=fukuen-ng-actions-and-heart-reset",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -650,7 +650,7 @@
     ],
     "category": "ツインレイ・運命の絆",
     "readTimeMinutes": 8,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=1200&q=80&topic=twinray-vs-soulmate-differences",
+    "thumbnailUrl": "/assets/columns/mbti-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -708,7 +708,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80&topic=date-conversation-topics-by-personality",
+    "thumbnailUrl": "/assets/columns/love-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -766,7 +766,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80&topic=first-date-impression-tips-personality",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -824,7 +824,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=first-impression-conversation-tips-by-type",
+    "thumbnailUrl": "/assets/columns/mbti-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -882,7 +882,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=how-to-say-i-want-to-see-you-without-being-heavy",
+    "thumbnailUrl": "/assets/columns/love-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -940,7 +940,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=reconcile-after-argument-tips-by-type",
+    "thumbnailUrl": "/assets/columns/calm-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -998,7 +998,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=how-to-handle-jealousy-in-relationship",
+    "thumbnailUrl": "/assets/columns/daily-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1056,7 +1056,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=how-to-read-their-true-feelings-without-guessing",
+    "thumbnailUrl": "/assets/columns/calm-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1114,7 +1114,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=long-distance-relationship-contact-and-meeting-tips",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1172,7 +1172,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=unrequited-love-heart-organizing-tips",
+    "thumbnailUrl": "/assets/columns/love-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1239,7 +1239,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=friends-to-lovers-turning-point-tips",
+    "thumbnailUrl": "/assets/columns/work-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1301,7 +1301,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=shy-first-message-how-to-start-chat",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1363,7 +1363,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=express-honest-feelings-to-partner-by-type",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1425,7 +1425,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=avoid-relationship-rut-ideas-for-couples",
+    "thumbnailUrl": "/assets/columns/love-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1487,7 +1487,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=values-to-check-before-dating-seriously",
+    "thumbnailUrl": "/assets/columns/calm-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1549,7 +1549,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=heartbreak-recovery-steps-move-forward",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1616,7 +1616,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=low-self-esteem-romance-confidence-tips",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1683,7 +1683,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=how-to-bring-up-future-plans-with-partner",
+    "thumbnailUrl": "/assets/columns/marriage-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1750,7 +1750,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=introduce-partner-to-friends-family-timing",
+    "thumbnailUrl": "/assets/columns/marriage-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1817,7 +1817,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=anniversary-surprise-gift-ideas-by-partner",
+    "thumbnailUrl": "/assets/columns/love-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1884,7 +1884,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=healthy-distance-avoid-emotional-dependence",
+    "thumbnailUrl": "/assets/columns/calm-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -1956,7 +1956,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=date-thank-you-message-after-first-date",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2033,7 +2033,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=partner-flaws-annoying-how-to-handle",
+    "thumbnailUrl": "/assets/columns/daily-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2110,7 +2110,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=busy-partner-missed-time-how-to-cope",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2187,7 +2187,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=workplace-romance-approach-tips",
+    "thumbnailUrl": "/assets/columns/work-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2264,7 +2264,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=living-together-before-talk-checklist",
+    "thumbnailUrl": "/assets/columns/marriage-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2341,7 +2341,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=age-gap-romance-communication-tips",
+    "thumbnailUrl": "/assets/columns/mbti-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2418,7 +2418,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80&topic=matching-app-before-first-meeting-checklist",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2481,7 +2481,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80&topic=lukewarm-after-date-reply-slower-how-to-act",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2544,7 +2544,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80&topic=how-to-turn-down-confession-kindly",
+    "thumbnailUrl": "/assets/columns/calm-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2607,7 +2607,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=date-expenses-money-values-talk-tips",
+    "thumbnailUrl": "/assets/columns/love-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2670,7 +2670,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&topic=low-budget-date-ideas-for-couples",
+    "thumbnailUrl": "/assets/columns/elements-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2733,7 +2733,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=1200&q=80&topic=how-to-apologize-sincerely-to-partner",
+    "thumbnailUrl": "/assets/columns/daily-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2796,7 +2796,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=christmas-plans-before-and-after-confession-tips",
+    "thumbnailUrl": "/assets/columns/calm-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2859,7 +2859,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=sns-posting-rules-for-couples-talk",
+    "thumbnailUrl": "/assets/columns/love-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2922,7 +2922,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80&topic=phone-call-or-text-preference-couple-balance",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -2985,7 +2985,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80&topic=ex-partner-contact-how-to-respond-guide",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3048,7 +3048,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=how-to-compliment-partner-naturally-by-type",
+    "thumbnailUrl": "/assets/columns/love-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3111,7 +3111,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=ready-for-new-love-after-breakup-signs",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3174,7 +3174,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 7,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=alone-time-and-together-time-balance-couple",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3237,7 +3237,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80&topic=night-anxiety-overthinking-love-calm-down-tips",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3304,7 +3304,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80&topic=friends-opposite-sex-partner-feel-uneasy-talk",
+    "thumbnailUrl": "/assets/columns/work-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3371,7 +3371,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=1200&q=80&topic=daily-fortune-how-to-use-without-being-controlled",
+    "thumbnailUrl": "/assets/columns/daily-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3438,7 +3438,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80&topic=low-luck-period-feeling-how-to-spend-calmly",
+    "thumbnailUrl": "/assets/columns/daily-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3505,7 +3505,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80&topic=strengths-weaknesses-two-sides-self-understanding",
+    "thumbnailUrl": "/assets/columns/love-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3572,7 +3572,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80&topic=introvert-extrovert-love-style-differences",
+    "thumbnailUrl": "/assets/columns/calm-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3639,7 +3639,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80&topic=friendship-compatibility-keep-good-distance-tips",
+    "thumbnailUrl": "/assets/columns/elements-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3706,7 +3706,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=1200&q=80&topic=difficult-person-part-time-school-getting-along",
+    "thumbnailUrl": "/assets/columns/work-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3773,7 +3773,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80&topic=no-crush-no-meetings-how-to-start-love",
+    "thumbnailUrl": "/assets/columns/love-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3840,7 +3840,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80&topic=first-impression-vs-real-self-gap-worry",
+    "thumbnailUrl": "/assets/columns/work-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3907,7 +3907,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80&topic=indecisive-decision-making-tips-by-style",
+    "thumbnailUrl": "/assets/columns/love-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -3974,7 +3974,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80&topic=year-end-reflection-new-year-goals-with-fortune",
+    "thumbnailUrl": "/assets/columns/elements-03.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4041,7 +4041,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&topic=recharge-style-by-personality-tired-recovery",
+    "thumbnailUrl": "/assets/columns/calm-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4108,7 +4108,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80&topic=oshi-hobby-and-love-balance-tips",
+    "thumbnailUrl": "/assets/columns/love-02.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4175,7 +4175,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80&topic=first-relationship-nervous-tips",
+    "thumbnailUrl": "/assets/columns/elements-01.webp",
     "toc": [
       {
         "id": "section-1",
@@ -4242,7 +4242,7 @@
     ],
     "category": "恋愛アプローチ・トリセツ",
     "readTimeMinutes": 5,
-    "thumbnailUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80&topic=told-incompatible-how-to-take-result-calmly",
+    "thumbnailUrl": "/assets/columns/elements-04.webp",
     "toc": [
       {
         "id": "section-1",
