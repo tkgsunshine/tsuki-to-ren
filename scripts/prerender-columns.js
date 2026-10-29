@@ -1,4 +1,5 @@
 import fs from 'fs';
+import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -6,6 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const BASE_URL = 'https://www.tsuki-to-ren.com';
+// OGP画像の絵柄を変えたら上げる（SNSに残った古い画像を使わせない）
+const OGP_DESIGN = 1;
 const distDir = path.resolve(__dirname, '../dist');
 const indexHtmlPath = path.join(distDir, 'index.html');
 const columnsFilePath = path.resolve(__dirname, '../src/data/columnsData.ts');
@@ -111,6 +114,8 @@ for (const article of columns) {
   const articleCanonical = `${BASE_URL}/column/${article.slug}`;
   // Local thumbnails are stored as /assets/... paths; OGP and JSON-LD need absolute URLs.
   const articleImage = article.thumbnailUrl.startsWith('/') ? `${BASE_URL}${article.thumbnailUrl}` : article.thumbnailUrl;
+  // 共有カード（OGP）は、タイトルとテーマ入りの画像（api/column-og.js）。v はタイトルが変わったときにSNSの古い画像を使わせないため
+  const ogImage = `${BASE_URL}/api/column-og?slug=${encodeURIComponent(article.slug)}&v=${crypto.createHash('md5').update(`${OGP_DESIGN}:${article.title}`).digest('hex').slice(0, 8)}`;
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -197,10 +202,10 @@ for (const article of columns) {
     .replace(/<meta property="og:title" content="[\s\S]*?" \/>/i, `<meta property="og:title" content="${escapeAttr(articleTitle)}" />`)
     .replace(/<meta property="og:description" content="[\s\S]*?" \/>/i, `<meta property="og:description" content="${escapeAttr(articleDesc)}" />`)
     .replace(/<meta property="og:url" content="[\s\S]*?" \/>/i, `<meta property="og:url" content="${articleCanonical}" />`)
-    .replace(/<meta property="og:image" content="[\s\S]*?" \/>/i, `<meta property="og:image" content="${escapeAttr(articleImage)}" />`)
+    .replace(/<meta property="og:image" content="[\s\S]*?" \/>/i, `<meta property="og:image" content="${escapeAttr(ogImage)}" />`)
     .replace(/<meta name="twitter:title" content="[\s\S]*?" \/>/i, `<meta name="twitter:title" content="${escapeAttr(articleTitle)}" />`)
     .replace(/<meta name="twitter:description" content="[\s\S]*?" \/>/i, `<meta name="twitter:description" content="${escapeAttr(articleDesc)}" />`)
-    .replace(/<meta name="twitter:image" content="[\s\S]*?" \/>/i, `<meta name="twitter:image" content="${escapeAttr(articleImage)}" />`);
+    .replace(/<meta name="twitter:image" content="[\s\S]*?" \/>/i, `<meta name="twitter:image" content="${escapeAttr(ogImage)}" />`);
 
   // Insert structured data before </head>
   articleHtml = articleHtml.replace('</head>', `${schemaTags}\n</head>`);
