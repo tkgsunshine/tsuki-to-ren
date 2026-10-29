@@ -29,6 +29,7 @@ import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
+import { ToolNicchuView } from './components/ToolNicchuView';
 import { trackFortune, trackPremiumStep } from './services/analytics';
 import { subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
@@ -81,6 +82,9 @@ const getInitialRoute = (): InitialRoute => {
   }
   if (path === '/column' || path === '/column/') {
     return { tab: 'column', slug: null, legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/tools/nicchu' || path === '/tools/nicchu/') {
+    return { tab: 'tool', slug: 'nicchu', legal: false, settingsSubView: 'main', compatibilityPair: null };
   }
   if (path === '/terms' || path === '/terms/' || path === '/privacy' || path === '/privacy/') {
     return { tab: 'home', slug: null, legal: true, settingsSubView: 'main', compatibilityPair: null };
@@ -606,7 +610,8 @@ function App() {
         setRelationship(rel);
         startDiagnosis(mName, mBirth, mMbti, mGender, '', '', 'UNKNOWN', 'female', rel, 'single', false, urlCharacter);
       }
-    } else {
+    } else if (!mBirth) {
+      // 生年月日だけのリンク（日柱ページからの ?mb=）では前回の結果を戻さず、入力画面のままにする（生年月日は UnifiedInputView が入れる）
       // Restore last diagnosis result when returning from 2-step email verification link
       try {
         const lastInputRaw = localStorage.getItem('hasu_last_diagnosis_input');
@@ -1611,6 +1616,13 @@ function App() {
                 onNavigateHome={() => handleTabChange('home')}
               />
             )}
+          </div>
+        )}
+
+        {/* ツールページ（/tools/nicchu 日柱の調べ方） */}
+        {activeTab === 'tool' && (
+          <div style={{ animation: 'fadeIn 0.4s ease', width: '100%' }}>
+            <ToolNicchuView />
           </div>
         )}
 

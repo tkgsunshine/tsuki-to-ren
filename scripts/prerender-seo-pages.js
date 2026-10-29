@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { calculateDayPillar } from '../api/_lib/fortuneEngine.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -366,6 +367,93 @@ writePage(
 
 console.log('✅ Pre-rendered Legal, Company, Result, Chat, Mypage & About pages successfully.');
 
+// 9. /tools/nicchu 日柱の調べ方（入力欄を使わなくても、調べ方・計算例・60通りの一覧が読めるように丸ごと出す）
+// 文面は src/data/nicchu-tool.json（画面 ToolNicchuView と共通）。計算は鑑定と同じエンジン（api/_lib/fortuneEngine.js）
+{
+  const tool = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../src/data/nicchu-tool.json'), 'utf-8'));
+  const esc = (str) => String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const url = `${BASE_URL}/tools/nicchu`;
+  const pillarOf = (iso) => {
+    const [y, m, d] = iso.split('-').map(Number);
+    const { stem, branch } = calculateDayPillar(new Date(y, m - 1, d));
+    return tool.pillars.find((p) => p.pillar === stem + branch);
+  };
+  const ja = (iso) => { const [y, m, d] = iso.split('-').map(Number); return `${y}年${m}月${d}日`; };
+  const h2 = 'font-size: 1.15rem; color: #e2c074; margin-top: 2rem;';
+  const kaigou = tool.pillars.filter((p) => p.kaigou);
+  const html = `
+    <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
+      <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>日柱の調べ方</span>
+      </nav>
+      <article>
+        <h1 style="font-size: 1.6rem; color: #fef08a; border-bottom: 1px solid rgba(226,192,116,0.3); padding-bottom: 0.5rem;">${esc(tool.h1)}</h1>
+        ${tool.conclusion.map((t) => `<p>${esc(t)}</p>`).join('\n        ')}
+        <p style="font-size: 0.85rem; color: #9ca3af;">このページを開くと、生年月日を入れるだけで日柱が分かる入力欄が表示されます（無料・登録不要）。</p>
+
+        <h2 id="kaigou" style="${h2}">魁罡（かいごう）かどうかの調べ方</h2>
+        <p>${esc(tool.kaigouIntro)}</p>
+        <ul>
+          ${kaigou.map((p) => `<li>${esc(p.pillar)}（${esc(p.reading)}）</li>`).join('\n          ')}
+        </ul>
+        <p><a href="${tool.kaigouColumn}" style="color: #e2c074;">魁罡の特徴・恋愛傾向はこちら</a></p>
+
+        <h2 style="${h2}">日柱の調べ方（計算の考え方）</h2>
+        ${tool.howTo.map((t) => `<p>${esc(t)}</p>`).join('\n        ')}
+        <h3 style="font-size: 1rem; color: #fef08a;">計算例</h3>
+        <ul>
+          ${tool.examples.map((iso) => { const p = pillarOf(iso); return `<li>${ja(iso)}生まれ → <strong>${esc(p.pillar)}</strong>（${esc(p.reading)}・五行：${esc(p.element)}）</li>`; }).join('\n          ')}
+        </ul>
+
+        <h2 id="list" style="${h2}">60通りの日柱一覧</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+          <thead><tr><th style="text-align: left; padding: 0.4rem 0;">日柱</th><th style="text-align: left; padding: 0.4rem 0;">五行</th><th style="text-align: left; padding: 0.4rem 0;">特徴</th></tr></thead>
+          <tbody>
+            ${tool.pillars.map((p) => `<tr id="p${p.no}" style="border-top: 1px solid rgba(255,255,255,0.1);"><td style="padding: 0.4rem 0.5rem 0.4rem 0; white-space: nowrap;">${p.no}. ${esc(p.pillar)}（${esc(p.reading)}）</td><td style="padding: 0.4rem 0.5rem 0.4rem 0;">${esc(p.element)}</td><td style="padding: 0.4rem 0;">${p.kaigou ? '<strong>魁罡</strong>。' : ''}${esc(p.image)}。${esc(p.line)}</td></tr>`).join('\n            ')}
+          </tbody>
+        </table>
+
+        <h2 style="${h2}">よくある質問</h2>
+        ${tool.faq.map((f) => `<h3 style="font-size: 1rem; color: #fef08a;">${esc(f.q)}</h3>\n        <p>${esc(f.a)}</p>`).join('\n        ')}
+
+        <h2 style="${h2}">関連する記事</h2>
+        <ul>
+          ${tool.related.map((r) => `<li><a href="${r.href}" style="color: #e2c074;">${esc(r.label)}</a></li>`).join('\n          ')}
+        </ul>
+        <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.8rem 2rem; border-radius: 30px; text-decoration: none; font-weight: bold;">無料で相性を占う</a></p>
+      </article>
+    </div>
+  `;
+  writePage('tools/nicchu', tool.title, tool.description, tool.keywords, url, html, [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
+        { '@type': 'ListItem', 'position': 2, 'name': '日柱の調べ方', 'item': url }
+      ]
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': tool.faq.map((f) => ({ '@type': 'Question', 'name': f.q, 'acceptedAnswer': { '@type': 'Answer', 'text': f.a } }))
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      'name': tool.h1,
+      'url': url,
+      'description': tool.description,
+      'applicationCategory': 'LifestyleApplication',
+      'operatingSystem': 'All',
+      'inLanguage': 'ja',
+      'isAccessibleForFree': true,
+      'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'JPY' }
+    }
+  ]);
+  console.log('✅ Pre-rendered /tools/nicchu');
+}
+
 // MBTI Types Data
 const MBTI_TYPES = [
   { code: 'INFJ', name: '提唱者', tag: '理想主義・深い洞察', element: '内向的直観', loveStyle: '魂の深いつながりを重視し、時間をかけて本物の信頼を築く誠実な愛' },
@@ -503,6 +591,7 @@ const homeSemanticHtml = `
         <a href="/" style="color: #cbd5e1; text-decoration: none;">恋愛診断ホーム</a>
         <a href="/column" style="color: #cbd5e1; text-decoration: none;">開運コラム</a>
         <a href="/about" style="color: #cbd5e1; text-decoration: none;">占い解説</a>
+        <a href="/tools/nicchu" style="color: #cbd5e1; text-decoration: none;">日柱の調べ方</a>
         <a href="/terms" style="color: #9ca3af; text-decoration: none;">利用規約</a>
         <a href="/privacy" style="color: #9ca3af; text-decoration: none;">プライバシーポリシー</a>
         <a href="/tokushoho" style="color: #9ca3af; text-decoration: none;">特定商取引法に基づく表記</a>
