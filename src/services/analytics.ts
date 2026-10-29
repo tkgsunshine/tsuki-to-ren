@@ -75,6 +75,8 @@ export const landingFrom = (pathname: string, search: string): string => {
   const col = /^\/column\/([a-z0-9-]{1,100})$/i.exec(path);
   if (col) return `column:${col[1].toLowerCase()}`;
   if (path.startsWith('/compatibility')) return 'compat';
+  const tool = /^\/tools\/([a-z0-9-]{1,40})$/i.exec(path);
+  if (tool) return `tool:${tool[1].toLowerCase()}`;
   if (path === '/chat') return 'chat';
   if (path === '/mypage' || path === '/profile') return 'mypage';
   return 'other';
@@ -159,6 +161,11 @@ export const trackShare = (channel: ShareChannel) => {
 
 /** The premium page opened (premium_view), or the button to Stripe's payment page pressed (checkout). */
 export const trackPremiumStep = (type: 'premium_view' | 'checkout') => {
+  void send({ type, ...current() });
+};
+
+/** A tool page (/tools/*) showed a result (tool_use), or its result's button to the fortune was pressed (tool_cta). */
+export const trackToolStep = (type: 'tool_use' | 'tool_cta') => {
   void send({ type, ...current() });
 };
 

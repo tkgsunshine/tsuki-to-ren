@@ -13,9 +13,10 @@ export const PREMIUM_COUNTED = 'analyticsPremium'; // one marker per subscriptio
 // event type -> counter name. 'premium' is recorded only by the Stripe webhook, never from /api/track.
 export const METRICS = {
   visit: 'visits', fortune: 'fortunes', signup: 'signups', share: 'shares',
-  premium_view: 'premiumViews', checkout: 'checkouts', premium: 'premiums'
+  premium_view: 'premiumViews', checkout: 'checkouts', premium: 'premiums',
+  tool_use: 'toolUses', tool_cta: 'toolCtas' // ツールページ（/tools/*）で結果を出した回数、結果から鑑定へ進んだ回数
 };
-export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout']);
+export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'tool_use', 'tool_cta']);
 
 // Fixed list so a forged request cannot add arbitrary keys (utm:* is the one open slot, kept short).
 export const SOURCES = new Set([
@@ -38,7 +39,7 @@ export function normalizeSource(v) {
 export function normalizeLanding(v) {
   const s = String(v ?? '').toLowerCase();
   if (LANDINGS.has(s)) return s;
-  return /^column:[a-z0-9-]{1,100}$/.test(s) ? s : 'other';
+  return /^column:[a-z0-9-]{1,100}$/.test(s) || /^tool:[a-z0-9-]{1,40}$/.test(s) ? s : 'other';
 }
 
 export const normalizeDevice = (v) => (DEVICES.has(String(v ?? '')) ? String(v) : 'unknown');

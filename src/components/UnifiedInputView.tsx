@@ -55,6 +55,10 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
 
   const [myBirth, setMyBirth] = useState(() => {
     try {
+      // 日柱ページなどから生年月日だけを引き継いだとき（/?mb=YYYYMMDD、16タイプなし）は、それを入れておく
+      const params = new URLSearchParams(window.location.search);
+      const mb = params.get('mb') || '';
+      if (/^\d{8}$/.test(mb) && !params.get('mm')) return `${mb.slice(0, 4)}-${mb.slice(4, 6)}-${mb.slice(6)}`;
       const stored = localStorage.getItem('hasu_user_profile');
       if (stored) {
         const parsed = JSON.parse(stored);

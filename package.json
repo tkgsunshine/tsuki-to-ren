@@ -14,7 +14,8 @@
     "test:userdata": "node --experimental-strip-types --test scripts/test-user-data.mjs",
     "test:chat": "node --test scripts/test-chat-limit.mjs",
     "test:inquiry": "node --test scripts/test-inquiry.mjs",
-    "test:share": "node --experimental-strip-types --test scripts/test-shared-result.mjs"
+    "test:share": "node --experimental-strip-types --test scripts/test-shared-result.mjs",
+    "test:tools": "node --experimental-strip-types --test scripts/test-nicchu-tool.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

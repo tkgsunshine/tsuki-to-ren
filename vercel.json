@@ -92,6 +92,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/tools/nicchu",
+      "destination": "/tools/nicchu/index.html"
+    },
+    {
       "source": "/contact",
       "destination": "/index.html"
     },

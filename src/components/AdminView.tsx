@@ -8,7 +8,7 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 // broken down by source / landing page / device, and the member list.
 // The data comes from /api/admin, which only answers accounts listed in ADMIN_EMAILS (Vercel env).
 
-const METRIC_KEYS = ['visits', 'fortunes', 'signups', 'shares', 'premiumViews', 'checkouts', 'premiums'] as const;
+const METRIC_KEYS = ['visits', 'fortunes', 'signups', 'shares', 'premiumViews', 'checkouts', 'premiums', 'toolUses', 'toolCtas'] as const;
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
 type FullCounts = Record<Metric, number>;
@@ -82,6 +82,7 @@ const LANDING_LABELS: Record<string, string> = {
   home: 'トップ', share_link: '共有リンク（/share/card）', column_list: 'コラム一覧', compat: '16タイプ相性ページ', result_link: '鑑定結果リンク（共有・毎朝メール）',
   chat: 'チャット', mypage: 'マイページ', other: 'その他',
 };
+const TOOL_LABELS: Record<string, string> = { nicchu: '日柱の調べ方' };
 const DEVICE_LABELS: Record<string, string> = {
   mobile_browser: 'スマホ（ブラウザ）', mobile_app: 'スマホ（ホーム画面のアプリ）',
   tablet_browser: 'タブレット（ブラウザ）', tablet_app: 'タブレット（ホーム画面のアプリ）',
@@ -98,6 +99,7 @@ const landingLabel = (l: string) => {
     const slug = l.slice(7);
     return `コラム: ${COLUMN_TITLES.get(slug) || slug}`;
   }
+  if (l.startsWith('tool:')) return `ツール: ${TOOL_LABELS[l.slice(5)] || l.slice(5)}`;
   return LANDING_LABELS[l] || l;
 };
 
@@ -110,7 +112,7 @@ const jstDay = (iso: string | null) => (iso ? jst(iso).slice(0, 10) : '');
 const premiumLabel = (p: Member['premium']) => (p === 'live' ? '有料' : p === 'test' ? 'テスト' : '');
 const pct = (num: number, den: number) => (den ? `${((num / den) * 100).toFixed(1)}%` : '—');
 
-const zero = (): FullCounts => ({ visits: 0, fortunes: 0, signups: 0, shares: 0, premiumViews: 0, checkouts: 0, premiums: 0 });
+const zero = (): FullCounts => ({ visits: 0, fortunes: 0, signups: 0, shares: 0, premiumViews: 0, checkouts: 0, premiums: 0, toolUses: 0, toolCtas: 0 });
 const addCounts = (a: FullCounts, v: Counts) => {
   for (const m of METRIC_KEYS) a[m] += v[m] || 0;
   return a;
@@ -365,6 +367,7 @@ function DailyTable({ days }: { days: DayRow[] }) {
   const cols: [keyof DayRow, string][] = [
     ['visits', '訪問'], ['fortunes', '鑑定'], ['signups', '会員登録'], ['shares', '共有'],
     ['premiumViews', 'プレミアム案内'], ['checkouts', '支払い画面'], ['premiums', '課金'], ['aiCalls', 'AIチャット'],
+    ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'],
   ];
   return (
     <div style={c.card}>
@@ -582,6 +585,7 @@ export default function AdminView() {
               <Tile label="鑑定" value={totals.fortunes} sub={`訪問あたり ${pct(totals.fortunes, totals.visits)}`} />
               <Tile label="会員登録（期間内）" value={newMembers} sub={`計測分 ${totals.signups} 件`} />
               <Tile label="共有" value={totals.shares} sub="X・LINE・リンク・画像" />
+              <Tile label="ツール使用" value={totals.toolUses} sub={`鑑定へ進んだ ${totals.toolCtas} 回`} />
               <Tile label="課金（期間内）" value={totals.premiums} sub={`支払い画面へ ${totals.checkouts} 回`} />
               <Tile label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
               <Tile label="有料会員" value={paying} sub={`会員の ${pct(paying, members.length)}`} />

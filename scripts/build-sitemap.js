@@ -74,6 +74,7 @@ function generateSitemap() {
     { path: 'chat', priority: '0.8', freq: 'daily' },
     { path: 'mypage', priority: '0.6', freq: 'weekly' },
     { path: 'about', priority: '0.6', freq: 'weekly' },
+    { path: 'tools/nicchu', priority: '0.8', freq: 'monthly' },
     { path: 'terms', priority: '0.5', freq: 'monthly' },
     { path: 'privacy', priority: '0.5', freq: 'monthly' },
     { path: 'tokushoho', priority: '0.5', freq: 'monthly' },
