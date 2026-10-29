@@ -8,7 +8,7 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 // broken down by source / landing page / device, and the member list.
 // The data comes from /api/admin, which only answers accounts listed in ADMIN_EMAILS (Vercel env).
 
-const METRIC_KEYS = ['visits', 'fortunes', 'signups', 'shares', 'premiumViews', 'checkouts', 'premiums', 'toolUses', 'toolCtas'] as const;
+const METRIC_KEYS = ['visits', 'fortunes', 'signups', 'shares', 'premiumViews', 'checkouts', 'premiums', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds'] as const;
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
 type FullCounts = Record<Metric, number>;
@@ -112,7 +112,7 @@ const jstDay = (iso: string | null) => (iso ? jst(iso).slice(0, 10) : '');
 const premiumLabel = (p: Member['premium']) => (p === 'live' ? '有料' : p === 'test' ? 'テスト' : '');
 const pct = (num: number, den: number) => (den ? `${((num / den) * 100).toFixed(1)}%` : '—');
 
-const zero = (): FullCounts => ({ visits: 0, fortunes: 0, signups: 0, shares: 0, premiumViews: 0, checkouts: 0, premiums: 0, toolUses: 0, toolCtas: 0 });
+const zero = (): FullCounts => ({ visits: 0, fortunes: 0, signups: 0, shares: 0, premiumViews: 0, checkouts: 0, premiums: 0, toolUses: 0, toolCtas: 0, columnCtaMids: 0, columnCtaEnds: 0 });
 const addCounts = (a: FullCounts, v: Counts) => {
   for (const m of METRIC_KEYS) a[m] += v[m] || 0;
   return a;
@@ -367,7 +367,7 @@ function DailyTable({ days }: { days: DayRow[] }) {
   const cols: [keyof DayRow, string][] = [
     ['visits', '訪問'], ['fortunes', '鑑定'], ['signups', '会員登録'], ['shares', '共有'],
     ['premiumViews', 'プレミアム案内'], ['checkouts', '支払い画面'], ['premiums', '課金'], ['aiCalls', 'AIチャット'],
-    ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'],
+    ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'], ['columnCtaMids', 'コラム途中→鑑定へ'], ['columnCtaEnds', 'コラム最後→鑑定へ'],
   ];
   return (
     <div style={c.card}>
@@ -597,6 +597,7 @@ export default function AdminView() {
               <Tile label="会員登録（期間内）" value={newMembers} sub={`計測分 ${totals.signups} 件`} />
               <Tile label="共有" value={totals.shares} sub="X・LINE・リンク・画像" />
               <Tile label="ツール使用" value={totals.toolUses} sub={`鑑定へ進んだ ${totals.toolCtas} 回`} />
+              <Tile label="コラム→鑑定へ" value={totals.columnCtaMids + totals.columnCtaEnds} sub={`途中 ${totals.columnCtaMids} 回・最後 ${totals.columnCtaEnds} 回`} />
               <Tile label="課金（期間内）" value={totals.premiums} sub={`支払い画面へ ${totals.checkouts} 回`} />
               <Tile label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
               <Tile label="有料会員" value={paying} sub={`会員の ${pct(paying, members.length)}`} />

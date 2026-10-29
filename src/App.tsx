@@ -168,7 +168,10 @@ function App() {
     if (mainEl) mainEl.scrollTop = top;
   };
 
+  // コラムの案内で入れてもらった生年月日。入力画面を開いたときに入れておく（ほかの方法で画面を移ったら消す）
+  const [inputPrefill, setInputPrefill] = useState<{ myBirth?: string; oppBirth?: string } | null>(null);
   const handleTabChange = (tab: string) => {
+    setInputPrefill(null);
     const cur = readNav();
     const next: PageFields = { tab, slug: null, subView: 'main', legal: false, flowStep: tab === 'home' ? 'input' : cur.flowStep };
     if (pageKey(next) !== pageKey(cur)) pushNav(next);
@@ -1344,6 +1347,7 @@ function App() {
                   onDeletePartner={handleDeletePartner}
                   isRegistered={isRegistered}
                   isSubscribed={isSubscribed}
+                  prefill={inputPrefill}
                 />
                 </>
                 )}
@@ -1599,7 +1603,10 @@ function App() {
                     scrollMainTo(0);
                   }
                 }}
-                onNavigateHome={() => handleTabChange('home')}
+                onNavigateHome={(prefill) => {
+                  handleTabChange('home');
+                  if (prefill) setInputPrefill(prefill);
+                }}
                 onSelectArticle={(slug) => {
                   pushNav({ tab: 'column', slug });
                   setSelectedColumnSlug(slug);

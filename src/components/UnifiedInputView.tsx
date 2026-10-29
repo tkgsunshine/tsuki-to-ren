@@ -28,6 +28,8 @@ interface UnifiedInputViewProps {
   onDeletePartner?: (id: string) => void;
   isRegistered?: boolean;
   isSubscribed?: boolean;
+  /** コラムの案内で入れてもらった生年月日（YYYY-MM-DD）。入っていれば最初からその値を入れておく */
+  prefill?: { myBirth?: string; oppBirth?: string } | null;
 }
 
 export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
@@ -39,7 +41,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   onSelectPartner = () => {},
   onDeletePartner = () => {},
   isRegistered = false,
-  isSubscribed = false
+  isSubscribed = false,
+  prefill = null
 }) => {
   // My Info states initialized from saved profile
   const [myName, setMyName] = useState(() => {
@@ -54,6 +57,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   });
 
   const [myBirth, setMyBirth] = useState(() => {
+    if (prefill?.myBirth) return prefill.myBirth;
     try {
       // 日柱ページなどから生年月日だけを引き継いだとき（/?mb=YYYYMMDD、16タイプなし）は、それを入れておく
       const params = new URLSearchParams(window.location.search);
@@ -110,7 +114,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
 
   // Opponent Info states
   const [oppName, setOppName] = useState('お相手');
-  const [oppBirth, setOppBirth] = useState('');
+  const [oppBirth, setOppBirth] = useState(() => prefill?.oppBirth || '');
   const [oppMbti, setOppMbti] = useState(() => {
     if (urlPair?.opp) return urlPair.opp;
     return 'UNKNOWN';

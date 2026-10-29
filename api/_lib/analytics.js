@@ -14,9 +14,10 @@ export const PREMIUM_COUNTED = 'analyticsPremium'; // one marker per subscriptio
 export const METRICS = {
   visit: 'visits', fortune: 'fortunes', signup: 'signups', share: 'shares',
   premium_view: 'premiumViews', checkout: 'checkouts', premium: 'premiums',
-  tool_use: 'toolUses', tool_cta: 'toolCtas' // ツールページ（/tools/*）で結果を出した回数、結果から鑑定へ進んだ回数
+  tool_use: 'toolUses', tool_cta: 'toolCtas', // ツールページ（/tools/*）で結果を出した回数、結果から鑑定へ進んだ回数
+  column_cta_mid: 'columnCtaMids', column_cta_end: 'columnCtaEnds' // コラムの途中・最後の案内から鑑定へ進んだ回数
 };
-export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'tool_use', 'tool_cta']);
+export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end']);
 
 // Fixed list so a forged request cannot add arbitrary keys (utm:* is the one open slot, kept short).
 export const SOURCES = new Set([
