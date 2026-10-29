@@ -156,6 +156,16 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     void Promise.resolve(onSubscribe()).finally(() => setIsProcessing(false));
   };
 
+  // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
+  const priceCardLabel = !isSubscribed
+    ? 'すべての機能を解放する'
+    : premiumEndsOn ? 'プレミアムを続ける' : 'お支払い・プランの確認';
+  const handlePriceCardAction = () => {
+    if (!isSubscribed) return handleSubscribeAction();
+    setIsProcessing(true);
+    void Promise.resolve(onCancelSubscription?.([], '')).finally(() => setIsProcessing(false));
+  };
+
   const faqs = [
     {
       q: 'いつでも解約できますか？',
@@ -401,24 +411,24 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
           {/* 料金 */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
-            {/* 未購読なら料金の枠ごと申し込みボタンにする（下の固定ボタンと同じ動き） */}
+            {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き） */}
             <button
               type="button"
-              disabled={isSubscribed || isProcessing}
-              onClick={handleSubscribeAction}
-              aria-label="月額500円ですべての機能を解放する"
+              disabled={isProcessing}
+              onClick={handlePriceCardAction}
+              aria-label={priceCardLabel}
               style={{
                 display: 'block',
                 width: '100%',
                 background: 'linear-gradient(135deg, rgba(230, 184, 92, 0.16) 0%, rgba(184, 105, 45, 0.2) 100%)',
-                border: isSubscribed ? '1.5px solid rgba(230, 184, 92, 0.35)' : '2px solid rgba(236, 200, 122, 0.85)',
+                border: '2px solid rgba(236, 200, 122, 0.85)',
                 borderRadius: '20px',
                 padding: '1.1rem 1rem',
                 textAlign: 'center',
                 color: 'inherit',
                 font: 'inherit',
-                cursor: isSubscribed ? 'default' : 'pointer',
-                boxShadow: isSubscribed ? 'none' : '0 8px 24px rgba(217, 164, 65, 0.28), inset 0 1px 0 rgba(255, 236, 190, 0.25)',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(217, 164, 65, 0.28), inset 0 1px 0 rgba(255, 236, 190, 0.25)',
                 transition: 'transform 0.15s ease'
               }}
             >
@@ -434,31 +444,29 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               <div style={{ fontSize: '0.72rem', color: '#d8d2c6', marginTop: '0.25rem' }}>
                 1日あたり約33円
               </div>
-              {!isSubscribed && (
-                <span style={{
-                  marginTop: '0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  padding: '0.75rem 1rem',
-                  background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
-                  color: '#000000',
-                  borderRadius: '9999px',
-                  fontSize: '0.92rem',
-                  fontWeight: '800',
-                  letterSpacing: '0.03em',
-                  boxShadow: '0 6px 18px rgba(217, 164, 65, 0.5)'
-                }}>
-                  {isProcessing ? '登録処理中...' : (
-                    <>
-                      <Moon size={16} style={{ fill: 'currentColor' }} />
-                      すべての機能を解放する
-                      <ArrowRight size={16} />
-                    </>
-                  )}
-                </span>
-              )}
+              <span style={{
+                marginTop: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                padding: '0.75rem 1rem',
+                background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
+                color: '#000000',
+                borderRadius: '9999px',
+                fontSize: '0.92rem',
+                fontWeight: '800',
+                letterSpacing: '0.03em',
+                boxShadow: '0 6px 18px rgba(217, 164, 65, 0.5)'
+              }}>
+                {isProcessing ? (isSubscribed ? '開いています...' : '登録処理中...') : (
+                  <>
+                    <Moon size={16} style={{ fill: 'currentColor' }} />
+                    {priceCardLabel}
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </span>
             </button>
             <div style={{ marginTop: '0.8rem' }}>
               <CharBubble who="ren" small>
