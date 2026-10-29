@@ -902,7 +902,9 @@ for (const topic of REGULATED_TOPICS_POOL) {
       thumbnailUrl: assignedThumbnail,
       toc: topic.toc,
       faqs: topic.faqs,
-      content: topic.content
+      content: topic.content,
+      // 記事冒頭の「この記事の結論」。公開待ちの記事に answer があれば引き継ぐ（無ければ表示側で metaDescription を使う）
+      ...(topic.answer ? { answer: topic.answer } : {})
     };
 
     // Ensure minimum quality check (at least 800 characters)
@@ -920,6 +922,8 @@ for (const topic of REGULATED_TOPICS_POOL) {
   keywords: string[];
   category: '四柱推命・特殊星' | '16タイプ・MBTI相性' | 'ツインレイ・運命の絆' | 'LINE攻略・アプローチ' | 'LINE攻略・16タイプ' | '恋愛アプローチ・トリセツ' | '復縁・引き寄せ' | '九星気学・バイオリズム' | '四柱推命入門' | '未来予測・結婚運';
   publishedAt: string; // ISO String (e.g. 2026-09-03T10:00:00+09:00)
+  updatedAt?: string; // 本文を書き直した日（ISO）。無ければ publishedAt
+  answer?: string; // 記事冒頭の「この記事の結論」（2文）。無ければ metaDescription を使う
   readTimeMinutes: number;
   thumbnailUrl: string;
   toc: { id: string; title: string; level: 1 | 2 }[];

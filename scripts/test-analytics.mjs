@@ -48,6 +48,12 @@ test('client source / landing detection', () => {
   assert.equal(sourceFrom('', '', 'www.tsuki-to-ren.com'), 'direct');
   assert.equal(sourceFrom('', 'https://www.google.co.jp/', 'www.tsuki-to-ren.com'), 'google');
   assert.equal(sourceFrom('', 'https://t.co/abc', 'www.tsuki-to-ren.com'), 'x');
+  assert.equal(sourceFrom('', 'https://chatgpt.com/', 'www.tsuki-to-ren.com'), 'chatgpt');
+  assert.equal(sourceFrom('?utm_source=chatgpt.com', '', 'www.tsuki-to-ren.com'), 'chatgpt');
+  assert.equal(sourceFrom('', 'https://www.perplexity.ai/', 'www.tsuki-to-ren.com'), 'perplexity');
+  assert.equal(sourceFrom('', 'https://gemini.google.com/', 'www.tsuki-to-ren.com'), 'gemini');
+  assert.equal(sourceFrom('', 'https://copilot.microsoft.com/', 'www.tsuki-to-ren.com'), 'copilot');
+  assert.equal(sourceFrom('', 'https://claude.ai/', 'www.tsuki-to-ren.com'), 'claude');
   assert.equal(sourceFrom('', 'https://mail.google.com/', 'www.tsuki-to-ren.com'), 'email');
   assert.equal(sourceFrom('?utm_source=X Post!', 'https://t.co/abc', 'www.tsuki-to-ren.com'), 'utm:xpost');
   assert.equal(sourceFrom('', 'https://www.tsuki-to-ren.com/column', 'www.tsuki-to-ren.com'), 'direct');

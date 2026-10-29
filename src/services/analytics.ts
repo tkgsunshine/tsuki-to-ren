@@ -32,6 +32,12 @@ const local = () => (typeof window === 'undefined' ? undefined : window.localSto
 
 const REFERRERS: [RegExp, string][] = [
   [/(^|\.)mail\.google\.com$|(^|\.)outlook\.|(^|\.)mail\.yahoo\./, 'email'],
+  // AI検索・チャットからの流入（Google より先に判定する。gemini.google.com を google にしないため）
+  [/(^|\.)chatgpt\.com$|(^|\.)chat\.openai\.com$/, 'chatgpt'],
+  [/(^|\.)perplexity\.ai$/, 'perplexity'],
+  [/(^|\.)gemini\.google\.com$/, 'gemini'],
+  [/(^|\.)copilot\.microsoft\.com$/, 'copilot'],
+  [/(^|\.)claude\.ai$/, 'claude'],
   [/(^|\.)google\./, 'google'],
   [/(^|\.)yahoo\./, 'yahoo'],
   [/(^|\.)bing\.com$/, 'bing'],
@@ -49,6 +55,7 @@ export const sourceFrom = (search: string, referrer: string, ownHost: string): s
   const utm = new URLSearchParams(search).get('utm_source');
   if (utm) {
     const clean = utm.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 30);
+    if (clean === 'chatgptcom') return 'chatgpt'; // ChatGPT が付ける utm_source=chatgpt.com
     if (clean) return `utm:${clean}`;
   }
   if (!referrer) return 'direct';

@@ -119,14 +119,16 @@ for (const article of columns) {
     'description': article.metaDescription,
     'image': articleImage,
     'datePublished': article.publishedAt,
-    'dateModified': article.publishedAt,
+    'dateModified': article.updatedAt || article.publishedAt,
+    'abstract': article.answer || article.metaDescription,
     'mainEntityOfPage': {
       '@type': 'WebPage',
       '@id': articleCanonical
     },
     'author': {
       '@type': 'Organization',
-      'name': '月と蓮 占い編集部'
+      'name': '月と蓮 占い編集部',
+      'url': `${BASE_URL}/`
     },
     'publisher': {
       '@type': 'Organization',
@@ -215,6 +217,10 @@ for (const article of columns) {
           <p style="color: #d8b4fe; font-size: 0.8rem; font-weight: bold;">${article.category} | 読了目安 ${article.readTimeMinutes}分</p>
           <h1 style="font-size: 1.6rem; color: #fef08a; line-height: 1.4;">${article.title}</h1>
         </header>
+        <section aria-label="この記事の結論" style="background: rgba(226,192,116,0.08); border: 1px solid rgba(226,192,116,0.35); border-radius: 12px; padding: 0.9rem 1.1rem; margin-bottom: 1.25rem;">
+          <div style="color: #f2e2b3; font-weight: bold; font-size: 0.8rem; margin-bottom: 0.4rem;">この記事の結論</div>
+          <p style="margin: 0; color: #f3efe6; line-height: 1.75;">${article.answer || article.metaDescription}</p>
+        </section>
         <div style="line-height: 1.8; color: #e2e8f0;">
           ${article.content}
         </div>

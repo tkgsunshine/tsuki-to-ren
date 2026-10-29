@@ -75,7 +75,8 @@ const INQUIRY_CATEGORIES: Record<string, string> = {
 const SOURCE_LABELS: Record<string, string> = {
   direct: '直接・不明', google: 'Google検索', yahoo: 'Yahoo!検索', bing: 'Bing検索', x: 'X', instagram: 'Instagram',
   line: 'LINE', facebook: 'Facebook', threads: 'Threads', tiktok: 'TikTok', youtube: 'YouTube', note: 'note',
-  email: 'メール', other: 'その他のサイト',
+  email: 'メール', chatgpt: 'ChatGPT', perplexity: 'Perplexity', gemini: 'Gemini', copilot: 'Copilot', claude: 'Claude',
+  other: 'その他のサイト',
 };
 const LANDING_LABELS: Record<string, string> = {
   home: 'トップ', share_link: '共有リンク（/share/card）', column_list: 'コラム一覧', compat: '16タイプ相性ページ', result_link: '鑑定結果リンク（共有・毎朝メール）',
