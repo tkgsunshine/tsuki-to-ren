@@ -991,7 +991,7 @@ body.chat-keyboard-open .chat-partner-picker {
   gap: 0.85rem;
   width: 100%;
   max-width: 100%;
-  padding: 0.5rem 0;
+  padding: 0.35rem 0 0;
   box-sizing: border-box;
 }
 
@@ -1007,11 +1007,10 @@ body.chat-keyboard-open .chat-partner-picker {
 .top-char-avatar {
   width: 100%;
   max-width: 170px;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 1 / 1;
   border-radius: 20px;
   border: 1.5px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
-  margin-bottom: 0.6rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
 }
@@ -1020,7 +1019,24 @@ body.chat-keyboard-open .chat-partner-picker {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* 正方形に切り抜くとき、顔を残して下側をカットする */
+  object-position: center top;
   transition: transform 0.5s ease;
+}
+
+/* 名前と説明を画像の下端に重ねる */
+.top-char-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.4rem 0.4rem 0.45rem;
+  background: linear-gradient(to top, rgba(8, 10, 16, 0.92) 0%, rgba(8, 10, 16, 0.7) 55%, transparent 100%);
+  pointer-events: none;
+  z-index: 5;
 }
 
 .top-char-card:hover img {
@@ -1040,7 +1056,7 @@ body.chat-keyboard-open .chat-partner-picker {
 }
 
 .top-char-card.active-ren, .top-char-card.active-tsuki {
-  transform: translateY(-8px);
+  transform: translateY(-4px);
 }
 
 /* Dim unselected cards using :has() parent selector */
@@ -1074,10 +1090,10 @@ body.chat-keyboard-open .chat-partner-picker {
 }
 
 .top-char-name {
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.05rem;
+  font-weight: 600;
   font-family: var(--font-serif);
-  margin-bottom: 0.15rem;
+  line-height: 1.2;
   letter-spacing: 0.05em;
 }
 
@@ -1423,4 +1439,98 @@ body.chat-keyboard-open .chat-partner-picker {
 
 @media (prefers-reduced-motion: reduce) {
   .field-invalid { animation: none; }
+}
+
+/* トップを開いた瞬間の光の演出（Header の is-opening の間だけ） */
+.opening-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.opening-glow-bloom {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--safe-top) + 3.5rem);
+  width: 140vmax;
+  height: 140vmax;
+  margin: -70vmax 0 0 -70vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 240, 200, 0.85) 0%, rgba(226, 192, 116, 0.45) 12%, rgba(159, 134, 192, 0.28) 30%, rgba(159, 134, 192, 0) 55%);
+  transform: scale(0.05);
+  opacity: 0;
+  animation: opening-bloom 2.2s cubic-bezier(0.22, 0.8, 0.3, 1) 0.25s forwards;
+}
+
+.opening-glow-ring {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--safe-top) + 3.5rem);
+  width: 60vmin;
+  height: 60vmin;
+  margin: -30vmin 0 0 -30vmin;
+  border-radius: 50%;
+  border: 1.5px solid rgba(242, 226, 179, 0.8);
+  box-shadow: 0 0 24px rgba(226, 192, 116, 0.6), inset 0 0 24px rgba(226, 192, 116, 0.35);
+  transform: scale(0.1);
+  opacity: 0;
+  animation: opening-ring 1.8s ease-out 0.45s forwards;
+}
+
+.opening-glow-spark {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff6d8;
+  box-shadow: 0 0 6px 2px rgba(242, 226, 179, 0.85), 0 0 14px 4px rgba(159, 134, 192, 0.45);
+  opacity: 0;
+  animation: opening-spark 2.2s ease-out forwards;
+}
+
+.app-header.is-opening .header-title {
+  animation: opening-title 1.6s ease-out 0.35s both;
+}
+
+.app-header.is-opening > div:not(.opening-glow) {
+  animation: opening-rise 1s ease-out 0.9s both;
+}
+
+.app-header.is-opening > div:last-child {
+  animation-delay: 1.05s;
+}
+
+@keyframes opening-bloom {
+  0% { transform: scale(0.05); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes opening-ring {
+  0% { transform: scale(0.1); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes opening-spark {
+  0% { opacity: 0; transform: translateY(6px) scale(0.4); }
+  30% { opacity: 1; transform: translateY(0) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-18px) scale(0.6); }
+}
+
+@keyframes opening-title {
+  0% { opacity: 0; filter: blur(10px) drop-shadow(0 0 0 rgba(226, 192, 116, 0)); }
+  60% { opacity: 1; filter: blur(0) drop-shadow(0 0 24px rgba(255, 236, 180, 0.95)); }
+  100% { opacity: 1; filter: blur(0) drop-shadow(0 0 12px rgba(226, 192, 116, 0.45)); }
+}
+
+@keyframes opening-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opening-glow { display: none; }
+  .app-header.is-opening .header-title,
+  .app-header.is-opening > div:not(.opening-glow) { animation: none; }
 }
