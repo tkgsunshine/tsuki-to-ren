@@ -77,7 +77,11 @@ export default async function handler(req, res, deps = {}) {
       return res.status(200).json({ status: 'success' });
     }
     const days = Math.min(Math.max(parseInt(req.query?.days, 10) || 30, 1), 180);
-    const from = jstDate(new Date(Date.now() - (days - 1) * 86400 * 1000));
+    // offset = how many days back the period ends (0 = up to today, 1 = up to yesterday)
+    const offset = Math.min(Math.max(parseInt(req.query?.offset, 10) || 0, 0), 180);
+    const to = jstDate(new Date(Date.now() - offset * 86400 * 1000));
+    const from = jstDate(new Date(Date.now() - (offset + days - 1) * 86400 * 1000));
+    const inPeriod = (d) => d.id <= to; // the query already starts at `from`; days after `to` are dropped here
 
     const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
@@ -130,10 +134,10 @@ export default async function handler(req, res, deps = {}) {
     return res.status(200).json({
       status: 'success',
       from,
-      to: jstDate(),
-      daily: dailySnap.docs.map((d) => d.data()).sort((a, b) => a.date.localeCompare(b.date)),
+      to,
+      daily: dailySnap.docs.filter(inPeriod).map((d) => d.data()).sort((a, b) => a.date.localeCompare(b.date)),
       // Chat (Claude API) use per day: calls answered by Claude and their tokens
-      chat: chatSnap.docs.map((d) => {
+      chat: chatSnap.docs.filter(inPeriod).map((d) => {
         const v = d.data();
         return { date: d.id, aiCalls: v.aiCalls || 0, premiumCalls: v.premiumCalls || 0, inputTokens: v.inputTokens || 0, outputTokens: v.outputTokens || 0 };
       }).sort((a, b) => a.date.localeCompare(b.date)),

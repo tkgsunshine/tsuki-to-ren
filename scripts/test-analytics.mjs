@@ -197,3 +197,30 @@ test('admin: the owner\'s accounts are flagged (ADMIN_EMAILS with +aliases, and 
   const owner = Object.fromEntries(res.body.users.map((u) => [u.uid, u.owner]));
   assert.deepEqual(owner, { a: 'auto', b: 'auto', c: 'marked', d: null });
 });
+
+test('admin ?days=1&offset=1 returns only yesterday (JST), for counts and chat', async () => {
+  const { jstDate } = await import('../api/_lib/analytics.js');
+  const today = jstDate();
+  const yesterday = jstDate(new Date(Date.now() - 86400 * 1000));
+  const auth = {
+    verifyIdToken: async () => ({ email: 'owner@example.com', email_verified: true }),
+    listUsers: async () => ({ users: [] }),
+  };
+  const snap = { docs: [today, yesterday].map((id) => ({ id, data: () => ({ date: id, visits: 1 }) })) };
+  const empty = { docs: [] };
+  let from;
+  const query = { get: async () => snap };
+  const db = { collection: (name) => ({
+    where: (_f, _op, v) => { from = v; return query; }, get: async () => empty,
+    orderBy: () => ({ limit: () => ({ get: async () => empty }) }),
+    doc: () => ({ get: async () => ({ data: () => undefined }) }),
+  }) };
+  const res = mockRes();
+  await admin({ method: 'GET', headers: { authorization: 'Bearer x' }, query: { days: '1', offset: '1' } }, res, { auth, db, adminEmails: 'owner@example.com' });
+  assert.equal(res.code, 200);
+  assert.equal(res.body.from, yesterday);
+  assert.equal(res.body.to, yesterday);
+  assert.equal(from, yesterday);
+  assert.deepEqual(res.body.daily.map((d) => d.date), [yesterday]);
+  assert.deepEqual(res.body.chat.map((d) => d.date), [yesterday]);
+});

@@ -417,9 +417,19 @@ function ShareTable({ rows, total }: { rows: [string, number][]; total: number }
   );
 }
 
+// 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる）
+const PERIODS = [
+  { label: '今日', days: 1, offset: 0 },
+  { label: '昨日', days: 1, offset: 1 },
+  { label: '7日', days: 7, offset: 0 },
+  { label: '30日', days: 30, offset: 0 },
+  { label: '90日', days: 90, offset: 0 },
+];
+
 export default function AdminView() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [days, setDays] = useState(30);
+  const [offset, setOffset] = useState(0); // 1 = the period ends yesterday（「昨日」）
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -442,7 +452,7 @@ export default function AdminView() {
     setLoading(true);
     setError('');
     user.getIdToken()
-      .then((token) => fetch(`/api/admin?days=${days}`, { headers: { Authorization: `Bearer ${token}` } }))
+      .then((token) => fetch(`/api/admin?days=${days}&offset=${offset}`, { headers: { Authorization: `Bearer ${token}` } }))
       .then(async (r) => {
         const body = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(body.message || `読み込みに失敗しました（${r.status}）`);
@@ -458,7 +468,7 @@ export default function AdminView() {
       .catch((e) => { if (!cancelled) { setData(null); setError(e.message); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user, days]);
+  }, [user, days, offset]);
 
   const daily = useMemo(() => {
     if (!data) return [];
@@ -512,7 +522,7 @@ export default function AdminView() {
       setError(e instanceof Error ? e.message : '更新に失敗しました');
     }
   };
-  const newMembers = useMemo(() => (data ? members.filter((m) => jstDay(m.createdAt) >= data.from).length : 0), [data, members]);
+  const newMembers = useMemo(() => (data ? members.filter((m) => (jstDay(m.createdAt) >= data.from && jstDay(m.createdAt) <= data.to)).length : 0), [data, members]);
   const mailOn = members.filter((m) => m.dailyMail).length;
   const paying = members.filter((m) => m.premium === 'live').length;
   const filtered = useMemo(() => {
@@ -560,8 +570,9 @@ export default function AdminView() {
       <div style={c.wrap}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <h1 style={{ fontSize: 18, fontWeight: 700, marginRight: 'auto' }}>月と蓮 管理画面</h1>
-          {[1, 7, 30, 90].map((n) => (
-            <button key={n} style={{ ...c.btn, ...(days === n ? c.btnOn : {}) }} onClick={() => setDays(n)}>{n === 1 ? '今日' : `${n}日`}</button>
+          {PERIODS.map((p) => (
+            <button key={p.label} style={{ ...c.btn, ...(days === p.days && offset === p.offset ? c.btnOn : {}) }}
+              onClick={() => { setDays(p.days); setOffset(p.offset); }}>{p.label}</button>
           ))}
           <button style={c.btn} onClick={() => { void logOutUser().then(() => setData(null)); }}>ログアウト</button>
         </div>
