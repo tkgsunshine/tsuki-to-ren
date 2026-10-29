@@ -4,6 +4,6 @@ import type { ColumnArticle } from '../data/columnsData';
 export const columnAnswer = (a: Pick<ColumnArticle, 'answer' | 'metaDescription'>): string =>
   (a.answer && a.answer.trim()) || a.metaDescription;
 
-/** 構造化データの dateModified に使う日付 */
+/** 構造化データの dateModified に使う日付（公開日より前の更新日は使わない） */
 export const columnModified = (a: Pick<ColumnArticle, 'updatedAt' | 'publishedAt'>): string =>
-  a.updatedAt || a.publishedAt;
+  a.updatedAt && Date.parse(a.updatedAt) > Date.parse(a.publishedAt) ? a.updatedAt : a.publishedAt;
