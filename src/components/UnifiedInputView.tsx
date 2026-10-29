@@ -424,7 +424,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
               transition: 'all 0.3s ease'
             }}
           >
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: mode === 'match' ? 'var(--color-gold)' : 'white' }}>相性を占う</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: mode === 'match' ? 'var(--color-gold)' : 'white' }}>お相手との相性を占う</div>
             <div style={{ fontSize: '0.6rem', color: '#a9a49a', marginTop: '0.15rem' }}>お相手の情報を追加</div>
           </div>
           

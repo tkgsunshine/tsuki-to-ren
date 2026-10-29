@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { User, LogIn } from 'lucide-react';
 import type { UserProfile } from '../services/firebase';
 
@@ -7,15 +7,52 @@ interface HeaderProps {
   onOpenAuth?: () => void;
 }
 
+// 開いた瞬間の光の演出は、ページを読み込んだ最初の1回だけ（タブを戻るたびには出さない）
+let openingPlayed = false;
+
+// 光の粒の位置（画面幅に対する%）と出るタイミング
+const OPENING_SPARKS = [
+  { x: 18, y: 10, d: 0.35, s: 3 }, { x: 30, y: 4, d: 0.6, s: 2 }, { x: 42, y: 16, d: 0.45, s: 4 },
+  { x: 58, y: 6, d: 0.7, s: 3 }, { x: 70, y: 14, d: 0.4, s: 2 }, { x: 82, y: 8, d: 0.55, s: 3 },
+  { x: 12, y: 24, d: 0.8, s: 2 }, { x: 26, y: 30, d: 0.65, s: 3 }, { x: 50, y: 26, d: 0.5, s: 2 },
+  { x: 74, y: 28, d: 0.75, s: 3 }, { x: 88, y: 22, d: 0.9, s: 2 }, { x: 38, y: 36, d: 0.95, s: 2 },
+  { x: 64, y: 38, d: 0.85, s: 3 }, { x: 8, y: 40, d: 1.0, s: 2 },
+];
+
+const OpeningGlow: React.FC = () => (
+  <div className="opening-glow" aria-hidden="true">
+    <div className="opening-glow-bloom" />
+    <div className="opening-glow-ring" />
+    {OPENING_SPARKS.map((p, i) => (
+      <span
+        key={i}
+        className="opening-glow-spark"
+        style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.s}px`, height: `${p.s}px`, animationDelay: `${p.d}s` }}
+      />
+    ))}
+  </div>
+);
+
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
+  const [opening, setOpening] = useState(() => !openingPlayed);
+
+  useEffect(() => {
+    if (!opening) return;
+    openingPlayed = true;
+    const timer = window.setTimeout(() => setOpening(false), 3200);
+    return () => window.clearTimeout(timer);
+  }, [opening]);
+
   return (
-    <header className="app-header" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', flexShrink: 0, padding: '2.2rem 0.75rem 0.25rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
+    <header className={`app-header${opening ? ' is-opening' : ''}`} style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', flexShrink: 0, padding: '0.5rem 0.75rem 0.25rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
+      {opening && <OpeningGlow />}
+
       {/* Top Auth Bar (Pinned Absolute Top-Right) */}
       {onOpenAuth && (
         <div style={{
           position: 'absolute',
-          top: '0.4rem',
-          right: '0.75rem',
+          top: '0.85rem',
+          right: '-0.25rem',
           zIndex: 10
         }}>
           <button
@@ -25,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.35rem',
-              padding: '0.35rem 0.75rem',
+              padding: '0.3rem 0.65rem',
               background: currentUser
                 ? 'rgba(125, 187, 138, 0.12)'
                 : 'rgba(255, 255, 255, 0.08)',
@@ -34,12 +71,13 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
                 : '1px solid rgba(226, 192, 116, 0.35)',
               borderRadius: '20px',
               color: currentUser ? '#7dbb8a' : '#f2e2b3',
-              fontSize: '0.75rem',
+              fontSize: '0.72rem',
               fontWeight: '600',
               cursor: 'pointer',
               backdropFilter: 'blur(8px)',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              maxWidth: '8.5rem'
             }}
           >
             {currentUser ? (
@@ -49,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
                 ) : (
                   <User size={13} />
                 )}
-                <span>{currentUser.displayName || 'マイページ'}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'マイページ'}</span>
               </>
             ) : (
               <>
