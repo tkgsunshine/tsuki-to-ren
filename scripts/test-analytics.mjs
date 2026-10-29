@@ -88,6 +88,18 @@ test('track: a share is counted with its channel and device; premium cannot be s
   assert.equal(db.writes.length, 1);
 });
 
+test('track: the column boxes that lead to the fortune are counted by position (middle / after the article)', async () => {
+  const db = mockDb();
+  for (const type of ['column_cta_mid', 'column_cta_end']) {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type, source: 'google', landing: 'column:line-timing', device: 'mobile_browser' } }, res, { db });
+    assert.equal(res.code, 204);
+  }
+  assert.ok(db.writes[0].data.columnCtaMids);
+  assert.ok(db.writes[1].data.columnCtaEnds);
+  assert.deepEqual(Object.keys(db.writes[1].data.byLanding), ['column:line-timing']);
+});
+
 test('countPremium: counted once per live subscription, under the member\'s first source', async () => {
   const db = mockDb(new Set(), { 'memberAttribution/u1': { source: 'x', landing: 'share_link', device: 'mobile_browser' } });
   assert.equal(await countPremium(db, { uid: 'u1', subscriptionId: 'sub_1', livemode: true }), true);

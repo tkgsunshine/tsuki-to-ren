@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo } from 'react';
-import { ArrowLeft, Clock, Calendar, Share2, BookOpen, ChevronRight, HelpCircle } from 'lucide-react';
-import { MoonMark } from './icons/BrandIcons';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Clock, Calendar, Share2, BookOpen, ChevronRight, HelpCircle, Heart } from 'lucide-react';
 import { COLUMNS_DATA } from '../data/columnsData';
+import type { ColumnArticle } from '../data/columnsData';
+import { trackColumnCta } from '../services/analytics';
 import { pickRelatedColumns } from '../utils/relatedColumns';
 import { columnAnswer, columnModified } from '../utils/columnAnswer';
 import { showAlert } from './AppDialog';
@@ -9,105 +10,243 @@ import { showAlert } from './AppDialog';
 interface ColumnDetailViewProps {
   slug: string;
   onBackToList: () => void;
-  onNavigateHome: () => void;
+  onNavigateHome: (prefill?: FortunePrefill) => void;
   onSelectArticle: (slug: string) => void;
 }
 
-interface ColumnCtaBoxProps {
-  onNavigateHome: () => void;
-  style?: React.CSSProperties;
-  headingTag?: 'h2' | 'h3';
+type FortunePrefill = { myBirth?: string; oppBirth?: string };
+
+const formatBirthDate = (val: string): string => {
+  const digits = val.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 4)}/${digits.slice(4)}`;
+  return `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
+};
+
+// 入力欄の値（YYYY/MM/DD）を、日付として正しいときだけ YYYY-MM-DD にする
+const toIsoBirth = (val: string): string | undefined => {
+  const m = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(val);
+  if (!m) return undefined;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const date = new Date(y, mo - 1, d);
+  if (y < 1900 || date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d || date > new Date()) return undefined;
+  return `${m[1]}-${m[2]}-${m[3]}`;
+};
+
+const savedMyBirth = (): string => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem('hasu_user_profile') || '{}');
+    return typeof parsed.birth === 'string' ? parsed.birth.replace(/-/g, '/') : '';
+  } catch {
+    return '';
+  }
+};
+
+const ctaBoxStyle: React.CSSProperties = {
+  padding: '1.4rem 1.25rem',
+  borderRadius: '20px',
+  textAlign: 'center',
+  background: 'linear-gradient(135deg, rgba(217, 164, 65, 0.15) 0%, rgba(159, 134, 192, 0.15) 100%)',
+  border: '1.5px solid rgba(217, 164, 65, 0.5)',
+  boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '0.75rem'
+};
+
+const ctaButtonStyle: React.CSSProperties = {
+  padding: '0.85rem 1.5rem',
+  fontSize: '0.92rem',
+  fontWeight: 'bold',
+  borderRadius: '9999px',
+  cursor: 'pointer',
+  marginTop: '0.2rem',
+  boxShadow: '0 8px 25px rgba(217, 164, 65, 0.4)'
+};
+
+const ctaNoteStyle: React.CSSProperties = { fontSize: '0.7rem', color: '#b8b0c6', margin: 0 };
+
+const birthInputStyle: React.CSSProperties = {
+  width: '100%',
+  boxSizing: 'border-box',
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.14)',
+  borderRadius: '10px',
+  padding: '0.6rem 0.5rem',
+  color: 'white',
+  outline: 'none',
+  fontSize: '16px', // 16px未満だと iOS Safari が入力時に画面を拡大する
+  textAlign: 'center'
+};
+
+const CTA_GETS: { icon: React.ReactNode; label: string }[] = [
+  { icon: <Heart size={12} />, label: '相性スコア' },
+  { icon: <BookOpen size={12} />, label: 'トリセツ' },
+  { icon: <Clock size={12} />, label: 'LINE吉時間' }
+];
+
+/** 記事の途中の案内：分かることを短く見せ、その場で二人の生年月日を入れて鑑定の入力画面へ */
+const ColumnMidCta: React.FC<{ onNavigateHome: (prefill?: FortunePrefill) => void }> = ({ onNavigateHome }) => {
+  const [myBirth, setMyBirth] = useState(savedMyBirth);
+  const [oppBirth, setOppBirth] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    trackColumnCta('mid');
+    onNavigateHome({ myBirth: toIsoBirth(myBirth), oppBirth: toIsoBirth(oppBirth) });
+  };
+
+  const field = (label: string, value: string, setValue: (v: string) => void, placeholder: string) => (
+    <label style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.3rem', textAlign: 'left' }}>
+      <span style={{ fontSize: '0.72rem', color: '#e8dfc9', fontWeight: 'bold' }}>{label}</span>
+      <input
+        type="text"
+        inputMode="numeric"
+        maxLength={10}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => setValue(formatBirthDate(e.target.value))}
+        style={birthInputStyle}
+      />
+    </label>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} className="glass-panel" style={{ ...ctaBoxStyle, margin: '2rem 0' }}>
+      <h3 className="font-serif gold-text" style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0, lineHeight: '1.45' }}>
+        あの人との相性、<br />無料で占ってみませんか？
+      </h3>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.3rem' }}>
+        {CTA_GETS.map((g) => (
+          <span
+            key={g.label}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.28rem 0.5rem', borderRadius: '9999px', background: 'rgba(242, 226, 179, 0.12)', border: '1px solid rgba(242, 226, 179, 0.35)', color: '#f2e2b3', fontSize: '0.68rem', whiteSpace: 'nowrap', fontWeight: 'bold' }}
+          >
+            {g.icon}{g.label}
+          </span>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: '0.6rem', width: '100%' }}>
+        {field('あなたの生年月日', myBirth, setMyBirth, '20010418')}
+        {field('お相手の生年月日', oppBirth, setOppBirth, '20000921')}
+      </div>
+      <button type="submit" className="consult-btn font-serif" style={ctaButtonStyle}>
+        相性を占う（無料） ➔
+      </button>
+      <p style={ctaNoteStyle}>数字8桁で入力。16タイプは次の画面で選べます</p>
+    </form>
+  );
+};
+
+interface EndCtaCopy {
+  char: 'tsuki' | 'ren';
+  heading: string;
+  message: string;
+  button: string;
 }
 
-const ColumnCtaBox: React.FC<ColumnCtaBoxProps> = ({ onNavigateHome, style, headingTag = 'h2' }) => {
-  const Heading = headingTag;
+const LINE_COPY: EndCtaCopy = {
+  char: 'ren',
+  heading: 'あの人に送るなら、今日は何時？',
+  message: '記事のコツは、相手によって効き方が変わる。二人の相性から、今日あの人に送るといい時間まで出せるよ。',
+  button: '二人のLINE吉時間を見る'
+};
+const SHICHU_COPY: EndCtaCopy = {
+  char: 'ren',
+  heading: '記事の星を、二人で出してみよう',
+  message: '読んだ内容が、自分とあの人にどう当てはまるか。二人の生年月日から、性格の傾向と相性をまとめて出せるよ。',
+  button: '二人の相性を見る'
+};
+
+// 記事の種類ごとの、記事のあとの案内（見出し・月か蓮の一言・ボタン）
+const END_CTA_COPY: Record<ColumnArticle['category'], EndCtaCopy> = {
+  '恋愛アプローチ・トリセツ': {
+    char: 'tsuki',
+    heading: 'あの人のトリセツ、見てみませんか？',
+    message: '記事のコツも、相手のタイプによって合う・合わないがあるの。二人の生年月日から、あの人の取扱説明書と相性を出してみるね。',
+    button: 'あの人のトリセツを見る'
+  },
+  '16タイプ・MBTI相性': {
+    char: 'ren',
+    heading: '16タイプに、生まれた日を重ねると',
+    message: '16タイプだけだと、同じタイプ同士はみんな同じ結果になる。生年月日も入れると、二人だけの相性が出せるよ。',
+    button: '二人だけの相性を見る'
+  },
+  'LINE攻略・アプローチ': LINE_COPY,
+  'LINE攻略・16タイプ': LINE_COPY,
+  'ツインレイ・運命の絆': {
+    char: 'tsuki',
+    heading: '二人のご縁、生まれた日から見てみませんか？',
+    message: '運命の相手かどうか、気になるよね。二人の生年月日から、ひかれ合うところと、すれ違いやすいところを一緒に見てみよう。',
+    button: '二人の相性を見る'
+  },
+  '復縁・引き寄せ': {
+    char: 'tsuki',
+    heading: 'いまの二人の流れを、一緒に見てみませんか？',
+    message: '焦らなくて大丈夫。二人の相性と、今日のあの人との流れを見てから、次の一歩を考えようね。',
+    button: 'いまの二人の相性を見る'
+  },
+  '四柱推命・特殊星': SHICHU_COPY,
+  '四柱推命入門': SHICHU_COPY,
+  '九星気学・バイオリズム': {
+    char: 'ren',
+    heading: '今日の二人の流れを見てみよう',
+    message: '運気には波がある。二人の相性に今日の流れを重ねて、動きやすい時間を出せるよ。',
+    button: '今日の二人の流れを見る'
+  },
+  '未来予測・結婚運': {
+    char: 'tsuki',
+    heading: '二人のこれから、のぞいてみませんか？',
+    message: '未来は決まっていないけれど、二人の相性を知っておくと、これからを話し合うときのヒントになるよ。',
+    button: '二人の相性を見る'
+  }
+};
+
+const DEFAULT_END_COPY: EndCtaCopy = {
+  char: 'tsuki',
+  heading: 'あの人との相性、見てみませんか？',
+  message: '二人の生年月日から、相性スコアとあの人のトリセツ、今日のLINEの吉時間を出してみるね。',
+  button: '二人の相性を見る'
+};
+
+const CHAR_STYLE = {
+  tsuki: { name: '月', img: '/assets/tsuki.webp', ring: 'rgba(214, 139, 164, 0.6)', bg: 'rgba(214, 139, 164, 0.08)', border: 'rgba(214, 139, 164, 0.3)', nameColor: '#e8b7c7' },
+  ren: { name: '蓮', img: '/assets/ren.webp', ring: 'rgba(58, 134, 171, 0.7)', bg: 'rgba(58, 134, 171, 0.1)', border: 'rgba(58, 134, 171, 0.4)', nameColor: '#8fc6e0' }
+};
+
+/** 記事のあとの案内：記事の種類に合わせて、月か蓮が一言そえる */
+const ColumnEndCta: React.FC<{ category: ColumnArticle['category']; onNavigateHome: () => void }> = ({ category, onNavigateHome }) => {
+  const copy = END_CTA_COPY[category] || DEFAULT_END_COPY;
+  const ch = CHAR_STYLE[copy.char];
   return (
-    <div
-      className="glass-panel"
-      style={{
-        padding: '1.5rem',
-        borderRadius: '20px',
-        textAlign: 'center',
-        background: 'linear-gradient(135deg, rgba(217, 164, 65, 0.15) 0%, rgba(159, 134, 192, 0.15) 100%)',
-        border: '1.5px solid rgba(217, 164, 65, 0.5)',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '0.75rem',
-        ...style
-      }}
-    >
-      <div
-        style={{
-          padding: '0.35rem 0.85rem',
-          borderRadius: '20px',
-          background: 'rgba(242, 226, 179, 0.2)',
-          border: '1px solid rgba(242, 226, 179, 0.5)',
-          color: '#f2e2b3',
-          fontSize: '0.72rem',
-          fontWeight: 'bold',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.35rem'
-        }}
-      >
-        <MoonMark size={14} />
-        <span>無料・約7,465万通り即時鑑定</span>
-      </div>
-      <Heading
-        className="font-serif gold-text"
-        style={{ fontSize: '1.15rem', fontWeight: 'bold', margin: 0, lineHeight: '1.4' }}
-      >
-        あなたとお相手の運命の相性を今すぐ確かめてみませんか？
-      </Heading>
+    <div className="glass-panel" style={ctaBoxStyle}>
+      <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0, lineHeight: '1.45' }}>
+        {copy.heading}
+      </h2>
       <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left', maxWidth: '500px' }}>
         <img
-          src="/assets/tsuki.webp"
-          alt="月"
+          src={ch.img}
+          alt={ch.name}
           loading="lazy"
-          style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '50%',
-            objectFit: 'cover',
-            objectPosition: '50% 12%',
-            border: '1.5px solid rgba(214, 139, 164, 0.6)',
-            flexShrink: 0
-          }}
+          style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 12%', border: `1.5px solid ${ch.ring}`, flexShrink: 0 }}
         />
         <div
-          style={{
-            flex: 1,
-            padding: '0.7rem 0.9rem',
-            background: 'rgba(214, 139, 164, 0.08)',
-            border: '1px solid rgba(214, 139, 164, 0.3)',
-            borderRadius: '4px 16px 16px 16px',
-            fontSize: '0.78rem',
-            color: '#f0ebf5',
-            lineHeight: '1.7'
-          }}
+          style={{ flex: 1, padding: '0.7rem 0.9rem', background: ch.bg, border: `1px solid ${ch.border}`, borderRadius: '4px 16px 16px 16px', fontSize: '0.82rem', color: '#f0ebf5', lineHeight: '1.7' }}
         >
-          <div style={{ fontSize: '0.68rem', color: '#e8b7c7', fontWeight: 'bold', marginBottom: '0.2rem' }}>月</div>
-          生年月日と16タイプを入れてくださいね。約7,465万通りの条件の掛け合わせから、二人の本格相性スコア・トリセツ（取扱説明書）・返信率MAXのLINE吉時間を、すぐにお届けします。
+          <div style={{ fontSize: '0.68rem', color: ch.nameColor, fontWeight: 'bold', marginBottom: '0.2rem' }}>{ch.name}</div>
+          {copy.message}
         </div>
       </div>
       <button
         type="button"
-        onClick={onNavigateHome}
+        onClick={() => { trackColumnCta('end'); onNavigateHome(); }}
         className="consult-btn font-serif"
-        style={{
-          padding: '0.85rem 1.75rem',
-          fontSize: '0.9rem',
-          fontWeight: 'bold',
-          borderRadius: '9999px',
-          cursor: 'pointer',
-          marginTop: '0.35rem',
-          boxShadow: '0 8px 25px rgba(217, 164, 65, 0.4)'
-        }}
+        style={ctaButtonStyle}
       >
-        今すぐ無料で相性を鑑定する ➔
+        {copy.button} ➔
       </button>
+      <p style={ctaNoteStyle}>無料で占えます</p>
     </div>
   );
 };
@@ -461,11 +600,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
                 wordBreak: 'break-word'
               }}
             />
-            <ColumnCtaBox
-              onNavigateHome={onNavigateHome}
-              headingTag="h3"
-              style={{ margin: '2rem 0' }}
-            />
+            <ColumnMidCta onNavigateHome={onNavigateHome} />
             <div
               className="article-body-content"
               dangerouslySetInnerHTML={{ __html: secondContentPart }}
@@ -518,7 +653,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
       </article>
 
       {/* High-Converting Bottom CTA Box */}
-      <ColumnCtaBox onNavigateHome={onNavigateHome} headingTag="h2" />
+      <ColumnEndCta category={article.category} onNavigateHome={() => onNavigateHome()} />
 
       {/* Related Articles Carousel / List */}
       {relatedArticles.length > 0 && (

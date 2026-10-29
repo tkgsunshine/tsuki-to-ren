@@ -169,6 +169,11 @@ export const trackToolStep = (type: 'tool_use' | 'tool_cta') => {
   void send({ type, ...current() });
 };
 
+/** A column's box that leads to the fortune was pressed: the one in the middle of the article (mid) or after it (end). */
+export const trackColumnCta = (position: 'mid' | 'end') => {
+  void send({ type: `column_cta_${position}`, ...current() });
+};
+
 /** Counts a newly created account once, with the source of its first visit. */
 export const trackSignupIfNew = async (user: User) => {
   const created = Date.parse(user.metadata.creationTime || '');
