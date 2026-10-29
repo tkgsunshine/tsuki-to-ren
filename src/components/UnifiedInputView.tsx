@@ -209,15 +209,15 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden', flexShrink: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden', flexShrink: 0 }}>
       
       {/* Character selection instruction */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', margin: '0.6rem 0 -0.25rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', margin: '0' }}>
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: '0.5rem',
-          padding: '0.4rem 1.1rem',
+          padding: '0.35rem 1.1rem',
           background: 'rgba(10, 13, 19, 0.85)',
           border: '1px solid rgba(226, 192, 116, 0.45)',
           borderRadius: '20px',
@@ -234,7 +234,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       </div>
 
       {/* 🔮 / 🌙 Side-by-side Character Visuals */}
-      <div className="top-characters-container" style={{ marginTop: '0.75rem' }}>
+      <div className="top-characters-container">
         {/* Tsuki Character */}
         <div
           className={`top-char-card ${selectedCharacter === 'tsuki' ? 'active-tsuki' : ''}`}
@@ -253,14 +253,12 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 選択中
               </div>
             )}
+            {/* 名前と説明は画像の下端に重ねて、縦幅を節約する */}
+            <div className="top-char-caption">
+              <span className={`top-char-name ${selectedCharacter === 'tsuki' ? 'tsuki-text' : 'text-gray-300'}`}>月</span>
+              <span className="top-char-desc">直感と優しさの象徴</span>
+            </div>
           </div>
-          <span className={`top-char-name ${selectedCharacter === 'tsuki' ? 'tsuki-text' : 'text-gray-300'}`}>月</span>
-          <div style={{ display: 'flex', alignItems: 'center', width: '80%', margin: '0.2rem 0 0.35rem', gap: '0.5rem', opacity: 0.6 }}>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, var(--color-tsuki), transparent)' }} />
-            <span style={{ fontSize: '0.65rem', color: 'var(--color-tsuki)' }}>✦</span>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, var(--color-tsuki), transparent)' }} />
-          </div>
-          <span className="top-char-desc">直感と優しさの象徴</span>
         </div>
 
         {/* Ren Character */}
@@ -280,14 +278,12 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 選択中
               </div>
             )}
+            {/* 名前と説明は画像の下端に重ねて、縦幅を節約する */}
+            <div className="top-char-caption">
+              <span className={`top-char-name ${selectedCharacter === 'ren' ? 'ren-text' : 'text-gray-300'}`}>蓮</span>
+              <span className="top-char-desc">理性と導きの象徴</span>
+            </div>
           </div>
-          <span className={`top-char-name ${selectedCharacter === 'ren' ? 'ren-text' : 'text-gray-300'}`}>蓮</span>
-          <div style={{ display: 'flex', alignItems: 'center', width: '80%', margin: '0.2rem 0 0.35rem', gap: '0.5rem', opacity: 0.6 }}>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, var(--color-ren), transparent)' }} />
-            <span style={{ fontSize: '0.65rem', color: 'var(--color-ren)' }}>✦</span>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, var(--color-ren), transparent)' }} />
-          </div>
-          <span className="top-char-desc">理性と導きの象徴</span>
         </div>
       </div>
 
@@ -316,23 +312,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
         )}
 
         {/* Your Info Section */}
-        <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.5rem', marginBottom: '0.25rem', fontWeight: 'bold' }}>
+        <div className="glass-panel" style={{ padding: '1rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.4rem', marginBottom: '-0.25rem', fontWeight: 'bold' }}>
             あなたの情報
           </h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>ニックネーム (任意)</label>
-            <input
-              type="text"
-              maxLength={8}
-              placeholder="あなた (最大8文字)"
-              value={myName}
-              onChange={(e) => setMyName(e.target.value.slice(0, 8))}
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
-            />
-          </div>
-
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
             <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
@@ -357,6 +341,18 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>ニックネーム (任意)</label>
+            <input
+              type="text"
+              maxLength={8}
+              placeholder="あなた (最大8文字)"
+              value={myName}
+              onChange={(e) => setMyName(e.target.value.slice(0, 8))}
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+            />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
@@ -683,7 +679,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       </form>
 
       {/* Differentiators & Rare Showcase */}
-      <div className="lp-features" style={{ width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+      <div className="lp-features" style={{ width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.1rem' }}>
         
 
 

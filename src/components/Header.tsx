@@ -9,7 +9,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
   return (
-    <header className="app-header" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', flexShrink: 0, padding: '2.6rem 0.75rem 0.75rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
+    <header className="app-header" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', flexShrink: 0, padding: '2.2rem 0.75rem 0.25rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
       {/* Top Auth Bar (Pinned Absolute Top-Right) */}
       {onOpenAuth && (
         <div style={{
@@ -63,8 +63,8 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
 
       {/* Main Brand Title - 100% Unobstructed Center */}
       <h1 className="header-title font-serif gold-text" style={{
-        fontSize: '2.5rem',
-        margin: '0.1rem 0 0 0',
+        fontSize: '2.2rem',
+        margin: '0',
         letterSpacing: '0.2em',
         fontWeight: 'bold',
         filter: 'drop-shadow(0 0 12px rgba(226, 192, 116, 0.45))',
@@ -75,13 +75,13 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
 
       {/* Subtitle Badge - High Impact */}
       <div style={{
-        margin: '0.65rem auto 0',
+        margin: '0.4rem auto 0',
         maxWidth: '100%',
         boxSizing: 'border-box',
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.4rem',
-        padding: '0.35rem 0.85rem',
+        padding: '0.3rem 0.85rem',
         background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.12) 0%, rgba(159, 134, 192, 0.12) 100%)',
         border: '1px solid rgba(226, 192, 116, 0.3)',
         borderRadius: '20px',
@@ -95,29 +95,28 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
 
       {/* Impact Catchphrase Box */}
       <div style={{
-        marginTop: '1rem',
-        padding: '1.1rem 1.1rem',
+        padding: '0.65rem 1rem',
         background: 'linear-gradient(135deg, rgba(17, 23, 33, 0.85) 0%, rgba(30, 20, 50, 0.85) 100%)',
         border: '1.5px solid rgba(226, 192, 116, 0.4)',
-        borderRadius: '18px',
+        borderRadius: '16px',
         width: '100%',
         maxWidth: '380px',
         boxSizing: 'border-box',
-        margin: '1rem auto 0',
+        margin: '0.6rem auto 0',
         fontSize: '0.88rem',
         color: '#f3efe6',
-        lineHeight: '1.7',
+        lineHeight: '1.55',
         textAlign: 'center',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(226, 192, 116, 0.08)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)'
       }}>
-        <div style={{ fontWeight: 'bold', color: '#ffffff', marginBottom: '0.35rem', fontSize: '0.86rem', letterSpacing: '0.01em', lineHeight: '1.5' }}>
+        <div style={{ fontWeight: 'bold', color: '#ffffff', marginBottom: '0.2rem', fontSize: '0.86rem', letterSpacing: '0.01em', lineHeight: '1.5' }}>
           東洋の<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>命式</span>と西洋の<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>心理統計</span>が導く<br />
           <span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>約7,465万通り</span>の運命マトリクス
         </div>
         <div style={{ color: '#d8d2c6', fontSize: '0.78rem', fontWeight: '500', letterSpacing: '-0.01em', wordBreak: 'break-word' }}>
-          二人の魂の相性・運気のバイオリズム・LINE攻略法を徹底鑑定します。
+          <span className="nobr">二人の魂の相性・運気のバイオリズム・</span><span className="nobr">LINE攻略法を徹底鑑定します。</span>
         </div>
       </div>
     </header>
