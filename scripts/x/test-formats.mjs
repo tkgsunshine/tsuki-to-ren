@@ -122,15 +122,14 @@ test('返信: 解説・続きなど（答え合わせ以外）は、親の投稿
   assert.equal(r.queue.find((x) => x.id === 'q-reply').status, 'scheduled');
 });
 
-test('アプリの予告: 返信の最後（署名の直前）に入る。守護獣の話題は守護獣の予告、MBTIの話題はMBTIの予告', async () => {
+test('アプリの予告: リリース済みなので、返信に予告の行は入れない（2026-10-30〜）', async () => {
   const { withTeaser, MBTI_TEASER, BEAST_TEASER, FORMAT_TEASER } = await import('./lib/teasers.mjs');
   const t = withTeaser('続きです\n9位 ISTJ\n-月-', MBTI_TEASER);
-  assert.equal(t, `続きです\n9位 ISTJ\n${MBTI_TEASER}\n-月-`);
-  assert.equal(withTeaser(t, MBTI_TEASER), t, '二重に入れない');
-  assert.equal(FORMAT_TEASER.gap_rank, MBTI_TEASER);
-  assert.equal(FORMAT_TEASER.mbti_love, MBTI_TEASER);
+  assert.equal(t, '続きです\n9位 ISTJ\n-月-');
+  assert.equal(BEAST_TEASER, '');
+  assert.deepEqual(FORMAT_TEASER, {});
   const r = buildBeastPairRanking('2026-10-07');
-  assert.ok(r.replyText2.includes(BEAST_TEASER) && r.replyText2.trimEnd().endsWith('-月-'));
+  assert.ok(!r.replyText2.includes('近日') && r.replyText2.trimEnd().endsWith('-月-'));
   for (const text of [t, r.replyText2]) assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), []);
 });
 
@@ -266,8 +265,8 @@ test('却下された型（選択式の問いかけ・保存型）は、型の�
     const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
     for (const f of Object.values(pickFormats(d))) assert.ok(!f.poll, `${d}: 選択式の問いかけは出さない`);
   }
-  const four = buildFacts(FORMATS.find((f) => f.id === 'mbti_habit'), { date: '2026-10-24' }).types;
-  assert.equal(new Set(four.map((t) => t.code)).size, 4);
+  const all = buildFacts(FORMATS.find((f) => f.id === 'mbti_habit'), { date: '2026-10-24' }).types;
+  assert.equal(new Set(all.map((t) => t.code)).size, 16, 'mbti_habit は16タイプ全員（2026-10-30〜）');
 });
 
 test('Xプレミアム: 毎日 mbti_love（昼）と long_deep（夜）が出る。長文は専用の上限で検査する', async () => {

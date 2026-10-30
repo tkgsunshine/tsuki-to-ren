@@ -191,7 +191,7 @@ export function buildPostText(c, dateStr, sign, postTime = '', variant = 0) {
   const air = pickVariant(BAND_AIR[bandOf(st.score)], `${dateStr}:${c.key}:air:${variant}`);
   const action = pickVariant(BAND_ACTION[bandOf(st.score)], `${dateStr}:${c.key}:action:${variant}`) + (ANIMAL_ACTION[c.animal] || '');
   const replyText = advice && flavor ? ['【月からのひとこと】', '', `${air}${flavor}`, sign].join('\n') : '';
-  const replyText2 = replyText ? ['【開運アクション】', '', action, BEAST_TEASER, sign].join('\n') : '';
+  const replyText2 = replyText ? ['【開運アクション】', '', action, sign].join('\n') : '';
   const facts = { name: c.name, theme: c.theme, animal: c.animal, animalYomi: c.animalYomi, star: st.name, score: st.score, band: bandOf(st.score), oneLine: st.oneLine, hours: st.hours, advice: st.advice?.tsuki || '', flavor: flavor || '' };
   return { text: postText, replyText, replyText2, star: st, facts };
 }

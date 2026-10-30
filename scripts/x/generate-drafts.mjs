@@ -134,6 +134,8 @@ function validate(posts) {
     if (f.poll) {
       if (!p.replyText) problems.push(`${slot}: 問いかけ型は replyText（答え合わせの返信）も書く`);
       else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}の返信: ${pr}`);
+    } else if (f.all16) {
+      for (const c of MBTI_TYPES.map((x) => x.code)) if ((String(p.text).match(new RegExp(`(^|[^A-Z])${c}(?![A-Z])`, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、1回だけ書かれていない（16タイプ全員を、1行ずつ、抜け・重複なし）`);
     } else if (f.rank16) {
       if (!p.replyText) problems.push(`${slot}: 続き（1位〜3位・12位〜16位）の replyText も書く`);
       else {
@@ -235,7 +237,7 @@ const BEAST_REPLY_SPEC = `守護獣の今日の恋愛運の投稿への、スレ
 4) 改行して、背中を押す一言（日本語15〜25文字）
 # 共通
 - 2通とも、見出しはこの表記のまま
-- 点数・順位の数字は書かない。署名・「近日…」の予告の行は書かない（あとで自動で付く）
+- 点数・順位の数字は書かない。署名・アプリの予告の行は書かない（署名はあとで自動で付く。アプリはリリース済みなので、予告は不要）
 - 専門用語・断定・保証・相手の気持ちの断定は書かない。「風」の比喩は使わない。守護獣の動物の比喩は、1通目だけで、1回まで
 - 文字数の上限（各通とも、日本語で見出しを含め約130字）を守る
 出力: {"replyText":"...","replyText2":"..."} のJSONのみ（改行は \\n）`;
@@ -261,7 +263,7 @@ async function writeBeastReply(parent, reply1, reply2, hist) {
       continue;
     }
     const full1 = `${b1}\n-月-`;
-    const full2 = `${b2}\n${BEAST_TEASER}\n-月-`;
+    const full2 = `${b2}\n-月-`;
     const problems = [
       ...lintPost({ slot: 'morning', kind: 'value', text: full1 }, [...hist, parent], { allowLinks }).map((x) => `1通目: ${x}`),
       ...lintPost({ slot: 'morning', kind: 'value', text: full2 }, [...hist, parent], { allowLinks }).map((x) => `2通目: ${x}`),
