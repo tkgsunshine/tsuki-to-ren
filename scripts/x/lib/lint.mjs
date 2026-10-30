@@ -50,7 +50,8 @@ export function lintPost(post, history = [], opts = {}) {
   if (!KINDS.includes(post.kind)) problems.push(`kindが不正: ${post.kind}`);
 
   const weight = weightedLength(text);
-  if (weight > MAX_WEIGHT) problems.push(`長すぎる（重み${weight}/${MAX_WEIGHT}）。日本語は約140字まで`);
+  const maxWeight = opts.maxWeight ?? post.maxWeight ?? MAX_WEIGHT; // 2026-10-24〜: Xプレミアム。長文の型だけ、型ごとの上限（formats.mjs の maxWeight）を使う
+  if (weight > maxWeight) problems.push(`長すぎる（重み${weight}/${maxWeight}）。日本語は約${Math.floor(maxWeight / 2)}字まで`);
 
   for (const w of JARGON) if (text.includes(w)) problems.push(`専門用語「${w}」は使わない`);
   for (const w of ABSOLUTE) if (text.includes(w)) problems.push(`断定・保証表現「${w}」は使わない`);
