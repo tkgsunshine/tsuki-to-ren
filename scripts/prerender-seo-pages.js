@@ -597,7 +597,7 @@ const homeSemanticHtml = `
         <a href="/tokushoho" style="color: #9ca3af; text-decoration: none;">特定商取引法に基づく表記</a>
         <a href="/company" style="color: #9ca3af; text-decoration: none;">運営会社</a>
       </nav>
-      <p style="margin: 0; font-size: 0.7rem; color: #64748b;">© 2026 月と蓮（Hasu to Tsuki） - Ill株式会社</p>
+      <p style="margin: 0; font-size: 0.7rem; color: #64748b;">© 2026 月と蓮（Tsuki to Ren） - Ill株式会社</p>
     </footer>
   </div>
 `;
