@@ -180,11 +180,12 @@ if (llmSlots.length) {
   for (let attempt = 1; attempt <= 3; attempt++) {
     const res = await client.messages.create({
       model,
-      max_tokens: 5000,
+      max_tokens: 12000, // 長文の型（long_deep。日本語400〜800字）が入るので、5000から増やした（2026-10-30）
       system,
       messages: [{ role: 'user', content: userBase + feedback }],
     });
     const text = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+    if (res.stop_reason !== 'end_turn') console.warn(`attempt ${attempt}: stop_reason=${res.stop_reason}`);
     let candidate;
     try {
       candidate = extractJson(text);
@@ -198,6 +199,7 @@ if (llmSlots.length) {
     } catch (e) {
       feedback = `\n\n# 前回の出力は不正でした: ${e.message}。JSON配列のみを出力してください。`;
       console.warn(`attempt ${attempt}: ${e.message}`);
+      console.warn(`出力の先頭: ${text.slice(0, 200).replace(/\n/g, ' ')} ／ 末尾: ${text.slice(-120).replace(/\n/g, ' ')}`);
       continue;
     }
     const problems = validate(candidate);
