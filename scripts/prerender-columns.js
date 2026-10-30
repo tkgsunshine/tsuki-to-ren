@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const BASE_URL = 'https://www.tsuki-to-ren.com';
 // OGP画像の絵柄を変えたら上げる（SNSに残った古い画像を使わせない）
-const OGP_DESIGN = 1;
+const OGP_DESIGN = 2;
 const distDir = path.resolve(__dirname, '../dist');
 const indexHtmlPath = path.join(distDir, 'index.html');
 const columnsFilePath = path.resolve(__dirname, '../src/data/columnsData.ts');

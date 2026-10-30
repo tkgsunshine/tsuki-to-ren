@@ -45,7 +45,7 @@ const iconUri = (name, color) =>
 export const TOPICS = [
   { key: 'twinray', label: 'ツインレイ', icon: 'orbs', re: /ツインレイ|ソウルメイト/, bg: ['mbti-01', 'mbti-04', 'fourpillars-02'] },
   { key: 'reunion', label: '復縁・失恋', icon: 'moon', re: /復縁|元恋人|元彼|元カノ|失恋|次の恋/, bg: ['daily-03', 'elements-04', 'calm-01'] },
-  { key: 'line', label: 'LINE・連絡', icon: 'chat', re: /LINE|ライン|返信|既読|未読|連絡|メッセージ|電話/, bg: ['mbti-02', 'love-03', 'calm-02', 'love-04'], phone: true },
+  { key: 'line', label: 'LINE・連絡', icon: 'chat', re: /LINE|ライン|返信|既読|未読|連絡|メッセージ|電話/, bg: ['mbti-02', 'love-03', 'calm-02', 'love-04'] },
   { key: 'mbti', label: '16タイプ相性', icon: 'people', re: /[EI][NS][TF][JP]|16タイプ|内向型|外向型/, bg: ['mbti-03', 'mbti-04', 'mbti-01'] },
   { key: 'fourpillars', label: '四柱推命', icon: 'star', re: /四柱推命|五行|十二支|十二運|天干|空亡|天中殺|大運|魁罡|特殊星|天乙貴人|紅艶|甲己|官星|10の星|合」/, bg: ['fourpillars-03', 'fourpillars-01', 'fourpillars-04'] },
   { key: 'kyusei', label: '九星気学', icon: 'star', re: /九星/, bg: ['fourpillars-02', 'daily-01'] },
@@ -106,44 +106,11 @@ export function splitTitle(title, { keepGeneric = false } = {}) {
 
 const el = (type, style, children, extra = {}) => ({ type, props: { style: { display: 'flex', ...style }, children, ...extra } });
 
-// LINE・連絡の記事に添える、スマホのやりとりの絵（文字は入れず、吹き出しの形だけ）
-function phone() {
-  const bubble = (side, w, color) =>
-    el('div', { width: '100%', justifyContent: side === 'r' ? 'flex-end' : 'flex-start', marginBottom: 16 }, [
-      el('div', { width: w, height: 40, borderRadius: 20, background: color, ...(side === 'r' ? { borderBottomRightRadius: 6 } : { borderBottomLeftRadius: 6 }) }, []),
-    ]);
-  return el(
-    'div',
-    {
-      position: 'absolute', right: 92, top: 70, width: 250, height: 440, borderRadius: 40, padding: '58px 22px 22px',
-      flexDirection: 'column', background: 'rgba(14,12,32,0.86)', border: '3px solid rgba(226,192,116,0.85)', boxShadow: '0 0 60px rgba(192,132,252,0.45)',
-    },
-    [
-      el('div', { position: 'absolute', top: 22, left: 95, width: 60, height: 10, borderRadius: 5, background: 'rgba(226,192,116,0.6)' }, []),
-      bubble('l', 150, 'rgba(255,255,255,0.88)'),
-      bubble('r', 120, 'rgba(226,192,116,0.95)'),
-      bubble('l', 170, 'rgba(255,255,255,0.88)'),
-      bubble('r', 96, 'rgba(226,192,116,0.95)'),
-      el('div', { width: '100%', justifyContent: 'flex-start', marginTop: 6 }, [
-        el('div', { width: 70, height: 36, borderRadius: 18, background: 'rgba(255,255,255,0.88)', alignItems: 'center', justifyContent: 'center', borderBottomLeftRadius: 6 }, [
-          el('div', { width: 8, height: 8, borderRadius: 4, background: '#6b5aa6', marginRight: 6 }, []),
-          el('div', { width: 8, height: 8, borderRadius: 4, background: '#6b5aa6', marginRight: 6 }, []),
-          el('div', { width: 8, height: 8, borderRadius: 4, background: '#6b5aa6' }, []),
-        ]),
-      ]),
-      el('div', { position: 'absolute', right: -26, top: -26, width: 64, height: 64, borderRadius: 32, background: '#c084fc', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(192,132,252,0.8)' }, [
-        { type: 'img', props: { src: iconUri('heart', '#ffffff'), width: 36, height: 36 } },
-      ]),
-    ],
-  );
-}
-
 /** 記事のOGP画像（PNG の Buffer） */
 export async function renderColumnOgp(article) {
   const topic = topicFor(article.title);
   const { head, sub } = splitTitle(article.title);
-  const withPhone = !!topic.phone;
-  const textW = withPhone ? 700 : 1000;
+  const textW = 1000;
   // 大見出しは2行に収まる大きさにする（小さくなりすぎるときだけ3行）。句読点の行頭禁止で行が増えないよう、1行あたり1字ぶん余らせる
   const fit = (lines) => Math.floor((textW * 0.92) / (Math.ceil(len(head) / lines) + 1));
   const headSize = Math.min(72, fit(2) >= 48 ? fit(2) : Math.min(52, fit(3)));
@@ -157,7 +124,6 @@ export async function renderColumnOgp(article) {
       // 文字を読みやすくするため、左側（文字の下）を暗くする
       el('div', { position: 'absolute', left: 0, top: 0, width: W, height: H, backgroundImage: 'linear-gradient(90deg, rgba(5,5,14,0.9) 0%, rgba(5,5,14,0.74) 50%, rgba(5,5,14,0.3) 100%)' }, []),
       el('div', { position: 'absolute', left: 24, top: 24, width: W - 48, height: H - 48, border: '1.5px solid rgba(226,192,116,0.45)', borderRadius: 22 }, []),
-      withPhone ? phone() : null,
       // 下の約90pxは、Xがタイトルを重ねて表示するので文字を置かない（api/og.js と同じ）
       el('div', { position: 'absolute', left: 72, top: 60, width: textW, height: H - 60 - 96, flexDirection: 'column', justifyContent: 'space-between' }, [
         el('div', { alignItems: 'center' }, [
