@@ -4800,19 +4800,20 @@
     "date": "2026-10-28",
     "slot": "evening",
     "kind": "value",
-    "text": "見た目は控えめ、恋愛はいちばん積極的な16タイプ（MBTI）\n\n4位 INFP 仲介者\n5位 ISTP 巨匠\n6位 INTJ 建築家\n7位 ISTJ 管理者\n8位 INTP 論理学者\n9位 ESFJ 領事官\n10位 ENFJ 主人公\n11位 ESTJ 幹部\n\n1位〜3位と12位〜16位は、リプ欄に。あなたは何位？\n-月-",
+    "text": "見た目は控えめ、恋愛はいちばん積極的な16タイプ（MBTI）\n\n3位 ISFJ 擁護者\n4位 INFP 仲介者\n5位 ISTP 巨匠\n6位 INTJ 建築家\n7位 ISTJ 管理者\n8位 INTP 論理学者\n9位 ESFJ 領事官\n10位 ENFJ 主人公\n11位 ESTJ 幹部\n12位 ENTJ 指揮官\n13位 ENFP 運動家\n14位 ENTP 討論者\n\n1位・2位と15位・16位は、リプ欄に。あなたは何位？\n-月-",
     "format": "gap_rank",
     "system": "mbti_love",
     "purpose": "buzz",
     "status": "scheduled",
-    "createdAt": "2026-10-26T18:39:09.267Z"
+    "createdAt": "2026-10-26T18:39:09.267Z",
+    "maxWeight": 700
   },
   {
     "id": "2026-10-28-evening-reply",
     "date": "2026-10-28",
     "slot": "evening",
     "kind": "value",
-    "text": "1位 INFJ 提唱者\n2位 ISFP 冒険家\n3位 ISFJ 擁護者\n\n12位 ENTJ 指揮官\n13位 ENFP 運動家\n14位 ENTP 討論者\n15位 ESTP 起業家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "text": "1位 INFJ 提唱者\n2位 ISFP 冒険家\n\n15位 ESTP 起業家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n-月-",
     "replyTo": "2026-10-28-evening",
     "format": "gap_rank_reply",
     "system": "mbti_love",
