@@ -10,6 +10,7 @@ import { PremiumUnlockButton } from './PremiumUnlockButton';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
+import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -339,7 +340,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   astrologyColor?: string;
 }
   const [zoomedImg, setZoomedImg] = useState<ZoomedImgData | null>(null);
-  const [explanation, setExplanation] = useState<{ title: string; reading: string; body: string } | null>(null);
+  const [explanation, setExplanation] = useState<{ title: string; reading: string; body: string; content?: React.ReactNode } | null>(null);
   
   // A2HS (Add to Home Screen) Floating Banner state & Scroll detection
   const [showA2hsModal, setShowA2hsModal] = useState(false);
@@ -517,6 +518,37 @@ export const ResultView: React.FC<ResultViewProps> = ({
       title: `本命星: ${baseStar}`,
       reading: `ほんめいせい：${reading}`,
       body
+    });
+  };
+
+  // 「五行 (陰陽)」の「？」: 五行と陰陽の意味を、木・火・土・金・水の色分けで説明する
+  const handleShowElementExplanation = (pillar: string, element: string) => {
+    if (!pillar || !element) return;
+    const [mine, yinYang] = element.split('・');
+    const body = `五行（ごぎょう）は、自然を「木・火・土・金・水」の5つに分けて、性格の傾向を見る考え方です。\n\nあなたの五行は、日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。${pillar}（${getKanjiReading(pillar)}）の「${pillar[0]}」は「${mine}」です。\n\n陰陽は、同じ五行の中での力の向きです。「陽」は外へ広がる力、「陰」は内にためる力を表します。あなたは「${yinYang === '陽' ? '陽：外へ広がる力' : '陰：内にためる力'}」です。`;
+    setExplanation({
+      title: `五行 (陰陽): ${element}`,
+      reading: 'ごぎょう（いんよう）',
+      body,
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left', margin: '-0.5rem 0 1.25rem' }}>
+          {ELEMENT_NOTES.map((n) => {
+            const isMine = n.element === mine;
+            return (
+              <div key={n.element} style={{ display: 'flex', gap: '0.55rem', alignItems: 'flex-start', padding: '0.45rem 0.55rem', borderRadius: '10px', background: isMine ? 'rgba(255,255,255,0.07)' : 'transparent', border: `1px solid ${isMine ? ELEMENT_COLORS[n.element] : 'rgba(255,255,255,0.06)'}` }}>
+                <span className="font-serif" style={{ flexShrink: 0, width: '1.9rem', height: '1.9rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem', color: '#0b111b', background: ELEMENT_COLORS[n.element] }}>{n.element}</span>
+                <span style={{ fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.55 }}>
+                  <strong style={{ color: ELEMENT_COLORS[n.element] }}>{n.element}（{n.reading}）</strong>
+                  <span style={{ color: '#a9a49a' }}>　{n.image}</span>
+                  {isMine && <span style={{ color: '#f2e2b3', fontWeight: 'bold' }}>　← あなた</span>}
+                  <br />{n.note}
+                </span>
+              </div>
+            );
+          })}
+          <a href="/tools/nicchu" style={{ fontSize: '0.72rem', color: '#e2c074', marginTop: '0.35rem' }}>日柱を、60通りの一覧でくわしく見る</a>
+        </div>
+      )
     });
   };
 
@@ -1381,8 +1413,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
                 <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3' }}>五行 (陰陽)</span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyElement || '火・陰'}</span>
+                  <button
+                    type="button"
+                    aria-label="五行（陰陽）の説明を見る"
+                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
+                  >
+                    五行 (陰陽)
+                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
+                  </button>
+                  {(() => {
+                    const [el, yy] = (activeResult.myAstrologyElement || '火・陰').split('・');
+                    return (
+                      <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#d5cfc3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                        <span style={{ color: ELEMENT_COLORS[el] || colors.primary }}>{el}</span>{yy ? `・${yy}` : ''}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>性格分類</span>
@@ -1654,8 +1701,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
                 <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3' }}>五行 (陰陽)</span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyElement || '火・陰'}</span>
+                  <button
+                    type="button"
+                    aria-label="五行（陰陽）の説明を見る"
+                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰'); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
+                  >
+                    五行 (陰陽)
+                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
+                  </button>
+                  {(() => {
+                    const [el, yy] = (activeResult.opponentAstrologyElement || '火・陰').split('・');
+                    return (
+                      <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#d5cfc3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                        <span style={{ color: ELEMENT_COLORS[el] || colors.primary }}>{el}</span>{yy ? `・${yy}` : ''}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>性格分類</span>
@@ -3363,7 +3425,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               borderRadius: '20px',
               padding: '1.5rem',
               textAlign: 'center',
-              animation: 'fadeIn 0.2s ease'
+              animation: 'fadeIn 0.2s ease',
+              maxHeight: '75dvh',
+              overflowY: 'auto'
             }} onClick={(e) => e.stopPropagation()}>
               <h3 className="font-serif gold-text" style={{ fontSize: '1.15rem', fontWeight: 'bold', margin: '0 0 0.35rem 0', letterSpacing: '0.05em' }}>
                 {explanation.title}
@@ -3374,6 +3438,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <p className="font-serif" style={{ fontSize: '0.75rem', color: '#d8d2c6', lineHeight: '1.6', margin: '0 0 1.25rem 0', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
                 {explanation.body}
               </p>
+              {explanation.content}
               <button
                 onClick={() => setExplanation(null)}
                 className="consult-btn"

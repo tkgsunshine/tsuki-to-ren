@@ -124,7 +124,8 @@ for (const article of columns) {
     'description': article.metaDescription,
     'image': articleImage,
     'datePublished': article.publishedAt,
-    'dateModified': article.updatedAt || article.publishedAt,
+    // 公開日より前の更新日は使わない（src/utils/columnAnswer.ts の columnModified と同じ）
+    'dateModified': article.updatedAt && Date.parse(article.updatedAt) > Date.parse(article.publishedAt) ? article.updatedAt : article.publishedAt,
     'abstract': article.answer || article.metaDescription,
     'mainEntityOfPage': {
       '@type': 'WebPage',

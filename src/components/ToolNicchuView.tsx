@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, ChevronRight, HelpCircle, Sparkles } from 'lucide-react';
 import { NICCHU, NICCHU_PILLARS, lookupNicchu, fortuneLinkFor } from '../utils/nicchuTool';
 import { trackToolStep } from '../services/analytics';
+import { ELEMENT_COLORS } from '../utils/elementColors';
 
 // 日柱ページ（/tools/nicchu）。生年月日から日柱・五行・一言の特徴・魁罡かどうかを、端末の中で計算して出す。
 // 文面は src/data/nicchu-tool.json。静的HTML（scripts/prerender-seo-pages.js）も同じ文面を出す。
@@ -12,8 +13,6 @@ const formatBirthDate = (val: string): string => {
   if (digits.length <= 6) return `${digits.slice(0, 4)}/${digits.slice(4)}`;
   return `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
 };
-
-const ELEMENT_COLORS: Record<string, string> = { 木: '#7dbb8a', 火: '#e88a6a', 土: '#d9b36a', 金: '#cfd6e0', 水: '#7fa8d9' };
 
 const KAIGOU = NICCHU_PILLARS.filter((p) => p.kaigou);
 
