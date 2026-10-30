@@ -396,15 +396,15 @@ export function calculateHonmeiStar(birthDate) {
 }
 // 四柱推命・九星気学ビジュアル設計データマッピング
 const stemThemes = {
-    '甲': { theme: '巨木の王、開拓者', element: '木・陽', color: '深緑・金', desc: '大剣、樹木、龍' },
-    '乙': { theme: '精霊使い、風花', element: '木・陰', color: '黄緑・白', desc: '蔦、花、風' },
+    '甲': { theme: '巨木の王', element: '木・陽', color: '深緑・金', desc: '大剣、樹木、龍' },
+    '乙': { theme: '精霊使い', element: '木・陰', color: '黄緑・白', desc: '蔦、花、風' },
     '丙': { theme: '太陽の英雄', element: '火・陽', color: '赤・金', desc: '炎剣、太陽' },
     '丁': { theme: '灯火の魔術師', element: '火・陰', color: '紫・橙', desc: 'ランプ、狐火' },
     '戊': { theme: '要塞の守護者', element: '土・陽', color: '黄土・黒', desc: '岩、盾、山' },
-    '己': { theme: '巫女、治癒者', element: '土・陰', color: '茶・生成', desc: '大地、陶器' },
+    '己': { theme: '巫女の治癒者', element: '土・陰', color: '茶・生成', desc: '大地、陶器' },
     '庚': { theme: '鋼鉄の戦神', element: '金・陽', color: '銀・白', desc: '刀、鎧、雷' },
     '辛': { theme: '宝石貴族', element: '金・陰', color: '白銀・紫', desc: '宝石、針、月' },
-    '壬': { theme: '海王、嵐使い', element: '水・陽', color: '紺・青', desc: '津波、龍、水槍' },
+    '壬': { theme: '海王の嵐使い', element: '水・陽', color: '紺・青', desc: '津波、龍、水槍' },
     '癸': { theme: '深海の術師', element: '水・陰', color: '蒼・水色', desc: '水球、霧、幻影' }
 };
 const branchPersonalities = {
