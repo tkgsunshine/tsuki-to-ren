@@ -53,7 +53,7 @@ test('守護獣の投稿: LINEのおすすめ時間と「解説はリプ欄へ�
     assert.ok(!r.text.includes('-月-') && !r.text.includes('-蓮-'), `${tag}: 本文に署名は置かない`);
     assert.ok(!r.text.includes('近日公開'), `${tag}: 本文に案内は置かない`);
     assert.ok(r.replyText.startsWith('【月からのひとこと】') && !/UNKNOWN/.test(r.replyText), `${tag}: ひとこと`);
-    assert.ok(r.replyText2.startsWith('【開運アクション】') && r.replyText2.includes(cta) && r.replyText2.endsWith(sign) && r.replyText.endsWith(sign), `${tag}: 2通目`);
+    assert.ok(r.replyText2.startsWith('【開運アクション】') && !r.replyText2.includes('近日') && r.replyText2.endsWith(sign) && r.replyText.endsWith(sign), `${tag}: 2通目`);
     assert.ok(r.facts.advice && r.facts.name === c.name, `${tag}: Claudeに渡す材料`);
     for (const t of [r.text, r.replyText, r.replyText2]) {
       assert.ok(weightedLength(t) <= 280, `${tag}: ${weightedLength(t)}`);
