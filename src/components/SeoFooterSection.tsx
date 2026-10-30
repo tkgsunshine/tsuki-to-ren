@@ -155,7 +155,7 @@ export const SeoFooterSection: React.FC = () => {
           paddingTop: '1.25rem'
         }}>
           <p style={{ margin: '0 0 0.35rem 0' }}>
-            © {new Date().getFullYear()} 月と蓮（Hasu to Tsuki） - 本格四柱推命・九星気学・16タイプ相性診断
+            © {new Date().getFullYear()} 月と蓮（Tsuki to Ren） - 本格四柱推命・九星気学・16タイプ相性診断
           </p>
           <p style={{ margin: 0, fontSize: '0.64rem', color: '#475569' }}>
             当サービスの鑑定ロジックは東洋占術および心理統計データに基づくエンターテインメント・アドバイスです。
