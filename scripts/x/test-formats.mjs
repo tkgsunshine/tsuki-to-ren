@@ -269,3 +269,22 @@ test('却下された型（選択式の問いかけ・保存型）は、型の�
   const four = buildFacts(FORMATS.find((f) => f.id === 'mbti_habit'), { date: '2026-10-24' }).types;
   assert.equal(new Set(four.map((t) => t.code)).size, 4);
 });
+
+test('Xプレミアム: 毎日 mbti_love（昼）と long_deep（夜）が出る。長文は専用の上限で検査する', async () => {
+  const { lintPost } = await import('./lib/lint.mjs');
+  for (let i = 0; i < 10; i++) {
+    const d = new Date(Date.UTC(2026, 9, 24 + i)).toISOString().slice(0, 10);
+    const day = pickFormats(d);
+    assert.equal(day.noon.id, 'mbti_love', d);
+    assert.equal(day.night.id, 'long_deep', d);
+    const a = buildFacts(day.noon, { date: d }).type.code, b = buildFacts(day.night, { date: d }).type.code;
+    assert.notEqual(a, b, `${d}: 同じ日に2本が同じタイプ`);
+  }
+  const types = new Set(Array.from({ length: 16 }, (_, i) => buildFacts(FORMATS.find((f) => f.id === 'mbti_love'), { date: new Date(Date.UTC(2026, 9, 24 + i)).toISOString().slice(0, 10) }).type.code));
+  assert.equal(types.size, 16, '16日で16タイプが一巡');
+  const long = FORMATS.find((f) => f.id === 'long_deep');
+  const base = { slot: 'night', kind: 'value', text: `${'あ'.repeat(600)}\n-月-` };
+  assert.ok(lintPost(base).length, '標準の上限（140字）を超える');
+  assert.deepEqual(lintPost(base, [], { maxWeight: long.maxWeight }), [], '長文の上限（1000字）に収まる');
+  assert.ok(lintPost({ ...base, text: 'あ'.repeat(1100) }, [], { maxWeight: long.maxWeight }).length, '長文の上限を超える');
+});
