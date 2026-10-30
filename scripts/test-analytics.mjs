@@ -88,6 +88,18 @@ test('track: a share is counted with its channel and device; premium cannot be s
   assert.equal(db.writes.length, 1);
 });
 
+test('track: the column boxes that lead to the fortune are counted by position (middle / after the article)', async () => {
+  const db = mockDb();
+  for (const type of ['column_cta_mid', 'column_cta_end']) {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type, source: 'google', landing: 'column:line-timing', device: 'mobile_browser' } }, res, { db });
+    assert.equal(res.code, 204);
+  }
+  assert.ok(db.writes[0].data.columnCtaMids);
+  assert.ok(db.writes[1].data.columnCtaEnds);
+  assert.deepEqual(Object.keys(db.writes[1].data.byLanding), ['column:line-timing']);
+});
+
 test('countPremium: counted once per live subscription, under the member\'s first source', async () => {
   const db = mockDb(new Set(), { 'memberAttribution/u1': { source: 'x', landing: 'share_link', device: 'mobile_browser' } });
   assert.equal(await countPremium(db, { uid: 'u1', subscriptionId: 'sub_1', livemode: true }), true);
@@ -196,4 +208,31 @@ test('admin: the owner\'s accounts are flagged (ADMIN_EMAILS with +aliases, and 
   assert.equal(res.code, 200);
   const owner = Object.fromEntries(res.body.users.map((u) => [u.uid, u.owner]));
   assert.deepEqual(owner, { a: 'auto', b: 'auto', c: 'marked', d: null });
+});
+
+test('admin ?days=1&offset=1 returns only yesterday (JST), for counts and chat', async () => {
+  const { jstDate } = await import('../api/_lib/analytics.js');
+  const today = jstDate();
+  const yesterday = jstDate(new Date(Date.now() - 86400 * 1000));
+  const auth = {
+    verifyIdToken: async () => ({ email: 'owner@example.com', email_verified: true }),
+    listUsers: async () => ({ users: [] }),
+  };
+  const snap = { docs: [today, yesterday].map((id) => ({ id, data: () => ({ date: id, visits: 1 }) })) };
+  const empty = { docs: [] };
+  let from;
+  const query = { get: async () => snap };
+  const db = { collection: (name) => ({
+    where: (_f, _op, v) => { from = v; return query; }, get: async () => empty,
+    orderBy: () => ({ limit: () => ({ get: async () => empty }) }),
+    doc: () => ({ get: async () => ({ data: () => undefined }) }),
+  }) };
+  const res = mockRes();
+  await admin({ method: 'GET', headers: { authorization: 'Bearer x' }, query: { days: '1', offset: '1' } }, res, { auth, db, adminEmails: 'owner@example.com' });
+  assert.equal(res.code, 200);
+  assert.equal(res.body.from, yesterday);
+  assert.equal(res.body.to, yesterday);
+  assert.equal(from, yesterday);
+  assert.deepEqual(res.body.daily.map((d) => d.date), [yesterday]);
+  assert.deepEqual(res.body.chat.map((d) => d.date), [yesterday]);
 });

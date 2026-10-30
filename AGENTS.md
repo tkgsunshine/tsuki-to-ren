@@ -1,4 +1,4 @@
-# 月と蓮（Hasu-to-Tsuki）開発ルール・レギュレーション集約定義書（AGENTS.md）
+# 月と蓮（Tsuki to Ren）開発ルール・レギュレーション集約定義書（AGENTS.md）
 
 本書は、本プロジェクト（『月と蓮』）に関わるすべてのAIエージェント（Antigravity, OpenAI Codex, Claude Code, Cursor, GitHub Copilot等）および開発者が遵守すべき共通ルール、安全性基準、コンテンツ制作レギュレーションを網羅・定義したものです。
 

@@ -55,7 +55,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 - 専門用語は出さない（比和・支合・相生・相剋・干合・三合・六沖・日干・十干・地支・通変星・蔵干・心理機能、および「干支」「五行」も使わない）。ブリーフの internal は参考情報で、本文に出さない
 - 恋愛以外（仕事・お金・健康）の話題は書かない。相手の気持ちや関係の結末を断定しない。浮気・不倫・復縁の強要など、人を傷つける行動をすすめない。性的な表現は使わない
 - 占いは傾向・ヒントとして書く。「必ず」「絶対」「確実に」「〜が決まる」などの断定・保証はしない。医療・健康・金銭の助言はしない
-- 日本語は約140字（X の重み付き280）以内。改行はOK。ハッシュタグは最大2個
+- 日本語は約140字（X の重み付き280）以内。改行はOK。ハッシュタグは最大2個。**ただし、型の指定に字数がある型（長文の型）は、その指定に従う（運営はXプレミアムなので、長文を投稿できる）**
 - 口調は、月（寄り添うタイプ。共感を先に置き、「〜だよ」「〜してね」とやさしく包む、温かなお姉さん）に統一する。**X もアプリも、すべて月が話している世界観**なので、投稿は常に月の一人称の語りかけ（「月だよ」のように名乗る必要はない）。蓮の声は使わない。末尾に、改行して「-月-」（半角ハイフンで挟む）を付ける
 - 「16タイプ」は、各投稿で最初に出すときだけ「16タイプ（MBTI）」と書いてよい（検索されやすくするため）。「MBTI診断」「公式MBTI」とは書かない（独自の診断のため）
 - 1行目は、読み手が自分ごとと感じる引きのある一文にする（例:「返事を待ちすぎている人へ」）。挨拶だけで始めない
@@ -120,7 +120,7 @@ function validate(posts) {
     }
     const f = planned[slot];
     const candidate = { ...p, slot, kind: f.kind || 'value' };
-    for (const pr of lintPost(candidate, history, { allowLinks })) problems.push(`${slot}: ${pr}`);
+    for (const pr of lintPost(candidate, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}: ${pr}`);
     if (!/-月-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」の署名を付ける（話し手は月だけ）`);
     if (f.card) {
       if (!p.card) problems.push(`${slot}: 画像つきの型は card（画像に載せる言葉）も書く`);
@@ -180,11 +180,12 @@ if (llmSlots.length) {
   for (let attempt = 1; attempt <= 3; attempt++) {
     const res = await client.messages.create({
       model,
-      max_tokens: 5000,
+      max_tokens: 12000, // 長文の型（long_deep。日本語400〜800字）が入るので、5000から増やした（2026-10-30）
       system,
       messages: [{ role: 'user', content: userBase + feedback }],
     });
     const text = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+    if (res.stop_reason !== 'end_turn') console.warn(`attempt ${attempt}: stop_reason=${res.stop_reason}`);
     let candidate;
     try {
       candidate = extractJson(text);
@@ -198,6 +199,7 @@ if (llmSlots.length) {
     } catch (e) {
       feedback = `\n\n# 前回の出力は不正でした: ${e.message}。JSON配列のみを出力してください。`;
       console.warn(`attempt ${attempt}: ${e.message}`);
+      console.warn(`出力の先頭: ${text.slice(0, 200).replace(/\n/g, ' ')} ／ 末尾: ${text.slice(-120).replace(/\n/g, ' ')}`);
       continue;
     }
     const problems = validate(candidate);
@@ -304,7 +306,7 @@ const buzzItem = (slot, time) => {
   const p = posts.find((x) => x.slot === slot);
   const item = {
     id: `${date}-${slot}`, date, slot, kind: f.kind || 'value', text: p.text.trim(),
-    format: f.id, system: f.system, purpose: f.purpose, // 反応の比較用（どの型が取れたか）
+    format: f.id, system: f.system, purpose: f.purpose, ...(f.maxWeight ? { maxWeight: f.maxWeight } : {}), // 反応の比較用（どの型が取れたか）
     status: 'scheduled', createdAt: new Date().toISOString(),
   };
   if (f.card && p.card) {

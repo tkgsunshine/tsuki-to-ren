@@ -8,7 +8,7 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 // broken down by source / landing page / device, and the member list.
 // The data comes from /api/admin, which only answers accounts listed in ADMIN_EMAILS (Vercel env).
 
-const METRIC_KEYS = ['visits', 'fortunes', 'signups', 'shares', 'premiumViews', 'checkouts', 'premiums', 'toolUses', 'toolCtas'] as const;
+const METRIC_KEYS = ['visits', 'fortunes', 'signups', 'shares', 'premiumViews', 'checkouts', 'premiums', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds'] as const;
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
 type FullCounts = Record<Metric, number>;
@@ -112,7 +112,7 @@ const jstDay = (iso: string | null) => (iso ? jst(iso).slice(0, 10) : '');
 const premiumLabel = (p: Member['premium']) => (p === 'live' ? '有料' : p === 'test' ? 'テスト' : '');
 const pct = (num: number, den: number) => (den ? `${((num / den) * 100).toFixed(1)}%` : '—');
 
-const zero = (): FullCounts => ({ visits: 0, fortunes: 0, signups: 0, shares: 0, premiumViews: 0, checkouts: 0, premiums: 0, toolUses: 0, toolCtas: 0 });
+const zero = (): FullCounts => ({ visits: 0, fortunes: 0, signups: 0, shares: 0, premiumViews: 0, checkouts: 0, premiums: 0, toolUses: 0, toolCtas: 0, columnCtaMids: 0, columnCtaEnds: 0 });
 const addCounts = (a: FullCounts, v: Counts) => {
   for (const m of METRIC_KEYS) a[m] += v[m] || 0;
   return a;
@@ -367,7 +367,7 @@ function DailyTable({ days }: { days: DayRow[] }) {
   const cols: [keyof DayRow, string][] = [
     ['visits', '訪問'], ['fortunes', '鑑定'], ['signups', '会員登録'], ['shares', '共有'],
     ['premiumViews', 'プレミアム案内'], ['checkouts', '支払い画面'], ['premiums', '課金'], ['aiCalls', 'AIチャット'],
-    ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'],
+    ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'], ['columnCtaMids', 'コラム途中→鑑定へ'], ['columnCtaEnds', 'コラム最後→鑑定へ'],
   ];
   return (
     <div style={c.card}>
@@ -417,9 +417,19 @@ function ShareTable({ rows, total }: { rows: [string, number][]; total: number }
   );
 }
 
+// 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる）
+const PERIODS = [
+  { label: '今日', days: 1, offset: 0 },
+  { label: '昨日', days: 1, offset: 1 },
+  { label: '7日', days: 7, offset: 0 },
+  { label: '30日', days: 30, offset: 0 },
+  { label: '90日', days: 90, offset: 0 },
+];
+
 export default function AdminView() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [days, setDays] = useState(30);
+  const [offset, setOffset] = useState(0); // 1 = the period ends yesterday（「昨日」）
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -442,7 +452,7 @@ export default function AdminView() {
     setLoading(true);
     setError('');
     user.getIdToken()
-      .then((token) => fetch(`/api/admin?days=${days}`, { headers: { Authorization: `Bearer ${token}` } }))
+      .then((token) => fetch(`/api/admin?days=${days}&offset=${offset}`, { headers: { Authorization: `Bearer ${token}` } }))
       .then(async (r) => {
         const body = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(body.message || `読み込みに失敗しました（${r.status}）`);
@@ -458,7 +468,7 @@ export default function AdminView() {
       .catch((e) => { if (!cancelled) { setData(null); setError(e.message); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user, days]);
+  }, [user, days, offset]);
 
   const daily = useMemo(() => {
     if (!data) return [];
@@ -512,7 +522,7 @@ export default function AdminView() {
       setError(e instanceof Error ? e.message : '更新に失敗しました');
     }
   };
-  const newMembers = useMemo(() => (data ? members.filter((m) => jstDay(m.createdAt) >= data.from).length : 0), [data, members]);
+  const newMembers = useMemo(() => (data ? members.filter((m) => (jstDay(m.createdAt) >= data.from && jstDay(m.createdAt) <= data.to)).length : 0), [data, members]);
   const mailOn = members.filter((m) => m.dailyMail).length;
   const paying = members.filter((m) => m.premium === 'live').length;
   const filtered = useMemo(() => {
@@ -560,8 +570,9 @@ export default function AdminView() {
       <div style={c.wrap}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <h1 style={{ fontSize: 18, fontWeight: 700, marginRight: 'auto' }}>月と蓮 管理画面</h1>
-          {[1, 7, 30, 90].map((n) => (
-            <button key={n} style={{ ...c.btn, ...(days === n ? c.btnOn : {}) }} onClick={() => setDays(n)}>{n === 1 ? '今日' : `${n}日`}</button>
+          {PERIODS.map((p) => (
+            <button key={p.label} style={{ ...c.btn, ...(days === p.days && offset === p.offset ? c.btnOn : {}) }}
+              onClick={() => { setDays(p.days); setOffset(p.offset); }}>{p.label}</button>
           ))}
           <button style={c.btn} onClick={() => { void logOutUser().then(() => setData(null)); }}>ログアウト</button>
         </div>
@@ -586,6 +597,7 @@ export default function AdminView() {
               <Tile label="会員登録（期間内）" value={newMembers} sub={`計測分 ${totals.signups} 件`} />
               <Tile label="共有" value={totals.shares} sub="X・LINE・リンク・画像" />
               <Tile label="ツール使用" value={totals.toolUses} sub={`鑑定へ進んだ ${totals.toolCtas} 回`} />
+              <Tile label="コラム→鑑定へ" value={totals.columnCtaMids + totals.columnCtaEnds} sub={`途中 ${totals.columnCtaMids} 回・最後 ${totals.columnCtaEnds} 回`} />
               <Tile label="課金（期間内）" value={totals.premiums} sub={`支払い画面へ ${totals.checkouts} 回`} />
               <Tile label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
               <Tile label="有料会員" value={paying} sub={`会員の ${pct(paying, members.length)}`} />
