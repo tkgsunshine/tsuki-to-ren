@@ -5201,5 +5201,120 @@
     "maxWeight": 2000,
     "status": "scheduled",
     "createdAt": "2026-10-30T05:09:36.643Z"
+  },
+  {
+    "id": "2026-11-01-chara-1",
+    "date": "2026-11-01",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮11月1日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：癸鳥（深海の術師×とり）\n【本命星】：三碧木星\n\n-結果-\n【今日の点数】：57点\n【今日の空気】無理せずエネルギーを蓄積し整える日\n【LINEのおすすめ時間】21:30〜23:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_bird_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:07.321Z"
+  },
+  {
+    "id": "2026-11-01-chara-1-reply",
+    "date": "2026-11-01",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【月からのひとこと】\n\n既読のまま止まったトーク、何度も開いて疲れてない？今日は鳥が羽を休めるみたいに、返事を考えるのをお休みしていいよ。\n既読のままの夜は、答えを待つ夜じゃなくて、心を休める夜。\n-月-",
+    "replyTo": "2026-11-01-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:07.321Z"
+  },
+  {
+    "id": "2026-11-01-chara-1-reply2",
+    "date": "2026-11-01",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n21時半から23時のあいだに、スマホを別の部屋に置いて、ぬるめのお風呂に15分つかってね。\n通知を見ない時間が、すり減った心をそっと戻してくれるから。\n今日は、早めに寝たあなたの勝ちだよ。\n-月-",
+    "replyTo": "2026-11-01-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:07.321Z"
+  },
+  {
+    "id": "2026-11-01-am",
+    "date": "2026-11-01",
+    "slot": "am",
+    "kind": "value",
+    "text": "「告白、いつ言えばいいの？」って、ずっと迷ってない？\nそれだけ本気ってことだよ。\n・「この日が正解」はないの\n・見るのは、二人の距離感\n・避けたい場面と、返事を待つ心構え\n-月-\n▼成功しやすいサインと、LINEで伝える文例\nhttps://www.tsuki-to-ren.com/column/confession-timing-line-message-guide?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "confession-timing-line-message-guide",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:28.948Z"
+  },
+  {
+    "id": "2026-11-01-noon",
+    "date": "2026-11-01",
+    "slot": "noon",
+    "kind": "value",
+    "text": "【ENTJの恋愛】\n好きになると：次に会う日を、自分からすぐ決めたくなる\n愛情表現：相手の夢や悩みに、本気で作戦を一緒に考える\n惹かれる人：自分の考えを持っていて、意見をはっきり言える人\nつまずき：気持ちより正しさが先に出て、言い方がきつくなる\nLINEのクセ：用件だけの短文。でも返信はかなり早め\nコツ：解決策の前に「それはしんどかったね」を一言添えて\nあなたのまわりのENTJは、当てはまる？\n-月-",
+    "format": "mbti_love",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "maxWeight": 600,
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:28.948Z"
+  },
+  {
+    "id": "2026-11-01-noon-reply",
+    "date": "2026-11-01",
+    "slot": "noon",
+    "kind": "value",
+    "text": "【ENTJの恋愛】詳細\n好きな人に相談されると、つい「こうしたらいい」と答えを出しがち。助けたい一心なのに、冷たく見えちゃうこともあるんだよね。人それぞれだけど、まず最後まで聞くだけで、気持ちは十分伝わるよ。\n恋は、正解を出すことじゃなくて、隣で聞くこと。\n-月-",
+    "replyTo": "2026-11-01-noon",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:28.949Z"
+  },
+  {
+    "id": "2026-11-01-pm",
+    "date": "2026-11-01",
+    "slot": "pm",
+    "kind": "value",
+    "text": "欠けていく月も、光をなくしたわけじゃない。\n今日は欠けはじめの月。\n握りしめていた「早く答えがほしい」を、少しゆるめるころかもしれない。\n空いた手のひらは、次の光が入る場所のようなもの。\n今夜は、深呼吸ひとつ分だけ手放してみてね。\n-月-",
+    "format": "maxim_spirit",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:28.949Z"
+  },
+  {
+    "id": "2026-11-01-evening",
+    "date": "2026-11-01",
+    "slot": "evening",
+    "kind": "value",
+    "text": "がんばりすぎた夜に、そっと思い出してね。\n保存しておくと、ちょっと息がしやすくなるよ。\n#恋愛 #片思い\n-月-",
+    "format": "card_voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:28.949Z",
+    "card": {
+      "text": "好きな気持ちを、|[ひとりで]抱えた日は|休んでいいんだよ。",
+      "who": "月",
+      "style": "portrait",
+      "expression": "normal"
+    },
+    "image": "data/x/cards/2026-11-01-evening.png"
+  },
+  {
+    "id": "2026-11-01-night",
+    "date": "2026-11-01",
+    "slot": "night",
+    "kind": "value",
+    "text": "ESTJは、好きな人と会う前の夜、たいてい頭の中で一度リハーサルを済ませている。\n待ち合わせの時間、お店までの道、雨だったときの別ルートまで。\n\n「土曜、楽しみにしてるね」とLINEが来る。\n既読をつけた瞬間、返事より先に浮かぶのは、当日の流れなんだよ。\nお店の予約は取れてるか。帰りの電車は何時が最後か。\n\n数分後。\n送れたのは「了解。11時に駅で」の一行。\nほんとは胸が弾んでいるのに、画面の上では連絡事項みたいに見えちゃう。\n\n夜。\n布団の中で、地図をもう一度ひらいて、駅からの道を確かめる。\n相手が歩き疲れないように、休めるカフェを一軒、候補に足しておく。\n当日うまく回らなかったら、楽しませられなかった自分を、ひとりで責めることが多いよ。\n\n段取りにこだわるのは、きっちりしたいからじゃなくて、\n相手の一日を、まるごと守りたいと思っているから。\n計画は、あなたなりの「大事にしたい」の形なんだよ。\n\nでもね、全部をひとりで背負うと、いちばん大事な二人の時間を味わう余裕がなくなっちゃう。\n予定がずれた日は、「まあいっか、ここも楽しいね」って、肩の力を抜いてみてね。\n\n完璧じゃない日も大丈夫。\nあなたが隣で笑っていることが、相手にとっていちばんの段取りだよ。\n\n-月-",
+    "format": "long_deep",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "maxWeight": 2000,
+    "status": "scheduled",
+    "createdAt": "2026-10-30T17:58:28.949Z"
   }
 ]
