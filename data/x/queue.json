@@ -5004,18 +5004,6 @@
     "createdAt": "2026-10-28T18:19:16.032Z"
   },
   {
-    "id": "2026-10-30-noon",
-    "date": "2026-10-30",
-    "slot": "noon",
-    "kind": "value",
-    "text": "長文を送っちゃうのは、重いからじゃなくて誤解が怖いから。\n3行で済む話に、言い訳を2つも足してない？\n送ったあと読み返して、スクロールの長さに焦ったり。\n短いと冷たく見えるかもって、先回りで隙間を埋めてることが多いの。\nそれ、伝えたい気持ちが強いだけだよ。\n-月-",
-    "format": "flip",
-    "system": "psychology",
-    "purpose": "follow",
-    "status": "scheduled",
-    "createdAt": "2026-10-28T18:19:16.032Z"
-  },
-  {
     "id": "2026-10-30-pm",
     "date": "2026-10-30",
     "slot": "pm",
@@ -5061,18 +5049,6 @@
     "replyTo": "2026-10-30-evening-reply",
     "format": "beast_pair_rank_reply2",
     "system": "pair",
-    "purpose": "buzz",
-    "status": "scheduled",
-    "createdAt": "2026-10-28T18:19:16.032Z"
-  },
-  {
-    "id": "2026-10-30-night",
-    "date": "2026-10-30",
-    "slot": "night",
-    "kind": "value",
-    "text": "好きな人のストーリー、3回見たのに、スタンプひとつ押せずに閉じた人へ。\n押したら気づかれる。押さなきゃ何も始まらない。\nその間で、親指が画面の上をうろうろしてたよね。\nそれだけ、相手のことを大事に思ってるってことだよ。\n-月-",
-    "format": "voice",
-    "system": "psychology",
     "purpose": "buzz",
     "status": "scheduled",
     "createdAt": "2026-10-28T18:19:16.032Z"
