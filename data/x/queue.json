@@ -5091,5 +5091,113 @@
     "maxWeight": 2000,
     "status": "scheduled",
     "createdAt": "2026-10-30T05:02:31.663Z"
+  },
+  {
+    "id": "2026-10-31-chara-1",
+    "date": "2026-10-31",
+    "slot": "morning",
+    "kind": "value",
+    "text": "❤️🔮10月31日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：癸猪（深海の術師×いのしし）\n【本命星】：四緑木星\n\n-結果-\n【今日の点数】：100点\n【今日の空気】魅力と自信が溢れる最高日\n【LINEのおすすめ時間】20:00〜22:00\n\n（解説はリプ欄へ）",
+    "image": "public/assets/astrology_boar_sample.jpg",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:15.997Z"
+  },
+  {
+    "id": "2026-10-31-chara-1-reply",
+    "date": "2026-10-31",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【月からのひとこと】\n\nずっと胸の奥にしまってた「会いたい」、今日は外に出していい日。猪みたいにまっすぐ、お気に入りの服で出かけてみて。\nご縁は、待つ部屋じゃなくて、あなたが笑える場所で育つ。\n-月-",
+    "replyTo": "2026-10-31-chara-1",
+    "format": "beast_daily_reply",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:15.997Z"
+  },
+  {
+    "id": "2026-10-31-chara-1-reply2",
+    "date": "2026-10-31",
+    "slot": "morning",
+    "kind": "value",
+    "text": "【開運アクション】\n\n20時〜22時に、気になる人へ「元気？さっきふと思い出したよ」と一通だけ送ってみて。\n用事のない一言って、受け取る側も気が楽なんだよ。\n今日は、送信ボタンを迷わず押していい日。\n近日、あなたの守護獣を鑑定するアプリを公開します\n-月-",
+    "replyTo": "2026-10-31-chara-1-reply",
+    "format": "beast_daily_reply2",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:15.997Z"
+  },
+  {
+    "id": "2026-10-31-am",
+    "date": "2026-10-31",
+    "slot": "am",
+    "kind": "value",
+    "text": "誘いたいのに、送信ボタンの前で指が止まっちゃう人へ。\n断られるのが怖いの、すごくわかるよ。\n・日時は具体的に、答えやすく\n・あえて断りやすい一言を添える\n・16タイプ（MBTI）別の文例つき\n-月-\n▼断られにくい誘い方とタイプ別の例\nhttps://www.tsuki-to-ren.com/column/line-date-invitation-examples-by-type?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "line-date-invitation-examples-by-type",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:36.643Z"
+  },
+  {
+    "id": "2026-10-31-noon",
+    "date": "2026-10-31",
+    "slot": "noon",
+    "kind": "value",
+    "text": "【INTPの恋愛】\n好きになると：相手の一言の意味を、夜までずっと考えてしまう\n愛情表現：好きな話題を、その人にだけ長く熱く語りだす\n惹かれる人：「なんで？」に、面倒がらず付き合ってくれる人\nつまずき：気持ちを分析しすぎて、伝えるタイミングを逃す\nLINEのクセ：雑談は短いのに、質問にはつい長文で返す\nコツ：答えが出る前の「気になってる」を、そのまま伝えてみて\nあなたのまわりのINTPは、当てはまる？\n-月-",
+    "format": "mbti_love",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "maxWeight": 600,
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:36.643Z"
+  },
+  {
+    "id": "2026-10-31-noon-reply",
+    "date": "2026-10-31",
+    "slot": "noon",
+    "kind": "value",
+    "text": "【INTPの恋愛】詳細\n好きな人の何気ない一言を、なぜそう言ったのか一晩じゅう考えがち。なのに会うと「別に」って顔をしちゃうことも。答えはいらないよ。「その話、もっと聞きたい」で十分。\n恋は、解く問題じゃなくて、一緒に考えるもの。\n近日、MBTI・四柱推命・九星気学の本格恋愛占いアプリを公開します\n-月-",
+    "replyTo": "2026-10-31-noon",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:36.643Z"
+  },
+  {
+    "id": "2026-10-31-pm",
+    "date": "2026-10-31",
+    "slot": "pm",
+    "kind": "value",
+    "text": "待った時間は、好きの証拠にならない。\n返信を待って、通知を何度も見返した夜。\nそのぶん想いが伝わる気がするけど、積もるのは疲れのほう。\nスマホを裏返して、お風呂に入っていい。\n待たない時間も、ちゃんと恋の一部だよ。\n-月-",
+    "format": "maxim",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:36.643Z"
+  },
+  {
+    "id": "2026-10-31-evening",
+    "date": "2026-10-31",
+    "slot": "evening",
+    "kind": "value",
+    "text": "「宙ぶらりんの今度」って、あると思う。\n「今度ごはん行こう」から、もう2週間。\n楽しみなのに、日にちだけが決まらない。\n聞いたら催促みたいで、重い気がしちゃうんだよね。\n相手も、きっかけを待ってるだけかも。\n「来週の土曜どう？」の一行で、今度が予定に変わるよ。\n-月-",
+    "format": "coined_feeling",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:36.643Z"
+  },
+  {
+    "id": "2026-10-31-night",
+    "date": "2026-10-31",
+    "slot": "night",
+    "kind": "value",
+    "text": "ISTPは、好きな人が落ちこんでいるとき、たいてい多くを語らない。\n代わりに、自分に何ができるかを黙って考えているんだよ。\n\n「今日ちょっとしんどい」とLINEが来る。\n既読をつけた瞬間、頭の中ではもう動き出している。\n励ましの言葉を並べるより、何に困っているのかを知りたいの。\n\n数分後。\n送れたのは「どうした？」の一言だけ。\nほんとは心配でたまらないのに、画面の上では素っ気なく見えちゃう。\n\n夜。\n話を聞きながら、相手が欲しいのは答えなのか、ただ聞いてほしいだけなのか、静かに見極めている。\n次に会う日、前に「切れかけ」って言ってた充電ケーブルを、さりげなく渡したりする。\n理由を聞かれても、「たまたま」としか言わないことが多いよ。\n\n気持ちを言葉にしないのは、興味がないからじゃなくて、\n口より手のほうが、正直に気持ちを運べると思っているから。\n形にできることを、ちゃんと差し出したいの。\n\nでもね、黙って全部を抱えこむと、あなたが先に疲れちゃう。\nときどき「心配してた」の一言を、そっと足してみてね。\n\n不器用なままで大丈夫。\nあなたの「好き」は、ちゃんと手のひらから伝わっているよ。\n\n-月-",
+    "format": "long_deep",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "maxWeight": 2000,
+    "status": "scheduled",
+    "createdAt": "2026-10-30T05:09:36.643Z"
   }
 ]
