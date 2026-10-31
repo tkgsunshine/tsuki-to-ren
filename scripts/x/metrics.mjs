@@ -36,6 +36,9 @@ export const normText = (t) =>
     .replace(/\r\n/g, '\n').split('\n').map((l) => l.trimEnd()).join('\n').trim();
 
 /** 手動投稿モード: 自分のタイムラインの投稿を、キューの未投稿の項目と本文で照合し、投稿済み（manual）にする。照合できた件数を返す */
+/** 照合のゆるいキー: 署名の行（-月-・-蓮-）と、空白・改行の違いを無視する（運営が署名を消して投稿しても、同じ投稿として照合する。2026-10-31） */
+export const looseKey = (t) => normText(t).replace(/\n?\s*[-ー−―]\s*[月蓮]\s*[-ー−―]\s*$/, '').replace(/\s+/g, '');
+
 export function reconcileTimeline(queue, tweets) {
   const byText = new Map();
   for (const t of [...tweets].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))) {
@@ -47,7 +50,12 @@ export function reconcileTimeline(queue, tweets) {
   let n = 0;
   for (const p of queue) {
     if (!['scheduled', 'expired', 'failed'].includes(p.status) || p.tweetId) continue;
-    const t = (byText.get(normText(p.text)) || []).find((x) => !taken.has(x.id));
+    let t = (byText.get(normText(p.text)) || []).find((x) => !taken.has(x.id));
+    if (!t) {
+      // 署名・空白の違いを無視して、もう一度（本文が十分に長いときだけ。先頭40文字が同じで、全体も同じ）
+      const k = looseKey(p.text);
+      if (k.length >= 20) t = tweets.find((x) => !taken.has(x.id) && looseKey(x.text) === k);
+    }
     if (!t) continue;
     taken.add(t.id);
     p.status = 'posted';

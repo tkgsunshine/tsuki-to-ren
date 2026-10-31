@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
-import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog, toPrivateMetrics } from './metrics.mjs';
+import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog, toPrivateMetrics, looseKey } from './metrics.mjs';
 
 const now = new Date('2026-10-10T00:00:00Z');
 const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
@@ -181,4 +181,15 @@ test('non_public_metrics: プロフィールへのクリックとリンクのク
   assert.match(r, /固定ポスト（9）: 表示 211/);
   const none = buildReport([], [], new Date(), { privateError: 'Forbidden' });
   assert.match(none, /取得できませんでした: Forbidden/);
+});
+
+test('照合: 運営が署名（-月-）を消して投稿しても、同じ投稿として照合する', () => {
+  const q = [{ id: 'a', status: 'scheduled', text: '見た目は控え、恋愛は積極的な16タイプ\n\n3位 ISFJ 擁護者\n4位 INFP 仲介者\n\n1位・2位は、リプ欄に。あなたは何位？\n-月-' }];
+  const tw = [{ id: '100', created_at: '2026-10-30T09:15:00Z', text: '見た目は控え、恋愛は積極的な16タイプ\n\n3位 ISFJ 擁護者\n4位 INFP 仲介者\n\n1位・2位は、リプ欄に。あなたは何位？' }];
+  assert.equal(reconcileTimeline(q, tw), 1);
+  assert.equal(q[0].status, 'posted');
+  assert.equal(q[0].tweetId, '100');
+  assert.equal(looseKey('あ\n-月-'), looseKey('あ'));
+  const q2 = [{ id: 'b', status: 'scheduled', text: 'ぜんぜん別の本文です。ぜんぜん別の本文です。\n-月-' }];
+  assert.equal(reconcileTimeline(q2, tw), 0);
 });
