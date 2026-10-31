@@ -132,7 +132,7 @@ test('アプリの予告: リリース済みなので、返信に予告の行は
   assert.ok(!r.replyText2.includes('近日') && r.replyText2.trimEnd().endsWith('-月-'));
   assert.ok(r.replyText2.includes('utm_source=x'), 'ランキングの返信には、サイトのリンクが入る（2026-10-31〜）');
   assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text: t }, [], OPTS), []);
-  assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text: r.replyText2 }, [], { ...OPTS, siteUrl: true }), []);
+  assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text: r.replyText2 }, [], { ...OPTS, siteUrl: true, maxWeight: 400 }), []);
 });
 
 test('守護獣の相性ランキング: 主役を1つ選び、本文は4位から、返信1は1〜3位（メダル＋一言）、返信2はワースト。点数は、アプリの鑑定ロジック（0〜100点）', () => {
@@ -169,8 +169,8 @@ test('守護獣の相性ランキング: 本文と返信が自動チェックを
     anchors.add(r.anchor);
     seen.add(r.text);
     for (const text of [r.text, r.replyText, r.replyText2]) {
-      assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], { ...OPTS, siteUrl: text === r.replyText2 }), [], `${d}`);
-      assert.ok(weightedLength(text) <= 280, `${d} ${weightedLength(text)}`);
+      assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], { ...OPTS, siteUrl: text === r.replyText2, maxWeight: 400 }), [], `${d}`);
+      assert.ok(weightedLength(text) <= 400, `${d} ${weightedLength(text)}`);
       assert.ok(!text.includes('％') && !text.includes('%'));
     }
   }

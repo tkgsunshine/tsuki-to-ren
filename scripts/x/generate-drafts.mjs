@@ -8,7 +8,7 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
-import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, withLink } from './lib/teasers.mjs';
+import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, GAP_CTA, withLink, withProfileCta } from './lib/teasers.mjs';
 import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
@@ -123,6 +123,7 @@ function validate(posts) {
     }
     const f = planned[slot];
     const candidate = { ...p, slot, kind: f.kind || 'value' };
+    if (f.id === 'gap_rank') candidate.text = withProfileCta(String(p.text || '').trim(), GAP_CTA); // 本文にも、プロフィールへ誘う一言が自動で入る（2026-10-31〜）
     for (const pr of lintPost(candidate, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}: ${pr}`);
     if (!/-月-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」の署名を付ける（話し手は月だけ）`);
     if (f.card) {
@@ -162,9 +163,9 @@ function validate(posts) {
 const detPosts = detSlots.map((slot) => {
   const f = planned[slot];
   const out = f.build(date);
-  const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
-  if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks }).map((x) => `返信: ${x}`));
-  if (out.replyText2) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText2 }, history, { allowLinks, siteUrl: true }).map((x) => `返信2: ${x}`));
+  const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks, maxWeight: f.maxWeight });
+  if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks, maxWeight: f.maxWeight }).map((x) => `返信: ${x}`));
+  if (out.replyText2) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText2 }, history, { allowLinks, siteUrl: true, maxWeight: f.maxWeight }).map((x) => `返信2: ${x}`));
   if (problems.length) {
     console.error(`${slot}（${f.id}）の本文がチェック不合格:\n - ${problems.join('\n - ')}`);
     process.exit(1);
@@ -312,7 +313,7 @@ const buzzItem = (slot, time) => {
   const f = planned[slot];
   const p = posts.find((x) => x.slot === slot);
   const item = {
-    id: `${date}-${slot}`, date, slot, kind: f.kind || 'value', text: p.text.trim(),
+    id: `${date}-${slot}`, date, slot, kind: f.kind || 'value', text: f.id === 'gap_rank' ? withProfileCta(p.text.trim(), GAP_CTA) : p.text.trim(),
     format: f.id, system: f.system, purpose: f.purpose, ...(f.maxWeight ? { maxWeight: f.maxWeight } : {}), // 反応の比較用（どの型が取れたか）
     status: 'scheduled', createdAt: new Date().toISOString(),
   };

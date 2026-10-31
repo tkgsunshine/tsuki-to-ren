@@ -5,7 +5,7 @@ import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getPillarPair
 import { STEM_YOMI, ANIMAL_YOMI } from './characters.mjs';
 import { weightedLength } from './lint.mjs';
 import { dayPillar, MBTI_TYPES as MBTI_OBJS } from './signals.mjs';
-import { BEAST_TEASER, BEAST_LINK } from './teasers.mjs';
+import { BEAST_TEASER, BEAST_LINK, BEAST_CTA } from './teasers.mjs';
 
 const MBTI_TYPES = MBTI_OBJS.map((t) => t.code);
 
@@ -94,11 +94,11 @@ export function buildBeastPairRanking(date) {
     .map((b) => ({ name: b.name, score: getPillarPairScore(anchor.stem, anchor.branch, b.stem, b.branch) }));
   const desc = [...others].sort((x, y) => y.score - x.score || x.name.localeCompare(y.name, 'ja'));
   const ranked = withRanks(desc);
-  const fits = (text) => weightedLength(text) <= 280;
+  const fits = (text) => weightedLength(text) <= 400; // Xプレミアム（2026-10-31）: プロフィールへの一言・リンクが入るので、280から400に
   // 本文: 4位から（点数だけの1行ずつ。280に収まる件数。最大8）。1〜3位は、リプ欄に出す（2026-10-23〜。先を見たくなるように）
   const top = ranked.filter((t) => t.rank <= 3).slice(0, 5); // 3位が同点のときは、同点の全員を、1〜3位として、リプ欄に出す
   let k = 8;
-  const mk0 = (n) => ({ mid: ranked.slice(top.length, top.length + n), get text() { return [`❤️ ${anchor.full}の相性ランキング（100点満点）`, '', `【${this.mid[0].rank}位〜${this.mid.at(-1).rank}位】`, this.mid.map((t) => `${t.rank}位 ${t.name} ${t.score}点`).join('\n'), '', 'いちばん相性がいい1〜3位は、リプ欄に🌙', 'あなたの守護獣は何位？', '-月-'].join('\n'); } });
+  const mk0 = (n) => ({ mid: ranked.slice(top.length, top.length + n), get text() { return [`❤️ ${anchor.full}の相性ランキング（100点満点）`, '', `【${this.mid[0].rank}位〜${this.mid.at(-1).rank}位】`, this.mid.map((t) => `${t.rank}位 ${t.name} ${t.score}点`).join('\n'), '', 'いちばん相性がいい1〜3位は、リプ欄に🌙', 'あなたの守護獣は何位？', '', BEAST_CTA, '-月-'].join('\n'); } });
   let r0 = mk0(k);
   while (!fits(r0.text) && k > 2) r0 = mk0(--k);
   const text = r0.text;
@@ -172,7 +172,7 @@ const FACTS = {
 export const FORMATS = [
   // A: ギャップ・キャラ化（「見た目は〇〇、恋愛は△△」。名乗り・引用をねらう）
   { id: 'gap_rank', system: 'mbti_love', purpose: 'buzz', reply: true, rank16: true, maxWeight: 700, // Xプレミアム（2026-10-30）: 上限を広げ、投稿に3位〜14位、リプ欄に1・2・15・16位
-    replyGuide: '1位・2位と、15位・16位を、1行ずつ（「1位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す）。見出しは付けない。1位・2位の2行、空行、15位・16位の2行、の順。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。最後は空行のあと「あなたは何位だった？」のような問い（1行）。サイトのリンクの行は、署名の前に自動で入る（書かない）。1位・2位・15位・16位以外の行は書かない',
+    replyGuide: '1位・2位と、15位・16位を、1行ずつ（「1位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す）。見出しは付けない。1位・2位の2行、空行、15位・16位の2行、の順。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。最後は空行のあと「あなたは何位だった？」のような問い（1行）。プロフィール・サイトへの案内の行は、署名の前に自動で入る（書かない）。1位・2位・15位・16位以外の行は書かない',
     guide: '「見た目は〇〇、恋愛は△△な16タイプ」の形のランキング。16タイプ全員を順位づけし、この投稿には3位〜14位の12行を、1行ずつ（「3位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す。理由は書かない）。1位・2位と15位・16位は replyText（リプ欄）に出す。テーマ（「見た目は〇〇、恋愛は△△な」の部分）は、全角30文字以内にする。テーマは毎回変える（例: 見た目はおだやか、恋愛はいちばん重い／連絡はマメそうで、返信がいちばん遅い／好きになると、急に行動力が出る／好きでも、素直に言えない／別れたあと、いちばん引きずる／嫉妬を隠すのがうまい）。統計・調査・「〇〇%」は書かない（独自の見立てであり、調査ではない）。最後は「1位・2位と15位・16位は、リプ欄に。あなたは何位？」のような、リプ欄を見たくなる問い' },
   // B: 一言代弁（共感。返信・保存をねらう）
   { id: 'voice', system: 'psychology', purpose: 'buzz',
@@ -184,7 +184,7 @@ export const FORMATS = [
   { id: 'mbti_love', system: 'mbti_love', purpose: 'follow', facts: 'mbti_one', reply: true, maxWeight: 600, // 2026-10-24: これまでで一番伸びた型（ESTP）。毎日1本、16タイプを順に出す
     replyGuide: '1通目の続きとして、同じタイプの恋愛を詳しく解説する（2026-10-24 に、文量を約2倍に: 70〜85文字。あとで、アプリの予告の行が自動で入るので、これ以上は長くしない）。好意の見せ方・つまずきやすい点・コツを、共感できる具体的な場面で、話し言葉で。最後に、月の格言を1文（20〜30文字。「〇〇は、△△じゃなくて□□。」のような言い切り）。最初の行は「【〇〇の恋愛】詳細」（〇〇は事実のタイプ名）。統計・調査・「〇〇%」は書かない。「こちら」は使わない。署名は親の投稿と同じ。傾向であって、人それぞれ、というニュアンスを、さりげなく入れてよい',
     guide: '事実の16タイプ1つの「恋愛」を解説する投稿。1行目は「【〇〇の恋愛】」（〇〇は事実のタイプ名）。そのあと、6項目を1行ずつ（各20〜30文字。2026-10-24 に、Xプレミアムで項目を増やした）: 「好きになると：」「愛情表現：」「惹かれる人：」「つまずき：」「LINEのクセ：」「コツ：」。最後は「あなたのまわりの〇〇は、当てはまる？」。傾向であって断定しない。統計・調査・「〇〇%」は書かない。ほかのタイプの名前は出さない（相性の話はしない）' },
-  { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true,
+  { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true, maxWeight: 400,
     guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
   // G: 格言（月のオリジナルの短い言葉。保存・引用・フォローをねらう。毎日1本・15:15）
   { id: 'maxim', system: 'psychology', purpose: 'follow',
