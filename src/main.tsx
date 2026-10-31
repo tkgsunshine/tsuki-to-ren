@@ -4,13 +4,17 @@ import './index.css'
 import App from './App.tsx'
 import { AppDialogHost } from './components/AppDialog'
 import { installPageScrollReset, installStandaloneBottomGapFix } from './utils/pwaHelper'
-import { initAttribution } from './services/analytics'
+import { initAttribution, isTrackingOptedOut } from './services/analytics'
+import { inject as injectVercelAnalytics } from '@vercel/analytics'
 
 const AdminView = lazy(() => import('./components/AdminView'))
 const isAdminPage = /^\/admin\/?$/.test(window.location.pathname)
 
 installStandaloneBottomGapFix()
 if (!isAdminPage) initAttribution()
+// 自前の訪問カウンターと突き合わせるための、Vercel Web Analytics（ページビュー・訪問者・流入元）。
+// 管理画面と、集計から外したブラウザ（運営の端末）は送らない。Vercel側で Web Analytics を有効にすると集計が始まる
+if (!isAdminPage) injectVercelAnalytics({ framework: 'vite', beforeSend: (event) => (isTrackingOptedOut() ? null : event) })
 if (!isAdminPage) installPageScrollReset()
 
 // index.html の起動スプラッシュを、アプリが描画されたあとにフェードアウトして外す
