@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
-import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, LoveLetterMark, GiftMark, RoadmapMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, LoveLetterMark, GiftMark, HangerMark, RoadmapMark } from './icons/BrandIcons';
 import { getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
@@ -2700,6 +2700,45 @@ export const ResultView: React.FC<ResultViewProps> = ({
             )}
               </div>
             </div>
+
+            {/* 7.5 お相手が惹かれるファッション＆仕草（イメージと系統は誰でも見られ、色・服装・仕草・NGはプレミアム限定） */}
+            {activeResult.opponentTorisetsu.attraction && (() => {
+              const at = activeResult.opponentTorisetsu.attraction;
+              const locked = !isSubscribed;
+              const lockStyle: React.CSSProperties = { filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 };
+              const label: React.CSSProperties = { color: '#f6c6d8', fontWeight: 'bold' };
+              return (
+                <div style={{ background: 'rgba(226, 139, 170, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 139, 170, 0.22)', position: 'relative' }}>
+                  <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f6c6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <HangerMark size={18} />
+                    <span>惹かれるファッション ＆ グッとくる仕草</span>
+                  </div>
+                  <div className="font-serif" style={{ fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                    <div><span style={label}>【惹かれるイメージ】</span>「{at.imageName}」のような人。{at.imageNote}</div>
+                    <div><span style={label}>【好みの系統】</span>{at.styleName}</div>
+                    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <div style={lockStyle}><span style={label}>【好きな色】</span>{lockedText(at.colors, locked)}</div>
+                      <div style={lockStyle}><span style={label}>【会う日の服装】</span>{lockedText(at.outfit, locked)}</div>
+                      <div style={lockStyle}>
+                        <span style={label}>【グッとくる仕草】</span>
+                        <ul style={{ margin: '0.15rem 0 0 0', paddingLeft: '1.2rem' }}>
+                          {at.gestures.map((g, i) => <li key={i}>{lockedText(g, locked)}</li>)}
+                        </ul>
+                      </div>
+                      <div style={lockStyle}><span style={label}>【冷めやすいポイント】</span>{lockedText(at.ngStyle, locked)}</div>
+                      {locked && (
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
+                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: '#a9a49a', marginTop: '0.2rem' }}>※お相手の生まれ日の星から、四柱推命で「恋人・パートナー」を表す星を読み解いています。</div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* 8. 蓮と月からの最終攻略アドバイス */}
             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>

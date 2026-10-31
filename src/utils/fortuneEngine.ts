@@ -547,6 +547,8 @@ export interface TorisetsuData {
   lineTemplateTopic: string;
   idealDateSpot: string;
   approachTip: string;
+  // お相手が惹かれるファッションと仕草（お相手のトリセツのみ。古い保存データには無い）
+  attraction?: AttractionStyle;
 }
 
 // 🌟 動的 取扱説明書 (トリセツ) ＆ 命式・MBTI深層分析エンジン
@@ -1597,6 +1599,179 @@ function generateTorisetsu(
     approachTip: `${isMbtiType(oppMbti) ? `${normMbti}タイプの` : ''}${name}様には、相手の境界線を尊重しつつ、${isKango ? '宿命の引力を信じて飾らない誠実さを見せること' : '共鳴するポイントをピンポイントで褒めること'}が成就への最短ルートです。`
   };
 }
+// 💐 お相手が惹かれるファッション（系統・色・服）と仕草
+// 伝統の考え方: 四柱推命では、男性は「正財」、女性は「正官」がパートナーを表す星（配偶者の星）。
+//   正財 = 日主が剋す五行のうち、日主と陰陽が逆の十干（例: 甲の男性 → 己）
+//   正官 = 日主を剋す五行のうち、日主と陰陽が逆の十干（例: 甲の女性 → 辛）
+// その十干の象意（大樹・草花・太陽…）を、惹かれる雰囲気・色・服装に置き換える（置き換えはアプリ独自）。
+// 仕草の3つ目は、16タイプ（伝統の体系の外。アプリ独自）から足す。点数には一切関係しない。
+export interface AttractionStyle {
+  imageName: string;   // 惹かれる相手のイメージ（例: 宝石）
+  imageNote: string;   // そのイメージの一言説明
+  styleName: string;   // 好みの系統
+  colors: string;      // 好みの色
+  outfit: string;      // あなた（の性別）向けの服装・髪・小物
+  gestures: string[];  // グッとくる仕草
+  ngStyle: string;     // 冷めやすい見た目・ふるまい
+}
+
+const attractionStyleMap: Record<string, {
+  imageName: string; imageNote: string; styleName: string; colors: string;
+  outfitFemale: string; outfitMale: string; gestures: string[]; ngStyle: string;
+}> = {
+  '甲': {
+    imageName: 'まっすぐ伸びる大樹',
+    imageNote: '飾りすぎず、凛としていて、まっすぐな人に惹かれます。',
+    styleName: 'ナチュラルで清潔感のある「きちんとシンプル」系',
+    colors: '深いグリーン・ネイビー・白',
+    outfitFemale: '白いシャツやコットンのブラウスに、ストレートのパンツかロングスカート。髪はまとめるか、まっすぐ下ろす。アクセは小さめ1つで十分です。',
+    outfitMale: '白シャツや無地のニットに、まっすぐなデニムかチノパン。髪は短めにすっきり。シワのない服を選ぶだけで印象が大きく変わります。',
+    gestures: ['背すじを伸ばして座る・歩く', '目を見て「ありがとう」をはっきり言う'],
+    ngStyle: 'ヨレた服やだらしない着くずし、姿勢の悪さ'
+  },
+  '乙': {
+    imageName: '風にゆれる草花',
+    imageNote: 'やわらかくて、そばにいるとほっとできる人に惹かれます。',
+    styleName: 'ふんわりやさしい「ナチュラル」系',
+    colors: '若草色・ミントグリーン・くすみピンク',
+    outfitFemale: '小花柄やふんわりしたブラウス、ひざ下のスカート。髪はゆるく巻くか、やわらかく下ろす。とがった印象の小物は控えめに。',
+    outfitMale: 'やわらかい素材のカーディガンや、淡い色のシャツ。髪は固めすぎず自然に。全身を黒でまとめるより、明るい色を1つ入れるのがおすすめです。',
+    gestures: ['話を聞くとき、少し首をかしげてうなずく', '小さなことに「かわいい」「きれいだね」と反応する'],
+    ngStyle: '威圧感のある全身黒や、強すぎる香水'
+  },
+  '丙': {
+    imageName: '空に輝く太陽',
+    imageNote: '明るくて、一緒にいると元気になれる人に惹かれます。',
+    styleName: '明るく元気な「華やかカジュアル」系',
+    colors: '赤・オレンジ・明るいイエロー',
+    outfitFemale: '明るい色のトップスを1枚。ポニーテールなど顔まわりがすっきりした髪型に、大きめのアクセを1つ。表情が明るく見えるリップを。',
+    outfitMale: '明るい色のTシャツやシャツに、きれいなスニーカー。髪は短めでさわやかに。暗い色だけでまとめず、どこかに明るい色を入れて。',
+    gestures: ['歯を見せて思いきり笑う', 'お相手の話に「えー！すごい！」と大きくリアクションする'],
+    ngStyle: '暗い色ばかりの服と、元気のない表情'
+  },
+  '丁': {
+    imageName: 'あたたかく灯るろうそくの火',
+    imageNote: 'さりげなく上品で、近づくとあたたかさを感じる人に惹かれます。',
+    styleName: '上品でさりげない「大人きれいめ」系',
+    colors: 'ボルドー・ローズピンク・キャメル',
+    outfitFemale: 'とろみのある素材のブラウスや、体にほどよく沿うニット。華奢なネックレスや小さなピアスで、近くで見たときに気づく上品さを。',
+    outfitMale: '落ち着いた色のニットやシャツに、細めの時計や革の小物。派手さよりも、近くで見たときの質の良さを大事にして。',
+    gestures: ['二人のときだけ、少し声を落として話す', '髪型や持ち物など、小さな変化に気づいて伝える'],
+    ngStyle: '派手すぎてギラギラした服や、大声で騒ぐこと'
+  },
+  '戊': {
+    imageName: 'どっしりそびえる山',
+    imageNote: '落ち着いていて、安心して頼れる人に惹かれます。',
+    styleName: '安定感のある「きれいめベーシック」系',
+    colors: 'ベージュ・キャメル・ブラウン',
+    outfitFemale: 'トレンチコートや上質なニット、きちんと感のあるロングスカート。髪はまとめ髪やきれいなストレートで、清潔感を一番に。',
+    outfitMale: 'ジャケットか上質な無地のニットに、チノパンと手入れした革靴。流行よりも、長く着られる定番を選ぶと好印象です。',
+    gestures: ['ゆっくり落ち着いたテンポで話す', 'お相手の話を最後まで聞いてから答える'],
+    ngStyle: '流行を追いすぎた奇抜な服や、そわそわ落ち着かない態度'
+  },
+  '己': {
+    imageName: '作物を育てる畑の土',
+    imageNote: '素朴でやさしく、家庭的なあたたかさのある人に惹かれます。',
+    styleName: 'やさしく素朴な「ほっこりナチュラル」系',
+    colors: 'アイボリー・ベージュ・やさしいイエロー',
+    outfitFemale: 'やわらかいニットやロングスカート、ナチュラルなメイク。作りこみすぎない、肩の力が抜けたかわいさがいちばん響きます。',
+    outfitMale: 'やわらかいスウェットやカーディガンなど、清潔感のあるカジュアル。ブランドロゴの目立つ服より、無地でやさしい色を。',
+    gestures: ['ごはんのときに「おいしいね」と笑う', 'さりげなく料理を取り分けたり、飲み物を気づかったりする'],
+    ngStyle: 'ブランドロゴだらけの服や、作りこみすぎた見た目'
+  },
+  '庚': {
+    imageName: '鍛えられた鋼の刀',
+    imageNote: 'すっきりしていて、決めるときは決める、潔い人に惹かれます。',
+    styleName: 'シャープな「モノトーンきれいめ」系',
+    colors: '白・グレー・シルバー・黒',
+    outfitFemale: 'きれいめなシャツにセンタープレスのパンツ、シルバーのアクセ。色は2〜3色までにしぼり、すっきりまとめるのがコツです。',
+    outfitMale: '白シャツに細身のパンツ、シルバーの時計。髪は短く整えて。色をしぼったシンプルなコーデがいちばん刺さります。',
+    gestures: ['お店やメニューを迷わずサッと決める', '姿勢よく、迷いのない足どりで歩く'],
+    ngStyle: '色や柄がごちゃごちゃした服と、いつまでも決められない態度'
+  },
+  '辛': {
+    imageName: 'きらめく宝石',
+    imageNote: '上品で、細かいところまで丁寧な人に惹かれます。',
+    styleName: '上質で洗練された「エレガント」系',
+    colors: 'パールホワイト・シャンパンゴールド・ラベンダー',
+    outfitFemale: '上質な素材のワンピースやブラウスに、パールなど小さく光るアクセ。指先（ネイル）や靴まで、丁寧に整えておくと必ず気づかれます。',
+    outfitMale: '上質なシャツやニットに、手入れした靴と時計。ほのかに香るくらいの香水も効果的です。高い服より、汚れやシワのなさが大事。',
+    gestures: ['物の受け渡しやグラスの持ち方など、指先まで丁寧にする', '目が合ったら、静かににこっと微笑む'],
+    ngStyle: '汚れた靴やほつれた服、ガサツな仕草'
+  },
+  '壬': {
+    imageName: 'ひろがる大海',
+    imageNote: '自由でおおらかで、一緒にいると世界が広がる人に惹かれます。',
+    styleName: '抜け感のある「ゆったりカジュアル」系',
+    colors: 'ネイビー・マリンブルー・黒',
+    outfitFemale: 'ゆったりしたシャツやデニム、動きやすいスニーカー。きっちり固めるより、少し抜け感のあるラフなまとめ方が響きます。',
+    outfitMale: 'ゆったりしたシャツやデニム、少しアウトドア寄りのカジュアル。かしこまりすぎない、自然体の服がいちばんです。',
+    gestures: ['「いいね、行こう！」とノリよく誘いに乗る', '行ってみたい場所や旅の話を、目を輝かせて話す'],
+    ngStyle: 'きっちりしすぎて窮屈そうな服や、ノリの悪さ'
+  },
+  '癸': {
+    imageName: '静かに降る雨と朝つゆ',
+    imageNote: 'しっとり落ち着いていて、少し謎めいた透明感のある人に惹かれます。',
+    styleName: '透明感のある「しっとりミステリアス」系',
+    colors: '黒・ネイビー・ラベンダーグレー',
+    outfitFemale: '透け感のある素材のブラウスや、とろみのあるスカート。髪はさらっと下ろして、つやを大切に。メイクは薄めで透明感を。',
+    outfitMale: '黒やネイビーの落ち着いたシンプルな服に、さらっとした髪。説明しすぎない、静かな雰囲気がいちばんの魅力になります。',
+    gestures: ['お相手の話に、静かにうなずいて共感する', '少し間をおいてから、目を合わせて話す'],
+    ngStyle: '大声や騒がしいふるまい、ギラギラした服'
+  }
+};
+
+// 16タイプ（4つの気質）から、グッとくる仕草を1つ足す
+const mbtiAttractionGesture = (mbti: string): string | null => {
+  if (!isMbtiType(mbti)) return null;
+  const t = mbti.toUpperCase();
+  const isI = t[0] === 'I';
+  if (t[1] === 'N' && t[2] === 'T') {
+    return isI
+      ? 'お相手の話に「それってどういうこと？」と興味をもって質問する（二人きりの静かな場所で）'
+      : 'お相手の考えに「それ面白いね」と乗っかり、自分の意見もはっきり返す';
+  }
+  if (t[1] === 'N' && t[2] === 'F') {
+    return isI
+      ? '気持ちを話してくれたとき、急かさずに目を見て最後まで聞く'
+      : 'うれしいことを「すごくうれしい！」と言葉と表情でまっすぐ伝える';
+  }
+  if (t[3] === 'J') { // SJ
+    return isI
+      ? '待ち合わせの時間を守り、前に話したことを覚えていて話題にする'
+      : '約束をきちんと守り、まわりの人にも気配りをする';
+  }
+  // SP
+  return isI
+    ? '言葉よりも行動で示す（荷物をさりげなく持つ、自然に隣に座る）'
+    : 'その場の楽しいことに笑って全力で乗っかる';
+};
+
+export function getAttractionStyle(
+  oppStem: string,
+  oppGender: 'male' | 'female',
+  oppMbti: string,
+  myGender: 'male' | 'female'
+): AttractionStyle {
+  const idx = Math.max(0, stems.indexOf(oppStem));
+  const elemIdx = Math.floor(idx / 2);
+  const opposite = 1 - (idx % 2);
+  // 男性: 日主が剋す五行（五行の順で2つ先）＝正財。女性: 日主を剋す五行（3つ先）＝正官。どちらも陰陽が逆の十干
+  const targetElemIdx = (elemIdx + (oppGender === 'male' ? 2 : 3)) % 5;
+  const partnerStem = stems[targetElemIdx * 2 + opposite];
+  const s = attractionStyleMap[partnerStem] || attractionStyleMap['甲'];
+  const extra = mbtiAttractionGesture(oppMbti);
+  return {
+    imageName: s.imageName,
+    imageNote: s.imageNote,
+    styleName: s.styleName,
+    colors: s.colors,
+    outfit: myGender === 'male' ? s.outfitMale : s.outfitFemale,
+    gestures: extra ? [...s.gestures, extra] : s.gestures,
+    ngStyle: s.ngStyle
+  };
+}
+
 const getAstrologyAvatar = (branch: string, gender: string): string => {
   const isMale = gender === 'male';
   
@@ -3111,13 +3286,21 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       input.opponentMbti || 'ENFP',
       input.myName || 'あなた'
     ),
-    opponentTorisetsu: oppPillarObj ? generateTorisetsu(
-      oppPillarObj.stem,
-      oppPillarObj.branch,
-      input.opponentMbti || 'ENFP',
-      myPillarObj.stem,
-      input.myMbti || 'ENFP',
-      input.opponentName || 'お相手'
-    ) : undefined
+    opponentTorisetsu: oppPillarObj ? {
+      ...generateTorisetsu(
+        oppPillarObj.stem,
+        oppPillarObj.branch,
+        input.opponentMbti || 'ENFP',
+        myPillarObj.stem,
+        input.myMbti || 'ENFP',
+        input.opponentName || 'お相手'
+      ),
+      attraction: getAttractionStyle(
+        oppPillarObj.stem,
+        input.opponentGender || (input.myGender === 'male' ? 'female' : 'male'),
+        input.opponentMbti || '',
+        input.myGender || 'female'
+      )
+    } : undefined
   };
 }
