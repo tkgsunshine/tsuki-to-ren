@@ -3,6 +3,7 @@ import { Send, X, RotateCcw } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/firebase';
 import type { FortuneResult } from '../utils/fortuneEngine';
+import { san } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { chatHistoryKey, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chatHistory';
@@ -84,7 +85,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const oppNickname = (opponentName || '').trim();
   const hasOppNickname = !!oppNickname && oppNickname !== 'お相手';
   const oppTitle = (result?.opponentAstrologyTheme || '').replace(/[【】]/g, '').replace(/\s*×\s*/g, '×').trim();
-  const oppDisplayName = hasOppNickname ? `${oppNickname}さん` : (oppTitle ? `お相手（${oppTitle}）` : 'お相手');
+  const oppDisplayName = hasOppNickname ? san(oppNickname) : (oppTitle ? `お相手（${oppTitle}）` : 'お相手');
   const hasOpponent = !!result?.opponentPillar || hasOppNickname;
 
   // Initial greeting（質問ボタンから開いたときは、あいさつを出さずにその質問から始める）
@@ -216,7 +217,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       return `${basicInfo}
       
 【お相手の属性】${hasOppNickname ? `
-呼び名: ${oppNickname}さん` : ''}
+呼び名: ${san(oppNickname)}` : ''}
 命式の日干: ${result.opponentPillar}
 本命星: ${result.opponentStar}
 性格タイプ: ${result.opponentMbtiText || '不明'} (${result.opponentMbtiName || '不明'})
@@ -673,7 +674,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             )}
             {partnerPicker.partners.map((p) => (
               <button key={p.id} className="chat-option-btn chat-partner-btn" onClick={() => partnerPicker.onPick(p)}>
-                <span className="chat-partner-name">💞 {p.name || 'お相手'}さん</span>
+                <span className="chat-partner-name">💞 {san(p.name)}</span>
                 {p.relationship && p.relationship !== 'single' && p.relationship !== 'partner' && (
                   <span className="chat-partner-rel">{p.relationship}</span>
                 )}
@@ -682,7 +683,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
             {partnerPicker.unsavedCurrentName && (
               <button className="chat-option-btn chat-partner-btn chat-partner-save" onClick={partnerPicker.onSaveCurrent}>
-                <span className="chat-partner-name">＋ さっき占った{partnerPicker.unsavedCurrentName}さんを保存して相談</span>
+                <span className="chat-partner-name">＋ さっき占った{san(partnerPicker.unsavedCurrentName)}を保存して相談</span>
               </button>
             )}
 
