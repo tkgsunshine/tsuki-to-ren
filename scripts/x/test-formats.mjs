@@ -1,7 +1,7 @@
 // node --experimental-strip-types --test scripts/x/test-formats.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES, buildBeastPairRanking, beastList, BUZZ_SLOTS } from './lib/formats.mjs';
+import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES, buildBeastPairRanking, buildMbtiBeastRanking, mbtiBeastScore, beastList, BUZZ_SLOTS } from './lib/formats.mjs';
 import { weightedLength } from './lib/lint.mjs';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -288,4 +288,28 @@ test('Xプレミアム: 毎日 mbti_love（昼）と long_deep（夜）が出る
   assert.ok(lintPost(base).length, '標準の上限（140字）を超える');
   assert.deepEqual(lintPost(base, [], { maxWeight: long.maxWeight }), [], '長文の上限（1000字）に収まる');
   assert.ok(lintPost({ ...base, text: 'あ'.repeat(1100) }, [], { maxWeight: long.maxWeight }).length, '長文の上限を超える');
+});
+
+test('MBTI×守護獣のランキング: 点数は16タイプ40：守護獣30の比。各MBTI・守護獣は1回ずつ、順位は重ねない、URLはリプ欄だけ', () => {
+  const [a, b] = beastList();
+  // 16タイプの相性が100・0の端どうしで、守護獣の相性が同じなら、差は 100×40/70 ≒ 57点
+  const hi = mbtiBeastScore('ENFP', a, 'INTJ', b); // 94
+  const lo = mbtiBeastScore('ENFP', a, 'ENFJ', b); // 0
+  assert.ok(Math.abs(hi - lo - Math.round((94 * 40) / 70)) <= 1);
+  for (const v of [hi, lo]) assert.ok(v >= 0 && v <= 100);
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(Date.UTC(2026, 10, 1 + i)).toISOString().slice(0, 10);
+    const r = buildMbtiBeastRanking(d);
+    assert.equal(r.top.length, 14);
+    assert.equal(r.worst.length, 2);
+    assert.deepEqual(r.top.map((t) => t.rank), Array.from({ length: 14 }, (_, k) => k + 1));
+    for (let k = 1; k < 14; k++) assert.ok(r.top[k - 1].score >= r.top[k].score, `${d}: 点数の降順`);
+    assert.equal(new Set(r.top.map((t) => t.mbti)).size, 14);
+    assert.equal(new Set(r.top.map((t) => t.beast)).size, 14);
+    assert.ok(!/https?:\/\//.test(r.text), `${d}: 本文にURLを入れない`);
+    assert.ok(/^🥉3位 /m.test(r.text) && /^14位 /m.test(r.text) && !/^🥇1位|^🥈2位/m.test(r.text), `${d}: 本文は3位〜14位`);
+    assert.ok(/^🥇1位 /m.test(r.replyText) && /^🥈2位 /m.test(r.replyText) && !/3位/.test(r.replyText) && !/ワースト3/.test(r.replyText), `${d}: リプ欄は1位・2位とワースト2だけ`);
+    assert.deepEqual(lintPost({ slot: 'late', kind: 'value', text: r.text }, [], { maxWeight: 700 }), [], d);
+    assert.deepEqual(lintPost({ slot: 'late', kind: 'value', text: r.replyText }, [], { maxWeight: 700, reply: true }), [], d);
+  }
 });

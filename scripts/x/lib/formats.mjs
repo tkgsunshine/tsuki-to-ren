@@ -1,11 +1,11 @@
 // 毎日2本（昼・夕）の「バズ検証用」投稿の型。8系統 × 3つの目的（バズ用／フォロー用／アプリ誘導用）。
 // 数字・ランキング・相性は、アプリの鑑定ロジック（fortuneEngine.ts）で算出した事実だけを使う（facts）。AIは言い回しだけを担当する。
 // 投稿には format / system / purpose を付け、あとで「どの型が反応を取れたか」を比べられるようにする。
-import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getPillarPairScore } from '../../../src/utils/fortuneEngine.ts';
+import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getPillarPairScore, getMBTICompatibility100 } from '../../../src/utils/fortuneEngine.ts';
 import { STEM_YOMI, ANIMAL_YOMI } from './characters.mjs';
 import { weightedLength } from './lint.mjs';
 import { dayPillar, MBTI_TYPES as MBTI_OBJS } from './signals.mjs';
-import { BEAST_TEASER, BEAST_LINK, BEAST_CTA } from './teasers.mjs';
+import { BEAST_TEASER, BEAST_LINK, BEAST_CTA, GAP_CTA, MB_BEAST_LINK } from './teasers.mjs';
 
 const MBTI_TYPES = MBTI_OBJS.map((t) => t.code);
 
@@ -120,6 +120,77 @@ export function buildBeastPairRanking(date) {
   return { text, replyText, replyText2: r2.text, anchor: anchor.name, top, mid: r0.mid, worst: r2.worst };
 }
 
+// ───────── MBTI×守護獣の相性ランキング（2026-10-31 追加。運営の依頼。アプリの鑑定ロジックで算出。AIは使わない）─────────
+// その日の主役「MBTI×守護獣」（例: ENFP×甲虎）に対して、相手の「MBTI×守護獣」（16×60＝960通り）を、点数順に並べる。
+// 点数: 16タイプの相性（0〜100。engine の getMBTICompatibility100）と、守護獣の相性（0〜100。getPillarPairScore。守護獣ランキングと同じ）を、
+// アプリの2人鑑定の配点の比（16タイプ40点：四柱推命30点。本命星30点は、守護獣からは出せないので除く）で合わせて、100点満点にしたもの。
+// そのまま上から並べると、同じタイプ・同じ守護獣ばかりになるので、上位から順に、まだ出ていないMBTIと守護獣の組み合わせだけを拾う（各MBTI・各守護獣は1回ずつ）。
+// 本文に3位〜14位、リプ欄に1位・2位とワースト1・2（2026-10-31 運営の指示。ワーストも、下から同じように拾う）。同点でも順位は重ねない。
+export const MBTI_BEAST_WEIGHTS = { mbti: 40, beast: 30 };
+export function mbtiBeastScore(mbtiA, beastA, mbtiB, beastB) {
+  const m = getMBTICompatibility100(mbtiA, mbtiB);
+  const b = getPillarPairScore(beastA.stem, beastA.branch, beastB.stem, beastB.branch);
+  return Math.round((m * MBTI_BEAST_WEIGHTS.mbti + b * MBTI_BEAST_WEIGHTS.beast) / (MBTI_BEAST_WEIGHTS.mbti + MBTI_BEAST_WEIGHTS.beast));
+}
+/** 並び順の先頭から、MBTIも守護獣もまだ出ていない組み合わせだけを、n件拾う */
+function pickDistinct(sorted, n) {
+  const usedM = new Set();
+  const usedB = new Set();
+  const out = [];
+  for (const c of sorted) {
+    if (usedM.has(c.mbti) || usedB.has(c.beast)) continue;
+    usedM.add(c.mbti);
+    usedB.add(c.beast);
+    out.push(c);
+    if (out.length >= n) break;
+  }
+  return out;
+}
+export function buildMbtiBeastRanking(date) {
+  const beasts = beastList();
+  const days = dayPillar(date).days;
+  const mbti = MBTI_TYPES[((days % 16) + 16) % 16];
+  const beast = beasts[(((days * 7) % 60) + 60) % 60]; // 16と60で周期をずらし、主役の組み合わせが毎回変わるようにする
+  const all = [];
+  for (const m of MBTI_TYPES) for (const b of beasts) {
+    if (m === mbti && b.index === beast.index) continue;
+    all.push({ mbti: m, beast: b.name, mi: MBTI_TYPES.indexOf(m), bi: b.index, name: `${m}×${b.name}`, score: mbtiBeastScore(mbti, beast, m, b) });
+  }
+  const desc = [...all].sort((x, y) => y.score - x.score || x.mi - y.mi || x.bi - y.bi);
+  const top = withRanks(pickDistinct(desc, 14));
+  const worst = withRanks(pickDistinct([...desc].reverse(), 2));
+  const line = (t) => `${MEDAL[t.rank] || ''}${t.rank}位 ${t.name} ${t.score}点`;
+  const anchorName = `${mbti}×${beast.full}`;
+  const text = [
+    `❤️ ${anchorName}と相性がいい`,
+    'MBTI×守護獣ランキング（100点満点）',
+    '',
+    '【3位〜14位】',
+    top.slice(2).map(line).join('\n'),
+    '',
+    '※16タイプの相性と、生年月日（守護獣）の相性を合わせた点数（同じMBTI・守護獣は1回ずつ）',
+    '',
+    'いちばん相性がいい1位・2位と、ぶつかりやすいワースト2は、リプ欄に🌙',
+    'あなたの好きな人は入ってた？',
+    '',
+    GAP_CTA,
+    '-月-',
+  ].join('\n');
+  const replyText = [
+    '【相性ベスト2】',
+    top.slice(0, 2).map(line).join('\n'),
+    '',
+    '【ぶつかりやすい組み合わせ ワースト2】',
+    worst.map((t) => `ワースト${t.rank} ${t.name} ${t.score}点`).join('\n'),
+    '',
+    'あなたと好きな人の組み合わせは、何点だと思う？',
+    '',
+    MB_BEAST_LINK,
+    '-月-',
+  ].join('\n');
+  return { text, replyText, anchor: anchorName, top, worst };
+}
+
 // 月の満ち欠け（計算。2000-01-06 18:14 UTC の新月を基準に、朔望月 29.530589 日で数える）。投稿の「月のことば」の事実に使う
 const SYNODIC = 29.530588853;
 const NEW_MOON_REF = Date.UTC(2000, 0, 6, 18, 14);
@@ -184,6 +255,8 @@ export const FORMATS = [
   { id: 'mbti_love', system: 'mbti_love', purpose: 'follow', facts: 'mbti_one', reply: true, maxWeight: 600, // 2026-10-24: これまでで一番伸びた型（ESTP）。毎日1本、16タイプを順に出す
     replyGuide: '1通目の続きとして、同じタイプの恋愛を詳しく解説する（2026-10-24 に、文量を約2倍に: 70〜85文字。あとで、アプリの予告の行が自動で入るので、これ以上は長くしない）。好意の見せ方・つまずきやすい点・コツを、共感できる具体的な場面で、話し言葉で。最後に、月の格言を1文（20〜30文字。「〇〇は、△△じゃなくて□□。」のような言い切り）。最初の行は「【〇〇の恋愛】詳細」（〇〇は事実のタイプ名）。統計・調査・「〇〇%」は書かない。「こちら」は使わない。署名は親の投稿と同じ。傾向であって、人それぞれ、というニュアンスを、さりげなく入れてよい',
     guide: '事実の16タイプ1つの「恋愛」を解説する投稿。1行目は「【〇〇の恋愛】」（〇〇は事実のタイプ名）。そのあと、6項目を1行ずつ（各20〜30文字。2026-10-24 に、Xプレミアムで項目を増やした）: 「好きになると：」「愛情表現：」「惹かれる人：」「つまずき：」「LINEのクセ：」「コツ：」。最後は「あなたのまわりの〇〇は、当てはまる？」。傾向であって断定しない。統計・調査・「〇〇%」は書かない。ほかのタイプの名前は出さない（相性の話はしない）' },
+  { id: 'mbti_beast_rank', system: 'mbti_birth', purpose: 'buzz', build: buildMbtiBeastRanking, reply: true, maxWeight: 700,
+    guide: 'MBTI×守護獣の相性ランキング（主役のMBTI×守護獣と相性がいい、相手のMBTI×守護獣の組み合わせTOP14・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。1位・2位とワースト2は、返信（リプ欄）に出す' },
   { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true, maxWeight: 400,
     guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
   // G: 格言（月のオリジナルの短い言葉。保存・引用・フォローをねらう。毎日1本・15:15）
@@ -231,7 +304,7 @@ const PLAN_DAYS = [
   ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'flip'],
   ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'mbti_habit'],
   ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'voice'],
-  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'beast_pair_rank'],
+  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'mbti_beast_rank'], // 2026-10-31: 2回目の守護獣ランキングを、MBTI×守護獣のランキングに
   ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'deep'],
   ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'pair_teaser'],
 ];
