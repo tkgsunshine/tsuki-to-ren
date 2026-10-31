@@ -20,10 +20,10 @@ export const FORMAT_TEASER = {};
 export const RANK_LINK_URL = `${SITE_URL}/?utm_source=x&utm_medium=ranking`;
 /** 本文に入れる、プロフィールへ誘う一言（2026-10-31〜。運営の指示。ランキングの本文と返信の両方）。URL は返信にだけ入れる */
 export const GAP_CTA = 'MBTIと生年月日だけで、好きな人との相性まで鑑定できます↓\n詳しくはプロフィールへ🌙';
-export const BEAST_CTA = '生年月日だけで、あなたの守護獣と好きな人との相性を鑑定できます\n詳しくはプロフィールへ🌙';
+export const BEAST_CTA = '生年月日だけで、あなたの守護獣と好きな人との相性を鑑定できます↓\n詳しくはプロフィールへ🌙';
 /** 返信に入れる、一言とURL */
 export const GAP_LINK = `MBTIと生年月日だけで、好きな人との相性まで鑑定できます↓\n${RANK_LINK_URL}`;
-export const BEAST_LINK = `生年月日だけで、あなたの守護獣と好きな人との相性を鑑定できます\n詳しくは、プロフィールか下のURLから\n${RANK_LINK_URL}`;
+export const BEAST_LINK = `生年月日だけで、あなたの守護獣と好きな人との相性を鑑定できます↓\n${RANK_LINK_URL}`;
 /** 署名の行の直前に、リンクの行を入れる。すでに入っていれば、そのまま */
 export function withLink(text, link) {
   if (text.includes(RANK_LINK_URL)) return text;
