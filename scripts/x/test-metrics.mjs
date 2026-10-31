@@ -193,3 +193,18 @@ test('照合: 運営が署名（-月-）を消して投稿しても、同じ投�
   const q2 = [{ id: 'b', status: 'scheduled', text: 'ぜんぜん別の本文です。ぜんぜん別の本文です。\n-月-' }];
   assert.equal(reconcileTimeline(q2, tw), 0);
 });
+
+test('照合: 親の本文を直して投稿しても、照合できた返信から、親の投稿を見つける', () => {
+  const q = [
+    { id: 'p', status: 'scheduled', text: '親の本文（キューの版）。ぜんぜん違う本文になって投稿された。\n-月-' },
+    { id: 'p-reply', replyTo: 'p', status: 'scheduled', text: '1位 INFJ 提唱者\n2位 ISFP 冒険家\n\n15位 ESTP 起業家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n-月-' },
+  ];
+  const tw = [
+    { id: '200', created_at: '2026-10-30T09:15:00Z', text: '運営が直した、まったく別の言い回しの親の投稿です' },
+    { id: '201', created_at: '2026-10-30T09:16:00Z', text: '1位 INFJ 提唱者\n2位 ISFP 冒険家\n\n15位 ESTP 起業家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？', referenced_tweets: [{ type: 'replied_to', id: '200' }] },
+  ];
+  assert.equal(reconcileTimeline(q, tw), 2);
+  assert.equal(q[0].tweetId, '200');
+  assert.equal(q[0].status, 'posted');
+  assert.equal(q[1].tweetId, '201');
+});

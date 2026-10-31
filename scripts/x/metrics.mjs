@@ -66,6 +66,24 @@ export function reconcileTimeline(queue, tweets) {
     delete p.lastError;
     n++;
   }
+  // スレッド返信が照合できたのに、親が照合できなかったとき（運営が親の本文を直して投稿した）は、返信が返信している投稿（referenced_tweets の replied_to）を、親として扱う
+  const byId = new Map(tweets.map((x) => [x.id, x]));
+  for (const c of queue) {
+    if (!c.replyTo || !c.tweetId) continue;
+    const parent = queue.find((x) => x.id === c.replyTo);
+    if (!parent || parent.tweetId || !['scheduled', 'expired', 'failed'].includes(parent.status)) continue;
+    const ct = byId.get(c.tweetId);
+    const pid = ct?.referenced_tweets?.find((r) => r.type === 'replied_to')?.id;
+    const pt = pid && byId.get(pid);
+    if (!pt || taken.has(pt.id)) continue;
+    taken.add(pt.id);
+    parent.status = 'posted';
+    parent.postedAt = pt.created_at;
+    parent.tweetId = pt.id;
+    parent.manual = true;
+    parent.editedOnPost = true; // 本文は、運営が直して投稿した
+    n++;
+  }
   return n;
 }
 
@@ -239,7 +257,7 @@ async function main() {
   let repliesLog = readJson(REPLIES_LOG_PATH, []);
   if (readConfig().apiPosting === false && me?.id) {
     try {
-      const tl = await apiGet(creds, `/2/users/${me.id}/tweets`, { max_results: '100', 'tweet.fields': 'created_at,public_metrics,in_reply_to_user_id', expansions: 'in_reply_to_user_id', 'user.fields': 'username' });
+      const tl = await apiGet(creds, `/2/users/${me.id}/tweets`, { max_results: '100', 'tweet.fields': 'created_at,public_metrics,in_reply_to_user_id,referenced_tweets', expansions: 'in_reply_to_user_id', 'user.fields': 'username' });
       reconciled = reconcileTimeline(queue, tl.data || []);
       repliesLog = mergeRepliesLog(repliesLog, tl.data || [], me.id, tl.includes?.users || []);
       for (const t of tl.data || []) byId.set(t.id, t.public_metrics);
