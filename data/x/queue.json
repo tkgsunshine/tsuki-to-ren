@@ -5349,5 +5349,17 @@
       "expression": "gaze"
     },
     "image": "data/x/cards/2026-10-31-late.png"
+  },
+  {
+    "id": "2026-10-31-extra",
+    "date": "2026-10-31",
+    "slot": "beast4",
+    "kind": "value",
+    "text": "「宙ぶらりんの今度」って、あると思う。\n「今度ごはん行こう」から、もう2週間。\n楽しみなのに、日にちだけが決まらない。\n聞いたら催促みたいで、重い気がしちゃうんだよね。\n相手も、きっかけを待ってるだけかも。\n「来週の土曜どう？」の一行で、今度が予定に変わるよ。\n-月-",
+    "format": "coined_feeling",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-10-31T05:02:38.626Z"
   }
 ]
