@@ -8,7 +8,7 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
-import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, GAP_CTA, withLink, withProfileCta } from './lib/teasers.mjs';
+import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, PAIR_LINK, GAP_CTA, withLink, withProfileCta } from './lib/teasers.mjs';
 import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
@@ -45,7 +45,7 @@ const recentFaces = history.filter((p) => p.card?.expression).slice(-5).map((p) 
 
 const allowLinks = config.allowLinks !== false;
 const serviceLine = allowLinks
-  ? `月と蓮は四柱推命・九星気学・16タイプ（MBTI）を掛け合わせた、本格恋愛占いの無料鑑定サービス（${SITE_URL}）で、アプリは公開済みです。URLは、型の指定があるときだけ入れる（月と蓮のURL以外は書かない）。「近日公開」「予告」とは書かない。`
+  ? `月と蓮は四柱推命・九星気学・16タイプ（MBTI）を掛け合わせた、本格恋愛占いの無料鑑定サービス（${SITE_URL}）で、アプリは公開済みです。本文にURLは書かない（URLは、型によってリプ欄に自動で入る）。「近日公開」「予告」とは書かない。`
   : '月と蓮は四柱推命・九星気学・16タイプ（MBTI）を掛け合わせた本格恋愛占いのサービスで、**まだ公開前（近日公開予定）**です。URL・リンク・「こちら」「無料」「アプリ」「今すぐ」「公開中」は絶対に書かない。';
 const system = `あなたは占いサービス「月と蓮」のX運用担当です。${serviceLine}このアカウントは恋愛（片思い・両思い・相性・連絡のタイミング・気持ちの整え方）の話題に絞ります。
 このアカウントは「月と蓮 運営」のブランドアカウントとして運用され、プロフィールで運営元を明示しています。第三者のふりをした体験談・口コミ風の投稿は禁止です。
@@ -84,7 +84,7 @@ const all = computeAll(date); // 守護獣・本命星の今日の点数（ア�
 // 守護獣・MBTIの話題の返信には、アプリの予告の行（署名の直前）を自動で入れる
 const finalReply = (f, text) => {
   const t = FORMAT_TEASER[f.id] ? withTeaser(String(text).trim(), FORMAT_TEASER[f.id]) : String(text).trim();
-  return f.id === 'gap_rank' ? withLink(t, GAP_LINK) : t; // ランキングの返信だけ、サイトのリンクを入れる（2026-10-31〜）
+  return f.id === 'gap_rank' ? withLink(t, GAP_LINK) : f.siteLink ? withLink(t, PAIR_LINK) : t; // ランキングと相性占いの紹介の返信だけ、サイトのリンクを入れる（2026-10-31〜。URLはリプ欄にだけ）
 };
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
@@ -137,7 +137,7 @@ function validate(posts) {
     } else if (p.card || p.expression) problems.push(`${slot}: 画像つきの型ではないので card・expression は不要`);
     if (f.poll) {
       if (!p.replyText) problems.push(`${slot}: 問いかけ型は replyText（答え合わせの返信）も書く`);
-      else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}の返信: ${pr}`);
+      else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks, maxWeight: f.maxWeight, reply: true })) problems.push(`${slot}の返信: ${pr}`);
     } else if (f.profileLine) {
       if (!/プロフィール/.test(String(p.text))) problems.push(`${slot}: 最後に、プロフィールへ誘う一言（「プロフィール」を入れる）を、署名の前に入れる`);
     } else if (f.all16) {
@@ -153,7 +153,7 @@ function validate(posts) {
       }
     } else if (f.replyGuide) {
       if (!p.replyText) problems.push(`${slot}: 続きの replyText（リプ欄の解説）も書く`);
-      else for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}の返信: ${pr}`);
+      else for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks, maxWeight: f.maxWeight, reply: true, siteUrl: !!f.siteLink })) problems.push(`${slot}の返信: ${pr}`);
     } else if (p.replyText) problems.push(`${slot}: 問いかけ型ではないので replyText は不要`);
   }
   return problems;
@@ -164,7 +164,7 @@ const detPosts = detSlots.map((slot) => {
   const f = planned[slot];
   const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks, maxWeight: f.maxWeight });
-  if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks, maxWeight: f.maxWeight }).map((x) => `返信: ${x}`));
+  if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks, maxWeight: f.maxWeight, reply: true }).map((x) => `返信: ${x}`));
   if (out.replyText2) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText2 }, history, { allowLinks, siteUrl: true, maxWeight: f.maxWeight }).map((x) => `返信2: ${x}`));
   if (problems.length) {
     console.error(`${slot}（${f.id}）の本文がチェック不合格:\n - ${problems.join('\n - ')}`);

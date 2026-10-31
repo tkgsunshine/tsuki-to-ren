@@ -41,7 +41,7 @@ const KINDS = ['value', 'promo'];
 
 /** 投稿1件を検査。問題の配列（空なら合格） */
 // opts.allowLinks=false: サイト公開前。URLと誘導文言を禁止し、promoは「近日公開」の予告にする
-// opts.allowLinks=true（2026-10-31〜。リリース済み）: 月と蓮のURLは、どの投稿にも必要に応じて入れてよい
+// opts.allowLinks=true（2026-10-31〜。リリース済み）: 月と蓮のURLは、リプ欄（opts.reply）にだけ入れてよい
 export function lintPost(post, history = [], opts = {}) {
   const allowLinks = opts.allowLinks !== false;
   const problems = [];
@@ -68,8 +68,8 @@ export function lintPost(post, history = [], opts = {}) {
   }
   if (urls.some((u) => !u.startsWith(SITE_URL))) problems.push('月と蓮以外のURLは入れない');
   if (allowLinks) {
-    // 2026-10-31〜: アプリはリリース済み。URLは、投稿ごとに必要に応じて入れてよい（月と蓮のURLだけ）。promo（アプリの紹介）にはURLを入れる
-    if (post.kind === 'promo' && !urls.some((u) => u.startsWith(SITE_URL))) problems.push(`promoには ${SITE_URL} のURLが必要`);
+    // 2026-10-31〜: アプリはリリース済み。月と蓮のURLは、リプ欄（返信。opts.reply）にだけ、必要に応じて入れてよい（運営の指示）。本文に入れてよいのは、コラム紹介だけ
+    if (urls.length && !opts.reply && !opts.siteUrl && !opts.columnUrl) problems.push('URLは、本文ではなくリプ欄（返信）にだけ入れる');
   } else {
     if (!opts.siteUrl && !opts.columnUrl && urls.length) problems.push('サイト公開前のためURLは入れない');
     for (const w of PRELAUNCH_NG) if (text.includes(w)) problems.push(`サイト公開前のため「${w}」は使わない`);
