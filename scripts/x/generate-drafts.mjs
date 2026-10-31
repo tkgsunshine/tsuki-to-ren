@@ -8,7 +8,7 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
-import { FORMAT_TEASER, withTeaser, BEAST_TEASER } from './lib/teasers.mjs';
+import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, withLink } from './lib/teasers.mjs';
 import { addMbtiNicks } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
@@ -82,7 +82,10 @@ const detSlots = activeSlots.filter((k) => planned[k].build);
 const llmSlots = activeSlots.filter((k) => !planned[k].build);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
 // 守護獣・MBTIの話題の返信には、アプリの予告の行（署名の直前）を自動で入れる
-const finalReply = (f, text) => (FORMAT_TEASER[f.id] ? withTeaser(String(text).trim(), FORMAT_TEASER[f.id]) : String(text).trim());
+const finalReply = (f, text) => {
+  const t = FORMAT_TEASER[f.id] ? withTeaser(String(text).trim(), FORMAT_TEASER[f.id]) : String(text).trim();
+  return f.id === 'gap_rank' ? withLink(t, GAP_LINK) : t; // ランキングの返信だけ、サイトのリンクを入れる（2026-10-31〜）
+};
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
   const reply = f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : '';
@@ -139,7 +142,7 @@ function validate(posts) {
     } else if (f.rank16) {
       if (!p.replyText) problems.push(`${slot}: 続き（1位・2位・15位・16位）の replyText も書く`);
       else {
-        for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}の返信: ${pr}`);
+        for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks, maxWeight: f.maxWeight, siteUrl: true })) problems.push(`${slot}の返信: ${pr}`);
         if (/^\s*(1|2|15|16)位\s+[EI][NS][FT][JP]/m.test(p.text)) problems.push(`${slot}: 1位・2位・15位・16位は、投稿ではなくリプ欄（replyText）に書く`);
         for (const n of [1, 2, 15, 16]) if (!new RegExp(`^\\s*${n}位`, 'm').test(p.replyText)) problems.push(`${slot}: replyText に「${n}位」の行がない`);
         const joined = `${p.text}\n${p.replyText}`;
@@ -159,7 +162,7 @@ const detPosts = detSlots.map((slot) => {
   const out = f.build(date);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks });
   if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks }).map((x) => `返信: ${x}`));
-  if (out.replyText2) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText2 }, history, { allowLinks }).map((x) => `返信2: ${x}`));
+  if (out.replyText2) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText2 }, history, { allowLinks, siteUrl: true }).map((x) => `返信2: ${x}`));
   if (problems.length) {
     console.error(`${slot}（${f.id}）の本文がチェック不合格:\n - ${problems.join('\n - ')}`);
     process.exit(1);

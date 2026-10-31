@@ -5,7 +5,7 @@ import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getPillarPair
 import { STEM_YOMI, ANIMAL_YOMI } from './characters.mjs';
 import { weightedLength } from './lint.mjs';
 import { dayPillar, MBTI_TYPES as MBTI_OBJS } from './signals.mjs';
-import { BEAST_TEASER } from './teasers.mjs';
+import { BEAST_TEASER, BEAST_LINK } from './teasers.mjs';
 
 const MBTI_TYPES = MBTI_OBJS.map((t) => t.code);
 
@@ -113,7 +113,7 @@ export function buildBeastPairRanking(date) {
   let w = 5;
   const mk2 = (n) => {
     const worst = worstAll.slice(0, n);
-    return { worst, text: [`【${anchor.name}と、ぶつかりやすい守護獣 ワースト${n}】`, '（点数が低い順）', '', worst.map((t, i) => rankBlock(t, i, false)).join('\n\n'), '', '-月-'].join('\n') };
+    return { worst, text: [`【${anchor.name}と、ぶつかりやすい守護獣 ワースト${n}】`, '（点数が低い順）', '', worst.map((t, i) => rankBlock(t, i, false)).join('\n\n'), '', BEAST_LINK, '-月-'].join('\n') };
   };
   let r2 = mk2(w);
   while (!fits(r2.text) && w > 2) r2 = mk2(--w);
@@ -172,7 +172,7 @@ const FACTS = {
 export const FORMATS = [
   // A: ギャップ・キャラ化（「見た目は〇〇、恋愛は△△」。名乗り・引用をねらう）
   { id: 'gap_rank', system: 'mbti_love', purpose: 'buzz', reply: true, rank16: true, maxWeight: 700, // Xプレミアム（2026-10-30）: 上限を広げ、投稿に3位〜14位、リプ欄に1・2・15・16位
-    replyGuide: '1位・2位と、15位・16位を、1行ずつ（「1位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す）。見出しは付けない。1位・2位の2行、空行、15位・16位の2行、の順。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。最後は空行のあと「あなたは何位だった？」のような問い（1行）。1位・2位・15位・16位以外の行は書かない',
+    replyGuide: '1位・2位と、15位・16位を、1行ずつ（「1位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す）。見出しは付けない。1位・2位の2行、空行、15位・16位の2行、の順。16タイプすべてが、投稿と返信で1回ずつ出る（重複・抜けなし）。署名は親の投稿と同じ。最後は空行のあと「あなたは何位だった？」のような問い（1行）。サイトのリンクの行は、署名の前に自動で入る（書かない）。1位・2位・15位・16位以外の行は書かない',
     guide: '「見た目は〇〇、恋愛は△△な16タイプ」の形のランキング。16タイプ全員を順位づけし、この投稿には3位〜14位の12行を、1行ずつ（「3位 ISFP」の形。タイプのコードのみ。二つ名は、あとで自動で足す。理由は書かない）。1位・2位と15位・16位は replyText（リプ欄）に出す。テーマ（「見た目は〇〇、恋愛は△△な」の部分）は、全角30文字以内にする。テーマは毎回変える（例: 見た目はおだやか、恋愛はいちばん重い／連絡はマメそうで、返信がいちばん遅い／好きになると、急に行動力が出る／好きでも、素直に言えない／別れたあと、いちばん引きずる／嫉妬を隠すのがうまい）。統計・調査・「〇〇%」は書かない（独自の見立てであり、調査ではない）。最後は「1位・2位と15位・16位は、リプ欄に。あなたは何位？」のような、リプ欄を見たくなる問い' },
   // B: 一言代弁（共感。返信・保存をねらう）
   { id: 'voice', system: 'psychology', purpose: 'buzz',
@@ -216,23 +216,23 @@ export const FORMATS = [
 ];
 
 /** バズ検証の投稿枠（1日4本）。noon=12:15 / pm=15:15（格言） / evening=18:15 / night=20:15（時刻は config.slots）。朝の守護獣1本・10:15のコラム紹介1本と合わせて1日6本 */
-export const BUZZ_SLOTS = ['noon', 'pm', 'evening', 'night'];
+export const BUZZ_SLOTS = ['noon', 'pm', 'evening', 'night', 'late']; // 2026-10-31: 夕に gap_rank を毎日にしたので、日替わりの型を22:15（late）に移した
 
 /** 10日で一巡する、1日4本の型の並び（BUZZ_SLOTS の順: 昼12:15・格言15:15・夕18:15・夜20:15）。2026-10-08 が先頭。
  *  2026-10-22 の見直し: 運営がホームで却下した型（選択式の問いかけ・保存型の3つのコツ）を削除し、気持ちに名前をつける型（coined_feeling）・16タイプ別のクセ一覧（mbti_habit）・常識の理由を入れ替える型（flip）・厚い実用型（howto）・格言を増やした。
  *  格言（15:15）は毎日1本。そのうち10日に3回は、スピリチュアル寄りの「月のことば」（maxim_spirit）。10日で全13型が出る。 */
 const PLAN_DAYS = [
-  // 2026-10-24: 昼=16タイプ別の恋愛（mbti_love。毎日。伸びた型）／15:15=格言／夕=ランキングなど／夜=長文の深い系（long_deep。毎日）
-  ['mbti_love', 'maxim', 'gap_rank', 'long_deep'],
-  ['mbti_love', 'maxim_spirit', 'howto', 'long_deep'],
-  ['mbti_love', 'maxim', 'beast_pair_rank', 'long_deep'],
-  ['mbti_love', 'maxim', 'coined_feeling', 'long_deep'],
-  ['mbti_love', 'maxim_spirit', 'card_voice', 'long_deep'],
-  ['mbti_love', 'maxim', 'flip', 'long_deep'],
-  ['mbti_love', 'maxim', 'voice', 'long_deep'],
-  ['mbti_love', 'maxim_spirit', 'mbti_habit', 'long_deep'],
-  ['mbti_love', 'maxim', 'deep', 'long_deep'],
-  ['mbti_love', 'maxim', 'pair_teaser', 'long_deep'],
+  // 2026-10-31: 昼12:15=mbti_love（毎日）／15:15=格言／夕18:15=gap_rank（毎日。約14万表示の型。リプ欄にサイトのリンク）／夜20:15=long_deep（毎日）／22:15=日替わり
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'beast_pair_rank'],
+  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'howto'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'coined_feeling'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'card_voice'],
+  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'flip'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'mbti_habit'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'voice'],
+  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'beast_pair_rank'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'deep'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'pair_teaser'],
 ];
 const PLAN_START_DAYS = dayPillar('2026-10-08').days;
 

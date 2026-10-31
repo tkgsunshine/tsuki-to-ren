@@ -67,7 +67,10 @@ export function lintPost(post, history = [], opts = {}) {
     if (urls.some((u) => !u.startsWith(SITE_URL))) problems.push('月と蓮以外のURLは入れない');
   } else {
     // コラム紹介（opts.columnUrl）だけは、月と蓮のコラムURLを1つ入れてよい（サイトのコンテンツで、アプリの宣伝ではない）
-    if (opts.columnUrl) {
+    if (opts.siteUrl) {
+      // ランキングの返信だけ、サイトのURLを1つ入れてよい（2026-10-31〜）
+      if (urls.length !== 1 || !urls[0].startsWith(`${SITE_URL}/`)) problems.push(`ランキングの返信には ${SITE_URL}/ のURLを1つだけ入れる`);
+    } else if (opts.columnUrl) {
       if (urls.length !== 1 || !urls[0].startsWith(`${SITE_URL}/column/`)) problems.push(`コラム紹介には ${SITE_URL}/column/ のURLを1つだけ入れる`);
     } else if (urls.length) problems.push('サイト公開前のためURLは入れない');
     for (const w of PRELAUNCH_NG) if (text.includes(w)) problems.push(`サイト公開前のため「${w}」は使わない`);

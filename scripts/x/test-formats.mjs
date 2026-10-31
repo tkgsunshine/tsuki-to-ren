@@ -23,7 +23,7 @@ test('型の一覧（A〜F）: 3つの目的（バズ・フォロー・アプリ
   }
 });
 
-test('毎日4本: 4つの枠すべてに型が入り、1日にアプリ誘導は最大1本。10日で全ての型が出る', () => {
+test('毎日5本: 5つの枠すべてに型が入り、1日にアプリ誘導は最大1本。10日で全ての型が出る', () => {
   const seen = new Set();
   for (let i = 0; i < 20; i++) {
     const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
@@ -33,7 +33,7 @@ test('毎日4本: 4つの枠すべてに型が入り、1日にアプリ誘導は
     for (const f of Object.values(day)) seen.add(f.id);
   }
   assert.equal(seen.size, FORMATS.length, '全ての型が一巡する');
-  assert.deepEqual(BUZZ_SLOTS, ['noon', 'pm', 'evening', 'night']);
+  assert.deepEqual(BUZZ_SLOTS, ['noon', 'pm', 'evening', 'night', 'late']);
 });
 
 test('事実はアプリの鑑定ロジックから出る（16タイプ4つ・今日の月）', () => {
@@ -130,7 +130,9 @@ test('アプリの予告: リリース済みなので、返信に予告の行は
   assert.deepEqual(FORMAT_TEASER, {});
   const r = buildBeastPairRanking('2026-10-07');
   assert.ok(!r.replyText2.includes('近日') && r.replyText2.trimEnd().endsWith('-月-'));
-  for (const text of [t, r.replyText2]) assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), []);
+  assert.ok(r.replyText2.includes('utm_source=x'), 'ランキングの返信には、サイトのリンクが入る（2026-10-31〜）');
+  assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text: t }, [], OPTS), []);
+  assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text: r.replyText2 }, [], { ...OPTS, siteUrl: true }), []);
 });
 
 test('守護獣の相性ランキング: 主役を1つ選び、本文は4位から、返信1は1〜3位（メダル＋一言）、返信2はワースト。点数は、アプリの鑑定ロジック（0〜100点）', () => {
@@ -167,7 +169,7 @@ test('守護獣の相性ランキング: 本文と返信が自動チェックを
     anchors.add(r.anchor);
     seen.add(r.text);
     for (const text of [r.text, r.replyText, r.replyText2]) {
-      assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], OPTS), [], `${d}`);
+      assert.deepEqual(lintPost({ slot: 'evening', kind: 'value', text }, [], { ...OPTS, siteUrl: text === r.replyText2 }), [], `${d}`);
       assert.ok(weightedLength(text) <= 280, `${d} ${weightedLength(text)}`);
       assert.ok(!text.includes('％') && !text.includes('%'));
     }
