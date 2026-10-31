@@ -11,6 +11,7 @@ import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
+import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES } from '../utils/attributeNotes';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -522,10 +523,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
   };
 
   // 「五行 (陰陽)」の「？」: 五行と陰陽の意味を、木・火・土・金・水の色分けで説明する
-  const handleShowElementExplanation = (pillar: string, element: string) => {
+  const handleShowElementExplanation = (pillar: string, element: string, who: string = 'あなた') => {
     if (!pillar || !element) return;
     const [mine, yinYang] = element.split('・');
-    const body = `五行（ごぎょう）は、自然を「木・火・土・金・水」の5つに分けて、性格の傾向を見る考え方です。\n\nあなたの五行は、日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。${pillar}（${getKanjiReading(pillar)}）の「${pillar[0]}」は「${mine}」です。\n\n陰陽は、同じ五行の中での力の向きです。「陽」は外へ広がる力、「陰」は内にためる力を表します。あなたは「${yinYang === '陽' ? '陽：外へ広がる力' : '陰：内にためる力'}」です。`;
+    const body = `五行（ごぎょう）は、自然を「木・火・土・金・水」の5つに分けて、性格の傾向を見る考え方です。\n\n${who}の五行は、日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。${pillar}（${getKanjiReading(pillar)}）の「${pillar[0]}」は「${mine}」です。\n\n陰陽は、同じ五行の中での力の向きです。「陽」は外へ広がる力、「陰」は内にためる力を表します。${who}は「${yinYang === '陽' ? '陽：外へ広がる力' : '陰：内にためる力'}」です。`;
     setExplanation({
       title: `五行 (陰陽): ${element}`,
       reading: 'ごぎょう（いんよう）',
@@ -540,13 +541,84 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <span style={{ fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.55 }}>
                   <strong style={{ color: ELEMENT_COLORS[n.element] }}>{n.element}（{n.reading}）</strong>
                   <span style={{ color: '#a9a49a' }}>　{n.image}</span>
-                  {isMine && <span style={{ color: '#f2e2b3', fontWeight: 'bold' }}>　← あなた</span>}
+                  {isMine && <span style={{ color: '#f2e2b3', fontWeight: 'bold', whiteSpace: 'nowrap' }}>　← {who}</span>}
                   <br />{n.note}
                 </span>
               </div>
             );
           })}
           <a href="/tools/nicchu" style={{ fontSize: '0.72rem', color: '#e2c074', marginTop: '0.35rem' }}>日柱を、60通りの一覧でくわしく見る</a>
+        </div>
+      )
+    });
+  };
+
+  // 「性格分類」の「？」: 12種類すべてを並べ、本人の分類を強調する
+  const handleShowPersonalityExplanation = (pillar: string, who: string = 'あなた') => {
+    if (!pillar || pillar.length < 2) return;
+    const branch = pillar[1];
+    const mine = PERSONALITY_NOTES.find((n) => n.branch === branch);
+    if (!mine) return;
+    const body = `性格分類は、生まれた日の十二支で決まる、${who}の性格のいちばん大きな特徴です。日柱（にっちゅう：生まれた日を表す2文字）の2文字目で決まります。\n\n${pillar}（${getKanjiReading(pillar)}）の「${branch}（${mine.reading}）」は「${mine.name}」タイプです。${mine.note}${mine.love}\n\n※分類の名前は、十二支の動物の特徴をもとに、月と蓮が名づけたものです。`;
+    setExplanation({
+      title: `性格分類: ${mine.name}`,
+      reading: 'せいかくぶんるい',
+      body,
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left', margin: '-0.5rem 0 1.25rem' }}>
+          <span style={{ fontSize: '0.72rem', color: '#e2c074', fontWeight: 'bold' }}>全12タイプ</span>
+          {PERSONALITY_NOTES.map((n) => {
+            const isMine = n.branch === branch;
+            return (
+              <div key={n.branch} style={{ display: 'flex', gap: '0.55rem', alignItems: 'flex-start', padding: '0.45rem 0.55rem', borderRadius: '10px', background: isMine ? 'rgba(226,192,116,0.1)' : 'transparent', border: `1px solid ${isMine ? 'rgba(226,192,116,0.7)' : 'rgba(255,255,255,0.06)'}` }}>
+                <span className="font-serif" style={{ flexShrink: 0, width: '1.9rem', height: '1.9rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1rem', color: '#0b111b', background: isMine ? '#e2c074' : '#a9a49a' }}>{n.branch}</span>
+                <span style={{ fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.55 }}>
+                  <strong style={{ color: isMine ? '#f2e2b3' : '#e7e1d5' }}>{n.name}</strong>
+                  <span style={{ color: '#a9a49a' }}>　{n.animal}</span>
+                  {isMine && <span style={{ color: '#f2e2b3', fontWeight: 'bold', whiteSpace: 'nowrap' }}>　← {who}</span>}
+                  <br />{n.note}
+                  <br /><span style={{ color: '#cdbfe2' }}>{n.love}</span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )
+    });
+  };
+
+  // 「守護カラー」の「？」: 10種類すべてを色見本つきで並べ、本人の色を強調する
+  const handleShowColorExplanation = (pillar: string, who: string = 'あなた') => {
+    if (!pillar) return;
+    const stem = pillar[0];
+    const mine = GUARDIAN_COLOR_NOTES.find((n) => n.stem === stem);
+    if (!mine) return;
+    const swatch = (c: string) => (
+      <span key={c} style={{ display: 'inline-block', width: '0.95rem', height: '0.95rem', borderRadius: '50%', background: COLOR_SWATCHES[c] || '#888', border: '1px solid rgba(255,255,255,0.45)' }} />
+    );
+    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。\n\n※2色の組み合わせは、五行の色をもとに、月と蓮が選んだものです。`;
+    setExplanation({
+      title: `守護カラー: ${mine.color}`,
+      reading: 'しゅごからー',
+      body,
+      content: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left', margin: '-0.5rem 0 1.25rem' }}>
+          <span style={{ fontSize: '0.72rem', color: '#e2c074', fontWeight: 'bold' }}>全10種類</span>
+          {GUARDIAN_COLOR_NOTES.map((n) => {
+            const isMine = n.stem === stem;
+            const el = n.element.split('・')[0];
+            return (
+              <div key={n.stem} style={{ display: 'flex', gap: '0.55rem', alignItems: 'flex-start', padding: '0.45rem 0.55rem', borderRadius: '10px', background: isMine ? 'rgba(255,255,255,0.07)' : 'transparent', border: `1px solid ${isMine ? (ELEMENT_COLORS[el] || '#e2c074') : 'rgba(255,255,255,0.06)'}` }}>
+                <span style={{ flexShrink: 0, display: 'flex', gap: '2px', paddingTop: '0.15rem' }}>{n.colors.map(swatch)}</span>
+                <span style={{ fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.55 }}>
+                  <strong style={{ color: '#e7e1d5' }}>{n.color}</strong>
+                  <span style={{ color: '#a9a49a' }}>　{n.stem}（{n.reading}）・<span style={{ color: ELEMENT_COLORS[el] }}>{el}</span></span>
+                  {isMine && <span style={{ color: '#f2e2b3', fontWeight: 'bold', whiteSpace: 'nowrap' }}>　← {who}</span>}
+                  <br />{n.note}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )
     });
@@ -1432,11 +1504,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   })()}
                 </div>
                 <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>性格分類</span>
+                  <button
+                    type="button"
+                    aria-label="性格分類の説明と全12タイプを見る"
+                    onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
+                  >
+                    性格分類
+                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
+                  </button>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
                 </div>
                 <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3' }}>守護カラー</span>
+                  <button
+                    type="button"
+                    aria-label="守護カラーの説明と全10種類を見る"
+                    onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
+                  >
+                    守護カラー
+                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
+                  </button>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
                 </div>
               </div>
@@ -1704,7 +1792,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <button
                     type="button"
                     aria-label="五行（陰陽）の説明を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰'); }}
+                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', 'お相手'); }}
                     style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
                   >
                     五行 (陰陽)
@@ -1720,11 +1808,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   })()}
                 </div>
                 <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>性格分類</span>
+                  <button
+                    type="button"
+                    aria-label="性格分類の説明と全12タイプを見る"
+                    onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', 'お相手'); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
+                  >
+                    性格分類
+                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
+                  </button>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
                 </div>
                 <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#d5cfc3' }}>守護カラー</span>
+                  <button
+                    type="button"
+                    aria-label="守護カラーの説明と全10種類を見る"
+                    onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', 'お相手'); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
+                  >
+                    守護カラー
+                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
+                  </button>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
                 </div>
               </div>
@@ -3412,7 +3516,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 1300,
+            zIndex: 9995, // 下のシェアボタン（9990）より前に出す
             animation: 'fadeIn 0.2s ease',
             padding: '1.5rem'
           }} onClick={() => setExplanation(null)}>
