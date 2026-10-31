@@ -5304,5 +5304,50 @@
     "maxWeight": 2000,
     "status": "scheduled",
     "createdAt": "2026-10-30T17:58:28.949Z"
+  },
+  {
+    "id": "2026-10-31-evening",
+    "date": "2026-10-31",
+    "slot": "evening",
+    "kind": "value",
+    "text": "見た目はクール、恋愛はいちばん一途な16タイプ（MBTI）\n\n3位 INTP 論理学者\n4位 ISTJ 管理者\n5位 INFJ 提唱者\n6位 ENTJ 指揮官\n7位 ESTP 起業家\n8位 ISFJ 擁護者\n9位 ESTJ 幹部\n10位 INFP 仲介者\n11位 ENTP 討論者\n12位 ISFP 冒険家\n13位 ENFJ 主人公\n14位 ESFJ 領事官\n\n1位・2位と15位・16位は、リプ欄に。あなたは何位？\n-月-",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "maxWeight": 700,
+    "status": "scheduled",
+    "createdAt": "2026-10-31T05:00:11.019Z"
+  },
+  {
+    "id": "2026-10-31-evening-reply",
+    "date": "2026-10-31",
+    "slot": "evening",
+    "kind": "value",
+    "text": "1位 INTJ 建築家\n2位 ISTP 巨匠\n\n15位 ENFP 運動家\n16位 ESFP エンターテイナー\n\nあなたは何位だった？\n\nあなたのタイプの恋愛運は、月と蓮で見られます\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=ranking\n-月-",
+    "replyTo": "2026-10-31-evening",
+    "format": "gap_rank_reply",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-31T05:00:11.019Z"
+  },
+  {
+    "id": "2026-10-31-late",
+    "date": "2026-10-31",
+    "slot": "late",
+    "kind": "value",
+    "text": "考えすぎて眠れない夜は、ここに戻ってきてね。\n#恋愛 #片思い\n-月-",
+    "format": "card_voice",
+    "system": "psychology",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-10-31T05:00:11.019Z",
+    "card": {
+      "text": "好きな人を想って|疲れちゃう日も、|それは[本気]の証拠だよ。",
+      "who": "月",
+      "style": "portrait",
+      "expression": "gaze"
+    },
+    "image": "data/x/cards/2026-10-31-late.png"
   }
 ]
