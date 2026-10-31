@@ -5,7 +5,7 @@ import { calculateHonmeiStar, getStemTraits, getStarCompatibility, getPillarPair
 import { STEM_YOMI, ANIMAL_YOMI } from './characters.mjs';
 import { weightedLength } from './lint.mjs';
 import { dayPillar, MBTI_TYPES as MBTI_OBJS } from './signals.mjs';
-import { BEAST_TEASER, BEAST_LINK, BEAST_CTA, GAP_CTA, GAP_LINK } from './teasers.mjs';
+import { BEAST_TEASER, BEAST_LINK, BEAST_CTA, GAP_CTA, MB_BEAST_LINK } from './teasers.mjs';
 
 const MBTI_TYPES = MBTI_OBJS.map((t) => t.code);
 
@@ -185,7 +185,7 @@ export function buildMbtiBeastRanking(date) {
     '',
     'あなたと好きな人の組み合わせは、何点だと思う？',
     '',
-    GAP_LINK,
+    MB_BEAST_LINK,
     '-月-',
   ].join('\n');
   return { text, replyText, anchor: anchorName, top, worst };

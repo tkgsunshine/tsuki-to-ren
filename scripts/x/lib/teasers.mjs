@@ -24,6 +24,8 @@ export const BEAST_CTA = '生年月日だけで、あなたの守護獣と好き
 /** 返信に入れる、一言とURL */
 export const GAP_LINK = `MBTIと生年月日だけで、好きな人との相性まで鑑定できます↓\n${RANK_LINK_URL}`;
 export const BEAST_LINK = `生年月日だけで、あなたの守護獣と好きな人との相性を鑑定できます↓\n${RANK_LINK_URL}`;
+/** MBTI×守護獣ランキングの返信に入れる、一言とURL（2026-10-31 運営の指示: 「あなたの守護獣を鑑定」のように） */
+export const MB_BEAST_LINK = `あなたの守護獣を、生年月日で鑑定できます↓\n${RANK_LINK_URL}`;
 /** 相性占いの紹介（pair_teaser）の返信に入れる、一言とURL（2026-10-31〜。URLはリプ欄にだけ） */
 export const PAIR_LINK = `MBTIと生年月日だけで、あなたと好きな人の相性を鑑定できます↓\n${SITE_URL}/?utm_source=x&utm_medium=pair`;
 /** 署名の行の直前に、リンクの行を入れる。すでに入っていれば、そのまま */
