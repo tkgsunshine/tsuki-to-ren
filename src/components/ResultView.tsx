@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
-import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, LoveLetterMark, GiftMark, RoadmapMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark } from './icons/BrandIcons';
 import { getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
@@ -11,6 +11,8 @@ import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
+import { buildLineKit } from '../utils/lineKit';
+import { LineKitSection } from './LineKitSection';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -2609,55 +2611,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
-            {/* 6. そのまま使えるLINEキラーテンプレート */}
-            <div style={{ background: 'rgba(159, 134, 192, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(159, 134, 192, 0.2)', position: 'relative' }}>
-              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#b9a3d6', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <LoveLetterMark size={18} />
-                <span>そのまま使えるLINEキラーテンプレート</span>
-              </div>
-              <div className="font-serif" style={{
-                fontSize: '0.78rem',
-                color: '#f0ebf5',
-                lineHeight: '1.6',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.35rem'
-              }}>
-                <div><strong>【自然にデートに誘う例文】</strong></div>
-                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                  {(activeResult.opponentTorisetsu.lineTemplateInvite || '「前に言ってたお店、今度サクッと行かない？」').replace(/〇〇/g, oppNickname || 'お相手')}
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}>
-                    <div style={{ marginTop: '0.2rem' }}><strong>【距離を縮める質問テンプレ】</strong></div>
-                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                      {lockedText((activeResult.opponentTorisetsu.lineTemplateTopic || '「休みの日って何してる時がいちばん癒される？」').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
-                    </div>
-                  </div>
-                  {!isSubscribed && (
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 10,
-                width: '90%',
-                display: 'flex',
-                justifyContent: 'center',
-                pointerEvents: 'auto'
-              }}>
-                <button
-                  type="button"
-                  className="premium-lock-tag"
-                  onClick={handleLockTagClick}
-                >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
-                </button>
-              </div>
-            )}
-                </div>
-              </div>
-            </div>
+            {/* 6. そのまま使えるLINEキラーテンプレート（お相手の性格タイプ×生まれ持った星から作る。中身は utils/lineKit.ts） */}
+            {(() => {
+              const kit = buildLineKit(activeResult.opponentMbtiCode, activeResult.opponentPillar);
+              return kit ? (
+                <LineKitSection kit={kit} isSubscribed={isSubscribed} isRegistered={isRegistered} onLockClick={handleLockTagClick} />
+              ) : null;
+            })()}
 
             {/* 7. 喜ばれるデート＆プレゼント傾向 */}
             <div style={{ background: 'rgba(226, 192, 116, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 192, 116, 0.2)' }}>
