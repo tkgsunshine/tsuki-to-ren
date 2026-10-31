@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
-import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog } from './metrics.mjs';
+import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog, toPrivateMetrics } from './metrics.mjs';
 
 const now = new Date('2026-10-10T00:00:00Z');
 const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
@@ -169,4 +169,16 @@ test('返信の記録: 他のアカウントへの返信だけを残し、既存
   ];
   const out = mergeRepliesLog(log, tweets, 'me', [{ id: 'ua', username: 'a' }]);
   assert.deepEqual(out.map((r) => [r.id, r.impressions, r.to]), [['1', 50, 'a']]);
+});
+
+test('non_public_metrics: プロフィールへのクリックとリンクのクリックを保存し、レポートに出す（取れないときは、その旨を書く）', () => {
+  const m = toPrivateMetrics({ impression_count: 1000, user_profile_clicks: 12, url_link_clicks: 3 }, new Date('2026-10-31T00:00:00Z'));
+  assert.deepEqual({ ...m, at: undefined }, { at: undefined, impressions: 1000, profileClicks: 12, urlClicks: 3 });
+  const q = [{ id: 'a', slot: 'evening', kind: 'value', format: 'gap_rank', text: 'x\n-月-', tweetId: '1', metrics24: toMetrics({ impression_count: 1000 }), metricsPrivate: m }];
+  const r = buildReport(q, [], new Date('2026-10-31T00:00:00Z'), { pinned: { id: '9', impressions: 211, profileClicks: null, urlClicks: null } });
+  assert.match(r, /プロフィールクリック \| \(率\)/);
+  assert.match(r, /1\.20%/);
+  assert.match(r, /固定ポスト（9）: 表示 211/);
+  const none = buildReport([], [], new Date(), { privateError: 'Forbidden' });
+  assert.match(none, /取得できませんでした: Forbidden/);
 });
