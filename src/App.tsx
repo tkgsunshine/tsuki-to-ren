@@ -16,7 +16,7 @@ import { mbtiOptions } from './constants/mbti';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
-import { generateFortuneResult } from './utils/fortuneEngine';
+import { generateFortuneResult, san } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
 import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, MessageCircle, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
 import { MoonMark } from './components/icons/BrandIcons';
@@ -781,7 +781,7 @@ function App() {
   const subHasPartner = !!(notifySub && notifySub.mode !== 'single' && notifySub.oppBirth);
   const isSubPartner = (p: SavedPartner) => subHasPartner && p.name === notifySub?.oppName && p.birth.replace(/\//g, '-') === notifySub?.oppBirth;
   const showKeepTarget = subHasPartner && !savedPartners.some(isSubPartner);
-  const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${notifySub.oppName || 'お相手'}さんとの相性` : 'あなたの運勢');
+  const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${san(notifySub.oppName)}との相性` : 'あなたの運勢');
   // Whether the reading on screen (the partner now, or the solo reading) is the one the daily mail is about
   const notifyIsCurrentReading = !!notifySub && (mode === 'match'
     ? subHasPartner && notifySub.oppName === oppName && notifySub.oppBirth === oppBirth.replace(/\//g, '-')
@@ -832,7 +832,7 @@ function App() {
       showAlert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
       return;
     }
-    const target = mode === 'match' ? `${oppName || 'お相手'}さんとの相性` : 'あなたの運勢';
+    const target = mode === 'match' ? `${san(oppName)}との相性` : 'あなたの運勢';
     const ok = await showConfirm(`毎朝8時の通知を「${target}」に切り替えますか？`, { okLabel: '切り替える', cancelLabel: 'やめる' });
     if (!ok) return;
     const partner: SavedPartner | null = mode === 'match'
@@ -915,7 +915,7 @@ function App() {
         setNotifyAfterPartnerAdd(false);
         openNotifyModal(newPartner.id);
       } else {
-        showAlert(`${newPartner.name}様の情報を保存しました。`);
+        showAlert(`${san(newPartner.name)}の情報を保存しました。`);
       }
       return;
     }
@@ -975,7 +975,7 @@ function App() {
     };
 
     setSavedPartners([...savedPartners, newPartner]);
-    showAlert(`${newPartner.name}様の情報を保存しました。`);
+    showAlert(`${san(newPartner.name)}の情報を保存しました。`);
     return newPartner;
   };
 
@@ -2564,7 +2564,7 @@ function App() {
                             <button
                               type="button"
                               onClick={() => {
-                                showConfirm(`${partner.name}様の保存データを削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
+                                showConfirm(`${san(partner.name)}の保存データを削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
                                 });
                               }}
@@ -3121,8 +3121,8 @@ function App() {
               <span style={{ fontSize: '0.75rem', color: '#a9a49a' }}>誰との運勢を届ける？</span>
               {[
                 { id: 'self', label: '🌙 自分だけの運勢' },
-                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${notifySub?.oppName || 'お相手'}さんとの相性（いまの設定）` }] : []),
-                ...savedPartners.map(p => ({ id: p.id, label: `💞 ${p.name}さんとの相性` }))
+                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${san(notifySub?.oppName)}との相性（いまの設定）` }] : []),
+                ...savedPartners.map(p => ({ id: p.id, label: `💞 ${san(p.name)}との相性` }))
               ].map(opt => (
                 <button
                   key={opt.id}
@@ -3190,7 +3190,7 @@ function App() {
 
                 const partner = savedPartners.find(p => p.id === notifyTarget);
                 if (partner && !isValidBirthDate(partner.birth.replace(/\//g, '-'))) {
-                  showAlert(`${partner.name}様の生年月日が正しくありません。「保存したお相手」で直してから選んでください。`);
+                  showAlert(`${san(partner.name)}の生年月日が正しくありません。「保存したお相手」で直してから選んでください。`);
                   return;
                 }
 

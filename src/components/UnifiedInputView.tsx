@@ -5,6 +5,7 @@ import type { SavedPartner } from '../App';
 import { CustomDatePicker } from './CustomDatePicker';
 import { mbtiOptions } from '../constants/mbti';
 import { showFieldError, showConfirm } from './AppDialog';
+import { san } from '../utils/fortuneEngine';
 export { mbtiOptions };
 
 interface UnifiedInputViewProps {
@@ -520,7 +521,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          showConfirm(`${partner.name}様を削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
+                          showConfirm(`${san(partner.name)}を削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
                             if (ok) onDeletePartner(partner.id);
                           });
                         }}

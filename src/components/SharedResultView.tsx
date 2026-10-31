@@ -1,7 +1,7 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
 import { MoonPhaseMark } from './icons/BrandIcons';
-import { getScoreMood } from '../utils/fortuneEngine';
+import { getScoreMood, san } from '../utils/fortuneEngine';
 import { SHARE_LINES, SHARE_MBTI_NAMES, SHARE_TITLES } from '../../api/_lib/share-card-text.js';
 
 // 共有リンク（/share/card → api/share.js）から来た人に、共有した人の鑑定結果を見せ、自分の鑑定へ誘う。
@@ -54,7 +54,6 @@ interface Props {
   onStart: () => void;
 }
 
-const san = (n: string) => (n === 'お友だち' ? n : `${n}さん`);
 
 const Person: React.FC<{ name: string; avatar?: string; mbti?: string }> = ({ name, avatar, mbti }) => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', width: '42%' }}>
