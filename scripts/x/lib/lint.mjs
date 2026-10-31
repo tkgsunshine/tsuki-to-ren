@@ -41,6 +41,7 @@ const KINDS = ['value', 'promo'];
 
 /** 投稿1件を検査。問題の配列（空なら合格） */
 // opts.allowLinks=false: サイト公開前。URLと誘導文言を禁止し、promoは「近日公開」の予告にする
+// opts.allowLinks=true（2026-10-31〜。リリース済み）: 月と蓮のURLは、リプ欄（opts.reply）にだけ入れてよい
 export function lintPost(post, history = [], opts = {}) {
   const allowLinks = opts.allowLinks !== false;
   const problems = [];
@@ -58,21 +59,19 @@ export function lintPost(post, history = [], opts = {}) {
   for (const w of STEALTH) if (text.includes(w)) problems.push(`第三者を装う表現「${w}」は使わない（ステマ防止）`);
 
   const urls = text.match(URL_RE) || [];
+  // ランキングの返信（opts.siteUrl）は、サイトのURLを1つだけ入れる（2026-10-31〜）
+  if (opts.siteUrl) {
+    if (urls.length !== 1 || !urls[0].startsWith(`${SITE_URL}/`)) problems.push(`ランキングの返信には ${SITE_URL}/ のURLを1つだけ入れる`);
+  } else if (opts.columnUrl) {
+    // コラム紹介は、月と蓮のコラムURLを1つだけ入れる
+    if (urls.length !== 1 || !urls[0].startsWith(`${SITE_URL}/column/`)) problems.push(`コラム紹介には ${SITE_URL}/column/ のURLを1つだけ入れる`);
+  }
+  if (urls.some((u) => !u.startsWith(SITE_URL))) problems.push('月と蓮以外のURLは入れない');
   if (allowLinks) {
-    if (post.kind === 'promo') {
-      if (!urls.some((u) => u.startsWith(SITE_URL))) problems.push(`promoには ${SITE_URL} のURLが必要`);
-    } else if (urls.length) {
-      problems.push('valueにはURLを入れない（誘導はpromoのみ）');
-    }
-    if (urls.some((u) => !u.startsWith(SITE_URL))) problems.push('月と蓮以外のURLは入れない');
+    // 2026-10-31〜: アプリはリリース済み。月と蓮のURLは、リプ欄（返信。opts.reply）にだけ、必要に応じて入れてよい（運営の指示）。本文に入れてよいのは、コラム紹介だけ
+    if (urls.length && !opts.reply && !opts.siteUrl && !opts.columnUrl) problems.push('URLは、本文ではなくリプ欄（返信）にだけ入れる');
   } else {
-    // コラム紹介（opts.columnUrl）だけは、月と蓮のコラムURLを1つ入れてよい（サイトのコンテンツで、アプリの宣伝ではない）
-    if (opts.siteUrl) {
-      // ランキングの返信だけ、サイトのURLを1つ入れてよい（2026-10-31〜）
-      if (urls.length !== 1 || !urls[0].startsWith(`${SITE_URL}/`)) problems.push(`ランキングの返信には ${SITE_URL}/ のURLを1つだけ入れる`);
-    } else if (opts.columnUrl) {
-      if (urls.length !== 1 || !urls[0].startsWith(`${SITE_URL}/column/`)) problems.push(`コラム紹介には ${SITE_URL}/column/ のURLを1つだけ入れる`);
-    } else if (urls.length) problems.push('サイト公開前のためURLは入れない');
+    if (!opts.siteUrl && !opts.columnUrl && urls.length) problems.push('サイト公開前のためURLは入れない');
     for (const w of PRELAUNCH_NG) if (text.includes(w)) problems.push(`サイト公開前のため「${w}」は使わない`);
     if (post.kind === 'promo' && !text.includes('近日公開')) problems.push('promoは「近日公開」の予告にする');
     if (text.includes('アプリ') && !text.includes('近日')) problems.push('サイト公開前のため「アプリ」は「近日」の予告のときだけ使う');

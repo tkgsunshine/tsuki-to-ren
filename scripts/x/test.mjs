@@ -38,8 +38,9 @@ test('lint: 合格・不合格', () => {
   assert.ok(lintPost({ ...ok, text: '日干が強い日です' }).length);
   assert.ok(lintPost({ ...ok, text: '友達に教えてもらったら当たりました' }).length);
   assert.ok(lintPost({ ...ok, text: 'あ'.repeat(141) }).length);
-  assert.ok(lintPost({ ...ok, kind: 'promo' }).length, 'promoにURLが無い');
-  assert.deepEqual(lintPost({ ...ok, kind: 'promo', text: `無料鑑定は月と蓮で ${SITE_URL}` }), []);
+  // 2026-10-31〜: URLはリプ欄にだけ。promoの本文にもURLは入れない
+  assert.deepEqual(lintPost({ ...ok, kind: 'promo' }), []);
+  assert.ok(lintPost({ ...ok, kind: 'promo', text: `無料鑑定は月と蓮で ${SITE_URL}` }).length, '本文にURL');
 });
 
 test('lint: サイト公開前（allowLinks=false）はURL・誘導・無料を禁止し、promoは近日公開にする', () => {
@@ -51,6 +52,17 @@ test('lint: サイト公開前（allowLinks=false）はURL・誘導・無料を�
   const promo = { id: 'b', slot: 'night', kind: 'promo' };
   assert.ok(lintPost({ ...promo, text: '今日もおつかれさま。—月' }, [], pre).length, '近日公開が無い');
   assert.deepEqual(lintPost({ ...promo, text: '今日もおつかれさま。恋愛占い『月と蓮』、近日公開予定。—月' }, [], pre), []);
+});
+
+test('lint: リリース後（allowLinks=true）は、月と蓮のURLをリプ欄にだけ入れてよい。ほかのURLは不可', () => {
+  const v = { id: 'c', slot: 'noon', kind: 'value', text: '今日は無理せず、ゆっくり過ごす日。\n-月-' };
+  assert.deepEqual(lintPost(v, []), []);
+  const withUrl = { ...v, text: `好きな人との相性は、無料で鑑定できるよ\n${SITE_URL}/?utm_source=x\n-月-` };
+  assert.ok(lintPost(withUrl, []).length, '本文にはURLを入れない');
+  assert.deepEqual(lintPost(withUrl, [], { reply: true }), []);
+  assert.ok(lintPost({ ...v, text: '詳しくは https://example.com/ で\n-月-' }, [], { reply: true }).length, '月と蓮以外のURL');
+  assert.deepEqual(lintPost({ ...v, kind: 'promo' }, []), [], 'promoの本文はURLなしでよい');
+  assert.ok(lintPost({ ...v, text: '相性はこちら\n-月-' }, [], { siteUrl: true }).length, 'ランキングの返信はURLが必要');
 });
 
 test('OAuth1署名: X公式ドキュメントのテストベクタと一致する', () => {
