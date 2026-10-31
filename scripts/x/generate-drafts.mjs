@@ -137,6 +137,8 @@ function validate(posts) {
     if (f.poll) {
       if (!p.replyText) problems.push(`${slot}: 問いかけ型は replyText（答え合わせの返信）も書く`);
       else for (const pr of lintPost({ slot, kind: 'value', text: p.replyText }, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}の返信: ${pr}`);
+    } else if (f.profileLine) {
+      if (!/プロフィール/.test(String(p.text))) problems.push(`${slot}: 最後に、プロフィールへ誘う一言（「プロフィール」を入れる）を、署名の前に入れる`);
     } else if (f.all16) {
       for (const c of MBTI_TYPES.map((x) => x.code)) if ((String(p.text).match(new RegExp(`(^|[^A-Z])${c}(?![A-Z])`, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、1回だけ書かれていない（16タイプ全員を、1行ずつ、抜け・重複なし）`);
     } else if (f.rank16) {
