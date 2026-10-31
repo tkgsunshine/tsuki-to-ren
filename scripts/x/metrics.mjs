@@ -89,6 +89,11 @@ export function toMetrics(pm = {}, now = new Date()) {
   };
 }
 
+/** API の non_public_metrics（自分の投稿だけ・30日以内）を、保存用の形にする。プロフィールへのクリックとリンクのクリックが取れる */
+export function toPrivateMetrics(npm = {}, now = new Date()) {
+  return { at: now.toISOString(), impressions: npm.impression_count ?? null, profileClicks: npm.user_profile_clicks ?? null, urlClicks: npm.url_link_clicks ?? null };
+}
+
 /** 取れた値を投稿に反映する。変えた件数を返す */
 export function applyMetrics(queue, byTweetId, now = new Date()) {
   let n = 0;
@@ -136,7 +141,22 @@ const table = (rows) =>
     .join('\n');
 
 /** data/x/report.md の本文 */
-export function buildReport(queue, followers = [], now = new Date()) {
+/** クリックの表（プロフィールへのクリック率＝クリック÷表示）。取れていなければ、その旨を書く */
+function clickLines(queue, extras = {}) {
+  const rows = queue.filter((p) => p.metricsPrivate && !p.replyTo && p.metricsPrivate.profileClicks != null)
+    .sort((a, b) => (b.metricsPrivate.impressions ?? 0) - (a.metricsPrivate.impressions ?? 0)).slice(0, 8);
+  const pct = (c, i) => (i ? `${((c / i) * 100).toFixed(2)}%` : '—');
+  const out = [];
+  if (extras.pinned) {
+    const x = extras.pinned;
+    out.push(`固定ポスト（${x.id}）: 表示 ${x.impressions ?? '—'} ／ プロフィールクリック ${x.profileClicks ?? '取得不可'} ／ リンククリック ${x.urlClicks ?? '取得不可'}`, '');
+  }
+  if (!rows.length) return [...out, extras.privateError ? `（取得できませんでした: ${extras.privateError}）` : '（まだデータがありません）'];
+  return [...out, '| 投稿 | 型 | 表示 | プロフィールクリック | (率) | リンククリック | (率) |', '|---|---|---|---|---|---|---|',
+    ...rows.map((p) => { const m = p.metricsPrivate; return `| ${p.id} | ${labelOf(p)} | ${m.impressions ?? '—'} | ${m.profileClicks} | ${pct(m.profileClicks, m.impressions)} | ${m.urlClicks ?? '—'} | ${pct(m.urlClicks ?? 0, m.impressions)} |`; })];
+}
+
+export function buildReport(queue, followers = [], now = new Date(), extras = {}) {
   const withM = queue.filter((p) => p.metrics24 && !p.replyTo);
   const top = [...withM].sort((a, b) => (b.metrics24.impressions ?? 0) - (a.metrics24.impressions ?? 0)).slice(0, 5);
   const last = followers.slice(-8);
@@ -154,6 +174,9 @@ export function buildReport(queue, followers = [], now = new Date()) {
     '',
     '## 表示回数の上位5本',
     ...(top.length ? top.map((p, i) => `${i + 1}. ${p.metrics24.impressions ?? '—'}回 ／ ${labelOf(p)} ／ ${p.id} ／ ${p.text.split('\n')[0]}`) : [none]),
+    '',
+    '## プロフィール・リンクのクリック（X API の non_public_metrics。取れた投稿だけ。投稿から30日以内）',
+    ...clickLines(queue, extras),
     '',
     '## フォロワー数（直近）',
     ...(last.length ? ['| 日付 | フォロワー | 投稿数 |', '|---|---|---|', ...last.map((r) => `| ${r.date} | ${r.followers} | ${r.tweets ?? ''} |`)] : [none]),
@@ -192,7 +215,7 @@ async function main() {
   let followers = readJson(FOLLOWERS_PATH, []);
   let me = null;
   try {
-    me = (await apiGet(creds, '/2/users/me', { 'user.fields': 'public_metrics' })).data;
+    me = (await apiGet(creds, '/2/users/me', { 'user.fields': 'public_metrics,pinned_tweet_id' })).data;
     const m = me?.public_metrics;
     if (m) {
       const date = jstDateString(now);
@@ -230,19 +253,38 @@ async function main() {
       errors.push(e.message);
     }
   }
+  // プロフィールへのクリック・リンクのクリック（non_public_metrics。投稿から30日以内の自分の投稿だけ取れる）。取れなくても、ほかの処理は続ける
+  const extras = {};
+  const recent = queue.filter((p) => p.tweetId && !p.replyTo && p.createdAt !== undefined && (now - new Date(p.postedAt || p.createdAt)) < 29 * 86400000);
+  const privIds = [...new Set([...recent.map((p) => p.tweetId), ...(me?.pinned_tweet_id ? [me.pinned_tweet_id] : [])])];
+  const priv = new Map();
+  for (let i = 0; i < privIds.length; i += 100) {
+    try {
+      const json = await apiGet(creds, '/2/tweets', { ids: privIds.slice(i, i + 100).join(','), 'tweet.fields': 'non_public_metrics,public_metrics,created_at' });
+      for (const t of json.data || []) priv.set(t.id, t);
+      for (const e of json.errors || []) extras.privateError = extras.privateError || `${e.title || ''} ${e.detail || ''}`.trim();
+    } catch (e) {
+      extras.privateError = e.message;
+    }
+  }
+  for (const p of queue) { const t = priv.get(p.tweetId); if (t?.non_public_metrics) p.metricsPrivate = toPrivateMetrics(t.non_public_metrics, now); }
+  if (me?.pinned_tweet_id && priv.get(me.pinned_tweet_id)) {
+    const t = priv.get(me.pinned_tweet_id);
+    extras.pinned = { id: t.id, impressions: t.non_public_metrics?.impression_count ?? t.public_metrics?.impression_count ?? null, profileClicks: t.non_public_metrics?.user_profile_clicks ?? null, urlClicks: t.non_public_metrics?.url_link_clicks ?? null };
+  }
   const applyTo = new Map(targets.map((p) => [p.tweetId, byId.get(p.tweetId)]).filter(([, v]) => v));
   const updated = applyMetrics(queue, applyTo, now);
   console.log(`対象${targets.length}件 → 反応を更新${updated}件`);
 
   if (errors.length) console.warn(`::warning::X API の取得で問題があります（プラン・残高・権限を確認）\n${errors.join('\n')}`);
   if (dryRun) {
-    console.log(buildReport(queue, followers, now));
+    console.log(buildReport(queue, followers, now, extras));
     return;
   }
-  if (updated || reconciled) writeQueue(queue);
+  if (updated || reconciled || queue.some((p) => p.metricsPrivate)) writeQueue(queue);
   writeJson(FOLLOWERS_PATH, followers);
   writeJson(REPLIES_LOG_PATH, repliesLog);
-  fs.writeFileSync(REPORT_PATH, buildReport(queue, followers, now), 'utf-8');
+  fs.writeFileSync(REPORT_PATH, buildReport(queue, followers, now, extras), 'utf-8');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();
