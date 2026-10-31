@@ -395,7 +395,7 @@ export function calculateHonmeiStar(birthDate) {
     return stars[starNum - 1];
 }
 // 四柱推命・九星気学ビジュアル設計データマッピング
-const stemThemes = {
+export const stemThemes = {
     '甲': { theme: '巨木の王', element: '木・陽', color: '深緑・金', desc: '大剣、樹木、龍' },
     '乙': { theme: '精霊使い', element: '木・陰', color: '黄緑・白', desc: '蔦、花、風' },
     '丙': { theme: '太陽の英雄', element: '火・陽', color: '赤・金', desc: '炎剣、太陽' },
@@ -407,7 +407,7 @@ const stemThemes = {
     '壬': { theme: '海王の嵐使い', element: '水・陽', color: '紺・青', desc: '津波、龍、水槍' },
     '癸': { theme: '深海の術師', element: '水・陰', color: '蒼・水色', desc: '水球、霧、幻影' }
 };
-const branchPersonalities = {
+export const branchPersonalities = {
     '子': '知略', '丑': '忍耐', '寅': '王者', '卯': '優雅', '辰': '覇王', '巳': '知性', '午': '情熱', '未': '癒し', '申': '策士', '酉': '美意識', '戌': '忠誠', '亥': '信念'
 };
 const branchThemes = {
