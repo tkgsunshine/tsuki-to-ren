@@ -21,6 +21,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
     "@resvg/resvg-wasm": "^2.0.0-alpha.4",
+    "@vercel/analytics": "2.0.1",
     "@vercel/og": "^1.0.0",
     "firebase": "^12.18.0",
     "firebase-admin": "^13.10.0",
