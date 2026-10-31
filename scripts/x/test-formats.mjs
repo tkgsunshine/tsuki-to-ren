@@ -300,13 +300,15 @@ test('MBTI×守護獣のランキング: 点数は16タイプ40：守護獣30の
   for (let i = 0; i < 30; i++) {
     const d = new Date(Date.UTC(2026, 10, 1 + i)).toISOString().slice(0, 10);
     const r = buildMbtiBeastRanking(d);
-    assert.equal(r.top.length, 12);
-    assert.deepEqual(r.top.map((t) => t.rank), Array.from({ length: 12 }, (_, k) => k + 1));
-    for (let k = 1; k < 12; k++) assert.ok(r.top[k - 1].score >= r.top[k].score, `${d}: 点数の降順`);
-    assert.equal(new Set(r.top.map((t) => t.mbti)).size, 12);
-    assert.equal(new Set(r.top.map((t) => t.beast)).size, 12);
+    assert.equal(r.top.length, 14);
+    assert.equal(r.worst.length, 2);
+    assert.deepEqual(r.top.map((t) => t.rank), Array.from({ length: 14 }, (_, k) => k + 1));
+    for (let k = 1; k < 14; k++) assert.ok(r.top[k - 1].score >= r.top[k].score, `${d}: 点数の降順`);
+    assert.equal(new Set(r.top.map((t) => t.mbti)).size, 14);
+    assert.equal(new Set(r.top.map((t) => t.beast)).size, 14);
     assert.ok(!/https?:\/\//.test(r.text), `${d}: 本文にURLを入れない`);
-    assert.ok(/^4位 /m.test(r.text) && !/^🥇1位/m.test(r.text), `${d}: 1〜3位は本文に出さない`);
+    assert.ok(/^🥉3位 /m.test(r.text) && /^14位 /m.test(r.text) && !/^🥇1位|^🥈2位/m.test(r.text), `${d}: 本文は3位〜14位`);
+    assert.ok(/^🥇1位 /m.test(r.replyText) && /^🥈2位 /m.test(r.replyText) && !/3位/.test(r.replyText) && !/ワースト3/.test(r.replyText), `${d}: リプ欄は1位・2位とワースト2だけ`);
     assert.deepEqual(lintPost({ slot: 'late', kind: 'value', text: r.text }, [], { maxWeight: 700 }), [], d);
     assert.deepEqual(lintPost({ slot: 'late', kind: 'value', text: r.replyText }, [], { maxWeight: 700, reply: true }), [], d);
   }
