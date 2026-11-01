@@ -562,7 +562,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const body = `性格分類は、生まれた日の十二支で決まる、${who}の性格のいちばん大きな特徴です。日柱（にっちゅう：生まれた日を表す2文字）の2文字目で決まります。\n\n${pillar}（${getKanjiReading(pillar)}）の「${branch}（${mine.reading}）」は「${mine.name}」タイプです。${mine.note}${mine.love}\n\n※分類の名前は、十二支の動物の特徴をもとに、月と蓮が名づけたものです。`;
     setExplanation({
       title: `性格分類: ${mine.name}`,
-      reading: 'せいかくぶんるい',
+      reading: '',
       body,
       content: (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left', margin: '-0.5rem 0 1.25rem' }}>
@@ -599,7 +599,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。\n\n※2色の組み合わせは、五行の色をもとに、月と蓮が選んだものです。`;
     setExplanation({
       title: `守護カラー: ${mine.color}`,
-      reading: 'しゅごからー',
+      reading: '',
       body,
       content: (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left', margin: '-0.5rem 0 1.25rem' }}>
@@ -3536,9 +3536,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <h3 className="font-serif gold-text" style={{ fontSize: '1.15rem', fontWeight: 'bold', margin: '0 0 0.35rem 0', letterSpacing: '0.05em' }}>
                 {explanation.title}
               </h3>
-              <div style={{ fontSize: '0.72rem', color: '#a996c9', marginBottom: '0.95rem', fontWeight: '600', letterSpacing: '0.05em' }}>
-                【よみがな】 {explanation.reading}
-              </div>
+              {explanation.reading ? (
+                <div style={{ fontSize: '0.72rem', color: '#a996c9', marginBottom: '0.95rem', fontWeight: '600', letterSpacing: '0.05em' }}>
+                  【よみがな】 {explanation.reading}
+                </div>
+              ) : <div style={{ marginBottom: '0.6rem' }} />}
               <p className="font-serif" style={{ fontSize: '0.75rem', color: '#d8d2c6', lineHeight: '1.6', margin: '0 0 1.25rem 0', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
                 {explanation.body}
               </p>
