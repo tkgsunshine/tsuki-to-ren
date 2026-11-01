@@ -62,7 +62,7 @@ async function main() {
           max_results: String(Math.min(100, MAX_PER_ACCOUNT - count)),
           start_time: since,
           exclude: 'retweets,replies',
-          'tweet.fields': 'created_at,public_metrics,note_tweet,attachments,referenced_tweets,conversation_id',
+          'tweet.fields': 'created_at,public_metrics,note_tweet,attachments,referenced_tweets,conversation_id,entities',
           expansions: 'attachments.media_keys',
           'media.fields': 'type',
         };
@@ -79,6 +79,7 @@ async function main() {
             text: decode(t.note_tweet?.text || t.text),
             media: (t.attachments?.media_keys || []).map((k) => media.get(k) || 'unknown'),
             quote: (t.referenced_tweets || []).some((r) => r.type === 'quoted'),
+            links: (t.entities?.urls || []).map((u) => u.expanded_url).filter(Boolean),
             impressions: pm.impression_count ?? null,
             likes: pm.like_count,
             replies: pm.reply_count,
@@ -112,7 +113,7 @@ async function main() {
     '',
     ...posts.map((p, i) => [
       `## ${i + 1}. ${p.impressions ?? '—'}表示 ／ いいね${p.likes} ／ 保存${p.bookmarks} ／ 返信${p.replies} ／ RP${p.reposts}`,
-      `${p.url} ／ ${p.created_at}${p.media.length ? ` ／ 画像など: ${p.media.join(',')}` : ''}${p.quote ? ' ／ 引用' : ''}`,
+      `${p.url} ／ ${p.created_at}${p.media.length ? ` ／ 画像など: ${p.media.join(',')}` : ''}${p.quote ? ' ／ 引用' : ''}${p.links?.length ? ` ／ リンク: ${p.links.join(' ')}` : ''}`,
       '',
       '```',
       p.text,
