@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><!-- トップのOGP（2026-10-31）。screen.png はアプリの鑑定結果画面（390幅×3倍）を切り抜いたもの。Playwrightで1200×630を撮って public/ogp-image.jpg に -->
+<!doctype html><meta charset="utf-8"><!-- トップのOGP（2026-11-01 A案）。app-screen.png はアプリの鑑定結果画面（390幅×3倍）を切り抜いたもの。Playwrightで1200×630を撮って public/ogp-image.jpg に -->
 <style>
 @font-face{font-family:'SM';font-weight:700;src:url('../../../scripts/x/assets/ShipporiMincho-Bold.ttf')}
 html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#0a0714}
@@ -21,14 +21,11 @@ svg.st{position:absolute;inset:0}
 .sub b{color:#e2c074}
 </style>
 <style>
-.o{background:radial-gradient(380px 420px at 70% 50%,rgba(168,85,247,.32),transparent 65%),radial-gradient(380px 420px at 95% 55%,rgba(59,130,246,.32),transparent 65%),linear-gradient(135deg,#0a0714 0%,#150f2c 55%,#1c1236 100%)}
-.tsuki{left:560px;top:60px;width:360px;height:482px;opacity:.9}
-.ren{left:905px;top:60px;width:360px;height:482px;opacity:.9}
-.t{position:absolute;left:64px;top:56px;width:560px}
-.t .big{margin-top:20px;font-size:76px}
-.t .big .x{font-size:56px}
-.t .sub{margin-top:22px}
-.phone{left:770px;top:52px}
+.tsuki{left:-70px;top:40px;width:420px;height:562px}
+.ren{left:900px;top:40px;width:420px;height:562px;opacity:.95}
+.t{position:absolute;left:250px;top:62px;width:480px;text-align:center}
+.t .big{margin-top:18px}.t .sub{margin-top:18px}
+.phone{left:735px;top:48px;transform:rotate(4deg)}
 </style>
 <div class="o"><svg class="st" width="1200" height="630" id="st"></svg>
 <div class="c tsuki"><img src="tsuki.jpg"></div>
@@ -36,7 +33,7 @@ svg.st{position:absolute;inset:0}
 <div class="t">
  <div class="badge">月と蓮</div>
  <div class="big">四柱推命<br><span class="x">×</span>九星気学<br><span class="x">×</span><span class="m">MBTI</span><small>（16タイプ）</small></div>
- <div class="sub">好きな人との<b>相性</b>がわかる<br>本格恋愛占い</div>
+ <div class="sub">好きな人との<b>相性</b>がわかる</div>
 </div>
 <div class="phone"><img src="app-screen.png"></div>
 </div><script>let s=11,r=()=>(s=(s*16807)%2147483647)/2147483647,o="";for(let i=0;i<70;i++){const x=r()*1200,y=r()*630,z=r()*1.5+.4;o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${z.toFixed(1)}" fill="#fff" opacity="${(r()*.5+.15).toFixed(2)}"/>`}document.getElementById("st").innerHTML=o;</script>
