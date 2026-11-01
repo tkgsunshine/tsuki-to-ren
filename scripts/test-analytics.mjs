@@ -39,6 +39,7 @@ test('normalizers keep only known values', () => {
   assert.equal(normalizeSource('google'), 'google');
   assert.equal(normalizeSource('utm:x_post'), 'utm:x_post');
   assert.equal(normalizeSource('evil.key'), 'other');
+  for (const ai of ['chatgpt', 'perplexity', 'gemini', 'copilot', 'claude']) assert.equal(normalizeSource(ai), ai);
   assert.equal(normalizeLanding('column:infp-love'), 'column:infp-love');
   assert.equal(normalizeLanding('column:../x'), 'other');
   assert.equal(jstDate(new Date('2026-10-14T15:30:00Z')), '2026-10-15');

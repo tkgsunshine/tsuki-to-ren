@@ -103,6 +103,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/news",
+      "destination": "/index.html"
+    },
+    {
       "source": "/compatibility",
       "destination": "/index.html"
     },
@@ -114,6 +118,15 @@
   "headers": [
     {
       "source": "/compatibility/:pair([a-zA-Z]{4}-[a-zA-Z]{4})",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/news",
       "headers": [
         {
           "key": "X-Robots-Tag",

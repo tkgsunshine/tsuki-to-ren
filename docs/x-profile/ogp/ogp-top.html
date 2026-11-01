@@ -1,0 +1,52 @@
+<!doctype html><meta charset="utf-8"><!-- トップのOGP（2026-11-02 Xヘッダーと同じ文字の組み方：コピー→方式3行を頭と幅をそろえて縦積み。元は2026-11-01 A案）。app-screen.png はアプリの鑑定結果画面（390幅×3倍）を切り抜いたもの。Playwrightで1200×630を撮って public/ogp-image.jpg に -->
+<style>
+@font-face{font-family:'SM';font-weight:700;src:url('../../../scripts/x/assets/ShipporiMincho-Bold.ttf')}
+html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#0a0714}
+.o{position:relative;width:1200px;height:630px;font-family:'SM',serif;color:#f4efe2;overflow:hidden;
+ background:radial-gradient(420px 460px at 18% 55%,rgba(168,85,247,.38),transparent 65%),
+            radial-gradient(420px 460px at 85% 55%,rgba(59,130,246,.32),transparent 65%),
+            linear-gradient(135deg,#0a0714 0%,#150f2c 55%,#1c1236 100%)}
+svg.st{position:absolute;inset:0}
+.c{position:absolute;-webkit-mask-image:radial-gradient(ellipse 52% 54% at 50% 46%,#000 55%,transparent 100%)}
+.c img{width:100%;height:100%;display:block}
+.phone{position:absolute;width:272px;padding:11px;border-radius:44px;background:linear-gradient(160deg,#3a3350,#151020 40%,#2a2340);
+ box-shadow:0 0 0 2px rgba(226,192,116,.55),0 24px 60px rgba(0,0,0,.6),0 0 60px rgba(120,160,255,.25)}
+.phone img{width:272px;display:block;border-radius:34px}
+.badge{display:inline-block;font-size:26px;letter-spacing:.14em;color:#e2c074;border:2px solid rgba(226,192,116,.6);border-radius:999px;padding:6px 22px;background:rgba(10,10,20,.45)}
+.big{font-size:68px;line-height:1.18;letter-spacing:.04em;text-shadow:0 0 28px rgba(160,140,255,.45)}
+.big .x{color:#e2c074;font-size:52px;margin-right:10px}
+.big .m{color:#9cc6ff}
+.big small{font-size:30px;color:#e8e2f7;letter-spacing:.02em}
+.sub{font-size:32px;letter-spacing:.08em;color:#f4efe2}
+.sub b{color:#e2c074}
+</style>
+<style>
+.tsuki{left:-70px;top:40px;width:420px;height:562px}
+.ren{left:900px;top:40px;width:420px;height:562px;opacity:.95}
+.t{position:absolute;left:250px;top:48px;width:480px;text-align:center}
+.cp{margin-top:16px;font-size:50px;line-height:1.24;letter-spacing:.02em;white-space:nowrap;text-shadow:0 0 26px rgba(226,192,116,.4)}
+.cp .p{color:#fe8fb6}.cp .g{color:#e2c074}
+.mt{margin-top:22px;text-shadow:0 0 24px rgba(160,140,255,.45)}
+/* 方式名を3行、×はその間の行（5行）。MBTIは字間で4文字幅に */
+.mn{display:block;font-size:52px;line-height:1.1;white-space:nowrap}
+.mn.b{color:#9cc6ff;font-size:60px;letter-spacing:10.1px;text-indent:10.1px}
+.mx{display:block;color:#e2c074;font-size:30px;line-height:1.05}
+.phone{left:740px;top:34px;width:258px;transform:rotate(4deg)}
+.phone img{width:258px}
+</style>
+<div class="o"><svg class="st" width="1200" height="630" id="st"></svg>
+<div class="c tsuki"><img src="tsuki.jpg"></div>
+<div class="c ren"><img src="ren.jpg"></div>
+<div class="t">
+ <div class="badge">月と蓮</div>
+ <div class="cp">好きな人との<br><span class="p">今日</span>の相性が<span class="g">わかる</span></div>
+ <div class="mt">
+  <span class="mn">四柱推命</span>
+  <span class="mx">×</span>
+  <span class="mn">九星気学</span>
+  <span class="mx">×</span>
+  <span class="mn b">MBTI</span>
+ </div>
+</div>
+<div class="phone"><img src="app-screen.png"></div>
+</div><script>let s=11,r=()=>(s=(s*16807)%2147483647)/2147483647,o="";for(let i=0;i<70;i++){const x=r()*1200,y=r()*630,z=r()*1.5+.4;o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${z.toFixed(1)}" fill="#fff" opacity="${(r()*.5+.15).toFixed(2)}"/>`}document.getElementById("st").innerHTML=o;</script>

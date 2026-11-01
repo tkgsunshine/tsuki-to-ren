@@ -603,6 +603,11 @@ const homeSemanticHtml = `
 `;
 
 // Insert into dist/index.html
-const updatedIndexHtml = baseHtml.replace('<div id="root"></div>', `<div id="root">${homeSemanticHtml}</div>`);
+// トップだけ og:url を外す。og:url がトップ固定だと、Xは ?utm_… 付きのURLも同じページとみなし、
+// 前に覚えた古いカード画像を出し続けるため（2026-11-02）。検索エンジン向けの canonical は残す。
+// ほかのページ（コラム・SEOページ）は、このあと/これまでに各自の og:url を入れているので、そのまま。
+const updatedIndexHtml = baseHtml
+  .replace('<div id="root"></div>', `<div id="root">${homeSemanticHtml}</div>`)
+  .replace(/\s*<meta property="og:url" content="[^"]*" \/>/i, '');
 fs.writeFileSync(indexHtmlPath, updatedIndexHtml, 'utf-8');
 console.log('✅ Pre-rendered root homepage: dist/index.html');
