@@ -27,6 +27,8 @@
   "minIntervalMinutes": 20,
   "expireAfterMinutes": 240,
   "promoEveryNthDay": 2,
+  "dailyBeast": false,
+  "_dailyBeastNote": "false=毎日の占い（守護獣・朝8:15）の投稿を作らない（2026-11-02、運営の判断で終了）。再開するときは true",
   "allowLinks": true,
   "_allowLinksNote": "true=リリース済み（2026-10-31〜）。月と蓮のURLは、リプ欄（返信）にだけ入れる（本文はコラム紹介だけ例外。ほかのサイトのURLは不可）。false=サイト公開前（URL・リンク誘導・「無料」を入れず、promoは「近日公開」の予告）",
   "_minIntervalNote": "同じ枠で2本（例: 08:15 と 08:45）出すため20分。通常の定期実行にだけ適用（臨時投稿は無視）",

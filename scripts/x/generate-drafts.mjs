@@ -233,7 +233,8 @@ if (llmSlots.length) {
 posts = [...detPosts, ...posts];
 
 // 守護獣の1本（朝 08:15）。署名は常に「-月-」（話し手は月だけ）
-const beastItems = missing('chara-1') && !redoBeast ? buildBeastItems(all, date, history, { allowLinks }) : [];
+// config.dailyBeast が false のときは、毎日の占い（守護獣）を作らない（2026-11-02: 運営の判断で終了）
+const beastItems = config.dailyBeast !== false && missing('chara-1') && !redoBeast ? buildBeastItems(all, date, history, { allowLinks }) : [];
 // 守護獣のリプ欄（2通）は、アプリの鑑定の解説（facts.advice）をもとに、Claudeが書く。検査に通らなければ、定型文のまま（保険）
 const BEAST_REPLY_SPEC = `守護獣の今日の恋愛運の投稿への、スレッド返信を2通書く。恋愛に共感してもらえて、保存・引用したくなる内容にする（薄い一般論にしない）。
 # replyText（1通目）
