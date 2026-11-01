@@ -22,7 +22,8 @@ export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'pre
 // Fixed list so a forged request cannot add arbitrary keys (utm:* is the one open slot, kept short).
 export const SOURCES = new Set([
   'direct', 'google', 'yahoo', 'bing', 'x', 'instagram', 'line', 'facebook', 'threads', 'tiktok',
-  'youtube', 'note', 'email', 'other'
+  'youtube', 'note', 'email', 'other',
+  'chatgpt', 'perplexity', 'gemini', 'copilot', 'claude' // AI検索・チャットからの流入（src/services/analytics.ts の REFERRERS と合わせる）
 ]);
 export const LANDINGS = new Set(['home', 'share_link', 'column_list', 'compat', 'result_link', 'chat', 'mypage', 'other']);
 // phone / tablet / pc, each opened in the browser or as the app added to the home screen (PWA)

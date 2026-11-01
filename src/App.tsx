@@ -16,12 +16,14 @@ import { mbtiOptions } from './constants/mbti';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
-import { generateFortuneResult } from './utils/fortuneEngine';
+import { generateFortuneResult, san } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
-import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, MessageCircle, Calendar, Bell, Crown, Smartphone } from 'lucide-react';
+import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, MessageCircle, Calendar, Bell, Crown, Smartphone, Megaphone } from 'lucide-react';
 import { MoonMark } from './components/icons/BrandIcons';
 import { CustomDatePicker } from './components/CustomDatePicker';
 import { ContactForm } from './components/ContactForm';
+import { NoticesView } from './components/NoticesView';
+import { useNotices } from './services/notices';
 import { AuthModal } from './components/AuthModal';
 import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
@@ -65,7 +67,7 @@ interface InitialRoute {
   tab: string;
   slug: string | null;
   legal: boolean;
-  settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact';
+  settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news';
   compatibilityPair: { myMbti: string; oppMbti: string } | null;
 }
 
@@ -97,6 +99,9 @@ const getInitialRoute = (): InitialRoute => {
   }
   if (path === '/contact' || path === '/contact/') {
     return { tab: 'profile', slug: null, legal: false, settingsSubView: 'contact', compatibilityPair: null };
+  }
+  if (path === '/news' || path === '/news/') {
+    return { tab: 'profile', slug: null, legal: false, settingsSubView: 'news', compatibilityPair: null };
   }
   if (path === '/about' || path === '/about/') {
     return { tab: 'profile', slug: null, legal: false, settingsSubView: 'about', compatibilityPair: null };
@@ -242,6 +247,8 @@ function App() {
   
   // Firebase Auth State
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+  // アプリ内のお知らせ（運営から全員へ／その会員へ）。未読の数をホームの鈴・下メニュー・マイページに出す
+  const notices = useNotices(currentUser?.uid ?? null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showLegalPage, setShowLegalPage] = useState(initialRoute.legal);
   const [showEmailPromptModal, setShowEmailPromptModal] = useState(false);
@@ -381,7 +388,7 @@ function App() {
   const [showPremiumLP, setShowPremiumLP] = useState(false);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
-  const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact'>(initialRoute.settingsSubView);
+  const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news'>(initialRoute.settingsSubView);
   // マイページの各ページ（お問い合わせ等）は、開いたら一番上から見せる（スクロールするのは .main-content）
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -781,7 +788,7 @@ function App() {
   const subHasPartner = !!(notifySub && notifySub.mode !== 'single' && notifySub.oppBirth);
   const isSubPartner = (p: SavedPartner) => subHasPartner && p.name === notifySub?.oppName && p.birth.replace(/\//g, '-') === notifySub?.oppBirth;
   const showKeepTarget = subHasPartner && !savedPartners.some(isSubPartner);
-  const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${notifySub.oppName || 'お相手'}さんとの相性` : 'あなたの運勢');
+  const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${san(notifySub.oppName)}との相性` : 'あなたの運勢');
   // Whether the reading on screen (the partner now, or the solo reading) is the one the daily mail is about
   const notifyIsCurrentReading = !!notifySub && (mode === 'match'
     ? subHasPartner && notifySub.oppName === oppName && notifySub.oppBirth === oppBirth.replace(/\//g, '-')
@@ -832,7 +839,7 @@ function App() {
       showAlert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
       return;
     }
-    const target = mode === 'match' ? `${oppName || 'お相手'}さんとの相性` : 'あなたの運勢';
+    const target = mode === 'match' ? `${san(oppName)}との相性` : 'あなたの運勢';
     const ok = await showConfirm(`毎朝8時の通知を「${target}」に切り替えますか？`, { okLabel: '切り替える', cancelLabel: 'やめる' });
     if (!ok) return;
     const partner: SavedPartner | null = mode === 'match'
@@ -915,7 +922,7 @@ function App() {
         setNotifyAfterPartnerAdd(false);
         openNotifyModal(newPartner.id);
       } else {
-        showAlert(`${newPartner.name}様の情報を保存しました。`);
+        showAlert(`${san(newPartner.name)}の情報を保存しました。`);
       }
       return;
     }
@@ -975,7 +982,7 @@ function App() {
     };
 
     setSavedPartners([...savedPartners, newPartner]);
-    showAlert(`${newPartner.name}様の情報を保存しました。`);
+    showAlert(`${san(newPartner.name)}の情報を保存しました。`);
     return newPartner;
   };
 
@@ -1336,7 +1343,7 @@ function App() {
                   <SharedResultView shared={sharedTeaser} onStart={() => handleTabChange('home')} />
                 ) : (
                 <>
-                <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} />
+                <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} unreadNotices={notices.unread} onOpenNotices={() => openSubView('news')} />
                 <UnifiedInputView
                   key={inputViewKey}
                   selectedCharacter={selectedCharacter}
@@ -1665,6 +1672,7 @@ function App() {
                   {settingsSubView === 'privacy' && 'プライバシーポリシー'}
                   {settingsSubView === 'company' && '運営会社情報'}
                   {settingsSubView === 'contact' && 'お問い合わせ・ご意見'}
+                  {settingsSubView === 'news' && 'お知らせ'}
                 </span>
               </div>
             ) : (
@@ -1727,6 +1735,44 @@ function App() {
                     </div>
                   </div>
                   <ChevronRight size={18} style={{ color: currentUser ? '#7dbb8a' : 'var(--color-gold)' }} />
+                </div>
+
+                {/* お知らせ（運営からのお知らせ・あなたへのメッセージ） */}
+                <div
+                  onClick={() => openSubView('news')}
+                  className="glass-panel"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '1.05rem 1.25rem',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                    border: notices.unread ? '1px solid rgba(207, 90, 67, 0.55)' : '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '16px',
+                    color: '#f3efe6',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem', minWidth: 0 }}>
+                    <Megaphone size={20} style={{ color: '#e2c074', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', minWidth: 0 }}>
+                      <span style={{ fontSize: '0.98rem', fontWeight: 'bold' }}>お知らせ</span>
+                      <span style={{ fontSize: '0.72rem', color: '#d8d2c6', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {notices.unread && notices.items[0] ? notices.items[0].title : '新しい機能や運営からのメッセージ'}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+                    {notices.unread > 0 && (
+                      <span style={{ minWidth: '1.3rem', height: '1.3rem', padding: '0 0.35rem', boxSizing: 'border-box', borderRadius: '999px', background: '#cf5a43', color: '#fff', fontSize: '0.72rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {notices.unread > 9 ? '9+' : notices.unread}
+                      </span>
+                    )}
+                    <ChevronRight size={18} style={{ color: '#a9a49a' }} />
+                  </div>
                 </div>
 
                 {/* Premium Plan Upgrade Banner Card / Member Rank (2nd) */}
@@ -2071,6 +2117,10 @@ function App() {
                   <ChevronRight size={18} style={{ color: '#a9a49a' }} />
                 </div>
               </div>
+            )}
+
+            {settingsSubView === 'news' && (
+              <NoticesView items={notices.items} readAt={notices.readAt} loaded={notices.loaded} onOpened={() => { void notices.markAllRead(); }} />
             )}
 
             {settingsSubView === 'contact' && (
@@ -2564,7 +2614,7 @@ function App() {
                             <button
                               type="button"
                               onClick={() => {
-                                showConfirm(`${partner.name}様の保存データを削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
+                                showConfirm(`${san(partner.name)}の保存データを削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
                                 });
                               }}
@@ -3121,8 +3171,8 @@ function App() {
               <span style={{ fontSize: '0.75rem', color: '#a9a49a' }}>誰との運勢を届ける？</span>
               {[
                 { id: 'self', label: '🌙 自分だけの運勢' },
-                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${notifySub?.oppName || 'お相手'}さんとの相性（いまの設定）` }] : []),
-                ...savedPartners.map(p => ({ id: p.id, label: `💞 ${p.name}さんとの相性` }))
+                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${san(notifySub?.oppName)}との相性（いまの設定）` }] : []),
+                ...savedPartners.map(p => ({ id: p.id, label: `💞 ${san(p.name)}との相性` }))
               ].map(opt => (
                 <button
                   key={opt.id}
@@ -3190,7 +3240,7 @@ function App() {
 
                 const partner = savedPartners.find(p => p.id === notifyTarget);
                 if (partner && !isValidBirthDate(partner.birth.replace(/\//g, '-'))) {
-                  showAlert(`${partner.name}様の生年月日が正しくありません。「保存したお相手」で直してから選んでください。`);
+                  showAlert(`${san(partner.name)}の生年月日が正しくありません。「保存したお相手」で直してから選んでください。`);
                   return;
                 }
 
@@ -3285,7 +3335,7 @@ function App() {
       />
 
       {/* Global Bottom Navbar (Always visible on top of all pages) */}
-      <Navbar activeTab={activeTab} setActiveTab={handleTabChange} />
+      <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />
     </div>
   );
 }

@@ -3,16 +3,20 @@ import { getDb, getAdminAuth } from './_lib/firestore.js';
 import { ATTRIBUTION, DAILY, jstDate } from './_lib/analytics.js';
 import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
+import { AUDIENCES, NOTICES, validateNotice } from './_lib/notices.js';
 
 // Data for the admin page (/admin): daily counters, and the member list (with each member's premium state).
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
 // GET ?check=1 only confirms the account is an admin (used by the site to leave the owner's browsers out of the counts).
 // POST { action: 'inquiryStatus', id, status } marks a contact-form message as handled (or back to new).
 // POST { action: 'ownerMark', uid, owner } marks a member as the owner's own account, left out of the member counts.
+// POST { action: 'noticeSend', to: 'all' | 'members' | uid, title, body, link } sends an in-app お知らせ (to everyone, to signed-in members only, or to one member).
+// POST { action: 'noticeDelete', id } takes one back (it disappears from the app).
 // Accounts whose email is in ADMIN_EMAILS (also with a +alias, e.g. name+1@) count as the owner's without a mark.
 const OWNERS = 'adminSettings'; // doc 'owners': { uids: [...] }
 const MAX_USER_PAGES = 20; // 20 x 1000 accounts
 const MAX_INQUIRIES = 200; // newest first
+const MAX_NOTICES = 100; // newest first
 
 export const parseAdminEmails = (raw) =>
   String(raw || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
@@ -69,6 +73,22 @@ export default async function handler(req, res, deps = {}) {
         );
         return res.status(200).json({ status: 'success' });
       }
+      if (body.action === 'noticeSend') {
+        const checked = validateNotice(body);
+        if (checked.error) return res.status(400).json({ status: 'error', message: checked.error });
+        if (!AUDIENCES.includes(checked.value.to)) {
+          try { await auth.getUser(checked.value.to); } catch { return res.status(400).json({ status: 'error', message: 'その会員が見つかりません' }); }
+        }
+        const doc = { ...checked.value, createdAt: new Date(deps.now ?? Date.now()).toISOString() };
+        const ref = await db.collection(NOTICES).add(doc);
+        return res.status(200).json({ status: 'success', notice: { id: ref.id, ...doc } });
+      }
+      if (body.action === 'noticeDelete') {
+        const noticeId = String(body.id || '');
+        if (!/^[A-Za-z0-9]{1,40}$/.test(noticeId)) return res.status(400).json({ status: 'error', message: '不正なリクエストです' });
+        await db.collection(NOTICES).doc(noticeId).delete();
+        return res.status(200).json({ status: 'success' });
+      }
       const id = String(body.id || '');
       if (body.action !== 'inquiryStatus' || !/^[A-Za-z0-9]{1,40}$/.test(id) || !STATUSES.includes(body.status)) {
         return res.status(400).json({ status: 'error', message: '不正なリクエストです' });
@@ -83,14 +103,15 @@ export default async function handler(req, res, deps = {}) {
     const from = jstDate(new Date(Date.now() - (offset + days - 1) * 86400 * 1000));
     const inPeriod = (d) => d.id <= to; // the query already starts at `from`; days after `to` are dropped here
 
-    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap] = await Promise.all([
+    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection('subscriptions').get(),
       db.collection(ATTRIBUTION).get(),
       db.collection(USAGE_DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection(INQUIRIES).orderBy('createdAt', 'desc').limit(MAX_INQUIRIES).get(),
       db.collection('premium').get(), // _lib/stripe.js PREMIUM (not imported, to keep the Stripe library out of this function)
-      db.collection(OWNERS).doc('owners').get()
+      db.collection(OWNERS).doc('owners').get(),
+      db.collection(NOTICES).orderBy('createdAt', 'desc').limit(MAX_NOTICES).get()
     ]);
 
     const subs = new Map(subsSnap.docs.map((d) => [d.id, d.data()]));
@@ -147,6 +168,11 @@ export default async function handler(req, res, deps = {}) {
       inquiries: inquirySnap.docs.map((d) => {
         const v = d.data();
         return { id: d.id, category: v.category, message: v.message, email: v.email || null, uid: v.uid || null, page: v.page || null, status: v.status || 'new', notified: v.notified || null, createdAt: v.createdAt || null };
+      }),
+      // In-app お知らせ sent so far (to everyone and to single members)
+      notices: noticeSnap.docs.map((d) => {
+        const v = d.data();
+        return { id: d.id, to: v.to, title: v.title, body: v.body, link: v.link || '', createdAt: v.createdAt || null };
       })
     });
   } catch (e) {

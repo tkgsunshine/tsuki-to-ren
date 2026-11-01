@@ -436,7 +436,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
       width: '100%',
       maxWidth: '680px',
       margin: '0 auto',
-      padding: '1.25rem 1rem 6rem',
+      padding: '1.25rem 0 6rem', // 左右の余白は外枠（.main-content）の1remだけにする
       boxSizing: 'border-box',
       display: 'flex',
       flexDirection: 'column',
@@ -486,7 +486,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
 
       {/* Main Article Container */}
       <article className="glass-panel" style={{
-        padding: '1.5rem 1.25rem',
+        padding: '1.25rem 0.85rem',
         borderRadius: '20px',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         background: 'rgba(255, 255, 255, 0.02)'
@@ -545,7 +545,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
           background: 'rgba(226, 192, 116, 0.08)',
           border: '1px solid rgba(226, 192, 116, 0.35)',
           borderRadius: '14px',
-          padding: '0.9rem 1.1rem',
+          padding: '0.85rem 0.95rem',
           marginBottom: '1.25rem'
         }}>
           <div style={{ color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.8rem', marginBottom: '0.4rem' }}>この記事の結論</div>
@@ -558,7 +558,7 @@ export const ColumnDetailView: React.FC<ColumnDetailViewProps> = ({
             background: 'rgba(13, 18, 26, 0.65)',
             border: '1px solid rgba(226, 192, 116, 0.3)',
             borderRadius: '14px',
-            padding: '1rem 1.15rem',
+            padding: '0.9rem 0.95rem',
             marginBottom: '1.5rem'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.65rem' }}>

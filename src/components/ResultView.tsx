@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
-import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, LoveLetterMark, GiftMark, RoadmapMark } from './icons/BrandIcons';
-import { getScoreMood } from '../utils/fortuneEngine';
+import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark } from './icons/BrandIcons';
+import { getScoreMood, san } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
@@ -12,6 +12,8 @@ import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
 import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES } from '../utils/attributeNotes';
+import { buildLineKit } from '../utils/lineKit';
+import { LineKitSection } from './LineKitSection';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -690,7 +692,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // 無料の日数を使い切ったお相手（または確認中）: 今日の点数と助言はダミーで描く。今日の流れ（月の形と一言）は見せる。
   const dailyHidden = hasOpponent && !isSubscribed && partnerLock !== null && partnerLock.status !== 'free';
   const dailyLocked = dailyHidden && partnerLock?.status === 'locked';
-  const partnerCall = opponentName && opponentName !== 'お相手' ? `${opponentName}さん` : 'お相手';
+  const partnerCall = san(opponentName);
 
   const detailedTopics = activeResult?.detailedTopics || [
     {
@@ -703,7 +705,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     {
       title: hasOpponent ? '2. 会話と伝わり方' : '2. 自己表現と周囲へのアプローチ',
       intro: hasOpponent
-        ? `会話ではあなた様の感情豊かな表現が、お相手には少し重く感じられる瞬間があるかもしれません。ですが、それはあなたがそれだけ相手を思っている証拠です。言葉の奥にある優しさは、お相手の心にしっかりと染み込んでいますよ。`
+        ? `会話ではあなたの感情豊かな表現が、お相手には少し重く感じられる瞬間があるかもしれません。ですが、それはあなたがそれだけ相手を思っている証拠です。言葉の奥にある優しさは、お相手の心にしっかりと染み込んでいますよ。`
         : '今日は周囲と言葉を交わす際、いつもより一歩引いた客観的な視点を保つとうまくいきます。感情をそのまま伝えるのではなく、整理してから論理的かつシンプルに話すことで、あなたの知性が際立ちます。',
       detail: `お相手の認知機能（16タイプ診断）と運気バイオリズムの周期を分析すると、お相手が心を開きやすい最適な「対話の窓口」が明確になります。現在、お相手のエネルギーは一時的に内省的な防衛状態にありますが、あなたの言葉選びとタイミング次第で、その心の壁を非常に自然に解きほぐすことが可能です。お相手が最も受け入れやすい具体的な連絡フレーズ、返信率を極限まで高める時間帯の法則、および会話中に相手を無意識に拒絶させてしまう絶対に避けるべきNGワードの全リストを公開します。`
     },
@@ -881,7 +883,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           boxShadow: '0 8px 24px rgba(0, 0, 0, 0.55)'
         }}>
           <span style={{ fontSize: '0.76rem', color: '#e2c074', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-            🔮 {sharedBy.name === 'あなた' ? 'お友だち' : `${sharedBy.name}さん`}が共有した鑑定結果
+            🔮 {sharedBy.name === 'あなた' ? 'お友だち' : san(sharedBy.name)}が共有した鑑定結果
           </span>
           {onReset && (
             <button type="button" className="consult-btn font-serif" onClick={onReset} style={{ flexShrink: 0, width: 'auto', padding: '0.5rem 1rem', fontSize: '0.8rem', margin: 0 }}>
@@ -2116,7 +2118,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {!sharedBy && (() => {
           const notifyOn = !!notifyStatus?.on;
           const isCurrent = notifyOn && notifyStatus!.isCurrentReading;
-          const currentLabel = hasOpponent ? `${oppNickname === 'お相手' ? 'お相手' : `${oppNickname}さん`}との相性` : 'あなたの運勢';
+          const currentLabel = hasOpponent ? `${san(oppNickname)}との相性` : 'あなたの運勢';
           const title = !notifyOn ? '毎朝8時に運勢＆LINE吉時間をお届け' : isCurrent ? '毎朝8時の通知はON' : `毎朝8時の通知：${notifyStatus!.targetLabel}`;
           const sub = !notifyOn ? '相性と運気は毎日変化します' : isCurrent ? `${notifyStatus!.targetLabel}を配信中` : `${currentLabel}に切り替えられます`;
           const buttonLabel = !notifyOn ? '通知を設定' : isCurrent ? '変更' : (hasOpponent ? 'この人に切替' : 'こちらに切替');
@@ -2189,7 +2191,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {onOpenChat && !sharedBy && (() => {
           const isRen = selectedChar === 'ren';
           const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
-          const oppLabel = hasOpponent ? (oppNickname === 'お相手' ? 'お相手' : `${oppNickname}さん`) : '';
+          const oppLabel = hasOpponent ? san(oppNickname) : '';
           const lead = hasOpponent
             ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考える。` : `今日のこと、もう少し一緒に考えましょうか？${oppLabel}に送る一言も、いっしょに選べますよ。`)
             : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
@@ -2470,7 +2472,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
             <TorisetsuBookMark size={21} style={{ color: 'var(--color-gold)' }} />
             <h2 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0, whiteSpace: 'nowrap', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {oppNickname}の取扱説明書（トリセツ）
+              {san(oppNickname)}の取扱説明書（トリセツ）
             </h2>
           </div>
 
@@ -2530,7 +2532,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <div style={{ background: 'rgba(207, 90, 67, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(207, 90, 67, 0.2)', position: 'relative' }}>
             <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#e6a99c', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               <CautionMark size={18} />
-              <span>絶対NGな取扱注意行動 5選</span>
+              <span>絶対にやってはいけないこと 5選</span>
             </div>
             <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#fee2e2', lineHeight: '1.75' }}>
               {activeResult.opponentTorisetsu.ngBehaviors.length > 0 && (
@@ -2586,7 +2588,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <div style={{ background: 'rgba(58, 134, 171, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(58, 134, 171, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#9cc6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <ReplyMoonMark size={18} />
-                <span>返信が遅い時の裏心理 ＆ ベストな神返信例</span>
+                <span>返信が遅いときの本当の理由と、おすすめの返し方</span>
               </div>
               <div className="font-serif" style={{
                 fontSize: '0.8rem',
@@ -2594,7 +2596,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 margin: 0,
                 lineHeight: '1.8'
               }}>
-                <p style={{ margin: '0 0 0.35rem 0' }}><strong>【本音の裏心理】</strong> {activeResult.opponentTorisetsu.slowReplyPsychology?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
+                <p style={{ margin: '0 0 0.35rem 0' }}><strong>【本当の理由】</strong> {activeResult.opponentTorisetsu.slowReplyPsychology?.replace(/〇〇/g, oppNickname || 'お相手')}</p>
                 <div style={{ position: 'relative' }}>
                   <p style={{
                     margin: 0,
@@ -2602,7 +2604,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     filter: !isSubscribed ? 'blur(4.5px)' : 'none',
                     userSelect: !isSubscribed ? 'none' : 'auto',
                     opacity: !isSubscribed ? 0.65 : 1
-                  }}><strong>【送るべき神返信】</strong> {lockedText(activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</p>
+                  }}><strong>【おすすめの返し方】</strong> {lockedText(activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</p>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2632,7 +2634,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <div style={{ background: 'rgba(106, 169, 124, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(106, 169, 124, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#a8d3b0', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <PulseUpMark size={18} />
-                <span>脈ありサイン 3段階レベル診断</span>
+                <span>脈ありサイン 3段階</span>
               </div>
               <div className="font-serif" style={{
                 fontSize: '0.78rem',
@@ -2645,7 +2647,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div><strong>Lv.1 (初期):</strong> {activeResult.opponentTorisetsu.greenFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                   <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.3 (ゾッコン):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
+                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.3 (大好き):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2675,7 +2677,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <div style={{ background: 'rgba(201, 86, 106, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(201, 86, 106, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fda4af', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <ReversalMark size={18} />
-                <span>脈なしサイン ＆ 逆転挽回アプローチ</span>
+                <span>脈なしサインと、立て直し方</span>
               </div>
               <div className="font-serif" style={{
                 fontSize: '0.78rem',
@@ -2687,7 +2689,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>【危険サイン】</strong> {activeResult.opponentTorisetsu.redFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>【逆転挽回策】</strong> {lockedText((activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
+                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>【立て直し方】</strong> {lockedText((activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
                   {!isSubscribed && (
               <div style={{
                 position: 'absolute',
@@ -2713,61 +2715,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
-            {/* 6. そのまま使えるLINEキラーテンプレート */}
-            <div style={{ background: 'rgba(159, 134, 192, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(159, 134, 192, 0.2)', position: 'relative' }}>
-              <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#b9a3d6', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <LoveLetterMark size={18} />
-                <span>そのまま使えるLINEキラーテンプレート</span>
-              </div>
-              <div className="font-serif" style={{
-                fontSize: '0.78rem',
-                color: '#f0ebf5',
-                lineHeight: '1.6',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.35rem'
-              }}>
-                <div><strong>【自然にデートに誘う例文】</strong></div>
-                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                  {(activeResult.opponentTorisetsu.lineTemplateInvite || '「前に言ってたお店、今度サクッと行かない？」').replace(/〇〇/g, oppNickname || 'お相手')}
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}>
-                    <div style={{ marginTop: '0.2rem' }}><strong>【距離を縮める質問テンプレ】</strong></div>
-                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '6px', fontStyle: 'italic' }}>
-                      {lockedText((activeResult.opponentTorisetsu.lineTemplateTopic || '「休みの日って何してる時がいちばん癒される？」').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
-                    </div>
-                  </div>
-                  {!isSubscribed && (
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 10,
-                width: '90%',
-                display: 'flex',
-                justifyContent: 'center',
-                pointerEvents: 'auto'
-              }}>
-                <button
-                  type="button"
-                  className="premium-lock-tag"
-                  onClick={handleLockTagClick}
-                >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
-                </button>
-              </div>
-            )}
-                </div>
-              </div>
-            </div>
+            {/* 6. そのまま使えるLINEキラーテンプレート（お相手の性格タイプ×生まれ持った星から作る。中身は utils/lineKit.ts） */}
+            {(() => {
+              const kit = buildLineKit(activeResult.opponentMbtiCode, activeResult.opponentPillar);
+              return kit ? (
+                <LineKitSection kit={kit} isSubscribed={isSubscribed} isRegistered={isRegistered} onLockClick={handleLockTagClick} />
+              ) : null;
+            })()}
 
             {/* 7. 喜ばれるデート＆プレゼント傾向 */}
             <div style={{ background: 'rgba(226, 192, 116, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 192, 116, 0.2)' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <GiftMark size={18} />
-                <span>喜ばれるデートスポット ＆ プレゼント傾向</span>
+                <span>喜ばれるデートスポット</span>
               </div>
               <div style={{ position: 'relative', marginTop: '0.2rem' }}>
                 <p className="font-serif" style={{
@@ -2809,7 +2769,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--color-gold)', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <RoadmapMark size={18} />
-                <span>蓮と月からの最終攻略ロードマップ</span>
+                <span>蓮と月からの、仲を深めるコツ</span>
               </div>
               <div style={{ position: 'relative', marginTop: '0.2rem' }}>
                 <p className="font-serif" style={{
@@ -2962,7 +2922,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? '今後7日間の相性バイオリズム' : '今後7日間の運気バイオリズム'} {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? '今後7日間の相性' : '今後7日間の運気'} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
               <div 
                 className={isSubscribed ? '' : 'timeline-blurred'} 

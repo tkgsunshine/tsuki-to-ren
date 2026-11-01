@@ -12,6 +12,7 @@
     "test:analytics": "node --experimental-strip-types --test scripts/test-analytics.mjs",
     "test:stripe": "node --test scripts/test-stripe.mjs scripts/test-partner-days.mjs",
     "test:userdata": "node --experimental-strip-types --test scripts/test-user-data.mjs",
+    "test:notices": "node --test scripts/test-notices.mjs",
     "test:chat": "node --test scripts/test-chat-limit.mjs",
     "test:inquiry": "node --test scripts/test-inquiry.mjs",
     "test:share": "node --experimental-strip-types --test scripts/test-shared-result.mjs",
@@ -21,6 +22,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
     "@resvg/resvg-wasm": "^2.0.0-alpha.4",
+    "@vercel/analytics": "2.0.1",
     "@vercel/og": "^1.0.0",
     "firebase": "^12.18.0",
     "firebase-admin": "^13.10.0",
