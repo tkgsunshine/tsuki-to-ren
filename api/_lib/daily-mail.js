@@ -1,4 +1,4 @@
-import { generateFortuneResult, getScoreMood } from './fortuneEngine.js';
+import { generateFortuneResult, getScoreMood, san } from './fortuneEngine.js';
 
 export const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -142,7 +142,7 @@ export function renderScoreRings(baseScore, dailyScore, hasOpponent) {
 }
 
 // 無料の日数の案内（お相手ありの無料会員）。最終日は「明日からはプレミアム」と先に伝える。
-export const partnerCall = (sub) => (sub.oppName && sub.oppName !== 'お相手' ? `${sub.oppName}さん` : 'お相手');
+export const partnerCall = (sub) => san(sub.oppName);
 
 export function renderFreeDaysNote(sub, daysLeft) {
   const who = esc(partnerCall(sub));
@@ -179,7 +179,7 @@ export function renderPartnerTeaser(sub, teaser) {
 
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
-  const oppLabel = content.hasOpponent && sub.oppName ? `とお相手（${esc(sub.oppName)}様）` : '';
+  const oppLabel = content.hasOpponent && sub.oppName ? `と${esc(san(sub.oppName))}` : '';
   const { score, baseScore, hourMain, hourNote, adviceParts = [], mbtiCode, mbtiName, profile = {} } = content;
   const facts = [
     profile.star && ['本命星', esc(profile.star)],
@@ -255,7 +255,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   </td>
                   <td valign="top" style="font-size: 14px; line-height: 1.7; color: #e2e8f0;">
                     <div style="font-size: 11px; font-weight: bold; color: ${accent}; letter-spacing: 0.1em; margin-bottom: 2px;">${charName}より</div>
-                    ${esc(name)} 様${oppLabel}<br>
+                    ${esc(san(name, 'あなた'))}${oppLabel}<br>
                     おはようございます。本日も素敵な一日をお過ごしいただけますよう、月と蓮より、${content.hasOpponent ? '本日のお二人の相性' : '本日のあなたの運勢'}をお届けします。
                   </td>
                 </tr>
