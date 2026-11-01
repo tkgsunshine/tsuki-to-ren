@@ -59,7 +59,7 @@ interface Inquiry {
 }
 interface SentNotice {
   id: string;
-  to: string; // 'all' or a member's uid
+  to: string; // 'all', 'members' (signed-in only) or a member's uid
   title: string;
   body: string;
   link: string;
@@ -277,6 +277,7 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
   const [busy, setBusy] = useState('');
   const [memberQuery, setMemberQuery] = useState('');
   const byUid = new Map(members.map((m) => [m.uid, m]));
+  const audienceLabel = (to: string) => (to === 'all' ? '全員' : to === 'members' ? '会員のみ' : null);
   const who = (uid: string) => {
     const m = byUid.get(uid);
     return m ? `${m.email || m.name || uid}${m.name && m.email ? `（${m.name}）` : ''}` : uid;
@@ -286,7 +287,7 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
   const ready = title.trim() && body.trim() && title.length <= NOTICE_MAX_TITLE && body.length <= NOTICE_MAX_BODY;
 
   const send = async () => {
-    const toLabel = target === 'all' ? '全員' : who(target);
+    const toLabel = audienceLabel(target) || who(target);
     if (!window.confirm(`「${title.trim()}」を ${toLabel} に送ります。よろしいですか？\n（送るとすぐアプリに表示されます）`)) return;
     setBusy('send');
     const ok = await onSend({ to: target, title, body, link });
@@ -298,13 +299,14 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
     <div style={c.card} id="admin-notices">
       <h2 style={c.h2}>アプリ内のお知らせ</h2>
       <div style={{ ...c.muted, marginBottom: 12 }}>
-        マイページの「お知らせ」に出ます（未読があるとホームの鈴と下メニューに印）。メールやプッシュ通知は送りません。全員向けはログインしていない人にも見えます。
+        マイページの「お知らせ」に出ます（未読があるとホームの鈴と下メニューに印）。メールやプッシュ通知は送りません。「全員」はログインしていない人にも見えます。「会員のみ」はログインしている人だけに見えます（後から登録した人にも、既読の状態で並びます）。
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
           <span style={{ fontWeight: 700 }}>送り先</span>
           <button style={{ ...c.btn, ...(target === 'all' ? c.btnOn : {}) }} onClick={() => setTarget('all')}>全員</button>
-          {target !== 'all' && <span style={{ ...c.btn, ...c.btnOn }}>会員: {who(target)}</span>}
+          <button style={{ ...c.btn, ...(target === 'members' ? c.btnOn : {}) }} onClick={() => setTarget('members')}>会員のみ</button>
+          {!audienceLabel(target) && <span style={{ ...c.btn, ...c.btnOn }}>会員: {who(target)}</span>}
           <input value={memberQuery} onChange={(e) => setMemberQuery(e.target.value)} placeholder="会員1人に送る: メール・名前で検索"
             style={{ ...inputStyle, width: 'auto', flex: '1 1 220px' }} />
         </div>
@@ -321,7 +323,7 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={c.muted}>タイトル {title.length}/{NOTICE_MAX_TITLE}・本文 {body.length}/{NOTICE_MAX_BODY}</span>
           <button style={{ ...c.btn, ...c.btnOn, marginLeft: 'auto', padding: '8px 18px', opacity: ready ? 1 : 0.5 }} disabled={!ready || busy === 'send'} onClick={() => { void send(); }}>
-            {busy === 'send' ? '送信中…' : target === 'all' ? '全員に送る' : 'この会員に送る'}
+            {busy === 'send' ? '送信中…' : target === 'all' ? '全員に送る' : target === 'members' ? '会員だけに送る' : 'この会員に送る'}
           </button>
         </div>
       </div>
@@ -333,7 +335,7 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span style={{ fontWeight: 700 }}>{n.title}</span>
             <span style={c.muted}>{jst(n.createdAt)}</span>
-            <span style={{ ...c.muted, color: n.to === 'all' ? '#e2c074' : '#a5b4fc' }}>{n.to === 'all' ? '全員' : `会員: ${who(n.to)}`}</span>
+            <span style={{ ...c.muted, color: n.to === 'all' ? '#e2c074' : n.to === 'members' ? '#7dbb8a' : '#a5b4fc' }}>{audienceLabel(n.to) || `会員: ${who(n.to)}`}</span>
             <button style={{ ...c.btn, marginLeft: 'auto' }} disabled={busy === n.id}
               onClick={() => { if (window.confirm(`「${n.title}」を取り消します（アプリから消えます）。よろしいですか？`)) { setBusy(n.id); void onDelete(n.id).finally(() => setBusy('')); } }}>
               取り消す
@@ -535,7 +537,7 @@ export default function AdminView() {
   const [query, setQuery] = useState('');
   const [optedOut, setOptedOut] = useState(isTrackingOptedOut);
   const [showOwners, setShowOwners] = useState(false);
-  const [noticeTarget, setNoticeTarget] = useState('all'); // 'all' or a member's uid
+  const [noticeTarget, setNoticeTarget] = useState('all'); // 'all', 'members' or a member's uid
 
   useEffect(() => {
     document.title = '管理画面 | 月と蓮';

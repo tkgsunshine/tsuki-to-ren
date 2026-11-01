@@ -5,7 +5,7 @@ import { PillarsMark } from './icons/BrandIcons';
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  profileBadge?: boolean; // 未読のお知らせがあるとき、マイページに赤い点
+  profileBadge?: number; // 未読のお知らせの数（1以上ならマイページに赤い数字）
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, profileBadge }) => {
@@ -54,8 +54,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, profile
       >
         <span style={{ position: 'relative', display: 'inline-flex' }}>
           <User />
-          {profileBadge && (
-            <span aria-label="未読のお知らせがあります" style={{ position: 'absolute', top: '-2px', right: '-4px', width: '8px', height: '8px', borderRadius: '50%', background: '#cf5a43', boxShadow: '0 0 0 2px rgba(10, 12, 20, 0.9)' }} />
+          {!!profileBadge && profileBadge > 0 && (
+            <span aria-label={`未読のお知らせ ${profileBadge} 件`} style={{ position: 'absolute', top: '-5px', right: '-10px', minWidth: '16px', height: '16px', padding: '0 4px', boxSizing: 'border-box', borderRadius: '999px', background: '#cf5a43', color: '#fff', fontSize: '10px', fontWeight: 'bold', lineHeight: '16px', textAlign: 'center', boxShadow: '0 0 0 2px rgba(10, 12, 20, 0.9)' }}>
+              {profileBadge > 9 ? '9+' : profileBadge}
+            </span>
           )}
         </span>
         <span>マイページ</span>
