@@ -1,0 +1,45 @@
+name: X Research (Hasu-to-Tsuki)
+
+# 伸びている型の調査: data/x/research/accounts.json の見本アカウントの直近7日の投稿を読み、
+# data/x/research/latest.md（表示の多い順）を作る。結果は実行の成果物（artifact）として保存する。
+# いまは手動実行だけ（定期実行にするかは、1回目の結果を見て決める）。投稿の仕組みには影響しない。
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: '何日分を読むか'
+        default: '7'
+  push:
+    branches:
+      - claude/project-thread-6nqqaq
+    paths:
+      - scripts/x/research.mjs
+      - data/x/research/accounts.json
+      - .github/workflows/x_research.yml
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch posts
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: |
+          node scripts/x/research.mjs --days "${{ github.event.inputs.days || '7' }}"
+          cat data/x/research/latest.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: x-research
+          path: data/x/research/latest.*
+          if-no-files-found: ignore
