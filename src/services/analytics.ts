@@ -147,9 +147,30 @@ export const initAttribution = () => {
 
 const current = (): Attribution => ({ source: 'direct', landing: 'other', ...read(session(), SESSION_KEY), device: currentDevice() });
 
-/** One fortune run from the input form. */
+const FORTUNE_DAY_KEY = 'hasu_fortune_day'; // JST date of this browser's last fortune, so the first one each day is counted apart
+const jstToday = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+
+/** One fortune run from the input form. The first one of the day in this browser also carries first=1 (counted as fortuneFirsts, in the same write). */
 export const trackFortune = () => {
-  void send({ type: 'fortune', ...current() });
+  const today = jstToday();
+  let first = false;
+  try {
+    first = local()?.getItem(FORTUNE_DAY_KEY) !== today;
+    if (first) local()?.setItem(FORTUNE_DAY_KEY, today);
+  } catch {}
+  void send({ type: 'fortune', ...current(), ...(first ? { first: '1' } : {}) });
+};
+
+/**
+ * Steps toward a free account, so the admin page shows where guests drop off:
+ * reg_view   = the sign-up box on the result page came into view (once per result shown)
+ * reg_click  = a button that leads to sign-up was pressed: top (under the scores), bar (bottom bar), lock (a locked part)
+ * reg_submit = a sign-up was started: card_* (the box on the result page) / modal_* (the sign-in window), by email / google / x
+ * auth_open  = the sign-in window opened for someone not signed in
+ */
+export type RegPlace = 'top' | 'bar' | 'lock' | `${'card' | 'modal'}_${'email' | 'google' | 'x'}`;
+export const trackRegStep = (type: 'reg_view' | 'reg_click' | 'reg_submit' | 'auth_open', place?: RegPlace) => {
+  void send({ type, ...current(), ...(place ? { place } : {}) });
 };
 
 export type ShareChannel = 'x' | 'line' | 'link' | 'image';

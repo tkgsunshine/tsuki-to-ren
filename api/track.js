@@ -1,5 +1,5 @@
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeSource, recordEvent } from './_lib/analytics.js';
+import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeRegPlace, normalizeSource, recordEvent } from './_lib/analytics.js';
 import { handleInquiry } from './_lib/inquiry.js';
 
 // Receives the site's own counters: a visit (once per browser session), a fortune (each time the form is submitted),
@@ -29,6 +29,8 @@ export default async function handler(req, res, deps = {}) {
   const landing = normalizeLanding(body.landing);
   const device = normalizeDevice(body.device);
   const channel = type === 'share' ? normalizeChannel(body.channel) : undefined;
+  const regPlace = normalizeRegPlace(type, body.place);
+  const first = type === 'fortune' && body.first === '1';
 
   try {
     const db = deps.db || getDb();
@@ -50,7 +52,7 @@ export default async function handler(req, res, deps = {}) {
       await recordEvent(db, { type, source, landing, device, date: jstDate(new Date(created)) });
       return res.status(204).end();
     }
-    await recordEvent(db, { type, source, landing, device, channel });
+    await recordEvent(db, { type, source, landing, device, channel, regPlace, first });
     return res.status(204).end();
   } catch (e) {
     console.error('⚠️ Could not record the event:', e?.message);

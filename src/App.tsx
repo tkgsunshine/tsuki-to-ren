@@ -32,7 +32,7 @@ import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
-import { trackFortune, trackPremiumStep } from './services/analytics';
+import { trackFortune, trackPremiumStep, trackRegStep } from './services/analytics';
 import { subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
@@ -1193,6 +1193,12 @@ function App() {
   useEffect(() => {
     if (showPremiumLP) trackPremiumStep('premium_view');
   }, [showPremiumLP]);
+
+  // ログインしていない人がログイン画面を開いた回数（会員登録までのどこで離れたかを見るため）
+  useEffect(() => {
+    if (showAuthModal && !currentUser) trackRegStep('auth_open');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAuthModal]);
 
   // チャット・プレミアム案内などの重ね表示を開いたら履歴を1件積み、閉じたら外す（戻るスワイプで閉じられるように）
   useEffect(() => {

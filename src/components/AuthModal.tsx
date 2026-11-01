@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, type UserProfile } from '../services/firebase';
+import { trackRegStep } from '../services/analytics';
 
 interface AuthModalProps {
   currentUser: UserProfile | null;
@@ -26,6 +27,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
     setErrorMsg(null);
     try {
       await sendEmailMagicLink(cleanEmail);
+      trackRegStep('reg_submit', 'modal_email');
       setEmailSent(true);
     } catch (err: any) {
       console.error('Email signin error:', err);
@@ -39,6 +41,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
   const handleGoogleSignIn = async () => {
     setLoading('google');
     setErrorMsg(null);
+    if (!currentUser) trackRegStep('reg_submit', 'modal_google');
     try {
       const user = await signInWithGoogle();
       if (user && user.uid) {
@@ -65,6 +68,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
   const handleXSignIn = async () => {
     setLoading('x');
     setErrorMsg(null);
+    if (!currentUser) trackRegStep('reg_submit', 'modal_x');
     try {
       const user = await signInWithX();
       if (user && user.uid) {

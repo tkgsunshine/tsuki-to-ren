@@ -101,6 +101,43 @@ test('track: the column boxes that lead to the fortune are counted by position (
   assert.deepEqual(Object.keys(db.writes[1].data.byLanding), ['column:line-timing']);
 });
 
+test('track: the first fortune of the day is counted apart, in the same single write', async () => {
+  const db = mockDb();
+  for (const first of ['1', undefined]) {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'fortune', source: 'x', landing: 'home', device: 'mobile_browser', ...(first ? { first } : {}) } }, res, { db });
+    assert.equal(res.code, 204);
+  }
+  assert.equal(db.writes.length, 2, 'one write per fortune');
+  assert.ok(db.writes[0].data.fortunes && db.writes[0].data.fortuneFirsts);
+  assert.ok(db.writes[0].data.bySource.x.fortuneFirsts);
+  assert.ok(db.writes[1].data.fortunes);
+  assert.equal(db.writes[1].data.fortuneFirsts, undefined);
+});
+
+test('track: steps toward a free account are counted, with where they happened', async () => {
+  const db = mockDb();
+  const send = async (body) => {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { source: 'x', landing: 'home', device: 'mobile_browser', ...body } }, res, { db });
+    return res.code;
+  };
+  assert.equal(await send({ type: 'reg_view' }), 204);
+  assert.equal(await send({ type: 'reg_click', place: 'top' }), 204);
+  assert.equal(await send({ type: 'reg_submit', place: 'card_google' }), 204);
+  assert.equal(await send({ type: 'auth_open' }), 204);
+  assert.equal(await send({ type: 'reg_click', place: '<script>' }), 204);
+  const [view, click, submit, auth, odd] = db.writes.map((w) => w.data);
+  assert.ok(view.regViews);
+  assert.equal(view.byReg, undefined);
+  assert.ok(click.regClicks);
+  assert.deepEqual(Object.keys(click.byReg), ['click_top']);
+  assert.ok(submit.regSubmits);
+  assert.deepEqual(Object.keys(submit.byReg), ['submit_card_google']);
+  assert.ok(auth.authOpens);
+  assert.deepEqual(Object.keys(odd.byReg), ['click_other'], 'an unknown place cannot add its own key');
+});
+
 test('countPremium: counted once per live subscription, under the member\'s first source', async () => {
   const db = mockDb(new Set(), { 'memberAttribution/u1': { source: 'x', landing: 'share_link', device: 'mobile_browser' } });
   assert.equal(await countPremium(db, { uid: 'u1', subscriptionId: 'sub_1', livemode: true }), true);
