@@ -32,7 +32,11 @@ const missing = (id) => !fillMissing || !haveIds.has(`${date}-${id}`);
 const slotMissing = (slot) => !haveIds.has(`${date}-${slot}`);
 // --redo-beast-reply: その日の守護獣のリプ欄だけを、Claudeで書き直す（本文は変えない。2通→1通への移行用）
 const redoBeast = args.includes('--redo-beast-reply');
-if (haveIds.size && !redoBeast && !(fillMissing && (slotMissing('am') || slotMissing('chara-1') || BUZZ_SLOTS.some(slotMissing)))) {
+// 運営が手で足した投稿（ランキング・長文・16タイプ別の行動など。id が -rank / -long2 / -scene など）は、
+// 自動の枠（朝・守護獣・バズ枠）とは別なので、「その日の投稿が既にある」の判定に数えない（2026-11-01: 手で先の日に足した投稿のせいで、毎晩の下書きが止まっていた）
+const genSlots = ['am', 'chara-1', ...BUZZ_SLOTS];
+const hasGenerated = genSlots.some((s) => !slotMissing(s));
+if (hasGenerated && !redoBeast && !(fillMissing && genSlots.some(slotMissing))) {
   console.log(`${date} の投稿は既にキューにあります。何もしません。`);
   process.exit(0);
 }
@@ -229,7 +233,8 @@ if (llmSlots.length) {
 posts = [...detPosts, ...posts];
 
 // 守護獣の1本（朝 08:15）。署名は常に「-月-」（話し手は月だけ）
-const beastItems = missing('chara-1') && !redoBeast ? buildBeastItems(all, date, history, { allowLinks }) : [];
+// config.dailyBeast が false のときは、毎日の占い（守護獣）を作らない（2026-11-02: 運営の判断で終了）
+const beastItems = config.dailyBeast !== false && missing('chara-1') && !redoBeast ? buildBeastItems(all, date, history, { allowLinks }) : [];
 // 守護獣のリプ欄（2通）は、アプリの鑑定の解説（facts.advice）をもとに、Claudeが書く。検査に通らなければ、定型文のまま（保険）
 const BEAST_REPLY_SPEC = `守護獣の今日の恋愛運の投稿への、スレッド返信を2通書く。恋愛に共感してもらえて、保存・引用したくなる内容にする（薄い一般論にしない）。
 # replyText（1通目）
