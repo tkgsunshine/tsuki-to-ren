@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
-import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog, toPrivateMetrics, looseKey } from './metrics.mjs';
+import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog, toPrivateMetrics, looseKey, similarity, tweetText, FUZZY_MIN } from './metrics.mjs';
 
 const now = new Date('2026-10-10T00:00:00Z');
 const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
@@ -207,4 +207,35 @@ test('照合: 親の本文を直して投稿しても、照合できた返信か
   assert.equal(q[0].tweetId, '200');
   assert.equal(q[0].status, 'posted');
   assert.equal(q[1].tweetId, '201');
+});
+
+test('照合: Xで本文を手直しして投稿しても、だいたい同じなら照合する（返信は、親へのスレッド返信の中から）', () => {
+  const q = [
+    { id: '2026-10-30-night', status: 'scheduled', createdAt: '2026-10-29T13:00:00Z', text: 'ISTJは、好きな人との約束を、カレンダーに入れた瞬間からずっと楽しみにしている。\nでもそれを、たいてい顔には出さない。\n\n約束の前の夜。\n待ち合わせの場所と時間を、もう一度だけ確かめる。\n-月-' },
+    { id: '2026-10-30-night-reply', replyTo: '2026-10-30-night', status: 'scheduled', text: 'ほかのタイプの恋も、プロフィールにまとめているよ。\n-月-' },
+    { id: 'other', status: 'scheduled', createdAt: '2026-10-29T13:00:00Z', text: 'まったく関係のない、別の投稿の本文です。こちらは照合されてはいけません。\n-月-' },
+  ];
+  const tw = [
+    { id: '300', created_at: '2026-10-30T11:00:00Z', text: 'ISTJは、好きな人との約束を…', note_tweet: { text: 'ISTJって、好きな人との約束を、カレンダーに入れた瞬間からずーっと楽しみにしてる。\nでもそれを、たいてい顔には出さないんだよね。\n\n約束の前の夜。\n待ち合わせの場所と時間を、もう一回だけ確かめる。' } },
+    { id: '301', created_at: '2026-10-30T11:01:00Z', text: 'ほかのタイプの恋も、プロフィールにあるよ🌙', referenced_tweets: [{ type: 'replied_to', id: '300' }] },
+  ];
+  assert.equal(reconcileTimeline(q, tw), 2);
+  assert.equal(q[0].tweetId, '300');
+  assert.equal(q[0].editedOnPost, true);
+  assert.ok(q[0].matchScore >= FUZZY_MIN && q[0].matchScore < 1);
+  assert.equal(q[1].tweetId, '301');
+  assert.equal(q[2].status, 'scheduled');
+});
+
+test('照合: 下書きを作る前の投稿や、別の日の占いとは、似ていても組まない', () => {
+  const daily = (d, n) => `❤️🔮10月${d}日の恋愛運🔮❤️\n守護獣と本命星の鑑定は固定ポストでリプしてね✨\n\n-対象-\n【守護獣】：庚鼠\n【本命星】：四緑木星\n\n-結果-\n【今日の点数】：${n}点`;
+  const q = [{ id: '2026-10-27-chara-1', date: '2026-10-27', status: 'scheduled', createdAt: '2026-10-25T13:00:00Z', text: daily(27, 59) }];
+  const tw = [{ id: '400', created_at: '2026-10-20T00:00:00Z', text: daily(20, 84) }, { id: '401', created_at: '2026-10-30T00:00:00Z', text: daily(30, 61) }];
+  assert.ok(similarity(looseKey(q[0].text), looseKey(tw[1].text)) >= FUZZY_MIN); // 似てはいるが
+  assert.equal(reconcileTimeline(q, tw), 0); // 10/20 は下書きより前、10/30 は日付が離れているので組まない
+});
+
+test('長い投稿は note_tweet の全文を使う', () => {
+  assert.equal(tweetText({ text: '途中で…', note_tweet: { text: '全文です' } }), '全文です');
+  assert.equal(tweetText({ text: '短い' }), '短い');
 });

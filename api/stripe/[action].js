@@ -4,15 +4,17 @@ import status from '../_lib/stripe-status.js';
 import webhook from '../_lib/stripe-webhook.js';
 import partner from '../_lib/partner-days.js';
 import userdata from '../_lib/user-data.js';
+import notices from '../_lib/notices.js';
 
-// /api/stripe/checkout | portal | status | webhook | partner | userdata in one function
-// (userdata = the member's profile and saved partners, kept here only to stay within the function limit)
+// /api/stripe/checkout | portal | status | webhook | partner | userdata | notices in one function
+// (userdata = the member's profile and saved partners, notices = the in-app お知らせ;
+//  both are kept here only to stay within the function limit)
 // (the Hobby plan allows at most 12 functions per deployment).
 // Body parsing is off because the webhook's signature is checked against the exact bytes Stripe sent;
 // the raw body is handed on as a Buffer, which the other handlers parse as JSON.
 export const config = { api: { bodyParser: false } };
 
-const HANDLERS = { checkout, portal, status, webhook, partner, userdata };
+const HANDLERS = { checkout, portal, status, webhook, partner, userdata, notices };
 
 const readRawBody = async (req) => {
   const chunks = [];
