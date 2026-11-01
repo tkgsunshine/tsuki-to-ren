@@ -2,7 +2,7 @@
 // 戻る（iPhoneの戻るスワイプ・ブラウザの戻るボタン）で、一つ前の画面に戻れるようにする。
 // 各履歴には「その時の画面」を丸ごと入れておき、戻ったときはそれをそのまま再現する。
 
-export type SettingsSubView = 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact';
+export type SettingsSubView = 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news';
 
 // 履歴に積む重ね表示（チャット・プレミアム案内など）。開くと1件積み、戻るで閉じる
 export type OverlayName = 'chat' | 'premiumLP' | 'auth' | 'shareCard' | 'notify' | 'installGuide' | 'premiumWelcome';
@@ -30,7 +30,7 @@ export const routeFromPath = (path: string): PageFields => {
   if (p === '/column') return page('column');
   if (p === '/tools/nicchu') return page('tool', { slug: 'nicchu' });
   if (p === '/terms' || p === '/privacy') return page('home', { legal: true });
-  if (p === '/tokushoho' || p === '/company' || p === '/contact' || p === '/about') return page('profile', { subView: p.slice(1) as SettingsSubView });
+  if (p === '/tokushoho' || p === '/company' || p === '/contact' || p === '/about' || p === '/news') return page('profile', { subView: p.slice(1) as SettingsSubView });
   if (p === '/result' || p === '/fortune') return page('fortune');
   if (p === '/chat') return page('chat');
   if (p === '/mypage' || p === '/profile') return page('profile');
@@ -46,7 +46,7 @@ export const pathForPage = (page: PageFields): string => {
     case 'fortune': return '/result';
     case 'chat': return '/chat';
     case 'profile':
-      return ['about', 'tokushoho', 'company', 'contact'].includes(page.subView) ? `/${page.subView}` : '/mypage';
+      return ['about', 'tokushoho', 'company', 'contact', 'news'].includes(page.subView) ? `/${page.subView}` : '/mypage';
     default: return '/';
   }
 };

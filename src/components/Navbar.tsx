@@ -5,9 +5,10 @@ import { PillarsMark } from './icons/BrandIcons';
 interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  profileBadge?: boolean; // 未読のお知らせがあるとき、マイページに赤い点
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
+export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, profileBadge }) => {
   return (
     <nav className="navbar-container">
       <button
@@ -51,7 +52,12 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
         className={`navbar-item ${activeTab === 'profile' ? 'active' : ''}`}
         onClick={() => setActiveTab('profile')}
       >
-        <User />
+        <span style={{ position: 'relative', display: 'inline-flex' }}>
+          <User />
+          {profileBadge && (
+            <span aria-label="未読のお知らせがあります" style={{ position: 'absolute', top: '-2px', right: '-4px', width: '8px', height: '8px', borderRadius: '50%', background: '#cf5a43', boxShadow: '0 0 0 2px rgba(10, 12, 20, 0.9)' }} />
+          )}
+        </span>
         <span>マイページ</span>
       </button>
     </nav>
