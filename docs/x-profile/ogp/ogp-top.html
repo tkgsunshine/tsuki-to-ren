@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><!-- トップのOGP（2026-11-01 A案）。app-screen.png はアプリの鑑定結果画面（390幅×3倍）を切り抜いたもの。Playwrightで1200×630を撮って public/ogp-image.jpg に -->
+<!doctype html><meta charset="utf-8"><!-- トップのOGP（2026-11-02 Xヘッダーと同じ文字の組み方：コピー→方式3行を頭と幅をそろえて縦積み。元は2026-11-01 A案）。app-screen.png はアプリの鑑定結果画面（390幅×3倍）を切り抜いたもの。Playwrightで1200×630を撮って public/ogp-image.jpg に -->
 <style>
 @font-face{font-family:'SM';font-weight:700;src:url('../../../scripts/x/assets/ShipporiMincho-Bold.ttf')}
 html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#0a0714}
@@ -23,17 +23,30 @@ svg.st{position:absolute;inset:0}
 <style>
 .tsuki{left:-70px;top:40px;width:420px;height:562px}
 .ren{left:900px;top:40px;width:420px;height:562px;opacity:.95}
-.t{position:absolute;left:250px;top:62px;width:480px;text-align:center}
-.t .big{margin-top:18px}.t .sub{margin-top:18px}
-.phone{left:735px;top:48px;transform:rotate(4deg)}
+.t{position:absolute;left:250px;top:48px;width:480px;text-align:center}
+.cp{margin-top:16px;font-size:50px;line-height:1.24;letter-spacing:.02em;white-space:nowrap;text-shadow:0 0 26px rgba(226,192,116,.4)}
+.cp .p{color:#fe8fb6}.cp .g{color:#e2c074}
+.mt{margin-top:22px;text-shadow:0 0 24px rgba(160,140,255,.45)}
+/* 方式名を3行、×はその間の行（5行）。MBTIは字間で4文字幅に */
+.mn{display:block;font-size:52px;line-height:1.1;white-space:nowrap}
+.mn.b{color:#9cc6ff;font-size:60px;letter-spacing:10.1px;text-indent:10.1px}
+.mx{display:block;color:#e2c074;font-size:30px;line-height:1.05}
+.phone{left:740px;top:34px;width:258px;transform:rotate(4deg)}
+.phone img{width:258px}
 </style>
 <div class="o"><svg class="st" width="1200" height="630" id="st"></svg>
 <div class="c tsuki"><img src="tsuki.jpg"></div>
 <div class="c ren"><img src="ren.jpg"></div>
 <div class="t">
  <div class="badge">月と蓮</div>
- <div class="big">四柱推命<br><span class="x">×</span>九星気学<br><span class="x">×</span><span class="m">MBTI</span><small>（16タイプ）</small></div>
- <div class="sub">好きな人との<b>相性</b>がわかる</div>
+ <div class="cp">好きな人との<br><span class="p">今日</span>の相性が<span class="g">わかる</span></div>
+ <div class="mt">
+  <span class="mn">四柱推命</span>
+  <span class="mx">×</span>
+  <span class="mn">九星気学</span>
+  <span class="mx">×</span>
+  <span class="mn b">MBTI</span>
+ </div>
 </div>
 <div class="phone"><img src="app-screen.png"></div>
 </div><script>let s=11,r=()=>(s=(s*16807)%2147483647)/2147483647,o="";for(let i=0;i<70;i++){const x=r()*1200,y=r()*630,z=r()*1.5+.4;o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${z.toFixed(1)}" fill="#fff" opacity="${(r()*.5+.15).toFixed(2)}"/>`}document.getElementById("st").innerHTML=o;</script>
