@@ -19,6 +19,7 @@ export const REPLIES_LOG_PATH = process.env.X_REPLIES_LOG_PATH || path.join(ROOT
 const HOUR = 3600 * 1000;
 export const MIN_AGE_H = 20; // これ以上たった投稿から取る（基準値 metrics24 になる）
 export const REFRESH_UNTIL_H = 72; // この時間までは、毎回 metrics（最新）を更新する。以降は基準値のみ
+export const TIMELINE_DAYS = 14; // 照合のために読む、自分のタイムラインの期間（日）
 
 /** 反応を取る対象: tweetId があり、投稿から MIN_AGE_H 以上。基準値が未取得か、REFRESH_UNTIL_H 以内なら対象 */
 export function pickTargets(queue, now = new Date()) {
@@ -39,7 +40,25 @@ export const normText = (t) =>
 /** 照合のゆるいキー: 署名の行（-月-・-蓮-）と、空白・改行の違いを無視する（運営が署名を消して投稿しても、同じ投稿として照合する。2026-10-31） */
 export const looseKey = (t) => normText(t).replace(/\n?\s*[-ー−―]\s*[月蓮]\s*[-ー−―]\s*$/, '').replace(/\s+/g, '');
 
+/** 投稿の全文。長い投稿（280の重みを超えるもの）は、APIの text が途中で切れ、全文は note_tweet.text に入る（2026-11-01） */
+export const tweetText = (t) => String(t?.note_tweet?.text || t?.text || '');
+
+/** 2文字ずつの組の重なり（Dice係数、0〜1）。運営がXで本文を手直しして投稿しても、だいたい同じなら照合するために使う */
+export function similarity(a, b) {
+  const grams = (s) => { const m = new Map(); for (let i = 0; i < s.length - 1; i++) { const g = s.slice(i, i + 2); m.set(g, (m.get(g) || 0) + 1); } return m; };
+  const A = grams(a), B = grams(b);
+  const na = Math.max(0, a.length - 1), nb = Math.max(0, b.length - 1);
+  if (!na || !nb) return 0;
+  let both = 0;
+  for (const [g, c] of A) both += Math.min(c, B.get(g) || 0);
+  return (2 * both) / (na + nb);
+}
+export const FUZZY_MIN = 0.6; // これ以上の重なりで、同じ投稿とみなす
+const OPEN = ['scheduled', 'expired', 'failed'];
+const jstDay = (iso) => new Date(new Date(iso).getTime() + 9 * HOUR).toISOString().slice(0, 10);
+
 export function reconcileTimeline(queue, tweets) {
+  tweets = tweets.map((t) => ({ ...t, text: tweetText(t) }));
   const byText = new Map();
   for (const t of [...tweets].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))) {
     const k = normText(t.text);
@@ -65,6 +84,56 @@ export function reconcileTimeline(queue, tweets) {
     delete p.skipReason;
     delete p.lastError;
     n++;
+  }
+  // だいたい同じ本文での照合（運営がXで手直しして投稿した分。2026-11-01）。重なりの大きい組から順に決める。
+  // 下書きを作る前の投稿とは組まない。日付つきの占い（-chara-数字）は、その日の前後1日の投稿とだけ組む
+  const pairs = [];
+  // 返信の項目は、毎回似た形（順位の並びなど）になりやすいので、ここでは親だけ。返信は、下で親の投稿へのスレッド返信の中から探す
+  const openItems = queue.filter((p) => !p.replyTo && OPEN.includes(p.status) && !p.tweetId && looseKey(p.text).length >= 20);
+  const freeTweets = tweets.filter((t) => !taken.has(t.id) && looseKey(t.text).length >= 20);
+  for (const p of openItems) {
+    const kp = looseKey(p.text);
+    const daily = /-chara-\d+$/.test(p.id) && p.date;
+    for (const t of freeTweets) {
+      if (p.createdAt && t.created_at && t.created_at < p.createdAt) continue;
+      if (daily && t.created_at && Math.abs(new Date(jstDay(t.created_at)) - new Date(p.date)) > 86400000) continue;
+      const s = similarity(kp, looseKey(t.text));
+      if (s >= FUZZY_MIN) pairs.push({ p, t, s });
+    }
+  }
+  pairs.sort((a, b) => b.s - a.s);
+  for (const { p, t, s } of pairs) {
+    if (p.tweetId || taken.has(t.id)) continue;
+    taken.add(t.id);
+    p.status = 'posted';
+    p.postedAt = t.created_at;
+    p.tweetId = t.id;
+    p.manual = true;
+    p.editedOnPost = true;
+    p.matchScore = Math.round(s * 100) / 100;
+    delete p.skipReason;
+    delete p.lastError;
+    n++;
+  }
+  // 返信の項目: 親が照合できていれば、親の投稿へのスレッド返信のうち、いちばん近い本文のものに照合する（返信1→親、返信2→返信1）
+  for (let round = 0; round < 2; round++) {
+    for (const c of queue) {
+      if (!c.replyTo || c.tweetId || !OPEN.includes(c.status)) continue;
+      const parent = queue.find((x) => x.id === c.replyTo);
+      if (!parent?.tweetId) continue;
+      let best = null;
+      for (const t of tweets) {
+        if (taken.has(t.id) || !t.referenced_tweets?.some((r) => r.type === 'replied_to' && r.id === parent.tweetId)) continue;
+        const s = similarity(looseKey(c.text), looseKey(t.text));
+        if (s >= 0.3 && (!best || s > best.s)) best = { t, s };
+      }
+      if (!best) continue;
+      taken.add(best.t.id);
+      Object.assign(c, { status: 'posted', postedAt: best.t.created_at, tweetId: best.t.id, manual: true, editedOnPost: true, matchScore: Math.round(best.s * 100) / 100 });
+      delete c.skipReason;
+      delete c.lastError;
+      n++;
+    }
   }
   // スレッド返信が照合できたのに、親が照合できなかったとき（運営が親の本文を直して投稿した）は、返信が返信している投稿（referenced_tweets の replied_to）を、親として扱う
   const byId = new Map(tweets.map((x) => [x.id, x]));
@@ -95,7 +164,7 @@ export function mergeRepliesLog(log, tweets, myId, users = []) {
     if (!t.in_reply_to_user_id || t.in_reply_to_user_id === myId) continue; // 自分のスレッド返信は除く
     const pm = t.public_metrics || {};
     byId.set(t.id, {
-      id: t.id, createdAt: t.created_at, to: handle.get(t.in_reply_to_user_id) || '', text: String(t.text || '').slice(0, 140),
+      id: t.id, createdAt: t.created_at, to: handle.get(t.in_reply_to_user_id) || '', text: tweetText(t).slice(0, 140),
       impressions: pm.impression_count ?? null, likes: pm.like_count ?? 0, replies: pm.reply_count ?? 0, reposts: pm.retweet_count ?? 0, bookmarks: pm.bookmark_count ?? 0,
     });
   }
@@ -257,7 +326,19 @@ async function main() {
   let repliesLog = readJson(REPLIES_LOG_PATH, []);
   if (readConfig().apiPosting === false && me?.id) {
     try {
-      const tl = await apiGet(creds, `/2/users/${me.id}/tweets`, { max_results: '100', 'tweet.fields': 'created_at,public_metrics,in_reply_to_user_id,referenced_tweets', expansions: 'in_reply_to_user_id', 'user.fields': 'username' });
+      // 長い投稿の全文（note_tweet）も取る。直近 TIMELINE_DAYS 日分を、最大3ページ（300件）まで読む
+      const tl = { data: [], includes: { users: [] } };
+      const since = new Date(now.getTime() - TIMELINE_DAYS * 86400000).toISOString();
+      let token = null;
+      for (let page = 0; page < 3; page++) {
+        const params = { max_results: '100', 'tweet.fields': 'created_at,public_metrics,in_reply_to_user_id,referenced_tweets,note_tweet', expansions: 'in_reply_to_user_id', 'user.fields': 'username', start_time: since };
+        if (token) params.pagination_token = token;
+        const res = await apiGet(creds, `/2/users/${me.id}/tweets`, params);
+        tl.data.push(...(res.data || []));
+        tl.includes.users.push(...(res.includes?.users || []));
+        token = res.meta?.next_token;
+        if (!token) break;
+      }
       reconciled = reconcileTimeline(queue, tl.data || []);
       repliesLog = mergeRepliesLog(repliesLog, tl.data || [], me.id, tl.includes?.users || []);
       for (const t of tl.data || []) byId.set(t.id, t.public_metrics);
