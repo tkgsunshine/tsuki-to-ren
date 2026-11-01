@@ -3,9 +3,15 @@
 @font-face{font-family:'SM';font-weight:700;src:url('../../scripts/x/assets/ShipporiMincho-Bold.ttf')}
 html,body{margin:0;width:1500px;height:500px;overflow:hidden}
 .h{position:relative;width:1500px;height:500px;background:url('header-base.png');font-family:'SM',serif;color:#f4efe2}
-.m{position:absolute;left:480px;top:298px;width:400px;text-align:center;font-size:44px;line-height:1.2;letter-spacing:.06em;text-shadow:0 0 22px rgba(160,140,255,.45)}
-.m .x{color:#e2c074;font-size:34px;margin-right:8px}
-.m .b{color:#9cc6ff}
-.m small{font-size:20px;color:#e8e2f7;letter-spacing:.02em}
+/* 方式名の左端と幅をそろえる：×は別の列、名前は4文字幅に均等割り */
+.m{position:absolute;left:0;top:300px;width:1500px;display:flex;justify-content:center}
+.g{display:grid;grid-template-columns:40px 176px;row-gap:6px;align-items:center;margin-left:-40px;margin-left:calc(697px*2 - 1500px - 40px);text-shadow:0 0 22px rgba(160,140,255,.45)}
+.x{color:#e2c074;font-size:30px;text-align:left;line-height:1}
+.n{font-size:44px;line-height:1.1;text-align-last:justify;white-space:nowrap}
+.n.b{color:#9cc6ff;font-size:50px;letter-spacing:9.3px;margin-right:calc(-1*9.3px)}
 </style>
-<div class="h"><div class="m">四柱推命<br><span class="x">×</span>九星気学<br><span class="x">×</span><span class="b">MBTI</span></div></div>
+<div class="h"><div class="m"><div class="g">
+<span class="x"></span><span class="n">四柱推命</span>
+<span class="x">×</span><span class="n">九星気学</span>
+<span class="x">×</span><span class="n b">MBTI</span>
+</div></div></div>
