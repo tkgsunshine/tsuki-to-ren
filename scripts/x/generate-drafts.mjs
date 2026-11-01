@@ -32,7 +32,11 @@ const missing = (id) => !fillMissing || !haveIds.has(`${date}-${id}`);
 const slotMissing = (slot) => !haveIds.has(`${date}-${slot}`);
 // --redo-beast-reply: その日の守護獣のリプ欄だけを、Claudeで書き直す（本文は変えない。2通→1通への移行用）
 const redoBeast = args.includes('--redo-beast-reply');
-if (haveIds.size && !redoBeast && !(fillMissing && (slotMissing('am') || slotMissing('chara-1') || BUZZ_SLOTS.some(slotMissing)))) {
+// 運営が手で足した投稿（ランキング・長文・16タイプ別の行動など。id が -rank / -long2 / -scene など）は、
+// 自動の枠（朝・守護獣・バズ枠）とは別なので、「その日の投稿が既にある」の判定に数えない（2026-11-01: 手で先の日に足した投稿のせいで、毎晩の下書きが止まっていた）
+const genSlots = ['am', 'chara-1', ...BUZZ_SLOTS];
+const hasGenerated = genSlots.some((s) => !slotMissing(s));
+if (hasGenerated && !redoBeast && !(fillMissing && genSlots.some(slotMissing))) {
   console.log(`${date} の投稿は既にキューにあります。何もしません。`);
   process.exit(0);
 }
