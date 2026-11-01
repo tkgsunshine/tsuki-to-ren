@@ -1,7 +1,7 @@
 // 伸びている型の調査: 見本アカウント（data/x/research/accounts.json）の直近の投稿を X API で読み、
 // 表示回数の多い順に data/x/research/latest.json と latest.md に書く。
 // 読み取りは件数に応じて料金がかかるので、アカウントごとに最大 MAX_PER_ACCOUNT 件まで。
-// 使い方: node scripts/x/research.mjs [--days 7] [--user name]（--user で accounts.json を上書き）
+// 使い方: node scripts/x/research.mjs [--days 7] [--user name]（--user で accounts.json を上書き） [--only-last]（最後の1件だけ）
 // 必要な環境変数: X_API_KEY / X_API_SECRET / X_ACCESS_TOKEN / X_ACCESS_TOKEN_SECRET（無いと何もしない）
 import fs from 'node:fs';
 import path from 'node:path';
@@ -46,6 +46,8 @@ async function main() {
   const accounts = userArg
     ? userArg.split(',').map((s) => s.trim().replace(/^@/, '')).filter(Boolean)
     : JSON.parse(fs.readFileSync(path.join(DIR, 'accounts.json'), 'utf8')).map((a) => a.username);
+  // --only-last: 追加したばかりの最後のアカウントだけ読む（読み取り料金を節約）
+  if (process.argv.includes('--only-last')) accounts.splice(0, accounts.length - 1);
   const since = new Date(Date.now() - days * 86400000).toISOString();
   const posts = [];
   const users = [];
