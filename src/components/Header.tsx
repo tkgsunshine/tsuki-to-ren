@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { User, LogIn } from 'lucide-react';
+import { User, LogIn, Bell } from 'lucide-react';
 import type { UserProfile } from '../services/firebase';
 
 interface HeaderProps {
   currentUser?: UserProfile | null;
   onOpenAuth?: () => void;
+  unreadNotices?: number;
+  onOpenNotices?: () => void; // 左上の鈴（お知らせ）
 }
 
 // 開いた瞬間の光の演出は、ページを読み込んだ最初の1回だけ（タブを戻るたびには出さない）
@@ -33,7 +35,7 @@ const OpeningGlow: React.FC = () => (
   </div>
 );
 
-export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
+export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth, unreadNotices = 0, onOpenNotices }) => {
   const [opening, setOpening] = useState(() => !openingPlayed);
 
   useEffect(() => {
@@ -46,6 +48,41 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth }) => {
   return (
     <header className={`app-header${opening ? ' is-opening' : ''}`} style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', flexShrink: 0, padding: '0.5rem 0.75rem 0.25rem', textAlign: 'center', userSelect: 'none', position: 'relative' }}>
       {opening && <OpeningGlow />}
+
+      {/* お知らせ（左上の鈴。未読があれば数を出す） */}
+      {onOpenNotices && (
+        <button
+          type="button"
+          onClick={onOpenNotices}
+          aria-label={unreadNotices ? `お知らせ（未読 ${unreadNotices} 件）` : 'お知らせ'}
+          style={{
+            position: 'absolute',
+            top: '0.85rem',
+            left: '-0.25rem',
+            zIndex: 10,
+            width: '30px',
+            height: '30px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(226, 192, 116, 0.35)',
+            borderRadius: '50%',
+            color: '#f2e2b3',
+            cursor: 'pointer',
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+          }}
+        >
+          <Bell size={14} />
+          {unreadNotices > 0 && (
+            <span style={{ position: 'absolute', top: '-5px', right: '-5px', minWidth: '16px', height: '16px', padding: '0 4px', boxSizing: 'border-box', borderRadius: '999px', background: '#cf5a43', color: '#fff', fontSize: '0.62rem', fontWeight: 'bold', lineHeight: '16px', textAlign: 'center' }}>
+              {unreadNotices > 9 ? '9+' : unreadNotices}
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Top Auth Bar (Pinned Absolute Top-Right) */}
       {onOpenAuth && (

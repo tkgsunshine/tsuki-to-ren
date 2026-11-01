@@ -57,6 +57,14 @@ interface Inquiry {
   notified: string | null;
   createdAt: string | null;
 }
+interface SentNotice {
+  id: string;
+  to: string; // 'all' or a member's uid
+  title: string;
+  body: string;
+  link: string;
+  createdAt: string | null;
+}
 interface AdminData {
   from: string;
   to: string;
@@ -65,6 +73,7 @@ interface AdminData {
   users: Member[];
   truncated: boolean;
   inquiries?: Inquiry[];
+  notices?: SentNotice[];
 }
 
 const INQUIRY_CATEGORIES: Record<string, string> = {
@@ -242,6 +251,96 @@ function Inquiries({ items, members, onStatus }: { items: Inquiry[]; members: Me
           <div style={c.muted}>
             返信先: {i.email ? <a href={`mailto:${i.email}`} style={{ color: '#e2c074' }}>{i.email}</a> : '（未記入）'}
           </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// アプリ内のお知らせ（マイページの「お知らせ」・ホームの鈴）。全員向けか、会員1人あて。
+// 送ったものはすぐアプリに出る（メールやプッシュ通知は送らない）。「取り消す」でアプリから消える。
+const NOTICE_MAX_TITLE = 60;
+const NOTICE_MAX_BODY = 1000;
+const inputStyle: React.CSSProperties = { background: '#0d0b19', color: '#ece8f6', border: '1px solid #3a3460', borderRadius: 8, padding: '8px 10px', fontSize: 13, width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' };
+
+function Notices({ items, members, target, setTarget, onSend, onDelete }: {
+  items: SentNotice[];
+  members: Member[];
+  target: string;
+  setTarget: (to: string) => void;
+  onSend: (n: { to: string; title: string; body: string; link: string }) => Promise<boolean>;
+  onDelete: (id: string) => Promise<void>;
+}) {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [link, setLink] = useState('');
+  const [busy, setBusy] = useState('');
+  const [memberQuery, setMemberQuery] = useState('');
+  const byUid = new Map(members.map((m) => [m.uid, m]));
+  const who = (uid: string) => {
+    const m = byUid.get(uid);
+    return m ? `${m.email || m.name || uid}${m.name && m.email ? `（${m.name}）` : ''}` : uid;
+  };
+  const q = memberQuery.trim().toLowerCase();
+  const candidates = q ? members.filter((m) => [m.email, m.name].some((v) => v?.toLowerCase().includes(q))).slice(0, 8) : [];
+  const ready = title.trim() && body.trim() && title.length <= NOTICE_MAX_TITLE && body.length <= NOTICE_MAX_BODY;
+
+  const send = async () => {
+    const toLabel = target === 'all' ? '全員' : who(target);
+    if (!window.confirm(`「${title.trim()}」を ${toLabel} に送ります。よろしいですか？\n（送るとすぐアプリに表示されます）`)) return;
+    setBusy('send');
+    const ok = await onSend({ to: target, title, body, link });
+    setBusy('');
+    if (ok) { setTitle(''); setBody(''); setLink(''); }
+  };
+
+  return (
+    <div style={c.card} id="admin-notices">
+      <h2 style={c.h2}>アプリ内のお知らせ</h2>
+      <div style={{ ...c.muted, marginBottom: 12 }}>
+        マイページの「お知らせ」に出ます（未読があるとホームの鈴と下メニューに印）。メールやプッシュ通知は送りません。全員向けはログインしていない人にも見えます。
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontWeight: 700 }}>送り先</span>
+          <button style={{ ...c.btn, ...(target === 'all' ? c.btnOn : {}) }} onClick={() => setTarget('all')}>全員</button>
+          {target !== 'all' && <span style={{ ...c.btn, ...c.btnOn }}>会員: {who(target)}</span>}
+          <input value={memberQuery} onChange={(e) => setMemberQuery(e.target.value)} placeholder="会員1人に送る: メール・名前で検索"
+            style={{ ...inputStyle, width: 'auto', flex: '1 1 220px' }} />
+        </div>
+        {candidates.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {candidates.map((m) => (
+              <button key={m.uid} style={c.btn} onClick={() => { setTarget(m.uid); setMemberQuery(''); }}>{who(m.uid)}</button>
+            ))}
+          </div>
+        )}
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`タイトル（${NOTICE_MAX_TITLE}文字まで）例: 新機能「○○」ができました`} style={inputStyle} />
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={5} placeholder={`本文（${NOTICE_MAX_BODY}文字まで。改行はそのまま出ます）`} style={{ ...inputStyle, resize: 'vertical' }} />
+        <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="ボタンのリンク（任意）例: /column や https://…" style={inputStyle} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={c.muted}>タイトル {title.length}/{NOTICE_MAX_TITLE}・本文 {body.length}/{NOTICE_MAX_BODY}</span>
+          <button style={{ ...c.btn, ...c.btnOn, marginLeft: 'auto', padding: '8px 18px', opacity: ready ? 1 : 0.5 }} disabled={!ready || busy === 'send'} onClick={() => { void send(); }}>
+            {busy === 'send' ? '送信中…' : target === 'all' ? '全員に送る' : 'この会員に送る'}
+          </button>
+        </div>
+      </div>
+      <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>送ったお知らせ（{items.length}件）</h3>
+      {items.length === 0 ? (
+        <div style={c.muted}>まだ送っていません</div>
+      ) : items.map((n) => (
+        <div key={n.id} style={{ borderTop: '1px solid #2a2545', padding: '10px 0' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ fontWeight: 700 }}>{n.title}</span>
+            <span style={c.muted}>{jst(n.createdAt)}</span>
+            <span style={{ ...c.muted, color: n.to === 'all' ? '#e2c074' : '#a5b4fc' }}>{n.to === 'all' ? '全員' : `会員: ${who(n.to)}`}</span>
+            <button style={{ ...c.btn, marginLeft: 'auto' }} disabled={busy === n.id}
+              onClick={() => { if (window.confirm(`「${n.title}」を取り消します（アプリから消えます）。よろしいですか？`)) { setBusy(n.id); void onDelete(n.id).finally(() => setBusy('')); } }}>
+              取り消す
+            </button>
+          </div>
+          <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', ...c.muted }}>{n.body}</div>
+          {n.link && <div style={c.muted}>リンク: {n.link}</div>}
         </div>
       ))}
     </div>
@@ -436,6 +535,7 @@ export default function AdminView() {
   const [query, setQuery] = useState('');
   const [optedOut, setOptedOut] = useState(isTrackingOptedOut);
   const [showOwners, setShowOwners] = useState(false);
+  const [noticeTarget, setNoticeTarget] = useState('all'); // 'all' or a member's uid
 
   useEffect(() => {
     document.title = '管理画面 | 月と蓮';
@@ -521,6 +621,44 @@ export default function AdminView() {
     } catch (e) {
       setError(e instanceof Error ? e.message : '更新に失敗しました');
     }
+  };
+  const postAdmin = async (payload: Record<string, unknown>) => {
+    if (!user) throw new Error('ログインが必要です');
+    const token = await user.getIdToken();
+    const r = await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    });
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(body.message || `更新に失敗しました（${r.status}）`);
+    return body;
+  };
+
+  const sendNotice = async (n: { to: string; title: string; body: string; link: string }) => {
+    try {
+      setError('');
+      const body = await postAdmin({ action: 'noticeSend', ...n });
+      setData((d) => (d ? { ...d, notices: [body.notice as SentNotice, ...(d.notices || [])] } : d));
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '送れませんでした');
+      return false;
+    }
+  };
+
+  const deleteNotice = async (id: string) => {
+    try {
+      await postAdmin({ action: 'noticeDelete', id });
+      setData((d) => (d ? { ...d, notices: (d.notices || []).filter((n) => n.id !== id) } : d));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '取り消せませんでした');
+    }
+  };
+
+  const messageMember = (uid: string) => {
+    setNoticeTarget(uid);
+    document.getElementById('admin-notices')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   const newMembers = useMemo(() => (data ? members.filter((m) => (jstDay(m.createdAt) >= data.from && jstDay(m.createdAt) <= data.to)).length : 0), [data, members]);
   const mailOn = members.filter((m) => m.dailyMail).length;
@@ -616,6 +754,8 @@ export default function AdminView() {
 
             <Inquiries items={data.inquiries || []} members={allMembers} onStatus={setInquiryStatus} />
 
+            <Notices items={data.notices || []} members={allMembers} target={noticeTarget} setTarget={setNoticeTarget} onSend={sendNotice} onDelete={deleteNotice} />
+
             <ChatCost days={data.chat || []} />
 
             <BreakdownTable title="流入元" rows={sumBy(data.daily, 'bySource')} label={sourceLabel}
@@ -668,6 +808,7 @@ export default function AdminView() {
                           {m.source ? [sourceLabel(m.source), landingLabel(m.landing || 'other'), ...(m.device ? [deviceLabel(m.device)] : [])].join(' / ') : '計測前'}
                         </td>
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>
+                          <button style={{ ...c.btn, marginRight: 6 }} onClick={() => messageMember(m.uid)}>メッセージ</button>
                           {m.owner === 'auto' ? (
                             <span style={c.muted}>自分（管理者）</span>
                           ) : (
