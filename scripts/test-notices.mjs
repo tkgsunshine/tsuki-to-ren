@@ -33,7 +33,8 @@ const NOTICES = [
   { id: 'a', to: 'all', title: '新機能', body: 'できました', link: '/column', createdAt: '2026-11-01T00:00:00.000Z' },
   { id: 'b', to: 'u1', title: 'たかしさんへ', body: 'ありがとう', link: '', createdAt: '2026-11-02T00:00:00.000Z' },
   { id: 'c', to: 'u2', title: '別の人へ', body: '秘密', link: '', createdAt: '2026-11-03T00:00:00.000Z' },
-  { id: 'd', to: 'all', title: '古いお知らせ', body: '前から', link: '', createdAt: '2026-09-01T00:00:00.000Z' }
+  { id: 'd', to: 'all', title: '古いお知らせ', body: '前から', link: '', createdAt: '2026-09-01T00:00:00.000Z' },
+  { id: 'e', to: 'members', title: '会員の皆さまへ', body: 'ご登録ありがとう', link: '', createdAt: '2026-10-15T00:00:00.000Z' }
 ];
 
 test('links must be a same-site path or an https URL', () => {
@@ -55,7 +56,7 @@ test('a notice needs a valid recipient, a title and a body within the limits', (
     { to: 'abc123', title: '新機能', body: '一行目\n二行目', link: '' });
 });
 
-test('a guest sees only notices for everyone, newest first', async () => {
+test('a guest sees only notices for everyone (not members-only), newest first', async () => {
   const res = mockRes();
   await notices({ method: 'GET', headers: {} }, res, { auth, db: mockDb(NOTICES) });
   assert.equal(res.code, 200);
@@ -63,11 +64,16 @@ test('a guest sees only notices for everyone, newest first', async () => {
   assert.equal(res.body.readAt, null);
 });
 
+test('members-only notices are accepted as a recipient', () => {
+  assert.equal(validateNotice({ to: 'members', title: 't', body: 'b' }).value.to, 'members');
+});
+
 test('a member sees notices for everyone and their own messages, never another member\'s', async () => {
   const items = await listNotices(mockDb(NOTICES), 'u1');
-  assert.deepEqual(items.map((n) => n.id), ['b', 'a', 'd']);
+  assert.deepEqual(items.map((n) => n.id), ['b', 'a', 'e', 'd']);
   assert.equal(items[0].personal, true);
   assert.equal(items[1].personal, false);
+  assert.equal(items[2].personal, false); // 会員のみ is not a personal message
 });
 
 test('before a member first opens the list, anything older than their sign-up counts as read', async () => {

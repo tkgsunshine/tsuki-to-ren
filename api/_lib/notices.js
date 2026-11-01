@@ -8,8 +8,9 @@ const parseBody = (body) => {
 };
 
 // アプリ内のお知らせ（マイページの「お知らせ」）。運営が /admin から送る。
-//   notices/{auto id}  { to: 'all' | uid, title, body, link, createdAt }
-//     to = 'all' … 全員向け（新機能のお知らせなど。ログインしていない人にも見える）
+//   notices/{auto id}  { to: 'all' | 'members' | uid, title, body, link, createdAt }
+//     to = 'all'     … 全員向け（新機能のお知らせなど。ログインしていない人にも見える）
+//     to = 'members' … 会員（ログインしている人）だけ。ゲストには見えない
 //     to = uid   … その会員だけへのメッセージ
 //   userData/{uid}.noticeReadAt  会員が最後にお知らせを開いた時刻（未読の数え方に使う）
 // 書くのはサーバーだけ（firestore.rules で端末からは読み書き不可）。中身は文字だけで、HTMLとしては表示しない。
@@ -20,6 +21,8 @@ export const MAX_LINK = 300;
 export const MAX_SHOWN = 50;
 
 const UID_RE = /^[A-Za-z0-9]{1,128}$/;
+// 個人あてではない送り先
+export const AUDIENCES = ['all', 'members'];
 
 // 押したときに開く先: サイト内のパス（/premium など）か https のURLだけ
 export function cleanLink(raw) {
@@ -39,7 +42,7 @@ export function cleanLink(raw) {
 export function validateNotice(body) {
   const b = body && typeof body === 'object' ? body : {};
   const to = String(b.to ?? '');
-  if (to !== 'all' && !UID_RE.test(to)) return { error: '送り先が正しくありません' };
+  if (!AUDIENCES.includes(to) && !UID_RE.test(to)) return { error: '送り先が正しくありません' };
   const title = String(b.title ?? '').replace(/\s+/g, ' ').trim();
   if (!title) return { error: 'タイトルを入れてください' };
   if (title.length > MAX_TITLE) return { error: `タイトルは${MAX_TITLE}文字以内にしてください` };
@@ -57,15 +60,15 @@ const view = (id, v) => ({
   body: v.body || '',
   link: v.link || '',
   createdAt: v.createdAt || null,
-  personal: v.to !== 'all'
+  personal: !AUDIENCES.includes(v.to)
 });
 
-// 全員向け＋その会員あて（ログイン中なら）を新しい順に。並べ替えはここで行う（Firestoreの複合インデックスを作らずに済むように）
+// 全員向け＋（ログイン中なら）会員向けとその会員あてを新しい順に。並べ替えはここで行う（Firestoreの複合インデックスを作らずに済むように）
 export async function listNotices(db, uid) {
   const col = db.collection(NOTICES);
   const snaps = await Promise.all([
     col.where('to', '==', 'all').get(),
-    ...(uid ? [col.where('to', '==', uid).get()] : [])
+    ...(uid ? [col.where('to', '==', 'members').get(), col.where('to', '==', uid).get()] : [])
   ]);
   return snaps
     .flatMap((s) => s.docs.map((d) => view(d.id, d.data())))

@@ -3335,7 +3335,7 @@ function App() {
       />
 
       {/* Global Bottom Navbar (Always visible on top of all pages) */}
-      <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread > 0} />
+      <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />
     </div>
   );
 }

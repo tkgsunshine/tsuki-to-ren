@@ -3,14 +3,14 @@ import { getDb, getAdminAuth } from './_lib/firestore.js';
 import { ATTRIBUTION, DAILY, jstDate } from './_lib/analytics.js';
 import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
-import { NOTICES, validateNotice } from './_lib/notices.js';
+import { AUDIENCES, NOTICES, validateNotice } from './_lib/notices.js';
 
 // Data for the admin page (/admin): daily counters, and the member list (with each member's premium state).
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
 // GET ?check=1 only confirms the account is an admin (used by the site to leave the owner's browsers out of the counts).
 // POST { action: 'inquiryStatus', id, status } marks a contact-form message as handled (or back to new).
 // POST { action: 'ownerMark', uid, owner } marks a member as the owner's own account, left out of the member counts.
-// POST { action: 'noticeSend', to: 'all' | uid, title, body, link } sends an in-app お知らせ (to everyone, or to one member).
+// POST { action: 'noticeSend', to: 'all' | 'members' | uid, title, body, link } sends an in-app お知らせ (to everyone, to signed-in members only, or to one member).
 // POST { action: 'noticeDelete', id } takes one back (it disappears from the app).
 // Accounts whose email is in ADMIN_EMAILS (also with a +alias, e.g. name+1@) count as the owner's without a mark.
 const OWNERS = 'adminSettings'; // doc 'owners': { uids: [...] }
@@ -76,7 +76,7 @@ export default async function handler(req, res, deps = {}) {
       if (body.action === 'noticeSend') {
         const checked = validateNotice(body);
         if (checked.error) return res.status(400).json({ status: 'error', message: checked.error });
-        if (checked.value.to !== 'all') {
+        if (!AUDIENCES.includes(checked.value.to)) {
           try { await auth.getUser(checked.value.to); } catch { return res.status(400).json({ status: 'error', message: 'その会員が見つかりません' }); }
         }
         const doc = { ...checked.value, createdAt: new Date(deps.now ?? Date.now()).toISOString() };
