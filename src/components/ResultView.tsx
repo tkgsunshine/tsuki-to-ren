@@ -6,6 +6,7 @@ import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMa
 import { getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
+import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
@@ -2707,6 +2708,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const locked = !isSubscribed;
               const lockStyle: React.CSSProperties = { filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 };
               const label: React.CSSProperties = { color: '#f6c6d8', fontWeight: 'bold' };
+              // 絵と色見本（古い保存データには key が無いので、そのときは文字だけ）。見られない人には絵も出さない（ぼかしの下で中身がわからないように）
+              const vis = at.key ? ATTRACTION_VISUALS[at.key] : undefined;
+              const myIsMale = activeResult.myGender === 'male';
               return (
                 <div style={{ background: 'rgba(226, 139, 170, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 139, 170, 0.22)', position: 'relative' }}>
                   <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f6c6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -2714,11 +2718,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <span>惹かれるファッション ＆ グッとくる仕草</span>
                   </div>
                   <div className="font-serif" style={{ fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                    <div><span style={label}>【惹かれるイメージ】</span>「{at.imageName}」のような人。{at.imageNote}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                      {vis && <AttractionMotif stemKey={at.key!} size={60} />}
+                      <div><span style={label}>【惹かれるイメージ】</span>「{at.imageName}」のような人。{at.imageNote}</div>
+                    </div>
                     <div><span style={label}>【好みの系統】</span>{at.styleName}</div>
                     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                      <div style={lockStyle}><span style={label}>【好きな色】</span>{lockedText(at.colors, locked)}</div>
-                      <div style={lockStyle}><span style={label}>【会う日の服装】</span>{lockedText(at.outfit, locked)}</div>
+                      <div style={lockStyle}>
+                        <span style={label}>【好きな色】</span>{vis && !locked ? null : lockedText(at.colors, locked)}
+                        {vis && !locked && <ColorSwatches hexes={vis.swatches} names={at.colors} />}
+                      </div>
+                      <div style={lockStyle}>
+                        <span style={label}>【会う日の服装】</span>
+                        {vis && !locked && <div style={{ margin: '0.35rem 0' }}><CoordFlatLay coord={myIsMale ? vis.male : vis.female} /></div>}
+                        {lockedText(at.outfit, locked)}
+                      </div>
                       <div style={lockStyle}>
                         <span style={label}>【グッとくる仕草】</span>
                         <ul style={{ margin: '0.15rem 0 0 0', paddingLeft: '1.2rem' }}>

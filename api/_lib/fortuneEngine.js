@@ -1569,6 +1569,7 @@ export function getAttractionStyle(oppStem, oppGender, oppMbti, myGender) {
     const s = attractionStyleMap[partnerStem] || attractionStyleMap['甲'];
     const extra = mbtiAttractionGesture(oppMbti);
     return {
+        key: attractionStyleMap[partnerStem] ? partnerStem : '甲',
         imageName: s.imageName,
         imageNote: s.imageNote,
         styleName: s.styleName,

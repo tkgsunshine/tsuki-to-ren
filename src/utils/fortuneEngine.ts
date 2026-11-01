@@ -1606,6 +1606,7 @@ function generateTorisetsu(
 // その十干の象意（大樹・草花・太陽…）を、惹かれる雰囲気・色・服装に置き換える（置き換えはアプリ独自）。
 // 仕草の3つ目は、16タイプ（伝統の体系の外。アプリ独自）から足す。点数には一切関係しない。
 export interface AttractionStyle {
+  key?: string;        // 惹かれる相手の十干（絵・色見本の選択用）
   imageName: string;   // 惹かれる相手のイメージ（例: 宝石）
   imageNote: string;   // そのイメージの一言説明
   styleName: string;   // 好みの系統
@@ -1762,6 +1763,7 @@ export function getAttractionStyle(
   const s = attractionStyleMap[partnerStem] || attractionStyleMap['甲'];
   const extra = mbtiAttractionGesture(oppMbti);
   return {
+    key: attractionStyleMap[partnerStem] ? partnerStem : '甲',
     imageName: s.imageName,
     imageNote: s.imageNote,
     styleName: s.styleName,
