@@ -2154,12 +2154,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     if (isCurrent) onOpenNotifySettings?.();
                     else onSwitchNotifyToCurrent?.();
                   } else if (!isRegistered) {
-                    showConfirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
+                    // 毎朝のメールは無料会員から受け取れる（api/cron/daily-luck.js。無料はアドバイス1段落・同じお相手は7日分まで）
+                    showConfirm('毎朝8時の運勢メールは、無料会員登録（アカウント作成）で受け取れます。\n無料登録しますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
                       if (ok) handleScrollToRegister();
-                    });
-                  } else if (!isSubscribed) {
-                    showConfirm('毎朝8時の運勢通知機能は、月額980円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
-                      if (ok) handleScrollToSub();
                     });
                   } else {
                     onOpenNotifySettings?.();
