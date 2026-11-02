@@ -11,7 +11,19 @@ import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
-import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES } from '../utils/attributeNotes';
+import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
+
+/** 守護カラーの値を、色名ごとにその色の文字で出す（黒・紺は白い光で縁取って読ませる） */
+const GuardianColorText: React.FC<{ value: string; fallbackColor: string }> = ({ value, fallbackColor }) => (
+  <>
+    {splitGuardianColors(value).map((c, i) => (
+      <React.Fragment key={i}>
+        {i > 0 && <span style={{ color: '#a8a296', textShadow: 'none' }}>・</span>}
+        <span style={{ color: c.color || fallbackColor, textShadow: c.halo ? '0 0 1px #fff, 0 0 2px rgba(255,255,255,0.95), 0 0 5px rgba(255,255,255,0.6)' : '0 1px 3px rgba(0,0,0,0.8)' }}>{c.name}</span>
+      </React.Fragment>
+    ))}
+  </>
+);
 import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
 
@@ -1524,7 +1536,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
                   </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.myAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
                 </button>
               </div>
 
@@ -1813,7 +1825,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
                   </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.opponentAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
                 </button>
               </div>
 
@@ -3450,7 +3462,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </div>
                     <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.54rem', color: '#d8d2c6' }}>守護カラー</span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}><GuardianColorText value={zoomedImg.astrologyColor || '銀・白'} fallbackColor="#f2e2b3" /></span>
                     </div>
                   </div>
                 </div>
