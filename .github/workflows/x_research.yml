@@ -13,12 +13,6 @@ on:
       days:
         description: '何日分を読むか'
         default: '7'
-  # 確認用（PRのマージ前に外す）: 作業ブランチへの push で1回実行する
-  push:
-    branches:
-      - claude/project-thread-6nqqaq
-    paths:
-      - scripts/x/research-drafts.mjs
 
 permissions:
   contents: write
