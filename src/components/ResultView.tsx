@@ -11,7 +11,19 @@ import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
-import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES } from '../utils/attributeNotes';
+import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
+
+/** 守護カラーの値を、色名ごとにその色の文字で出す（黒・紺は白い光で縁取って読ませる） */
+const GuardianColorText: React.FC<{ value: string; fallbackColor: string }> = ({ value, fallbackColor }) => (
+  <>
+    {splitGuardianColors(value).map((c, i) => (
+      <React.Fragment key={i}>
+        {i > 0 && <span style={{ color: '#a8a296', textShadow: 'none' }}>・</span>}
+        <span style={{ color: c.color || fallbackColor, textShadow: c.halo ? '0 0 1px #fff, 0 0 2px rgba(255,255,255,0.95), 0 0 5px rgba(255,255,255,0.6)' : '0 1px 3px rgba(0,0,0,0.8)' }}>{c.name}</span>
+      </React.Fragment>
+    ))}
+  </>
+);
 import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
 
@@ -610,7 +622,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const swatch = (c: string) => (
       <span key={c} style={{ display: 'inline-block', width: '0.95rem', height: '0.95rem', borderRadius: '50%', background: COLOR_SWATCHES[c] || '#888', border: '1px solid rgba(255,255,255,0.45)' }} />
     );
-    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。\n\n※2色の組み合わせは、五行の色をもとに、月と蓮が選んだものです。`;
+    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。`;
     setExplanation({
       title: `守護カラー: ${mine.color}`,
       reading: '',
@@ -1517,14 +1529,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
                   </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
                 </button>
                 <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
                   </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.myAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
                 </button>
               </div>
 
@@ -1806,14 +1818,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
                   </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
                 </button>
                 <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
                   </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.opponentAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
                 </button>
               </div>
 
@@ -3450,7 +3462,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </div>
                     <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.54rem', color: '#d8d2c6' }}>守護カラー</span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}><GuardianColorText value={zoomedImg.astrologyColor || '銀・白'} fallbackColor="#f2e2b3" /></span>
                     </div>
                   </div>
                 </div>
