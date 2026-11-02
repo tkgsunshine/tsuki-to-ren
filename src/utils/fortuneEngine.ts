@@ -1627,6 +1627,8 @@ export interface AttractionStyle {
   colors: string;      // 好みの色
   outfit: string;      // あなた（の性別）向けの服装・髪・小物
   gestures: string[];  // グッとくる仕草
+  mbtiType?: string;   // お相手の16タイプ（入力があるときだけ）
+  mbtiTip?: string;    // お相手の16タイプに合わせた、服装の一工夫
   ngStyle: string;     // 冷めやすい見た目・ふるまい
 }
 
@@ -1746,6 +1748,26 @@ const attractionStyleMap: Record<string, {
   }
 };
 
+// 16タイプ（伝統の体系の外。アプリ独自）から、服装の一工夫を足す。
+// 好みはお相手1人の性質なので、二人の相性ではなく、お相手のタイプの4文字から決める。
+const mbtiFashionTip = (mbti: string): string | null => {
+  if (!isMbtiType(mbti)) return null;
+  const t = mbti.toUpperCase();
+  const sn = t[1] === 'S'
+    ? '流行を追うより、定番の服をサイズ感と清潔感で丁寧に着るほうが好印象です'
+    : 'どこか1点、あなたらしいこだわり（小物・色・柄）を入れると「センスいいね」と印象に残ります';
+  const tf = t[2] === 'T'
+    ? 'シルエットはすっきり、ごちゃごちゃさせないのが正解'
+    : 'やわらかい素材や色で、話しかけやすい雰囲気をつくって';
+  const ei = t[0] === 'E'
+    ? '明るい差し色を1つ入れると、会った瞬間の印象が上がります'
+    : '色は落ち着かせて、近くで見たときに気づく上質さで勝負して';
+  const jp = t[3] === 'J'
+    ? 'アイロンや靴の手入れなど「きちんと感」は必ずチェックされます。'
+    : 'きっちりしすぎず、袖をまくるなど少しの抜け感があると距離が縮まります。';
+  return `${sn}。${tf}。${ei}。${jp}`;
+};
+
 // 16タイプ（4つの気質）から、グッとくる仕草を1つ足す
 const mbtiAttractionGesture = (mbti: string): string | null => {
   if (!isMbtiType(mbti)) return null;
@@ -1795,6 +1817,8 @@ export function getAttractionStyle(
     colors: s.colors,
     outfit: myGender === 'male' ? s.outfitMale : s.outfitFemale,
     gestures: extra ? [...s.gestures, extra] : s.gestures,
+    mbtiType: isMbtiType(oppMbti) ? oppMbti.toUpperCase() : undefined,
+    mbtiTip: mbtiFashionTip(oppMbti) ?? undefined,
     ngStyle: s.ngStyle
   };
 }

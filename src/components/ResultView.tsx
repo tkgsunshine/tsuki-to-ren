@@ -2801,6 +2801,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {vis && !locked && <div style={{ margin: '0.35rem 0' }}><CoordFlatLay coord={myIsMale ? vis.male : vis.female} /></div>}
                         {lockedText(at.outfit, locked)}
                       </div>
+                      {at.mbtiTip && (
+                        <div style={lockStyle}><span style={label}>【{at.mbtiType}タイプのお相手に効く一工夫】</span>{lockedText(at.mbtiTip, locked)}</div>
+                      )}
                       <div style={lockStyle}>
                         <span style={label}>【グッとくる仕草】</span>
                         <ul style={{ margin: '0.15rem 0 0 0', paddingLeft: '1.2rem' }}>
@@ -2816,7 +2819,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         </div>
                       )}
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: '#a9a49a', marginTop: '0.2rem' }}>※お相手の生まれ日の星から、四柱推命で「恋人・パートナー」を表す星を読み解いています。</div>
+                    <div style={{ fontSize: '0.68rem', color: '#a9a49a', marginTop: '0.2rem' }}>※お相手の生まれ日の星から、四柱推命で「恋人・パートナー」を表す星を読み解き、お相手の16タイプで服装の一工夫を足しています。</div>
                   </div>
                 </div>
               );
