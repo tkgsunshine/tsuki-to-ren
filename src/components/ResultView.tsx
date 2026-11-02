@@ -2193,7 +2193,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
           const oppLabel = hasOpponent ? san(oppNickname) : '';
           const lead = hasOpponent
-            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考える。` : `今日のこと、もう少し一緒に考えましょうか？${oppLabel}に送る一言も、いっしょに選べますよ。`)
+            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考えるよ。` : `今日のこと、もう少しお話ししませんか？${oppLabel}に送る一言も、一緒に考えましょう。`)
             : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
           const questions = hasOpponent
             ? [`${oppLabel}に今日なんて送ればいい？`, `${oppLabel}の本音や脈ありサインは？`]
