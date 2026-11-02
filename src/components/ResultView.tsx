@@ -11,7 +11,19 @@ import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
-import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES } from '../utils/attributeNotes';
+import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
+
+/** 守護カラーの値を、色名ごとにその色の文字で出す（黒・紺は白い光で縁取って読ませる） */
+const GuardianColorText: React.FC<{ value: string; fallbackColor: string }> = ({ value, fallbackColor }) => (
+  <>
+    {splitGuardianColors(value).map((c, i) => (
+      <React.Fragment key={i}>
+        {i > 0 && <span style={{ color: '#a8a296', textShadow: 'none' }}>・</span>}
+        <span style={{ color: c.color || fallbackColor, textShadow: c.halo ? '0 0 1px #fff, 0 0 2px rgba(255,255,255,0.95), 0 0 5px rgba(255,255,255,0.6)' : '0 1px 3px rgba(0,0,0,0.8)' }}>{c.name}</span>
+      </React.Fragment>
+    ))}
+  </>
+);
 import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
 
@@ -183,6 +195,18 @@ const splitTeaser = (text: string | undefined): { head: string; restLength: numb
   const limit = Math.min(TEASER_MAX_CHARS, Math.ceil(t.length * 0.5));
   let cut = limit;
   for (let i = limit; i >= Math.floor(limit * 0.6); i--) {
+    if ('、。！？'.includes(t[i - 1])) { cut = i; break; }
+  }
+  return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
+};
+// 「本日のアプローチ助言」は、未登録・無料会員とも、1段落目（約2行）に続けて2段落目の冒頭を約3行ぶん見せる（スマホ幅で合計約5行）。
+// 短い段落は全部見せる。長いときは読点・句点の直後で切れるならそこで切り、続きはダミー文にしてぼかす。
+const ADVICE_PREVIEW_CHARS = 50;
+const splitAdvicePreview = (text: string | undefined): { head: string; restLength: number } => {
+  const t = text ?? '';
+  if (t.length <= ADVICE_PREVIEW_CHARS) return { head: t, restLength: 0 };
+  let cut = ADVICE_PREVIEW_CHARS;
+  for (let i = ADVICE_PREVIEW_CHARS; i >= Math.floor(ADVICE_PREVIEW_CHARS * 0.75); i--) {
     if ('、。！？'.includes(t[i - 1])) { cut = i; break; }
   }
   return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
@@ -598,7 +622,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const swatch = (c: string) => (
       <span key={c} style={{ display: 'inline-block', width: '0.95rem', height: '0.95rem', borderRadius: '50%', background: COLOR_SWATCHES[c] || '#888', border: '1px solid rgba(255,255,255,0.45)' }} />
     );
-    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。\n\n※2色の組み合わせは、五行の色をもとに、月と蓮が選んだものです。`;
+    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。`;
     setExplanation({
       title: `守護カラー: ${mine.color}`,
       reading: '',
@@ -628,6 +652,34 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   const activeResult = selectedChar === 'ren' ? renResult : tsukiResult;
   const oppNickname = opponentName || 'お相手';
+
+  // 守護獣の保存モーダルを開く（画像タップと、その下の「※タップで保存できます」の文言タップで共通）
+  const openMyGuardianSave = () => setZoomedImg({
+    src: activeResult.myAvatarUrl || '',
+    headerTitle: '✦ あなたの守護獣 ✦',
+    nickname: myName || 'あなた',
+    astrologyName: activeResult.myAstrologyName || '守護獣',
+    astrologyTheme: activeResult.myAstrologyTheme || '',
+    isKaigo: activeResult.isKaigo,
+    isRare: activeResult.isRare,
+    myGender: activeResult.myGender,
+    astrologyElement: activeResult.myAstrologyElement || '金・陽',
+    branchPersonality: activeResult.myBranchPersonality || '策士',
+    astrologyColor: activeResult.myAstrologyColor || '銀・白'
+  });
+  const openOpponentGuardianSave = () => setZoomedImg({
+    src: activeResult.opponentAvatarUrl || '',
+    headerTitle: '✦ お相手の守護獣 ✦',
+    nickname: opponentName || 'お相手',
+    astrologyName: activeResult.opponentAstrologyName || '守護獣',
+    astrologyTheme: activeResult.opponentAstrologyTheme || '',
+    isKaigo: activeResult.opponentIsKaigo,
+    isRare: activeResult.opponentIsRare,
+    myGender: activeResult.opponentGender,
+    astrologyElement: activeResult.opponentAstrologyElement || '金・陽',
+    branchPersonality: activeResult.opponentBranchPersonality || '策士',
+    astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
+  });
   const [isPastGuardian, setIsPastGuardian] = useState(false);
   const [isShareDismissed, setIsShareDismissed] = useState(() => {
     try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
@@ -1110,7 +1162,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         
         {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}
         {(() => {
-          const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+          const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
           const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
           const base = activeResult.baseScore;
           const realDaily = activeResult.dailyScore;
@@ -1390,19 +1442,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
               <div 
                 className="guardian-hero"
-                onClick={() => setZoomedImg({ 
-                  src: activeResult.myAvatarUrl || '', 
-                  headerTitle: '✦ あなたの守護獣 ✦',
-                  nickname: myName || 'あなた',
-                  astrologyName: activeResult.myAstrologyName || '守護獣',
-                  astrologyTheme: activeResult.myAstrologyTheme || '',
-                  isKaigo: activeResult.isKaigo,
-                  isRare: activeResult.isRare,
-                  myGender: activeResult.myGender,
-                  astrologyElement: activeResult.myAstrologyElement || '金・陽',
-                  branchPersonality: activeResult.myBranchPersonality || '策士',
-                  astrologyColor: activeResult.myAstrologyColor || '銀・白'
-                })}
+                onClick={openMyGuardianSave}
               >
                 <div className="guardian-hero-media">
                   <img 
@@ -1468,34 +1508,34 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
 
-              {/* Sub-text explaining tap to save */}
-              <div style={{
+              {/* Sub-text explaining tap to save（文言もタップで保存できる） */}
+              <button type="button" onClick={openMyGuardianSave} style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
                 fontSize: '0.68rem',
                 color: '#a9a49a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '0.6rem',
-                marginBottom: '0.75rem',
+                marginTop: '0.35rem',
+                marginBottom: '0.5rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
+              </button>
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="五行（陰陽）の説明を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
-                  >
+                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
                     五行 (陰陽)
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
-                  </button>
+                  </span>
                   {(() => {
                     const [el, yy] = (activeResult.myAstrologyElement || '火・陰').split('・');
                     return (
@@ -1504,31 +1544,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       </span>
                     );
                   })()}
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="性格分類の説明と全12タイプを見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                </button>
+                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="守護カラーの説明と全10種類を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                  </span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
+                </button>
+                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
-                </div>
+                  </span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.myAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
+                </button>
               </div>
 
               {/* Visual Divider to separate Avatar and Destiny Chart */}
@@ -1694,19 +1724,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
               <div 
                 className="guardian-hero"
-                onClick={() => setZoomedImg({ 
-                  src: activeResult.opponentAvatarUrl || '', 
-                  headerTitle: '✦ お相手の守護獣 ✦',
-                  nickname: opponentName || 'お相手',
-                  astrologyName: activeResult.opponentAstrologyName || '守護獣',
-                  astrologyTheme: activeResult.opponentAstrologyTheme || '',
-                  isKaigo: activeResult.opponentIsKaigo,
-                  isRare: activeResult.opponentIsRare,
-                  myGender: activeResult.opponentGender,
-                  astrologyElement: activeResult.opponentAstrologyElement || '金・陽',
-                  branchPersonality: activeResult.opponentBranchPersonality || '策士',
-                  astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
-                })}
+                onClick={openOpponentGuardianSave}
               >
                 <div className="guardian-hero-media">
                   <img 
@@ -1772,34 +1790,34 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
 
-              {/* Sub-text explaining tap to save */}
-              <div style={{
+              {/* Sub-text explaining tap to save（文言もタップで保存できる） */}
+              <button type="button" onClick={openOpponentGuardianSave} style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
                 fontSize: '0.68rem',
                 color: '#a9a49a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '0.6rem',
-                marginBottom: '0.75rem',
+                marginTop: '0.35rem',
+                marginBottom: '0.5rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
+              </button>
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="五行（陰陽）の説明を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
-                  >
+                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
                     五行 (陰陽)
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
-                  </button>
+                  </span>
                   {(() => {
                     const [el, yy] = (activeResult.opponentAstrologyElement || '火・陰').split('・');
                     return (
@@ -1808,31 +1826,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       </span>
                     );
                   })()}
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="性格分類の説明と全12タイプを見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                </button>
+                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="守護カラーの説明と全10種類を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                  </span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
+                </button>
+                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
-                </div>
+                  </span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.opponentAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
+                </button>
               </div>
 
               {/* Visual Divider to separate Avatar and Destiny Chart */}
@@ -2055,6 +2063,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               };
               // ボタンは「気持ちが伝わるコツ」の本文の上下中央に重ねる（末尾に置くと見落とされやすいため）。
               // その項目がないときは「二人のLINEのコツ」全体の中央に置く。
+              // 「本日のアプローチ助言」の見せ方（未登録・無料会員とも約5行）。お相手の鑑定自体が隠れているときは見せない。
+              const adviceTeaser = locked && !dailyHidden && parts.length > 1;
               const lockAt = tips ? tips.items.findIndex(it => it.label.startsWith('💡')) : -1;
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
@@ -2069,7 +2079,43 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     style={{ color: '#e8e3d8', lineHeight: '1.55', ...(dailyHidden ? { filter: 'blur(4.5px)', userSelect: 'none' as const, opacity: 0.65, cursor: 'pointer' } : {}) }}
                     onClick={dailyHidden ? handleLockTagClick : undefined}
                   >{lockedText(parts[0], dailyHidden)}</div>
-                  {parts.length > 1 && (
+                  {adviceTeaser && (() => {
+                    const { head, restLength } = splitAdvicePreview(parts[1]);
+                    return (
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', marginTop: '0.35rem' }}>
+                        {head}
+                        {restLength > 0 && (
+                          <span
+                            style={{ ...blurred, display: 'inline', cursor: 'pointer' }}
+                            onClick={handleLockTagClick}
+                          >{lockedText(' '.repeat(restLength), true)}</span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  {adviceTeaser && parts.length > 2 && (
+                    <div
+                      style={{ position: 'relative', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: 'pointer' }}
+                      onClick={handleLockTagClick}
+                    >
+                      {parts.slice(2).map((p, i) => (
+                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, true)}</div>
+                      ))}
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                          <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {adviceTeaser && parts.length === 2 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                      <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                      </button>
+                    </div>
+                  )}
+                  {!adviceTeaser && parts.length > 1 && (
                     <div
                       style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
@@ -2094,13 +2140,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       style={{ position: 'relative', marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
-                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>{preview ? '(続きはプレミアム限定)' : '(プレミアム限定)'}</span>}</div>
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ</div>
                       <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...(preview ? {} : blurred) }}>{lockedBody(tips.intro)}</div>
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
                           <div style={{ position: 'relative' }}>
-                            <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>
+                            {/* 「お相手のLINEのくせ」は無料（未登録・無料会員とも）で全文を見せる。他の項目はこれまでどおり。 */}
+                            {it.label.startsWith('📱')
+                              ? <div style={{ color: '#e8e3d8' }}>{it.text}</div>
+                              : <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>}
                             {locked && i === lockAt && lockButton}
                           </div>
                         </div>
@@ -2154,12 +2203,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     if (isCurrent) onOpenNotifySettings?.();
                     else onSwitchNotifyToCurrent?.();
                   } else if (!isRegistered) {
-                    showConfirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
+                    // 毎朝のメールは無料会員から受け取れる（api/cron/daily-luck.js。無料はアドバイス1段落・同じお相手は7日分まで）
+                    showConfirm('毎朝8時の運勢メールは、無料会員登録（アカウント作成）で受け取れます。\n無料登録しますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
                       if (ok) handleScrollToRegister();
-                    });
-                  } else if (!isSubscribed) {
-                    showConfirm('毎朝8時の運勢通知機能は、月額980円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
-                      if (ok) handleScrollToSub();
                     });
                   } else {
                     onOpenNotifySettings?.();
@@ -2193,7 +2239,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
           const oppLabel = hasOpponent ? san(oppNickname) : '';
           const lead = hasOpponent
-            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考える。` : `今日のこと、もう少し一緒に考えましょうか？${oppLabel}に送る一言も、いっしょに選べますよ。`)
+            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考えるよ。` : `今日のこと、もう少しお話ししませんか？${oppLabel}に送る一言も、一緒に考えましょう。`)
             : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
           const questions = hasOpponent
             ? [`${oppLabel}に今日なんて送ればいい？`, `${oppLabel}の本音や脈ありサインは？`]
@@ -3430,7 +3476,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </div>
                     <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.54rem', color: '#d8d2c6' }}>守護カラー</span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}><GuardianColorText value={zoomedImg.astrologyColor || '銀・白'} fallbackColor="#f2e2b3" /></span>
                     </div>
                   </div>
                 </div>
