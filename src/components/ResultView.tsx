@@ -1486,16 +1486,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="五行（陰陽）の説明を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
-                  >
+                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
                     五行 (陰陽)
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
-                  </button>
+                  </span>
                   {(() => {
                     const [el, yy] = (activeResult.myAstrologyElement || '火・陰').split('・');
                     return (
@@ -1504,31 +1499,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       </span>
                     );
                   })()}
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="性格分類の説明と全12タイプを見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                </button>
+                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
+                  </span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="守護カラーの説明と全10種類を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                </button>
+                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
+                  </span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
-                </div>
+                </button>
               </div>
 
               {/* Visual Divider to separate Avatar and Destiny Chart */}
@@ -1790,16 +1775,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="五行（陰陽）の説明を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
-                  >
+                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
                     五行 (陰陽)
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
-                  </button>
+                  </span>
                   {(() => {
                     const [el, yy] = (activeResult.opponentAstrologyElement || '火・陰').split('・');
                     return (
@@ -1808,31 +1788,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       </span>
                     );
                   })()}
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="性格分類の説明と全12タイプを見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                </button>
+                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
+                  </span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="守護カラーの説明と全10種類を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                </button>
+                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
+                  </span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
-                </div>
+                </button>
               </div>
 
               {/* Visual Divider to separate Avatar and Destiny Chart */}
