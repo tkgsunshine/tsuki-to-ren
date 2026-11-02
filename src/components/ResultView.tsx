@@ -652,6 +652,34 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   const activeResult = selectedChar === 'ren' ? renResult : tsukiResult;
   const oppNickname = opponentName || 'お相手';
+
+  // 守護獣の保存モーダルを開く（画像タップと、その下の「※タップで保存できます」の文言タップで共通）
+  const openMyGuardianSave = () => setZoomedImg({
+    src: activeResult.myAvatarUrl || '',
+    headerTitle: '✦ あなたの守護獣 ✦',
+    nickname: myName || 'あなた',
+    astrologyName: activeResult.myAstrologyName || '守護獣',
+    astrologyTheme: activeResult.myAstrologyTheme || '',
+    isKaigo: activeResult.isKaigo,
+    isRare: activeResult.isRare,
+    myGender: activeResult.myGender,
+    astrologyElement: activeResult.myAstrologyElement || '金・陽',
+    branchPersonality: activeResult.myBranchPersonality || '策士',
+    astrologyColor: activeResult.myAstrologyColor || '銀・白'
+  });
+  const openOpponentGuardianSave = () => setZoomedImg({
+    src: activeResult.opponentAvatarUrl || '',
+    headerTitle: '✦ お相手の守護獣 ✦',
+    nickname: opponentName || 'お相手',
+    astrologyName: activeResult.opponentAstrologyName || '守護獣',
+    astrologyTheme: activeResult.opponentAstrologyTheme || '',
+    isKaigo: activeResult.opponentIsKaigo,
+    isRare: activeResult.opponentIsRare,
+    myGender: activeResult.opponentGender,
+    astrologyElement: activeResult.opponentAstrologyElement || '金・陽',
+    branchPersonality: activeResult.opponentBranchPersonality || '策士',
+    astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
+  });
   const [isPastGuardian, setIsPastGuardian] = useState(false);
   const [isShareDismissed, setIsShareDismissed] = useState(() => {
     try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
@@ -1414,19 +1442,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
               <div 
                 className="guardian-hero"
-                onClick={() => setZoomedImg({ 
-                  src: activeResult.myAvatarUrl || '', 
-                  headerTitle: '✦ あなたの守護獣 ✦',
-                  nickname: myName || 'あなた',
-                  astrologyName: activeResult.myAstrologyName || '守護獣',
-                  astrologyTheme: activeResult.myAstrologyTheme || '',
-                  isKaigo: activeResult.isKaigo,
-                  isRare: activeResult.isRare,
-                  myGender: activeResult.myGender,
-                  astrologyElement: activeResult.myAstrologyElement || '金・陽',
-                  branchPersonality: activeResult.myBranchPersonality || '策士',
-                  astrologyColor: activeResult.myAstrologyColor || '銀・白'
-                })}
+                onClick={openMyGuardianSave}
               >
                 <div className="guardian-hero-media">
                   <img 
@@ -1492,21 +1508,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
 
-              {/* Sub-text explaining tap to save */}
-              <div style={{
+              {/* Sub-text explaining tap to save（文言もタップで保存できる） */}
+              <button type="button" onClick={openMyGuardianSave} style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
                 fontSize: '0.68rem',
                 color: '#a9a49a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '0.6rem',
-                marginBottom: '0.75rem',
+                marginTop: '0.35rem',
+                marginBottom: '0.5rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
+              </button>
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
@@ -1703,19 +1724,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
               <div 
                 className="guardian-hero"
-                onClick={() => setZoomedImg({ 
-                  src: activeResult.opponentAvatarUrl || '', 
-                  headerTitle: '✦ お相手の守護獣 ✦',
-                  nickname: opponentName || 'お相手',
-                  astrologyName: activeResult.opponentAstrologyName || '守護獣',
-                  astrologyTheme: activeResult.opponentAstrologyTheme || '',
-                  isKaigo: activeResult.opponentIsKaigo,
-                  isRare: activeResult.opponentIsRare,
-                  myGender: activeResult.opponentGender,
-                  astrologyElement: activeResult.opponentAstrologyElement || '金・陽',
-                  branchPersonality: activeResult.opponentBranchPersonality || '策士',
-                  astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
-                })}
+                onClick={openOpponentGuardianSave}
               >
                 <div className="guardian-hero-media">
                   <img 
@@ -1781,21 +1790,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
 
-              {/* Sub-text explaining tap to save */}
-              <div style={{
+              {/* Sub-text explaining tap to save（文言もタップで保存できる） */}
+              <button type="button" onClick={openOpponentGuardianSave} style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
                 fontSize: '0.68rem',
                 color: '#a9a49a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '0.6rem',
-                marginBottom: '0.75rem',
+                marginTop: '0.35rem',
+                marginBottom: '0.5rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
+              </button>
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
