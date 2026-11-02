@@ -2094,7 +2094,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       style={{ position: 'relative', marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
-                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>{preview ? '(続きはプレミアム限定)' : '(プレミアム限定)'}</span>}</div>
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ</div>
                       <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...(preview ? {} : blurred) }}>{lockedBody(tips.intro)}</div>
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
