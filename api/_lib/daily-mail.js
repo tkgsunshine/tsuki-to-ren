@@ -103,7 +103,7 @@ export function resultUrlFor(sub, hasOpponent) {
 }
 
 // 点数ブロック: 鑑定結果画面と同じ「基本（小）と今日（大）の丸いメーター」と「今日の流れ」。
-// 二人の相性は「基本相性／今日の相性」、一人で占う人は「基本運勢／今日の運勢」（画像の種類 -solo）。
+// 二人の相性は「基本の相性／今日の相性」、一人で占う人は「基本運勢／今日の運勢」（画像の種類 -solo）。
 // メールでは SVG もアニメーションも使えないため、点数ごとの画像（scripts/build-mail-score-images.mjs で作成）を並べる。
 const clampScore = (v) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
 const MOOD_COLORS = { up: '#8fd3ae', flat: '#d8cfb8', down: '#e0a9a0' };
@@ -113,7 +113,7 @@ export function renderScoreRings(baseScore, dailyScore, hasOpponent) {
   const daily = clampScore(dailyScore);
   const mood = getScoreMood(base, daily);
   const suffix = hasOpponent ? '' : '-solo';
-  const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+  const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
   const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
   const img = (file, w, alt) => `<img src="${SITE}/assets/mail/score/${file}" width="${w}" height="${w}" alt="${alt}" style="display: block; width: ${w}px; height: ${w}px; border: 0; color: #f6e6c2; font-size: 14px;">`;
   return `<tr>

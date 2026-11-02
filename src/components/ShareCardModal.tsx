@@ -355,7 +355,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 gap: '10px',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
               }}>
-                <span style={{ fontSize: '15px', color: '#d8d2c6' }}>基本相性</span>
+                <span style={{ fontSize: '15px', color: '#d8d2c6' }}>基本の相性</span>
                 <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#e8a93a', lineHeight: '1' }}>
                   {result.baseScore}<span style={{ fontSize: '16px' }}>点</span>
                 </span>
@@ -713,7 +713,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   gap: '4px',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
                 }}>
-                  <span style={{ fontSize: '0.55rem', color: '#d8d2c6' }}>基本相性</span>
+                  <span style={{ fontSize: '0.55rem', color: '#d8d2c6' }}>基本の相性</span>
                   <span className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold', lineHeight: '1' }}>
                     {result.baseScore}<span style={{ fontSize: '0.55rem' }}>点</span>
                   </span>
