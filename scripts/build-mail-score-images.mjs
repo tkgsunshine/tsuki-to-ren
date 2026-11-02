@@ -59,7 +59,7 @@ const ring = ({ size, score, from, to, glow, icon, label, caption, numColor, id 
 };
 
 const SETS = {
-  base: (score) => ring({ size: 116, score, id: 'b', from: '#9f86c0', to: '#e2c074', glow: 'rgba(226, 192, 116, 0.45)', icon: heartSvg, label: '基本相性', caption: '', numColor: '#f6e6c2' }),
+  base: (score) => ring({ size: 116, score, id: 'b', from: '#9f86c0', to: '#e2c074', glow: 'rgba(226, 192, 116, 0.45)', icon: heartSvg, label: '基本の相性', caption: '', numColor: '#f6e6c2' }),
   today: (score) => ring({ size: 156, score, id: 't', from: '#9cc6d8', to: '#3a86ab', glow: 'rgba(156, 198, 216, 0.55)', icon: moonSvg(18, 'full', 'blue'), label: '今日の相性', caption: '毎日変わる', numColor: '#e8f3f8' }),
   // 一人で占う人のメール用（ラベルだけ違う）
   'base-solo': (score) => ring({ size: 116, score, id: 'b', from: '#9f86c0', to: '#e2c074', glow: 'rgba(226, 192, 116, 0.45)', icon: heartSvg, label: '基本運勢', caption: '', numColor: '#f6e6c2' }),

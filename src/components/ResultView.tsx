@@ -1110,7 +1110,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         
         {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}
         {(() => {
-          const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+          const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
           const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
           const base = activeResult.baseScore;
           const realDaily = activeResult.dailyScore;

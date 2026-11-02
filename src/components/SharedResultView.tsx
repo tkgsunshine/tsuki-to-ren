@@ -88,7 +88,7 @@ const ScorePod: React.FC<{ label: string; score?: number; color: string; big?: b
 export const SharedResultView: React.FC<Props> = ({ shared, onStart }) => {
   const { myName, oppName, baseScore, dailyScore, myAvatar, oppAvatar, title, oneLiner, myMbti, oppMbti } = shared;
   const hasOpponent = !!oppName;
-  const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+  const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
   const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
   const mood = baseScore !== undefined && dailyScore !== undefined ? getScoreMood(baseScore, dailyScore) : null;
   const cta = (
