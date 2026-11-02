@@ -420,6 +420,24 @@ export const ResultView: React.FC<ResultViewProps> = ({
     } catch {}
   };
 
+  // 守護獣の名前（例: 壬虎）のふりがな（例: みずのえとら）。魁罡・極稀の印は読みから外す
+  const getAstrologyNameReading = (name?: string): string => {
+    if (!name) return '';
+    const core = name.replace(/👑[^👑]*👑\s*/u, '').trim();
+    if (core.length !== 2) return '';
+    const stemReadings: Record<string, string> = {
+      '甲': 'きのえ', '乙': 'きのと', '丙': 'ひのえ', '丁': 'ひのと', '戊': 'つちのえ',
+      '己': 'つちのと', '庚': 'かのえ', '辛': 'かのと', '壬': 'みずのえ', '癸': 'みずのと'
+    };
+    const animalReadings: Record<string, string> = {
+      '鼠': 'ねずみ', '牛': 'うし', '虎': 'とら', '兎': 'うさぎ', '龍': 'りゅう', '蛇': 'へび',
+      '馬': 'うま', '羊': 'ひつじ', '猿': 'さる', '鳥': 'とり', '犬': 'いぬ', '猪': 'いのしし'
+    };
+    const stem = stemReadings[core[0]];
+    const animal = animalReadings[core[1]];
+    return stem && animal ? stem + animal : '';
+  };
+
   const getKanjiReading = (pillar: string): string => {
     if (!pillar || pillar.length !== 2) return '';
     const stem = pillar[0];
@@ -1454,6 +1472,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
                       {activeResult.myAstrologyName}
                     </span>
+                    {getAstrologyNameReading(activeResult.myAstrologyName) && (
+                      <span style={{ fontSize: '0.72rem', color: '#d8d2c6', marginLeft: '-0.3rem' }}>（{getAstrologyNameReading(activeResult.myAstrologyName)}）</span>
+                    )}
                     <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
                       fontSize: '0.72rem',
                       padding: '2px 7px',
@@ -1758,6 +1779,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
                       {activeResult.opponentAstrologyName}
                     </span>
+                    {getAstrologyNameReading(activeResult.opponentAstrologyName) && (
+                      <span style={{ fontSize: '0.72rem', color: '#d8d2c6', marginLeft: '-0.3rem' }}>（{getAstrologyNameReading(activeResult.opponentAstrologyName)}）</span>
+                    )}
                     <span className={activeResult.opponentIsKaigo ? 'kaigo-badge' : (activeResult.opponentIsRare ? 'rare-badge' : '')} style={{
                       fontSize: '0.72rem',
                       padding: '2px 7px',
@@ -3396,6 +3420,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <span className="font-serif" style={{ fontSize: '1.15rem', fontWeight: '800', color: '#f2e2b3', textShadow: '0 0 12px rgba(242, 226, 179, 0.8), 0 2px 6px rgba(0,0,0,0.95)', letterSpacing: '0.03em' }}>
                       {zoomedImg.astrologyName}
                     </span>
+                    {getAstrologyNameReading(zoomedImg.astrologyName) && (
+                      <span style={{ fontSize: '0.62rem', color: '#d8d2c6', marginLeft: '-0.3rem' }}>（{getAstrologyNameReading(zoomedImg.astrologyName)}）</span>
+                    )}
                     <span className={zoomedImg.isKaigo ? 'kaigo-badge' : (zoomedImg.isRare ? 'rare-badge' : '')} style={{
                       fontSize: '0.6rem',
                       padding: '2px 6px',
