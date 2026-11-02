@@ -622,7 +622,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const swatch = (c: string) => (
       <span key={c} style={{ display: 'inline-block', width: '0.95rem', height: '0.95rem', borderRadius: '50%', background: COLOR_SWATCHES[c] || '#888', border: '1px solid rgba(255,255,255,0.45)' }} />
     );
-    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。\n\n※2色の組み合わせは、五行の色をもとに、月と蓮が選んだものです。`;
+    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。`;
     setExplanation({
       title: `守護カラー: ${mine.color}`,
       reading: '',
