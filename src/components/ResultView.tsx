@@ -187,6 +187,18 @@ const splitTeaser = (text: string | undefined): { head: string; restLength: numb
   }
   return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
 };
+// 「本日のアプローチ助言」は、未登録・無料会員とも、1段落目（約2行）に続けて2段落目の冒頭を約3行ぶん見せる（スマホ幅で合計約5行）。
+// 短い段落は全部見せる。長いときは読点・句点の直後で切れるならそこで切り、続きはダミー文にしてぼかす。
+const ADVICE_PREVIEW_CHARS = 50;
+const splitAdvicePreview = (text: string | undefined): { head: string; restLength: number } => {
+  const t = text ?? '';
+  if (t.length <= ADVICE_PREVIEW_CHARS) return { head: t, restLength: 0 };
+  let cut = ADVICE_PREVIEW_CHARS;
+  for (let i = ADVICE_PREVIEW_CHARS; i >= Math.floor(ADVICE_PREVIEW_CHARS * 0.75); i--) {
+    if ('、。！？'.includes(t[i - 1])) { cut = i; break; }
+  }
+  return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
+};
 // 7日間・月次・年次の点数も、見られない人にはダミーの値で描く（本物の点数を画面に置かない）
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
@@ -2055,6 +2067,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               };
               // ボタンは「気持ちが伝わるコツ」の本文の上下中央に重ねる（末尾に置くと見落とされやすいため）。
               // その項目がないときは「二人のLINEのコツ」全体の中央に置く。
+              // 「本日のアプローチ助言」の見せ方（未登録・無料会員とも約5行）。お相手の鑑定自体が隠れているときは見せない。
+              const adviceTeaser = locked && !dailyHidden && parts.length > 1;
               const lockAt = tips ? tips.items.findIndex(it => it.label.startsWith('💡')) : -1;
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
@@ -2069,7 +2083,43 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     style={{ color: '#e8e3d8', lineHeight: '1.55', ...(dailyHidden ? { filter: 'blur(4.5px)', userSelect: 'none' as const, opacity: 0.65, cursor: 'pointer' } : {}) }}
                     onClick={dailyHidden ? handleLockTagClick : undefined}
                   >{lockedText(parts[0], dailyHidden)}</div>
-                  {parts.length > 1 && (
+                  {adviceTeaser && (() => {
+                    const { head, restLength } = splitAdvicePreview(parts[1]);
+                    return (
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', marginTop: '0.35rem' }}>
+                        {head}
+                        {restLength > 0 && (
+                          <span
+                            style={{ ...blurred, display: 'inline', cursor: 'pointer' }}
+                            onClick={handleLockTagClick}
+                          >{lockedText(' '.repeat(restLength), true)}</span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  {adviceTeaser && parts.length > 2 && (
+                    <div
+                      style={{ position: 'relative', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: 'pointer' }}
+                      onClick={handleLockTagClick}
+                    >
+                      {parts.slice(2).map((p, i) => (
+                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, true)}</div>
+                      ))}
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                          <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {adviceTeaser && parts.length === 2 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                      <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                      </button>
+                    </div>
+                  )}
+                  {!adviceTeaser && parts.length > 1 && (
                     <div
                       style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
