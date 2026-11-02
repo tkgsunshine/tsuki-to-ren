@@ -1623,6 +1623,7 @@ export interface AttractionStyle {
   imageName: string;   // 惹かれる相手のイメージ（例: 宝石）
   imageNote: string;   // そのイメージの一言説明
   styleName: string;   // 好みの系統
+  styleTag?: string;   // ひと言の系統（清楚系・ギャル系など。あなたの性別向け）
   colors: string;      // 好みの色
   outfit: string;      // あなた（の性別）向けの服装・髪・小物
   gestures: string[];  // グッとくる仕草
@@ -1630,10 +1631,11 @@ export interface AttractionStyle {
 }
 
 const attractionStyleMap: Record<string, {
-  imageName: string; imageNote: string; styleName: string; colors: string;
+  tagFemale: string; tagMale: string; imageName: string; imageNote: string; styleName: string; colors: string;
   outfitFemale: string; outfitMale: string; gestures: string[]; ngStyle: string;
 }> = {
   '甲': {
+    tagFemale: '清楚系', tagMale: '爽やか系',
     imageName: 'まっすぐ伸びる大樹',
     imageNote: '飾りすぎず、凛としていて、まっすぐな人に惹かれます。',
     styleName: 'ナチュラルで清潔感のある「きちんとシンプル」系',
@@ -1644,6 +1646,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: 'ヨレた服やだらしない着くずし、姿勢の悪さ'
   },
   '乙': {
+    tagFemale: 'ゆるふわ系', tagMale: '韓国系',
     imageName: '風にゆれる草花',
     imageNote: 'やわらかくて、そばにいるとほっとできる人に惹かれます。',
     styleName: 'ふんわりやさしい「ナチュラル」系',
@@ -1654,6 +1657,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: '威圧感のある全身黒や、強すぎる香水'
   },
   '丙': {
+    tagFemale: 'ギャル系', tagMale: 'スポーティ系',
     imageName: '空に輝く太陽',
     imageNote: '明るくて、一緒にいると元気になれる人に惹かれます。',
     styleName: '明るく元気な「華やかカジュアル」系',
@@ -1664,6 +1668,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: '暗い色ばかりの服と、元気のない表情'
   },
   '丁': {
+    tagFemale: 'フェミニン系', tagMale: '大人っぽい系',
     imageName: 'あたたかく灯るろうそくの火',
     imageNote: 'さりげなく上品で、近づくとあたたかさを感じる人に惹かれます。',
     styleName: '上品でさりげない「大人きれいめ」系',
@@ -1674,6 +1679,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: '派手すぎてギラギラした服や、大声で騒ぐこと'
   },
   '戊': {
+    tagFemale: 'コンサバ系', tagMale: '大人カジュアル系',
     imageName: 'どっしりそびえる山',
     imageNote: '落ち着いていて、安心して頼れる人に惹かれます。',
     styleName: '安定感のある「きれいめベーシック」系',
@@ -1684,6 +1690,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: '流行を追いすぎた奇抜な服や、そわそわ落ち着かない態度'
   },
   '己': {
+    tagFemale: 'ナチュラル系', tagMale: 'ナチュラル系',
     imageName: '作物を育てる畑の土',
     imageNote: '素朴でやさしく、家庭的なあたたかさのある人に惹かれます。',
     styleName: 'やさしく素朴な「ほっこりナチュラル」系',
@@ -1694,6 +1701,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: 'ブランドロゴだらけの服や、作りこみすぎた見た目'
   },
   '庚': {
+    tagFemale: 'きれいめ系', tagMale: 'きれいめ系',
     imageName: '鍛えられた鋼の刀',
     imageNote: 'すっきりしていて、決めるときは決める、潔い人に惹かれます。',
     styleName: 'シャープな「モノトーンきれいめ」系',
@@ -1704,6 +1712,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: '色や柄がごちゃごちゃした服と、いつまでも決められない態度'
   },
   '辛': {
+    tagFemale: 'お嬢様系', tagMale: '上品系',
     imageName: 'きらめく宝石',
     imageNote: '上品で、細かいところまで丁寧な人に惹かれます。',
     styleName: '上質で洗練された「エレガント」系',
@@ -1714,6 +1723,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: '汚れた靴やほつれた服、ガサツな仕草'
   },
   '壬': {
+    tagFemale: 'カジュアル系', tagMale: 'アメカジ系',
     imageName: 'ひろがる大海',
     imageNote: '自由でおおらかで、一緒にいると世界が広がる人に惹かれます。',
     styleName: '抜け感のある「ゆったりカジュアル」系',
@@ -1724,6 +1734,7 @@ const attractionStyleMap: Record<string, {
     ngStyle: 'きっちりしすぎて窮屈そうな服や、ノリの悪さ'
   },
   '癸': {
+    tagFemale: '韓国系', tagMale: '塩系',
     imageName: '静かに降る雨と朝つゆ',
     imageNote: 'しっとり落ち着いていて、少し謎めいた透明感のある人に惹かれます。',
     styleName: '透明感のある「しっとりミステリアス」系',
@@ -1780,6 +1791,7 @@ export function getAttractionStyle(
     imageName: s.imageName,
     imageNote: s.imageNote,
     styleName: s.styleName,
+    styleTag: myGender === 'male' ? s.tagMale : s.tagFemale,
     colors: s.colors,
     outfit: myGender === 'male' ? s.outfitMale : s.outfitFemale,
     gestures: extra ? [...s.gestures, extra] : s.gestures,

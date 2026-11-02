@@ -2786,7 +2786,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {vis && <AttractionMotif stemKey={at.key!} size={60} />}
                       <div><span style={label}>【惹かれるイメージ】</span>「{at.imageName}」のような人。{at.imageNote}</div>
                     </div>
-                    <div><span style={label}>【好みの系統】</span>{at.styleName}</div>
+                    <div>
+                      <span style={label}>【好みの系統】</span>
+                      {at.styleTag && <span style={{ display: 'inline-block', margin: '0 0.35rem 0.15rem 0', padding: '0.05rem 0.6rem', borderRadius: '999px', background: 'rgba(226, 139, 170, 0.22)', border: '1px solid rgba(246, 198, 216, 0.55)', color: '#fff', fontWeight: 'bold', fontSize: '0.86rem' }}>{at.styleTag}</span>}
+                      {at.styleName}
+                    </div>
                     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                       <div style={lockStyle}>
                         <span style={label}>【好きな色】</span>{vis && !locked ? null : lockedText(at.colors, locked)}
