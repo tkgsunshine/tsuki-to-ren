@@ -2100,7 +2100,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
                           <div style={{ position: 'relative' }}>
-                            <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>
+                            {/* 「お相手のLINEのくせ」は無料（未登録・無料会員とも）で全文を見せる。他の項目はこれまでどおり。 */}
+                            {it.label.startsWith('📱')
+                              ? <div style={{ color: '#e8e3d8' }}>{it.text}</div>
+                              : <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>}
                             {locked && i === lockAt && lockButton}
                           </div>
                         </div>
