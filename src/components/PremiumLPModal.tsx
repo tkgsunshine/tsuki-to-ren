@@ -461,7 +461,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
                   {pair.name}のことを今日じっくり知りたいなら、¥480で十分ですよ。<br />
-                  毎日の相性やLINEの助言も見たい、ほかの人のことも占いたいなら、月額で毎日そばにいさせてくださいね。<br />
+                  毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。<br />
                   どちらも会員登録なしで購入できます。
                 </CharBubble>
               </div>
