@@ -389,22 +389,21 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
                 無料で見えているのは、{pair.name}のほんの入り口です
               </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', marginBottom: '0.9rem' }}>
-                {[
-                  { t: '刺さる言葉 TOP5 ＆ 絶対NG行動 5選', d: `${pair.name}がキュンとする褒め方と、言うと一気に冷めてしまう一言。` },
-                  { t: '返信が遅いときの心理と、ベストな返し方', d: '既読のまま止まったとき、何を考えているのか。追いLINEしていいのか、待つべきか。' },
-                  { t: '脈ありサイン 3段階 ＆ 脈なしからの挽回', d: '今どの段階にいるのか。少し離れかけたときの戻し方。' },
-                  { t: '惹かれ合うポイント ＆ 地雷行動 3選', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターン。' },
-                  { t: '6つの相性グラフ ＆ 二人のこれから', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。' },
-                  { t: 'そのまま送れるLINEキラーテンプレート', d: `${pair.name}の性格に合わせた文例。言葉に迷う夜に、そのまま使えます。` }
-                ].map((it) => (
-                  <div key={it.t} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', padding: '0.65rem 0.8rem', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <Lock size={13} style={{ color: '#e2c074', flexShrink: 0, marginTop: '0.2rem' }} />
-                    <div>
-                      <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>{it.t}</div>
-                      <div style={{ fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.65, marginTop: '0.15rem' }}>{it.d}</div>
-                    </div>
-                  </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '0.7rem' }}>
+                {([
+                  { who: 'ren', t: '刺さる言葉 TOP5 ＆ 絶対NG行動 5選', d: `${pair.name}がキュンとする褒め方と、言うと一気に冷めてしまう一言。ここは知っておいたほうがいい。` },
+                  { who: 'tsuki', t: '返信が遅いときの心理と、ベストな返し方', d: '既読のまま止まったとき、あの人が何を考えているのか。追いLINEしていいのか、待つべきか、一緒に見ていきましょうね。' },
+                  { who: 'ren', t: '脈ありサイン 3段階 ＆ 脈なしからの挽回', d: '今どの段階にいるのかがわかる。少し離れかけたときの戻し方もある。' },
+                  { who: 'tsuki', t: '惹かれ合うポイント ＆ 地雷行動 3選', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあるんです。先に知っておけば、大丈夫。' },
+                  { who: 'ren', t: '6つの相性グラフ ＆ 二人のこれから', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを読もう。' },
+                  { who: 'tsuki', t: 'そのまま送れるLINEキラーテンプレート', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってくださいね。` }
+                ] as const).map((it) => (
+                  <CharBubble key={it.t} who={it.who} small>
+                    <span style={{ display: 'block', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.2rem' }}>
+                      <Lock size={12} style={{ verticalAlign: '-1px', marginRight: '0.3rem', color: '#e2c074' }} />{it.t}
+                    </span>
+                    {it.d}
+                  </CharBubble>
                 ))}
               </div>
               <CharBubble who="ren" small>
