@@ -9,10 +9,11 @@ import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
 import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, PAIR_LINK, GAP_CTA, withLink, withProfileCta } from './lib/teasers.mjs';
-import { addMbtiNicks } from './lib/mbti-nick.mjs';
+import { addMbtiNicks, addMbtiNicksInline } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 import { parseCardText, renderCard, EXPRESSIONS } from './lib/card.mjs';
+import { attachRankImages } from './lib/rank-card.mjs';
 import { pickColumn, COLUMN_GUIDE, withColumnUrl } from './lib/column-post.mjs';
 import fs from 'node:fs';
 
@@ -167,6 +168,8 @@ function validate(posts) {
 const detPosts = detSlots.map((slot) => {
   const f = planned[slot];
   const out = f.build(date);
+  // 二つ名を足す（「ISFP×辛羊」→「ISFP 冒険家×辛羊」。2026-11-03〜）
+  for (const k of ['text', 'replyText', 'replyText2']) if (typeof out[k] === 'string') out[k] = addMbtiNicksInline(out[k]);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks, maxWeight: f.maxWeight });
   if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks, maxWeight: f.maxWeight, reply: true }).map((x) => `返信: ${x}`));
   if (out.replyText2) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText2 }, history, { allowLinks, siteUrl: true, maxWeight: f.maxWeight }).map((x) => `返信2: ${x}`));
@@ -202,11 +205,15 @@ if (llmSlots.length) {
     try {
       candidate = extractJson(text);
       // 16タイプのランキングの行に、二つ名（冒険家など）を足す（アプリと同じ一覧から。AIには書かせない）
+      // 2026-11-03〜: ほかの型も、本文中の「ESTJ」を「ESTJ 幹部」の形にする（運営の指定。各タイプの最初の1回だけ）
       for (const c of candidate) {
-        if (c && planned[c.slot]?.rank16) {
+        if (!c) continue;
+        if (planned[c.slot]?.rank16) {
           c.text = addMbtiNicks(c.text);
           if (c.replyText) c.replyText = addMbtiNicks(c.replyText);
         }
+        if (typeof c.text === 'string') c.text = addMbtiNicksInline(c.text);
+        if (typeof c.replyText === 'string') c.replyText = addMbtiNicksInline(c.replyText);
       }
     } catch (e) {
       feedback = `\n\n# 前回の出力は不正でした: ${e.message}。JSON配列のみを出力してください。`;
@@ -360,7 +367,7 @@ if (col) {
     let text;
     try {
       const out = extractJson(res.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
-      text = withColumnUrl(out[0].text, col);
+      text = addMbtiNicksInline(withColumnUrl(out[0].text, col));
     } catch (e) {
       const raw = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('').slice(0, 300).replace(/\n/g, '\\n');
       console.warn(`コラム紹介 attempt ${attempt}: 出力を読めません（${e.message}、stop_reason=${res.stop_reason}）。出力の先頭: ${raw}`);
@@ -393,6 +400,12 @@ for (const it of items.filter((x) => x.card)) {
   const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(it.image));
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, await renderCard(it.card));
+}
+// 16タイプのランキングに画像を付ける（投稿用＝1・2・15・16位を隠す／返信用＝全順位。2026-11-03 運営の承認）
+for (const f of await attachRankImages(items)) {
+  const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(f.image));
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, f.png);
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);

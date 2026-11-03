@@ -23,9 +23,11 @@ interface Props {
   isSubscribed: boolean;
   isRegistered: boolean;
   onLockClick: () => void;
+  /** 見出しに出すお相手の呼び方（例: ゆうとさん） */
+  partnerLabel?: string;
 }
 
-export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, isRegistered, onLockClick }) => {
+export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, isRegistered, onLockClick, partnerLabel = 'お相手' }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const locked = !isSubscribed;
   const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
@@ -88,7 +90,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, isRegistere
 
       <div className="font-serif" style={{ fontSize: '0.78rem', color: '#f0ebf5', lineHeight: '1.65', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
         {/* 1. 送り方の分析 */}
-        <div style={sectionTitle}>【お相手に届くLINEの送り方】</div>
+        <div style={sectionTitle}>【{partnerLabel}に届くLINEの送り方】</div>
         {firstStyle && (
           <div><strong style={{ color: '#e9defa' }}>{firstStyle.label}：</strong>{firstStyle.text}</div>
         )}

@@ -12,9 +12,22 @@ import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
-import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES } from '../utils/attributeNotes';
+import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
+
+/** 守護カラーの値を、色名ごとにその色の文字で出す（黒・紺は白い光で縁取って読ませる） */
+const GuardianColorText: React.FC<{ value: string; fallbackColor: string }> = ({ value, fallbackColor }) => (
+  <>
+    {splitGuardianColors(value).map((c, i) => (
+      <React.Fragment key={i}>
+        {i > 0 && <span style={{ color: '#a8a296', textShadow: 'none' }}>・</span>}
+        <span style={{ color: c.color || fallbackColor, textShadow: c.halo ? '0 0 1px #fff, 0 0 2px rgba(255,255,255,0.95), 0 0 5px rgba(255,255,255,0.6)' : '0 1px 3px rgba(0,0,0,0.8)' }}>{c.name}</span>
+      </React.Fragment>
+    ))}
+  </>
+);
 import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
+import { SelfReadingCard } from './SelfReadingCard';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -146,6 +159,18 @@ const CharHeadingIcon: React.FC<{ char: '月' | '蓮'; size?: number }> = ({ cha
   />
 );
 
+// 本文の中の「【二人の性格・コミュニケーションの相性】」のような1行だけの見出しは、本文と区別できる小見出しにする
+const SECTION_HEADING_RE = /^【([^】]{2,30})】$/u;
+
+const renderSectionHeading = (line: string): React.ReactNode => {
+  const h = line.trim().match(SECTION_HEADING_RE);
+  return (
+    <span style={{ display: 'block', margin: '0.9rem 0 0.15rem', paddingLeft: '0.55rem', borderLeft: '3px solid #e2c074', color: '#e2c074', fontWeight: 'bold', fontSize: '0.92rem', lineHeight: 1.5 }}>
+      {h ? h[1] : line}
+    </span>
+  );
+};
+
 const renderCharHeading = (line: string, size?: number): React.ReactNode => {
   const m = line.match(CHAR_HEADING_RE);
   if (!m) return line;
@@ -162,8 +187,8 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
   const lines = text.split('\n');
   return lines.map((line, i) => (
     <React.Fragment key={i}>
-      {renderCharHeading(line, 32)}
-      {i < lines.length - 1 ? '\n' : null}
+      {SECTION_HEADING_RE.test(line.trim()) ? renderSectionHeading(line) : renderCharHeading(line, 32)}
+      {i < lines.length - 1 && !SECTION_HEADING_RE.test(line.trim()) ? '\n' : null}
     </React.Fragment>
   ));
 };
@@ -188,9 +213,95 @@ const splitTeaser = (text: string | undefined): { head: string; restLength: numb
   }
   return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
 };
+// 「本日のアプローチ助言」は、未登録・無料会員とも、1段落目（約2行）に続けて2段落目の冒頭を約3行ぶん見せる（スマホ幅で合計約5行）。
+// 短い段落は全部見せる。長いときは読点・句点の直後で切れるならそこで切り、続きはダミー文にしてぼかす。
+const ADVICE_PREVIEW_CHARS = 50;
+const splitAdvicePreview = (text: string | undefined): { head: string; restLength: number } => {
+  const t = text ?? '';
+  if (t.length <= ADVICE_PREVIEW_CHARS) return { head: t, restLength: 0 };
+  let cut = ADVICE_PREVIEW_CHARS;
+  for (let i = ADVICE_PREVIEW_CHARS; i >= Math.floor(ADVICE_PREVIEW_CHARS * 0.75); i--) {
+    if ('、。！？'.includes(t[i - 1])) { cut = i; break; }
+  }
+  return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
+};
 // 7日間・月次・年次の点数も、見られない人にはダミーの値で描く（本物の点数を画面に置かない）
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
+
+// 未来予測スケジュール（7日間・月次・年次）の点数の折れ線グラフ。点の高さは 40点（下限）〜100点 で決める
+const SCORE_LINE_HEIGHT_PX = 64;
+const SCORE_LINE_MIN = 40;
+const ScoreLineChart = ({ items, locked }: { items: { key: string; label: string; score: number }[]; locked: boolean }) => {
+  const n = items.length;
+  const pos = items.map((item, i) => {
+    const clamped = Math.max(SCORE_LINE_MIN, Math.min(100, item.score));
+    return { x: ((i + 0.5) / n) * 100, y: (1 - (clamped - SCORE_LINE_MIN) / (100 - SCORE_LINE_MIN)) * SCORE_LINE_HEIGHT_PX };
+  });
+  const gradId = `scoreLineFill-${items.map((i) => i.key).join('-').replace(/[^A-Za-z0-9-]/g, '')}`;
+  return (
+    <div
+      className={locked ? 'timeline-blurred' : ''}
+      style={{
+        filter: locked ? 'blur(4.5px)' : 'none',
+        userSelect: locked ? 'none' : 'auto',
+        pointerEvents: locked ? 'none' : 'auto'
+      }}
+    >
+      {/* 上に点数ラベルぶんの余白を取り、その下に線と点を描く */}
+      <div style={{ position: 'relative', height: `${SCORE_LINE_HEIGHT_PX + 22}px` }}>
+        <svg
+          viewBox={`0 0 100 ${SCORE_LINE_HEIGHT_PX}`}
+          preserveAspectRatio="none"
+          style={{ position: 'absolute', left: 0, right: 0, top: '22px', width: '100%', height: `${SCORE_LINE_HEIGHT_PX}px`, overflow: 'visible' }}
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(226, 192, 116, 0.22)" />
+              <stop offset="100%" stopColor="rgba(226, 192, 116, 0)" />
+            </linearGradient>
+          </defs>
+          {[0, 0.5, 1].map((t) => (
+            <line key={t} x1="0" x2="100" y1={t * SCORE_LINE_HEIGHT_PX} y2={t * SCORE_LINE_HEIGHT_PX} stroke="rgba(255,255,255,0.06)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          ))}
+          <polygon
+            points={`${pos[0]?.x ?? 0},${SCORE_LINE_HEIGHT_PX} ${pos.map((p) => `${p.x},${p.y}`).join(' ')} ${pos[n - 1]?.x ?? 100},${SCORE_LINE_HEIGHT_PX}`}
+            fill={`url(#${gradId})`}
+          />
+          <polyline
+            points={pos.map((p) => `${p.x},${p.y}`).join(' ')}
+            fill="none"
+            stroke="#e2c074"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+            style={{ filter: 'drop-shadow(0 0 4px rgba(226, 192, 116, 0.45))' }}
+          />
+        </svg>
+        {items.map((item, i) => {
+          const visuals = getScoreVisuals(item.score);
+          return (
+            <div key={item.key} style={{ position: 'absolute', left: `${pos[i].x}%`, top: `${pos[i].y + 22}px`, transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <span style={{ position: 'absolute', bottom: '9px', fontSize: '0.7rem', color: visuals.textColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                {item.score}点
+              </span>
+              <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: visuals.textColor, border: '2px solid #0d121b', boxShadow: visuals.shadow === 'none' ? 'none' : `0 0 6px ${visuals.textColor}` }} />
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${n}, 1fr)`, marginTop: '6px' }}>
+        {items.map((item) => (
+          <span key={item.key} style={{ fontSize: '0.64rem', color: '#a9a49a', textAlign: 'center', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
+            {item.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const getMbtiColor = (mbtiCode: string) => {
   const code = (mbtiCode || '').toUpperCase();
@@ -421,6 +532,24 @@ export const ResultView: React.FC<ResultViewProps> = ({
     } catch {}
   };
 
+  // 守護獣の名前（例: 壬虎）のふりがな（例: みずのえとら）。魁罡・極稀の印は読みから外す
+  const getAstrologyNameReading = (name?: string): string => {
+    if (!name) return '';
+    const core = name.replace(/👑[^👑]*👑\s*/u, '').trim();
+    if (core.length !== 2) return '';
+    const stemReadings: Record<string, string> = {
+      '甲': 'きのえ', '乙': 'きのと', '丙': 'ひのえ', '丁': 'ひのと', '戊': 'つちのえ',
+      '己': 'つちのと', '庚': 'かのえ', '辛': 'かのと', '壬': 'みずのえ', '癸': 'みずのと'
+    };
+    const animalReadings: Record<string, string> = {
+      '鼠': 'ねずみ', '牛': 'うし', '虎': 'とら', '兎': 'うさぎ', '龍': 'りゅう', '蛇': 'へび',
+      '馬': 'うま', '羊': 'ひつじ', '猿': 'さる', '鳥': 'とり', '犬': 'いぬ', '猪': 'いのしし'
+    };
+    const stem = stemReadings[core[0]];
+    const animal = animalReadings[core[1]];
+    return stem && animal ? stem + animal : '';
+  };
+
   const getKanjiReading = (pillar: string): string => {
     if (!pillar || pillar.length !== 2) return '';
     const stem = pillar[0];
@@ -599,7 +728,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const swatch = (c: string) => (
       <span key={c} style={{ display: 'inline-block', width: '0.95rem', height: '0.95rem', borderRadius: '50%', background: COLOR_SWATCHES[c] || '#888', border: '1px solid rgba(255,255,255,0.45)' }} />
     );
-    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。\n\n※2色の組み合わせは、五行の色をもとに、月と蓮が選んだものです。`;
+    const body = `守護カラーは、${who}の持ち味を引き出し、守ってくれる2色です。日柱（にっちゅう：生まれた日を表す2文字）の1文字目で決まります。\n\n1色目はその文字の五行（木・火・土・金・水）を表す色、2色目は持ち味を引き立てる差し色です。${pillar}（${getKanjiReading(pillar)}）の「${stem}（${mine.reading}）」は「${mine.color}」。${mine.note}\n\n服や小物、スマホの壁紙などに少し取り入れると、${who}らしさが出しやすくなります。`;
     setExplanation({
       title: `守護カラー: ${mine.color}`,
       reading: '',
@@ -629,6 +758,34 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   const activeResult = selectedChar === 'ren' ? renResult : tsukiResult;
   const oppNickname = opponentName || 'お相手';
+
+  // 守護獣の保存モーダルを開く（画像タップと、その下の「※タップで保存できます」の文言タップで共通）
+  const openMyGuardianSave = () => setZoomedImg({
+    src: activeResult.myAvatarUrl || '',
+    headerTitle: `✦ ${san(myName, 'あなた')}の守護獣 ✦`,
+    nickname: myName || 'あなた',
+    astrologyName: activeResult.myAstrologyName || '守護獣',
+    astrologyTheme: activeResult.myAstrologyTheme || '',
+    isKaigo: activeResult.isKaigo,
+    isRare: activeResult.isRare,
+    myGender: activeResult.myGender,
+    astrologyElement: activeResult.myAstrologyElement || '金・陽',
+    branchPersonality: activeResult.myBranchPersonality || '策士',
+    astrologyColor: activeResult.myAstrologyColor || '銀・白'
+  });
+  const openOpponentGuardianSave = () => setZoomedImg({
+    src: activeResult.opponentAvatarUrl || '',
+    headerTitle: `✦ ${san(oppNickname)}の守護獣 ✦`,
+    nickname: opponentName || 'お相手',
+    astrologyName: activeResult.opponentAstrologyName || '守護獣',
+    astrologyTheme: activeResult.opponentAstrologyTheme || '',
+    isKaigo: activeResult.opponentIsKaigo,
+    isRare: activeResult.opponentIsRare,
+    myGender: activeResult.opponentGender,
+    astrologyElement: activeResult.opponentAstrologyElement || '金・陽',
+    branchPersonality: activeResult.opponentBranchPersonality || '策士',
+    astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
+  });
   const [isPastGuardian, setIsPastGuardian] = useState(false);
   const [isShareDismissed, setIsShareDismissed] = useState(() => {
     try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
@@ -1111,7 +1268,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         
         {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}
         {(() => {
-          const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+          const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
           const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
           const base = activeResult.baseScore;
           const realDaily = activeResult.dailyScore;
@@ -1236,7 +1393,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {partnerLock?.status === 'free' && (
                 <div style={{ textAlign: 'center', fontSize: '0.74rem', color: '#cfc8b8', lineHeight: 1.6 }}>
                   {partnerLock.guest
-                    ? <>{partnerCall}との今日の相性を明日も見るには、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください（登録すると、あと6日無料）</>
+                    ? <>明日からも見るなら、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください</>
                     : partnerLock.daysLeft > 0
                       ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見られます</>
                       : <>{partnerCall}との今日の相性を無料で見られるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見られます</>}
@@ -1246,7 +1403,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
                   <div style={{ fontSize: '0.8rem', color: '#e8e3d8', lineHeight: 1.65 }}>
                     {partnerLock.guest
-                      ? <>{partnerCall}との今日の相性を続けて見るには、無料会員登録をしてください。登録すると、あと6日無料で見られます。</>
+                      ? <>{partnerCall}との今日の相性を続けて見るなら、無料会員登録をしてください。</>
                       : <>{partnerCall}との無料の期間が終わりました。<br />二人の毎日の点数と助言は、プレミアム（月額980円）でずっと見られます。</>}
                   </div>
                   <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
@@ -1273,7 +1430,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           }}>
             {hasOpponent && (
               <span style={{ display: 'block', fontSize: '0.66rem', color: '#c9b98e', marginBottom: '0.25rem', letterSpacing: '0.05em' }}>
-                二人の相性ひとこと
+                {san(oppNickname)}との相性ひとこと
               </span>
             )}
             “{activeResult.oneLiner}”
@@ -1316,11 +1473,24 @@ export const ResultView: React.FC<ResultViewProps> = ({
         )}
       </div>
 
+      {/* あなたってこんな人: 本人の性格・恋愛の傾向を先に見せて「当たってる」と感じてもらう（点数には関わらない。文は utils/selfReading.ts） */}
+      <SelfReadingCard
+        pillar={activeResult.myPillar}
+        star={activeResult.myStar}
+        mbti={activeResult.myMbtiCode}
+        name={myName}
+        char={selectedChar}
+        charIcon={<CharHeadingIcon char={selectedChar === 'ren' ? '蓮' : '月'} size={30} />}
+        hasOpponent={hasOpponent}
+        oppName={oppNickname}
+      />
+
       {/* Free Summary Section (Fully Visible) */}
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
         <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={16} />
-          {hasOpponent ? '基本相性サマリー' : '基本運勢サマリー'}
+          {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる */}
+          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
         </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
           {renderTextWithCharHeadings(formatAppraisalText(activeResult.summary))}
@@ -1384,26 +1554,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
                   letterSpacing: '0.05em'
                 }}>
-                  ✦ あなたの守護獣 ✦
+                  ✦ {san(myName, 'あなた')}の守護獣 ✦
                 </span>
               </div>
 
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
               <div 
                 className="guardian-hero"
-                onClick={() => setZoomedImg({ 
-                  src: activeResult.myAvatarUrl || '', 
-                  headerTitle: '✦ あなたの守護獣 ✦',
-                  nickname: myName || 'あなた',
-                  astrologyName: activeResult.myAstrologyName || '守護獣',
-                  astrologyTheme: activeResult.myAstrologyTheme || '',
-                  isKaigo: activeResult.isKaigo,
-                  isRare: activeResult.isRare,
-                  myGender: activeResult.myGender,
-                  astrologyElement: activeResult.myAstrologyElement || '金・陽',
-                  branchPersonality: activeResult.myBranchPersonality || '策士',
-                  astrologyColor: activeResult.myAstrologyColor || '銀・白'
-                })}
+                onClick={openMyGuardianSave}
               >
                 <div className="guardian-hero-media">
                   <img 
@@ -1455,6 +1613,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
                       {activeResult.myAstrologyName}
                     </span>
+                    {getAstrologyNameReading(activeResult.myAstrologyName) && (
+                      <span style={{ fontSize: '0.72rem', color: '#d8d2c6', marginLeft: '-0.3rem' }}>（{getAstrologyNameReading(activeResult.myAstrologyName)}）</span>
+                    )}
                     <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
                       fontSize: '0.72rem',
                       padding: '2px 7px',
@@ -1469,34 +1630,34 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
 
-              {/* Sub-text explaining tap to save */}
-              <div style={{
+              {/* Sub-text explaining tap to save（文言もタップで保存できる） */}
+              <button type="button" onClick={openMyGuardianSave} style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
                 fontSize: '0.68rem',
                 color: '#a9a49a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '0.6rem',
-                marginBottom: '0.75rem',
+                marginTop: '0.35rem',
+                marginBottom: '0.5rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
+              </button>
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="五行（陰陽）の説明を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
-                  >
+                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
                     五行 (陰陽)
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
-                  </button>
+                  </span>
                   {(() => {
                     const [el, yy] = (activeResult.myAstrologyElement || '火・陰').split('・');
                     return (
@@ -1505,31 +1666,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       </span>
                     );
                   })()}
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="性格分類の説明と全12タイプを見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                </button>
+                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="守護カラーの説明と全10種類を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                  </span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
+                </button>
+                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myAstrologyColor || '紫・橙'}</span>
-                </div>
+                  </span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.myAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
+                </button>
               </div>
 
               {/* Visual Divider to separate Avatar and Destiny Chart */}
@@ -1537,7 +1688,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Destiny Chart (命式表示) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
-                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● あなたの命式</span>
+                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● {san(myName, 'あなた')}の命式</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                   <button
                     type="button"
@@ -1688,26 +1839,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
                   letterSpacing: '0.05em'
                 }}>
-                  ✦ お相手の守護獣 ✦
+                  ✦ {san(oppNickname)}の守護獣 ✦
                 </span>
               </div>
 
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
               <div 
                 className="guardian-hero"
-                onClick={() => setZoomedImg({ 
-                  src: activeResult.opponentAvatarUrl || '', 
-                  headerTitle: '✦ お相手の守護獣 ✦',
-                  nickname: opponentName || 'お相手',
-                  astrologyName: activeResult.opponentAstrologyName || '守護獣',
-                  astrologyTheme: activeResult.opponentAstrologyTheme || '',
-                  isKaigo: activeResult.opponentIsKaigo,
-                  isRare: activeResult.opponentIsRare,
-                  myGender: activeResult.opponentGender,
-                  astrologyElement: activeResult.opponentAstrologyElement || '金・陽',
-                  branchPersonality: activeResult.opponentBranchPersonality || '策士',
-                  astrologyColor: activeResult.opponentAstrologyColor || '銀・白'
-                })}
+                onClick={openOpponentGuardianSave}
               >
                 <div className="guardian-hero-media">
                   <img 
@@ -1759,6 +1898,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
                       {activeResult.opponentAstrologyName}
                     </span>
+                    {getAstrologyNameReading(activeResult.opponentAstrologyName) && (
+                      <span style={{ fontSize: '0.72rem', color: '#d8d2c6', marginLeft: '-0.3rem' }}>（{getAstrologyNameReading(activeResult.opponentAstrologyName)}）</span>
+                    )}
                     <span className={activeResult.opponentIsKaigo ? 'kaigo-badge' : (activeResult.opponentIsRare ? 'rare-badge' : '')} style={{
                       fontSize: '0.72rem',
                       padding: '2px 7px',
@@ -1773,34 +1915,34 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>
 
-              {/* Sub-text explaining tap to save */}
-              <div style={{
+              {/* Sub-text explaining tap to save（文言もタップで保存できる） */}
+              <button type="button" onClick={openOpponentGuardianSave} style={{
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem 0.5rem',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
                 fontSize: '0.68rem',
                 color: '#a9a49a',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '0.6rem',
-                marginBottom: '0.75rem',
+                marginTop: '0.35rem',
+                marginBottom: '0.5rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
                 <span>※タップで守護獣画像を保存できます</span>
-              </div>
+              </button>
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="五行（陰陽）の説明を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3' }}
-                  >
+                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
                     五行 (陰陽)
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
-                  </button>
+                  </span>
                   {(() => {
                     const [el, yy] = (activeResult.opponentAstrologyElement || '火・陰').split('・');
                     return (
@@ -1809,31 +1951,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       </span>
                     );
                   })()}
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="性格分類の説明と全12タイプを見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                </button>
+                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
-                </div>
-                <div style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    aria-label="守護カラーの説明と全10種類を見る"
-                    onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', 'お相手'); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}
-                  >
+                  </span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
+                </button>
+                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </button>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary, textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentAstrologyColor || '紫・橙'}</span>
-                </div>
+                  </span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.opponentAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
+                </button>
               </div>
 
               {/* Visual Divider to separate Avatar and Destiny Chart */}
@@ -1841,7 +1973,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Destiny Chart (命式表示) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
-                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● お相手の命式</span>
+                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● {san(oppNickname)}の命式</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                   <button
                     type="button"
@@ -2056,6 +2188,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               };
               // ボタンは「気持ちが伝わるコツ」の本文の上下中央に重ねる（末尾に置くと見落とされやすいため）。
               // その項目がないときは「二人のLINEのコツ」全体の中央に置く。
+              // 「本日のアプローチ助言」の見せ方（未登録・無料会員とも約5行）。お相手の鑑定自体が隠れているときは見せない。
+              const adviceTeaser = locked && !dailyHidden && parts.length > 1;
               const lockAt = tips ? tips.items.findIndex(it => it.label.startsWith('💡')) : -1;
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
@@ -2070,7 +2204,43 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     style={{ color: '#e8e3d8', lineHeight: '1.55', ...(dailyHidden ? { filter: 'blur(4.5px)', userSelect: 'none' as const, opacity: 0.65, cursor: 'pointer' } : {}) }}
                     onClick={dailyHidden ? handleLockTagClick : undefined}
                   >{lockedText(parts[0], dailyHidden)}</div>
-                  {parts.length > 1 && (
+                  {adviceTeaser && (() => {
+                    const { head, restLength } = splitAdvicePreview(parts[1]);
+                    return (
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', marginTop: '0.35rem' }}>
+                        {head}
+                        {restLength > 0 && (
+                          <span
+                            style={{ ...blurred, display: 'inline', cursor: 'pointer' }}
+                            onClick={handleLockTagClick}
+                          >{lockedText(' '.repeat(restLength), true)}</span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  {adviceTeaser && parts.length > 2 && (
+                    <div
+                      style={{ position: 'relative', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: 'pointer' }}
+                      onClick={handleLockTagClick}
+                    >
+                      {parts.slice(2).map((p, i) => (
+                        <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, true)}</div>
+                      ))}
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                          <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {adviceTeaser && parts.length === 2 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
+                      <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                      </button>
+                    </div>
+                  )}
+                  {!adviceTeaser && parts.length > 1 && (
                     <div
                       style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
@@ -2095,13 +2265,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       style={{ position: 'relative', marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
-                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ{locked && <span style={{ fontSize: '0.66rem', color: '#a9a49a', fontWeight: 'normal', marginLeft: '0.4rem' }}>{preview ? '(続きはプレミアム限定)' : '(プレミアム限定)'}</span>}</div>
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 {san(oppNickname)}とのLINEのコツ</div>
                       <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...(preview ? {} : blurred) }}>{lockedBody(tips.intro)}</div>
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
                           <div style={{ position: 'relative' }}>
-                            <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>
+                            {/* 「お相手のLINEのくせ」は無料（未登録・無料会員とも）で全文を見せる。他の項目はこれまでどおり。 */}
+                            {it.label.startsWith('📱')
+                              ? <div style={{ color: '#e8e3d8' }}>{it.text}</div>
+                              : <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>}
                             {locked && i === lockAt && lockButton}
                           </div>
                         </div>
@@ -2155,12 +2328,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     if (isCurrent) onOpenNotifySettings?.();
                     else onSwitchNotifyToCurrent?.();
                   } else if (!isRegistered) {
-                    showConfirm('毎朝8時の運勢通知機能は有料会員限定の機能です。\nまずは無料会員登録（アカウント作成）を行いますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
+                    // 毎朝のメールは無料会員から受け取れる（api/cron/daily-luck.js。無料はアドバイス1段落・同じお相手は7日分まで）
+                    showConfirm('毎朝8時の運勢メールは、無料会員登録（アカウント作成）で受け取れます。\n無料登録しますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
                       if (ok) handleScrollToRegister();
-                    });
-                  } else if (!isSubscribed) {
-                    showConfirm('毎朝8時の運勢通知機能は、月額980円の有料会員（プレミアム）限定の機能です。\nプレミアムプランの登録画面へ移動しますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
-                      if (ok) handleScrollToSub();
                     });
                   } else {
                     onOpenNotifySettings?.();
@@ -2194,7 +2364,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
           const oppLabel = hasOpponent ? san(oppNickname) : '';
           const lead = hasOpponent
-            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考える。` : `今日のこと、もう少し一緒に考えましょうか？${oppLabel}に送る一言も、いっしょに選べますよ。`)
+            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考えるよ。` : `今日のこと、もう少しお話ししませんか？${oppLabel}に送る一言も、一緒に考えましょう。`)
             : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
           const questions = hasOpponent
             ? [`${oppLabel}に今日なんて送ればいい？`, `${oppLabel}の本音や脈ありサインは？`]
@@ -2263,10 +2433,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {/* 5 Detailed Appraisal Topics */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={18} />
-          深層鑑定結果
+          {hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : `${san(myName, 'あなた')}の深層鑑定結果`}
         </h2>
 
-        {detailedTopics.map((topic, index) => (
+        {detailedTopics.map((topic, index) => {
+          // 「惹かれ合うポイント＆地雷行動3選」「二人のこれから」はプレミアム限定（無料会員も冒頭の1文だけ）。他の項目は無料会員なら全文。
+          const premiumOnly = hasOpponent && (topic.title.includes('惹かれ合うポイント') || topic.title.includes('二人のこれから'));
+          const topicOpen = premiumOnly ? isSubscribed : isRegistered;
+          return (
           <React.Fragment key={topic.title}>
 
             {/* Topic Card */}
@@ -2275,7 +2449,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {topic.title}
               </h3>
               
-              {isRegistered ? (
+              {topicOpen ? (
                 <p className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                   {formatAppraisalText(`${topic.intro}\n\n${topic.detail}`)}
                 </p>
@@ -2320,7 +2494,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     無料会員登録で鑑定結果の続きを開く
                   </h2>
                   <p style={{ fontSize: '0.75rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
-                    会員登録をいただくと深層鑑定結果の続きを全てご覧になれます。
+                    会員登録をいただくと深層鑑定結果の続きをご覧になれます（一部の項目はプレミアム限定）。
                   </p>
                 </div>
 
@@ -2452,7 +2626,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             )}
           </React.Fragment>
-        ))}
+          );
+        })}
 
         {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
       {activeResult.opponentTorisetsu && (
@@ -2720,7 +2895,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             {(() => {
               const kit = buildLineKit(activeResult.opponentMbtiCode, activeResult.opponentPillar);
               return kit ? (
-                <LineKitSection kit={kit} isSubscribed={isSubscribed} isRegistered={isRegistered} onLockClick={handleLockTagClick} />
+                <LineKitSection kit={kit} isSubscribed={isSubscribed} isRegistered={isRegistered} onLockClick={handleLockTagClick} partnerLabel={san(oppNickname)} />
               ) : null;
             })()}
 
@@ -2896,7 +3071,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     ✦ プレミアムプラン解放 ✦
                   </span>
                   <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
-                    二人の取扱説明書・6軸詳細相性・未来予測をすべて解禁
+                    {san(oppNickname)}のトリセツ・6軸の詳しい相性・未来予測をすべて解禁
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
@@ -2969,6 +3144,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         onOpenAuth={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
         onOpenPremiumLP={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
         character={selectedChar}
+        partnerLabel={san(oppNickname)}
       />
       )}
 
@@ -2976,49 +3152,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
             <Calendar size={16} />
-            未来予測スケジュール
+            {hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : `${san(myName, 'あなた')}の未来予測スケジュール`}
           </h2>
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? '今後7日間の相性' : '今後7日間の運気'} {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? `今後7日間の${san(oppNickname)}との相性` : `今後7日間の${san(myName, 'あなた')}の運気`} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
-              <div 
-                className={isSubscribed ? '' : 'timeline-blurred'} 
-                style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(7, 1fr)', 
-                  gap: '6px', 
-                  height: '80px', 
-                  alignItems: 'end',
-                  filter: isSubscribed ? 'none' : 'blur(4.5px)',
-                  userSelect: isSubscribed ? 'auto' : 'none',
-                  pointerEvents: isSubscribed ? 'auto' : 'none'
-                }}
-              >
-                {activeResult.weeklyScores.map((day, index) => {
-                  const score = lockedScore(day.score, index, !isSubscribed);
-                  const visuals = getScoreVisuals(score);
-                  return (
-                    <div key={day.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '0.7rem', color: visuals.textColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                        {score}点
-                      </span>
-                      <div style={{
-                        width: '100%',
-                        height: `${score * 0.5}px`,
-                        background: visuals.barColor,
-                        borderRadius: '4px 4px 0 0',
-                        boxShadow: visuals.shadow,
-                        transition: 'all 0.3s ease'
-                      }} />
-                      <span style={{ fontSize: '0.64rem', color: '#a9a49a', marginTop: '2px', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
-                        {index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+              <ScoreLineChart
+                locked={!isSubscribed}
+                items={activeResult.weeklyScores.map((day, index) => ({
+                  key: day.day,
+                  label: index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day,
+                  score: lockedScore(day.score, index, !isSubscribed)
+                }))}
+              />
               {!isSubscribed && (
                 <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
                   <button 
@@ -3036,6 +3184,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* Monthly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
             <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 月次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <div style={{ position: 'relative', marginTop: '0.5rem', marginBottom: '0.35rem' }}>
+              <ScoreLineChart
+                locked={!isSubscribed}
+                items={activeResult.monthlyPreviews.map((m, index) => ({
+                  key: m.month,
+                  label: m.month,
+                  score: lockedScore(m.score, index + 2, !isSubscribed)
+                }))}
+              />
+                {!isSubscribed && (
+                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
+                    <button
+                      type="button"
+                      className="premium-lock-tag"
+                      onClick={handleLockTagClick}
+                    >
+                      <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                    </button>
+                  </div>
+                )}
+            </div>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
@@ -3063,20 +3232,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             filter: isSubscribed ? 'none' : 'blur(4.5px)',
                             userSelect: isSubscribed ? 'auto' : 'none'
                           }}>{isSubscribed ? m.label : '★★★'}</span>
-                        </span>
-                        <span style={{
-                          color: visuals.textColor,
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          border: visuals.border,
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          letterSpacing: '0.05em',
-                          filter: isSubscribed ? 'none' : 'blur(4px)',
-                          userSelect: isSubscribed ? 'auto' : 'none'
-                        }}>
-                          {score}点
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
@@ -3115,6 +3270,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* Yearly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
             <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <div style={{ position: 'relative', marginTop: '0.5rem', marginBottom: '0.35rem' }}>
+              <ScoreLineChart
+                locked={!isSubscribed}
+                items={activeResult.yearlyPreviews.map((y, index) => ({
+                  key: y.year,
+                  label: y.year,
+                  score: lockedScore(y.score, index + 2, !isSubscribed)
+                }))}
+              />
+                {!isSubscribed && (
+                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
+                    <button
+                      type="button"
+                      className="premium-lock-tag"
+                      onClick={handleLockTagClick}
+                    >
+                      <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                    </button>
+                  </div>
+                )}
+            </div>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
@@ -3142,20 +3318,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             filter: isSubscribed ? 'none' : 'blur(4.5px)',
                             userSelect: isSubscribed ? 'auto' : 'none'
                           }}>{isSubscribed ? y.label : '★★★'}</span>
-                        </span>
-                        <span style={{
-                          color: visuals.textColor,
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          border: visuals.border,
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          letterSpacing: '0.05em',
-                          filter: isSubscribed ? 'none' : 'blur(4px)',
-                          userSelect: isSubscribed ? 'auto' : 'none'
-                        }}>
-                          {score}点
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
@@ -3217,7 +3379,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   ✦ プレミアムプラン解放 ✦
                 </span>
                 <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
-                  {hasOpponent ? '二人の未来予測スケジュールをすべて解禁' : 'あなたの未来予測スケジュールをすべて解禁'}
+                  {hasOpponent ? `${san(oppNickname)}との未来予測スケジュールをすべて解禁` : 'あなたの未来予測スケジュールをすべて解禁'}
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.4', margin: 0 }}>
                   月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
@@ -3455,6 +3617,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <span className="font-serif" style={{ fontSize: '1.15rem', fontWeight: '800', color: '#f2e2b3', textShadow: '0 0 12px rgba(242, 226, 179, 0.8), 0 2px 6px rgba(0,0,0,0.95)', letterSpacing: '0.03em' }}>
                       {zoomedImg.astrologyName}
                     </span>
+                    {getAstrologyNameReading(zoomedImg.astrologyName) && (
+                      <span style={{ fontSize: '0.62rem', color: '#d8d2c6', marginLeft: '-0.3rem' }}>（{getAstrologyNameReading(zoomedImg.astrologyName)}）</span>
+                    )}
                     <span className={zoomedImg.isKaigo ? 'kaigo-badge' : (zoomedImg.isRare ? 'rare-badge' : '')} style={{
                       fontSize: '0.6rem',
                       padding: '2px 6px',
@@ -3489,7 +3654,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </div>
                     <div style={{ background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(226, 192, 116, 0.3)', borderRadius: '8px', padding: '5px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.54rem', color: '#d8d2c6' }}>守護カラー</span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}>{zoomedImg.astrologyColor || '銀・白'}</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 'bold', color: '#f2e2b3' }}><GuardianColorText value={zoomedImg.astrologyColor || '銀・白'} fallbackColor="#f2e2b3" /></span>
                     </div>
                   </div>
                 </div>

@@ -123,5 +123,15 @@
     "date": "2026-11-01",
     "followers": 56,
     "tweets": 327
+  },
+  {
+    "date": "2026-11-02",
+    "followers": 58,
+    "tweets": 332
+  },
+  {
+    "date": "2026-11-03",
+    "followers": 61,
+    "tweets": 340
   }
 ]
