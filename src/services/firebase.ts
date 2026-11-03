@@ -12,6 +12,8 @@ import {
   signInWithEmailLink,
   signOut,
   onAuthStateChanged,
+  EmailAuthProvider,
+  linkWithCredential,
   type User
 } from 'firebase/auth';
 
@@ -265,6 +267,9 @@ export interface MagicLinkResult {
 
 // Complete Email Magic Link Sign-In on redirect back
 export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Promise<MagicLinkResult> => {
+  // A link from "メールアドレスを追加" adds the address to the signed-in account (completeAddEmailLink).
+  // Signing in with it here would create a separate account instead.
+  if (isAddEmailLink()) return { success: false };
   if (isSignInWithEmailLink(auth, window.location.href)) {
     let email = providedEmail || safeGetItem('emailForSignIn') || (() => { try { return window.sessionStorage.getItem('emailForSignIn'); } catch { return null; } })();
     
@@ -303,6 +308,83 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
     }
   }
   return { success: false };
+};
+
+// ---- Adding an email address to an account that has none (X sign-in) ----
+// The link from sendAddEmailLink comes back to /mypage?addEmail=1. Opened in the browser where the member is signed
+// in, it is linked to the SAME account (linkWithCredential): the address becomes verified (daily mail works) and the
+// member can later sign in with an email link to this account, e.g. when they can no longer use X.
+const ADD_EMAIL_KEY = 'hasu_add_email_pending';
+
+const siteOrigin = () => {
+  const h = window.location.hostname;
+  const isLocal = h === 'localhost' || h === '127.0.0.1' || h.startsWith('192.168.') || h.startsWith('10.') || h.startsWith('172.');
+  return isLocal ? window.location.origin : 'https://www.tsuki-to-ren.com';
+};
+
+export const isAddEmailLink = (): boolean => {
+  try {
+    return new URLSearchParams(window.location.search).get('addEmail') === '1' && isSignInWithEmailLink(auth, window.location.href);
+  } catch {
+    return false;
+  }
+};
+
+/** True when the signed-in account has no verified email (X sign-in without an address, or an unconfirmed one). */
+export const accountNeedsEmail = (): boolean => {
+  const user = getFirebaseAuth().currentUser;
+  return !!user && !(user.email && user.emailVerified);
+};
+
+export const sendAddEmailLink = async (email: string): Promise<void> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) throw Object.assign(new Error('Not signed in'), { code: 'app/not-signed-in' });
+  await sendSignInLinkToEmail(auth, email, { url: `${siteOrigin()}/mypage?addEmail=1`, handleCodeInApp: true });
+  safeSetItem(ADD_EMAIL_KEY, JSON.stringify({ email, uid: user.uid }));
+};
+
+export type AddEmailResult =
+  | { status: 'linked'; user: UserProfile }
+  | { status: 'not-signed-in' | 'no-pending' | 'in-use' | 'expired' | 'error' };
+
+export const completeAddEmailLink = async (): Promise<AddEmailResult> => {
+  const href = window.location.href;
+  if (window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
+  const a = getFirebaseAuth();
+  await a.authStateReady();
+  const user = a.currentUser;
+  if (!user) return { status: 'not-signed-in' };
+  let email: string | null = null;
+  try {
+    const pending = JSON.parse(safeGetItem(ADD_EMAIL_KEY) || 'null');
+    if (pending?.uid === user.uid && typeof pending.email === 'string') email = pending.email;
+  } catch {}
+  if (!email) return { status: 'no-pending' };
+  try {
+    await linkWithCredential(user, EmailAuthProvider.credentialWithLink(email, href));
+  } catch (err: any) {
+    const code = err?.code || '';
+    console.warn('Add email link error:', code, err?.message);
+    if (code === 'auth/email-already-in-use' || code === 'auth/credential-already-in-use' || code === 'auth/account-exists-with-different-credential') return { status: 'in-use' };
+    if (code === 'auth/invalid-action-code' || code === 'auth/expired-action-code') return { status: 'expired' };
+    if (code !== 'auth/provider-already-linked') return { status: 'error' };
+  }
+  safeRemoveItem(ADD_EMAIL_KEY);
+  await user.reload().catch(() => {});
+  // New ID token, so the server and Firestore rules see the verified address right away
+  await user.getIdToken(true).catch(() => {});
+  const cur = a.currentUser || user;
+  let cached: Partial<UserProfile> = {};
+  try { cached = JSON.parse(safeGetItem('hasu_tsuki_user') || '{}'); } catch {}
+  const profile: UserProfile = {
+    uid: cur.uid,
+    displayName: cur.displayName || (cached.uid === cur.uid ? cached.displayName ?? null : null) || 'X ユーザー',
+    email: cur.email || email,
+    photoURL: cur.photoURL,
+    providerId: cur.providerData.some(p => p.providerId === 'twitter.com') ? 'twitter.com' : (cached.providerId || 'google.com')
+  };
+  safeSetItem('hasu_tsuki_user', JSON.stringify(profile));
+  return { status: 'linked', user: profile };
 };
 
 // Keys holding the signed-in member's own data on this device (the account copy is in userData/{uid} and subscriptions/{uid})
