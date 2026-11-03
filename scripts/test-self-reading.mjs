@@ -9,13 +9,13 @@ const STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '�
 const BRANCHES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 const PILLARS = Array.from({ length: 60 }, (_, i) => STEMS[i % 10] + BRANCHES[i % 12]);
 
-test('self reading: all 60 pillars x every star x 16 types (and no type) give 3 items', () => {
+test('self reading: all 60 pillars x every star x 16 types (and no type) give 4 items with a type (3 from the type) and 3 without', () => {
   for (const p of PILLARS) {
     for (const s of stars) {
       for (const m of [...MBTI_COMPAT_TYPES, 'UNKNOWN', '']) {
         const r = getSelfReading(p, `${s.name} (${s.element})`, m);
         assert.ok(r, `${p} ${s.name} ${m}`);
-        assert.equal(r.items.length, 3);
+        assert.equal(r.items.length, /^[EI][NS][TF][JP]$/.test(m) ? 4 : 3);
         for (const it of r.items) assert.ok(it.text.length > 20);
       }
     }
@@ -25,8 +25,12 @@ test('self reading: all 60 pillars x every star x 16 types (and no type) give 3 
 test('self reading: the love line follows the traditional twelve stages of the day pillar', () => {
   // 甲子=沐浴、丙午=帝旺、癸卯=長生
   assert.equal(getJuniUn('甲', '子'), '沐浴');
-  assert.match(getSelfReading('甲子', '一白水星 (水)', 'INFP').items[1].text, /ときめき/);
-  assert.match(getSelfReading('丙午', '一白水星 (水)', 'INFP').items[1].text, /リード/);
+  assert.match(getSelfReading('甲子', '一白水星 (水)', '').items[1].text, /ときめき/);
+  assert.match(getSelfReading('丙午', '一白水星 (水)', 'UNKNOWN').items[1].text, /リード/);
+  // 16タイプを選ぶと恋愛は16タイプの文、生まれた日の星は3つ目に
+  const r = getSelfReading('戊申', '一白水星 (水)', 'ESTP');
+  assert.match(r.items[1].text, /ノリと勢い/);
+  assert.equal(r.items[2].label, 'もう一つの顔（生まれた日の星から）');
 });
 
 test('self reading: no technical words on screen', () => {
