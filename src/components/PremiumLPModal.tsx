@@ -344,9 +344,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: 'ずっと', monthly: '全員分' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: '買った日だけ', monthly: '毎日' },
                   { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
-                  { label: '毎朝の運勢メールが全文で届く', pair: null, monthly: '◯' },
-                  { label: '月・蓮へのチャット相談', pair: null, monthly: '無制限' },
-                  { label: 'お相手の保存', pair: null, monthly: '10人' }
+                  { label: '毎朝の運勢メール', pair: '冒頭だけ', monthly: '全文' },
+                  { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
+                  { label: 'お相手の保存', pair: '2人＋買った相手', monthly: '10人' }
                 ].map((row, idx) => {
                   const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
                   return (
@@ -361,6 +361,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <p style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.6rem 0 0.75rem' }}>
                 {pair.name}のことを今日じっくり知りたいだけなら¥480、毎日の相性やLINEの助言・ほかのお相手も見るなら月額がおすすめです。どちらも会員登録なしで買えます。
+                <br />※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥480で買ったお相手は2人の枠に数えません）。
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
                 {(pairFirst ? ['pair', 'monthly'] : ['monthly', 'pair']).map((kind) =>
