@@ -3049,25 +3049,36 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', letterSpacing: '1px', fontWeight: 'bold', background: 'rgba(226, 192, 116, 0.1)', padding: '2px 8px', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.2)' }}>
                     ✦ {partnerCall}の鑑定は解放済み ✦
                   </span>
+                  <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', margin: '0.5rem 0 0', lineHeight: '1.45', wordBreak: 'keep-all' }}>
+                    明日からも、{partnerCall}との毎日をそばで
+                  </h3>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                   <CharHeadingIcon char="月" size={34} />
                   <p style={{ fontSize: '0.74rem', color: '#e2d9ee', lineHeight: '1.65', margin: 0 }}>
                     {pairUnlock?.today
-                      ? `トリセツと深層鑑定は、これからずっと読めます。今日の相性とLINEの助言も、今日いっぱいはすべてお見せしますね。`
-                      : `トリセツと深層鑑定は、いつでも読めます。毎日変わる「今日の相性」やLINEの助言は、プレミアムで毎日お届けしますね。`}
+                      ? `${partnerCall}のトリセツと深層鑑定は、これからずっと読めます。今日の相性とLINEの送り方は、今日だけの特別公開。明日からも毎日知りたくなったら、プレミアムで続きをお届けしますね。`
+                      : `${partnerCall}のトリセツと深層鑑定は、いつでも読めます。毎日変わる今日の相性とLINEの送り方は、プレミアムで毎朝お届けしますね。`}
                   </p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold' }}>月額980円のプレミアムなら、毎日こちらも</div>
-                  {['今日の相性と、本日のLINEの送り方（毎日）', 'これからの7日間と、月ごとの流れ', '毎朝の運勢メールが全文で届く', '気になる人を10人まで保存・ほかのお相手も全部読める', '月と蓮に、いつでも相談'].map((t) => (
+                  <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold' }}>プレミアムなら、買い切りの分に加えて</div>
+                  {[
+                    `今日の相性とLINEの送り方が、今日だけでなく毎日読める`,
+                    `送るタイミングを逃さない、これからの7日間・月ごとの流れ`,
+                    `結婚や大きな転機の年がわかる、10年先までの流れ`,
+                    `毎朝の運勢メールが全文で届く`,
+                    `${partnerCall}のことを、月と蓮にいつでも相談`,
+                    `気になる人を10人まで保存。ほかのお相手も全部読める`
+                  ].map((t) => (
                     <div key={t} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
                       <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
                       <span>{t}</span>
                     </div>
                   ))}
                 </div>
-                <PremiumUnlockButton onClick={() => { if (onOpenPremiumLP) onOpenPremiumLP(); else onSubscribe(); }} />
+                <PremiumUnlockButton label="月額980円で、毎日見守る" onClick={() => { if (onOpenPremiumLP) onOpenPremiumLP('monthly'); else onSubscribe(); }} />
+                <div style={{ fontSize: '0.64rem', color: '#a9a293', textAlign: 'center', marginTop: '-0.35rem' }}>1日あたり約33円・マイページからいつでも解約できます</div>
               </div>
             )}
 
@@ -3439,35 +3450,38 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   ✦ プレミアムプラン解放 ✦
                 </span>
                 <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
-                  {hasOpponent ? `${san(oppNickname)}との未来予測スケジュールをすべて解禁` : 'あなたの未来予測スケジュールをすべて解禁'}
+                  {hasOpponent ? <>{san(oppNickname)}との<br />未来予測スケジュールをすべて解禁</> : 'あなたの未来予測スケジュールをすべて解禁'}
                 </h3>
-                <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.4', margin: 0 }}>
-                  月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
+                <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
+                  {pairOpen
+                    ? `月額980円で、明日からの7日間・月ごとの波から、結婚や大きな転機がわかる10年先の流れまで、${san(oppNickname)}との未来をいつでも確かめられます。`
+                    : '月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。'}
                 </p>
               </div>
 
               {/* Comprehensive Premium Benefits list */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                  <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                  <span><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                  <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                  <span><strong>月次・年次運勢スケジュールの完全閲覧</strong></span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                  <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                  <span><strong>お相手の保存上限が10人に拡大</strong>（無料会員2人 → 10人）</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                  <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                  <span><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                  <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                  <span><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></span>
-                </div>
+                {(pairOpen
+                  ? [
+                      <><strong>これからの7日間・月ごとの流れ</strong></>,
+                      <><strong>10年先までの年ごとの流れ</strong>（結婚・大きな転機の年）</>,
+                      <><strong>今日の相性とLINEの送り方を毎日</strong>（買い切りは購入日だけ）</>,
+                      <><strong>月 ＆ 蓮へのチャット相談が無制限</strong></>,
+                      <><strong>お相手の保存が10人まで</strong>（ほかのお相手のトリセツも全部読める）</>
+                    ]
+                  : [
+                      <><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></>,
+                      <><strong>月次・年次運勢スケジュールの完全閲覧</strong></>,
+                      <><strong>お相手の保存上限が10人に拡大</strong>（無料会員2人 → 10人）</>,
+                      <><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></>,
+                      <><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></>
+                    ]
+                ).map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
+                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
               </div>
 
               {subSuccess ? (
@@ -3476,7 +3490,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
-                  <PremiumUnlockButton
+                  <PremiumUnlockButton {...(pairOpen ? { label: '月額980円で、未来をすべて見る' } : {})}
                     onClick={() => {
                       if (onOpenPremiumLP) {
                         onOpenPremiumLP('monthly');
