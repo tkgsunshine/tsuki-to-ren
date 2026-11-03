@@ -2335,7 +2335,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
           深層鑑定結果
         </h2>
 
-        {detailedTopics.map((topic, index) => (
+        {detailedTopics.map((topic, index) => {
+          // 「惹かれ合うポイント＆地雷行動3選」「二人のこれから」はプレミアム限定（無料会員も冒頭の1文だけ）。他の項目は無料会員なら全文。
+          const premiumOnly = hasOpponent && (topic.title.includes('惹かれ合うポイント') || topic.title.includes('二人のこれから'));
+          const topicOpen = premiumOnly ? isSubscribed : isRegistered;
+          return (
           <React.Fragment key={topic.title}>
 
             {/* Topic Card */}
@@ -2344,7 +2348,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {topic.title}
               </h3>
               
-              {isRegistered ? (
+              {topicOpen ? (
                 <p className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                   {formatAppraisalText(`${topic.intro}\n\n${topic.detail}`)}
                 </p>
@@ -2389,7 +2393,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     無料会員登録で鑑定結果の続きを開く
                   </h2>
                   <p style={{ fontSize: '0.75rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
-                    会員登録をいただくと深層鑑定結果の続きを全てご覧になれます。
+                    会員登録をいただくと深層鑑定結果の続きをご覧になれます（一部の項目はプレミアム限定）。
                   </p>
                 </div>
 
@@ -2521,7 +2525,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             )}
           </React.Fragment>
-        ))}
+          );
+        })}
 
         {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
       {activeResult.opponentTorisetsu && (
