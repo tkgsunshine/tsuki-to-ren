@@ -314,13 +314,8 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
 // The link from sendAddEmailLink comes back to /mypage?addEmail=1. Opened in the browser where the member is signed
 // in, it is linked to the SAME account (linkWithCredential): the address becomes verified (daily mail works) and the
 // member can later sign in with an email link to this account, e.g. when they can no longer use X.
+// The link returns to this same site (production, or the PR's Preview), where the member is signed in.
 const ADD_EMAIL_KEY = 'hasu_add_email_pending';
-
-const siteOrigin = () => {
-  const h = window.location.hostname;
-  const isLocal = h === 'localhost' || h === '127.0.0.1' || h.startsWith('192.168.') || h.startsWith('10.') || h.startsWith('172.');
-  return isLocal ? window.location.origin : 'https://www.tsuki-to-ren.com';
-};
 
 export const isAddEmailLink = (): boolean => {
   try {
@@ -339,7 +334,7 @@ export const accountNeedsEmail = (): boolean => {
 export const sendAddEmailLink = async (email: string): Promise<void> => {
   const user = getFirebaseAuth().currentUser;
   if (!user) throw Object.assign(new Error('Not signed in'), { code: 'app/not-signed-in' });
-  await sendSignInLinkToEmail(auth, email, { url: `${siteOrigin()}/mypage?addEmail=1`, handleCodeInApp: true });
+  await sendSignInLinkToEmail(auth, email, { url: `${window.location.origin}/mypage?addEmail=1`, handleCodeInApp: true });
   safeSetItem(ADD_EMAIL_KEY, JSON.stringify({ email, uid: user.uid }));
 };
 
