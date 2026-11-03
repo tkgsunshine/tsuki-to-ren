@@ -16,7 +16,7 @@ import { ChatModal } from './components/ChatModal';
 import { UnifiedInputView } from './components/UnifiedInputView';
 import { mbtiOptions } from './constants/mbti';
 import { LoadingScreen } from './components/LoadingScreen';
-import { ResultView, PAIR_PRICE_LABEL } from './components/ResultView';
+import { ResultView } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult, san } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
@@ -908,6 +908,8 @@ function App() {
     setEditPartnerRel(partner.relationship);
   };
 
+  // 解放済みのお相手の生年月日を変える確認で「変更する」を押したあと、もう一度保存を通すため
+  const confirmedUnlockEditRef = useRef(false);
   const saveEditPartner = () => {
     if (!editingPartnerId) return;
     if (!editPartnerBirth || editPartnerBirth.length < 10) {
@@ -935,7 +937,23 @@ function App() {
       return;
     }
     const before = savedPartners.find(p => p.id === editingPartnerId);
-    const updated = savedPartners.map(p => (p.id === editingPartnerId ? { ...p, ...fields } : p));
+    // 買い切りで解放したお相手は生年月日で決まる。生年月日を変えると、この行は解放の対象ではなくなる
+    const leavesUnlock = Boolean(before?.unlocked && before.birth !== fields.birth);
+    if (leavesUnlock && !confirmedUnlockEditRef.current) {
+      const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+      // 解放済みは保存の上限に数えていないので、外れると上限を超えることがある
+      if (savedPartners.filter((x) => !x.unlocked).length + 1 > limit) {
+        showAlert(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
+        return;
+      }
+      showConfirm(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n\n解放は生年月日で決まるため、生年月日を変えると、変更後のお相手は解放されていない状態になります（もう一度購入が必要です）。\n元の生年月日（${before?.birth.replace(/-/g, '/')}）の購入はなくならず、元に戻せばまた見られます。\n\n名前・16タイプ・性別だけの変更なら、解放はそのままです。\n\n本当に生年月日を変えますか？`, { okLabel: 'それでも変更する', danger: true }).then(ok => {
+        if (!ok) return;
+        confirmedUnlockEditRef.current = true;
+        try { saveEditPartner(); } finally { confirmedUnlockEditRef.current = false; }
+      });
+      return;
+    }
+    const updated = savedPartners.map(p => (p.id === editingPartnerId ? { ...p, ...fields, ...(leavesUnlock ? { unlocked: false } : {}) } : p));
     setSavedPartners(updated);
     setEditingPartnerId(null);
     // If this partner is the one the daily mail is about, the mail follows the edit
@@ -2509,6 +2527,11 @@ function App() {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', position: 'relative' }}>
                               <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
+                              {partner.unlocked && (
+                                <div style={{ fontSize: '0.7rem', color: '#f2c27a', lineHeight: 1.6 }}>
+                                  ⚠️ 解放済みのお相手です。生年月日を変えると、解放の対象から外れます（名前・16タイプ・性別の変更は大丈夫です）。
+                                </div>
+                              )}
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input
                                   ref={editPartnerBirthRef}
@@ -2747,7 +2770,7 @@ function App() {
                               onClick={() => {
                                 // 買い切りで解放したお相手は、消す前にはっきり知らせる（購入は消えない＝同じ生年月日で占えばまた見られる）
                                 const confirmText = partner.unlocked
-                                  ? `⚠️ ${san(partner.name)}は、${PAIR_PRICE_LABEL}の買い切りで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見られます。\n\n本当に削除しますか？`
+                                  ? `⚠️ ${san(partner.name)}は、買い切りプランで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見られます。\n\n本当に削除しますか？`
                                   : `${san(partner.name)}の保存データを削除しますか？`;
                                 showConfirm(confirmText, { okLabel: partner.unlocked ? 'それでも削除する' : '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
