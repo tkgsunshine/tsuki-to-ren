@@ -1712,68 +1712,71 @@ export function generateFortuneResult(input, character) {
     const oppStemTrait = oppPillarObj ? getStemTraits(oppPillarObj.stem, oppNickname) : null;
     let oneLiner = '';
     let summary = '';
+    // 状況（片思い中など）に合わせた月・蓮のひとこと。サマリーの末尾ではなく「月からあなたへ」のカードの先頭に出す（同じ月の言葉が続けて2つ並ばないように）
+    let relAdviceText = '';
     if (hasOpponent) {
         const relKey = input.relationship || '片思い中';
         const relAdviceMap = {
             '片思い中': {
-                tsuki: `【状況：片思い中】${san(myNickname)}の自然な優しさや気配りを、そのまま届けてみてください。少しずつ心を開いてもらえて、${san(oppNickname)}にとって「かけがえのない大切な存在」へ一歩ずつ近づけます。`,
-                ren: `【状況：片思い中】お相手の性格タイプに合わせて、「返事がしやすく、負担にならない具体的なお誘い」を送るのが、いちばんうまくいくやり方です。`
+                tsuki: `${san(myNickname)}の自然な優しさや気配りを、そのまま届けてみてください。少しずつ心を開いてもらえて、${san(oppNickname)}にとって「かけがえのない大切な存在」へ一歩ずつ近づけます。`,
+                ren: `お相手の性格タイプに合わせて、「返事がしやすく、負担にならない具体的なお誘い」を送るのが、いちばんうまくいくやり方です。`
             },
             '両思い・交際中': {
-                tsuki: `【状況：交際中】二人の信頼関係は非常に良好です。日頃の「ありがとう」や素直な感謝の言葉を日常的に伝えることで、愛の絆はより一層深まります。`,
-                ren: `【状況：交際中】マンネリを防ぐには、二人で新しいことを体験したり、これからのことを具体的に話し合ったりするのがいちばんです。関係がぐっと深まります。`
+                tsuki: `二人の信頼関係は非常に良好です。日頃の「ありがとう」や素直な感謝の言葉を日常的に伝えることで、愛の絆はより一層深まります。`,
+                ren: `マンネリを防ぐには、二人で新しいことを体験したり、これからのことを具体的に話し合ったりするのがいちばんです。関係がぐっと深まります。`
             },
             '復縁したい': {
-                tsuki: `【状況：復縁希望】昔のもめごとには触れず、相手の負担にならない「温かい見守り」と軽い気づかいを続けてください。それが、もう一度心を開いてもらういちばんの鍵です。`,
-                ren: `【状況：復縁希望】感情的に何度も連絡したり、返事を急かしたりするのは逆効果です。相手が気持ちを整理する時間を大切にして、LINE吉時間に、短くて答えやすいメッセージを送るのがいちばんです。`
+                tsuki: `昔のもめごとには触れず、相手の負担にならない「温かい見守り」と軽い気づかいを続けてください。それが、もう一度心を開いてもらういちばんの鍵です。`,
+                ren: `感情的に何度も連絡したり、返事を急かしたりするのは逆効果です。相手が気持ちを整理する時間を大切にして、LINE吉時間に、短くて答えやすいメッセージを送るのがいちばんです。`
             },
             '結婚・夫婦': {
-                tsuki: `【状況：結婚・夫婦】日常の小さな思いやりの積み重ねが二人の幸運の土台です。お互いがほっとできる、温かい家庭を育てていきましょう。`,
-                ren: `【状況：結婚・夫婦】生活のリズムを合わせることと、家事などの分担でお互いに「ありがとう」を伝え合うことが、二人の運気をいちばん高めます。`
+                tsuki: `日常の小さな思いやりの積み重ねが二人の幸運の土台です。お互いがほっとできる、温かい家庭を育てていきましょう。`,
+                ren: `生活のリズムを合わせることと、家事などの分担でお互いに「ありがとう」を伝え合うことが、二人の運気をいちばん高めます。`
             },
             '複雑愛・秘密の恋': {
-                tsuki: `【状況：複雑愛・秘密の恋】まわりの声に心を乱されず、二人でいるときの安心できる時間を、やさしく大切にしてください。`,
-                ren: `【状況：複雑愛・秘密の恋】気持ちに流されず、冷静でいることが大切です。連絡する時間帯や会う場面はとても慎重に選び、無理のない形で関わりましょう。`
+                tsuki: `まわりの声に心を乱されず、二人でいるときの安心できる時間を、やさしく大切にしてください。`,
+                ren: `気持ちに流されず、冷静でいることが大切です。連絡する時間帯や会う場面はとても慎重に選び、無理のない形で関わりましょう。`
             }
         };
         const curRelAdvice = relAdviceMap[relKey] || relAdviceMap['片思い中'];
+        relAdviceText = character === 'tsuki' ? curRelAdvice.tsuki : curRelAdvice.ren;
         const sType = stemComp?.type || '宿命';
         const sTitle = stemComp?.title || '【宿命の結びつき】';
         const bType = branchComp?.type || '調和';
         if (character === 'tsuki') {
             if (baseScore >= 85) {
                 oneLiner = `${sTitle}。心と心が深く通じ合い、自然と愛が深まる最高の幸運期です。`;
-                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：\n${curRelAdvice.tsuki}`;
+                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else if (baseScore >= 70) {
                 oneLiner = `${sTitle}。お互いを思いやることで絆がぐんと深まる好調期。素直な気持ちを届けましょう。`;
-                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：\n${curRelAdvice.tsuki}`;
+                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else if (baseScore >= 55) {
                 oneLiner = `【${bType}】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
-                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：\n${curRelAdvice.tsuki}`;
+                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else {
                 oneLiner = `【${sType}】焦らず穏やかに見守る時。お互いの違いをポジティブに楽しむ姿勢が大切です。`;
-                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🌙 月からのメッセージ：\n${curRelAdvice.tsuki}`;
+                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
         }
         else { // ren
             if (baseScore >= 85) {
                 oneLiner = `${sTitle}。星が示す抜群の相性。具体的なお誘いに進むベストタイミングです。`;
-                summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
+                summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else if (baseScore >= 70) {
                 oneLiner = `${sTitle}。関係性は着実に上昇中。相手の好む会話のペースに合わせるのが効果的です。`;
-                summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
+                summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else if (baseScore >= 55) {
                 oneLiner = `【${bType}】相性は安定しています。無理にペースを変えず、今の心地よい関係を続けるのが正解です。`;
-                summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
+                summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else {
                 oneLiner = `【${sType}】少しすれ違いやすい時期。気持ちのままに何度も連絡せず、落ち着いて見守るのがいちばんです。`;
-                summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}\n\n🔮 蓮からのアドバイス：\n${curRelAdvice.ren}`;
+                summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
         }
     }
@@ -1899,11 +1902,11 @@ export function generateFortuneResult(input, character) {
     }
     const topics = [
         {
-            title: character === 'tsuki' ? '🌙 月からあなたへ' : '🔮 蓮からあなたへ',
-            text: firstCardText
+            title: character === 'tsuki' ? `🌙 月から${san(myNickname, 'あなた')}へ` : `🔮 蓮から${san(myNickname, 'あなた')}へ`,
+            text: relAdviceText ? `${relAdviceText}\n\n${firstCardText}` : firstCardText
         },
         {
-            title: character === 'tsuki' ? '💖 あなたの恋愛運をひらく鍵' : '🎯 うまくいくためのアドバイス',
+            title: character === 'tsuki' ? `💖 ${san(myNickname, 'あなた')}の恋愛運をひらく鍵` : '🎯 うまくいくためのアドバイス',
             text: secondCardText
         }
     ];

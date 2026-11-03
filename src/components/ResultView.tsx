@@ -187,7 +187,7 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
   return lines.map((line, i) => (
     <React.Fragment key={i}>
       {SECTION_HEADING_RE.test(line.trim()) ? renderSectionHeading(line) : renderCharHeading(line, 32)}
-      {i < lines.length - 1 ? '\n' : null}
+      {i < lines.length - 1 && !SECTION_HEADING_RE.test(line.trim()) ? '\n' : null}
     </React.Fragment>
   ));
 };
