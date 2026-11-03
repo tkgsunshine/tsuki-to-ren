@@ -3007,7 +3007,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
             <Calendar size={16} />
-            未来予測スケジュール
+            {hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : `${san(myName, 'あなた')}の未来予測スケジュール`}
           </h2>
 
           {/* Weekly Scores */}
