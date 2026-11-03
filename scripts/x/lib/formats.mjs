@@ -255,7 +255,7 @@ export const FORMATS = [
   { id: 'mbti_love', system: 'mbti_love', purpose: 'follow', facts: 'mbti_one', reply: true, maxWeight: 600, // 2026-10-24: これまでで一番伸びた型（ESTP）。毎日1本、16タイプを順に出す
     replyGuide: '1通目の続きとして、同じタイプの恋愛を詳しく解説する（2026-10-24 に、文量を約2倍に: 70〜85文字。あとで、アプリの予告の行が自動で入るので、これ以上は長くしない）。好意の見せ方・つまずきやすい点・コツを、共感できる具体的な場面で、話し言葉で。最後に、月の格言を1文（20〜30文字。「〇〇は、△△じゃなくて□□。」のような言い切り）。最初の行は「【〇〇の恋愛】詳細」（〇〇は事実のタイプ名）。統計・調査・「〇〇%」は書かない。「こちら」は使わない。署名は親の投稿と同じ。傾向であって、人それぞれ、というニュアンスを、さりげなく入れてよい',
     guide: '事実の16タイプ1つの「恋愛」を解説する投稿。1行目は「【〇〇の恋愛】」（〇〇は事実のタイプ名）。そのあと、6項目を1行ずつ（各20〜30文字。2026-10-24 に、Xプレミアムで項目を増やした）: 「好きになると：」「愛情表現：」「惹かれる人：」「つまずき：」「LINEのクセ：」「コツ：」。最後は「あなたのまわりの〇〇は、当てはまる？」。傾向であって断定しない。統計・調査・「〇〇%」は書かない。ほかのタイプの名前は出さない（相性の話はしない）' },
-  { id: 'mbti_beast_rank', system: 'mbti_birth', purpose: 'buzz', build: buildMbtiBeastRanking, reply: true, maxWeight: 700,
+  { id: 'mbti_beast_rank', system: 'mbti_birth', purpose: 'buzz', build: buildMbtiBeastRanking, reply: true, maxWeight: 800,
     guide: 'MBTI×守護獣の相性ランキング（主役のMBTI×守護獣と相性がいい、相手のMBTI×守護獣の組み合わせTOP14・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。1位・2位とワースト2は、返信（リプ欄）に出す' },
   { id: 'beast_pair_rank', system: 'pair', purpose: 'buzz', build: buildBeastPairRanking, reply: true, maxWeight: 400,
     guide: '守護獣の相性ランキング（主役の守護獣と相性がいい守護獣TOP12・100点満点）。アプリの鑑定で算出した本文を、そのまま使う（AIは書かない）。ワースト10は、返信（リプ欄）に出す' },
