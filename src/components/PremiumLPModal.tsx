@@ -671,7 +671,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {!(showPlans && pair) && <div ref={ctaMarkerRef} />}
           {/* 料金 */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
-            {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き） */}
+            {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き）。
+                上でプランを見比べているとき（お相手あり）は、同じ月額ボタンが2つにならないよう出さない */}
+            {!(showPlans && pair) && (
             <button
               type="button"
               disabled={isProcessing}
@@ -728,7 +730,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 )}
               </span>
             </button>
-            <div style={{ marginTop: '0.8rem' }}>
+            )}
+            <div style={{ marginTop: (showPlans && pair) ? 0 : '0.8rem' }}>
               <CharBubble who="ren" small>
                 毎朝のおまもりとして、気軽に使ってみてください。<br />
                 合わないと感じたら、マイページからいつでも解約できますよ。
