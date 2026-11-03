@@ -453,11 +453,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
-                  { label: '10年先までの年ごとの流れ（結婚・大きな転機の年）', pair: null, monthly: '◯' },
+                  { label: '7日間・月ごと・10年先までの流れ（結婚・転機の年）', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
-                  { label: 'お相手の保存', pair: '2人', monthly: '10人' },
-                  { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' }
+                  { label: 'お相手の保存', pair: '2人', monthly: '10人' }
                 ].map((row, idx) => {
                   const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
                   return (
