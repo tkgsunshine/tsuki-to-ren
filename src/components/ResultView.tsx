@@ -2752,58 +2752,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </h2>
           </div>
 
-          {/* 1. 刺さる言葉 TOP5 (Item 1 & 2 visible, Item 3-5 blurred) */}
-          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', position: 'relative' }}>
-            <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <PiercedHeartMark size={18} />
-              <span>刺さる言葉 TOP5（キュンとさせる褒め方）</span>
-            </div>
-            <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#f3efe6', lineHeight: '1.75' }}>
-              {activeResult.opponentTorisetsu.killingWords.slice(0, 1).map((word, idx) => (
-                <li key={idx} style={{ marginBottom: '0.2rem' }}>{word.replace(/〇〇/g, oppNickname || 'お相手')}</li>
-              ))}
-            </ul>
-            <div style={{ position: 'relative', marginTop: '0.2rem' }}>
-              <ul className="font-serif" style={{
-                margin: 0,
-                paddingLeft: '1.2rem',
-                fontSize: '0.8rem',
-                color: '#f3efe6',
-                lineHeight: '1.75',
-                filter: !deepOpen ? 'blur(4.5px)' : 'none',
-                userSelect: !deepOpen ? 'none' : 'auto',
-                opacity: !deepOpen ? 0.6 : 1
-              }}>
-                {activeResult.opponentTorisetsu.killingWords.slice(1).map((word, idx) => (
-                  <li key={idx + 1} style={{ marginBottom: '0.2rem' }}>
-                    {lockedText(word.replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}
-                  </li>
-                ))}
-              </ul>
-              {!deepOpen && (
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 10,
-                width: '90%',
-                display: 'flex',
-                justifyContent: 'center',
-                pointerEvents: 'auto'
-              }}>
-                <button
-                  type="button"
-                  className="premium-lock-tag"
-                  onClick={handleDeepLockClick}
-                >
-                  <Lock size={11} /> {deepLockWord}
-                </button>
-              </div>
-            )}
-            </div>
-          </div>
-
           {/* 2. 絶対NG行動 5選 (Item 1 is visible teaser, Item 2-5 are blurred) */}
           <div style={{ background: 'rgba(207, 90, 67, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(207, 90, 67, 0.2)', position: 'relative' }}>
             <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#e6a99c', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
