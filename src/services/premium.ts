@@ -56,6 +56,9 @@ const postForUrl = async (endpoint: string, body: Record<string, unknown>): Prom
 /** Sends the signed-in member to Stripe's payment page. Throws with a message to show when it cannot. */
 export const startPremiumCheckout = () => postForUrl('/api/stripe/checkout', {});
 
+/** One-time purchase (¥480) of one partner's reading, identified by the partner's birth date. */
+export const startPairCheckout = (oppBirth: string) => postForUrl('/api/stripe/checkout', { kind: 'pair', oppBirth });
+
 /** Sends the member to Stripe's page for cancelling, changing the card and receipts. */
 export const openBillingPortal = (reasons: string[] = [], note = '') => postForUrl('/api/stripe/portal', { reasons, note });
 

@@ -1,8 +1,10 @@
 import { getDb } from './firestore.js';
 import { PREMIUM, getStripe, premiumRecord } from './stripe.js';
 import { countPremium } from './analytics.js';
+import { recordPairPurchase } from './pair-unlock.js';
 
-// Stripe → app: keeps premium/{uid} in step with the subscription.
+// Stripe → app: keeps premium/{uid} in step with the subscription,
+// and records one-time pair purchases (checkout.session.completed with mode=payment) in pairUnlocks/{uid}.
 // Register https://www.tsuki-to-ren.com/api/stripe/webhook in Stripe with the events below.
 // Events can arrive late or out of order, so each one re-reads the subscription from Stripe and writes its current state.
 
@@ -42,6 +44,16 @@ export default async function handler(req, res, deps = {}) {
   let fallbackUid = null;
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
+    if (session.mode === 'payment') {
+      try {
+        const done = await recordPairPurchase(deps.db || getDb(), session, (event.created || 0) * 1000 || Date.now());
+        if (done) console.log('💳 pair purchase recorded');
+        return res.status(200).json({ status: done ? 'ok' : 'ignored' });
+      } catch (e) {
+        console.error('❌ Could not record the pair purchase:', e?.message);
+        return res.status(500).json({ status: 'error', message: 'Could not record the pair purchase' });
+      }
+    }
     if (session.mode !== 'subscription') return res.status(200).json({ status: 'ignored' });
     subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
     fallbackUid = session.client_reference_id || session.metadata?.uid || null;

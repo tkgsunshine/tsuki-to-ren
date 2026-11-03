@@ -38,12 +38,12 @@ import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
 import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
-import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
+import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPairCheckout, startPremiumCheckout } from './services/premium';
 import { fetchPartnerAccess } from './services/partnerDays';
 import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFromPath, type NavState, type OverlayName, type PageFields, type SettingsSubView } from './utils/navHistory';
 import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
 import { decideSync, sameProfile, samePartners, type SyncProfile } from './utils/userDataSync';
-import type { PartnerLock } from './components/ResultView';
+import type { PairUnlock, PartnerLock } from './components/ResultView';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -1013,21 +1013,62 @@ function App() {
   // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
   // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
   const [partnerLock, setPartnerLock] = useState<PartnerLock>(null);
+  // 買い切り（お相手1人 ¥480）の状態。同じ /api/stripe/partner の答えに入っている
+  const [pairUnlock, setPairUnlock] = useState<PairUnlock>(null);
+  // Stripe の決済から戻ったとき（?pair=success|cancel）。Webhook が数秒遅れることがあるので、解放されるまで何度か読み直す
+  const [pairReturn, setPairReturn] = useState<string | null>(() => {
+    const v = new URLSearchParams(window.location.search).get('pair');
+    if (!v) return null;
+    const params = new URLSearchParams(window.location.search);
+    params.delete('pair');
+    const qs = params.toString();
+    window.history.replaceState(window.history.state, '', window.location.pathname + (qs ? `?${qs}` : ''));
+    return v;
+  });
   const signedInUid = currentUser?.uid;
   useEffect(() => {
     if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || isSubscribed) {
       setPartnerLock(null);
+      setPairUnlock(null);
       return;
     }
     let cancelled = false;
     setPartnerLock({ status: 'checking', daysLeft: 0, guest: !signedInUid });
-    fetchPartnerAccess(oppBirth).then((access) => {
-      if (cancelled) return;
-      if (!access || access.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
-      else setPartnerLock({ status: access.locked ? 'locked' : 'free', daysLeft: access.daysLeft, guest: access.guest });
-    });
+    (async () => {
+      const waitForPair = pairReturn === 'success' && Boolean(signedInUid);
+      const tries = waitForPair ? 8 : 1;
+      for (let i = 0; i < tries; i++) {
+        const access = await fetchPartnerAccess(oppBirth);
+        if (cancelled) return;
+        if (!access || access.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
+        else setPartnerLock({ status: access.locked ? 'locked' : 'free', daysLeft: access.daysLeft, guest: access.guest });
+        setPairUnlock(access?.pair ?? null);
+        if (!waitForPair) return;
+        if (access?.pair?.unlocked) {
+          setPairReturn(null);
+          showAlert(`${san(oppName)}の鑑定を解放しました。\nトリセツと深層鑑定は、これからずっと読めます。今日の相性とLINEの助言も、今日いっぱいはすべて見られます。`);
+          return;
+        }
+        if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
+      }
+      if (!cancelled) {
+        setPairReturn(null);
+        showAlert('お支払いを受け付けました。解放の反映に少し時間がかかっています。\n1〜2分たってから、ページを再読み込みしてください。');
+      }
+    })();
     return () => { cancelled = true; };
-  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid]);
+  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid, pairReturn]);
+  const handleBuyPair = async () => {
+    if (!isRegistered) {
+      setShowAuthModal(true);
+      return;
+    }
+    try {
+      await startPairCheckout(oppBirth);
+    } catch (e) {
+      showAlert(e instanceof Error ? e.message : '決済画面を開けませんでした。');
+    }
+  };
   const dailyScoreHidden = partnerLock !== null && partnerLock.status !== 'free';
 
   // Form submits
@@ -1376,6 +1417,8 @@ function App() {
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
                 partnerLock={partnerLock}
+                pairUnlock={pairUnlock}
+                onBuyPair={handleBuyPair}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -1419,6 +1462,8 @@ function App() {
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
                 partnerLock={partnerLock}
+                pairUnlock={pairUnlock}
+                onBuyPair={handleBuyPair}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={() => setShowPremiumLP(true)}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -2864,13 +2909,13 @@ function App() {
                   <span style={{ color: '#a9a49a' }}>電話番号</span>
                   <span style={{ color: 'white' }}>請求があった場合は遅滞なく開示します</span>
                 </div>
-                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#a9a49a' }}>販売価格</span>
-                  <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額980円 (税込)</span>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
+                  <span style={{ color: '#a9a49a', flexShrink: 0 }}>販売価格</span>
+                  <span style={{ color: 'white', fontWeight: 'bold', textAlign: 'right' }}>プレミアムプラン: 月額980円 (税込)<br />お相手1人の深層鑑定（買い切り）: 480円 (税込)</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>契約期間・自動更新</span>
-                  <span style={{ color: 'white' }}>1か月ごとの自動更新のサブスクリプション（初回はお申し込み時、2回目以降は毎月の更新日に決済）。更新日までに解約手続き（自動更新の停止）を行わない限り、同一条件で1か月ごとに自動的に契約が更新され、継続課金が発生します。無料お試し期間はありません。</span>
+                  <span style={{ color: 'white' }}>1か月ごとの自動更新のサブスクリプション（初回はお申し込み時、2回目以降は毎月の更新日に決済）。更新日までに解約手続き（自動更新の停止）を行わない限り、同一条件で1か月ごとに自動的に契約が更新され、継続課金が発生します。無料お試し期間はありません。<br />お相手1人の深層鑑定（買い切り）は1回払いで、自動更新・継続課金はありません。購入したお相手（生年月日で判定）のトリセツ・深層鑑定・6つの相性グラフ・年次の流れを期間の定めなくご利用いただけます。今日の相性など毎日変わる内容は、購入日（日本時間）のみご覧いただけます。</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>支払方法</span>

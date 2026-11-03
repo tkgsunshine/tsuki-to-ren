@@ -8,6 +8,8 @@ export interface PartnerAccess {
   /** Free days left with this partner after today */
   daysLeft: number;
   guest: boolean;
+  /** One-time purchase for this partner (¥480): unlocked = bought, today = bought today (Japan time) */
+  pair: { unlocked: boolean; today: boolean } | null;
 }
 
 export const GUEST_PARTNER_DAYS = 1;
@@ -22,11 +24,11 @@ const guestAccess = (oppBirth: string): PartnerAccess => {
   try { all = JSON.parse(localStorage.getItem(GUEST_KEY) || '{}') || {}; } catch { /* blocked storage: count from zero */ }
   const entry = all[oppBirth];
   const days = Number(entry?.days) || 0;
-  if (entry?.last === today) return { locked: false, daysLeft: Math.max(0, GUEST_PARTNER_DAYS - days), guest: true };
-  if (days >= GUEST_PARTNER_DAYS) return { locked: true, daysLeft: 0, guest: true };
+  if (entry?.last === today) return { locked: false, daysLeft: Math.max(0, GUEST_PARTNER_DAYS - days), guest: true, pair: null };
+  if (days >= GUEST_PARTNER_DAYS) return { locked: true, daysLeft: 0, guest: true, pair: null };
   all[oppBirth] = { days: days + 1, last: today };
   try { localStorage.setItem(GUEST_KEY, JSON.stringify(all)); } catch { /* ignore */ }
-  return { locked: false, daysLeft: GUEST_PARTNER_DAYS - days - 1, guest: true };
+  return { locked: false, daysLeft: GUEST_PARTNER_DAYS - days - 1, guest: true, pair: null };
 };
 
 /**
@@ -47,8 +49,11 @@ export const fetchPartnerAccess = async (oppBirth: string): Promise<PartnerAcces
     });
     if (!res.ok) return null;
     const data = await res.json();
-    if (data.premium) return { locked: false, daysLeft: Number.POSITIVE_INFINITY, guest: false };
-    return { locked: data.locked === true, daysLeft: Number(data.daysLeft) || 0, guest: false };
+    if (data.premium) return { locked: false, daysLeft: Number.POSITIVE_INFINITY, guest: false, pair: null };
+    const pair = data.pair && typeof data.pair === 'object'
+      ? { unlocked: data.pair.unlocked === true, today: data.pair.today === true }
+      : null;
+    return { locked: data.locked === true, daysLeft: Number(data.daysLeft) || 0, guest: false, pair };
   } catch {
     return null;
   }

@@ -268,6 +268,8 @@ const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
 
 // 同じお相手との「今日の相性」を無料で見られる日数の状態（App.tsx が api/stripe/partner で数える）。null = 制限なし。
 export type PartnerLock = { status: 'checking' | 'free' | 'locked'; daysLeft: number; guest: boolean } | null;
+export type PairUnlock = { unlocked: boolean; today: boolean } | null;
+export const PAIR_PRICE_LABEL = '¥480';
 
 interface ResultViewProps {
   result: FortuneResult;
@@ -277,6 +279,9 @@ interface ResultViewProps {
   onRegister: (email: string) => void;
   isSubscribed: boolean;
   partnerLock?: PartnerLock;
+  // 買い切り「お相手1人の深層鑑定」（¥480）。unlocked: このお相手を買った、today: 買ったのが今日（日本時間）
+  pairUnlock?: PairUnlock;
+  onBuyPair?: () => Promise<void> | void;
   onSubscribe: () => void;
   onOpenPremiumLP?: () => void;
   selectedChar: 'ren' | 'tsuki';
@@ -306,6 +311,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onRegister,
   isSubscribed,
   partnerLock = null,
+  pairUnlock = null,
+  onBuyPair,
   onSubscribe,
   onOpenPremiumLP,
   selectedChar,
@@ -757,6 +764,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
     } else {
       handleScrollToSub();
     }
+  };
+
+  // 買い切り（お相手1人 ¥480）。変わらない鑑定（トリセツ・深層鑑定・6つの相性グラフ・年次の流れ）は deepOpen、
+  // 毎日変わる内容（本日のアプローチ助言・二人のLINEのコツ）は todayOpen で開く。7日間・月次・朝メール・チャットは月額だけ。
+  const pairOpen = hasOpponent && !sharedBy && pairUnlock?.unlocked === true;
+  const deepOpen = isSubscribed || pairOpen;
+  const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
+  // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
+  const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
+  const deepLockWord = canBuyPair && isRegistered ? `${PAIR_PRICE_LABEL}で解放` : 'プレミアム登録で全解放';
+  const pairCardRef = React.useRef<HTMLDivElement>(null);
+  const [buyingPair, setBuyingPair] = useState(false);
+  const handleBuyPair = async () => {
+    if (!isRegistered) { handleScrollToRegister(); return; }
+    if (!onBuyPair || buyingPair) return;
+    setBuyingPair(true);
+    try { await onBuyPair(); } finally { setBuyingPair(false); }
+  };
+  // 変わらない鑑定のロック: 会員なら、買い切りと月額を並べたカードへ
+  const handleDeepLockClick = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (isRegistered && canBuyPair && pairCardRef.current) {
+      pairCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    handleLockTagClick();
   };
 
   // 無料の日数を使い切ったお相手（または確認中）: 今日の点数と助言はダミーで描く。今日の流れ（月の形と一言）は見せる。
@@ -2071,7 +2104,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const parts = activeResult.dailyActionAdviceParts?.length ? activeResult.dailyActionAdviceParts : [activeResult.dailyActionAdvice || ''];
               const tips = activeResult.lineTips;
               // 2段落目以降と「二人のLINEのコツ」の本文はプレミアム限定。見出しは誰にでも見せ、本文だけぼかす。
-              const locked = !isSubscribed;
+              // 買い切りの人は、買った日（日本時間）だけ全文が読める
+              const locked = !todayOpen;
               // 無料会員（登録済み・未課金）は、各本文の冒頭だけ読める。未登録の人は全部ぼかしのまま。
               const preview = locked && isRegistered;
               const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
@@ -2338,7 +2372,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {detailedTopics.map((topic, index) => {
           // 「惹かれ合うポイント＆地雷行動3選」「二人のこれから」はプレミアム限定（無料会員も冒頭の1文だけ）。他の項目は無料会員なら全文。
           const premiumOnly = hasOpponent && (topic.title.includes('惹かれ合うポイント') || topic.title.includes('二人のこれから'));
-          const topicOpen = premiumOnly ? isSubscribed : isRegistered;
+          const topicOpen = premiumOnly ? deepOpen : isRegistered;
           return (
           <React.Fragment key={topic.title}>
 
@@ -2357,15 +2391,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                     {formatAppraisalText(topic.intro)}
                   </p>
-                  <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleLockTagClick}>
+                  <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleDeepLockClick}>
                     <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                       {lockedText(`${topic.detail} ${topic.detail}`, true)}
                     </p>
                     
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
-                      <button className="premium-lock-tag" onClick={handleLockTagClick}>
-                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                      <button className="premium-lock-tag" onClick={handleDeepLockClick}>
+                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                       </button>
                     </div>
                   </div>
@@ -2569,17 +2603,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 fontSize: '0.8rem',
                 color: '#f3efe6',
                 lineHeight: '1.75',
-                filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                userSelect: !isSubscribed ? 'none' : 'auto',
-                opacity: !isSubscribed ? 0.6 : 1
+                filter: !deepOpen ? 'blur(4.5px)' : 'none',
+                userSelect: !deepOpen ? 'none' : 'auto',
+                opacity: !deepOpen ? 0.6 : 1
               }}>
                 {activeResult.opponentTorisetsu.killingWords.slice(1).map((word, idx) => (
                   <li key={idx + 1} style={{ marginBottom: '0.2rem' }}>
-                    {lockedText(word.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
+                    {lockedText(word.replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}
                   </li>
                 ))}
               </ul>
-              {!isSubscribed && (
+              {!deepOpen && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -2594,9 +2628,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={handleLockTagClick}
+                  onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                 </button>
               </div>
             )}
@@ -2623,17 +2657,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 fontSize: '0.8rem',
                 color: '#fee2e2',
                 lineHeight: '1.75',
-                filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                userSelect: !isSubscribed ? 'none' : 'auto',
-                opacity: !isSubscribed ? 0.6 : 1
+                filter: !deepOpen ? 'blur(4.5px)' : 'none',
+                userSelect: !deepOpen ? 'none' : 'auto',
+                opacity: !deepOpen ? 0.6 : 1
               }}>
                 {activeResult.opponentTorisetsu.ngBehaviors.slice(1).map((ng, idx) => (
                   <li key={idx} style={{ marginBottom: '0.2rem' }}>
-                    {lockedText(ng.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
+                    {lockedText(ng.replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}
                   </li>
                 ))}
               </ul>
-              {!isSubscribed && (
+              {!deepOpen && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -2648,9 +2682,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={handleLockTagClick}
+                  onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                 </button>
               </div>
             )}
@@ -2676,11 +2710,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <p style={{
                     margin: 0,
                     color: '#5d9fc0',
-                    filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                    userSelect: !isSubscribed ? 'none' : 'auto',
-                    opacity: !isSubscribed ? 0.65 : 1
-                  }}><strong>【おすすめの返し方】</strong> {lockedText(activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</p>
-                  {!isSubscribed && (
+                    filter: !deepOpen ? 'blur(4.5px)' : 'none',
+                    userSelect: !deepOpen ? 'none' : 'auto',
+                    opacity: !deepOpen ? 0.65 : 1
+                  }}><strong>【おすすめの返し方】</strong> {lockedText(activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</p>
+                  {!deepOpen && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -2695,9 +2729,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={handleLockTagClick}
+                  onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                 </button>
               </div>
             )}
@@ -2721,9 +2755,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>Lv.1 (初期):</strong> {activeResult.opponentTorisetsu.greenFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>Lv.3 (大好き):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
-                  {!isSubscribed && (
+                  <div style={{ filter: !deepOpen ? 'blur(4.5px)' : 'none', opacity: !deepOpen ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</div>
+                  <div style={{ filter: !deepOpen ? 'blur(4.5px)' : 'none', opacity: !deepOpen ? 0.65 : 1 }}><strong>Lv.3 (大好き):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</div>
+                  {!deepOpen && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -2738,9 +2772,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={handleLockTagClick}
+                  onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                 </button>
               </div>
             )}
@@ -2764,8 +2798,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>【危険サイン】</strong> {activeResult.opponentTorisetsu.redFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative' }}>
-                  <div style={{ filter: !isSubscribed ? 'blur(4.5px)' : 'none', opacity: !isSubscribed ? 0.65 : 1 }}><strong>【立て直し方】</strong> {lockedText((activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}</div>
-                  {!isSubscribed && (
+                  <div style={{ filter: !deepOpen ? 'blur(4.5px)' : 'none', opacity: !deepOpen ? 0.65 : 1 }}><strong>【立て直し方】</strong> {lockedText((activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</div>
+                  {!deepOpen && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -2780,9 +2814,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={handleLockTagClick}
+                  onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                 </button>
               </div>
             )}
@@ -2794,7 +2828,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             {(() => {
               const kit = buildLineKit(activeResult.opponentMbtiCode, activeResult.opponentPillar);
               return kit ? (
-                <LineKitSection kit={kit} isSubscribed={isSubscribed} isRegistered={isRegistered} onLockClick={handleLockTagClick} />
+                <LineKitSection kit={kit} isSubscribed={deepOpen} isRegistered={isRegistered} onLockClick={handleDeepLockClick} lockWord={deepLockWord} />
               ) : null;
             })()}
 
@@ -2810,13 +2844,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   color: '#fef9c3',
                   margin: 0,
                   lineHeight: '1.8',
-                  filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                  userSelect: !isSubscribed ? 'none' : 'auto',
-                  opacity: !isSubscribed ? 0.65 : 1
+                  filter: !deepOpen ? 'blur(4.5px)' : 'none',
+                  userSelect: !deepOpen ? 'none' : 'auto',
+                  opacity: !deepOpen ? 0.65 : 1
                 }}>
-                  {lockedText((activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
+                  {lockedText((activeResult.opponentTorisetsu.idealDateSpot || '静かで落ち着いた個室レストランやおしゃれなカフェ。').replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}
                 </p>
-                {!isSubscribed && (
+                {!deepOpen && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -2831,9 +2865,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={handleLockTagClick}
+                  onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                 </button>
               </div>
             )}
@@ -2852,13 +2886,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   color: '#e7e1d5',
                   margin: 0,
                   lineHeight: '1.8',
-                  filter: !isSubscribed ? 'blur(4.5px)' : 'none',
-                  userSelect: !isSubscribed ? 'none' : 'auto',
-                  opacity: !isSubscribed ? 0.65 : 1
+                  filter: !deepOpen ? 'blur(4.5px)' : 'none',
+                  userSelect: !deepOpen ? 'none' : 'auto',
+                  opacity: !deepOpen ? 0.65 : 1
                 }}>
-                  {lockedText(activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手'), !isSubscribed)}
+                  {lockedText(activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}
                 </p>
-                {!isSubscribed && (
+                {!deepOpen && (
               <div style={{
                 position: 'absolute',
                 top: '50%',
@@ -2873,18 +2907,58 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <button
                   type="button"
                   className="premium-lock-tag"
-                  onClick={handleLockTagClick}
+                  onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                 </button>
               </div>
             )}
               </div>
             </div>
 
+            {/* 買い切りで解放済み・月額は未加入: 毎日変わる内容は月額でと案内する（アップセル） */}
+            {pairOpen && !isSubscribed && (
+              <div className="glass-panel" style={{
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.06) 0%, rgba(13, 18, 27, 0.98) 100%)',
+                border: '1px solid rgba(226, 192, 116, 0.3)',
+                borderRadius: '16px',
+                padding: '1.25rem',
+                marginTop: '0.75rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem',
+                width: '100%',
+                boxSizing: 'border-box'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', letterSpacing: '1px', fontWeight: 'bold', background: 'rgba(226, 192, 116, 0.1)', padding: '2px 8px', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.2)' }}>
+                    ✦ {partnerCall}の鑑定は解放済み ✦
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
+                  <CharHeadingIcon char="月" size={34} />
+                  <p style={{ fontSize: '0.74rem', color: '#e2d9ee', lineHeight: '1.65', margin: 0 }}>
+                    {pairUnlock?.today
+                      ? `トリセツと深層鑑定は、これからずっと読めます。今日の相性とLINEの助言も、今日いっぱいはすべてお見せしますね。`
+                      : `トリセツと深層鑑定は、いつでも読めます。毎日変わる「今日の相性」やLINEの助言は、プレミアムで毎日お届けしますね。`}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold' }}>月額980円のプレミアムなら、毎日こちらも</div>
+                  {['今日の相性と、本日のLINEの送り方（毎日）', 'これからの7日間と、月ごとの流れ', '毎朝の運勢メールが全文で届く', '気になる人を10人まで保存・ほかのお相手も全部読める', '月と蓮に、いつでも相談'].map((t) => (
+                    <div key={t} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
+                      <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                      <span>{t}</span>
+                    </div>
+                  ))}
+                </div>
+                <PremiumUnlockButton onClick={() => { if (onOpenPremiumLP) onOpenPremiumLP(); else onSubscribe(); }} />
+              </div>
+            )}
+
             {/* Lock CTA Card placed BELOW the content boxes for Non-Premium Users */}
-            {!isSubscribed && (
-              <div className="glass-panel animate-pulse-subtle" style={{
+            {!deepOpen && (
+              <div ref={pairCardRef} className="glass-panel animate-pulse-subtle" style={{
                 background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.04) 0%, rgba(13, 18, 27, 0.98) 100%)',
                 border: '1px solid rgba(226, 192, 116, 0.25)',
                 borderRadius: '16px',
@@ -2964,6 +3038,38 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     }}
                   />
                 </div>
+
+                {/* 買い切り: このお相手だけ、変わらない鑑定をずっと。買った日は今日の相性も全部 */}
+                {canBuyPair && (
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#e8e3d8', lineHeight: 1.6 }}>
+                      <strong style={{ color: '#f2e2b3' }}>{partnerCall}のことだけ知りたい方は</strong><br />
+                      トリセツ・深層鑑定・6つの相性グラフ・年次の流れを、{PAIR_PRICE_LABEL}の1回払いでずっと読めます。買った日は、今日の相性とLINEの助言も全部見られます。
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleBuyPair}
+                      disabled={buyingPair}
+                      style={{
+                        width: '100%',
+                        padding: '0.8rem 1rem',
+                        borderRadius: '999px',
+                        border: '1px solid rgba(226, 192, 116, 0.55)',
+                        background: 'rgba(226, 192, 116, 0.06)',
+                        color: '#f2e2b3',
+                        fontSize: '0.85rem',
+                        fontWeight: 'bold',
+                        cursor: buyingPair ? 'wait' : 'pointer',
+                        opacity: buyingPair ? 0.7 : 1
+                      }}
+                    >
+                      {!isRegistered ? '無料会員登録して購入する' : buyingPair ? '決済画面を開いています…' : `${partnerCall}の鑑定だけ解放する（${PAIR_PRICE_LABEL}・買い切り）`}
+                    </button>
+                    <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
+                      自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -2981,9 +3087,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
           obsession: Math.min(99, Math.floor((activeResult.baseScore || 88) * 1.02)),
           trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
         }}
-        isUnlocked={isSubscribed}
-        onOpenAuth={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
-        onOpenPremiumLP={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
+        isUnlocked={deepOpen}
+        onOpenAuth={!isRegistered ? handleScrollToRegister : canBuyPair ? () => handleDeepLockClick() : onOpenPremiumLP}
+        onOpenPremiumLP={!isRegistered ? handleScrollToRegister : canBuyPair ? () => handleDeepLockClick() : onOpenPremiumLP}
         character={selectedChar}
       />
       )}
@@ -3130,7 +3236,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Yearly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!deepOpen && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
@@ -3138,7 +3244,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 gap: '0.65rem'
               }}>
                 {activeResult.yearlyPreviews.map((y, index) => {
-                  const score = lockedScore(y.score, index + 2, !isSubscribed);
+                  const score = lockedScore(y.score, index + 2, !deepOpen);
                   const visuals = getScoreVisuals(score);
                   return (
                     <div key={y.year} style={{ 
@@ -3155,9 +3261,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         <span className="font-serif" style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#f8fafc' }}>
                           {y.year}：<span style={{ 
                             color: visuals.textColor,
-                            filter: isSubscribed ? 'none' : 'blur(4.5px)',
-                            userSelect: isSubscribed ? 'auto' : 'none'
-                          }}>{isSubscribed ? y.label : '★★★'}</span>
+                            filter: deepOpen ? 'none' : 'blur(4.5px)',
+                            userSelect: deepOpen ? 'auto' : 'none'
+                          }}>{deepOpen ? y.label : '★★★'}</span>
                         </span>
                         <span style={{
                           color: visuals.textColor,
@@ -3168,33 +3274,33 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           fontSize: '0.65rem',
                           fontWeight: 'bold',
                           letterSpacing: '0.05em',
-                          filter: isSubscribed ? 'none' : 'blur(4px)',
-                          userSelect: isSubscribed ? 'auto' : 'none'
+                          filter: deepOpen ? 'none' : 'blur(4px)',
+                          userSelect: deepOpen ? 'auto' : 'none'
                         }}>
                           {score}点
                         </span>
                       </div>
-                      <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
+                      <p className={deepOpen ? '' : 'timeline-blurred'} style={{
                         color: '#d8d2c6',
                         fontSize: '0.65rem',
                         marginTop: '0.35rem',
                         lineHeight: '1.6',
                         textAlign: 'justify',
                         letterSpacing: '0.03em',
-                        filter: isSubscribed ? 'none' : 'blur(4.5px)',
-                        userSelect: isSubscribed ? 'auto' : 'none',
-                        pointerEvents: isSubscribed ? 'auto' : 'none'
+                        filter: deepOpen ? 'none' : 'blur(4.5px)',
+                        userSelect: deepOpen ? 'auto' : 'none',
+                        pointerEvents: deepOpen ? 'auto' : 'none'
                       }}>
-                        {lockedText(y.text, !isSubscribed)}
+                        {lockedText(y.text, !deepOpen)}
                       </p>
-                      {!isSubscribed && (
-                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
+                      {!deepOpen && (
+                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleDeepLockClick}>
                           <button 
                             type="button"
                             className="premium-lock-tag" 
-                            onClick={handleLockTagClick}
+                            onClick={handleDeepLockClick}
                           >
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
                           </button>
                         </div>
                       )}
