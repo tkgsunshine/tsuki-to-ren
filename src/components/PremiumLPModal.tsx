@@ -128,6 +128,8 @@ interface PremiumLPModalProps {
   onRegisterFirst: () => void;
   /** 買い切りプラン。null のときは月額だけを見せる */
   pair?: PairPlanInfo | null;
+  /** お相手がいない（鑑定していない）ときに、お相手との鑑定画面へ移動する。買い切りの案内に使う */
+  onStartPairReading?: () => void;
   /** 先に見せるプラン。買い切りで解放できる項目のロックから開いたときは 'pair' */
   focus?: 'pair' | 'monthly';
   /** 解約理由を添えて、Stripe の解約・お支払い画面へ移動する */
@@ -141,6 +143,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   onClose,
   onSubscribe,
   isSubscribed,
+  onStartPairReading,
   onCancelSubscription,
   premiumEndsOn,
   pair = null,
@@ -317,6 +320,45 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               ここから先は、あの人の気持ちやこれからの流れを、私ともう少し深く一緒に見ていきませんか？
             </CharBubble>
           </div>
+
+          {/* 鑑定していない（お相手がいない）ときも、買い切りがあることは伝える。買うにはお相手の鑑定が要る */}
+          {!pair && !isSubscribed && onStartPairReading && (
+            <div style={{ padding: '0 1.15rem 1.35rem' }}>
+              <div style={{
+                border: '1px solid rgba(226, 192, 116, 0.35)',
+                borderRadius: '14px',
+                background: 'rgba(226, 192, 116, 0.06)',
+                padding: '0.95rem 1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.6rem'
+              }}>
+                <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>
+                  お相手1人だけなら ¥480の買い切りも（1回払い）
+                </p>
+                <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
+                  気になる人1人のトリセツ・深層鑑定・相性グラフ・年次の流れを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で買えます（会員登録なしでもOK）。
+                </p>
+                <button
+                  type="button"
+                  onClick={onStartPairReading}
+                  style={{
+                    alignSelf: 'flex-start',
+                    background: 'transparent',
+                    border: '1px solid rgba(226, 192, 116, 0.6)',
+                    color: '#f2e2b3',
+                    borderRadius: '999px',
+                    padding: '0.5rem 1.1rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  お相手と鑑定する →
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* プランを選ぶ（買い切り ¥480 と 月額 ¥980 を1枚で見比べる） */}
           {showPlans && pair && (

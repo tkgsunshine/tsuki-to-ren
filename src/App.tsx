@@ -3389,6 +3389,11 @@ function App() {
         onClose={() => setShowPremiumLP(false)}
         focus={premiumLPFocus}
         pair={mode === 'match' && oppBirth && renResult ? { name: san(oppName), unlocked: pairUnlock?.unlocked === true, onBuy: handleBuyPair } : null}
+        onStartPairReading={() => {
+          setMode('match');
+          handleTabChange('home');
+          window.scrollTo({ top: 0 });
+        }}
         onSubscribe={handleStartCheckout}
         onCancelSubscription={handleOpenBillingPortal}
         isSubscribed={isSubscribed}
