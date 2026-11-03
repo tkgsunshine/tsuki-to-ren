@@ -1437,7 +1437,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       onClick={() => onOpenPremiumLP && onOpenPremiumLP('pair')}
                       style={{ background: 'none', border: 'none', color: '#d8d2c6', fontSize: '0.7rem', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
                     >
-                      {partnerCall}のことだけなら {PAIR_PRICE_LABEL}（買い切り・今日の相性つき）
+                      {PAIR_PRICE_LABEL}/買い切りで解放する（今日の相性つき）
                     </button>
                   )}
                 </div>
@@ -3147,7 +3147,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         opacity: buyingPair ? 0.7 : 1
                       }}
                     >
-                      {buyingPair ? '決済画面を開いています…' : `${partnerCall}の鑑定だけ解放する（${PAIR_PRICE_LABEL}・買い切り）`}
+                      {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで解放する`}
                     </button>
                     <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
                       自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。

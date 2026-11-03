@@ -190,6 +190,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   };
   // 2プランの比べ方（買い切りは、いま見ているお相手がいるときだけ）
   const showPlans = Boolean(pair) && !isSubscribed;
+  // 買い切りで「今日」の内容が見られるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
+  const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
 
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
@@ -355,7 +357,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 gap: '0.6rem'
               }}>
                 <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>
-                  お相手1人だけなら ¥480の買い切りも（1回払い）
+                  お相手1人だけなら ¥480/買い切りも
                 </p>
                 <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
                   気になる人1人のトリセツ・深層鑑定・相性グラフ・年次の流れを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
@@ -437,8 +439,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   ))}
                 </div>
                 {[
-                  { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: `${pair.name}だけ\n（ずっと）`, monthly: '全員分' },
-                  { label: '今日の相性と、本日のLINEの送り方', pair: '買った日だけ', monthly: '毎日' },
+                  { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
+                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日(${todayJst})だけ`, monthly: '毎日' },
                   { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭だけ', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
@@ -516,7 +518,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                         cursor: 'pointer'
                       }}
                     >
-                      {isProcessing ? '決済画面へ移動しています...' : `${pair.name}の鑑定だけ解放する（¥480・買い切り）`}
+                      {isProcessing ? '決済画面へ移動しています...' : '¥480/買い切りで解放する'}
                     </button>
                   )
                 )}
@@ -897,7 +899,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 padding: '0.1rem'
               }}
             >
-              {pair.name}だけなら ¥480（買い切り・1回払い）
+              ¥480/買い切りで解放する
             </button>
           )}
         </div>
