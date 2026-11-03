@@ -173,6 +173,7 @@ const guestAuth = (existing = {}) => {
     verifyIdToken: async () => { throw new Error('no token'); },
     getUserByEmail: async (e) => { if (existing[e]) return { uid: existing[e] }; throw new Error('auth/user-not-found'); },
     createUser: async (props = {}) => { calls.created.push(props); return { uid: `new_u${calls.created.length}` }; },
+    setCustomUserClaims: async (uid, claims) => { calls.claims = { ...(calls.claims || {}), [uid]: claims }; },
     createCustomToken: async (uid) => `token_${uid}`
   };
 };
@@ -207,6 +208,7 @@ test('resolveCheckoutAccount creates an account for a new email once, and reuses
   // the auto-created account carries NO email: paying does not prove the payer owns the address,
   // and an email-bearing account could be claimed ahead of the address's real owner
   assert.deepEqual(auth.calls.created[0], {});
+  assert.deepEqual(auth.calls.claims['new_u1'], { guest: true });
   assert.equal(db.docs[`${CLAIMS}/cs_1`].email, 'buyer@example.com');
   // a retried webhook keeps created=true and the same uid (from the claim, not from auth)
   const again = await resolveCheckoutAccount(db, guestAuth(), session);
@@ -327,4 +329,20 @@ test('claim signs in only the account this purchase created, and only once', asy
   res = mockRes();
   await claim(ask('bad id'), res, { db, auth });
   assert.equal(res.code, 400);
+});
+
+test('a purchase account that somehow got an email is signed out and loses the email', async () => {
+  const { verifyUser } = await import('../api/_lib/stripe.js');
+  const done = [];
+  const a = {
+    verifyIdToken: async () => ({ uid: 'new_u9', guest: true, email: 'victim@example.com', email_verified: true }),
+    revokeRefreshTokens: async (uid) => done.push(['revoke', uid]),
+    updateUser: async (uid, p) => done.push(['update', uid, p.email])
+  };
+  const r = await verifyUser({ headers: { authorization: 'Bearer x' } }, a);
+  assert.equal(r.error.status, 401);
+  assert.deepEqual(done, [['revoke', 'new_u9'], ['update', 'new_u9', null]]);
+  // a purchase account without an email signs in as usual
+  const ok = await verifyUser({ headers: { authorization: 'Bearer x' } }, { verifyIdToken: async () => ({ uid: 'new_u9', guest: true }) });
+  assert.equal(ok.uid, 'new_u9');
 });

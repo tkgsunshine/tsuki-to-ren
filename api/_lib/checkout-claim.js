@@ -41,6 +41,10 @@ export async function resolveCheckoutAccount(db, auth, session) {
       // No email on the account: the payer has not proven they own the address. The address lives only in
       // this claim, and transferGuestPurchases hands the purchase to whoever signs in with it verified.
       uid = (await a.createUser({})).uid;
+      // Marks the account for good (custom claims ride on every later ID token, however it signs in): if anyone
+      // ever attaches an email to it, verifyUser and firestore.rules refuse it, so a purchase account can't be
+      // turned into a trap for the real owner of an address.
+      await a.setCustomUserClaims(uid, { guest: true });
       created = true;
     }
   }
