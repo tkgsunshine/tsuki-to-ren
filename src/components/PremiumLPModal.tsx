@@ -72,11 +72,12 @@ const speakers = {
   ren: { name: '蓮', img: '/assets/ren.webp', accent: '96, 165, 250', label: '#9cc6d8' }
 };
 
-/** 月・蓮のセリフ（アイコン付きの吹き出し） */
+/** 月・蓮のセリフ（アイコン付きの吹き出し）。会話に見えるよう、月は左から・蓮は右から話す */
 const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speakers; small?: boolean }> = ({ children, who = 'tsuki', small = false }) => {
   const sp = speakers[who];
+  const right = who === 'ren';
   return (
-    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left' }}>
+    <div style={{ display: 'flex', flexDirection: right ? 'row-reverse' : 'row', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left' }}>
       <img
         src={sp.img}
         alt={sp.name}
@@ -95,12 +96,12 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
         padding: small ? '0.7rem 0.9rem' : '0.85rem 1rem',
         background: `rgba(${sp.accent}, 0.08)`,
         border: `1px solid rgba(${sp.accent}, 0.3)`,
-        borderRadius: '4px 16px 16px 16px',
+        borderRadius: right ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
         fontSize: small ? '0.76rem' : '0.8rem',
         color: '#f0ebf5',
         lineHeight: '1.75'
       }}>
-        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem' }}>
+        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem', textAlign: right ? 'right' : 'left' }}>
           {sp.name}
         </div>
         {children}
@@ -391,11 +392,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '0.7rem' }}>
                 {([
-                  { who: 'ren', t: '刺さる言葉 TOP5 ＆ 絶対NG行動 5選', d: `${pair.name}がキュンとする褒め方と、言うと一気に冷めてしまう一言。ここは知っておいたほうがいい。` },
+                  { who: 'ren', t: '刺さる言葉 TOP5 ＆ 絶対NG行動 5選', d: `${pair.name}がキュンとする褒め方と、言うと一気に冷めてしまう一言。ここは知っておいたほうがいいです。` },
                   { who: 'tsuki', t: '返信が遅いときの心理と、ベストな返し方', d: '既読のまま止まったとき、あの人が何を考えているのか。追いLINEしていいのか、待つべきか、一緒に見ていきましょうね。' },
-                  { who: 'ren', t: '脈ありサイン 3段階 ＆ 脈なしからの挽回', d: '今どの段階にいるのかがわかる。少し離れかけたときの戻し方もある。' },
+                  { who: 'ren', t: '脈ありサイン 3段階 ＆ 脈なしからの挽回', d: '今どの段階にいるのかがわかります。少し離れかけたときの戻し方もありますよ。' },
                   { who: 'tsuki', t: '惹かれ合うポイント ＆ 地雷行動 3選', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあるんです。先に知っておけば、大丈夫。' },
-                  { who: 'ren', t: '6つの相性グラフ ＆ 二人のこれから', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを読もう。' },
+                  { who: 'ren', t: '6つの相性グラフ ＆ 二人のこれから', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを一緒に読みましょう。' },
                   { who: 'tsuki', t: 'そのまま送れるLINEキラーテンプレート', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってくださいね。` }
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
@@ -407,8 +408,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 ))}
               </div>
               <CharBubble who="ren" small>
-                なんとなくで動くと、同じすれ違いをくり返しやすい。<br />
-                {pair.name}のくせを先に知っておけば、次の一言を自分で選べるようになるよ。
+                なんとなくで動くと、同じすれ違いをくり返しやすいんです。<br />
+                {pair.name}のくせを先に知っておけば、次の一言を自分で選べるようになりますよ。
               </CharBubble>
             </div>
           )}
