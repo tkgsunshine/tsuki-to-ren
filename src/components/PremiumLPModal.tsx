@@ -103,7 +103,7 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
         color: '#f0ebf5',
         lineHeight: '1.75'
       }}>
-        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem', textAlign: right ? 'right' : 'left' }}>
+        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem', textAlign: 'left' }}>
           {sp.name}
         </div>
         {children}
