@@ -194,7 +194,6 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   // 買い切りボタンの「〇〇さんだけ」。名前が空のとき（san() が「お相手」を返す）は「このお相手だけ」
   const pairWho = !pair || pair.name === 'お相手' ? 'このお相手' : pair.name;
   // 買い切りで「今日」の内容が見られるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
-  const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
 
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
@@ -438,7 +437,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 </div>
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
-                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日(${todayJst})だけ`, monthly: '毎日' },
+                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日分`, monthly: '毎日' },
                   { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭だけ', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
