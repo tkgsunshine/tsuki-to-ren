@@ -215,47 +215,79 @@ const splitAdvicePreview = (text: string | undefined): { head: string; restLengt
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
 
-// 未来予測スケジュール（7日間・月次・年次）の点数の棒グラフ。棒の高さは点数に比例（100点で最大）
-const SCORE_BAR_MAX_PX = 56;
-const ScoreBarChart = ({ items, locked }: { items: { key: string; label: string; score: number }[]; locked: boolean }) => (
-  <div
-    className={locked ? 'timeline-blurred' : ''}
-    style={{
-      display: 'grid',
-      gridTemplateColumns: `repeat(${items.length}, 1fr)`,
-      gap: '6px',
-      alignItems: 'end',
-      filter: locked ? 'blur(4.5px)' : 'none',
-      userSelect: locked ? 'none' : 'auto',
-      pointerEvents: locked ? 'none' : 'auto'
-    }}
-  >
-    {items.map((item) => {
-      const visuals = getScoreVisuals(item.score);
-      return (
-        <div key={item.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', minWidth: 0 }}>
-          <span style={{ fontSize: '0.7rem', color: visuals.textColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-            {item.score}点
-          </span>
-          <div style={{ height: `${SCORE_BAR_MAX_PX}px`, width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-            <div style={{
-              width: '100%',
-              maxWidth: '44px',
-              height: `${Math.round(Math.max(0, Math.min(100, item.score)) / 100 * SCORE_BAR_MAX_PX)}px`,
-              background: visuals.barColor,
-              borderRadius: '4px 4px 0 0',
-              boxShadow: visuals.shadow,
-              transition: 'all 0.3s ease'
-            }} />
-          </div>
-          <span style={{ fontSize: '0.64rem', color: '#a9a49a', marginTop: '2px', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
+// 未来予測スケジュール（7日間・月次・年次）の点数の折れ線グラフ。点の高さは 40点（下限）〜100点 で決める
+const SCORE_LINE_HEIGHT_PX = 64;
+const SCORE_LINE_MIN = 40;
+const ScoreLineChart = ({ items, locked }: { items: { key: string; label: string; score: number }[]; locked: boolean }) => {
+  const n = items.length;
+  const pos = items.map((item, i) => {
+    const clamped = Math.max(SCORE_LINE_MIN, Math.min(100, item.score));
+    return { x: ((i + 0.5) / n) * 100, y: (1 - (clamped - SCORE_LINE_MIN) / (100 - SCORE_LINE_MIN)) * SCORE_LINE_HEIGHT_PX };
+  });
+  const gradId = `scoreLineFill-${items.map((i) => i.key).join('-').replace(/[^A-Za-z0-9-]/g, '')}`;
+  return (
+    <div
+      className={locked ? 'timeline-blurred' : ''}
+      style={{
+        filter: locked ? 'blur(4.5px)' : 'none',
+        userSelect: locked ? 'none' : 'auto',
+        pointerEvents: locked ? 'none' : 'auto'
+      }}
+    >
+      {/* 上に点数ラベルぶんの余白を取り、その下に線と点を描く */}
+      <div style={{ position: 'relative', height: `${SCORE_LINE_HEIGHT_PX + 22}px` }}>
+        <svg
+          viewBox={`0 0 100 ${SCORE_LINE_HEIGHT_PX}`}
+          preserveAspectRatio="none"
+          style={{ position: 'absolute', left: 0, right: 0, top: '22px', width: '100%', height: `${SCORE_LINE_HEIGHT_PX}px`, overflow: 'visible' }}
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(226, 192, 116, 0.22)" />
+              <stop offset="100%" stopColor="rgba(226, 192, 116, 0)" />
+            </linearGradient>
+          </defs>
+          {[0, 0.5, 1].map((t) => (
+            <line key={t} x1="0" x2="100" y1={t * SCORE_LINE_HEIGHT_PX} y2={t * SCORE_LINE_HEIGHT_PX} stroke="rgba(255,255,255,0.06)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          ))}
+          <polygon
+            points={`${pos[0]?.x ?? 0},${SCORE_LINE_HEIGHT_PX} ${pos.map((p) => `${p.x},${p.y}`).join(' ')} ${pos[n - 1]?.x ?? 100},${SCORE_LINE_HEIGHT_PX}`}
+            fill={`url(#${gradId})`}
+          />
+          <polyline
+            points={pos.map((p) => `${p.x},${p.y}`).join(' ')}
+            fill="none"
+            stroke="#e2c074"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+            style={{ filter: 'drop-shadow(0 0 4px rgba(226, 192, 116, 0.45))' }}
+          />
+        </svg>
+        {items.map((item, i) => {
+          const visuals = getScoreVisuals(item.score);
+          return (
+            <div key={item.key} style={{ position: 'absolute', left: `${pos[i].x}%`, top: `${pos[i].y + 22}px`, transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <span style={{ position: 'absolute', bottom: '9px', fontSize: '0.7rem', color: visuals.textColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                {item.score}点
+              </span>
+              <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: visuals.textColor, border: '2px solid #0d121b', boxShadow: visuals.shadow === 'none' ? 'none' : `0 0 6px ${visuals.textColor}` }} />
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${n}, 1fr)`, marginTop: '6px' }}>
+        {items.map((item) => (
+          <span key={item.key} style={{ fontSize: '0.64rem', color: '#a9a49a', textAlign: 'center', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
             {item.label}
           </span>
-        </div>
-      );
-    })}
-  </div>
-);
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const getMbtiColor = (mbtiCode: string) => {
   const code = (mbtiCode || '').toUpperCase();
@@ -3041,7 +3073,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
             <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? '今後7日間の相性' : '今後7日間の運気'} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
-              <ScoreBarChart
+              <ScoreLineChart
                 locked={!isSubscribed}
                 items={activeResult.weeklyScores.map((day, index) => ({
                   key: day.day,
@@ -3067,7 +3099,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
             <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 月次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem', marginBottom: '0.35rem' }}>
-              <ScoreBarChart
+              <ScoreLineChart
                 locked={!isSubscribed}
                 items={activeResult.monthlyPreviews.map((m, index) => ({
                   key: m.month,
@@ -3153,7 +3185,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
             <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem', marginBottom: '0.35rem' }}>
-              <ScoreBarChart
+              <ScoreLineChart
                 locked={!isSubscribed}
                 items={activeResult.yearlyPreviews.map((y, index) => ({
                   key: y.year,
