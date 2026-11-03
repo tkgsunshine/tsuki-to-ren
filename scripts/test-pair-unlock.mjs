@@ -26,11 +26,19 @@ const mockDb = (docs = {}) => {
   const ref = (name, id) => ({
     key: `${name}/${id}`,
     get: async () => ({ exists: !!docs[`${name}/${id}`], data: () => docs[`${name}/${id}`] }),
-    set: async (data, opts) => merge(`${name}/${id}`, data, opts)
+    set: async (data, opts) => merge(`${name}/${id}`, data, opts),
+    delete: async () => { delete docs[`${name}/${id}`]; }
+  });
+  const matches = (name, filters) => Object.entries(docs)
+    .filter(([k, d]) => k.startsWith(`${name}/`) && d && filters.every(([f, v]) => d[f] === v))
+    .map(([k, d]) => ({ id: k.slice(name.length + 1), data: () => d }));
+  const query = (name, filters) => ({
+    where: (f, _op, v) => query(name, [...filters, [f, v]]),
+    get: async () => ({ docs: matches(name, filters) })
   });
   return {
     docs,
-    collection: (name) => ({ doc: (id) => ref(name, id) }),
+    collection: (name) => ({ doc: (id) => ref(name, id), where: (f, _op, v) => query(name, [[f, v]]) }),
     runTransaction: async (fn) => fn({ get: (r) => r.get(), set: (r, data, opts) => merge(r.key, data, opts ?? { merge: true }) })
   };
 };
@@ -156,7 +164,7 @@ test('the partner endpoint opens today on the purchase day even after the free d
 });
 
 // ---- 登録なしの購入（guest checkout, checkout-claim.js） ----
-import claim, { resolveCheckoutAccount, CLAIMS } from '../api/_lib/checkout-claim.js';
+import claim, { resolveCheckoutAccount, transferGuestPurchases, CLAIMS } from '../api/_lib/checkout-claim.js';
 
 const guestAuth = (existing = {}) => {
   const calls = { created: [] };
@@ -164,7 +172,7 @@ const guestAuth = (existing = {}) => {
     calls,
     verifyIdToken: async () => { throw new Error('no token'); },
     getUserByEmail: async (e) => { if (existing[e]) return { uid: existing[e] }; throw new Error('auth/user-not-found'); },
-    createUser: async ({ email, emailVerified }) => { calls.created.push({ email, emailVerified }); return { uid: `new_${email}` }; },
+    createUser: async (props = {}) => { calls.created.push(props); return { uid: `new_u${calls.created.length}` }; },
     createCustomToken: async (uid) => `token_${uid}`
   };
 };
@@ -195,14 +203,54 @@ test('resolveCheckoutAccount creates an account for a new email once, and reuses
   const auth = guestAuth();
   const session = paidSession({ client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'Buyer@Example.com ' } });
   const first = await resolveCheckoutAccount(db, auth, session);
-  assert.deepEqual(first, { uid: 'new_buyer@example.com', created: true });
-  assert.equal(auth.calls.created[0].emailVerified, false);
-  // a retried webhook keeps created=true even though the user now exists
-  const again = await resolveCheckoutAccount(db, guestAuth({ 'buyer@example.com': 'new_buyer@example.com' }), session);
-  assert.deepEqual(again, { uid: 'new_buyer@example.com', created: true });
-  // a different session with the same, now existing, email joins the existing account
-  const other = await resolveCheckoutAccount(db, guestAuth({ 'buyer@example.com': 'new_buyer@example.com' }), paidSession({ id: 'cs_2', client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'buyer@example.com' } }));
-  assert.deepEqual(other, { uid: 'new_buyer@example.com', created: false });
+  assert.deepEqual(first, { uid: 'new_u1', created: true });
+  // the auto-created account carries NO email: paying does not prove the payer owns the address,
+  // and an email-bearing account could be claimed ahead of the address's real owner
+  assert.deepEqual(auth.calls.created[0], {});
+  assert.equal(db.docs[`${CLAIMS}/cs_1`].email, 'buyer@example.com');
+  // a retried webhook keeps created=true and the same uid (from the claim, not from auth)
+  const again = await resolveCheckoutAccount(db, guestAuth(), session);
+  assert.deepEqual(again, { uid: 'new_u1', created: true });
+  // when a registered account already owns the email, the purchase joins it and no token is issued
+  const other = await resolveCheckoutAccount(db, guestAuth({ 'buyer@example.com': 'u_registered' }), paidSession({ id: 'cs_2', client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'buyer@example.com' } }));
+  assert.deepEqual(other, { uid: 'u_registered', created: false });
+});
+
+test('a verified sign-in with the purchase email takes over the guest purchases', async () => {
+  const db = mockDb();
+  const session = paidSession({ id: 'cs_tr_000000000001', client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'victim@example.com' } });
+  const account = await resolveCheckoutAccount(db, guestAuth(), session);
+  await recordPairPurchase(db, session, Date.now(), account.uid);
+  db.docs[`premium/${account.uid}`] = { active: true, subscriptionId: 'sub_g1', livemode: true };
+  const retagged = [];
+  const stripe = { subscriptions: { update: async (id, params) => retagged.push([id, params.metadata.uid]) } };
+  // the real owner of the email signs in (verified); the attacker's orphan account loses the purchases
+  await transferGuestPurchases(db, { uid: 'u_real', email: 'Victim@example.com' }, { stripe });
+  assert.ok(db.docs['pairUnlocks/u_real'].partners[KEY]);
+  assert.equal(db.docs[`pairUnlocks/${account.uid}`], undefined);
+  assert.equal(db.docs['premium/u_real'].subscriptionId, 'sub_g1');
+  assert.equal(db.docs[`premium/${account.uid}`], undefined);
+  assert.deepEqual(retagged, [['sub_g1', 'u_real']]);
+  assert.equal(db.docs[`${CLAIMS}/cs_tr_000000000001`].transferred, true);
+  // marked transferred: a second verified sign-in with the same email moves nothing
+  await transferGuestPurchases(db, { uid: 'u_other', email: 'victim@example.com' }, { stripe });
+  assert.ok(db.docs['pairUnlocks/u_real'].partners[KEY]);
+  assert.equal(db.docs['pairUnlocks/u_other'], undefined);
+  // an unverified sign-in (verifyUser passes no email) moves nothing
+  await transferGuestPurchases(db, { uid: 'u_unverified' }, { stripe });
+  assert.equal(db.docs['pairUnlocks/u_unverified'], undefined);
+});
+
+test('a live membership of the real account is never overwritten by a transferred one', async () => {
+  const db = mockDb();
+  const session = paidSession({ id: 'cs_tr_000000000002', client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'both@example.com' } });
+  const account = await resolveCheckoutAccount(db, guestAuth(), session);
+  db.docs[`premium/${account.uid}`] = { active: true, subscriptionId: 'sub_guest', livemode: true };
+  db.docs['premium/u_member'] = { active: true, subscriptionId: 'sub_own', livemode: true };
+  await transferGuestPurchases(db, { uid: 'u_member', email: 'both@example.com' }, { stripe: { subscriptions: { update: async () => { throw new Error('must not retag'); } } } });
+  assert.equal(db.docs['premium/u_member'].subscriptionId, 'sub_own');
+  assert.equal(db.docs[`premium/${account.uid}`].subscriptionId, 'sub_guest');
+  assert.equal(db.docs[`${CLAIMS}/cs_tr_000000000002`].transferred, true);
 });
 
 test('the webhook records a guest pair purchase under the new account', async () => {
@@ -215,7 +263,7 @@ test('the webhook records a guest pair purchase under the new account', async ()
   const res = mockRes();
   await webhook(req, res, { webhookSecret: SECRET, stripe: { webhooks: real.webhooks }, db, auth: guestAuth() });
   assert.equal(res.code, 200);
-  assert.ok(db.docs['pairUnlocks/new_buyer@example.com'].partners[KEY]);
+  assert.ok(db.docs['pairUnlocks/new_u1'].partners[KEY]);
   assert.equal(db.docs[`${CLAIMS}/cs_1`].created, true);
 });
 
@@ -245,8 +293,8 @@ test('a guest subscription gets an account and the subscription is tagged with i
   const res = mockRes();
   await webhook(req, res, { webhookSecret: SECRET, stripe, db, auth: guestAuth() });
   assert.equal(res.code, 200);
-  assert.equal(tagged, 'new_buyer@example.com');
-  assert.equal(db.docs['premium/new_buyer@example.com'].active, true);
+  assert.equal(tagged, 'new_u1');
+  assert.equal(db.docs['premium/new_u1'].active, true);
 });
 
 test('claim signs in only the account this purchase created, and only once', async () => {
@@ -262,7 +310,7 @@ test('claim signs in only the account this purchase created, and only once', asy
   await resolveCheckoutAccount(db, auth, paidSession({ id: 'cs_new_000000000', client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'buyer@example.com' } }));
   res = mockRes();
   await claim(ask('cs_new_000000000'), res, { db, auth });
-  assert.equal(res.body.token, 'token_new_buyer@example.com');
+  assert.equal(res.body.token, 'token_new_u1');
   assert.equal(res.body.email, 'buyer@example.com');
   // the token is handed out once
   res = mockRes();

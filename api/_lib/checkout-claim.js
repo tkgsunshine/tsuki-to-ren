@@ -1,15 +1,19 @@
 import { getDb, getAdminAuth } from './firestore.js';
-import { parseBody } from './stripe.js';
+import { PREMIUM, getStripe, parseBody } from './stripe.js';
+import { PAIR_UNLOCKS } from './pair-unlock.js';
 
 // 登録なしの購入（買い切り・月額とも）。
-// Stripe の決済画面で入力したメールでアカウントを自動で作り、戻ってきた端末をその場でログイン状態にする。
+// アカウントを自動で作り、戻ってきた端末をその場でログイン状態にする。
 // - Webhook が resolveCheckoutAccount でメール→アカウント（なければ作る）を解決し、checkoutClaims/{sessionId} に記録する。
 // - アプリは戻り先URLの sid（Checkout の session id。推測できない値）で POST /api/stripe/claim を呼ぶ。
 //   この購入で「新しく作られた」アカウントのときだけ、1回かぎりのログイン用トークン（custom token）を返す。
 // - すでに登録済みのメールだったときはトークンを返さない（他人のメールを入力してその人のアカウントに入る、を防ぐ）。
 //   アプリは「そのメールでログインしてください」と案内する。
-// - 作ったアカウントの emailVerified は false のまま（支払いはメールの持ち主の証明にならない）。
-//   メールリンクでログインした時点で確認済みになる。
+// - 自動で作るアカウントには**メールを付けない**（支払いはメールの持ち主の証明にならない。メール付きで作ると、
+//   まだ登録していない他人のメールを入力した買い手が、本人が後日メールリンクで登録するアカウントを先回りで
+//   乗っ取れてしまう）。メールは checkoutClaims にだけ控える。
+// - 本人がそのメールで（メールリンク等で）確認済みログインをしたとき、transferGuestPurchases が
+//   購入をそのアカウントへ引き継ぐ。買い手本人も、別の端末では同じメールでログインすれば引き継げる。
 export const CLAIMS = 'checkoutClaims';
 
 const emailOf = (session) => String(session.customer_details?.email || session.customer_email || '').trim().toLowerCase();
@@ -34,8 +38,9 @@ export async function resolveCheckoutAccount(db, auth, session) {
     try {
       uid = (await a.getUserByEmail(email)).uid;
     } catch {
-      // The buyer proves the address on their first email-link sign-in, so the address stays unverified here
-      uid = (await a.createUser({ email, emailVerified: false })).uid;
+      // No email on the account: the payer has not proven they own the address. The address lives only in
+      // this claim, and transferGuestPurchases hands the purchase to whoever signs in with it verified.
+      uid = (await a.createUser({})).uid;
       created = true;
     }
   }
@@ -49,6 +54,46 @@ export async function resolveCheckoutAccount(db, auth, session) {
     at: new Date().toISOString()
   });
   return { uid, created };
+}
+
+/**
+ * Hands guest purchases to the account that proved it owns the purchase email (a verified sign-in:
+ * verifyUser only passes `email` through when the token says email_verified). Moves pairUnlocks and the
+ * premium membership off the email-less auto-created account, retags the Stripe subscription's uid, and
+ * marks the claim transferred so this runs once per purchase. Called on every premium-status read.
+ */
+export async function transferGuestPurchases(db, user, deps = {}) {
+  const email = String(user?.email || '').trim().toLowerCase();
+  if (!email || !user?.uid) return;
+  const snap = await db.collection(CLAIMS).where('email', '==', email).where('created', '==', true).get();
+  for (const doc of snap.docs || []) {
+    const c = doc.data();
+    if (!c?.uid || c.uid === user.uid || c.transferred === true) continue;
+    const srcUnlockRef = db.collection(PAIR_UNLOCKS).doc(c.uid);
+    const unlocks = (await srcUnlockRef.get()).data();
+    if (unlocks?.partners) {
+      await db.collection(PAIR_UNLOCKS).doc(user.uid).set({ partners: unlocks.partners }, { merge: true });
+      await srcUnlockRef.delete();
+    }
+    const srcPremRef = db.collection(PREMIUM).doc(c.uid);
+    const prem = (await srcPremRef.get()).data();
+    if (prem) {
+      const target = (await db.collection(PREMIUM).doc(user.uid).get()).data();
+      if (target?.active !== true) { // never overwrite a live membership of the real account
+        await db.collection(PREMIUM).doc(user.uid).set(prem);
+        await srcPremRef.delete();
+        if (prem.subscriptionId) {
+          try {
+            const stripe = deps.stripe || getStripe();
+            await stripe.subscriptions.update(prem.subscriptionId, { metadata: { uid: user.uid } });
+          } catch (e) {
+            console.error('⚠️ Could not retag the transferred subscription:', e?.message);
+          }
+        }
+      }
+    }
+    await db.collection(CLAIMS).doc(doc.id).set({ ...c, transferred: true, transferredTo: user.uid, transferredAt: new Date().toISOString() });
+  }
 }
 
 // POST /api/stripe/claim { sessionId } → { token, email }
