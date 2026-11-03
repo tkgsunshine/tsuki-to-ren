@@ -326,6 +326,8 @@ function App() {
   // Set when the member has cancelled: the date Premium ends (Stripe stops renewal at the period end)
   const [premiumEndsOn, setPremiumEndsOn] = useState<string | null>(null);
   const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
+  // 買い切りで解放したお祝いのときのお相手の呼び方（null ならプレミアムのお祝い）
+  const [welcomePairPartner, setWelcomePairPartner] = useState<string | null>(null);
   const premiumUidRef = useRef<string | null>(null);
   useEffect(() => {
     const uid = currentUser?.uid || null;
@@ -356,7 +358,7 @@ function App() {
           setPremiumEndsOn(status.active && status.cancelAtPeriodEnd ? status.currentPeriodEnd : null);
         }
         if (status?.active && back !== 'portal') {
-          if (back === 'success') setShowPremiumWelcome(true);
+          if (back === 'success') { setWelcomePairPartner(null); setShowPremiumWelcome(true); }
           return;
         }
         if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
@@ -1109,7 +1111,8 @@ function App() {
         if (!waitForPair) return;
         if (access?.pair?.unlocked) {
           setPairReturn(null);
-          showAlert(`${san(oppName)}の鑑定を解放しました。\nトリセツと深層鑑定は、これからずっと読めます。今日の相性とLINEの助言も、今日いっぱいはすべて見られます。\nこのお相手は「保存したお相手」にも残しました。`);
+          setWelcomePairPartner(san(oppName));
+          setShowPremiumWelcome(true);
           return;
         }
         if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
@@ -3388,7 +3391,7 @@ function App() {
         </div>
       )}
 
-      <PremiumWelcomeModal isOpen={showPremiumWelcome} onClose={() => setShowPremiumWelcome(false)} />
+      <PremiumWelcomeModal isOpen={showPremiumWelcome} pairPartner={welcomePairPartner} onClose={() => setShowPremiumWelcome(false)} />
 
       {/* Premium LP Modal / Landing Page */}
       <PremiumLPModal
