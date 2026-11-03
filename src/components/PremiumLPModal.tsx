@@ -23,8 +23,8 @@ const benefits = [
     Icon: Calendar,
     color: '#5d9fc0',
     title: 'これからの7日間と、10年先までの流れ',
-    shot: '/assets/premium/timeline.webp',
-    shotAlt: '7日間の相性グラフと年ごとの運勢の画面',
+    shot: '/assets/premium/timeline-line.webp',
+    shotAlt: '7日間と月ごとの相性の折れ線グラフの画面',
     pairNote: 'pairYears',
     body: '明日から7日間の二人の相性の波と、この先10年の「結婚・同棲・運気が大きく開く時期」まで、鍵のかかっていたところをぜんぶ読めるようになりますよ。'
   },
