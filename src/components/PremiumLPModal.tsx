@@ -430,8 +430,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textAlign: 'center' }}>
                   <div style={{ padding: '0.55rem 0.5rem', textAlign: 'left' }}>できること</div>
                   {(pairFirst
-                    ? ['¥480/買い切り', '全部 ¥980/月']
-                    : ['全部 ¥980/月', '¥480/買い切り']
+                    ? ['¥480/買い切り', '¥980/月']
+                    : ['¥980/月', '¥480/買い切り']
                   ).map((h, i) => (
                     <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4 }}>{h}</div>
                   ))}
@@ -449,7 +449,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     <div key={row.label} style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.06)', background: idx % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
                       <div style={{ padding: '0.5rem', lineHeight: 1.45 }}>{row.label}</div>
                       {cells.map((c, i) => (
-                        <div key={i} style={{ padding: '0.5rem 0.25rem', textAlign: 'center', alignSelf: 'center', whiteSpace: 'pre-line', lineHeight: 1.4, color: c ? '#8ecaa5' : '#6b665c', fontWeight: c ? 600 : 400 }}>{c ?? '−'}</div>
+                        <div key={i} style={{ padding: '0.5rem 0.25rem', textAlign: 'center', alignSelf: 'center', whiteSpace: 'pre-line', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.4, color: c ? '#8ecaa5' : '#6b665c', fontWeight: c ? 600 : 400 }}>{c ?? '−'}</div>
                       ))}
                     </div>
                   );
