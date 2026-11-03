@@ -1055,8 +1055,15 @@ function App() {
           if (cancelled) return;
           if (!r.pending) {
             if (r.token) {
-              // この購入で新しく作られたアカウント。1回かぎりのトークンでそのままログイン
-              await signInWithCustomToken(auth, r.token);
+              // この購入で新しく作られたアカウント。1回かぎりのトークンでそのままログイン。
+              // トークンは使い切りなので、失敗してもclaimを呼び直さない（呼び直すと「登録済みのメール」と誤って案内してしまう）
+              try {
+                await signInWithCustomToken(auth, r.token);
+              } catch (e) {
+                console.error('Could not sign in with the checkout token:', e);
+                showAlert('お支払いを受け付けました。\n自動でログインできなかったので、決済のときに入力したメールでログインしてください。購入はそのアカウントに引き継がれます。');
+                setShowAuthModal(true);
+              }
             } else if (r.email) {
               showAlert(`お支払いを受け付けました。\n「${r.email}」は登録済みのメールです。このメールでログインすると、購入が反映されます。`);
               setShowAuthModal(true);
