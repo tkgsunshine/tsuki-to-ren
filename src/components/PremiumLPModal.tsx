@@ -383,7 +383,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   ))}
                 </div>
                 {[
-                  { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: 'ずっと', monthly: '全員分' },
+                  { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: `${pair.name}だけ\n（ずっと）`, monthly: '全員分' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: '買った日だけ', monthly: '毎日' },
                   { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭だけ', monthly: '全文' },
@@ -395,7 +395,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     <div key={row.label} style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.06)', background: idx % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
                       <div style={{ padding: '0.5rem', lineHeight: 1.45 }}>{row.label}</div>
                       {cells.map((c, i) => (
-                        <div key={i} style={{ padding: '0.5rem 0.25rem', textAlign: 'center', alignSelf: 'center', color: c ? '#8ecaa5' : '#6b665c', fontWeight: c ? 600 : 400 }}>{c ?? '−'}</div>
+                        <div key={i} style={{ padding: '0.5rem 0.25rem', textAlign: 'center', alignSelf: 'center', whiteSpace: 'pre-line', lineHeight: 1.4, color: c ? '#8ecaa5' : '#6b665c', fontWeight: c ? 600 : 400 }}>{c ?? '−'}</div>
                       ))}
                     </div>
                   );
