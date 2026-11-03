@@ -576,6 +576,56 @@ export const updateEmailSubscriptionProfile = async (
   }
 };
 
+// ---- Daily mail ON by default for new members ----
+// A new account (made within NEW_ACCOUNT_WINDOW_MS) gets the 8:00 mail turned on once, the first time it can be:
+// a verified email and a birth date are needed. Until then the account stays "pending" on this device (e.g. X sign-in
+// without an address: it turns on when the member adds one). Existing members and anyone who already has a
+// subscription document (including one turned OFF) are never touched.
+const NEW_ACCOUNT_WINDOW_MS = 48 * 3600 * 1000;
+const DEFAULT_MAIL_KEY = 'hasu_notify_default';
+
+export type DefaultMailResult =
+  | { status: 'enabled'; data: EmailSubscriptionData }
+  | { status: 'wait' }   // not possible yet (no verified email / no birth date / read failed): try again later
+  | { status: 'skip' };  // not a new account, or it already has a subscription: never again for this account
+
+export const enableDailyMailForNewMember = async (
+  build: (email: string) => EmailSubscriptionData | null
+): Promise<DefaultMailResult> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) return { status: 'wait' };
+  const key = `${DEFAULT_MAIL_KEY}_${user.uid}`;
+  const state = safeGetItem(key);
+  if (state === 'done') return { status: 'skip' };
+  if (state !== 'pending') {
+    const created = Date.parse(user.metadata.creationTime || '');
+    if (!created || Date.now() - created > NEW_ACCOUNT_WINDOW_MS) {
+      safeSetItem(key, 'done');
+      return { status: 'skip' };
+    }
+    safeSetItem(key, 'pending');
+  }
+  if (await isGuestAccount()) {
+    safeSetItem(key, 'done'); // purchase-only account: the buyer signs in with the purchase email instead
+    return { status: 'skip' };
+  }
+  if (!user.email || !user.emailVerified) return { status: 'wait' };
+  try {
+    const snap = await getDoc(doc(db, 'subscriptions', user.uid));
+    if (snap.exists()) {
+      safeSetItem(key, 'done');
+      return { status: 'skip' };
+    }
+  } catch {
+    return { status: 'wait' };
+  }
+  const data = build(user.email.toLowerCase());
+  if (!data) return { status: 'wait' };
+  if (!(await saveEmailSubscriptionData(data))) return { status: 'wait' };
+  safeSetItem(key, 'done');
+  return { status: 'enabled', data };
+};
+
 /**
  * Turns off the signed-in user's daily fortune email notification
  */
