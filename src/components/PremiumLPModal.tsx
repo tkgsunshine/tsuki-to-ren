@@ -16,6 +16,7 @@ const benefits = [
     title: '今日のLINEの送り方と、二人のLINEのコツ',
     shot: '/assets/premium/line.webp',
     shotAlt: '本日のLINE吉時間とアプローチ助言、二人のLINEのコツの画面',
+    pairNote: 'pairToday',
     body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。返信が遅いときの理由や気持ちが伝わるコツも、二人に合わせてお伝えしますね。'
   },
   {
@@ -24,6 +25,7 @@ const benefits = [
     title: 'これからの7日間と、10年先までの流れ',
     shot: '/assets/premium/timeline.webp',
     shotAlt: '7日間の相性グラフと年ごとの運勢の画面',
+    pairNote: 'pairYears',
     body: '明日から7日間の二人の相性の波と、この先10年の「結婚・同棲・運気が大きく開く時期」まで、鍵のかかっていたところをぜんぶ読めるようになりますよ。'
   },
   {
@@ -32,6 +34,7 @@ const benefits = [
     title: 'あの人のトリセツと、6つの相性グラフ',
     shot: '/assets/premium/torisetsu.webp',
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
+    pairNote: 'pairAll',
     body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、ぜんぶ見られます。'
   },
   {
@@ -560,7 +563,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <div style={{ marginTop: '0.8rem' }}>
               <CharBubble who="ren" small>
                 そういうときこそ、気持ちだけで動かずに、相手の流れを知っておくのが近道です。<br />
-                プレミアムでできることを、順番に整理してお伝えしますね。
+                月額でできることを、順番に整理してお伝えしますね。
               </CharBubble>
             </div>
           </div>
@@ -568,9 +571,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {/* できること */}
           <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-              プレミアムでできること
+              月額980円でできること
             </h2>
-            {benefits.map(({ Icon, color, title, body, shot, shotAlt }) => (
+            {benefits.map(({ Icon, color, title, body, shot, shotAlt, pairNote }) => (
               <div key={title} className="glass-panel" style={{
                 padding: '0.9rem 1rem',
                 display: 'flex',
@@ -598,6 +601,15 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f3efe6' }}>
                     {title}
                   </span>
+                  {pairNote && (
+                    <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
+                      {pairNote === 'pairAll'
+                        ? `¥680の買い切りでも見られます（${pair ? pairWho : "お相手1人"}だけ）`
+                        : pairNote === 'pairYears'
+                          ? `10年先の流れは¥680の買い切りでも（${pair ? pairWho : "お相手1人"}だけ）`
+                          : '¥680の買い切りは購入日だけ'}
+                    </span>
+                  )}
                   <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
                     {body}
                   </p>
