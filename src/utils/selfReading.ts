@@ -146,7 +146,7 @@ export function getSelfReading(pillar: string, star: string, mbti?: string): Sel
     ? [
         { label: 'ふだんのあなた', text: CORE_MBTI[code] },
         { label: '恋をするとあなたは', text: LOVE_MBTI[code] },
-        { label: 'もう一つの顔（生まれた日の星から）', text: core },
+        { label: 'もう一つの顔', text: core },
         { label: 'ついやってしまうこと', text: HABIT_MBTI[code] }
       ]
     : [

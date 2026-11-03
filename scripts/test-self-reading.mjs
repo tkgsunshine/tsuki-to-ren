@@ -30,7 +30,7 @@ test('self reading: the love line follows the traditional twelve stages of the d
   // 16タイプを選ぶと恋愛は16タイプの文、生まれた日の星は3つ目に
   const r = getSelfReading('戊申', '一白水星 (水)', 'ESTP');
   assert.match(r.items[1].text, /ノリと勢い/);
-  assert.equal(r.items[2].label, 'もう一つの顔（生まれた日の星から）');
+  assert.equal(r.items[2].label, 'もう一つの顔');
 });
 
 test('self reading: no technical words on screen', () => {

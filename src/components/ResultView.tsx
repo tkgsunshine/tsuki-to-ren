@@ -158,6 +158,18 @@ const CharHeadingIcon: React.FC<{ char: '月' | '蓮'; size?: number }> = ({ cha
   />
 );
 
+// 本文の中の「【二人の性格・コミュニケーションの相性】」のような1行だけの見出しは、本文と区別できる小見出しにする
+const SECTION_HEADING_RE = /^【([^】]{2,30})】$/u;
+
+const renderSectionHeading = (line: string): React.ReactNode => {
+  const h = line.trim().match(SECTION_HEADING_RE);
+  return (
+    <span style={{ display: 'block', margin: '0.9rem 0 0.15rem', paddingLeft: '0.55rem', borderLeft: '3px solid #e2c074', color: '#e2c074', fontWeight: 'bold', fontSize: '0.92rem', lineHeight: 1.5 }}>
+      {h ? h[1] : line}
+    </span>
+  );
+};
+
 const renderCharHeading = (line: string, size?: number): React.ReactNode => {
   const m = line.match(CHAR_HEADING_RE);
   if (!m) return line;
@@ -174,8 +186,8 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
   const lines = text.split('\n');
   return lines.map((line, i) => (
     <React.Fragment key={i}>
-      {renderCharHeading(line, 32)}
-      {i < lines.length - 1 ? '\n' : null}
+      {SECTION_HEADING_RE.test(line.trim()) ? renderSectionHeading(line) : renderCharHeading(line, 32)}
+      {i < lines.length - 1 && !SECTION_HEADING_RE.test(line.trim()) ? '\n' : null}
     </React.Fragment>
   ));
 };
@@ -749,7 +761,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // 守護獣の保存モーダルを開く（画像タップと、その下の「※タップで保存できます」の文言タップで共通）
   const openMyGuardianSave = () => setZoomedImg({
     src: activeResult.myAvatarUrl || '',
-    headerTitle: '✦ あなたの守護獣 ✦',
+    headerTitle: `✦ ${san(myName, 'あなた')}の守護獣 ✦`,
     nickname: myName || 'あなた',
     astrologyName: activeResult.myAstrologyName || '守護獣',
     astrologyTheme: activeResult.myAstrologyTheme || '',
@@ -1380,7 +1392,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {partnerLock?.status === 'free' && (
                 <div style={{ textAlign: 'center', fontSize: '0.74rem', color: '#cfc8b8', lineHeight: 1.6 }}>
                   {partnerLock.guest
-                    ? <>{partnerCall}との今日の相性を明日も見るには、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください（登録すると、あと6日無料）</>
+                    ? <>明日からも見るなら、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください</>
                     : partnerLock.daysLeft > 0
                       ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見られます</>
                       : <>{partnerCall}との今日の相性を無料で見られるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見られます</>}
@@ -1390,7 +1402,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
                   <div style={{ fontSize: '0.8rem', color: '#e8e3d8', lineHeight: 1.65 }}>
                     {partnerLock.guest
-                      ? <>{partnerCall}との今日の相性を続けて見るには、無料会員登録をしてください。登録すると、あと6日無料で見られます。</>
+                      ? <>{partnerCall}との今日の相性を続けて見るなら、無料会員登録をしてください。</>
                       : <>{partnerCall}との無料の期間が終わりました。<br />二人の毎日の点数と助言は、プレミアム（月額980円）でずっと見られます。</>}
                   </div>
                   <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
@@ -1470,7 +1482,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
         charIcon={<CharHeadingIcon char={selectedChar === 'ren' ? '蓮' : '月'} size={30} />}
         hasOpponent={hasOpponent}
         oppName={oppNickname}
-        showFeedback={!sharedBy}
       />
 
       {/* Free Summary Section (Fully Visible) */}
@@ -1478,7 +1489,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={16} />
           {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる */}
-          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : 'あなたの基本運勢サマリー'}
+          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
         </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
           {renderTextWithCharHeadings(formatAppraisalText(activeResult.summary))}
@@ -1542,7 +1553,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
                   letterSpacing: '0.05em'
                 }}>
-                  ✦ あなたの守護獣 ✦
+                  ✦ {san(myName, 'あなた')}の守護獣 ✦
                 </span>
               </div>
 
@@ -1676,7 +1687,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Destiny Chart (命式表示) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
-                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● あなたの命式</span>
+                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● {san(myName, 'あなた')}の命式</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                   <button
                     type="button"
@@ -2421,7 +2432,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {/* 5 Detailed Appraisal Topics */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={18} />
-          {hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : 'あなたの深層鑑定結果'}
+          {hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : `${san(myName, 'あなた')}の深層鑑定結果`}
         </h2>
 
         {detailedTopics.map((topic, index) => {
@@ -3082,12 +3093,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
             <Calendar size={16} />
-            {hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : 'あなたの未来予測スケジュール'}
+            {hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : `${san(myName, 'あなた')}の未来予測スケジュール`}
           </h2>
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? `今後7日間の${san(oppNickname)}との相性` : '今後7日間のあなたの運気'} {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? `今後7日間の${san(oppNickname)}との相性` : `今後7日間の${san(myName, 'あなた')}の運気`} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
               <ScoreLineChart
                 locked={!isSubscribed}
