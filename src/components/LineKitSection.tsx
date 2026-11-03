@@ -23,7 +23,7 @@ interface Props {
   isSubscribed: boolean;
   isRegistered: boolean;
   onLockClick: () => void;
-  // ロックのボタンの文字（買い切りが買えるときは「¥480で解放」）
+  // ロックのボタンの文字（買い切りが買えるときは「¥680で解放」）
   lockWord?: string;
 }
 

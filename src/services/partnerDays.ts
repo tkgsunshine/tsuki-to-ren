@@ -8,7 +8,7 @@ export interface PartnerAccess {
   /** Free days left with this partner after today */
   daysLeft: number;
   guest: boolean;
-  /** One-time purchase for this partner (¥480): unlocked = bought, today = bought today (Japan time) */
+  /** One-time purchase for this partner (¥680): unlocked = bought, today = bought today (Japan time) */
   pair: { unlocked: boolean; today: boolean } | null;
 }
 

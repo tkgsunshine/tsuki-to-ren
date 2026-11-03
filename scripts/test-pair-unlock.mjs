@@ -98,7 +98,7 @@ test('checkout without the pair price set fails instead of selling the subscript
 });
 
 const paidSession = (over = {}) => ({
-  id: 'cs_1', mode: 'payment', payment_status: 'paid', client_reference_id: 'u1', amount_total: 480, livemode: true, customer: 'cus_1',
+  id: 'cs_1', mode: 'payment', payment_status: 'paid', client_reference_id: 'u1', amount_total: 680, livemode: true, customer: 'cus_1',
   metadata: { uid: 'u1', kind: 'pair', partner: KEY }, ...over
 });
 

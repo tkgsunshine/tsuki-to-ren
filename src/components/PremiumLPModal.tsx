@@ -110,7 +110,7 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
   );
 };
 
-/** 買い切り「お相手1人の深層鑑定」（¥480）。いま見ている鑑定にお相手がいるときだけ渡される */
+/** 買い切り「お相手1人の深層鑑定」（¥680）。いま見ている鑑定にお相手がいるときだけ渡される */
 export interface PairPlanInfo {
   /** 「◯◯さん」の形 */
   name: string;
@@ -209,7 +209,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   const faqs = [
     ...(pair ? [{
-      q: '買い切り（480円）と月額の違いは？',
+      q: '買い切り（680円）と月額の違いは？',
       a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・年次の流れ）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
@@ -360,7 +360,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 gap: '0.6rem'
               }}>
                 <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>
-                  お相手1人だけなら ¥480/買い切りも
+                  お相手1人だけなら ¥680/買い切りも
                 </p>
                 <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
                   気になる人1人のトリセツ・深層鑑定・相性グラフ・年次の流れを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
@@ -414,7 +414,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
           {showPlans && pair && <div ref={ctaMarkerRef} />}
 
-          {/* プランを選ぶ（買い切り ¥480 と 月額 ¥980 を1枚で見比べる） */}
+          {/* プランを選ぶ（買い切り ¥680 と 月額 ¥980 を1枚で見比べる） */}
           {showPlans && pair && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -430,8 +430,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textAlign: 'center' }}>
                   <div style={{ padding: '0.55rem 0.5rem', textAlign: 'left' }}>できること</div>
                   {(pairFirst
-                    ? ['¥480/買い切り', '¥980/月']
-                    : ['¥980/月', '¥480/買い切り']
+                    ? ['¥680/買い切り', '¥980/月']
+                    : ['¥980/月', '¥680/買い切り']
                   ).map((h, i) => (
                     <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4 }}>{h}</div>
                   ))}
@@ -456,11 +456,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 })}
               </div>
               <p style={{ fontSize: '0.68rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.5rem 0 0.8rem' }}>
-                ※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥480で買ったお相手は2人の枠に数えません）。
+                ※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥680で買ったお相手は2人の枠に数えません）。
               </p>
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
-                  {pair.name}のことを今日じっくり知りたいなら、¥480で十分ですよ。<br />
+                  {pair.name}のことを今日じっくり知りたいなら、¥680で十分ですよ。<br />
                   毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。<br />
                   どちらも会員登録なしで購入できます。
                 </CharBubble>
@@ -522,13 +522,13 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                         cursor: 'pointer'
                       }}
                     >
-                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（480円/買い切り）`}
+                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（680円/買い切り）`}
                     </button>
                   )
                 )}
               </div>
               <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                ¥480は1回払いで、自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。
+                ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。
               </p>
             </div>
           )}
@@ -903,7 +903,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 padding: '0.1rem'
               }}
             >
-              {pairWho}だけなら 買い切り480円で解放する
+              {pairWho}だけなら 買い切り680円で解放する
             </button>
           )}
         </div>

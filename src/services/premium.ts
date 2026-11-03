@@ -73,7 +73,7 @@ export const claimCheckout = async (sessionId: string): Promise<{ pending: boole
   return { pending: false, token: data.token ?? null, email: data.email ?? null };
 };
 
-/** One-time purchase (¥480) of one partner's reading, identified by the partner's birth date. */
+/** One-time purchase (¥680) of one partner's reading, identified by the partner's birth date. */
 export const startPairCheckout = (oppBirth: string) => postForUrl('/api/stripe/checkout', { kind: 'pair', oppBirth });
 
 /** Sends the member to Stripe's page for cancelling, changing the card and receipts. */

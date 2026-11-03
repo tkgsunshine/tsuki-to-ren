@@ -7,7 +7,7 @@ export interface SavedPartner {
   mbti: string;
   gender: 'male' | 'female';
   relationship: string;
-  /** 買い切り（お相手1人の深層鑑定 ¥480）で解放したお相手。保存上限に数えない */
+  /** 買い切り（お相手1人の深層鑑定 ¥680）で解放したお相手。保存上限に数えない */
   unlocked?: boolean;
 }
 import { Header } from './components/Header';
@@ -1020,7 +1020,7 @@ function App() {
   // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
   // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
   const [partnerLock, setPartnerLock] = useState<PartnerLock>(null);
-  // 買い切り（お相手1人 ¥480）の状態。同じ /api/stripe/partner の答えに入っている
+  // 買い切り（お相手1人 ¥680）の状態。同じ /api/stripe/partner の答えに入っている
   const [pairUnlock, setPairUnlock] = useState<PairUnlock>(null);
   // Stripe の決済から戻ったとき（?pair=success|cancel）。Webhook が数秒遅れることがあるので、解放されるまで何度か読み直す
   const [pairReturn, setPairReturn] = useState<string | null>(() => {
@@ -2977,7 +2977,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
                   <span style={{ color: '#a9a49a', flexShrink: 0 }}>販売価格</span>
-                  <span style={{ color: 'white', fontWeight: 'bold', textAlign: 'right' }}>プレミアムプラン: 月額980円 (税込)<br />お相手1人の深層鑑定（買い切り）: 480円 (税込)</span>
+                  <span style={{ color: 'white', fontWeight: 'bold', textAlign: 'right' }}>プレミアムプラン: 月額980円 (税込)<br />お相手1人の深層鑑定（買い切り）: 680円 (税込)</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>契約期間・自動更新</span>

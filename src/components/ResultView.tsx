@@ -344,7 +344,7 @@ const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
 export type PartnerLock = { status: 'checking' | 'free' | 'locked'; daysLeft: number; guest: boolean } | null;
 export type PairUnlock = { unlocked: boolean; today: boolean } | null;
 export const LOCK_WORD = '解放する';
-export const PAIR_PRICE_LABEL = '¥480';
+export const PAIR_PRICE_LABEL = '¥680';
 
 interface ResultViewProps {
   result: FortuneResult;
@@ -354,11 +354,11 @@ interface ResultViewProps {
   onRegister: (email: string) => void;
   isSubscribed: boolean;
   partnerLock?: PartnerLock;
-  // 買い切り「お相手1人の深層鑑定」（¥480）。unlocked: このお相手を買った、today: 買ったのが今日（日本時間）
+  // 買い切り「お相手1人の深層鑑定」（¥680）。unlocked: このお相手を買った、today: 買ったのが今日（日本時間）
   pairUnlock?: PairUnlock;
   onBuyPair?: () => Promise<void> | void;
   onSubscribe: () => void;
-  // 購入LPを開く。focus: 先に見せるプラン（買い切り ¥480 か 月額）
+  // 購入LPを開く。focus: 先に見せるプラン（買い切り ¥680 か 月額）
   onOpenPremiumLP?: (focus?: 'pair' | 'monthly') => void;
   selectedChar: 'ren' | 'tsuki';
   setSelectedChar: (char: 'ren' | 'tsuki') => void;
@@ -842,7 +842,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     }
   };
 
-  // 買い切り（お相手1人 ¥480）。変わらない鑑定（トリセツ・深層鑑定・6つの相性グラフ・年次の流れ）は deepOpen、
+  // 買い切り（お相手1人 ¥680）。変わらない鑑定（トリセツ・深層鑑定・6つの相性グラフ・年次の流れ）は deepOpen、
   // 毎日変わる内容（本日のアプローチ助言・二人のLINEのコツ）は todayOpen で開く。7日間・月次・朝メール・チャットは月額だけ。
   const pairOpen = hasOpponent && !sharedBy && pairUnlock?.unlocked === true;
   const deepOpen = isSubscribed || pairOpen;
@@ -859,7 +859,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     setBuyingPair(true);
     try { await onBuyPair(); } finally { setBuyingPair(false); }
   };
-  // 変わらない鑑定（トリセツ・深層鑑定・相性グラフ・年次）のロック: ¥480を先に見せたLPへ
+  // 変わらない鑑定（トリセツ・深層鑑定・相性グラフ・年次）のロック: ¥680を先に見せたLPへ
   const handleDeepLockClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (canBuyPair && onOpenPremiumLP) {
