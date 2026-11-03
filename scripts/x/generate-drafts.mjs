@@ -13,6 +13,7 @@ import { addMbtiNicks, addMbtiNicksInline } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 import { parseCardText, renderCard, EXPRESSIONS } from './lib/card.mjs';
+import { attachRankImages } from './lib/rank-card.mjs';
 import { pickColumn, COLUMN_GUIDE, withColumnUrl } from './lib/column-post.mjs';
 import fs from 'node:fs';
 
@@ -399,6 +400,12 @@ for (const it of items.filter((x) => x.card)) {
   const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(it.image));
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, await renderCard(it.card));
+}
+// 16タイプのランキングに画像を付ける（投稿用＝1・2・15・16位を隠す／返信用＝全順位。2026-11-03 運営の承認）
+for (const f of await attachRankImages(items)) {
+  const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(f.image));
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, f.png);
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);
