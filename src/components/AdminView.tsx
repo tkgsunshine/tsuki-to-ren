@@ -847,7 +847,7 @@ export default function AdminView() {
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{jst(m.createdAt)}</td>
                         <td style={c.td}>{m.email || '—'}</td>
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{m.name || '—'}</td>
-                        <td style={c.td}>{m.guest ? '購入用（自動）' : PROVIDER_LABELS[m.provider] || m.provider}</td>
+                        <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{m.guest ? '購入用（自動）' : PROVIDER_LABELS[m.provider] || m.provider}</td>
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{jst(m.lastSignInAt)}</td>
                         <td style={c.td}>{m.dailyMail ? 'ON' : '—'}</td>
                         <td style={c.td}>{m.mbti || '—'}</td>
