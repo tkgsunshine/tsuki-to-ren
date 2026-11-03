@@ -121,7 +121,7 @@ export const PremiumWelcomeModal: React.FC<PremiumWelcomeModalProps> = ({ isOpen
         </div>
 
         <h2 className="font-serif gold-text" style={{ fontSize: '1.45rem', fontWeight: 'bold', margin: '0.7rem 0 0.4rem', lineHeight: 1.4 }}>
-          {pair ? <>{pairPartner}の鑑定、<br />ぜんぶ開きました</> : 'プレミアムへようこそ'}
+          {pair ? <>{pairPartner}の鑑定が<br />解放されました</> : 'プレミアムへようこそ'}
         </h2>
         <p style={{ fontSize: '0.84rem', color: '#e6dff0', lineHeight: 1.8, margin: '0 0 1.2rem' }}>
           {pair ? (
