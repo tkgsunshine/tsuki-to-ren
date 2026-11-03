@@ -140,6 +140,10 @@ export const SOLO_BASE_CONSTANT = 70;
 // 今日の点数に足す4つの項目（天干・十二支・十二運・日の九星）は、どれも平均がプラスなので、
 // そのままだと「基本の相性より今日の方が高い」日が7割になっていた。平均（約+4.8点）を引いて、＋と−がおおよそ半々になるようにする。
 export const DAILY_CENTER_OFFSET = -5;
+// 月次・年次の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
+// 月次・年次は天干と十二支の2項目だけを足す（十二運・九星は入れていない）。2項目の平均は1人あたり約+4.1点（天干+2.3、十二支+1.8）なので、-4 で戻す。
+// 旧版は、二人分を合計（平均でなく）し、補正もなかったため、二人の鑑定で月次の100点が約7%・90点以上が約17%と出すぎていた。
+export const PERIOD_CENTER_OFFSET = -4;
 // 地支の相性・生剋影響度算出 (支合・三合・六沖・五行生剋)
 export const getBranchImpact = (branchA, branchB) => {
     if (!branchA || !branchB)
@@ -2866,7 +2870,8 @@ export function generateFortuneResult(input, character) {
         const oppStemImpact = hasOpponent ? getDailyStemImpact(mPillar.stem, oppPillarObj.stem) : 0;
         const myBranchImpact = getBranchImpact(mPillar.branch, myPillarObj.branch);
         const oppBranchImpact = hasOpponent ? getBranchImpact(mPillar.branch, oppPillarObj.branch) : 0;
-        let score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact);
+        // 今日・7日間と同じく、相手がいる場合は二人の平均にし、＋への偏りを PERIOD_CENTER_OFFSET で戻す。
+        let score = Math.floor(baseScore + pairAvg(myStemImpact, oppStemImpact) + pairAvg(myBranchImpact, oppBranchImpact) + PERIOD_CENTER_OFFSET);
         if (score > 100)
             score = 100;
         if (score < 40)
@@ -2893,7 +2898,8 @@ export function generateFortuneResult(input, character) {
         const oppStemImpact = hasOpponent ? getDailyStemImpact(yPillar.stem, oppPillarObj.stem) : 0;
         const myBranchImpact = getBranchImpact(yPillar.branch, myPillarObj.branch);
         const oppBranchImpact = hasOpponent ? getBranchImpact(yPillar.branch, oppPillarObj.branch) : 0;
-        let score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact);
+        // 月次と同じ式（二人の平均＋偏りの補正）。
+        let score = Math.floor(baseScore + pairAvg(myStemImpact, oppStemImpact) + pairAvg(myBranchImpact, oppBranchImpact) + PERIOD_CENTER_OFFSET);
         if (score > 100)
             score = 100;
         if (score < 40)
