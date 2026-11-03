@@ -524,7 +524,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                         cursor: 'pointer'
                       }}
                     >
-                      {isProcessing ? '決済画面へ移動しています...' : '¥480/買い切りで解放する'}
+                      {isProcessing ? '決済画面へ移動しています...' : 'この人だけ見れる買い切り480円で解放する'}
                     </button>
                   )
                 )}
@@ -905,7 +905,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 padding: '0.1rem'
               }}
             >
-              ¥480/買い切りで解放する
+              この人だけなら 買い切り480円で解放する
             </button>
           )}
         </div>
