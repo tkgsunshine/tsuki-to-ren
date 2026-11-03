@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X, Lock } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
-import { showConfirm } from './AppDialog';
 
 const worries = [
   '既読のまま返事がこなくて、なかなか眠れない夜',
@@ -17,14 +16,16 @@ const benefits = [
     title: '今日のLINEの送り方と、二人のLINEのコツ',
     shot: '/assets/premium/line.webp',
     shotAlt: '本日のLINE吉時間とアプローチ助言、二人のLINEのコツの画面',
+    pairNote: 'pairToday',
     body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。返信が遅いときの理由や気持ちが伝わるコツも、二人に合わせてお伝えしますね。'
   },
   {
     Icon: Calendar,
     color: '#5d9fc0',
     title: 'これからの7日間と、10年先までの流れ',
-    shot: '/assets/premium/timeline.webp',
-    shotAlt: '7日間の相性グラフと年ごとの運勢の画面',
+    shot: '/assets/premium/timeline-line.webp',
+    shotAlt: '7日間と月ごとの相性の折れ線グラフの画面',
+    pairNote: 'pairYears',
     body: '明日から7日間の二人の相性の波と、この先10年の「結婚・同棲・運気が大きく開く時期」まで、鍵のかかっていたところをぜんぶ読めるようになりますよ。'
   },
   {
@@ -33,6 +34,7 @@ const benefits = [
     title: 'あの人のトリセツと、6つの相性グラフ',
     shot: '/assets/premium/torisetsu.webp',
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
+    pairNote: 'pairAll',
     body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、ぜんぶ見られます。'
   },
   {
@@ -73,11 +75,12 @@ const speakers = {
   ren: { name: '蓮', img: '/assets/ren.webp', accent: '96, 165, 250', label: '#9cc6d8' }
 };
 
-/** 月・蓮のセリフ（アイコン付きの吹き出し） */
+/** 月・蓮のセリフ（アイコン付きの吹き出し）。会話に見えるよう、月は左から・蓮は右から話す */
 const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speakers; small?: boolean }> = ({ children, who = 'tsuki', small = false }) => {
   const sp = speakers[who];
+  const right = who === 'ren';
   return (
-    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left' }}>
+    <div style={{ display: 'flex', flexDirection: right ? 'row-reverse' : 'row', gap: '0.6rem', alignItems: 'flex-start', textAlign: 'left' }}>
       <img
         src={sp.img}
         alt={sp.name}
@@ -96,12 +99,12 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
         padding: small ? '0.7rem 0.9rem' : '0.85rem 1rem',
         background: `rgba(${sp.accent}, 0.08)`,
         border: `1px solid rgba(${sp.accent}, 0.3)`,
-        borderRadius: '4px 16px 16px 16px',
+        borderRadius: right ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
         fontSize: small ? '0.76rem' : '0.8rem',
         color: '#f0ebf5',
         lineHeight: '1.75'
       }}>
-        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem' }}>
+        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem', textAlign: right ? 'right' : 'left' }}>
           {sp.name}
         </div>
         {children}
@@ -109,6 +112,15 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
     </div>
   );
 };
+
+/** 買い切り「お相手1人の深層鑑定」（¥680）。いま見ている鑑定にお相手がいるときだけ渡される */
+export interface PairPlanInfo {
+  /** 「◯◯さん」の形 */
+  name: string;
+  /** このお相手を購入済み */
+  unlocked: boolean;
+  onBuy: () => void | Promise<void>;
+}
 
 interface PremiumLPModalProps {
   isOpen: boolean;
@@ -118,6 +130,12 @@ interface PremiumLPModalProps {
   isSubscribed: boolean;
   isRegistered: boolean;
   onRegisterFirst: () => void;
+  /** 買い切りプラン。null のときは月額だけを見せる */
+  pair?: PairPlanInfo | null;
+  /** お相手がいない（鑑定していない）ときに、お相手との鑑定画面へ移動する。買い切りの案内に使う */
+  onStartPairReading?: () => void;
+  /** 先に見せるプラン。買い切りで解放できる項目のロックから開いたときは 'pair' */
+  focus?: 'pair' | 'monthly';
   /** 解約理由を添えて、Stripe の解約・お支払い画面へ移動する */
   onCancelSubscription?: (reasons: string[], note: string) => void | Promise<void>;
   /** 解約済み（更新日で終了）のとき、その終了日（ISO）。この場合は解約アンケートを出さず、お支払い画面へ直接進む */
@@ -129,32 +147,58 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   onClose,
   onSubscribe,
   isSubscribed,
-  isRegistered,
-  onRegisterFirst,
+  onStartPairReading,
   onCancelSubscription,
-  premiumEndsOn
+  premiumEndsOn,
+  pair = null,
+  focus = 'monthly'
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [zoomShot, setZoomShot] = useState<{ src: string; alt: string } | null>(null);
+  // 下の固定の購入ボタンは、いきなり出さない。説明（教育）を読み終えてプラン・料金の所まで来たら出す（一度出たら出たまま）
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const ctaMarkerRef = useRef<HTMLDivElement | null>(null);
+  const [ctaReady, setCtaReady] = useState(false);
+  useEffect(() => {
+    if (!isOpen) { setCtaReady(false); return; }
+    const root = scrollRef.current;
+    const marker = ctaMarkerRef.current;
+    if (!root || !marker) { setCtaReady(true); return; }
+    // 目印（プラン・料金の手前）が画面の下から1/4より上に来たら出す。速くスクロールして通り過ぎた場合も出す
+    const check = () => {
+      const r = root.getBoundingClientRect();
+      if (marker.getBoundingClientRect().top < r.bottom - r.height * 0.25) {
+        setCtaReady(true);
+        root.removeEventListener('scroll', check);
+      }
+    };
+    check();
+    root.addEventListener('scroll', check, { passive: true });
+    return () => root.removeEventListener('scroll', check);
+  }, [isOpen, Boolean(pair)]);
 
   if (!isOpen) return null;
 
+  // 登録なしでも申し込める（決済のときのメールでアカウントを自動で作る）。
+  // Stripe の決済画面へ移動する。開けなかったときは App がお知らせを出し、ボタンを元に戻す
   const handleSubscribeAction = () => {
-    if (!isRegistered) {
-      showConfirm('プレミアムのお申し込みには、無料の会員登録が必要です。\n登録画面へ進みますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
-        if (!ok) return;
-        onClose();
-        onRegisterFirst();
-      });
-      return;
-    }
-
-    // Stripe の決済画面へ移動する。開けなかったときは App がお知らせを出し、ボタンを元に戻す
     setIsProcessing(true);
     void Promise.resolve(onSubscribe()).finally(() => setIsProcessing(false));
   };
+  const handlePairAction = () => {
+    if (!pair || pair.unlocked) return;
+    setIsProcessing(true);
+    void Promise.resolve(pair.onBuy()).finally(() => setIsProcessing(false));
+  };
+  // 2プランの比べ方（買い切りは、いま見ているお相手がいるときだけ）
+  const showPlans = Boolean(pair) && !isSubscribed;
+  // 買い切りボタンの「〇〇さんだけ」。名前が空のとき（san() が「お相手」を返す）は「このお相手だけ」
+  const pairWho = !pair || pair.name === 'お相手' ? 'このお相手' : pair.name;
+  // 買い切りで「今日」の内容が見られるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
+  const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
+  const pairFirst = showPlans && focus === 'pair';
 
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
   const priceCardLabel = !isSubscribed
@@ -167,6 +211,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   };
 
   const faqs = [
+    ...(pair ? [{
+      q: '買い切り（680円）と月額の違いは？',
+      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・年次の流れ）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+    }] : []),
+    {
+      q: '会員登録をしていなくても購入できますか？',
+      a: 'はい。お支払いのときに入力したメールアドレスで、アカウントを自動でお作りします。支払いが終わるとそのままログインした状態になり、別の端末では同じメールでログインすると引き継げます。'
+    },
     {
       q: 'いつでも解約できますか？',
       a: 'はい、いつでもマイページからワンタップで解約できます。解約したあとも、有効期間が終わるまではプレミアムの機能をそのまま使えますよ。'
@@ -250,7 +302,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
         </div>
 
         {/* Scrollable Content Container */}
-        <div style={{
+        <div ref={scrollRef} style={{
           flex: 1,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
@@ -298,6 +350,203 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </CharBubble>
           </div>
 
+          {/* 鑑定していない（お相手がいない）ときも、買い切りがあることは伝える。買うにはお相手の鑑定が要る */}
+          {!pair && !isSubscribed && onStartPairReading && (
+            <div style={{ padding: '0 1.15rem 1.35rem' }}>
+              <div style={{
+                border: '1px solid rgba(226, 192, 116, 0.35)',
+                borderRadius: '14px',
+                background: 'rgba(226, 192, 116, 0.06)',
+                padding: '0.95rem 1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.6rem'
+              }}>
+                <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>
+                  お相手1人だけなら ¥680/買い切りも
+                </p>
+                <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
+                  気になる人1人のトリセツ・深層鑑定・相性グラフ・年次の流れを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
+                </p>
+                <button
+                  type="button"
+                  onClick={onStartPairReading}
+                  style={{
+                    alignSelf: 'flex-start',
+                    background: 'transparent',
+                    border: '1px solid rgba(226, 192, 116, 0.6)',
+                    color: '#f2e2b3',
+                    borderRadius: '999px',
+                    padding: '0.5rem 1.1rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  お相手と鑑定する →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 教育: 無料で見えているのは入り口だけで、この先に何がわかるのかを、お相手の名前で具体的に見せる */}
+          {showPlans && pair && !pair.unlocked && (
+            <div style={{ padding: '0 1.15rem 1.35rem' }}>
+              <h2 className="font-serif gold-text" style={sectionTitleStyle}>
+                無料で見えているのは、{pair.name}のほんの入り口です
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '0.7rem' }}>
+                {([
+                  { who: 'ren', t: '刺さる言葉 TOP5 ＆ 絶対NG行動 5選', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}がキュンとする褒め方と、言うと一気に冷めてしまう一言。ここは知っておいたほうがいいです。` },
+                  { who: 'tsuki', t: '返信が遅いときの心理 ＆ 脈ありサイン 3段階', shot: '/assets/premium/edu-reply.webp', d: '既読のまま止まったとき、あの人が何を考えているのか。今どの段階にいるのか、少し離れかけたときの戻し方まで、一緒に見ていきましょうね。' },
+                  { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
+                  { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
+                  { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` }
+                ] as const).map((it) => (
+                  <CharBubble key={it.t} who={it.who} small>
+                    <span style={{ display: 'block', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.2rem' }}>
+                      <Lock size={12} style={{ verticalAlign: '-1px', marginRight: '0.3rem', color: '#e2c074' }} />{it.t}
+                    </span>
+                    {it.d}
+                    {/* 実際の画面の参考スクショ（ダミーのお相手）。タップで拡大 */}
+                    <button
+                      type="button"
+                      aria-label={`${it.t}の画面イメージを拡大して見る`}
+                      onClick={() => setZoomShot({ src: it.shot, alt: `${it.t}の画面イメージ` })}
+                      style={{ position: 'relative', display: 'block', width: '100%', marginTop: '0.55rem', padding: 0, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', background: '#0a0e14', cursor: 'zoom-in' }}
+                    >
+                      <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: 'top' }} />
+                      <span style={{ position: 'absolute', right: '0.4rem', bottom: '0.4rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(5, 7, 10, 0.75)', color: '#e8e3d8', fontSize: '0.6rem' }}>
+                        画面イメージ・タップで拡大
+                      </span>
+                    </button>
+                  </CharBubble>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {showPlans && pair && <div ref={ctaMarkerRef} />}
+
+          {/* プランを選ぶ（買い切り ¥680 と 月額 ¥980 を1枚で見比べる） */}
+          {showPlans && pair && (
+            <div style={{ padding: '0 1.15rem 1.35rem' }}>
+              <h2 className="font-serif gold-text" style={sectionTitleStyle}>
+                {pair.name}のこと、どこまで知りたいですか？
+              </h2>
+              <div style={{
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '14px',
+                overflow: 'hidden',
+                fontSize: '0.72rem',
+                color: '#e8e3d8'
+              }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textAlign: 'center' }}>
+                  <div style={{ padding: '0.55rem 0.5rem', textAlign: 'left' }}>できること</div>
+                  {(pairFirst
+                    ? ['買い切り\nプラン\n¥680', 'プレミアム\nプラン\n¥980/月']
+                    : ['プレミアム\nプラン\n¥980/月', '買い切り\nプラン\n¥680']
+                  ).map((h, i) => (
+                    <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4, whiteSpace: 'pre-line', fontSize: '0.72rem' }}>{h}</div>
+                  ))}
+                </div>
+                {[
+                  { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
+                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
+                  { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
+                  { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
+                  { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
+                  { label: 'お相手の保存', pair: '2人', monthly: '10人' }
+                ].map((row, idx) => {
+                  const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
+                  return (
+                    <div key={row.label} style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.06)', background: idx % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
+                      <div style={{ padding: '0.5rem', lineHeight: 1.45 }}>{row.label}</div>
+                      {cells.map((c, i) => (
+                        <div key={i} style={{ padding: '0.5rem 0.25rem', textAlign: 'center', alignSelf: 'center', whiteSpace: 'pre-line', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.4, color: c ? '#8ecaa5' : '#6b665c', fontWeight: c ? 600 : 400 }}>{c ?? '−'}</div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              <p style={{ fontSize: '0.68rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.5rem 0 0.8rem' }}>
+                ※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥680で買ったお相手は2人の枠に数えません）。
+              </p>
+              <div style={{ marginBottom: '0.85rem' }}>
+                <CharBubble who="tsuki" small>
+                  {pair.name}のことを今日じっくり知りたいなら、¥680で十分ですよ。<br />
+                  毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。<br />
+                  どちらも会員登録なしで購入できます。
+                </CharBubble>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                {(['monthly', 'pair'] as const).map((kind) =>
+                  kind === 'monthly' ? (
+                    <button
+                      key="monthly"
+                      type="button"
+                      disabled={isProcessing}
+                      onClick={handleSubscribeAction}
+                      style={{
+                        width: '100%',
+                        padding: '0.8rem 1rem',
+                        background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
+                        color: '#000',
+                        border: 'none',
+                        borderRadius: '9999px',
+                        fontSize: '0.9rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.03em',
+                        boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isProcessing ? '決済画面へ移動しています...' : '誰でも無制限に鑑定を見る（980円/月）'}
+                    </button>
+                  ) : pair.unlocked ? (
+                    <div key="pair" style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '9999px',
+                      border: '1px solid rgba(111, 176, 143, 0.5)',
+                      background: 'rgba(111, 176, 143, 0.08)',
+                      color: '#8ecaa5',
+                      fontSize: '0.82rem',
+                      fontWeight: 'bold',
+                      textAlign: 'center'
+                    }}>
+                      ✓ {pair.name}の鑑定は解放済みです
+                    </div>
+                  ) : (
+                    <button
+                      key="pair"
+                      type="button"
+                      disabled={isProcessing}
+                      onClick={handlePairAction}
+                      style={{
+                        width: '100%',
+                        padding: '0.8rem 1rem',
+                        borderRadius: '9999px',
+                        border: '1.5px solid rgba(226, 192, 116, 0.6)',
+                        background: 'rgba(226, 192, 116, 0.07)',
+                        color: '#f2e2b3',
+                        fontSize: '0.88rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（680円/買い切り）`}
+                    </button>
+                  )
+                )}
+              </div>
+              <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
+                ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります。
+              </p>
+            </div>
+          )}
+
           {/* こんなときに */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -325,7 +574,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <div style={{ marginTop: '0.8rem' }}>
               <CharBubble who="ren" small>
                 そういうときこそ、気持ちだけで動かずに、相手の流れを知っておくのが近道です。<br />
-                プレミアムでできることを、順番に整理してお伝えしますね。
+                プレミアムプランでできることを、順番に整理してお伝えしますね。
               </CharBubble>
             </div>
           </div>
@@ -333,9 +582,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {/* できること */}
           <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-              プレミアムでできること
+              プレミアムプラン（月額980円）でできること
             </h2>
-            {benefits.map(({ Icon, color, title, body, shot, shotAlt }) => (
+            {benefits.map(({ Icon, color, title, body, shot, shotAlt, pairNote }) => (
               <div key={title} className="glass-panel" style={{
                 padding: '0.9rem 1rem',
                 display: 'flex',
@@ -363,6 +612,15 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f3efe6' }}>
                     {title}
                   </span>
+                  {pairNote && (
+                    <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
+                      {pairNote === 'pairAll'
+                        ? `¥680の買い切りでも見られます（${pair ? pairWho : "お相手1人"}だけ）`
+                        : pairNote === 'pairYears'
+                          ? `10年先の流れは¥680の買い切りでも（${pair ? pairWho : "お相手1人"}だけ）`
+                          : '¥680の買い切りは購入日だけ'}
+                    </span>
+                  )}
                   <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
                     {body}
                   </p>
@@ -409,9 +667,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             ))}
           </div>
 
+          {!(showPlans && pair) && <div ref={ctaMarkerRef} />}
           {/* 料金 */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
-            {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き） */}
+            {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き）。
+                上でプランを見比べているとき（お相手あり）は、同じ月額ボタンが2つにならないよう出さない */}
+            {!(showPlans && pair) && (
             <button
               type="button"
               disabled={isProcessing}
@@ -451,7 +712,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 justifyContent: 'center',
                 gap: '0.4rem',
                 padding: '0.75rem 1rem',
-                background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
+                background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
                 color: '#000000',
                 borderRadius: '9999px',
                 fontSize: '0.92rem',
@@ -468,7 +729,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 )}
               </span>
             </button>
-            <div style={{ marginTop: '0.8rem' }}>
+            )}
+            <div style={{ marginTop: (showPlans && pair) ? 0 : '0.8rem' }}>
               <CharBubble who="ren" small>
                 毎朝のおまもりとして、気軽に使ってみてください。<br />
                 合わないと感じたら、マイページからいつでも解約できますよ。
@@ -563,8 +825,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           </div>
         </div>
 
-        {/* PINNED FIXED BOTTOM CTA FOOTER */}
-        <div style={{
+        {/* PINNED FIXED BOTTOM CTA FOOTER（未購読の人には、説明を読み終えてから出す） */}
+        {(isSubscribed || ctaReady) && (
+        <div className="lp-cta-footer" style={{
           padding: '0.85rem 1.25rem max(1.75rem, calc(0.85rem + env(safe-area-inset-bottom, 24px))) 1.25rem',
           background: 'rgba(12, 17, 24, 0.96)',
           backdropFilter: 'blur(16px)',
@@ -629,7 +892,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.45rem',
-                background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
+                background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
                 color: '#000000',
                 border: 'none',
                 borderRadius: '9999px',
@@ -649,7 +912,28 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               )}
             </button>
           )}
+          {!isSubscribed && pair && !pair.unlocked && (
+            <button
+              type="button"
+              disabled={isProcessing}
+              onClick={handlePairAction}
+              style={{
+                width: '100%',
+                marginTop: '0.5rem',
+                background: 'none',
+                border: 'none',
+                color: '#d8d2c6',
+                fontSize: '0.74rem',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                padding: '0.1rem'
+              }}
+            >
+              {pairWho}だけ 買い切り680円で解放する
+            </button>
+          )}
         </div>
+        )}
       </div>
 
       {zoomShot && (

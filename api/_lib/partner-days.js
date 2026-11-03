@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { getDb, getAdminAuth } from './firestore.js';
 import { PREMIUM, isLiveKey, parseBody, verifyUser } from './stripe.js';
 import { isOverrideEmail } from './premium-override.js';
+import { findPairUnlock, pairAccess } from './pair-unlock.js';
 
 // 同じお相手（同じ誕生日）との「今日の相性」は、無料では FREE_PARTNER_DAYS 日分まで。
 // 数えるのは「見た日」（日本時間）で、同じ日に何度開いても1日。朝のメールが届いた日も1日に数える。
@@ -48,7 +49,7 @@ export async function countPartnerDay(db, uid, birth, today = jstToday(), limit 
 // Only memberships from the Stripe mode in use count (same rule as stripe-status.js)
 export const isPremiumRecord = (p, live = isLiveKey()) => Boolean(p && p.active === true && (p.livemode === true) === live);
 
-// POST /api/stripe/partner { oppBirth } → today's access to this partner's daily compatibility.
+// POST /api/stripe/partner { oppBirth } → today's access to this partner's daily compatibility, and the pair purchase.
 export default async function handler(req, res, deps = {}) {
   res.setHeader('Cache-Control', 'no-store, private');
   if (req.method !== 'POST') return res.status(405).json({ status: 'error', message: 'Method not allowed' });
@@ -64,8 +65,14 @@ export default async function handler(req, res, deps = {}) {
     if (isPremiumRecord(p, deps.live ?? isLiveKey()) || isOverrideEmail(user.email, deps.premiumEmails)) {
       return res.status(200).json({ status: 'ok', premium: true, locked: false, daysLeft: null, limit: FREE_PARTNER_DAYS });
     }
-    const r = await countPartnerDay(db, user.uid, birth, deps.today || jstToday());
-    return res.status(200).json({ status: 'ok', premium: false, locked: r.locked, daysUsed: r.daysUsed, daysLeft: r.daysLeft, limit: FREE_PARTNER_DAYS });
+    const today = deps.today || jstToday();
+    const [r, unlock] = await Promise.all([
+      countPartnerDay(db, user.uid, birth, today),
+      findPairUnlock(db, user.uid, birth, deps.live ?? isLiveKey())
+    ]);
+    // pair: the one-time purchase for this partner. On the purchase day, today's compatibility is open even after the free days.
+    const pair = pairAccess(unlock, today);
+    return res.status(200).json({ status: 'ok', premium: false, locked: r.locked && !pair.today, daysUsed: r.daysUsed, daysLeft: r.daysLeft, limit: FREE_PARTNER_DAYS, pair });
   } catch (e) {
     console.error('❌ Could not count the partner day:', e?.message);
     return res.status(500).json({ status: 'error', message: 'Could not count the partner day' });

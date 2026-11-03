@@ -1,8 +1,11 @@
 import { getDb } from './firestore.js';
 import { PREMIUM, getStripe, premiumRecord } from './stripe.js';
 import { countPremium } from './analytics.js';
+import { recordPairPurchase } from './pair-unlock.js';
+import { resolveCheckoutAccount } from './checkout-claim.js';
 
-// Stripe → app: keeps premium/{uid} in step with the subscription.
+// Stripe → app: keeps premium/{uid} in step with the subscription,
+// and records one-time pair purchases (checkout.session.completed with mode=payment) in pairUnlocks/{uid}.
 // Register https://www.tsuki-to-ren.com/api/stripe/webhook in Stripe with the events below.
 // Events can arrive late or out of order, so each one re-reads the subscription from Stripe and writes its current state.
 
@@ -42,9 +45,39 @@ export default async function handler(req, res, deps = {}) {
   let fallbackUid = null;
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
+    if (session.mode === 'payment') {
+      if (session.payment_status !== 'paid') return res.status(200).json({ status: 'ignored' });
+      try {
+        const db = deps.db || getDb();
+        // A guest purchase names no account: make or find one for the payer's email (checkout-claim.js)
+        const account = await resolveCheckoutAccount(db, deps.auth ?? null, session);
+        if (!account) return res.status(200).json({ status: 'ignored' });
+        const done = await recordPairPurchase(db, session, (event.created || 0) * 1000 || Date.now(), account.uid);
+        if (done) console.log(`💳 pair purchase recorded${account.created ? ' (new account)' : ''}`);
+        return res.status(200).json({ status: done ? 'ok' : 'ignored' });
+      } catch (e) {
+        console.error('❌ Could not record the pair purchase:', e?.message);
+        return res.status(500).json({ status: 'error', message: 'Could not record the pair purchase' });
+      }
+    }
     if (session.mode !== 'subscription') return res.status(200).json({ status: 'ignored' });
     subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
     fallbackUid = session.client_reference_id || session.metadata?.uid || null;
+    if (!fallbackUid) {
+      // 登録なしの購入: make or find the account for the payer's email, and put its uid on the
+      // subscription so later events (updated/deleted) know whose membership it is
+      const account = await resolveCheckoutAccount(deps.db || getDb(), deps.auth ?? null, session).catch((e) => {
+        console.error('❌ Could not resolve the account for a guest subscription:', e?.message);
+        return null;
+      });
+      if (!account) return res.status(200).json({ status: 'ignored' });
+      fallbackUid = account.uid;
+      try {
+        await stripe.subscriptions.update(subscriptionId, { metadata: { uid: account.uid } });
+      } catch (e) {
+        console.error('⚠️ Could not tag the subscription with its uid:', e?.message);
+      }
+    }
   } else if (SUBSCRIPTION_EVENTS.has(event.type)) {
     subscriptionId = event.data.object.id;
   } else {

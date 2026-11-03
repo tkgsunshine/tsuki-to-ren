@@ -280,6 +280,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
             </span>
 
             <PremiumUnlockButton
+              label="解放する"
               onClick={() => {
                 if (onOpenPremiumLP) onOpenPremiumLP();
                 else if (onOpenAuth) onOpenAuth();

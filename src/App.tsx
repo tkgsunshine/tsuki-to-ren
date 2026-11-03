@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 
 export interface SavedPartner {
   id: string;
@@ -7,6 +7,8 @@ export interface SavedPartner {
   mbti: string;
   gender: 'male' | 'female';
   relationship: string;
+  /** 買い切り（お相手1人の深層鑑定 ¥680）で解放したお相手。保存上限に数えない */
+  unlocked?: boolean;
 }
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
@@ -33,17 +35,18 @@ import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
 import { trackFortune, trackPremiumStep } from './services/analytics';
-import { subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { signInWithCustomToken } from 'firebase/auth';
+import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
 import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
-import { fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPremiumCheckout } from './services/premium';
-import { fetchPartnerAccess } from './services/partnerDays';
+import { claimCheckout, fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPairCheckout, startPremiumCheckout } from './services/premium';
+import { fetchPartnerAccess, readCachedPartnerAccess, writeCachedPartnerAccess } from './services/partnerDays';
 import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFromPath, type NavState, type OverlayName, type PageFields, type SettingsSubView } from './utils/navHistory';
 import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
 import { decideSync, sameProfile, samePartners, type SyncProfile } from './utils/userDataSync';
-import type { PartnerLock } from './components/ResultView';
+import type { PairUnlock, PartnerLock } from './components/ResultView';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -323,6 +326,8 @@ function App() {
   // Set when the member has cancelled: the date Premium ends (Stripe stops renewal at the period end)
   const [premiumEndsOn, setPremiumEndsOn] = useState<string | null>(null);
   const [showPremiumWelcome, setShowPremiumWelcome] = useState(false);
+  // 買い切りで解放したお祝いのときのお相手の呼び方（null ならプレミアムのお祝い）
+  const [welcomePairPartner, setWelcomePairPartner] = useState<string | null>(null);
   const premiumUidRef = useRef<string | null>(null);
   useEffect(() => {
     const uid = currentUser?.uid || null;
@@ -353,7 +358,7 @@ function App() {
           setPremiumEndsOn(status.active && status.cancelAtPeriodEnd ? status.currentPeriodEnd : null);
         }
         if (status?.active && back !== 'portal') {
-          if (back === 'success') setShowPremiumWelcome(true);
+          if (back === 'success') { setWelcomePairPartner(null); setShowPremiumWelcome(true); }
           return;
         }
         if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
@@ -365,11 +370,8 @@ function App() {
     return () => { cancelled = true; };
   }, [currentUser?.uid]);
 
+  // 登録なしでも申し込める（Stripeで入力したメールでアカウントを自動で作る）
   const handleStartCheckout = async () => {
-    if (!isRegistered) {
-      setShowAuthModal(true);
-      return;
-    }
     trackPremiumStep('checkout');
     try {
       await startPremiumCheckout();
@@ -386,6 +388,12 @@ function App() {
     }
   };
   const [showPremiumLP, setShowPremiumLP] = useState(false);
+  // LPで先に見せるプラン。買い切りで解放できる項目のロックからは 'pair'、毎日の内容のロックからは 'monthly'
+  const [premiumLPFocus, setPremiumLPFocus] = useState<'pair' | 'monthly'>('monthly');
+  const openPremiumLP = (focus: 'pair' | 'monthly' = 'monthly') => {
+    setPremiumLPFocus(focus);
+    setShowPremiumLP(true);
+  };
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news'>(initialRoute.settingsSubView);
@@ -900,6 +908,8 @@ function App() {
     setEditPartnerRel(partner.relationship);
   };
 
+  // 解放済みのお相手の生年月日を変える確認で「変更する」を押したあと、もう一度保存を通すため
+  const confirmedUnlockEditRef = useRef(false);
   const saveEditPartner = () => {
     if (!editingPartnerId) return;
     if (!editPartnerBirth || editPartnerBirth.length < 10) {
@@ -927,7 +937,23 @@ function App() {
       return;
     }
     const before = savedPartners.find(p => p.id === editingPartnerId);
-    const updated = savedPartners.map(p => (p.id === editingPartnerId ? { ...p, ...fields } : p));
+    // 買い切りで解放したお相手は生年月日で決まる。生年月日を変えると、この行は解放の対象ではなくなる
+    const leavesUnlock = Boolean(before?.unlocked && before.birth !== fields.birth);
+    if (leavesUnlock && !confirmedUnlockEditRef.current) {
+      const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+      // 解放済みは保存の上限に数えていないので、外れると上限を超えることがある
+      if (savedPartners.filter((x) => !x.unlocked).length + 1 > limit) {
+        showAlert(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
+        return;
+      }
+      showConfirm(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n\n解放は生年月日で決まるため、生年月日を変えると、変更後のお相手は解放されていない状態になります（もう一度購入が必要です）。\n元の生年月日（${before?.birth.replace(/-/g, '/')}）の購入はなくならず、元に戻せばまた見られます。\n\n名前・16タイプ・性別だけの変更なら、解放はそのままです。\n\n本当に生年月日を変えますか？`, { okLabel: 'それでも変更する', danger: true }).then(ok => {
+        if (!ok) return;
+        confirmedUnlockEditRef.current = true;
+        try { saveEditPartner(); } finally { confirmedUnlockEditRef.current = false; }
+      });
+      return;
+    }
+    const updated = savedPartners.map(p => (p.id === editingPartnerId ? { ...p, ...fields, ...(leavesUnlock ? { unlocked: false } : {}) } : p));
     setSavedPartners(updated);
     setEditingPartnerId(null);
     // If this partner is the one the daily mail is about, the mail follows the edit
@@ -940,7 +966,8 @@ function App() {
   // Checks the saved-partner limit for the member level; shows the upgrade prompt and returns false when full
   const canAddPartner = () => {
     const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
-    if (savedPartners.length >= limit) {
+    // 買い切りで解放したお相手は上限に数えない
+    if (savedPartners.filter((x) => !x.unlocked).length >= limit) {
       if (!isRegistered) {
         showConfirm(`非会員の保存上限（1人）に達しています。\n無料会員登録を行うと最大2人まで保存できます。無料登録しますか？`, { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
@@ -1013,21 +1040,126 @@ function App() {
   // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
   // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
   const [partnerLock, setPartnerLock] = useState<PartnerLock>(null);
+  // 買い切り（お相手1人 ¥680）の状態。同じ /api/stripe/partner の答えに入っている
+  const [pairUnlock, setPairUnlock] = useState<PairUnlock>(null);
+  // Stripe の決済から戻ったとき（?pair=success|cancel）。Webhook が数秒遅れることがあるので、解放されるまで何度か読み直す
+  const [pairReturn, setPairReturn] = useState<string | null>(() => {
+    const v = new URLSearchParams(window.location.search).get('pair');
+    if (!v) return null;
+    const params = new URLSearchParams(window.location.search);
+    params.delete('pair');
+    const qs = params.toString();
+    window.history.replaceState(window.history.state, '', window.location.pathname + (qs ? `?${qs}` : ''));
+    return v;
+  });
+  // 登録なしの購入から戻ったとき（?sid=...）。Webhookが作ったアカウントで、この端末をログイン状態にする
+  const [checkoutSid] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const v = params.get('sid');
+    if (!v) return null;
+    params.delete('sid');
+    const qs = params.toString();
+    window.history.replaceState(window.history.state, '', window.location.pathname + (qs ? `?${qs}` : ''));
+    return v;
+  });
+  useEffect(() => {
+    if (!checkoutSid) return;
+    let cancelled = false;
+    (async () => {
+      const auth = getFirebaseAuth();
+      await auth.authStateReady();
+      if (cancelled || auth.currentUser) return; // ログイン中に買ったときは sid が付かない。付いていても何もしない
+      for (let i = 0; i < 8; i++) {
+        try {
+          const r = await claimCheckout(checkoutSid);
+          if (cancelled) return;
+          if (!r.pending) {
+            if (r.token) {
+              // この購入で新しく作られたアカウント。1回かぎりのトークンでそのままログイン。
+              // トークンは使い切りなので、失敗してもclaimを呼び直さない（呼び直すと「登録済みのメール」と誤って案内してしまう）
+              try {
+                await signInWithCustomToken(auth, r.token);
+              } catch (e) {
+                console.error('Could not sign in with the checkout token:', e);
+                showAlert('お支払いを受け付けました。\n自動でログインできなかったので、決済のときに入力したメールでログインしてください。購入はそのアカウントに引き継がれます。');
+                setShowAuthModal(true);
+              }
+            } else if (r.email) {
+              showAlert(`お支払いを受け付けました。\n「${r.email}」は登録済みのメールです。このメールでログインすると、購入が反映されます。`);
+              setShowAuthModal(true);
+            }
+            return;
+          }
+        } catch { /* 一時的な通信エラー: 少し待ってもう一度 */ }
+        if (i < 7) await new Promise((r2) => setTimeout(r2, 2500));
+      }
+      if (!cancelled) showAlert('お支払いの確認に時間がかかっています。\n決済のときに入力したメールでログインすると、購入が反映されます。');
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutSid]);
+  // 解放したお相手は保存一覧に残し（上限に数えない）、印を付ける
+  const rememberUnlockedPartner = useCallback((birth: string, info?: { name: string; mbti: string; gender: 'male' | 'female'; relationship: string }) => {
+    setSavedPartners((prev) => {
+      const i = prev.findIndex((x) => x.birth === birth);
+      if (i >= 0) return prev[i].unlocked ? prev : prev.map((x, j) => (j === i ? { ...x, unlocked: true } : x));
+      if (!info) return prev;
+      return [...prev, { id: `${info.name}_${birth}_${Date.now()}`, name: info.name, birth, mbti: info.mbti, gender: info.gender, relationship: info.relationship, unlocked: true }];
+    });
+  }, []);
   const signedInUid = currentUser?.uid;
   useEffect(() => {
     if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || isSubscribed) {
       setPartnerLock(null);
+      setPairUnlock(null);
       return;
     }
     let cancelled = false;
-    setPartnerLock({ status: 'checking', daysLeft: 0, guest: !signedInUid });
-    fetchPartnerAccess(oppBirth).then((access) => {
-      if (cancelled) return;
-      if (!access || access.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
-      else setPartnerLock({ status: access.locked ? 'locked' : 'free', daysLeft: access.daysLeft, guest: access.guest });
-    });
+    // 今日すでに確認したお相手なら、その結果で先に表示する（再読み込みで点数が一瞬伏せられないように）
+    const cached = readCachedPartnerAccess(signedInUid, oppBirth);
+    if (cached) {
+      const a = cached.access;
+      if (!a || a.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
+      else setPartnerLock({ status: a.locked ? 'locked' : 'free', daysLeft: a.daysLeft, guest: a.guest });
+      setPairUnlock(a?.pair ?? null);
+    } else {
+      setPartnerLock({ status: 'checking', daysLeft: 0, guest: !signedInUid });
+    }
+    (async () => {
+      const waitForPair = pairReturn === 'success' && Boolean(signedInUid);
+      const tries = waitForPair ? 8 : 1;
+      for (let i = 0; i < tries; i++) {
+        const access = await fetchPartnerAccess(oppBirth);
+        if (cancelled) return;
+        if (access) writeCachedPartnerAccess(signedInUid, oppBirth, access);
+        if (!access || access.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
+        else setPartnerLock({ status: access.locked ? 'locked' : 'free', daysLeft: access.daysLeft, guest: access.guest });
+        setPairUnlock(access?.pair ?? null);
+        if (access?.pair?.unlocked) rememberUnlockedPartner(oppBirth, { name: oppName || 'お相手', mbti: oppMbti, gender: oppGender, relationship });
+        if (!waitForPair) return;
+        if (access?.pair?.unlocked) {
+          setPairReturn(null);
+          setWelcomePairPartner(san(oppName));
+          setShowPremiumWelcome(true);
+          return;
+        }
+        if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
+      }
+      if (!cancelled) {
+        setPairReturn(null);
+        showAlert('お支払いを受け付けました。解放の反映に少し時間がかかっています。\n1〜2分たってから、ページを再読み込みしてください。');
+      }
+    })();
     return () => { cancelled = true; };
-  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid]);
+  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid, pairReturn]);
+  // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
+  const handleBuyPair = async () => {
+    try {
+      await startPairCheckout(oppBirth);
+    } catch (e) {
+      showAlert(e instanceof Error ? e.message : '決済画面を開けませんでした。');
+    }
+  };
   const dailyScoreHidden = partnerLock !== null && partnerLock.status !== 'free';
 
   // Form submits
@@ -1318,7 +1450,7 @@ function App() {
               onRegister={handleRegister}
               isSubscribed={isSubscribed}
               onSubscribe={handleStartCheckout}
-              onOpenPremiumLP={() => setShowPremiumLP(true)}
+              onOpenPremiumLP={openPremiumLP}
               onOpenShareCard={() => {}}
               myName={d.myName}
               opponentName={d.mode === 'match' ? d.oppName : undefined}
@@ -1376,8 +1508,10 @@ function App() {
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
                 partnerLock={partnerLock}
+                pairUnlock={pairUnlock}
+                onBuyPair={handleBuyPair}
                 onSubscribe={handleStartCheckout}
-                onOpenPremiumLP={() => setShowPremiumLP(true)}
+                onOpenPremiumLP={openPremiumLP}
                 onOpenShareCard={() => setShowShareCard(true)}
                 myName={myName}
                 opponentName={mode === 'match' ? oppName : undefined}
@@ -1419,8 +1553,10 @@ function App() {
                 onRegister={handleRegister}
                 isSubscribed={isSubscribed}
                 partnerLock={partnerLock}
+                pairUnlock={pairUnlock}
+                onBuyPair={handleBuyPair}
                 onSubscribe={handleStartCheckout}
-                onOpenPremiumLP={() => setShowPremiumLP(true)}
+                onOpenPremiumLP={openPremiumLP}
                 onOpenShareCard={() => setShowShareCard(true)}
                 myName={myName}
                 opponentName={mode === 'match' ? oppName : undefined}
@@ -1777,7 +1913,7 @@ function App() {
 
                 {/* Premium Plan Upgrade Banner Card / Member Rank (2nd) */}
                 <div 
-                  onClick={() => setShowPremiumLP(true)}
+                  onClick={() => openPremiumLP('monthly')}
                   className="glass-panel" 
                   style={{
                     display: 'flex',
@@ -2312,9 +2448,17 @@ function App() {
             {settingsSubView === 'partners' && (
               <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.65rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
-                    保存件数: {savedPartners.length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
-                  </span>
+                  {/* 買い切りプランのお相手は上限に数えない（canAddPartner と同じ数え方） */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
+                      保存件数: {savedPartners.filter((x) => !x.unlocked).length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
+                    </span>
+                    {savedPartners.some((x) => x.unlocked) && (
+                      <span style={{ fontSize: '0.68rem', color: '#e2c074', lineHeight: 1.5 }}>
+                        ＋ 買い切りプランのお相手 {savedPartners.filter((x) => x.unlocked).length}人（保存件数とは別）
+                      </span>
+                    )}
+                  </div>
                   <span style={{ fontSize: '0.65rem', color: '#a9a49a' }}>
                     {isSubscribed ? '有料会員 (最大10人)' : (isRegistered ? '無料会員 (最大2人)' : '非会員 (最大1人)')}
                   </span>
@@ -2391,6 +2535,11 @@ function App() {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', position: 'relative' }}>
                               <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
+                              {partner.unlocked && (
+                                <div style={{ fontSize: '0.7rem', color: '#f2c27a', lineHeight: 1.6 }}>
+                                  ⚠️ 買い切りプランを購入したお相手です。生年月日を変えると、解放の対象から外れます（名前・16タイプ・性別の変更は大丈夫です）。
+                                </div>
+                              )}
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <input
                                   ref={editPartnerBirthRef}
@@ -2584,6 +2733,19 @@ function App() {
                                   {partner.mbti}
                                 </span>
                               )}
+                              {partner.unlocked && (
+                                <span style={{
+                                  fontSize: '0.6rem',
+                                  padding: '1px 6px',
+                                  borderRadius: '6px',
+                                  background: 'rgba(111, 176, 143, 0.12)',
+                                  color: '#8ecaa5',
+                                  border: '1px solid rgba(111, 176, 143, 0.35)',
+                                  fontWeight: '600'
+                                }}>
+                                  ✦ 買い切りプラン購入済み
+                                </span>
+                              )}
                             </div>
                             <span style={{ fontSize: '0.72rem', color: '#a9a49a' }}>
                               生年月日: {partner.birth.replace(/-/g, '/')}
@@ -2614,7 +2776,11 @@ function App() {
                             <button
                               type="button"
                               onClick={() => {
-                                showConfirm(`${san(partner.name)}の保存データを削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
+                                // 買い切りで解放したお相手は、消す前にはっきり知らせる（購入は消えない＝同じ生年月日で占えばまた見られる）
+                                const confirmText = partner.unlocked
+                                  ? `⚠️ ${san(partner.name)}は、買い切りプランで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見られます。\n\n本当に削除しますか？`
+                                  : `${san(partner.name)}の保存データを削除しますか？`;
+                                showConfirm(confirmText, { okLabel: partner.unlocked ? 'それでも削除する' : '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
                                 });
                               }}
@@ -2864,13 +3030,13 @@ function App() {
                   <span style={{ color: '#a9a49a' }}>電話番号</span>
                   <span style={{ color: 'white' }}>請求があった場合は遅滞なく開示します</span>
                 </div>
-                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#a9a49a' }}>販売価格</span>
-                  <span style={{ color: 'white', fontWeight: 'bold' }}>プレミアムプラン: 月額980円 (税込)</span>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
+                  <span style={{ color: '#a9a49a', flexShrink: 0 }}>販売価格</span>
+                  <span style={{ color: 'white', fontWeight: 'bold', textAlign: 'right' }}>プレミアムプラン: 月額980円 (税込)<br />お相手1人の深層鑑定（買い切り）: 680円 (税込)</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>契約期間・自動更新</span>
-                  <span style={{ color: 'white' }}>1か月ごとの自動更新のサブスクリプション（初回はお申し込み時、2回目以降は毎月の更新日に決済）。更新日までに解約手続き（自動更新の停止）を行わない限り、同一条件で1か月ごとに自動的に契約が更新され、継続課金が発生します。無料お試し期間はありません。</span>
+                  <span style={{ color: 'white' }}>1か月ごとの自動更新のサブスクリプション（初回はお申し込み時、2回目以降は毎月の更新日に決済）。更新日までに解約手続き（自動更新の停止）を行わない限り、同一条件で1か月ごとに自動的に契約が更新され、継続課金が発生します。無料お試し期間はありません。<br />お相手1人の深層鑑定（買い切り）は1回払いで、自動更新・継続課金はありません。購入したお相手（生年月日で判定）のトリセツ・深層鑑定・6つの相性グラフ・年次の流れを期間の定めなくご利用いただけます。今日の相性など毎日変わる内容は、購入日（日本時間）のみご覧いただけます。</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>支払方法</span>
@@ -3270,12 +3436,19 @@ function App() {
         </div>
       )}
 
-      <PremiumWelcomeModal isOpen={showPremiumWelcome} onClose={() => setShowPremiumWelcome(false)} />
+      <PremiumWelcomeModal isOpen={showPremiumWelcome} pairPartner={welcomePairPartner} onClose={() => setShowPremiumWelcome(false)} />
 
       {/* Premium LP Modal / Landing Page */}
       <PremiumLPModal
         isOpen={showPremiumLP}
         onClose={() => setShowPremiumLP(false)}
+        focus={premiumLPFocus}
+        pair={mode === 'match' && oppBirth && renResult ? { name: san(oppName), unlocked: pairUnlock?.unlocked === true, onBuy: handleBuyPair } : null}
+        onStartPairReading={() => {
+          setMode('match');
+          handleTabChange('home');
+          window.scrollTo({ top: 0 });
+        }}
         onSubscribe={handleStartCheckout}
         onCancelSubscription={handleOpenBillingPortal}
         isSubscribed={isSubscribed}

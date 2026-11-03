@@ -7,10 +7,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /subscriptions/{uid} {
-      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      // guest: an auto-created purchase account (api/_lib/checkout-claim.js). It never legitimately has an email,
+      // so it gets no access here (stops a buyer reading what the address's real owner saves after signing in to it).
+      allow read, delete: if request.auth != null && request.auth.uid == uid
+        && request.auth.token.get('guest', false) != true;
 
       allow create, update: if request.auth != null
         && request.auth.uid == uid
+        && request.auth.token.get('guest', false) != true
         && request.auth.token.email_verified == true
         && request.resource.data.keys().hasOnly([
           'uid', 'email', 'enabled', 'myName', 'myBirth', 'myGender', 'myMbti',

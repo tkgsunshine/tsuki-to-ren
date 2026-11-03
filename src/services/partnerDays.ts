@@ -8,6 +8,8 @@ export interface PartnerAccess {
   /** Free days left with this partner after today */
   daysLeft: number;
   guest: boolean;
+  /** One-time purchase for this partner (¥680): unlocked = bought, today = bought today (Japan time) */
+  pair: { unlocked: boolean; today: boolean } | null;
 }
 
 export const GUEST_PARTNER_DAYS = 1;
@@ -22,11 +24,11 @@ const guestAccess = (oppBirth: string): PartnerAccess => {
   try { all = JSON.parse(localStorage.getItem(GUEST_KEY) || '{}') || {}; } catch { /* blocked storage: count from zero */ }
   const entry = all[oppBirth];
   const days = Number(entry?.days) || 0;
-  if (entry?.last === today) return { locked: false, daysLeft: Math.max(0, GUEST_PARTNER_DAYS - days), guest: true };
-  if (days >= GUEST_PARTNER_DAYS) return { locked: true, daysLeft: 0, guest: true };
+  if (entry?.last === today) return { locked: false, daysLeft: Math.max(0, GUEST_PARTNER_DAYS - days), guest: true, pair: null };
+  if (days >= GUEST_PARTNER_DAYS) return { locked: true, daysLeft: 0, guest: true, pair: null };
   all[oppBirth] = { days: days + 1, last: today };
   try { localStorage.setItem(GUEST_KEY, JSON.stringify(all)); } catch { /* ignore */ }
-  return { locked: false, daysLeft: GUEST_PARTNER_DAYS - days - 1, guest: true };
+  return { locked: false, daysLeft: GUEST_PARTNER_DAYS - days - 1, guest: true, pair: null };
 };
 
 /**
@@ -47,9 +49,41 @@ export const fetchPartnerAccess = async (oppBirth: string): Promise<PartnerAcces
     });
     if (!res.ok) return null;
     const data = await res.json();
-    if (data.premium) return { locked: false, daysLeft: Number.POSITIVE_INFINITY, guest: false };
-    return { locked: data.locked === true, daysLeft: Number(data.daysLeft) || 0, guest: false };
+    if (data.premium) return { locked: false, daysLeft: Number.POSITIVE_INFINITY, guest: false, pair: null };
+    const pair = data.pair && typeof data.pair === 'object'
+      ? { unlocked: data.pair.unlocked === true, today: data.pair.today === true }
+      : null;
+    return { locked: data.locked === true, daysLeft: Number(data.daysLeft) || 0, guest: false, pair };
   } catch {
     return null;
   }
+};
+
+// 前回の確認結果（同じアカウント・同じお相手・同じ日）。再読み込みのたびに点数が一瞬伏せられないよう、
+// 確認が終わるまではこれを使う。見た目のためだけで、確認の結果が来たら必ずそちらで上書きする。
+const ACCESS_CACHE_KEY = 'hasu_partner_access';
+type CachedAccess = { day: string; access: PartnerAccess | null };
+const cacheId = (uid: string | null | undefined, oppBirth: string) => `${uid || 'guest'}|${oppBirth}`;
+
+export const readCachedPartnerAccess = (uid: string | null | undefined, oppBirth: string): { access: PartnerAccess | null } | null => {
+  try {
+    const all = JSON.parse(localStorage.getItem(ACCESS_CACHE_KEY) || '{}') as Record<string, CachedAccess>;
+    const hit = all[cacheId(uid, oppBirth)];
+    if (!hit || hit.day !== jstToday()) return null;
+    const a = hit.access;
+    return { access: a && a.daysLeft === null ? { ...a, daysLeft: Number.POSITIVE_INFINITY } : a };
+  } catch {
+    return null;
+  }
+};
+
+export const writeCachedPartnerAccess = (uid: string | null | undefined, oppBirth: string, access: PartnerAccess) => {
+  try {
+    const all = JSON.parse(localStorage.getItem(ACCESS_CACHE_KEY) || '{}') as Record<string, CachedAccess>;
+    const today = jstToday();
+    // 古い日の分は捨てる（増え続けないように）
+    for (const k of Object.keys(all)) if (all[k]?.day !== today) delete all[k];
+    all[cacheId(uid, oppBirth)] = { day: today, access };
+    localStorage.setItem(ACCESS_CACHE_KEY, JSON.stringify(all));
+  } catch { /* blocked storage: just check every time */ }
 };
