@@ -61,3 +61,15 @@ test('計測: /tools/nicchu の入口は tool:nicchu、ツールの2つの数は
   assert.equal(METRICS.tool_use, 'toolUses');
   assert.equal(METRICS.tool_cta, 'toolCtas');
 });
+
+test('調べ方の計算例（文面の数字）: 2026-10-29は基準から1032日後で13番目、2000-01-01は8766日前で55番目', async () => {
+  const { default: data } = await import('../src/data/nicchu-tool.json', { with: { type: 'json' } });
+  const DAY = 24 * 60 * 60 * 1000;
+  const days = (iso) => Math.round((Date.UTC(...iso.split('-').map((v, i) => Number(v) - (i === 1 ? 1 : 0))) - Date.UTC(2024, 0, 1)) / DAY);
+  assert.equal(days('2026-10-29'), 1032);
+  assert.equal(lookupNicchu('2026-10-29')?.no, (1032 % 60) + 1);
+  assert.equal(days('2000-01-01'), -8766);
+  assert.equal(lookupNicchu('2000-01-01')?.no, 1 - (8766 % 60) + 60);
+  const text = data.howTo.join('');
+  for (const s of ['1032日後', '余りは12', '13番目の「丙子」', '8766日前', '余りは6', '55番目の「戊午」']) assert.ok(text.includes(s), s);
+});

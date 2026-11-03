@@ -12,6 +12,8 @@ interface CompatibilityRadarChartProps {
   onOpenAuth?: () => void;
   onOpenPremiumLP?: () => void;
   character?: 'ren' | 'tsuki';
+  /** 見出しに出すお相手の呼び方（例: ゆうとさん） */
+  partnerLabel?: string;
 }
 
 export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = ({
@@ -19,7 +21,8 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
   isUnlocked = false,
   onOpenAuth,
   onOpenPremiumLP,
-  character = 'tsuki'
+  character = 'tsuki',
+  partnerLabel = 'お相手'
 }) => {
   const [demoUnlocked, setDemoUnlocked] = useState(false);
   const activeUnlocked = isUnlocked || demoUnlocked;
@@ -108,7 +111,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
           fontWeight: '700',
           margin: '0.4rem 0 0.1rem 0'
         }}>
-          二人の詳細相性レーダー
+          {partnerLabel}との詳細相性レーダー
         </h3>
         <p style={{ fontSize: '0.72rem', color: '#a9a49a', margin: 0 }}>
           四柱推命・16タイプ・九星気学を統合した精密判定
