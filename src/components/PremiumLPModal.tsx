@@ -409,10 +409,6 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   </CharBubble>
                 ))}
               </div>
-              <CharBubble who="ren" small>
-                なんとなくで動くと、同じすれ違いをくり返しやすいんです。<br />
-                {pair.name}のくせを先に知っておけば、次の一言を自分で選べるようになりますよ。
-              </CharBubble>
             </div>
           )}
 
