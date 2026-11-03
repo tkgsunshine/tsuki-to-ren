@@ -158,6 +158,18 @@ const CharHeadingIcon: React.FC<{ char: '月' | '蓮'; size?: number }> = ({ cha
   />
 );
 
+// 本文の中の「【二人の性格・コミュニケーションの相性】」のような1行だけの見出しは、本文と区別できる小見出しにする
+const SECTION_HEADING_RE = /^【([^】]{2,30})】$/u;
+
+const renderSectionHeading = (line: string): React.ReactNode => {
+  const h = line.trim().match(SECTION_HEADING_RE);
+  return (
+    <span style={{ display: 'block', margin: '0.9rem 0 0.15rem', paddingLeft: '0.55rem', borderLeft: '3px solid #e2c074', color: '#e2c074', fontWeight: 'bold', fontSize: '0.92rem', lineHeight: 1.5 }}>
+      {h ? h[1] : line}
+    </span>
+  );
+};
+
 const renderCharHeading = (line: string, size?: number): React.ReactNode => {
   const m = line.match(CHAR_HEADING_RE);
   if (!m) return line;
@@ -174,7 +186,7 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
   const lines = text.split('\n');
   return lines.map((line, i) => (
     <React.Fragment key={i}>
-      {renderCharHeading(line, 32)}
+      {SECTION_HEADING_RE.test(line.trim()) ? renderSectionHeading(line) : renderCharHeading(line, 32)}
       {i < lines.length - 1 ? '\n' : null}
     </React.Fragment>
   ));
