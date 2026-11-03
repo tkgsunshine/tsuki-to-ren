@@ -14,7 +14,7 @@ const UNLOCKED = [
 // 買い切り（¥680）で解放されたもの
 const PAIR_UNLOCKED = [
   { icon: BookHeart, text: 'トリセツと深層鑑定が、ずっと読める' },
-  { icon: Radar, text: '6つの相性グラフ・10年先の流れ' },
+  { icon: Radar, text: '6つの相性グラフも、ずっと見られる' },
   { icon: Heart, text: '今日の相性・LINEの送り方（今日だけ）' },
   { icon: Users, text: '「保存したお相手」に追加済み' }
 ];

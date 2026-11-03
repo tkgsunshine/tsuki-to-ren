@@ -22,11 +22,10 @@ const benefits = [
   {
     Icon: Calendar,
     color: '#5d9fc0',
-    title: 'これからの7日間と、10年先までの流れ',
+    title: '7日間の波から、10年先の二人の未来まで',
     shot: '/assets/premium/timeline-line.webp',
     shotAlt: '7日間と月ごとの相性の折れ線グラフの画面',
-    pairNote: 'pairYears',
-    body: '明日から7日間の二人の相性の波と、この先10年の「結婚・同棲・運気が大きく開く時期」まで、鍵のかかっていたところをぜんぶ読めるようになりますよ。'
+    body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目でわかるので、先を見すえて動けますよ。'
   },
   {
     Icon: BookOpen,
@@ -213,7 +212,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const faqs = [
     ...(pair ? [{
       q: '買い切り（680円）と月額の違いは？',
-      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・年次の流れ）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
@@ -366,7 +365,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   お相手1人だけなら ¥680/買い切りも
                 </p>
                 <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
-                  気になる人1人のトリセツ・深層鑑定・相性グラフ・年次の流れを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
+                  気になる人1人のトリセツ・深層鑑定・相性グラフを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
                 </p>
                 <button
                   type="button"
@@ -451,9 +450,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   ))}
                 </div>
                 {[
-                  { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
+                  { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
                   { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
+                  { label: '10年先までの年ごとの流れ（結婚・大きな転機の年）', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
                   { label: 'お相手の保存', pair: '2人', monthly: '10人' }
@@ -616,9 +616,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
                       {pairNote === 'pairAll'
                         ? `¥680の買い切りでも見られます（${pair ? pairWho : "お相手1人"}だけ）`
-                        : pairNote === 'pairYears'
-                          ? `10年先の流れは¥680の買い切りでも（${pair ? pairWho : "お相手1人"}だけ）`
-                          : '¥680の買い切りは購入日だけ'}
+                        : '¥680の買い切りは購入日だけ'}
                     </span>
                   )}
                   <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>

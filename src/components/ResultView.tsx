@@ -3157,7 +3157,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ fontSize: '0.74rem', color: '#e8e3d8', lineHeight: 1.6 }}>
                       <strong style={{ color: '#f2e2b3' }}>{partnerCall}のことだけ知りたい方は</strong><br />
-                      トリセツ・深層鑑定・6つの相性グラフ・年次の流れを、{PAIR_PRICE_LABEL}の1回払いでずっと読めます。買った日は、今日の相性とLINEの助言も全部見られます。
+                      トリセツ・深層鑑定・6つの相性グラフを、{PAIR_PRICE_LABEL}の1回払いでずっと読めます。買った日は、今日の相性とLINEの助言も全部見られます。
                     </div>
                     <button
                       type="button"
@@ -3329,24 +3329,24 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Yearly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!deepOpen && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem', marginBottom: '0.35rem' }}>
               <ScoreLineChart
-                locked={!deepOpen}
+                locked={!isSubscribed}
                 items={activeResult.yearlyPreviews.map((y, index) => ({
                   key: y.year,
                   label: y.year,
-                  score: lockedScore(y.score, index + 2, !deepOpen)
+                  score: lockedScore(y.score, index + 2, !isSubscribed)
                 }))}
               />
-                {!deepOpen && (
-                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleDeepLockClick}>
+                {!isSubscribed && (
+                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
                     <button
                       type="button"
                       className="premium-lock-tag"
-                      onClick={handleDeepLockClick}
+                      onClick={handleLockTagClick}
                     >
-                      <Lock size={11} /> {deepLockWord}
+                      <Lock size={11} /> {LOCK_WORD}
                     </button>
                   </div>
                 )}
@@ -3358,7 +3358,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 gap: '0.65rem'
               }}>
                 {activeResult.yearlyPreviews.map((y, index) => {
-                  const score = lockedScore(y.score, index + 2, !deepOpen);
+                  const score = lockedScore(y.score, index + 2, !isSubscribed);
                   const visuals = getScoreVisuals(score);
                   return (
                     <div key={y.year} style={{ 
@@ -3375,32 +3375,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         <span className="font-serif" style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#f8fafc' }}>
                           {y.year}：<span style={{ 
                             color: visuals.textColor,
-                            filter: deepOpen ? 'none' : 'blur(4.5px)',
-                            userSelect: deepOpen ? 'auto' : 'none'
-                          }}>{deepOpen ? y.label : '★★★'}</span>
+                            filter: isSubscribed ? 'none' : 'blur(4.5px)',
+                            userSelect: isSubscribed ? 'auto' : 'none'
+                          }}>{isSubscribed ? y.label : '★★★'}</span>
                         </span>
                       </div>
-                      <p className={deepOpen ? '' : 'timeline-blurred'} style={{
+                      <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
                         color: '#d8d2c6',
                         fontSize: '0.65rem',
                         marginTop: '0.35rem',
                         lineHeight: '1.6',
                         textAlign: 'justify',
                         letterSpacing: '0.03em',
-                        filter: deepOpen ? 'none' : 'blur(4.5px)',
-                        userSelect: deepOpen ? 'auto' : 'none',
-                        pointerEvents: deepOpen ? 'auto' : 'none'
+                        filter: isSubscribed ? 'none' : 'blur(4.5px)',
+                        userSelect: isSubscribed ? 'auto' : 'none',
+                        pointerEvents: isSubscribed ? 'auto' : 'none'
                       }}>
-                        {lockedText(y.text, !deepOpen)}
+                        {lockedText(y.text, !isSubscribed)}
                       </p>
-                      {!deepOpen && (
-                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleDeepLockClick}>
+                      {!isSubscribed && (
+                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
                           <button 
                             type="button"
                             className="premium-lock-tag" 
-                            onClick={handleDeepLockClick}
+                            onClick={handleLockTagClick}
                           >
-                            <Lock size={11} /> {deepLockWord}
+                            <Lock size={11} /> {LOCK_WORD}
                           </button>
                         </div>
                       )}
