@@ -22,25 +22,26 @@ export const SelfReadingCard: React.FC<{
   pillar: string;
   star: string;
   mbti?: string;
-  name: string;
+  name?: string;
   char: 'tsuki' | 'ren';
   charIcon: React.ReactNode;
   hasOpponent: boolean;
   oppName: string;
   /** 共有リンクから開いた他人の結果では、当たり/はずれのボタンを出さない */
   showFeedback: boolean;
-}> = ({ pillar, star, mbti, name, char, charIcon, hasOpponent, oppName, showFeedback }) => {
+}> = ({ pillar, star, mbti, char, charIcon, hasOpponent, oppName, showFeedback }) => {
   const reading = getSelfReading(pillar, star, mbti);
   const [feedback, setFeedback] = useState<'hit' | 'miss' | null>(() => (reading ? readFeedback(reading.key) : null));
   if (!reading) return null;
 
-  const who = san(name, 'あなた');
+  // 見出しの呼び方のルール: 自分＝「あなた」、お相手＝「〇〇さん」、二人のこと＝「〇〇さんとの」
+  const who = 'あなた';
   const accent = char === 'ren' ? '#9cc6d8' : '#cdbfe2';
   const opp = san(oppName);
   // 相性・運勢の鑑定の前置きとして読めるように、「〇〇との相性を見る前に、まずはあなたのことから」で始める
   const intro = hasOpponent
-    ? (char === 'ren' ? `${opp}との相性を読む前に、まず${who}がどんな人かを見ておこう。` : `${opp}との相性を見る前に、まず、${who}のことから。こんなところ、ありませんか？`)
-    : (char === 'ren' ? `運勢を読む前に、まず${who}がどんな人かを見ておこう。` : `運勢を見る前に、まず、${who}のことから。こんなところ、ありませんか？`);
+    ? (char === 'ren' ? `${opp}との相性を読む前に、まずあなたがどんな人かを見ておこう。` : `${opp}との相性を見る前に、まずはあなたのことから。こんなところ、ありませんか？`)
+    : (char === 'ren' ? `運勢を読む前に、まずあなたがどんな人かを見ておこう。` : `運勢を見る前に、まずはあなたのことから。こんなところ、ありませんか？`);
   const next = hasOpponent ? `${opp}との相性` : `${who}の運勢`;
   const afterText = feedback === 'hit'
     ? (char === 'ren' ? `やっぱりね。この性格をふまえて、${next}を読み解いていこう。` : `よかった。この性格をふまえて、${next}を見ていきましょうね。`)
@@ -70,7 +71,7 @@ export const SelfReadingCard: React.FC<{
     <>
     <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
       <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.55rem', fontWeight: 'bold', textAlign: 'center', letterSpacing: '0.05em' }}>
-        {who === 'あなた' ? 'あなたってこんな人' : `${who}ってこんな人`}
+        あなたってこんな人
       </h2>
       <p className="font-serif" style={{ display: 'flex', alignItems: 'center', fontSize: '0.84rem', color: accent, margin: '0 0 0.85rem', lineHeight: 1.6 }}>
         {charIcon}

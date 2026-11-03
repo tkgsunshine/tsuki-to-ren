@@ -688,7 +688,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   });
   const openOpponentGuardianSave = () => setZoomedImg({
     src: activeResult.opponentAvatarUrl || '',
-    headerTitle: '✦ お相手の守護獣 ✦',
+    headerTitle: `✦ ${san(oppNickname)}の守護獣 ✦`,
     nickname: opponentName || 'お相手',
     astrologyName: activeResult.opponentAstrologyName || '守護獣',
     astrologyTheme: activeResult.opponentAstrologyTheme || '',
@@ -1343,7 +1343,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           }}>
             {hasOpponent && (
               <span style={{ display: 'block', fontSize: '0.66rem', color: '#c9b98e', marginBottom: '0.25rem', letterSpacing: '0.05em' }}>
-                二人の相性ひとこと
+                {san(oppNickname)}との相性ひとこと
               </span>
             )}
             “{activeResult.oneLiner}”
@@ -1404,7 +1404,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={16} />
           {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる */}
-          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
+          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : 'あなたの基本運勢サマリー'}
         </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
           {renderTextWithCharHeadings(formatAppraisalText(activeResult.summary))}
@@ -1753,7 +1753,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
                   letterSpacing: '0.05em'
                 }}>
-                  ✦ お相手の守護獣 ✦
+                  ✦ {san(oppNickname)}の守護獣 ✦
                 </span>
               </div>
 
@@ -1852,7 +1852,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Dynamic Attributes Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
                     五行 (陰陽)
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
@@ -1866,14 +1866,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     );
                   })()}
                 </button>
-                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
                   </span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
                 </button>
-                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', 'お相手'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
@@ -1887,7 +1887,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
               {/* Destiny Chart (命式表示) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
-                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● お相手の命式</span>
+                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● {san(oppNickname)}の命式</span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                   <button
                     type="button"
@@ -2179,7 +2179,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       style={{ position: 'relative', marginTop: '0.7rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.45rem', cursor: locked ? 'pointer' : undefined }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
-                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 二人のLINEのコツ</div>
+                      <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 {san(oppNickname)}とのLINEのコツ</div>
                       <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...(preview ? {} : blurred) }}>{lockedBody(tips.intro)}</div>
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
@@ -2347,7 +2347,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {/* 5 Detailed Appraisal Topics */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={18} />
-          深層鑑定結果
+          {hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : 'あなたの深層鑑定結果'}
         </h2>
 
         {detailedTopics.map((topic, index) => {
@@ -2809,7 +2809,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             {(() => {
               const kit = buildLineKit(activeResult.opponentMbtiCode, activeResult.opponentPillar);
               return kit ? (
-                <LineKitSection kit={kit} isSubscribed={isSubscribed} isRegistered={isRegistered} onLockClick={handleLockTagClick} />
+                <LineKitSection kit={kit} isSubscribed={isSubscribed} isRegistered={isRegistered} onLockClick={handleLockTagClick} partnerLabel={san(oppNickname)} />
               ) : null;
             })()}
 
@@ -2927,7 +2927,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     ✦ プレミアムプラン解放 ✦
                   </span>
                   <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
-                    二人の取扱説明書・6軸詳細相性・未来予測をすべて解禁
+                    {san(oppNickname)}のトリセツ・6軸の詳しい相性・未来予測をすべて解禁
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
@@ -3000,6 +3000,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         onOpenAuth={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
         onOpenPremiumLP={!isRegistered ? handleScrollToRegister : onOpenPremiumLP}
         character={selectedChar}
+        partnerLabel={san(oppNickname)}
       />
       )}
 
@@ -3007,12 +3008,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
             <Calendar size={16} />
-            {hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : `${san(myName, 'あなた')}の未来予測スケジュール`}
+            {hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : 'あなたの未来予測スケジュール'}
           </h2>
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? '今後7日間の相性' : '今後7日間の運気'} {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? `今後7日間の${san(oppNickname)}との相性` : '今後7日間のあなたの運気'} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
               <div 
                 className={isSubscribed ? '' : 'timeline-blurred'} 
@@ -3248,7 +3249,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   ✦ プレミアムプラン解放 ✦
                 </span>
                 <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
-                  {hasOpponent ? '二人の未来予測スケジュールをすべて解禁' : 'あなたの未来予測スケジュールをすべて解禁'}
+                  {hasOpponent ? `${san(oppNickname)}との未来予測スケジュールをすべて解禁` : 'あなたの未来予測スケジュールをすべて解禁'}
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.4', margin: 0 }}>
                   月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。
