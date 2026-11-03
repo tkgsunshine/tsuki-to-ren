@@ -1,9 +1,10 @@
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeSource, recordEvent } from './_lib/analytics.js';
+import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, FIRST_METRICS, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeSource, recordEvent } from './_lib/analytics.js';
 import { handleInquiry } from './_lib/inquiry.js';
 
 // Receives the site's own counters: a visit (once per browser session), a fortune (each time the form is submitted),
-// a sign-up (once per new account), a share (X / LINE / link copy / image save), the premium page opened and the payment page opened.
+// a sign-up (once per new account), a share (X / LINE / link copy / image save), the paid-plan page opened and the payment page
+// opened (monthly 'checkout' / one-time pair 'checkout_pair').
 // Payments themselves are counted by the Stripe webhook, not here. Counts only; no names, birth dates or emails are sent here.
 // A sign-up must carry the new account's sign-in token, so sign-up counts cannot be forged from outside.
 // The contact form (type 'inquiry') is handled here too, so it needs no serverless function of its own: _lib/inquiry.js
@@ -36,7 +37,11 @@ export default async function handler(req, res, deps = {}) {
       const token = /^Bearer (.+)$/.exec(String(req.headers.authorization || ''))?.[1];
       if (!token) return res.status(401).json({ status: 'error', message: 'Sign-in required' });
       const auth = deps.auth || getAdminAuth();
-      const { uid } = await auth.verifyIdToken(token);
+      const decoded = await auth.verifyIdToken(token);
+      const { uid } = decoded;
+      // 登録なしの購入で自動作成されたアカウント（guest）は会員登録ではない。購入した人がそのメールで
+      // ログインし直したときに作られる本物のアカウントのほうを数える
+      if (decoded.guest === true) return res.status(204).end();
       const user = await auth.getUser(uid);
       const created = Date.parse(user.metadata?.creationTime || '');
       if (!created || Date.now() - created > SIGNUP_WINDOW_MS) return res.status(204).end();
@@ -50,7 +55,11 @@ export default async function handler(req, res, deps = {}) {
       await recordEvent(db, { type, source, landing, device, date: jstDate(new Date(created)) });
       return res.status(204).end();
     }
-    await recordEvent(db, { type, source, landing, device, channel });
+    // first = this browser session's first fortune / first look at the paid-plan page, so the funnel can count people
+    const also = [];
+    if (body.first === '1' && FIRST_METRICS[type]) also.push(FIRST_METRICS[type]);
+    if (type === 'premium_view' && body.plan === 'pair') also.push(PAIR_VIEW_METRIC);
+    await recordEvent(db, { type, source, landing, device, channel, also });
     return res.status(204).end();
   } catch (e) {
     console.error('⚠️ Could not record the event:', e?.message);

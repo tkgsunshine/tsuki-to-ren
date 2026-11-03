@@ -56,10 +56,13 @@ test('checkout without a sign-in is a guest purchase, and a broken token is stil
   let params;
   const stripe = { checkout: { sessions: { create: async (p) => { params = p; return { url: 'https://checkout.stripe.com/x' }; } } } };
   const res = mockRes();
-  await checkout({ method: 'POST', headers: {}, body: {} }, res, { auth, db: mockDb(), stripe, priceId: 'price_1' });
+  await checkout({ method: 'POST', headers: {}, body: { attrib: { source: 'google', landing: 'home', device: 'mobile_browser' } } }, res, { auth, db: mockDb(), stripe, priceId: 'price_1' });
   assert.equal(res.code, 200);
   assert.equal(params.client_reference_id, undefined);
   assert.equal(params.metadata.guest, '1');
+  // この訪問の流入元が付く（登録なしの購入を /admin で流入元ごとに数えるため）。サブスクのメタデータには付けない
+  assert.deepEqual([params.metadata.src, params.metadata.land, params.metadata.dev], ['google', 'home', 'mobile_browser']);
+  assert.equal(params.subscription_data.metadata.src, undefined);
   assert.ok(params.success_url.includes('sid={CHECKOUT_SESSION_ID}'));
 
   const bad = mockRes();

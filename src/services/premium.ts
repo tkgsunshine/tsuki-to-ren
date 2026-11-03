@@ -1,4 +1,5 @@
 import { getFirebaseAuth } from './firebase';
+import { currentAttribution } from './analytics';
 
 // Premium (月額980円) through Stripe: the app sends the member to Stripe's pages for paying and cancelling,
 // and reads the membership the webhook recorded (api/stripe/*).
@@ -47,7 +48,7 @@ const postForUrl = async (endpoint: string, body: Record<string, unknown>): Prom
   const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(auth.currentUser ? { Authorization: await authHeader() } : {}) },
-    body: JSON.stringify({ returnPath: currentPath(), ...body })
+    body: JSON.stringify({ returnPath: currentPath(), attrib: currentAttribution(), ...body })
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.url) throw new Error(data.message || 'うまく開けませんでした。時間をおいてもう一度お試しください。');

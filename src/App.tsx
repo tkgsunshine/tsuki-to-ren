@@ -34,7 +34,7 @@ import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
-import { trackFortune, trackPremiumStep } from './services/analytics';
+import { trackCheckout, trackFortune, trackPremiumView } from './services/analytics';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
@@ -393,7 +393,7 @@ function App() {
 
   // 登録なしでも申し込める（Stripeで入力したメールでアカウントを自動で作る）
   const handleStartCheckout = async () => {
-    trackPremiumStep('checkout');
+    trackCheckout('monthly');
     try {
       await startPremiumCheckout();
     } catch (e) {
@@ -1186,6 +1186,7 @@ function App() {
   }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid, pairReturn]);
   // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
   const handleBuyPair = async () => {
+    trackCheckout('pair');
     try {
       await startPairCheckout(oppBirth);
     } catch (e) {
@@ -1353,9 +1354,10 @@ function App() {
     }
   };
 
-  // プレミアム案内を開いた回数（管理画面の集計用）
+  // 有料プランの案内を開いた回数（管理画面の集計用）。買い切りで解放できるロックから開いたか（pair）、月額側か（monthly）も送る
   useEffect(() => {
-    if (showPremiumLP) trackPremiumStep('premium_view');
+    if (showPremiumLP) trackPremiumView(premiumLPFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPremiumLP]);
 
   // チャット・プレミアム案内などの重ね表示を開いたら履歴を1件積み、閉じたら外す（戻るスワイプで閉じられるように）
