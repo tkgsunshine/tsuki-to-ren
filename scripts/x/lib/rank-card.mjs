@@ -135,7 +135,7 @@ export async function renderRankCard({ text, replyText = '', reveal = false, wid
       el('div', { position: 'absolute', top: 1172, left: 0, width: W, justifyContent: 'center', alignItems: 'center' }, [
         { type: 'img', props: { src: emblem(), width: 76, height: 76 } },
         el('div', { flexDirection: 'column', marginLeft: 16 }, [
-          el('div', { fontSize: 26, color: 'rgba(244,239,230,0.85)', letterSpacing: '0.08em' }, '月と蓮 ・ 月の見立て'),
+          el('div', { fontSize: 26, color: 'rgba(244,239,230,0.85)', letterSpacing: '0.08em' }, '月と蓮'),
           el('div', { fontSize: 20, color: 'rgba(244,239,230,0.5)', letterSpacing: '0.3em', marginTop: 4 }, 'TSUKI × REN'),
         ]),
       ]),
