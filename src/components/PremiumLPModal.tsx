@@ -481,7 +481,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 </CharBubble>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-                {(pairFirst ? ['pair', 'monthly'] : ['monthly', 'pair']).map((kind) =>
+                {(['monthly', 'pair'] as const).map((kind) =>
                   kind === 'monthly' ? (
                     <button
                       key="monthly"
@@ -491,7 +491,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                       style={{
                         width: '100%',
                         padding: '0.8rem 1rem',
-                        background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
+                        background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
                         color: '#000',
                         border: 'none',
                         borderRadius: '9999px',
@@ -711,7 +711,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 justifyContent: 'center',
                 gap: '0.4rem',
                 padding: '0.75rem 1rem',
-                background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
+                background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
                 color: '#000000',
                 borderRadius: '9999px',
                 fontSize: '0.92rem',
@@ -890,7 +890,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.45rem',
-                background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
+                background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
                 color: '#000000',
                 border: 'none',
                 borderRadius: '9999px',

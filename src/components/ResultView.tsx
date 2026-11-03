@@ -2513,7 +2513,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     無料会員登録で鑑定結果の続きを開く
                   </h2>
                   <p style={{ fontSize: '0.75rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
-                    会員登録をいただくと深層鑑定結果の続きをご覧になれます（一部の項目はプレミアム限定）。
+                    会員登録をいただくと深層鑑定結果の続きをご覧になれます{hasOpponent ? `（一部の項目は${PAIR_PRICE_LABEL}の買い切りか月額プレミアムで解放）` : ''}。
                   </p>
                 </div>
 
