@@ -418,7 +418,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {showPlans && pair && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-                {pair.name}のこと、どこまで知りたい？
+                {pair.name}のこと、どこまで知りたいですか？
               </h2>
               <div style={{
                 border: '1px solid rgba(255,255,255,0.1)',
