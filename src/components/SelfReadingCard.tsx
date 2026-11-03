@@ -36,13 +36,15 @@ export const SelfReadingCard: React.FC<{
 
   const who = san(name, 'あなた');
   const accent = char === 'ren' ? '#9cc6d8' : '#cdbfe2';
-  const intro = char === 'ren'
-    ? '生まれた日の星から見ると、たぶんこういう人だと思う。'
-    : '生まれた日の星から見ると、こんなところ、ありませんか？';
-  const next = hasOpponent ? `${san(oppName)}との相性` : `${who}の運勢`;
+  const opp = san(oppName);
+  // 相性・運勢の鑑定の前置きとして読めるように、「〇〇との相性を見る前に、まずはあなたのことから」で始める
+  const intro = hasOpponent
+    ? (char === 'ren' ? `${opp}との相性を読む前に、まず${who}がどんな人かを見ておこう。` : `${opp}との相性を見る前に、まず、${who}のことから。こんなところ、ありませんか？`)
+    : (char === 'ren' ? `運勢を読む前に、まず${who}がどんな人かを見ておこう。` : `運勢を見る前に、まず、${who}のことから。こんなところ、ありませんか？`);
+  const next = hasOpponent ? `${opp}との相性` : `${who}の運勢`;
   const afterText = feedback === 'hit'
-    ? (char === 'ren' ? `やっぱりね。この星をもとに、${next}を読み解いていこう。` : `よかった。この星をもとに、${next}を見ていきましょうね。`)
-    : (char === 'ren' ? `生まれた日だけで見た傾向だから、違う部分もあると思う。${next}も読んでみて。` : `生まれた日だけで見た傾向なので、違うところもありますよね。${next}も読んでみてくださいね。`);
+    ? (char === 'ren' ? `やっぱりね。この性格をふまえて、${next}を読み解いていこう。` : `よかった。この性格をふまえて、${next}を見ていきましょうね。`)
+    : (char === 'ren' ? `あくまで傾向だから、違う部分もあると思う。${next}も読んでみて。` : `あくまで傾向なので、違うところもありますよね。${next}も読んでみてくださいね。`);
 
   const answer = (v: 'hit' | 'miss') => {
     if (feedback) return;
@@ -65,6 +67,7 @@ export const SelfReadingCard: React.FC<{
   });
 
   return (
+    <>
     <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
       <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.55rem', fontWeight: 'bold', textAlign: 'center', letterSpacing: '0.05em' }}>
         {who === 'あなた' ? 'あなたってこんな人' : `${who}ってこんな人`}
@@ -97,5 +100,6 @@ export const SelfReadingCard: React.FC<{
         </div>
       )}
     </div>
+    </>
   );
 };

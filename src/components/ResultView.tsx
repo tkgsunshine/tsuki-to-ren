@@ -1403,7 +1403,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
         <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={16} />
-          {hasOpponent ? '基本相性サマリー' : '基本運勢サマリー'}
+          {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる */}
+          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
         </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
           {renderTextWithCharHeadings(formatAppraisalText(activeResult.summary))}
