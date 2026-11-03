@@ -215,6 +215,48 @@ const splitAdvicePreview = (text: string | undefined): { head: string; restLengt
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
 
+// 未来予測スケジュール（7日間・月次・年次）の点数の棒グラフ。棒の高さは点数に比例（100点で最大）
+const SCORE_BAR_MAX_PX = 56;
+const ScoreBarChart = ({ items, locked }: { items: { key: string; label: string; score: number }[]; locked: boolean }) => (
+  <div
+    className={locked ? 'timeline-blurred' : ''}
+    style={{
+      display: 'grid',
+      gridTemplateColumns: `repeat(${items.length}, 1fr)`,
+      gap: '6px',
+      alignItems: 'end',
+      filter: locked ? 'blur(4.5px)' : 'none',
+      userSelect: locked ? 'none' : 'auto',
+      pointerEvents: locked ? 'none' : 'auto'
+    }}
+  >
+    {items.map((item) => {
+      const visuals = getScoreVisuals(item.score);
+      return (
+        <div key={item.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', minWidth: 0 }}>
+          <span style={{ fontSize: '0.7rem', color: visuals.textColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+            {item.score}点
+          </span>
+          <div style={{ height: `${SCORE_BAR_MAX_PX}px`, width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+            <div style={{
+              width: '100%',
+              maxWidth: '44px',
+              height: `${Math.round(Math.max(0, Math.min(100, item.score)) / 100 * SCORE_BAR_MAX_PX)}px`,
+              background: visuals.barColor,
+              borderRadius: '4px 4px 0 0',
+              boxShadow: visuals.shadow,
+              transition: 'all 0.3s ease'
+            }} />
+          </div>
+          <span style={{ fontSize: '0.64rem', color: '#a9a49a', marginTop: '2px', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
+            {item.label}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+);
+
 const getMbtiColor = (mbtiCode: string) => {
   const code = (mbtiCode || '').toUpperCase();
   if (code.includes('N') && code.includes('F')) return '#6fb08f'; // Emerald Green
@@ -2999,42 +3041,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
             <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? '今後7日間の相性' : '今後7日間の運気'} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
-              <div 
-                className={isSubscribed ? '' : 'timeline-blurred'} 
-                style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(7, 1fr)', 
-                  gap: '6px', 
-                  height: '80px', 
-                  alignItems: 'end',
-                  filter: isSubscribed ? 'none' : 'blur(4.5px)',
-                  userSelect: isSubscribed ? 'auto' : 'none',
-                  pointerEvents: isSubscribed ? 'auto' : 'none'
-                }}
-              >
-                {activeResult.weeklyScores.map((day, index) => {
-                  const score = lockedScore(day.score, index, !isSubscribed);
-                  const visuals = getScoreVisuals(score);
-                  return (
-                    <div key={day.day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '0.7rem', color: visuals.textColor, fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                        {score}点
-                      </span>
-                      <div style={{
-                        width: '100%',
-                        height: `${score * 0.5}px`,
-                        background: visuals.barColor,
-                        borderRadius: '4px 4px 0 0',
-                        boxShadow: visuals.shadow,
-                        transition: 'all 0.3s ease'
-                      }} />
-                      <span style={{ fontSize: '0.64rem', color: '#a9a49a', marginTop: '2px', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
-                        {index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+              <ScoreBarChart
+                locked={!isSubscribed}
+                items={activeResult.weeklyScores.map((day, index) => ({
+                  key: day.day,
+                  label: index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day,
+                  score: lockedScore(day.score, index, !isSubscribed)
+                }))}
+              />
               {!isSubscribed && (
                 <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
                   <button 
@@ -3052,6 +3066,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* Monthly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
             <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 月次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <div style={{ position: 'relative', marginTop: '0.5rem', marginBottom: '0.35rem' }}>
+              <ScoreBarChart
+                locked={!isSubscribed}
+                items={activeResult.monthlyPreviews.map((m, index) => ({
+                  key: m.month,
+                  label: m.month,
+                  score: lockedScore(m.score, index + 2, !isSubscribed)
+                }))}
+              />
+                {!isSubscribed && (
+                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
+                    <button
+                      type="button"
+                      className="premium-lock-tag"
+                      onClick={handleLockTagClick}
+                    >
+                      <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                    </button>
+                  </div>
+                )}
+            </div>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
@@ -3079,20 +3114,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             filter: isSubscribed ? 'none' : 'blur(4.5px)',
                             userSelect: isSubscribed ? 'auto' : 'none'
                           }}>{isSubscribed ? m.label : '★★★'}</span>
-                        </span>
-                        <span style={{
-                          color: visuals.textColor,
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          border: visuals.border,
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          letterSpacing: '0.05em',
-                          filter: isSubscribed ? 'none' : 'blur(4px)',
-                          userSelect: isSubscribed ? 'auto' : 'none'
-                        }}>
-                          {score}点
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
@@ -3131,6 +3152,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* Yearly Preview */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', position: 'relative' }}>
             <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● 年次運勢スケジュール {!isSubscribed && '(プレミアム限定)'}</span>
+            <div style={{ position: 'relative', marginTop: '0.5rem', marginBottom: '0.35rem' }}>
+              <ScoreBarChart
+                locked={!isSubscribed}
+                items={activeResult.yearlyPreviews.map((y, index) => ({
+                  key: y.year,
+                  label: y.year,
+                  score: lockedScore(y.score, index + 2, !isSubscribed)
+                }))}
+              />
+                {!isSubscribed && (
+                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
+                    <button
+                      type="button"
+                      className="premium-lock-tag"
+                      onClick={handleLockTagClick}
+                    >
+                      <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                    </button>
+                  </div>
+                )}
+            </div>
             <div style={{ position: 'relative', marginTop: '0.2rem' }}>
               <div style={{
                 display: 'flex',
@@ -3158,20 +3200,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             filter: isSubscribed ? 'none' : 'blur(4.5px)',
                             userSelect: isSubscribed ? 'auto' : 'none'
                           }}>{isSubscribed ? y.label : '★★★'}</span>
-                        </span>
-                        <span style={{
-                          color: visuals.textColor,
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          border: visuals.border,
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          fontSize: '0.65rem',
-                          fontWeight: 'bold',
-                          letterSpacing: '0.05em',
-                          filter: isSubscribed ? 'none' : 'blur(4px)',
-                          userSelect: isSubscribed ? 'auto' : 'none'
-                        }}>
-                          {score}点
                         </span>
                       </div>
                       <p className={isSubscribed ? '' : 'timeline-blurred'} style={{
