@@ -1392,7 +1392,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {partnerLock?.status === 'free' && (
                 <div style={{ textAlign: 'center', fontSize: '0.74rem', color: '#cfc8b8', lineHeight: 1.6 }}>
                   {partnerLock.guest
-                    ? <>{partnerCall}との今日の相性を明日も見るには、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください（登録すると、あと6日無料）</>
+                    ? <>明日からも見るなら、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>で、あと6日無料で見られます</>
                     : partnerLock.daysLeft > 0
                       ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見られます</>
                       : <>{partnerCall}との今日の相性を無料で見られるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見られます</>}
@@ -1402,7 +1402,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
                   <div style={{ fontSize: '0.8rem', color: '#e8e3d8', lineHeight: 1.65 }}>
                     {partnerLock.guest
-                      ? <>{partnerCall}との今日の相性を続けて見るには、無料会員登録をしてください。登録すると、あと6日無料で見られます。</>
+                      ? <>{partnerCall}との今日の相性を続けて見るなら、無料会員登録で、あと6日無料で見られます。</>
                       : <>{partnerCall}との無料の期間が終わりました。<br />二人の毎日の点数と助言は、プレミアム（月額980円）でずっと見られます。</>}
                   </div>
                   <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
