@@ -930,7 +930,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 padding: '0.1rem'
               }}
             >
-              {pairWho}だけなら 買い切り680円で解放する
+              {pairWho}だけ 買い切り680円で解放する
             </button>
           )}
         </div>
