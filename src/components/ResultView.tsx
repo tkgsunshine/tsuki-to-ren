@@ -3150,7 +3150,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {buyingPair ? '決済画面を開いています…' : `${partnerCall}の鑑定だけ解放する（${PAIR_PRICE_LABEL}・買い切り）`}
                     </button>
                     <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。会員登録なしでも買えます（決済のときのメールでアカウントをお作りします）。
+                      自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
                     </div>
                   </div>
                 )}

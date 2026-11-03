@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X, Lock } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 
@@ -153,6 +153,27 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [zoomShot, setZoomShot] = useState<{ src: string; alt: string } | null>(null);
+  // 下の固定の購入ボタンは、いきなり出さない。説明（教育）を読み終えてプラン・料金の所まで来たら出す（一度出たら出たまま）
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const ctaMarkerRef = useRef<HTMLDivElement | null>(null);
+  const [ctaReady, setCtaReady] = useState(false);
+  useEffect(() => {
+    if (!isOpen) { setCtaReady(false); return; }
+    const root = scrollRef.current;
+    const marker = ctaMarkerRef.current;
+    if (!root || !marker) { setCtaReady(true); return; }
+    // 目印（プラン・料金の手前）が画面の下から1/4より上に来たら出す。速くスクロールして通り過ぎた場合も出す
+    const check = () => {
+      const r = root.getBoundingClientRect();
+      if (marker.getBoundingClientRect().top < r.bottom - r.height * 0.25) {
+        setCtaReady(true);
+        root.removeEventListener('scroll', check);
+      }
+    };
+    check();
+    root.addEventListener('scroll', check, { passive: true });
+    return () => root.removeEventListener('scroll', check);
+  }, [isOpen, Boolean(pair)]);
 
   if (!isOpen) return null;
 
@@ -187,7 +208,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
       a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・年次の流れ）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
-      q: '会員登録をしていなくても買えますか？',
+      q: '会員登録をしていなくても購入できますか？',
       a: 'はい。お支払いのときに入力したメールアドレスで、アカウントを自動でお作りします。支払いが終わるとそのままログインした状態になり、別の端末では同じメールでログインすると引き継げます。'
     },
     {
@@ -273,7 +294,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
         </div>
 
         {/* Scrollable Content Container */}
-        <div style={{
+        <div ref={scrollRef} style={{
           flex: 1,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
@@ -337,7 +358,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   お相手1人だけなら ¥480の買い切りも（1回払い）
                 </p>
                 <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
-                  気になる人1人のトリセツ・深層鑑定・相性グラフ・年次の流れを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で買えます（会員登録なしでもOK）。
+                  気になる人1人のトリセツ・深層鑑定・相性グラフ・年次の流れを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
                 </p>
                 <button
                   type="button"
@@ -359,6 +380,39 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* 教育: 無料で見えているのは入り口だけで、この先に何がわかるのかを、お相手の名前で具体的に見せる */}
+          {showPlans && pair && !pair.unlocked && (
+            <div style={{ padding: '0 1.15rem 1.35rem' }}>
+              <h2 className="font-serif gold-text" style={sectionTitleStyle}>
+                無料で見えているのは、{pair.name}のほんの入り口です
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', marginBottom: '0.9rem' }}>
+                {[
+                  { t: '刺さる言葉 TOP5 ＆ 絶対NG行動 5選', d: `${pair.name}がキュンとする褒め方と、言うと一気に冷めてしまう一言。` },
+                  { t: '返信が遅いときの心理と、ベストな返し方', d: '既読のまま止まったとき、何を考えているのか。追いLINEしていいのか、待つべきか。' },
+                  { t: '脈ありサイン 3段階 ＆ 脈なしからの挽回', d: '今どの段階にいるのか。少し離れかけたときの戻し方。' },
+                  { t: '惹かれ合うポイント ＆ 地雷行動 3選', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターン。' },
+                  { t: '6つの相性グラフ ＆ 二人のこれから', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。' },
+                  { t: 'そのまま送れるLINEキラーテンプレート', d: `${pair.name}の性格に合わせた文例。言葉に迷う夜に、そのまま使えます。` }
+                ].map((it) => (
+                  <div key={it.t} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', padding: '0.65rem 0.8rem', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    <Lock size={13} style={{ color: '#e2c074', flexShrink: 0, marginTop: '0.2rem' }} />
+                    <div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>{it.t}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.65, marginTop: '0.15rem' }}>{it.d}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <CharBubble who="ren" small>
+                なんとなくで動くと、同じすれ違いをくり返しやすい。<br />
+                {pair.name}のくせを先に知っておけば、次の一言を自分で選べるようになるよ。
+              </CharBubble>
+            </div>
+          )}
+
+          {showPlans && pair && <div ref={ctaMarkerRef} />}
 
           {/* プランを選ぶ（買い切り ¥480 と 月額 ¥980 を1枚で見比べる） */}
           {showPlans && pair && (
@@ -402,7 +456,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 })}
               </div>
               <p style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.6rem 0 0.75rem' }}>
-                {pair.name}のことを今日じっくり知りたいだけなら¥480、毎日の相性やLINEの助言・ほかのお相手も見るなら月額がおすすめです。どちらも会員登録なしで買えます。
+                {pair.name}のことを今日じっくり知りたいだけなら¥480、毎日の相性やLINEの助言・ほかのお相手も見るなら月額がおすすめです。どちらも会員登録なしで購入できます。
                 <br />※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥480で買ったお相手は2人の枠に数えません）。
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -584,6 +638,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             ))}
           </div>
 
+          {!(showPlans && pair) && <div ref={ctaMarkerRef} />}
           {/* 料金 */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き） */}
@@ -738,8 +793,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           </div>
         </div>
 
-        {/* PINNED FIXED BOTTOM CTA FOOTER */}
-        <div style={{
+        {/* PINNED FIXED BOTTOM CTA FOOTER（未購読の人には、説明を読み終えてから出す） */}
+        {(isSubscribed || ctaReady) && (
+        <div className="lp-cta-footer" style={{
           padding: '0.85rem 1.25rem max(1.75rem, calc(0.85rem + env(safe-area-inset-bottom, 24px))) 1.25rem',
           background: 'rgba(12, 17, 24, 0.96)',
           backdropFilter: 'blur(16px)',
@@ -845,6 +901,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </button>
           )}
         </div>
+        )}
       </div>
 
       {zoomShot && (
