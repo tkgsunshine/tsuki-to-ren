@@ -3086,27 +3086,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></span>
+                    <span><strong>トリセツ・深層鑑定・6つの相性グラフ（誰でも無制限）</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>6軸詳細相性分析（レーダーチャート）の完全解説</strong></span>
+                    <span><strong>今日の相性とLINEの送り方を毎日</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>月次・年次運勢スケジュールの完全閲覧</strong></span>
+                    <span><strong>これからの7日間・月ごと・年ごとの流れ</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>お相手の保存上限が10人に拡大</strong>（無料会員2人 → 10人）</span>
+                    <span><strong>毎朝の運勢メールが全文で届く</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></span>
+                    <span><strong>お相手の保存が10人まで（無料会員は2人）</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></span>
+                    <span><strong>月 ＆ 蓮へのチャット相談が無制限</strong></span>
                   </div>
                 </div>
 
@@ -3150,7 +3150,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで解放する`}
                     </button>
                     <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
+                      自動更新はありません。お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
                     </div>
                   </div>
                 )}

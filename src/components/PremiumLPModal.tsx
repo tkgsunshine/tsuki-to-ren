@@ -397,18 +397,30 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '0.7rem' }}>
                 {([
-                  { who: 'ren', t: '刺さる言葉 TOP5 ＆ 絶対NG行動 5選', d: `${pair.name}がキュンとする褒め方と、言うと一気に冷めてしまう一言。ここは知っておいたほうがいいです。` },
-                  { who: 'tsuki', t: '返信が遅いときの心理と、ベストな返し方', d: '既読のまま止まったとき、あの人が何を考えているのか。追いLINEしていいのか、待つべきか、一緒に見ていきましょうね。' },
-                  { who: 'ren', t: '脈ありサイン 3段階 ＆ 脈なしからの挽回', d: '今どの段階にいるのかがわかります。少し離れかけたときの戻し方もありますよ。' },
-                  { who: 'tsuki', t: '惹かれ合うポイント ＆ 地雷行動 3選', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあるんです。先に知っておけば、大丈夫。' },
-                  { who: 'ren', t: '6つの相性グラフ ＆ 二人のこれから', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを一緒に読みましょう。' },
-                  { who: 'tsuki', t: 'そのまま送れるLINEキラーテンプレート', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってくださいね。` }
+                  { who: 'ren', t: '刺さる言葉 TOP5 ＆ 絶対NG行動 5選', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}がキュンとする褒め方と、言うと一気に冷めてしまう一言。ここは知っておいたほうがいいです。` },
+                  { who: 'tsuki', t: '返信が遅いときの心理と、ベストな返し方', shot: '/assets/premium/edu-reply.webp', d: '既読のまま止まったとき、あの人が何を考えているのか。追いLINEしていいのか、待つべきか、一緒に見ていきましょうね。' },
+                  { who: 'ren', t: '脈ありサイン 3段階 ＆ 脈なしからの挽回', shot: '/assets/premium/edu-myaku.webp', d: '今どの段階にいるのかがわかります。少し離れかけたときの戻し方もありますよ。' },
+                  { who: 'tsuki', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあるんです。先に知っておけば、大丈夫。' },
+                  { who: 'ren', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを一緒に読みましょう。' },
+                  { who: 'tsuki', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってくださいね。` }
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
                     <span style={{ display: 'block', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.2rem' }}>
                       <Lock size={12} style={{ verticalAlign: '-1px', marginRight: '0.3rem', color: '#e2c074' }} />{it.t}
                     </span>
                     {it.d}
+                    {/* 実際の画面の参考スクショ（ダミーのお相手）。タップで拡大 */}
+                    <button
+                      type="button"
+                      aria-label={`${it.t}の画面イメージを拡大して見る`}
+                      onClick={() => setZoomShot({ src: it.shot, alt: `${it.t}の画面イメージ` })}
+                      style={{ position: 'relative', display: 'block', width: '100%', marginTop: '0.55rem', padding: 0, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', background: '#0a0e14', cursor: 'zoom-in' }}
+                    >
+                      <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: 'top' }} />
+                      <span style={{ position: 'absolute', right: '0.4rem', bottom: '0.4rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(5, 7, 10, 0.75)', color: '#e8e3d8', fontSize: '0.6rem' }}>
+                        画面イメージ・タップで拡大
+                      </span>
+                    </button>
                   </CharBubble>
                 ))}
               </div>
@@ -531,7 +543,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 )}
               </div>
               <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。
+                ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります。
               </p>
             </div>
           )}
