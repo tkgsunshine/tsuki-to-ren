@@ -456,10 +456,16 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   );
                 })}
               </div>
-              <p style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.6rem 0 0.75rem' }}>
-                {pair.name}のことを今日じっくり知りたいだけなら¥480、毎日の相性やLINEの助言・ほかのお相手も見るなら月額がおすすめです。どちらも会員登録なしで購入できます。
-                <br />※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥480で買ったお相手は2人の枠に数えません）。
+              <p style={{ fontSize: '0.68rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.5rem 0 0.8rem' }}>
+                ※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥480で買ったお相手は2人の枠に数えません）。
               </p>
+              <div style={{ marginBottom: '0.85rem' }}>
+                <CharBubble who="tsuki" small>
+                  {pair.name}のことを今日じっくり知りたいなら、¥480で十分ですよ。<br />
+                  毎日の相性やLINEの助言も見たい、ほかの人のことも占いたいなら、月額で毎日そばにいさせてくださいね。<br />
+                  どちらも会員登録なしで購入できます。
+                </CharBubble>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
                 {(pairFirst ? ['pair', 'monthly'] : ['monthly', 'pair']).map((kind) =>
                   kind === 'monthly' ? (
