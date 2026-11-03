@@ -27,7 +27,7 @@ interface Props {
   lockWord?: string;
 }
 
-export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick, lockWord = 'プレミアム登録で全解放' }) => {
+export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick, lockWord = '解放する' }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const locked = !isSubscribed;
   const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};

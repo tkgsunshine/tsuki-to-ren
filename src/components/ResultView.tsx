@@ -343,6 +343,7 @@ const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
 // 同じお相手との「今日の相性」を無料で見られる日数の状態（App.tsx が api/stripe/partner で数える）。null = 制限なし。
 export type PartnerLock = { status: 'checking' | 'free' | 'locked'; daysLeft: number; guest: boolean } | null;
 export type PairUnlock = { unlocked: boolean; today: boolean } | null;
+export const LOCK_WORD = '解放する';
 export const PAIR_PRICE_LABEL = '¥480';
 
 interface ResultViewProps {
@@ -848,7 +849,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
-  const deepLockWord = canBuyPair ? `${PAIR_PRICE_LABEL}で解放` : 'プレミアム登録で全解放';
+  // ロックの文言は全部「解放する」に統一（料金・違いは開いた先の購入LPで説明する）
+  const deepLockWord = LOCK_WORD;
   const pairCardRef = React.useRef<HTMLDivElement>(null);
   const [buyingPair, setBuyingPair] = useState(false);
   // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
@@ -2211,7 +2213,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                   <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={handleLockTagClick}>
-                    <Lock size={11} /> {'プレミアム登録で全解放'}
+                    <Lock size={11} /> {LOCK_WORD}
                   </button>
                 </div>
               );
@@ -2245,7 +2247,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       ))}
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                          <Lock size={11} /> {'プレミアム登録で全解放'}
+                          <Lock size={11} /> {LOCK_WORD}
                         </button>
                       </div>
                     </div>
@@ -2253,7 +2255,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {adviceTeaser && parts.length === 2 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
                       <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                        <Lock size={11} /> {'プレミアム登録で全解放'}
+                        <Lock size={11} /> {LOCK_WORD}
                       </button>
                     </div>
                   )}
@@ -2271,7 +2273,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && !preview && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <Lock size={11} /> {'プレミアム登録で全解放'}
+                            <Lock size={11} /> {LOCK_WORD}
                           </button>
                         </div>
                       )}
@@ -2483,7 +2485,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
                       <button className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); if (premiumOnly) handleDeepLockClick(e); else handleScrollToRegister(); }}>
-                        <Lock size={11} /> {premiumOnly ? deepLockWord : (!isRegistered ? '無料会員登録' : deepLockWord)}
+                        <Lock size={11} /> {deepLockWord}
                       </button>
                     </div>
                   </div>
@@ -3202,7 +3204,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     className="premium-lock-tag" 
                     onClick={handleLockTagClick}
                   >
-                    <Lock size={11} /> {'プレミアム登録で全解放'}
+                    <Lock size={11} /> {LOCK_WORD}
                   </button>
                 </div>
               )}
@@ -3228,7 +3230,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       className="premium-lock-tag"
                       onClick={handleLockTagClick}
                     >
-                      <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                      <Lock size={11} /> {LOCK_WORD}
                     </button>
                   </div>
                 )}
@@ -3282,7 +3284,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" 
                             onClick={handleLockTagClick}
                           >
-                            <Lock size={11} /> {'プレミアム登録で全解放'}
+                            <Lock size={11} /> {LOCK_WORD}
                           </button>
                         </div>
                       )}
