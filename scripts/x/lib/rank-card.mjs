@@ -146,3 +146,30 @@ export async function renderRankCard({ text, replyText = '', reveal = false, wid
   await wasmReady;
   return Buffer.from(new Resvg(svg, { fitTo: { mode: 'width', value: width } }).render());
 }
+
+/** 16タイプのランキング（gap_rank と、手で足した -rank）の投稿か。本文に3位〜14位の行がそろっているもの */
+export function isRankPost(item) {
+  if (!item || item.replyTo || !/^【MBTI別】/.test(String(item.text || ''))) return false;
+  const { ranks } = parseRanking(item.text);
+  return Array.from({ length: 12 }, (_, i) => i + 3).every((n) => ranks[n]);
+}
+
+/**
+ * ランキングの投稿と、その返信に、画像（data/x/cards/<id>.png）を付ける。items の項目の image を書き換え、書き出すPNGを返す。
+ * 画像を作れない（順位が足りない等）ときは、その投稿には付けずに warn で知らせる（下書き作りは止めない）
+ */
+export async function attachRankImages(items, all = items) {
+  const out = [];
+  for (const it of items.filter((x) => isRankPost(x) && !x.image)) {
+    const reply = all.find((x) => x.replyTo === it.id);
+    try {
+      const post = await renderRankCard({ text: it.text });
+      const files = [{ item: it, image: `data/x/cards/${it.id}.png`, png: post }];
+      if (reply && !reply.image) files.push({ item: reply, image: `data/x/cards/${reply.id}.png`, png: await renderRankCard({ text: it.text, replyText: reply.text, reveal: true }) });
+      for (const f of files) { f.item.image = f.image; out.push(f); }
+    } catch (e) {
+      console.warn(`ランキング画像を作れませんでした（${it.id}）: ${e.message}`);
+    }
+  }
+  return out;
+}

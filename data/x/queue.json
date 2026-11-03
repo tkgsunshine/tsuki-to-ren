@@ -7117,7 +7117,8 @@
     "purpose": "buzz",
     "maxWeight": 700,
     "status": "scheduled",
-    "createdAt": "2026-10-31T09:39:23.126Z"
+    "createdAt": "2026-10-31T09:39:23.126Z",
+    "image": "data/x/cards/2026-11-06-rank.png"
   },
   {
     "id": "2026-11-06-rank-reply",
@@ -7130,7 +7131,8 @@
     "system": "mbti_love",
     "purpose": "buzz",
     "status": "scheduled",
-    "createdAt": "2026-10-31T09:39:23.126Z"
+    "createdAt": "2026-10-31T09:39:23.126Z",
+    "image": "data/x/cards/2026-11-06-rank-reply.png"
   },
   {
     "id": "2026-11-07-rank",
@@ -7143,7 +7145,8 @@
     "purpose": "buzz",
     "maxWeight": 700,
     "status": "scheduled",
-    "createdAt": "2026-10-31T09:39:23.126Z"
+    "createdAt": "2026-10-31T09:39:23.126Z",
+    "image": "data/x/cards/2026-11-07-rank.png"
   },
   {
     "id": "2026-11-07-rank-reply",
@@ -7156,7 +7159,8 @@
     "system": "mbti_love",
     "purpose": "buzz",
     "status": "scheduled",
-    "createdAt": "2026-10-31T09:39:23.126Z"
+    "createdAt": "2026-10-31T09:39:23.126Z",
+    "image": "data/x/cards/2026-11-07-rank-reply.png"
   },
   {
     "id": "2026-11-01-long2",
@@ -7790,7 +7794,8 @@
     "purpose": "buzz",
     "maxWeight": 700,
     "status": "scheduled",
-    "createdAt": "2026-11-02T21:40:44.629Z"
+    "createdAt": "2026-11-02T21:40:44.629Z",
+    "image": "data/x/cards/2026-11-04-evening.png"
   },
   {
     "id": "2026-11-04-evening-reply",
@@ -7803,7 +7808,8 @@
     "system": "mbti_love",
     "purpose": "buzz",
     "status": "scheduled",
-    "createdAt": "2026-11-02T21:40:44.629Z"
+    "createdAt": "2026-11-02T21:40:44.629Z",
+    "image": "data/x/cards/2026-11-04-evening-reply.png"
   },
   {
     "id": "2026-11-04-night",
