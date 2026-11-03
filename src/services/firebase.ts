@@ -306,7 +306,7 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
 };
 
 // Keys holding the signed-in member's own data on this device (the account copy is in userData/{uid} and subscriptions/{uid})
-export const ACCOUNT_DEVICE_KEYS = ['hasu_user_profile', 'hasu_saved_partners', 'hasu_user_data_uid', 'hasu_notify_email', 'hasu_notify_daily_luck', 'hasu_last_diagnosis_input'];
+export const ACCOUNT_DEVICE_KEYS = ['hasu_user_profile', 'hasu_saved_partners', 'hasu_user_data_uid', 'hasu_notify_email', 'hasu_notify_daily_luck', 'hasu_last_diagnosis_input', 'hasu_partner_access_v2'];
 export const clearAccountDataOnDevice = () => {
   ACCOUNT_DEVICE_KEYS.forEach(safeRemoveItem);
 };

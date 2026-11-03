@@ -61,9 +61,11 @@ export const fetchPartnerAccess = async (oppBirth: string): Promise<PartnerAcces
 
 // 前回の確認結果（同じアカウント・同じお相手・同じ日）。再読み込みのたびに点数が一瞬伏せられないよう、
 // 確認が終わるまではこれを使う。見た目のためだけで、確認の結果が来たら必ずそちらで上書きする。
-const ACCESS_CACHE_KEY = 'hasu_partner_access';
+const ACCESS_CACHE_KEY = 'hasu_partner_access_v2';
 type CachedAccess = { day: string; access: PartnerAccess | null };
-const cacheId = (uid: string | null | undefined, oppBirth: string) => `${uid || 'guest'}|${oppBirth}`;
+// 端末ごと・お相手ごと（アカウントは見ない）。読み込み直後はログイン状態の復元前で uid がまだ無く、
+// uid で分けると最初の表示で必ず外れて一瞬伏せてしまうため。表示用だけで、確認の結果が来れば上書きする
+const cacheId = (_uid: string | null | undefined, oppBirth: string) => oppBirth;
 
 export const readCachedPartnerAccess = (uid: string | null | undefined, oppBirth: string): { access: PartnerAccess | null } | null => {
   try {
