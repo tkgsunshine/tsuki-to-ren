@@ -445,10 +445,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textAlign: 'center' }}>
                   <div style={{ padding: '0.55rem 0.5rem', textAlign: 'left' }}>できること</div>
                   {(pairFirst
-                    ? ['¥680/買い切り', '¥980/月']
-                    : ['¥980/月', '¥680/買い切り']
+                    ? ['買い切り\nプラン\n¥680', 'プレミアム\nプラン\n¥980/月']
+                    : ['プレミアム\nプラン\n¥980/月', '買い切り\nプラン\n¥680']
                   ).map((h, i) => (
-                    <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4 }}>{h}</div>
+                    <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4, whiteSpace: 'pre-line', fontSize: '0.72rem' }}>{h}</div>
                   ))}
                 </div>
                 {[
