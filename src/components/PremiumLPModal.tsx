@@ -575,7 +575,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <div style={{ marginTop: '0.8rem' }}>
               <CharBubble who="ren" small>
                 そういうときこそ、気持ちだけで動かずに、相手の流れを知っておくのが近道です。<br />
-                月額でできることを、順番に整理してお伝えしますね。
+                プレミアムプランでできることを、順番に整理してお伝えしますね。
               </CharBubble>
             </div>
           </div>
@@ -583,7 +583,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {/* できること */}
           <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-              月額980円でできること
+              プレミアムプラン（月額980円）でできること
             </h2>
             {benefits.map(({ Icon, color, title, body, shot, shotAlt, pairNote }) => (
               <div key={title} className="glass-panel" style={{
