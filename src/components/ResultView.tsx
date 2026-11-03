@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
-import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
@@ -190,6 +190,61 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
       {i < lines.length - 1 && !SECTION_HEADING_RE.test(line.trim()) ? '\n' : null}
     </React.Fragment>
   ));
+};
+
+// 深層鑑定の本文: 「💘 お相手が惹かれる本質：」のような絵文字の小見出しを、トリセツと同じ独自マーク＋色付きの見出しにする。
+// 文言は鑑定エンジン（メールと共通）のままで、表示のときだけ置き換える。
+const DEEP_HEADING_MARKS: Record<string, { Icon: React.FC<{ size?: number }>; color: string }> = {
+  '💘': { Icon: PiercedHeartMark, color: '#f2b8c6' },
+  '✨': { Icon: PraiseSparkMark, color: '#f2e2b3' },
+  '📍': { Icon: SpotPinMark, color: '#9cc6d8' },
+  '💌': { Icon: LoveLetterMark, color: '#f2b8c6' },
+  '⚠️': { Icon: CautionMark, color: '#e6a99c' },
+  '💡': { Icon: MoonMark, color: '#f2e2b3' },
+  '🎁': { Icon: GiftMark, color: '#f2e2b3' }
+};
+const DEEP_HEADING_RE = /^(💘|✨|📍|💌|⚠️|💡|🎁)\s*(.+?)[：:]\s*(.*)$/u;
+const DEEP_CHAR_RE = /^(🌙|🔮)\s*((月|蓮)[^：:]{0,14})[：:]\s*(.*)$/u;
+
+const DeepHeading: React.FC<{ icon: React.ReactNode; color: string; label: string }> = ({ icon, color, label }) => (
+  <div className="font-serif" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', margin: '1rem 0 0.3rem', paddingBottom: '0.3rem', borderBottom: `1px solid ${color}33`, color, fontWeight: 'bold', fontSize: '0.84rem', lineHeight: 1.5 }}>
+    <span style={{ display: 'inline-flex', flexShrink: 0 }}>{icon}</span>
+    <span>{label}</span>
+  </div>
+);
+
+const renderDeepTopicText = (raw: string): React.ReactNode => {
+  // 「⚠️ 【二人の間で踏みやすい地雷3選】：」は、整形で ⚠️・見出し・「：」がばらばらの行になるので先にまとめる
+  const text = formatAppraisalText(raw.replace(/(⚠️)\s*【([^】]+)】\s*[：:]/gu, '$1 $2：'));
+  const blocks: React.ReactNode[] = [];
+  let para: string[] = [];
+  const flush = () => {
+    if (para.length) blocks.push(<p key={`p${blocks.length}`} style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{para.join('\n')}</p>);
+    para = [];
+  };
+  for (const line of text.split('\n')) {
+    const t = line.trim();
+    if (!t || /^[：:]$/.test(t)) continue;
+    const h = t.match(DEEP_HEADING_RE);
+    if (h) {
+      flush();
+      const mark = DEEP_HEADING_MARKS[h[1]];
+      blocks.push(<DeepHeading key={`h${blocks.length}`} icon={<mark.Icon size={18} />} color={mark.color} label={h[2].replace(/^【|】$/g, '')} />);
+      if (h[3]) para.push(h[3]);
+      continue;
+    }
+    const c = t.match(DEEP_CHAR_RE);
+    if (c) {
+      flush();
+      const isRen = c[3] === '蓮';
+      blocks.push(<DeepHeading key={`c${blocks.length}`} icon={<CharHeadingIcon char={c[3] as '月' | '蓮'} size={22} />} color={isRen ? '#9cc6d8' : '#cdbfe2'} label={c[2]} />);
+      if (c[4]) para.push(c[4]);
+      continue;
+    }
+    para.push(t);
+  }
+  flush();
+  return blocks;
 };
 
 // 見られない人には、ぼかす文章として本物の代わりにダミー文を渡す。
@@ -2495,9 +2550,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </h3>
               
               {topicOpen ? (
-                <p className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
-                  {formatAppraisalText(`${topic.intro}\n\n${topic.detail}`)}
-                </p>
+                <div className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3" }}>
+                  {renderDeepTopicText(`${topic.intro}\n\n${topic.detail}`)}
+                </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
