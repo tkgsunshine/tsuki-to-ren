@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
-import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, type UserProfile } from '../services/firebase';
+import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, accountNeedsEmail, sendAddEmailLink, type UserProfile } from '../services/firebase';
 
 interface AuthModalProps {
   currentUser: UserProfile | null;
@@ -14,6 +14,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
   const [emailInput, setEmailInput] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // "メールアドレスを追加" for signed-in accounts without a verified email (X sign-in)
+  const [addEmailInput, setAddEmailInput] = useState(() => (currentUser?.email || ''));
+  const [addEmailSending, setAddEmailSending] = useState(false);
+  const [addEmailSent, setAddEmailSent] = useState<string | null>(null);
+  const [addEmailError, setAddEmailError] = useState<string | null>(null);
+  const needsEmail = !!currentUser && accountNeedsEmail();
+
+  const handleAddEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = addEmailInput.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+      setAddEmailError('有効なメールアドレスを入力してください。');
+      return;
+    }
+    setAddEmailSending(true);
+    setAddEmailError(null);
+    try {
+      await sendAddEmailLink(clean);
+      setAddEmailSent(clean);
+    } catch (err: any) {
+      console.error('Add email send error:', err?.code, err?.message);
+      setAddEmailError(err?.code === 'auth/too-many-requests'
+        ? '送信回数が多すぎます。しばらく時間をおいてからお試しください。'
+        : 'メールの送信に失敗しました。メールアドレスを確認して、もう一度お試しください。');
+    } finally {
+      setAddEmailSending(false);
+    }
+  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,6 +270,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 </span>
               </div>
             </div>
+
+            {needsEmail && (
+              <div style={{ width: '100%', boxSizing: 'border-box', padding: '0.9rem 1rem', borderRadius: '14px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>
+                  <Mail size={15} />
+                  <span>メールアドレスを追加</span>
+                </div>
+                {addEmailSent ? (
+                  <p style={{ fontSize: '0.78rem', color: '#d8d2c6', lineHeight: 1.7, margin: '0.5rem 0 0' }}>
+                    {addEmailSent} に確認メールを送りました。メールのリンクを、<strong style={{ color: '#f2e2b3' }}>このブラウザ（アプリ）で</strong>開くと追加が完了します。届かないときは迷惑メールフォルダもご確認ください。
+                  </p>
+                ) : (
+                  <form onSubmit={handleAddEmail} style={{ marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#a9a49a', lineHeight: 1.7, margin: '0 0 0.6rem' }}>
+                      追加すると、毎朝の運勢メールが受け取れます。Xにログインできなくなったときも、このメールで今のアカウントにログインできます。
+                    </p>
+                    <input
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      value={addEmailInput}
+                      onChange={(e) => setAddEmailInput(e.target.value)}
+                      placeholder="example@email.com"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '0.7rem 0.85rem', borderRadius: '12px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.15)', color: '#f3efe6', fontSize: '16px' }}
+                    />
+                    {addEmailError && <p style={{ fontSize: '0.75rem', color: '#e6a99c', margin: '0.4rem 0 0' }}>{addEmailError}</p>}
+                    <button
+                      type="submit"
+                      disabled={addEmailSending}
+                      style={{ width: '100%', marginTop: '0.6rem', padding: '0.7rem', borderRadius: '12px', background: 'linear-gradient(135deg, #e2c074 0%, #b8862d 100%)', border: 'none', color: '#1c1a22', fontSize: '0.85rem', fontWeight: 'bold', cursor: addEmailSending ? 'wait' : 'pointer' }}
+                    >
+                      {addEmailSending ? '送信中...' : '確認メールを送る'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
 
             <button
               onClick={handleLogOut}
