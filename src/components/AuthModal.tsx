@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
-import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, accountNeedsEmail, sendAddEmailLink, type UserProfile } from '../services/firebase';
+import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, accountNeedsEmail, sendAddEmailLink, isGuestAccount, type UserProfile } from '../services/firebase';
 
 interface AuthModalProps {
   currentUser: UserProfile | null;
@@ -19,7 +19,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
   const [addEmailSending, setAddEmailSending] = useState(false);
   const [addEmailSent, setAddEmailSent] = useState<string | null>(null);
   const [addEmailError, setAddEmailError] = useState<string | null>(null);
-  const needsEmail = !!currentUser && accountNeedsEmail();
+  // A purchase-only account (bought without signing in) can't get an email attached: it signs in with the purchase email instead
+  const [isGuest, setIsGuest] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    if (currentUser) isGuestAccount().then((g) => { if (alive) setIsGuest(g); });
+    return () => { alive = false; };
+  }, [currentUser?.uid]);
+  const needsEmail = !!currentUser && !isGuest && accountNeedsEmail();
 
   const handleAddEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -262,7 +269,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
               }}>
                 <CheckCircle size={12} />
                 <span>
-                  {currentUser.providerId === 'twitter.com'
+                  {isGuest
+                    ? '購入用のアカウント'
+                    : currentUser.providerId === 'twitter.com'
                     ? 'X 連携中'
                     : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })())
                     ? 'メール認証完了'
@@ -270,6 +279,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 </span>
               </div>
             </div>
+
+            {isGuest && (
+              <div style={{ width: '100%', boxSizing: 'border-box', padding: '0.9rem 1rem', borderRadius: '14px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>
+                  <Mail size={15} />
+                  <span>購入したときのメールアドレスでログイン</span>
+                </div>
+                {emailSent ? (
+                  <p style={{ fontSize: '0.78rem', color: '#d8d2c6', lineHeight: 1.7, margin: '0.5rem 0 0' }}>
+                    ログイン用のメールを送りました。メールのリンクを開くとログインでき、購入した鑑定もそのまま引き継がれます。届かないときは迷惑メールフォルダもご確認ください。
+                  </p>
+                ) : (
+                  <form onSubmit={handleEmailSignIn} style={{ marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#a9a49a', lineHeight: 1.7, margin: '0 0 0.6rem' }}>
+                      今は、購入のときに自動で作られたアカウントで見ています。購入したときのメールアドレスでログインすると、購入した鑑定がそのアカウントに引き継がれ、ほかの端末でも見られて、毎朝の運勢メールも受け取れます。
+                    </p>
+                    <input
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="購入したときのメールアドレス"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '0.7rem 0.85rem', borderRadius: '12px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.15)', color: '#f3efe6', fontSize: '16px' }}
+                    />
+                    {errorMsg && <p style={{ fontSize: '0.75rem', color: '#e6a99c', margin: '0.4rem 0 0' }}>{errorMsg}</p>}
+                    <button
+                      type="submit"
+                      disabled={loading === 'email'}
+                      style={{ width: '100%', marginTop: '0.6rem', padding: '0.7rem', borderRadius: '12px', background: 'linear-gradient(135deg, #e2c074 0%, #b8862d 100%)', border: 'none', color: '#1c1a22', fontSize: '0.85rem', fontWeight: 'bold', cursor: loading === 'email' ? 'wait' : 'pointer' }}
+                    >
+                      {loading === 'email' ? '送信中...' : 'ログイン用のメールを送る'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
 
             {needsEmail && (
               <div style={{ width: '100%', boxSizing: 'border-box', padding: '0.9rem 1rem', borderRadius: '14px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>

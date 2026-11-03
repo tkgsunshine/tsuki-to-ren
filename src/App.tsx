@@ -36,7 +36,7 @@ import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
 import { trackFortune, trackPremiumStep } from './services/analytics';
 import { signInWithCustomToken } from 'firebase/auth';
-import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
@@ -859,7 +859,10 @@ function App() {
 
   // Accounts without a verified email (X sign-in) can't get the daily mail; offer to add an address to the same account
   const askToAddEmail = async () => {
-    const ok = await showConfirm('毎朝の運勢メールには、確認済みのメールアドレスが必要です。今のアカウントのまま、メールアドレスを追加しますか？', { okLabel: '追加する', cancelLabel: 'やめる' });
+    // A purchase-only account signs in with the purchase email instead of adding one (AuthModal shows that form)
+    const ok = await isGuestAccount()
+      ? await showConfirm('毎朝の運勢メールには、メールアドレスでのログインが必要です。購入したときのメールアドレスでログインしますか？（購入した鑑定はそのまま引き継がれます）', { okLabel: 'ログインへ', cancelLabel: 'やめる' })
+      : await showConfirm('毎朝の運勢メールには、確認済みのメールアドレスが必要です。今のアカウントのまま、メールアドレスを追加しますか？', { okLabel: '追加する', cancelLabel: 'やめる' });
     if (!ok) return;
     setShowNotifyEmailModal(false);
     setShowAuthModal(true);
