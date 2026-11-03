@@ -774,7 +774,7 @@ export default function AdminView() {
           <>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
               <Tile label="訪問" value={totals.visits} sub="ブラウザのセッション単位" />
-              <Tile label="鑑定" value={totals.fortunes} sub={`訪問あたり ${pct(totals.fortunes, totals.visits)}`} />
+              <Tile label="鑑定" value={totals.fortunes} sub={`鑑定した人 ${totals.fortuneSessions}（訪問の ${pct(totals.fortuneSessions, totals.visits)}）`} />
               <Tile label="会員登録（期間内）" value={newMembers} sub={`計測分 ${totals.signups} 件`} />
               <Tile label="共有" value={totals.shares} sub="X・LINE・リンク・画像" />
               <Tile label="ツール使用" value={totals.toolUses} sub={`鑑定へ進んだ ${totals.toolCtas} 回`} />
