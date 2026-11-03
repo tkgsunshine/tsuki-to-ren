@@ -36,7 +36,7 @@ import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
 import { trackFortune, trackPremiumStep } from './services/analytics';
 import { signInWithCustomToken } from 'firebase/auth';
-import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
@@ -286,6 +286,27 @@ function App() {
           }
         }
       });
+
+      // Link from "メールアドレスを追加": attach the address to the signed-in account
+      if (isAddEmailLink()) {
+        completeAddEmailLink().then((res) => {
+          if (res.status === 'linked') {
+            setCurrentUser(res.user);
+            setIsRegistered(true);
+            showAlert(`メールアドレス（${res.user.email}）を追加しました。毎朝の運勢メールが使えるようになり、Xにログインできないときもこのメールでログインできます。`);
+          } else if (res.status === 'not-signed-in') {
+            showAlert('このブラウザではログインしていないため、メールアドレスを追加できませんでした。「メールアドレスを追加」を押したのと同じブラウザ（アプリ）でログインしてから、もう一度お試しください。');
+          } else if (res.status === 'no-pending') {
+            showAlert('メールアドレスを追加できませんでした。「メールアドレスを追加」を押したのと同じブラウザ（アプリ）で、もう一度メールを送り直してください。');
+          } else if (res.status === 'in-use') {
+            showAlert('このメールアドレスは、別のアカウントで使われているため追加できませんでした。別のメールアドレスでお試しください。');
+          } else if (res.status === 'expired') {
+            showAlert('リンクの有効期限が切れているか、すでに使われています。マイページからもう一度メールを送ってください。');
+          } else {
+            showAlert('メールアドレスを追加できませんでした。時間をおいて、もう一度お試しください。');
+          }
+        });
+      }
 
       completeEmailMagicLinkSignIn().then((res) => {
         if (res.success && res.user) {
@@ -836,11 +857,19 @@ function App() {
     return saved;
   };
 
+  // Accounts without a verified email (X sign-in) can't get the daily mail; offer to add an address to the same account
+  const askToAddEmail = async () => {
+    const ok = await showConfirm('毎朝の運勢メールには、確認済みのメールアドレスが必要です。今のアカウントのまま、メールアドレスを追加しますか？', { okLabel: '追加する', cancelLabel: 'やめる' });
+    if (!ok) return;
+    setShowNotifyEmailModal(false);
+    setShowAuthModal(true);
+  };
+
   // From the result screen: makes the daily mail about the reading on screen, keeping the address
   const switchNotifyToCurrentReading = async () => {
     const email = (notifySub?.email || currentUser?.email || '').toLowerCase();
-    if (!email) {
-      showAlert('メール通知には、メールアドレス付きのアカウントでのログインが必要です。');
+    if (!email || accountNeedsEmail()) {
+      await askToAddEmail();
       return;
     }
     if (!isValidBirthDate(myBirth)) {
@@ -1866,7 +1895,7 @@ function App() {
                         {currentUser ? currentUser.displayName : 'Google / X で無料登録・ログイン'}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: currentUser ? '#7dbb8a' : '#d8d2c6', marginTop: '2px' }}>
-                        {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })()) ? 'メール認証完了' : 'Google 連携中'} (${currentUser.email || '登録済み'})` : '鑑定履歴・お相手データをクラウド保存'}
+                        {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })()) ? 'メール認証完了' : 'Google 連携中'} (${currentUser.email || 'メール未登録'})` : '鑑定履歴・お相手データをクラウド保存'}
                       </div>
                     </div>
                   </div>
@@ -3395,8 +3424,8 @@ function App() {
                 }
                 const cleanEmail = notifyEmailInput.trim().toLowerCase();
                 const accountEmail = currentUser?.email?.toLowerCase();
-                if (!accountEmail) {
-                  showAlert('メール通知には、メールアドレス付きのアカウントでのログインが必要です。Googleまたはメールリンクでログインしてください。');
+                if (!accountEmail || accountNeedsEmail()) {
+                  await askToAddEmail();
                   return;
                 }
                 if (cleanEmail !== accountEmail) {
