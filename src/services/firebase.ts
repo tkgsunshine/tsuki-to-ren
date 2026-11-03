@@ -331,6 +331,21 @@ export const accountNeedsEmail = (): boolean => {
   return !!user && !(user.email && user.emailVerified);
 };
 
+/**
+ * True for the account made automatically by a purchase without sign-in (custom claim "guest", api/_lib/checkout-claim.js).
+ * Such an account must never get an email attached (the server signs it out and removes the address); the buyer signs in
+ * with the purchase email instead, and the purchase moves to that account (transferGuestPurchases).
+ */
+export const isGuestAccount = async (): Promise<boolean> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) return false;
+  try {
+    return (await user.getIdTokenResult()).claims.guest === true;
+  } catch {
+    return false;
+  }
+};
+
 export const sendAddEmailLink = async (email: string): Promise<void> => {
   const user = getFirebaseAuth().currentUser;
   if (!user) throw Object.assign(new Error('Not signed in'), { code: 'app/not-signed-in' });
