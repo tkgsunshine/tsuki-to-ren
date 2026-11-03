@@ -2529,7 +2529,7 @@ function App() {
                               <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
                               {partner.unlocked && (
                                 <div style={{ fontSize: '0.7rem', color: '#f2c27a', lineHeight: 1.6 }}>
-                                  ⚠️ 解放済みのお相手です。生年月日を変えると、解放の対象から外れます（名前・16タイプ・性別の変更は大丈夫です）。
+                                  ⚠️ 買い切りプランを購入したお相手です。生年月日を変えると、解放の対象から外れます（名前・16タイプ・性別の変更は大丈夫です）。
                                 </div>
                               )}
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -2735,7 +2735,7 @@ function App() {
                                   border: '1px solid rgba(111, 176, 143, 0.35)',
                                   fontWeight: '600'
                                 }}>
-                                  ✦ 鑑定解放済み
+                                  ✦ 買い切りプラン購入済み
                                 </span>
                               )}
                             </div>
