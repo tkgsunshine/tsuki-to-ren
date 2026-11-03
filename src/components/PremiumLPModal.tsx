@@ -24,7 +24,7 @@ const benefits = [
     color: '#5d9fc0',
     title: '7日間の波から、10年先の二人の未来まで',
     shot: '/assets/premium/timeline-line.webp',
-    shotAlt: '7日間と月ごとの相性の折れ線グラフの画面',
+    shotAlt: '7日間・月ごと・年ごとの相性の折れ線グラフの画面',
     body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目でわかるので、先を見すえて動けますよ。'
   },
   {
@@ -103,7 +103,7 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
         color: '#f0ebf5',
         lineHeight: '1.75'
       }}>
-        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem', textAlign: right ? 'right' : 'left' }}>
+        <div style={{ fontSize: '0.68rem', color: sp.label, fontWeight: 'bold', marginBottom: '0.2rem', textAlign: 'left' }}>
           {sp.name}
         </div>
         {children}
@@ -400,7 +400,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { who: 'tsuki', t: '返信が遅いときの心理 ＆ 脈ありサイン 3段階', shot: '/assets/premium/edu-reply.webp', d: '既読のまま止まったとき、あの人が何を考えているのか。今どの段階にいるのか、少し離れかけたときの戻し方まで、一緒に見ていきましょうね。' },
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
-                  { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` }
+                  { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
+                  { who: 'tsuki', t: '7日間の波から、10年先の二人の未来まで', shot: '/assets/premium/edu-future.webp', d: '明日からの7日間・月ごとの相性の波と、この先10年の年ごとの流れ。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' }
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
                     <span style={{ display: 'block', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.2rem' }}>
@@ -452,11 +453,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
-                  { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
                   { label: '10年先までの年ごとの流れ（結婚・大きな転機の年）', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
-                  { label: 'お相手の保存', pair: '2人', monthly: '10人' }
+                  { label: 'お相手の保存', pair: '2人', monthly: '10人' },
+                  { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' }
                 ].map((row, idx) => {
                   const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
                   return (
