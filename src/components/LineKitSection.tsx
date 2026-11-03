@@ -84,7 +84,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, isRegistere
     <div style={{ background: 'rgba(159, 134, 192, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(159, 134, 192, 0.2)', position: 'relative' }}>
       <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#b9a3d6', marginBottom: '0.15rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
         <LoveLetterMark size={18} />
-        <span>{partnerLabel}にそのまま送れるLINE文例</span>
+        <span>そのまま使えるLINEキラーテンプレート</span>
       </div>
       <div style={{ fontSize: '0.68rem', color: '#a99bbd', marginBottom: '0.5rem' }}>{kit.basis}</div>
 
