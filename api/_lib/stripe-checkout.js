@@ -2,6 +2,7 @@ import { getDb, getAdminAuth } from './firestore.js';
 import { PREMIUM, getStripe, isLiveKey, parseBody, safeReturnPath, verifyUser, withParam } from './stripe.js';
 import { PAIR_KIND, findPairUnlock } from './pair-unlock.js';
 import { partnerKey } from './partner-days.js';
+import { guestPurchaseEmail } from './checkout-claim.js';
 
 const BIRTH_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -32,6 +33,9 @@ export default async function handler(req, res, deps = {}) {
     if (current && (current.livemode === true) !== live) current = undefined;
     if (current?.active) return res.status(409).json({ status: 'error', message: 'すでにプレミアム会員です' });
 
+    // 登録なしの購入で作られたアカウント（メールなし）は、前回の購入で入力したメールを Stripe に渡す（もう一度入力させない）
+    const email = user?.email || (user ? await guestPurchaseEmail(db, user.uid, live) : null);
+    const payer = current?.customerId ? { customer: current.customerId } : (email ? { customer_email: email } : {});
     const back = safeReturnPath(body.returnPath);
     // A guest comes back with the session id, so the app can sign this device in (checkout-claim.js).
     // {CHECKOUT_SESSION_ID} must stay unencoded for Stripe to fill it in.
@@ -47,7 +51,7 @@ export default async function handler(req, res, deps = {}) {
         mode: 'payment',
         line_items: [{ price: priceId, quantity: 1 }],
         ...(user ? { client_reference_id: user.uid } : {}),
-        ...(current?.customerId ? { customer: current.customerId } : (user?.email ? { customer_email: user.email } : {})),
+        ...payer,
         payment_intent_data: { metadata },
         metadata,
         locale: 'ja',
@@ -62,7 +66,7 @@ export default async function handler(req, res, deps = {}) {
       line_items: [{ price: priceId, quantity: 1 }],
       ...(user ? { client_reference_id: user.uid } : {}),
       // Reuse the Stripe customer of an earlier (cancelled) membership, so its payment history stays in one place
-      ...(current?.customerId ? { customer: current.customerId } : (user?.email ? { customer_email: user.email } : {})),
+      ...payer,
       // A guest subscription gets its uid after the webhook resolves the account (stripe-webhook.js)
       subscription_data: { metadata },
       metadata,

@@ -346,3 +346,23 @@ test('a purchase account that somehow got an email is signed out and loses the e
   const ok = await verifyUser({ headers: { authorization: 'Bearer x' } }, { verifyIdToken: async () => ({ uid: 'new_u9', guest: true }) });
   assert.equal(ok.uid, 'new_u9');
 });
+
+test('a guest account buying again gets its earlier purchase email filled in (only its own, same mode)', async () => {
+  const guestAuth = { verifyIdToken: async () => ({ uid: 'g1', guest: true }) };
+  const db = mockDb({
+    [`${CLAIMS}/cs_old`]: { uid: 'g1', email: 'old@example.com', created: true, livemode: true, at: '2026-11-01T00:00:00Z' },
+    [`${CLAIMS}/cs_new`]: { uid: 'g1', email: 'buyer@example.com', created: true, livemode: true, at: '2026-11-03T00:00:00Z' },
+    [`${CLAIMS}/cs_test`]: { uid: 'g1', email: 'test@example.com', created: true, livemode: false, at: '2026-11-04T00:00:00Z' },
+    [`${CLAIMS}/cs_other`]: { uid: 'g2', email: 'someone@example.com', created: true, livemode: true, at: '2026-11-05T00:00:00Z' }
+  });
+  const stripe = stripeCapturing();
+  const res = mockRes();
+  await checkout(buy({ oppBirth: '1999-09-09' }), res, { auth: guestAuth, db, stripe, pairPriceId: 'price_pair', live: true });
+  assert.equal(res.code, 200);
+  assert.equal(stripe.params.customer_email, 'buyer@example.com');
+  assert.equal(stripe.params.client_reference_id, 'g1');
+
+  const stripe2 = stripeCapturing();
+  await checkout(buy({ oppBirth: '1999-09-09' }), mockRes(), { auth: guestAuth, db: mockDb(), stripe: stripe2, pairPriceId: 'price_pair', live: true });
+  assert.equal(stripe2.params.customer_email, undefined);
+});

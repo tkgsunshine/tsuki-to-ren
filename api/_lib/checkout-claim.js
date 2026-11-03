@@ -61,6 +61,19 @@ export async function resolveCheckoutAccount(db, auth, session) {
 }
 
 /**
+ * The email a guest account (auto-created by a guest purchase, no email on the account) paid with,
+ * for the next checkout from the same account so Stripe does not ask for it again. Only the account
+ * itself asks (its own uid), so it learns nothing it did not type. null when there is none.
+ */
+export async function guestPurchaseEmail(db, uid, live) {
+  if (!uid) return null;
+  const snap = await db.collection(CLAIMS).where('uid', '==', uid).get();
+  const claims = (snap.docs || []).map((d) => d.data()).filter((c) => c?.created === true && c.email && (c.livemode === true) === live);
+  claims.sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
+  return claims[0]?.email || null;
+}
+
+/**
  * Hands guest purchases to the account that proved it owns the purchase email (a verified sign-in:
  * verifyUser only passes `email` through when the token says email_verified). Moves pairUnlocks and the
  * premium membership off the email-less auto-created account, retags the Stripe subscription's uid, and
