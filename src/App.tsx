@@ -16,7 +16,7 @@ import { ChatModal } from './components/ChatModal';
 import { UnifiedInputView } from './components/UnifiedInputView';
 import { mbtiOptions } from './constants/mbti';
 import { LoadingScreen } from './components/LoadingScreen';
-import { ResultView } from './components/ResultView';
+import { ResultView, PAIR_PRICE_LABEL } from './components/ResultView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult, san } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
@@ -2745,7 +2745,11 @@ function App() {
                             <button
                               type="button"
                               onClick={() => {
-                                showConfirm(`${san(partner.name)}の保存データを削除しますか？`, { okLabel: '削除する', danger: true }).then(ok => {
+                                // 買い切りで解放したお相手は、消す前にはっきり知らせる（購入は消えない＝同じ生年月日で占えばまた見られる）
+                                const confirmText = partner.unlocked
+                                  ? `⚠️ ${san(partner.name)}は、${PAIR_PRICE_LABEL}の買い切りで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見られます。\n\n本当に削除しますか？`
+                                  : `${san(partner.name)}の保存データを削除しますか？`;
+                                showConfirm(confirmText, { okLabel: partner.unlocked ? 'それでも削除する' : '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
                                 });
                               }}
