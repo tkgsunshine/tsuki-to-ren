@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
-import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
@@ -190,6 +190,61 @@ const renderTextWithCharHeadings = (text: string): React.ReactNode => {
       {i < lines.length - 1 && !SECTION_HEADING_RE.test(line.trim()) ? '\n' : null}
     </React.Fragment>
   ));
+};
+
+// 深層鑑定の本文: 「💘 お相手が惹かれる本質：」のような絵文字の小見出しを、トリセツと同じ独自マーク＋色付きの見出しにする。
+// 文言は鑑定エンジン（メールと共通）のままで、表示のときだけ置き換える。
+const DEEP_HEADING_MARKS: Record<string, { Icon: React.FC<{ size?: number }>; color: string }> = {
+  '💘': { Icon: PiercedHeartMark, color: '#f2b8c6' },
+  '✨': { Icon: PraiseSparkMark, color: '#f2e2b3' },
+  '📍': { Icon: SpotPinMark, color: '#9cc6d8' },
+  '💌': { Icon: LoveLetterMark, color: '#f2b8c6' },
+  '⚠️': { Icon: CautionMark, color: '#e6a99c' },
+  '💡': { Icon: MoonMark, color: '#f2e2b3' },
+  '🎁': { Icon: GiftMark, color: '#f2e2b3' }
+};
+const DEEP_HEADING_RE = /^(💘|✨|📍|💌|⚠️|💡|🎁)\s*(.+?)[：:]\s*(.*)$/u;
+const DEEP_CHAR_RE = /^(🌙|🔮)\s*((月|蓮)[^：:]{0,14})[：:]\s*(.*)$/u;
+
+const DeepHeading: React.FC<{ icon: React.ReactNode; color: string; label: string }> = ({ icon, color, label }) => (
+  <div className="font-serif" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', margin: '1rem 0 0.3rem', paddingBottom: '0.3rem', borderBottom: `1px solid ${color}33`, color, fontWeight: 'bold', fontSize: '0.84rem', lineHeight: 1.5 }}>
+    <span style={{ display: 'inline-flex', flexShrink: 0 }}>{icon}</span>
+    <span>{label}</span>
+  </div>
+);
+
+const renderDeepTopicText = (raw: string): React.ReactNode => {
+  // 「⚠️ 【二人の間で踏みやすい地雷3選】：」は、整形で ⚠️・見出し・「：」がばらばらの行になるので先にまとめる
+  const text = formatAppraisalText(raw.replace(/(⚠️)\s*【([^】]+)】\s*[：:]/gu, '$1 $2：'));
+  const blocks: React.ReactNode[] = [];
+  let para: string[] = [];
+  const flush = () => {
+    if (para.length) blocks.push(<p key={`p${blocks.length}`} style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{para.join('\n')}</p>);
+    para = [];
+  };
+  for (const line of text.split('\n')) {
+    const t = line.trim();
+    if (!t || /^[：:]$/.test(t)) continue;
+    const h = t.match(DEEP_HEADING_RE);
+    if (h) {
+      flush();
+      const mark = DEEP_HEADING_MARKS[h[1]];
+      blocks.push(<DeepHeading key={`h${blocks.length}`} icon={<mark.Icon size={18} />} color={mark.color} label={h[2].replace(/^【|】$/g, '')} />);
+      if (h[3]) para.push(h[3]);
+      continue;
+    }
+    const c = t.match(DEEP_CHAR_RE);
+    if (c) {
+      flush();
+      const isRen = c[3] === '蓮';
+      blocks.push(<DeepHeading key={`c${blocks.length}`} icon={<CharHeadingIcon char={c[3] as '月' | '蓮'} size={22} />} color={isRen ? '#9cc6d8' : '#cdbfe2'} label={c[2]} />);
+      if (c[4]) para.push(c[4]);
+      continue;
+    }
+    para.push(t);
+  }
+  flush();
+  return blocks;
 };
 
 // 見られない人には、ぼかす文章として本物の代わりにダミー文を渡す。
@@ -2495,9 +2550,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </h3>
               
               {topicOpen ? (
-                <p className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
-                  {formatAppraisalText(`${topic.intro}\n\n${topic.detail}`)}
-                </p>
+                <div className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3" }}>
+                  {renderDeepTopicText(`${topic.intro}\n\n${topic.detail}`)}
+                </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
@@ -2695,58 +2750,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <h2 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0, whiteSpace: 'nowrap', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {san(oppNickname)}の取扱説明書（トリセツ）
             </h2>
-          </div>
-
-          {/* 1. 刺さる言葉 TOP5 (Item 1 & 2 visible, Item 3-5 blurred) */}
-          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', position: 'relative' }}>
-            <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <PiercedHeartMark size={18} />
-              <span>刺さる言葉 TOP5（キュンとさせる褒め方）</span>
-            </div>
-            <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#f3efe6', lineHeight: '1.75' }}>
-              {activeResult.opponentTorisetsu.killingWords.slice(0, 1).map((word, idx) => (
-                <li key={idx} style={{ marginBottom: '0.2rem' }}>{word.replace(/〇〇/g, oppNickname || 'お相手')}</li>
-              ))}
-            </ul>
-            <div style={{ position: 'relative', marginTop: '0.2rem' }}>
-              <ul className="font-serif" style={{
-                margin: 0,
-                paddingLeft: '1.2rem',
-                fontSize: '0.8rem',
-                color: '#f3efe6',
-                lineHeight: '1.75',
-                filter: !deepOpen ? 'blur(4.5px)' : 'none',
-                userSelect: !deepOpen ? 'none' : 'auto',
-                opacity: !deepOpen ? 0.6 : 1
-              }}>
-                {activeResult.opponentTorisetsu.killingWords.slice(1).map((word, idx) => (
-                  <li key={idx + 1} style={{ marginBottom: '0.2rem' }}>
-                    {lockedText(word.replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}
-                  </li>
-                ))}
-              </ul>
-              {!deepOpen && (
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 10,
-                width: '90%',
-                display: 'flex',
-                justifyContent: 'center',
-                pointerEvents: 'auto'
-              }}>
-                <button
-                  type="button"
-                  className="premium-lock-tag"
-                  onClick={handleDeepLockClick}
-                >
-                  <Lock size={11} /> {deepLockWord}
-                </button>
-              </div>
-            )}
-            </div>
           </div>
 
           {/* 2. 絶対NG行動 5選 (Item 1 is visible teaser, Item 2-5 are blurred) */}
