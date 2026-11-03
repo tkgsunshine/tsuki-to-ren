@@ -15,21 +15,22 @@ export const SelfReadingCard: React.FC<{
   charIcon: React.ReactNode;
   hasOpponent: boolean;
   oppName: string;
-}> = ({ pillar, star, mbti, char, charIcon, hasOpponent, oppName }) => {
+}> = ({ pillar, star, mbti, name, char, charIcon, hasOpponent, oppName }) => {
   const reading = getSelfReading(pillar, star, mbti);
   if (!reading) return null;
 
-  // 見出しの呼び方のルール: 自分＝「あなた」、お相手＝「〇〇さん」、二人のこと＝「〇〇さんとの」
+  // 見出しの呼び方のルール: 自分＝ニックネーム（空欄なら「あなた」）、お相手＝「〇〇さん」、二人のこと＝「〇〇さんとの」
+  const who = san(name, 'あなた');
   const accent = char === 'ren' ? '#9cc6d8' : '#cdbfe2';
   const opp = san(oppName);
-  // 相性・運勢の鑑定の前置きとして読めるように、「〇〇との相性を見る前に、まずはあなたのことから」で始める
+  // 相性・運勢の鑑定の前置きとして読めるように、「〇〇との相性を見る前に、まずは${who}のことから」で始める
   const intro = hasOpponent
-    ? (char === 'ren' ? `${opp}との相性を読む前に、まずあなたがどんな人かを見ておこう。` : `${opp}との相性を見る前に、まずはあなたのことから。こんなところ、ありませんか？`)
-    : (char === 'ren' ? `運勢を読む前に、まずあなたがどんな人かを見ておこう。` : `運勢を見る前に、まずはあなたのことから。こんなところ、ありませんか？`);
+    ? (char === 'ren' ? `${opp}との相性を読む前に、まず${who}がどんな人かを見ておこう。` : `${opp}との相性を見る前に、まずは${who}のことから。`)
+    : (char === 'ren' ? `運勢を読む前に、まず${who}がどんな人かを見ておこう。` : `運勢を見る前に、まずは${who}のことから。`);
   return (
     <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
       <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.55rem', fontWeight: 'bold', textAlign: 'center', letterSpacing: '0.05em' }}>
-        あなたってこんな人
+        {who}ってこんな人
       </h2>
       <p className="font-serif" style={{ display: 'flex', alignItems: 'center', fontSize: '0.84rem', color: accent, margin: '0 0 0.85rem', lineHeight: 1.6 }}>
         {charIcon}
@@ -38,7 +39,7 @@ export const SelfReadingCard: React.FC<{
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {reading.items.map((item) => (
           <div key={item.label} style={{ borderLeft: '2px solid rgba(226,192,116,0.55)', paddingLeft: '0.75rem' }}>
-            <div style={{ fontSize: '0.74rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>{item.label}</div>
+            <div style={{ fontSize: '0.74rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>{item.label.replace('あなた', who)}</div>
             <p className="font-serif" style={{ fontSize: '0.88rem', lineHeight: 1.85, letterSpacing: '0.02em', color: '#e8e3d8', margin: 0 }}>{item.text}</p>
           </div>
         ))}
