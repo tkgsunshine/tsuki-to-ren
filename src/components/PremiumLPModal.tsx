@@ -388,7 +388,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭だけ', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
-                  { label: 'お相手の保存', pair: '2人＋買った相手', monthly: '10人' }
+                  { label: 'お相手の保存', pair: '2人', monthly: '10人' }
                 ].map((row, idx) => {
                   const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
                   return (
