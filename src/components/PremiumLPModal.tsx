@@ -191,6 +191,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   };
   // 2プランの比べ方（買い切りは、いま見ているお相手がいるときだけ）
   const showPlans = Boolean(pair) && !isSubscribed;
+  // 買い切りボタンの「〇〇さんだけ」。名前が空のとき（san() が「お相手」を返す）は「このお相手だけ」
+  const pairWho = !pair || pair.name === 'お相手' ? 'このお相手' : pair.name;
   // 買い切りで「今日」の内容が見られるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
@@ -524,7 +526,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                         cursor: 'pointer'
                       }}
                     >
-                      {isProcessing ? '決済画面へ移動しています...' : 'この人だけ見れる買い切り480円で解放する'}
+                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}だけ見れる買い切り480円で解放する`}
                     </button>
                   )
                 )}
@@ -905,7 +907,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 padding: '0.1rem'
               }}
             >
-              この人だけなら 買い切り480円で解放する
+              {pairWho}だけなら 買い切り480円で解放する
             </button>
           )}
         </div>
