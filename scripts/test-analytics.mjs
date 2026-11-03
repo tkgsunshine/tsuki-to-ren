@@ -237,14 +237,3 @@ test('admin ?days=1&offset=1 returns only yesterday (JST), for counts and chat',
   assert.deepEqual(res.body.daily.map((d) => d.date), [yesterday]);
   assert.deepEqual(res.body.chat.map((d) => d.date), [yesterday]);
 });
-
-test('track: the answer to 「当たっていましたか？」 at the top of a result is counted (self_hit / self_miss)', async () => {
-  const db = mockDb();
-  for (const type of ['self_hit', 'self_miss']) {
-    const res = mockRes();
-    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type, source: 'google', landing: 'home', device: 'mobile_browser' } }, res, { db });
-    assert.equal(res.code, 204);
-  }
-  assert.ok(db.writes[0].data.selfHits);
-  assert.ok(db.writes[1].data.selfMisses);
-});

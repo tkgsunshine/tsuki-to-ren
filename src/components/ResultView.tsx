@@ -1470,7 +1470,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
         charIcon={<CharHeadingIcon char={selectedChar === 'ren' ? '蓮' : '月'} size={30} />}
         hasOpponent={hasOpponent}
         oppName={oppNickname}
-        showFeedback={!sharedBy}
       />
 
       {/* Free Summary Section (Fully Visible) */}
