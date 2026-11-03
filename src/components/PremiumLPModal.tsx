@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
-import { showConfirm } from './AppDialog';
 
 const worries = [
   '既読のまま返事がこなくて、なかなか眠れない夜',
@@ -110,6 +109,15 @@ const CharBubble: React.FC<{ children: React.ReactNode; who?: keyof typeof speak
   );
 };
 
+/** 買い切り「お相手1人の深層鑑定」（¥480）。いま見ている鑑定にお相手がいるときだけ渡される */
+export interface PairPlanInfo {
+  /** 「◯◯さん」の形 */
+  name: string;
+  /** このお相手を購入済み */
+  unlocked: boolean;
+  onBuy: () => void | Promise<void>;
+}
+
 interface PremiumLPModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -118,6 +126,10 @@ interface PremiumLPModalProps {
   isSubscribed: boolean;
   isRegistered: boolean;
   onRegisterFirst: () => void;
+  /** 買い切りプラン。null のときは月額だけを見せる */
+  pair?: PairPlanInfo | null;
+  /** 先に見せるプラン。買い切りで解放できる項目のロックから開いたときは 'pair' */
+  focus?: 'pair' | 'monthly';
   /** 解約理由を添えて、Stripe の解約・お支払い画面へ移動する */
   onCancelSubscription?: (reasons: string[], note: string) => void | Promise<void>;
   /** 解約済み（更新日で終了）のとき、その終了日（ISO）。この場合は解約アンケートを出さず、お支払い画面へ直接進む */
@@ -129,10 +141,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   onClose,
   onSubscribe,
   isSubscribed,
-  isRegistered,
-  onRegisterFirst,
   onCancelSubscription,
-  premiumEndsOn
+  premiumEndsOn,
+  pair = null,
+  focus = 'monthly'
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -141,20 +153,20 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   if (!isOpen) return null;
 
+  // 登録なしでも申し込める（決済のときのメールでアカウントを自動で作る）。
+  // Stripe の決済画面へ移動する。開けなかったときは App がお知らせを出し、ボタンを元に戻す
   const handleSubscribeAction = () => {
-    if (!isRegistered) {
-      showConfirm('プレミアムのお申し込みには、無料の会員登録が必要です。\n登録画面へ進みますか？', { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
-        if (!ok) return;
-        onClose();
-        onRegisterFirst();
-      });
-      return;
-    }
-
-    // Stripe の決済画面へ移動する。開けなかったときは App がお知らせを出し、ボタンを元に戻す
     setIsProcessing(true);
     void Promise.resolve(onSubscribe()).finally(() => setIsProcessing(false));
   };
+  const handlePairAction = () => {
+    if (!pair || pair.unlocked) return;
+    setIsProcessing(true);
+    void Promise.resolve(pair.onBuy()).finally(() => setIsProcessing(false));
+  };
+  // 2プランの比べ方（買い切りは、いま見ているお相手がいるときだけ）
+  const showPlans = Boolean(pair) && !isSubscribed;
+  const pairFirst = showPlans && focus === 'pair';
 
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
   const priceCardLabel = !isSubscribed
@@ -167,6 +179,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   };
 
   const faqs = [
+    ...(pair ? [{
+      q: '買い切り（480円）と月額の違いは？',
+      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・年次の流れ）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+    }] : []),
+    {
+      q: '会員登録をしていなくても買えますか？',
+      a: 'はい。お支払いのときに入力したメールアドレスで、アカウントを自動でお作りします。支払いが終わるとそのままログインした状態になり、別の端末では同じメールでログインすると引き継げます。'
+    },
     {
       q: 'いつでも解約できますか？',
       a: 'はい、いつでもマイページからワンタップで解約できます。解約したあとも、有効期間が終わるまではプレミアムの機能をそのまま使えますよ。'
@@ -297,6 +317,118 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               ここから先は、あの人の気持ちやこれからの流れを、私ともう少し深く一緒に見ていきませんか？
             </CharBubble>
           </div>
+
+          {/* プランを選ぶ（買い切り ¥480 と 月額 ¥980 を1枚で見比べる） */}
+          {showPlans && pair && (
+            <div style={{ padding: '0 1.15rem 1.35rem' }}>
+              <h2 className="font-serif gold-text" style={sectionTitleStyle}>
+                {pair.name}のこと、どこまで知りたい？
+              </h2>
+              <div style={{
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '14px',
+                overflow: 'hidden',
+                fontSize: '0.72rem',
+                color: '#e8e3d8'
+              }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textAlign: 'center' }}>
+                  <div style={{ padding: '0.55rem 0.5rem', textAlign: 'left' }}>できること</div>
+                  {(pairFirst
+                    ? [`${pair.name}だけ ¥480・1回`, '全部 ¥980/月']
+                    : ['全部 ¥980/月', `${pair.name}だけ ¥480・1回`]
+                  ).map((h, i) => (
+                    <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4 }}>{h}</div>
+                  ))}
+                </div>
+                {[
+                  { label: 'トリセツ・深層鑑定・相性グラフ・年次の流れ', pair: 'ずっと', monthly: '全員分' },
+                  { label: '今日の相性と、本日のLINEの送り方', pair: '買った日だけ', monthly: '毎日' },
+                  { label: 'これからの7日間・月ごとの流れ', pair: null, monthly: '◯' },
+                  { label: '毎朝の運勢メールが全文で届く', pair: null, monthly: '◯' },
+                  { label: '月・蓮へのチャット相談', pair: null, monthly: '無制限' },
+                  { label: 'お相手の保存', pair: null, monthly: '10人' }
+                ].map((row, idx) => {
+                  const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
+                  return (
+                    <div key={row.label} style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.06)', background: idx % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
+                      <div style={{ padding: '0.5rem', lineHeight: 1.45 }}>{row.label}</div>
+                      {cells.map((c, i) => (
+                        <div key={i} style={{ padding: '0.5rem 0.25rem', textAlign: 'center', alignSelf: 'center', color: c ? '#8ecaa5' : '#6b665c', fontWeight: c ? 600 : 400 }}>{c ?? '−'}</div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              <p style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.6rem 0 0.75rem' }}>
+                {pair.name}のことを今日じっくり知りたいだけなら¥480、毎日の相性やLINEの助言・ほかのお相手も見るなら月額がおすすめです。どちらも会員登録なしで買えます。
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                {(pairFirst ? ['pair', 'monthly'] : ['monthly', 'pair']).map((kind) =>
+                  kind === 'monthly' ? (
+                    <button
+                      key="monthly"
+                      type="button"
+                      disabled={isProcessing}
+                      onClick={handleSubscribeAction}
+                      style={{
+                        width: '100%',
+                        padding: '0.8rem 1rem',
+                        background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
+                        color: '#000',
+                        border: 'none',
+                        borderRadius: '9999px',
+                        fontSize: '0.9rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.03em',
+                        boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isProcessing ? '決済画面へ移動しています...' : '全部見られる月額980円ではじめる'}
+                    </button>
+                  ) : pair.unlocked ? (
+                    <div key="pair" style={{
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '9999px',
+                      border: '1px solid rgba(111, 176, 143, 0.5)',
+                      background: 'rgba(111, 176, 143, 0.08)',
+                      color: '#8ecaa5',
+                      fontSize: '0.82rem',
+                      fontWeight: 'bold',
+                      textAlign: 'center'
+                    }}>
+                      ✓ {pair.name}の鑑定は解放済みです
+                    </div>
+                  ) : (
+                    <button
+                      key="pair"
+                      type="button"
+                      disabled={isProcessing}
+                      onClick={handlePairAction}
+                      style={{
+                        width: '100%',
+                        padding: '0.8rem 1rem',
+                        borderRadius: '9999px',
+                        border: '1.5px solid rgba(226, 192, 116, 0.6)',
+                        background: 'rgba(226, 192, 116, 0.07)',
+                        color: '#f2e2b3',
+                        fontSize: '0.88rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {isProcessing ? '決済画面へ移動しています...' : `${pair.name}の鑑定だけ解放する（¥480・買い切り）`}
+                    </button>
+                  )
+                )}
+              </div>
+              <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
+                ¥480は1回払いで、自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。
+              </p>
+            </div>
+          )}
 
           {/* こんなときに */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
@@ -647,6 +779,26 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   <ArrowRight size={18} />
                 </>
               )}
+            </button>
+          )}
+          {!isSubscribed && pair && !pair.unlocked && (
+            <button
+              type="button"
+              disabled={isProcessing}
+              onClick={handlePairAction}
+              style={{
+                width: '100%',
+                marginTop: '0.5rem',
+                background: 'none',
+                border: 'none',
+                color: '#d8d2c6',
+                fontSize: '0.74rem',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                padding: '0.1rem'
+              }}
+            >
+              {pair.name}だけなら ¥480（買い切り・1回払い）
             </button>
           )}
         </div>

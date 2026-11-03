@@ -283,7 +283,8 @@ interface ResultViewProps {
   pairUnlock?: PairUnlock;
   onBuyPair?: () => Promise<void> | void;
   onSubscribe: () => void;
-  onOpenPremiumLP?: () => void;
+  // 購入LPを開く。focus: 先に見せるプラン（買い切り ¥480 か 月額）
+  onOpenPremiumLP?: (focus?: 'pair' | 'monthly') => void;
   selectedChar: 'ren' | 'tsuki';
   setSelectedChar: (char: 'ren' | 'tsuki') => void;
   onOpenShareCard: () => void;
@@ -756,11 +757,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
   const handleLockTagClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    // 非会員はまず無料会員登録へ（購入LPには飛ばさない）
-    if (!isRegistered) {
+    // 登録なしでも購入できるので、未登録の人も購入LPへ（2026-11-04 TAKASHI判断）
+    if (onOpenPremiumLP) {
+      onOpenPremiumLP('monthly');
+    } else if (!isRegistered) {
       handleScrollToRegister();
-    } else if (onOpenPremiumLP) {
-      onOpenPremiumLP();
     } else {
       handleScrollToSub();
     }
@@ -773,20 +774,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
-  const deepLockWord = canBuyPair && isRegistered ? `${PAIR_PRICE_LABEL}で解放` : 'プレミアム登録で全解放';
+  const deepLockWord = canBuyPair ? `${PAIR_PRICE_LABEL}で解放` : 'プレミアム登録で全解放';
   const pairCardRef = React.useRef<HTMLDivElement>(null);
   const [buyingPair, setBuyingPair] = useState(false);
+  // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
   const handleBuyPair = async () => {
-    if (!isRegistered) { handleScrollToRegister(); return; }
     if (!onBuyPair || buyingPair) return;
     setBuyingPair(true);
     try { await onBuyPair(); } finally { setBuyingPair(false); }
   };
-  // 変わらない鑑定のロック: 会員なら、買い切りと月額を並べたカードへ
+  // 変わらない鑑定（トリセツ・深層鑑定・相性グラフ・年次）のロック: ¥480を先に見せたLPへ
   const handleDeepLockClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (isRegistered && canBuyPair && pairCardRef.current) {
-      pairCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (canBuyPair && onOpenPremiumLP) {
+      onOpenPremiumLP('pair');
       return;
     }
     handleLockTagClick();
@@ -1351,9 +1352,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       ? <>{partnerCall}との今日の相性を続けて見るには、無料会員登録をしてください。登録すると、あと6日無料で見られます。</>
                       : <>{partnerCall}との無料の期間が終わりました。<br />二人の毎日の点数と助言は、プレミアム（月額980円）でずっと見られます。</>}
                   </div>
-                  <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                  <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); if (partnerLock.guest) handleScrollToRegister(); else handleLockTagClick(e); }}>
                     <Lock size={11} /> {partnerLock.guest ? '無料会員登録' : 'プレミアムで今日の相性を見る'}
                   </button>
+                  {!partnerLock.guest && canBuyPair && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenPremiumLP && onOpenPremiumLP('pair')}
+                      style={{ background: 'none', border: 'none', color: '#d8d2c6', fontSize: '0.7rem', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+                    >
+                      {partnerCall}のことだけなら {PAIR_PRICE_LABEL}（買い切り・今日の相性つき）
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -2127,7 +2137,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                   <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={handleLockTagClick}>
-                    <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                    <Lock size={11} /> {'プレミアム登録で全解放'}
                   </button>
                 </div>
               );
@@ -2161,7 +2171,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       ))}
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                          <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                          <Lock size={11} /> {'プレミアム登録で全解放'}
                         </button>
                       </div>
                     </div>
@@ -2169,7 +2179,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {adviceTeaser && parts.length === 2 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
                       <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                        <Lock size={11} /> {'プレミアム登録で全解放'}
                       </button>
                     </div>
                   )}
@@ -2187,7 +2197,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && !preview && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                            <Lock size={11} /> {'プレミアム登録で全解放'}
                           </button>
                         </div>
                       )}
@@ -2391,15 +2401,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                     {formatAppraisalText(topic.intro)}
                   </p>
-                  <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={handleDeepLockClick}>
+                  <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={premiumOnly ? handleDeepLockClick : () => handleScrollToRegister()}>
                     <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                       {lockedText(`${topic.detail} ${topic.detail}`, true)}
                     </p>
                     
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
-                      <button className="premium-lock-tag" onClick={handleDeepLockClick}>
-                        <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                      <button className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); if (premiumOnly) handleDeepLockClick(e); else handleScrollToRegister(); }}>
+                        <Lock size={11} /> {premiumOnly ? deepLockWord : (!isRegistered ? '無料会員登録' : deepLockWord)}
                       </button>
                     </div>
                   </div>
@@ -2630,7 +2640,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                  <Lock size={11} /> {deepLockWord}
                 </button>
               </div>
             )}
@@ -2684,7 +2694,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                  <Lock size={11} /> {deepLockWord}
                 </button>
               </div>
             )}
@@ -2731,7 +2741,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                  <Lock size={11} /> {deepLockWord}
                 </button>
               </div>
             )}
@@ -2774,7 +2784,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                  <Lock size={11} /> {deepLockWord}
                 </button>
               </div>
             )}
@@ -2816,7 +2826,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                  <Lock size={11} /> {deepLockWord}
                 </button>
               </div>
             )}
@@ -2867,7 +2877,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                  <Lock size={11} /> {deepLockWord}
                 </button>
               </div>
             )}
@@ -2909,7 +2919,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag"
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                  <Lock size={11} /> {deepLockWord}
                 </button>
               </div>
             )}
@@ -3027,10 +3037,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
                   <PremiumUnlockButton
                     onClick={() => {
-                      if (!isRegistered) {
-                        handleScrollToRegister();
-                      } else if (onOpenPremiumLP) {
-                        onOpenPremiumLP();
+                      if (onOpenPremiumLP) {
+                        onOpenPremiumLP('monthly');
                       } else {
                         onSubscribe();
                         setSubSuccess(true);
@@ -3063,10 +3071,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         opacity: buyingPair ? 0.7 : 1
                       }}
                     >
-                      {!isRegistered ? '無料会員登録して購入する' : buyingPair ? '決済画面を開いています…' : `${partnerCall}の鑑定だけ解放する（${PAIR_PRICE_LABEL}・買い切り）`}
+                      {buyingPair ? '決済画面を開いています…' : `${partnerCall}の鑑定だけ解放する（${PAIR_PRICE_LABEL}・買い切り）`}
                     </button>
                     <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。
+                      自動更新はありません。お相手は生年月日で決まります（名前を変えても同じお相手です）。会員登録なしでも買えます（決済のときのメールでアカウントをお作りします）。
                     </div>
                   </div>
                 )}
@@ -3088,8 +3096,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           trust: Math.min(99, Math.floor((activeResult.baseScore || 82) * 0.98))
         }}
         isUnlocked={deepOpen}
-        onOpenAuth={!isRegistered ? handleScrollToRegister : canBuyPair ? () => handleDeepLockClick() : onOpenPremiumLP}
-        onOpenPremiumLP={!isRegistered ? handleScrollToRegister : canBuyPair ? () => handleDeepLockClick() : onOpenPremiumLP}
+        onOpenAuth={() => handleDeepLockClick()}
+        onOpenPremiumLP={() => handleDeepLockClick()}
         character={selectedChar}
       />
       )}
@@ -3148,7 +3156,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     className="premium-lock-tag" 
                     onClick={handleLockTagClick}
                   >
-                    <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                    <Lock size={11} /> {'プレミアム登録で全解放'}
                   </button>
                 </div>
               )}
@@ -3221,7 +3229,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" 
                             onClick={handleLockTagClick}
                           >
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                            <Lock size={11} /> {'プレミアム登録で全解放'}
                           </button>
                         </div>
                       )}
@@ -3300,7 +3308,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" 
                             onClick={handleDeepLockClick}
                           >
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : deepLockWord}
+                            <Lock size={11} /> {deepLockWord}
                           </button>
                         </div>
                       )}
@@ -3378,10 +3386,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
                   <PremiumUnlockButton
                     onClick={() => {
-                      if (!isRegistered) {
-                        handleScrollToRegister();
-                      } else if (onOpenPremiumLP) {
-                        onOpenPremiumLP();
+                      if (onOpenPremiumLP) {
+                        onOpenPremiumLP('monthly');
                       } else {
                         onSubscribe();
                         setSubSuccess(true);

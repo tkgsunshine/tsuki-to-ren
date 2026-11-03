@@ -5,8 +5,9 @@ import webhook from '../_lib/stripe-webhook.js';
 import partner from '../_lib/partner-days.js';
 import userdata from '../_lib/user-data.js';
 import notices from '../_lib/notices.js';
+import claim from '../_lib/checkout-claim.js';
 
-// /api/stripe/checkout | portal | status | webhook | partner | userdata | notices in one function
+// /api/stripe/checkout | portal | status | webhook | partner | userdata | notices | claim in one function
 // (userdata = the member's profile and saved partners, notices = the in-app お知らせ;
 //  both are kept here only to stay within the function limit)
 // (the Hobby plan allows at most 12 functions per deployment).
@@ -14,7 +15,7 @@ import notices from '../_lib/notices.js';
 // the raw body is handed on as a Buffer, which the other handlers parse as JSON.
 export const config = { api: { bodyParser: false } };
 
-const HANDLERS = { checkout, portal, status, webhook, partner, userdata, notices };
+const HANDLERS = { checkout, portal, status, webhook, partner, userdata, notices, claim };
 
 const readRawBody = async (req) => {
   const chunks = [];

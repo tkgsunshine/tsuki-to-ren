@@ -51,10 +51,20 @@ test('premiumRecord maps a subscription', () => {
   assert.equal(premiumRecord(subscription({ status: 'past_due' })).active, true);
 });
 
-test('checkout needs a sign-in', async () => {
+test('checkout without a sign-in is a guest purchase, and a broken token is still refused', async () => {
+  // 登録なしの購入: no Authorization header makes a guest session (no uid, sid on the way back)
+  let params;
+  const stripe = { checkout: { sessions: { create: async (p) => { params = p; return { url: 'https://checkout.stripe.com/x' }; } } } };
   const res = mockRes();
-  await checkout({ method: 'POST', headers: {}, body: {} }, res, { auth, db: mockDb(), stripe: {}, priceId: 'price_1' });
-  assert.equal(res.code, 401);
+  await checkout({ method: 'POST', headers: {}, body: {} }, res, { auth, db: mockDb(), stripe, priceId: 'price_1' });
+  assert.equal(res.code, 200);
+  assert.equal(params.client_reference_id, undefined);
+  assert.equal(params.metadata.guest, '1');
+  assert.ok(params.success_url.includes('sid={CHECKOUT_SESSION_ID}'));
+
+  const bad = mockRes();
+  await checkout({ method: 'POST', headers: { authorization: 'Bearer wrong' }, body: {} }, bad, { auth, db: mockDb(), stripe: {}, priceId: 'price_1' });
+  assert.equal(bad.code, 401);
 });
 
 test('checkout creates a subscription session tied to the account', async () => {

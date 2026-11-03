@@ -27,7 +27,7 @@ interface Props {
   lockWord?: string;
 }
 
-export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, isRegistered, onLockClick, lockWord = 'プレミアム登録で全解放' }) => {
+export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick, lockWord = 'プレミアム登録で全解放' }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const locked = !isSubscribed;
   const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
@@ -47,7 +47,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, isRegistere
     // ぼかす部分は縦に長いので、ボタンは中央ではなく上のほう（すぐ目に入る位置）に置く
     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '3.2rem', pointerEvents: 'none', zIndex: 10 }}>
       <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={onLockClick}>
-        <Lock size={11} /> {!isRegistered ? '無料会員登録' : lockWord}
+        <Lock size={11} /> {lockWord}
       </button>
     </div>
   );

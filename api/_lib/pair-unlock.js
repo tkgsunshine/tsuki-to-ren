@@ -29,8 +29,8 @@ export const pairAccess = (entry, today = jstToday()) => ({
  * Records a paid one-time checkout (called by the webhook). The purchase day is the day Stripe completed the payment.
  * Returns false when the session is not a paid pair purchase. A retried event writes the same record again.
  */
-export async function recordPairPurchase(db, session, completedAtMs = Date.now()) {
-  const uid = session.client_reference_id || session.metadata?.uid;
+export async function recordPairPurchase(db, session, completedAtMs = Date.now(), uidOverride = null) {
+  const uid = uidOverride || session.client_reference_id || session.metadata?.uid;
   const key = session.metadata?.partner;
   if (session.mode !== 'payment' || session.metadata?.kind !== PAIR_KIND || !uid || !key) return false;
   if (session.payment_status !== 'paid') return false;
