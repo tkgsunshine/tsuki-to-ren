@@ -313,3 +313,26 @@ test('MBTI×守護獣のランキング: 点数は16タイプ40：守護獣30の
     assert.deepEqual(lintPost({ slot: 'late', kind: 'value', text: r.replyText }, [], { maxWeight: 700, reply: true }), [], d);
   }
 });
+
+test('本文中の16タイプに、二つ名が足される（各タイプ最初の1回だけ・付いているもの・ハッシュタグはそのまま）', async () => {
+  const { addMbtiNicksInline } = await import('./lib/mbti-nick.mjs');
+  assert.equal(addMbtiNicksInline('ESTJは、前の夜に。ESTJは'), 'ESTJ 幹部は、前の夜に。ESTJは');
+  assert.equal(addMbtiNicksInline('INTJ：無表情\nINFP：泣く'), 'INTJ 建築家：無表情\nINFP 仲介者：泣く');
+  assert.equal(addMbtiNicksInline('1位 ESTJ 幹部'), '1位 ESTJ 幹部');
+  assert.equal(addMbtiNicksInline('ESTJ（幹部）'), 'ESTJ（幹部）');
+  assert.equal(addMbtiNicksInline('#INFP の人'), '#INFP の人');
+  const once = addMbtiNicksInline('【INFJの恋愛】');
+  assert.equal(once, '【INFJ 提唱者の恋愛】');
+  assert.equal(addMbtiNicksInline(once), once, '二重に足さない');
+});
+
+test('MBTI×守護獣ランキングは、二つ名を足しても上限（800）に収まる', async () => {
+  const { buildMbtiBeastRanking } = await import('./lib/formats.mjs');
+  const { addMbtiNicksInline } = await import('./lib/mbti-nick.mjs');
+  const { weightedLength } = await import('./lib/lint.mjs');
+  for (let i = 0; i < 60; i++) {
+    const d = new Date(Date.UTC(2026, 10, 1) + i * 864e5).toISOString().slice(0, 10);
+    const r = buildMbtiBeastRanking(d);
+    assert.ok(weightedLength(addMbtiNicksInline(r.text)) <= 800, d);
+  }
+});

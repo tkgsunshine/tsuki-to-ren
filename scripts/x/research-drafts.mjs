@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
+import { addMbtiNicksInline } from './lib/mbti-nick.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DIR = path.join(ROOT, 'data/x/research');
@@ -159,6 +160,11 @@ async function main() {
       console.warn(`attempt ${attempt}: ${e.message}`);
       feedback = `\n\n# 前回の出力は不正でした: ${e.message}。JSONのオブジェクトだけを出力してください。`;
       continue;
+    }
+    // 本文・リプ欄の「ESTJ」を「ESTJ 幹部」の形にしてから検査する（2026-11-03 運営の指定）
+    for (const d of out.drafts || []) {
+      if (typeof d.text === 'string') d.text = addMbtiNicksInline(d.text);
+      if (typeof d.replyText === 'string') d.replyText = addMbtiNicksInline(d.replyText);
     }
     const problems = validate(out, refs, count);
     if (problems.length) {
