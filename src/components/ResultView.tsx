@@ -2789,7 +2789,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <div>
                       <span style={label}>【好みの系統】</span>
                       {at.styleTag && <span style={{ display: 'inline-block', margin: '0 0.35rem 0.15rem 0', padding: '0.05rem 0.6rem', borderRadius: '999px', background: 'rgba(226, 139, 170, 0.22)', border: '1px solid rgba(246, 198, 216, 0.55)', color: '#fff', fontWeight: 'bold', fontSize: '0.86rem' }}>{at.styleTag}</span>}
-                      {at.styleName}
+                      {!at.styleTag && at.styleName}
                     </div>
                     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                       <div style={lockStyle}>
@@ -2819,7 +2819,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         </div>
                       )}
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: '#a9a49a', marginTop: '0.2rem' }}>※お相手の生まれ日の星から、四柱推命で「恋人・パートナー」を表す星を読み解き、お相手の16タイプで服装の一工夫を足しています。</div>
                   </div>
                 </div>
               );
