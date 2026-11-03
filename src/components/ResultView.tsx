@@ -26,6 +26,7 @@ const GuardianColorText: React.FC<{ value: string; fallbackColor: string }> = ({
 );
 import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
+import { SelfReadingCard } from './SelfReadingCard';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -1384,6 +1385,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </button>
         )}
       </div>
+
+      {/* あなたってこんな人: 本人の性格・恋愛の傾向を先に見せて「当たってる」と感じてもらう（点数には関わらない。文は utils/selfReading.ts） */}
+      <SelfReadingCard
+        pillar={activeResult.myPillar}
+        star={activeResult.myStar}
+        mbti={activeResult.myMbtiCode}
+        name={myName}
+        char={selectedChar}
+        charIcon={<CharHeadingIcon char={selectedChar === 'ren' ? '蓮' : '月'} size={30} />}
+        hasOpponent={hasOpponent}
+        oppName={oppNickname}
+        showFeedback={!sharedBy}
+      />
 
       {/* Free Summary Section (Fully Visible) */}
       <div className="glass-panel" style={{ padding: '1.25rem' }}>

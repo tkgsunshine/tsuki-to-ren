@@ -174,6 +174,11 @@ export const trackColumnCta = (position: 'mid' | 'end') => {
   void send({ type: `column_cta_${position}`, ...current() });
 };
 
+/** The answer to 「当たっていましたか？」 under 「あなたってこんな人」 at the top of a result: hit (当たってる) or miss (ちょっと違うかも). */
+export const trackSelfReading = (hit: boolean) => {
+  void send({ type: hit ? 'self_hit' : 'self_miss', ...current() });
+};
+
 /** Counts a newly created account once, with the source of its first visit. */
 export const trackSignupIfNew = async (user: User) => {
   const created = Date.parse(user.metadata.creationTime || '');
