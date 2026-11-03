@@ -233,6 +233,54 @@ export const getDailyStemImpact = (dayStem: string, personStem: string): number 
   return TEN_GOD_POINTS[getTenGod(personStem, dayStem)];
 };
 
+// 深層鑑定「二人の間で踏みやすい地雷3選」。
+// トリセツの「やってはいけないこと5選」は、お相手本人が嫌がること（お相手の日干・16タイプ）。
+// こちらは、二人の組み合わせで「あなた」がやりがちなこと。
+// 1) お相手の日干から見た、あなたの日干の通変星（四柱推命の伝統的な分類）。干合なら干合の文を先に。
+//    通変星ごとの「やりがちなこと」への言い換えは、伝統の象意（比劫=張り合う、財=扱い方、官殺=抑える、印=世話を焼く、食傷=甘え・言い合い）をもとにアプリが書いた文。
+// 2) 二人の16タイプで違う軸（T/F → J/P → E/I → S/N の順）。どちらかが未選択なら使わない。
+// 足りないぶんは通変星の2文目、それでも足りなければ共通の文で埋める。
+const PAIR_PITFALL_BY_TEN_GOD: Record<TenGod, [string, string]> = {
+  '比肩': ['張り合って、どちらが正しいかで譲らないこと', '相手も自分と同じ考えだと思いこんで、気持ちを確かめないこと'],
+  '劫財': ['相手の時間やお金を、当たり前のように自分のことに使うこと', '相手のまわりの人に張り合ったり、やきもちを強く見せたりすること'],
+  '食神': ['相手のやさしさに甘えすぎて、してもらうのを当たり前にすること', '楽しいことだけ一緒にして、大事な話を後回しにすること'],
+  '傷官': ['相手の鋭いひと言にむきになって、言い返して言い合いにすること', '相手のこだわりやセンスに、興味のないそぶりを見せること'],
+  '偏財': ['その場の気分で約束を変えて、相手を振り回すこと', '楽しさばかり求めて、相手の地道ながんばりに気づかないこと'],
+  '正財': ['相手がそばにいることに慣れて、二人の時間を後回しにすること', 'お金や時間の使い方を、相手に相談せずに決めること'],
+  '偏官': ['自分の意見を通そうとして、相手が話し終わる前に結論を決めてしまうこと', '相手の弱いところを、からかいや冗談でつつくこと'],
+  '正官': ['相手のやり方を、細かいところまで「ちゃんとして」と直させること', '相手の失敗を、あとから何度も持ち出すこと'],
+  '偏印': ['自分のやり方を教えこもうとして、相手のやり方を変えさせること', '気が向いたときだけかまって、そっけないときとの差を大きくすること'],
+  '正印': ['先回りして世話を焼きすぎて、相手の「自分でやりたい」気持ちをつぶすこと', '心配のあまり、相手の予定や行動を細かく聞きすぎること']
+};
+const PAIR_PITFALL_KANGO = '惹かれ合うぶん相手に合わせすぎて、本当の気持ちを言わずにためこむこと';
+// [自分がこの軸の1文字目, 自分が2文字目] のときの文
+const PAIR_PITFALL_BY_AXIS: { idx: number; letters: [string, string]; lines: [string, string] }[] = [
+  { idx: 2, letters: ['T', 'F'], lines: ['相手のうれしかった話やつらかった話に、短いそっけない返事ですませること', '察してほしくて、はっきり言わずに不機嫌な空気で伝えること'] },
+  { idx: 3, letters: ['J', 'P'], lines: ['予定や返信のペースを自分で決めて、守れないと責めること', '「また今度ね」と、会う日や約束をなかなか決めないこと'] },
+  { idx: 0, letters: ['E', 'I'], lines: ['会う回数や連絡の多さで気持ちを測って、相手の一人の時間まで埋めようとすること', '反応や返事が少なすぎて、「興味ないのかな」と不安にさせること'] },
+  { idx: 1, letters: ['S', 'N'], lines: ['相手の思いつきや夢の話を、「現実的じゃない」と切り捨てること', '日時や中身を決めないまま、思いつきの話ばかりすること'] }
+];
+const PAIR_PITFALL_COMMON = ['似ているところが多いぶん、「言わなくてもわかるはず」と確かめずに決めつけること', 'どちらも引けないときに意地を張り合って、先に謝らないこと'];
+
+export function getPairPitfalls(myStem: string, oppStem: string, myMbti?: string, oppMbti?: string): string[] {
+  const out: string[] = [];
+  const add = (t: string) => { if (out.length < 3 && !out.includes(t)) out.push(t); };
+  const hasStems = !!stemElements[myStem] && !!stemElements[oppStem];
+  const tg = hasStems ? PAIR_PITFALL_BY_TEN_GOD[getTenGod(oppStem, myStem)] : null;
+  if (hasStems && STEM_COMBINATIONS[myStem] === oppStem) add(PAIR_PITFALL_KANGO);
+  if (tg) add(tg[0]);
+  if (isMbtiType(myMbti) && isMbtiType(oppMbti)) {
+    const me = myMbti.toUpperCase();
+    const opp = oppMbti.toUpperCase();
+    for (const a of PAIR_PITFALL_BY_AXIS) {
+      if (me[a.idx] !== opp[a.idx]) add(me[a.idx] === a.letters[0] ? a.lines[0] : a.lines[1]);
+    }
+  }
+  if (tg) add(tg[1]);
+  PAIR_PITFALL_COMMON.forEach(add);
+  return out;
+}
+
 // 対象年の年柱 (Year Pillar)
 export function calculateYearPillar(year: number): { stem: string; branch: string } {
   let sIdx = (year - 4) % 10;
@@ -2499,42 +2547,42 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       };
 
       // Topic 3: 惹かれ合うポイント＆地雷行動3選
+      // 地雷3選は「二人の組み合わせで、あなたがやりがちなこと」（getPairPitfalls）。
+      // お相手本人が嫌がることは、トリセツの「やってはいけないこと5選」に出すので、ここでは重ねない。
       const oppFallInLove = oppMbtiTrait?.fallInLove || '飾らない素直な笑顔と、自分の世界観を認めてくれた瞬間。';
       const oppKilling = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「いつも誠実でいてくれるとこ、ほんと尊敬してる」');
-      const ng1 = oppMbtiTrait?.ngList[0] || '相手のペースを無視した連絡の連投';
-      const ng2 = oppMbtiTrait?.ngList[1] || '感情的な詰問や試し行為';
-      const ng3 = oppMbtiTrait?.ngList[2] || 'プライベートな領域への過度な干渉';
-      const stemNgNote = oppStemTrait ? `（また、お相手の生まれ持った星の性質から、『${oppStemTrait.ng.join('』『')}』もとても嫌がりやすいので注意してください）` : '';
+      const [ng1, ng2, ng3] = getPairPitfalls(myPillarObj.stem, oppPillarObj.stem, input.myMbti, input.opponentMbti);
+      const stemNgNote = `（${san(oppNick)}から見たあなたの星と、二人の性格タイプの違いから選んでいます。${san(oppNick)}本人が嫌がることは、トリセツの「やってはいけないこと5選」にあります）`;
 
       let topic3Intro = '';
       let topic3Detail = '';
       if (character === 'tsuki') {
         if (score >= 85) {
           topic3Intro = `二人の生まれ持った性質と気持ちが、ちょうどよく惹かれ合っています。`;
-          topic3Detail = `💘 ${san(oppNick)}が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 相手の心に響くほめ言葉：\n${oppKilling}\n\n⚠️ 【絶対にやってはいけない地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：駆け引きより、相手のいいところを素直に言葉にして、地雷行動を避けること。それが長く続く絆を育てます。`;
+          topic3Detail = `💘 ${san(oppNick)}が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 相手の心に響くほめ言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：駆け引きより、相手のいいところを素直に言葉にして、地雷行動を避けること。それが長く続く絆を育てます。`;
         } else if (score >= 70) {
           topic3Intro = `異なる魅力が互いを引き寄せ合い、知るほどに愛おしさが増す相性です。`;
-          topic3Detail = `💘 お相手が惹かれる本質：\n${oppFallInLove}\n\n✨ 相手を喜ばせる褒め言葉：\n${oppKilling}\n\n⚠️ 【注意すべき地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：相手の一人の時間や距離感を大切にしながら、たまに素直に甘えたり感謝を伝えたりすると、相手の「大切にしたい」という気持ちが強くなります。`;
+          topic3Detail = `💘 お相手が惹かれる本質：\n${oppFallInLove}\n\n✨ 相手を喜ばせる褒め言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：相手の一人の時間や距離感を大切にしながら、たまに素直に甘えたり感謝を伝えたりすると、相手の「大切にしたい」という気持ちが強くなります。`;
         } else if (score >= 55) {
           topic3Intro = `お互いの価値観の違いが目につきやすい時期ですが、それはお互いを深く知るための大切なステップです。`;
-          topic3Detail = `💘 お相手の心を開く鍵：\n${oppFallInLove}\n\n✨ 響く褒め言葉：\n${oppKilling}\n\n⚠️ 【警戒すべき地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：自分の価値観を押し付けず、「そういう考えもあるんだね」と受け止める広い心が、二人をまた近づけてくれます。`;
+          topic3Detail = `💘 お相手の心を開く鍵：\n${oppFallInLove}\n\n✨ 響く褒め言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：自分の価値観を押し付けず、「そういう考えもあるんだね」と受け止める広い心が、二人をまた近づけてくれます。`;
         } else {
           topic3Intro = `価値観がぶつかりやすく、惹かれ合う力が一時的に弱まっている状態です。`;
-          topic3Detail = `💘 本来お相手が心を開くポイント：\n${oppFallInLove}\n\n⚠️ 【絶対に避けるべき地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：今は相手への過剰な期待や執着を手放し、自分の好きなことや内面の充実に意識を向けるべき時です。あなたが自分を大切にしていると、お相手の気持ちも自然と戻ってきます。`;
+          topic3Detail = `💘 本来お相手が心を開くポイント：\n${oppFallInLove}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：今は相手への過剰な期待や執着を手放し、自分の好きなことや内面の充実に意識を向けるべき時です。あなたが自分を大切にしていると、お相手の気持ちも自然と戻ってきます。`;
         }
       } else { // ren
         if (score >= 85) {
           topic3Intro = `双方の弱点を補い合うとても良い組み合わせが、星の配置に表れています。`;
-          topic3Detail = `💘 お相手${oppTypeParen}が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 響くほめ言葉：\n${oppKilling}\n\n⚠️ 【絶対に避けたい地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：対等な相手として敬意を持ち、上の地雷を必ず避けること。それだけで、関係がこじれる心配はぐっと減ります。`;
+          topic3Detail = `💘 お相手${oppTypeParen}が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 響くほめ言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：対等な相手として敬意を持ち、上の地雷を必ず避けること。それだけで、関係がこじれる心配はぐっと減ります。`;
         } else if (score >= 70) {
           topic3Intro = `お互いのいいところを引き出し合える、いい関係ができています。`;
-          topic3Detail = `💘 お相手が惹かれるポイント：\n${oppFallInLove}\n\n✨ おすすめのほめ言葉：\n${oppKilling}\n\n⚠️ 【警戒すべきNG行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手に頼りきらず、一緒に目標に向かって高め合える「いいパートナー」でいることが、うまくいく秘訣です。`;
+          topic3Detail = `💘 お相手が惹かれるポイント：\n${oppFallInLove}\n\n✨ おすすめのほめ言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手に頼りきらず、一緒に目標に向かって高め合える「いいパートナー」でいることが、うまくいく秘訣です。`;
         } else if (score >= 55) {
           topic3Intro = `価値観の違いが目立ちますが、ちょうどいい距離感を保てば、ぶつかり合いは防げます。`;
-          topic3Detail = `💘 お相手の心が動くポイント：\n${oppFallInLove}\n\n⚠️ 【相手が身構えてしまうNG行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手の行動は「自分とは違う文化」だと思って受け止め、あっさりと礼儀正しく接してください。`;
+          topic3Detail = `💘 お相手の心が動くポイント：\n${oppFallInLove}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手の行動は「自分とは違う文化」だと思って受け止め、あっさりと礼儀正しく接してください。`;
         } else {
           topic3Intro = `性格タイプと命式の組み合わせに、少し噛み合いにくい部分が表れています。`;
-          topic3Detail = `⚠️ 【一気に嫌われてしまう地雷行動3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：今は、押すほど相手が離れていきやすい時期です。上の地雷をしっかり避けて、しばらくはアプローチをお休みするのがいちばんです。`;
+          topic3Detail = `⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：今は、押すほど相手が離れていきやすい時期です。上の地雷をしっかり避けて、しばらくはアプローチをお休みするのがいちばんです。`;
         }
       }
 
