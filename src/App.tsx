@@ -42,7 +42,7 @@ import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
 import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { claimCheckout, fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPairCheckout, startPremiumCheckout } from './services/premium';
-import { fetchPartnerAccess } from './services/partnerDays';
+import { fetchPartnerAccess, readCachedPartnerAccess, writeCachedPartnerAccess } from './services/partnerDays';
 import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFromPath, type NavState, type OverlayName, type PageFields, type SettingsSubView } from './utils/navHistory';
 import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
 import { decideSync, sameProfile, samePartners, type SyncProfile } from './utils/userDataSync';
@@ -1097,13 +1097,23 @@ function App() {
       return;
     }
     let cancelled = false;
-    setPartnerLock({ status: 'checking', daysLeft: 0, guest: !signedInUid });
+    // 今日すでに確認したお相手なら、その結果で先に表示する（再読み込みで点数が一瞬伏せられないように）
+    const cached = readCachedPartnerAccess(signedInUid, oppBirth);
+    if (cached) {
+      const a = cached.access;
+      if (!a || a.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
+      else setPartnerLock({ status: a.locked ? 'locked' : 'free', daysLeft: a.daysLeft, guest: a.guest });
+      setPairUnlock(a?.pair ?? null);
+    } else {
+      setPartnerLock({ status: 'checking', daysLeft: 0, guest: !signedInUid });
+    }
     (async () => {
       const waitForPair = pairReturn === 'success' && Boolean(signedInUid);
       const tries = waitForPair ? 8 : 1;
       for (let i = 0; i < tries; i++) {
         const access = await fetchPartnerAccess(oppBirth);
         if (cancelled) return;
+        if (access) writeCachedPartnerAccess(signedInUid, oppBirth, access);
         if (!access || access.daysLeft === Number.POSITIVE_INFINITY) setPartnerLock(null);
         else setPartnerLock({ status: access.locked ? 'locked' : 'free', daysLeft: access.daysLeft, guest: access.guest });
         setPairUnlock(access?.pair ?? null);
