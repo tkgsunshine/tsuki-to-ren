@@ -146,8 +146,14 @@ const JUNIUN_POINTS: Record<string, number> = {
 };
 export const juniUnPoints = (stem: string, branch: string): number => JUNIUN_POINTS[getJuniUn(stem, branch)] ?? 0;
 
-// 単身の基本点の定数（旧版の基本点の平均 約82.8 に、新しい式の平均が合うように決めた値）
-const SOLO_BASE_CONSTANT = 80;
+// 単身の基本点の定数（アプリが決めた値）。
+// 旧版は80（基本点の平均 約81）。今日の点数が上限100に張り付く人が多かった（1日あたり2〜3割）ため下げた。
+export const SOLO_BASE_CONSTANT = 70;
+
+// 今日の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
+// 今日の点数に足す4つの項目（天干・十二支・十二運・日の九星）は、どれも平均がプラスなので、
+// そのままだと「基本の相性より今日の方が高い」日が7割になっていた。平均（約+4.8点）を引いて、＋と−がおおよそ半々になるようにする。
+export const DAILY_CENTER_OFFSET = -5;
 
 // 地支の相性・生剋影響度算出 (支合・三合・六沖・五行生剋)
 export const getBranchImpact = (branchA: string, branchB: string): number => {
@@ -167,7 +173,9 @@ export const getBranchImpact = (branchA: string, branchB: string): number => {
     ['寅', '午', '戌'],
     ['亥', '卯', '未']
   ];
-  if (threeHarmonies.some(group => group.includes(branchA) && group.includes(branchB))) {
+  // 同じ十二支どうしは三合に入れない（伝統では三合は「異なる」2支・3支の結びつき。同じ支は比和として下の五行で扱う）。
+  // 旧版は、同じ十二支も三合として+12にしていた。
+  if (branchA !== branchB && threeHarmonies.some(group => group.includes(branchA) && group.includes(branchB))) {
     return 12;
   }
 
@@ -1842,6 +1850,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   // 週次スコア（weeklyScores の2日目以降）と同じ式・同じ強度に揃えている。0 にすると十二支の影響なし（旧仕様）。
   const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
   const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
+  // 相手がいる場合、天干と十二支も（十二運・日の九星と同じく）二人の平均にする。旧版は二人分を合計しており、振れ幅と＋への偏りが2倍になっていた。
+  const pairAvg = (mine: number, opp: number) => (hasOpponent ? (mine + opp) / 2 : mine);
 
   // 今日の日盤の中宮の星（日の九星）と、本命星の関係（九星気学）。相手がいる場合は、二人の平均。
   const dayStarOf = (d: Date) => {
@@ -1852,7 +1862,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   };
   const dayStarDaily = dayStarOf(today);
 
-  let dailyScore = Math.floor(baseScore + myDailyImpact + oppDailyImpact + myBranchDaily + oppBranchDaily + juniUnDaily + dayStarDaily);
+  let dailyScore = Math.floor(baseScore + pairAvg(myDailyImpact, oppDailyImpact) + pairAvg(myBranchDaily, oppBranchDaily) + juniUnDaily + dayStarDaily + DAILY_CENTER_OFFSET);
   if (dailyScore > 100) dailyScore = 100;
   if (dailyScore < 0) dailyScore = 0;
   
@@ -2105,7 +2115,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     } else {
       const myJuniUn = juniUnPoints(myPillarObj.stem, dayPillar.branch);
       const dayJuniUn = hasOpponent ? (myJuniUn + juniUnPoints(oppPillarObj.stem, dayPillar.branch)) / 2 : myJuniUn;
-      score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact + dayJuniUn + dayStarOf(d));
+      score = Math.floor(baseScore + pairAvg(myStemImpact, oppStemImpact) + pairAvg(myBranchImpact, oppBranchImpact) + dayJuniUn + dayStarOf(d) + DAILY_CENTER_OFFSET);
       if (score > 100) score = 100;
       if (score < 30) score = 30;
     }
