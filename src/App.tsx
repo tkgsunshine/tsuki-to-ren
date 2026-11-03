@@ -392,8 +392,30 @@ function App() {
   }, [currentUser?.uid]);
 
   // 登録なしでも申し込める（Stripeで入力したメールでアカウントを自動で作る）
+  // Stripe から戻ったとき、画面に出ていた鑑定を出し直せるように、決済の直前に入力をこの端末に残す
+  // （鑑定のあとにログアウトすると、ログアウトでこの記録が消え、戻ったときに「まだ鑑定結果がありません」になっていた）
+  const rememberReadingForCheckout = () => {
+    if (flowStep !== 'result' || !isValidBirthDate(myBirth)) return;
+    try {
+      localStorage.setItem('hasu_last_diagnosis_input', JSON.stringify({
+        mName: myName,
+        mBirth: myBirth,
+        mMbti: myMbti,
+        mGender: myGender,
+        oName: oppName,
+        oBirth: oppBirth,
+        oMbti: oppMbti,
+        oGender: oppGender,
+        rel: relationship,
+        runMode: mode,
+        selectedCharacter
+      }));
+    } catch { /* blocked storage */ }
+  };
+
   const handleStartCheckout = async () => {
     trackPremiumStep('checkout');
+    rememberReadingForCheckout();
     try {
       await startPremiumCheckout();
     } catch (e) {
@@ -1186,6 +1208,7 @@ function App() {
   }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid, pairReturn]);
   // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
   const handleBuyPair = async () => {
+    rememberReadingForCheckout();
     try {
       await startPairCheckout(oppBirth);
     } catch (e) {
