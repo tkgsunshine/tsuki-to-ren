@@ -487,7 +487,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                         cursor: 'pointer'
                       }}
                     >
-                      {isProcessing ? '決済画面へ移動しています...' : '全部誰でも見れる月額980円ではじめる'}
+                      {isProcessing ? '決済画面へ移動しています...' : '誰でも無制限に鑑定を見る（980円/月）'}
                     </button>
                   ) : pair.unlocked ? (
                     <div key="pair" style={{
@@ -522,7 +522,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                         cursor: 'pointer'
                       }}
                     >
-                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}だけ見れる買い切り480円で解放する`}
+                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（480円/買い切り）`}
                     </button>
                   )
                 )}
