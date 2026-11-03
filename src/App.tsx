@@ -2448,9 +2448,17 @@ function App() {
             {settingsSubView === 'partners' && (
               <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.65rem' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
-                    保存件数: {savedPartners.length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
-                  </span>
+                  {/* 買い切りプランのお相手は上限に数えない（canAddPartner と同じ数え方） */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
+                      保存件数: {savedPartners.filter((x) => !x.unlocked).length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
+                    </span>
+                    {savedPartners.some((x) => x.unlocked) && (
+                      <span style={{ fontSize: '0.68rem', color: '#e2c074', lineHeight: 1.5 }}>
+                        ＋ 買い切りプランのお相手 {savedPartners.filter((x) => x.unlocked).length}人（保存件数とは別）
+                      </span>
+                    )}
+                  </div>
                   <span style={{ fontSize: '0.65rem', color: '#a9a49a' }}>
                     {isSubscribed ? '有料会員 (最大10人)' : (isRegistered ? '無料会員 (最大2人)' : '非会員 (最大1人)')}
                   </span>
