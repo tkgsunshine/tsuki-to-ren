@@ -88,6 +88,9 @@ const SYSTEM = `あなたは占いサービス「月と蓮」のX運用担当で
 - 本文にURLを書かない。**アプリへの誘導は replyText（リプ欄）にだけ**、最後の行にこのURLをそのまま入れる: ${LINK_URL}
 - 誘導の文は、本文の続き（隠した答え・1位など）を読みに来た人に向けて、本文の話題とつながる一言にする（例の形: 「あなたと好きな人の相性も、生年月日とMBTIで鑑定できます↓」）。「無料」「今すぐ」は書かない
 - 本文は重み付き560以内（日本語約280字まで。運営はXプレミアム）、リプ欄は重み付き280以内（日本語約140字まで）
+- **「5位→2位を並べて、1位だけリプ欄に隠す」ランキング型は、この形どおりに書く**（2026-11-04 運営が手直しした形で投稿し、2時間で1万表示）:
+  - 本文: 1行目はお題「好きな人の前だと「〇〇しちゃう」16タイプ（MBTI）」の形。空行。「5位：ISTJ 管理者」の次の行に「→一言（20〜25字、話し言葉）」。順位ごとに空行を入れて、2位まで。空行。最後の行は「1位は...↓」だけ。前置き（「月の見立てだよ」など）、締めの一言、「-月-」は付けない
+  - リプ欄: 1行目「1位：INFP 仲介者」。次に、そのタイプの説明を2文（やさしく肯定する）。空行。誘導の一言（「あなたと好きな人の相性も、生年月日とMBTIで鑑定できます↓」の形）。最後の行にURL。「-月-」は付けない
 - AIが書いた感じを出さない。「〜することが大切です」「〜でしょう」「素晴らしい」は使わない。1文は短く、言い切る
 
 # 出力
@@ -105,7 +108,8 @@ function validate(out, refs, count) {
     const p2 = lintPost({ slot: 'noon', kind: 'promo', text: d.replyText }, [], { reply: true });
     for (const p of p1) problems.push(`${tag} 本文: ${p}`);
     for (const p of p2) problems.push(`${tag} リプ欄: ${p}`);
-    if (!String(d.text || '').trim().endsWith('-月-')) problems.push(`${tag} 本文の末尾に「-月-」を付ける`);
+    const rankHide = /1位は\.\.\.↓\s*$/.test(String(d.text || '').trim()); // 5位→2位のランキング型は、署名なし（2026-11-04 運営の形）
+    if (!rankHide && !String(d.text || '').trim().endsWith('-月-')) problems.push(`${tag} 本文の末尾に「-月-」を付ける`);
     if (!String(d.replyText || '').includes(LINK_URL)) problems.push(`${tag} リプ欄に ${LINK_URL} を入れる`);
     const c1 = findCopied(d.text, refs);
     const c2 = findCopied(d.replyText, refs);
