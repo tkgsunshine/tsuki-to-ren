@@ -3,12 +3,24 @@
 // 取り込みは AI社員（毎時の定期実行）が ArtifactData の set で行う。data/x/report.md の更新（metrics の実行）があったときだけ行えばよい
 import fs from 'node:fs';
 import { readQueue, readJson } from './lib/queue.mjs';
-import { summarize, labelOf, FOLLOWERS_PATH, REPLIES_LOG_PATH } from './metrics.mjs';
+import { summarize, labelOf, clickTotals, FOLLOWERS_PATH, REPLIES_LOG_PATH } from './metrics.mjs';
 
 const queue = readQueue();
 const withM = queue.filter((p) => p.metrics24 && !p.replyTo);
-const round = (r) => ({ ...r, impressions: Math.round(r.impressions * 10) / 10, likes: Math.round(r.likes * 10) / 10, replies: Math.round(r.replies * 10) / 10, reposts: Math.round(r.reposts * 10) / 10, bookmarks: Math.round(r.bookmarks * 10) / 10 });
+const r1 = (x) => Math.round(x * 10) / 10;
+const round = (r) => ({ ...r, impressions: r1(r.impressions), likes: r1(r.likes), replies: r1(r.replies), reposts: r1(r.reposts), bookmarks: r1(r.bookmarks), profileClicks: r1(r.profileClicks), urlClicks: r1(r.urlClicks) });
 const followers = readJson(FOLLOWERS_PATH, []).slice(-30);
+const jstDay = (iso) => new Date(new Date(iso).getTime() + 9 * 3600000).toISOString().slice(0, 10);
+// 投稿ごとのクリック（プロフィールへのクリック・リンクのクリック。リンクはリプ欄の返信の分も合計。2026-11-04）
+const clicks = clickTotals(queue);
+const postClicks = queue.filter((p) => clicks.has(p.id))
+  .sort((a, b) => String(b.postedAt || '').localeCompare(String(a.postedAt || '')))
+  .slice(0, 40)
+  .map((p) => ({ id: p.id, label: labelOf(p), text: String(p.text || '').split('\n')[0].slice(0, 50), postedAt: p.postedAt ? jstDay(p.postedAt) : '', ...clicks.get(p.id) }));
+// フォロワーの増減（Xは投稿ごとのフォロー数を出さないので、日ごとの増減と、その日に投稿したものを並べる）
+const postedOn = (date) => queue.filter((p) => !p.replyTo && p.postedAt && jstDay(p.postedAt) === date)
+  .map((p) => ({ id: p.id, label: labelOf(p), impressions: p.metrics?.impressions ?? p.metrics24?.impressions ?? null, profileClicks: clicks.get(p.id)?.profileClicks ?? null }));
+const followerDays = followers.map((r, i) => ({ date: r.date, followers: r.followers, delta: i ? r.followers - followers[i - 1].followers : null, posts: postedOn(r.date) })).reverse();
 const latestAt = withM.map((p) => p.metrics?.at || p.metrics24.at).sort().pop() || '';
 const jst = latestAt ? new Date(new Date(latestAt).getTime() + 9 * 3600000).toISOString().slice(0, 16).replace('T', ' ') : '';
 const repliesLog = readJson(REPLIES_LOG_PATH, []);
@@ -19,6 +31,8 @@ const out = {
   measuredPosts: withM.length,
   avgImpressions: withM.length ? Math.round((withM.reduce((a, p) => a + (p.metrics24.impressions ?? 0), 0) / withM.length) * 10) / 10 : 0,
   followers,
+  postClicks,
+  followerDays,
   myReplies: { count: repliesLog.length, totalImpressions: rsum(repliesLog), avgImpressions: repliesLog.length ? Math.round((rsum(repliesLog) / repliesLog.length) * 10) / 10 : 0, items: repliesLog.slice(0, 10).map((r) => ({ id: r.id, to: r.to, text: String(r.text || '').split('\n')[0].slice(0, 60), impressions: r.impressions, likes: r.likes, createdAt: r.createdAt })) },
   byFormat: summarize(queue).map(round),
   bySlot: summarize(queue, (p) => p.slot).map(round),

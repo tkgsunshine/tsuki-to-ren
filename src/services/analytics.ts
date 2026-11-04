@@ -56,6 +56,9 @@ export const sourceFrom = (search: string, referrer: string, ownHost: string): s
   if (utm) {
     const clean = utm.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 30);
     if (clean === 'chatgptcom') return 'chatgpt'; // ChatGPT が付ける utm_source=chatgpt.com
+    // Xの投稿ごとの計測（2026-11-04）: utm_content=投稿ID があれば utm:x_<投稿ID> として数える（管理画面の流入元に投稿ごとに出る）
+    const content = (new URLSearchParams(search).get('utm_content') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (clean === 'x' && content) return `utm:x_${content}`.slice(0, 34);
     if (clean) return `utm:${clean}`;
   }
   if (!referrer) return 'direct';
