@@ -2256,17 +2256,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
           background: 'rgba(255, 255, 255, 0.03)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '10px',
-          padding: '0.65rem 0.85rem',
+          // 左右の余白は上の「推奨送信タイミング」の枠と同じ。💡は見出しの頭に置き、本文を枠の幅いっぱいに使う
+          padding: '0.75rem 1rem',
           fontSize: '0.76rem',
           color: '#e8e3d8',
-          lineHeight: '1.55',
-          display: 'flex',
-          gap: '0.4rem',
-          alignItems: 'flex-start'
+          lineHeight: '1.55'
         }}>
-          <span style={{ fontSize: '0.9rem', flexShrink: 0, marginTop: '1px' }}>💡</span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: 0, flex: 1 }}>
-            <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>本日のアプローチ助言</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: 0 }}>
+            <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💡 本日のアプローチ助言</div>
             {(() => {
               const parts = activeResult.dailyActionAdviceParts?.length ? activeResult.dailyActionAdviceParts : [activeResult.dailyActionAdvice || ''];
               const tips = activeResult.lineTips;
