@@ -1,7 +1,7 @@
 // node --experimental-strip-types --test scripts/x/test-formats.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES, buildBeastPairRanking, buildMbtiBeastRanking, mbtiBeastScore, beastList, BUZZ_SLOTS } from './lib/formats.mjs';
+import { FORMATS, RETIRED_FORMATS, pickFormats, buildFacts, SYSTEMS, PURPOSES, buildBeastPairRanking, buildMbtiBeastRanking, mbtiBeastScore, beastList, BUZZ_SLOTS } from './lib/formats.mjs';
 import { weightedLength } from './lib/lint.mjs';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -32,7 +32,8 @@ test('毎日5本: 5つの枠すべてに型が入り、1日にアプリ誘導は
     assert.equal(Object.values(day).filter((f) => f.purpose === 'app').length <= 1, true, d);
     for (const f of Object.values(day)) seen.add(f.id);
   }
-  assert.equal(seen.size, FORMATS.length, '全ての型が一巡する');
+  assert.equal(seen.size, FORMATS.length - RETIRED_FORMATS.length, '外した型以外の全ての型が一巡する');
+  for (const id of RETIRED_FORMATS) assert.ok(!seen.has(id), `${id} は並びから外した`);
   assert.deepEqual(BUZZ_SLOTS, ['noon', 'pm', 'evening', 'night', 'late']);
 });
 
@@ -215,7 +216,7 @@ test('手動投稿モード（apiPosting=false）: APIでは何も投稿せず�
   assert.deepEqual(r.queue.map((x) => x.status), ['scheduled', 'scheduled'], '期限切れにもしない');
 });
 
-test('格言（maxim）: 15:15（pm）に毎日1本。10日に3回は、スピリチュアル寄りの月のことば（maxim_spirit）。選択式の問いかけは減らす', () => {
+test('格言（maxim）: 15:15（pm）に毎日1本。10日に1回は、スピリチュアル寄りの月のことば（maxim_spirit）。選択式の問いかけは減らす', () => {
   let maxim = 0, spirit = 0, polls = 0;
   for (let i = 0; i < 10; i++) {
     const d = new Date(Date.UTC(2026, 9, 8 + i)).toISOString().slice(0, 10);
@@ -228,7 +229,7 @@ test('格言（maxim）: 15:15（pm）に毎日1本。10日に3回は、スピ�
     }
   }
   assert.equal(maxim + spirit, 10);
-  assert.equal(spirit, 3);
+  assert.equal(spirit, 1, '月のことばは10日に1回（2026-11-04、却下が多いため3回→1回）');
   assert.ok(polls <= 5, `選択式の問いかけは10日で5本以下（実際 ${polls}）`);
   const sp = FORMATS.find((x) => x.id === 'maxim_spirit');
   assert.equal(sp.facts, 'moon');
@@ -259,6 +260,17 @@ test('コラム紹介: 未紹介のコラムを古い順に選び、URL付きの
   assert.deepEqual(lintPost({ slot: 'am', kind: 'value', text }, [], { allowLinks: false, columnUrl: true }), []);
   assert.ok(lintPost({ slot: 'am', kind: 'value', text }, [], { allowLinks: false }).length, '通常の投稿ではURLは不可');
   assert.ok(lintPost({ slot: 'am', kind: 'value', text: `${text.split('\n').slice(0, -1).join('\n')}\nhttps://example.com/` }, [], { allowLinks: false, columnUrl: true }).length);
+});
+
+test('ホームで投稿された型を増やし、却下が多い型を減らす（2026-11-04）', () => {
+  const count = {};
+  for (let i = 0; i < 10; i++) {
+    const d = new Date(Date.UTC(2026, 10, 4 + i)).toISOString().slice(0, 10);
+    for (const f of Object.values(pickFormats(d))) count[f.id] = (count[f.id] || 0) + 1;
+  }
+  assert.equal(count.mbti_habit, 3);
+  assert.equal(count.coined_feeling, 2);
+  for (const id of ['howto', 'beast_pair_rank', 'card_voice']) assert.equal(count[id] || 0, 0, id);
 });
 
 test('却下された型（選択式の問いかけ・保存型）は、型の一覧と並びから外れている', () => {
@@ -318,6 +330,7 @@ test('本文中の16タイプに、二つ名が足される（各タイプ最初
   const { addMbtiNicksInline } = await import('./lib/mbti-nick.mjs');
   assert.equal(addMbtiNicksInline('ESTJは、前の夜に。ESTJは'), 'ESTJ 幹部は、前の夜に。ESTJは');
   assert.equal(addMbtiNicksInline('INTJ：無表情\nINFP：泣く'), 'INTJ 建築家：無表情\nINFP 仲介者：泣く');
+  assert.equal(addMbtiNicksInline('❤️ ISFP×辛羊と相性\n10位 ISFP×辛猪 52点'), '❤️ ISFP 冒険家×辛羊と相性\n10位 ISFP 冒険家×辛猪 52点', 'ランキングの行は、前に同じタイプがあっても足す');
   assert.equal(addMbtiNicksInline('1位 ESTJ 幹部'), '1位 ESTJ 幹部');
   assert.equal(addMbtiNicksInline('ESTJ（幹部）'), 'ESTJ（幹部）');
   assert.equal(addMbtiNicksInline('#INFP の人'), '#INFP の人');

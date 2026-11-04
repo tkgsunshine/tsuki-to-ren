@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, CheckSquare, Square, X, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { useBackForwardReset } from '../utils/useBackForwardReset';
 
 interface SubscriptionCancelModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
   const [otherReasonText, setOtherReasonText] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  useBackForwardReset(() => setIsSubmitting(false));
 
   if (!isOpen) return null;
 

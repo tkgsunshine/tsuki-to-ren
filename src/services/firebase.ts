@@ -12,6 +12,8 @@ import {
   signInWithEmailLink,
   signOut,
   onAuthStateChanged,
+  EmailAuthProvider,
+  linkWithCredential,
   type User
 } from 'firebase/auth';
 
@@ -265,6 +267,9 @@ export interface MagicLinkResult {
 
 // Complete Email Magic Link Sign-In on redirect back
 export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Promise<MagicLinkResult> => {
+  // A link from "メールアドレスを追加" adds the address to the signed-in account (completeAddEmailLink).
+  // Signing in with it here would create a separate account instead.
+  if (isAddEmailLink()) return { success: false };
   if (isSignInWithEmailLink(auth, window.location.href)) {
     let email = providedEmail || safeGetItem('emailForSignIn') || (() => { try { return window.sessionStorage.getItem('emailForSignIn'); } catch { return null; } })();
     
@@ -305,8 +310,95 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
   return { success: false };
 };
 
+// ---- Adding an email address to an account that has none (X sign-in) ----
+// The link from sendAddEmailLink comes back to /mypage?addEmail=1. Opened in the browser where the member is signed
+// in, it is linked to the SAME account (linkWithCredential): the address becomes verified (daily mail works) and the
+// member can later sign in with an email link to this account, e.g. when they can no longer use X.
+// The link returns to this same site (production, or the PR's Preview), where the member is signed in.
+const ADD_EMAIL_KEY = 'hasu_add_email_pending';
+
+export const isAddEmailLink = (): boolean => {
+  try {
+    return new URLSearchParams(window.location.search).get('addEmail') === '1' && isSignInWithEmailLink(auth, window.location.href);
+  } catch {
+    return false;
+  }
+};
+
+/** True when the signed-in account has no verified email (X sign-in without an address, or an unconfirmed one). */
+export const accountNeedsEmail = (): boolean => {
+  const user = getFirebaseAuth().currentUser;
+  return !!user && !(user.email && user.emailVerified);
+};
+
+/**
+ * True for the account made automatically by a purchase without sign-in (custom claim "guest", api/_lib/checkout-claim.js).
+ * Such an account must never get an email attached (the server signs it out and removes the address); the buyer signs in
+ * with the purchase email instead, and the purchase moves to that account (transferGuestPurchases).
+ */
+export const isGuestAccount = async (): Promise<boolean> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) return false;
+  try {
+    return (await user.getIdTokenResult()).claims.guest === true;
+  } catch {
+    return false;
+  }
+};
+
+export const sendAddEmailLink = async (email: string): Promise<void> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) throw Object.assign(new Error('Not signed in'), { code: 'app/not-signed-in' });
+  await sendSignInLinkToEmail(auth, email, { url: `${window.location.origin}/mypage?addEmail=1`, handleCodeInApp: true });
+  safeSetItem(ADD_EMAIL_KEY, JSON.stringify({ email, uid: user.uid }));
+};
+
+export type AddEmailResult =
+  | { status: 'linked'; user: UserProfile }
+  | { status: 'not-signed-in' | 'no-pending' | 'in-use' | 'expired' | 'error' };
+
+export const completeAddEmailLink = async (): Promise<AddEmailResult> => {
+  const href = window.location.href;
+  if (window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
+  const a = getFirebaseAuth();
+  await a.authStateReady();
+  const user = a.currentUser;
+  if (!user) return { status: 'not-signed-in' };
+  let email: string | null = null;
+  try {
+    const pending = JSON.parse(safeGetItem(ADD_EMAIL_KEY) || 'null');
+    if (pending?.uid === user.uid && typeof pending.email === 'string') email = pending.email;
+  } catch {}
+  if (!email) return { status: 'no-pending' };
+  try {
+    await linkWithCredential(user, EmailAuthProvider.credentialWithLink(email, href));
+  } catch (err: any) {
+    const code = err?.code || '';
+    console.warn('Add email link error:', code, err?.message);
+    if (code === 'auth/email-already-in-use' || code === 'auth/credential-already-in-use' || code === 'auth/account-exists-with-different-credential') return { status: 'in-use' };
+    if (code === 'auth/invalid-action-code' || code === 'auth/expired-action-code') return { status: 'expired' };
+    if (code !== 'auth/provider-already-linked') return { status: 'error' };
+  }
+  safeRemoveItem(ADD_EMAIL_KEY);
+  await user.reload().catch(() => {});
+  // New ID token, so the server and Firestore rules see the verified address right away
+  await user.getIdToken(true).catch(() => {});
+  const cur = a.currentUser || user;
+  let cached: Partial<UserProfile> = {};
+  try { cached = JSON.parse(safeGetItem('hasu_tsuki_user') || '{}'); } catch {}
+  const profile: UserProfile = {
+    uid: cur.uid,
+    displayName: cur.displayName || (cached.uid === cur.uid ? cached.displayName ?? null : null) || 'X ユーザー',
+    email: cur.email || email,
+    photoURL: cur.photoURL,
+    providerId: cur.providerData.some(p => p.providerId === 'twitter.com') ? 'twitter.com' : (cached.providerId || 'google.com')
+  };
+  safeSetItem('hasu_tsuki_user', JSON.stringify(profile));
+  return { status: 'linked', user: profile };
+};
+
 // Keys holding the signed-in member's own data on this device (the account copy is in userData/{uid} and subscriptions/{uid})
-export const ACCOUNT_DEVICE_KEYS = ['hasu_user_profile', 'hasu_saved_partners', 'hasu_user_data_uid', 'hasu_notify_email', 'hasu_notify_daily_luck', 'hasu_last_diagnosis_input'];
+export const ACCOUNT_DEVICE_KEYS = ['hasu_user_profile', 'hasu_saved_partners', 'hasu_user_data_uid', 'hasu_notify_email', 'hasu_notify_daily_luck', 'hasu_last_diagnosis_input', 'hasu_partner_access_v2'];
 export const clearAccountDataOnDevice = () => {
   ACCOUNT_DEVICE_KEYS.forEach(safeRemoveItem);
 };
@@ -482,6 +574,56 @@ export const updateEmailSubscriptionProfile = async (
     console.warn('⚠️ Could not update the email subscription profile:', err);
     return false;
   }
+};
+
+// ---- Daily mail ON by default for new members ----
+// A new account (made within NEW_ACCOUNT_WINDOW_MS) gets the 8:00 mail turned on once, the first time it can be:
+// a verified email and a birth date are needed. Until then the account stays "pending" on this device (e.g. X sign-in
+// without an address: it turns on when the member adds one). Existing members and anyone who already has a
+// subscription document (including one turned OFF) are never touched.
+const NEW_ACCOUNT_WINDOW_MS = 48 * 3600 * 1000;
+const DEFAULT_MAIL_KEY = 'hasu_notify_default';
+
+export type DefaultMailResult =
+  | { status: 'enabled'; data: EmailSubscriptionData }
+  | { status: 'wait' }   // not possible yet (no verified email / no birth date / read failed): try again later
+  | { status: 'skip' };  // not a new account, or it already has a subscription: never again for this account
+
+export const enableDailyMailForNewMember = async (
+  build: (email: string) => EmailSubscriptionData | null
+): Promise<DefaultMailResult> => {
+  const user = getFirebaseAuth().currentUser;
+  if (!user) return { status: 'wait' };
+  const key = `${DEFAULT_MAIL_KEY}_${user.uid}`;
+  const state = safeGetItem(key);
+  if (state === 'done') return { status: 'skip' };
+  if (state !== 'pending') {
+    const created = Date.parse(user.metadata.creationTime || '');
+    if (!created || Date.now() - created > NEW_ACCOUNT_WINDOW_MS) {
+      safeSetItem(key, 'done');
+      return { status: 'skip' };
+    }
+    safeSetItem(key, 'pending');
+  }
+  if (await isGuestAccount()) {
+    safeSetItem(key, 'done'); // purchase-only account: the buyer signs in with the purchase email instead
+    return { status: 'skip' };
+  }
+  if (!user.email || !user.emailVerified) return { status: 'wait' };
+  try {
+    const snap = await getDoc(doc(db, 'subscriptions', user.uid));
+    if (snap.exists()) {
+      safeSetItem(key, 'done');
+      return { status: 'skip' };
+    }
+  } catch {
+    return { status: 'wait' };
+  }
+  const data = build(user.email.toLowerCase());
+  if (!data) return { status: 'wait' };
+  if (!(await saveEmailSubscriptionData(data))) return { status: 'wait' };
+  safeSetItem(key, 'done');
+  return { status: 'enabled', data };
 };
 
 /**

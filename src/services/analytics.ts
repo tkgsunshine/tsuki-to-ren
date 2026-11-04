@@ -147,9 +147,22 @@ export const initAttribution = () => {
 
 const current = (): Attribution => ({ source: 'direct', landing: 'other', ...read(session(), SESSION_KEY), device: currentDevice() });
 
+/** This visit's source / landing page / device, sent with a checkout so a purchase without sign-up is counted under it. */
+export const currentAttribution = (): Attribution => current();
+
+// '1' the first time this browser session does `type` (the funnel on /admin counts people, not repeats)
+const firstInSession = (type: string): '1' | '0' => {
+  const key = `hasu_first_${type}`;
+  try {
+    if (session()?.getItem(key)) return '0';
+    session()?.setItem(key, '1');
+  } catch {}
+  return '1';
+};
+
 /** One fortune run from the input form. */
 export const trackFortune = () => {
-  void send({ type: 'fortune', ...current() });
+  void send({ type: 'fortune', first: firstInSession('fortune'), ...current() });
 };
 
 export type ShareChannel = 'x' | 'line' | 'link' | 'image';
@@ -159,9 +172,14 @@ export const trackShare = (channel: ShareChannel) => {
   void send({ type: 'share', channel, ...current() });
 };
 
-/** The premium page opened (premium_view), or the button to Stripe's payment page pressed (checkout). */
-export const trackPremiumStep = (type: 'premium_view' | 'checkout') => {
-  void send({ type, ...current() });
+/** The paid-plan page opened, with the plan it led with: 'pair' from a lock the one-time purchase opens, else 'monthly'. */
+export const trackPremiumView = (plan: 'pair' | 'monthly') => {
+  void send({ type: 'premium_view', plan, first: firstInSession('premium_view'), ...current() });
+};
+
+/** The button to Stripe's payment page pressed: monthly Premium (checkout) or the one-time pair purchase (checkout_pair). */
+export const trackCheckout = (plan: 'pair' | 'monthly') => {
+  void send({ type: plan === 'pair' ? 'checkout_pair' : 'checkout', ...current() });
 };
 
 /** A tool page (/tools/*) showed a result (tool_use), or its result's button to the fortune was pressed (tool_cta). */
@@ -175,6 +193,7 @@ export const trackColumnCta = (position: 'mid' | 'end') => {
 };
 
 /** Counts a newly created account once, with the source of its first visit. */
+// The account made automatically by a purchase without sign-up (custom claim guest) is not a sign-up; the server checks too.
 export const trackSignupIfNew = async (user: User) => {
   const created = Date.parse(user.metadata.creationTime || '');
   if (!created || Date.now() - created > SIGNUP_WINDOW_MS) return;
@@ -182,7 +201,8 @@ export const trackSignupIfNew = async (user: User) => {
     if (local()?.getItem(`${SIGNUP_KEY}_${user.uid}`)) return;
   } catch {}
   try {
-    const token = await user.getIdToken();
+    const { token, claims } = await user.getIdTokenResult();
+    if (claims.guest === true) return;
     await send({ type: 'signup', ...current(), ...read(local(), FIRST_KEY) }, token);
     write(local(), `${SIGNUP_KEY}_${user.uid}`, '1');
   } catch {}
