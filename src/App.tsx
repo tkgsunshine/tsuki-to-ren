@@ -1100,6 +1100,9 @@ function App() {
   // Diagnostic Results Cache
   const [renResult, setRenResult] = useState<FortuneResult | null>(null);
   const [tsukiResult, setTsukiResult] = useState<FortuneResult | null>(null);
+  // お相手ありの鑑定のときの、自分だけの鑑定結果（共有カードの「自分の運勢」タブ用。一人で占ったときと同じ計算）
+  const [soloRenResult, setSoloRenResult] = useState<FortuneResult | null>(null);
+  const [soloTsukiResult, setSoloTsukiResult] = useState<FortuneResult | null>(null);
 
   // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
   // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
@@ -1323,6 +1326,14 @@ function App() {
       
       setRenResult(resRen);
       setTsukiResult(resTsuki);
+      if (runMode === 'match') {
+        const soloInput = { ...input, opponentName: undefined, opponentBirth: undefined, opponentMbti: undefined, opponentGender: undefined };
+        setSoloRenResult(generateFortuneResult(soloInput, 'ren'));
+        setSoloTsukiResult(generateFortuneResult(soloInput, 'tsuki'));
+      } else {
+        setSoloRenResult(resRen);
+        setSoloTsukiResult(resTsuki);
+      }
       
       setFlowStep('result');
       // 結果はいつも「鑑定結果」タブ（/result）で見せ、下のメニューと表示中の画面をそろえる。
@@ -3240,6 +3251,7 @@ function App() {
         <ShareCardModal
           selectedChar={selectedCharacter}
           result={activeResult}
+          soloResult={selectedCharacter === 'ren' ? soloRenResult : soloTsukiResult}
           myName={myName}
           opponentName={mode === 'match' ? oppName : undefined}
           hasOpponent={mode === 'match'}
