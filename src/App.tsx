@@ -1443,6 +1443,22 @@ function App() {
       .catch(() => {});
     return () => { active = false; };
   }, [showShareCard, renResult, tsukiResult]);
+  // お相手ありの鑑定でも、共有カードの「自分の運勢」タブのリンクは、自分だけの鑑定結果を保存して普段の結果画面で開けるようにする。
+  // 自分だけの結果にはお相手の情報が入らないので、今日の相性を隠している日でも保存してよい
+  const [savedSoloShare, setSavedSoloShare] = useState<{ id: string; result: FortuneResult } | null>(null);
+  useEffect(() => {
+    if (!showShareCard || mode !== 'match' || !soloRenResult || !soloTsukiResult || savedSoloShare?.result === soloTsukiResult) return;
+    let active = true;
+    fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'single', myName, oppName: '', character: selectedCharacter, tsuki: soloTsukiResult, ren: soloRenResult }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (active && d && typeof d.id === 'string') setSavedSoloShare({ id: d.id, result: soloTsukiResult }); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [showShareCard, soloRenResult, soloTsukiResult]);
 
   // 対話ロビーで選んだお相手（または自分だけ）の鑑定を、チャット用にその場で出す。点数の出し方は鑑定と同じ generateFortuneResult
   const chatResult = useMemo(() => {
@@ -3252,6 +3268,7 @@ function App() {
           selectedChar={selectedCharacter}
           result={activeResult}
           soloResult={selectedCharacter === 'ren' ? soloRenResult : soloTsukiResult}
+          soloShareId={mode === 'match' && savedSoloShare && savedSoloShare.result === soloTsukiResult ? savedSoloShare.id : undefined}
           myName={myName}
           opponentName={mode === 'match' ? oppName : undefined}
           hasOpponent={mode === 'match'}

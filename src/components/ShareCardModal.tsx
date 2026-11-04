@@ -11,6 +11,8 @@ interface ShareCardModalProps {
   result: FortuneResult;
   /** お相手ありの鑑定で「自分の運勢」タブに出す、自分だけの鑑定結果（一人で占ったときと同じもの） */
   soloResult?: FortuneResult | null;
+  /** 「自分の運勢」タブのリンクに付ける、保存した自分だけの結果のID（開いた人は普段の結果画面で見られる） */
+  soloShareId?: string;
   myName: string;
   opponentName?: string;
   hasOpponent: boolean;
@@ -39,6 +41,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   selectedChar,
   result: pairResult,
   soloResult,
+  soloShareId,
   myName,
   opponentName,
   hasOpponent,
@@ -109,9 +112,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       const u = new URL(shareUrl);
       if (!showOpponent) {
         u.searchParams.set('mode', 'single');
-        // 保存した結果（r）は二人の相性なので、「自分だけ」のカードのリンクには付けない
+        // 保存した結果（r）は二人の相性なので、「自分だけ」のカードのリンクには、自分だけの結果を保存したID（あれば）に差し替える
         if (hasOpponent) {
-          u.searchParams.delete('r');
+          if (soloShareId) u.searchParams.set('r', soloShareId); else u.searchParams.delete('r');
           // 点数とひとことも、自分だけの鑑定のものに差し替える（共有ページ・カード画像に二人の相性の文や点数が出ないように）
           for (const k of ['on', 'oa', 'om', 'c']) u.searchParams.delete(k);
           if (soloResult) {
