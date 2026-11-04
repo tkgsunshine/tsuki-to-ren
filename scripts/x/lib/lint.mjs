@@ -33,6 +33,9 @@ const STEALTH = [
   '教えてもらった', '友達に聞いた', '使ってみたら', '試してみたら', 'やってみたら当たった', '当たりすぎ', '口コミ', 'レビュー',
 ];
 
+// 占いっぽい前置き・断り書き（2026-11-04 運営の指定: 事実を語る温度感で書く）
+const HEDGE = ['占いの話', '当てはまったら', '占いでは', '占い的には'];
+
 // サイト公開前に使わない言い回し（誘導・無料・公開中と誤解される表現）
 const PRELAUNCH_NG = ['リンク', 'こちら', '無料', '今すぐ', '公開中', 'ダウンロード'];
 
@@ -58,6 +61,7 @@ export function lintPost(post, history = [], opts = {}) {
   for (const w of ABSOLUTE) if (text.includes(w)) problems.push(`断定・保証表現「${w}」は使わない`);
   for (const w of STEALTH) if (text.includes(w)) problems.push(`第三者を装う表現「${w}」は使わない（ステマ防止）`);
   if (text.includes('見立て')) problems.push('「月の見立て」などの断り書きは書かない（2026-11-04 運営の指定）');
+  for (const w of HEDGE) if (text.includes(w)) problems.push(`占いっぽい前置き・断り書き「${w}」は入れない。事実を語る温度感で書く（2026-11-04 運営の指定）`);
 
   const urls = text.match(URL_RE) || [];
   // ランキングの返信（opts.siteUrl）は、サイトのURLを1つだけ入れる（2026-10-31〜）
