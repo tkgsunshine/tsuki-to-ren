@@ -1,6 +1,7 @@
 import { getDb, getAdminAuth } from './firestore.js';
 import { PREMIUM, getStripe, parseBody } from './stripe.js';
 import { PAIR_UNLOCKS } from './pair-unlock.js';
+import { NOTICES } from './notices.js';
 
 // 登録なしの購入（買い切り・月額とも）。
 // アカウントを自動で作り、戻ってきた端末をその場でログイン状態にする。
@@ -92,6 +93,9 @@ export async function transferGuestPurchases(db, user, deps = {}) {
       await db.collection(PAIR_UNLOCKS).doc(user.uid).set({ partners: unlocks.partners }, { merge: true });
       await srcUnlockRef.delete();
     }
+    // 購入のお礼など、自動作成アカウントあてのお知らせも本人のアカウントへ
+    const noticeSnap = await db.collection(NOTICES).where('to', '==', c.uid).get();
+    for (const n of noticeSnap.docs || []) await db.collection(NOTICES).doc(n.id).set({ ...n.data(), to: user.uid });
     const srcPremRef = db.collection(PREMIUM).doc(c.uid);
     const prem = (await srcPremRef.get()).data();
     if (prem) {

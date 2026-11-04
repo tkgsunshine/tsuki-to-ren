@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import notices, { cleanLink, validateNotice, listNotices, MAX_TITLE, MAX_BODY } from '../api/_lib/notices.js';
+import notices, { cleanLink, validateNotice, listNotices, sendPurchaseThanks, thanksNoticeId, PURCHASE_THANKS, MAX_TITLE, MAX_BODY } from '../api/_lib/notices.js';
 
 const mockRes = () => {
   const r = { code: 0, body: null, headers: {} };
@@ -101,4 +101,31 @@ test('marking as read needs a sign-in, and an expired sign-in is refused', async
   const expired = mockRes();
   await notices({ method: 'GET', headers: { authorization: 'Bearer old' } }, expired, { auth, db: mockDb() });
   assert.equal(expired.code, 401);
+});
+
+test('a purchase sends one thank-you notice to the buyer, even when the webhook is retried', async () => {
+  const db = mockDb();
+  const sent = await sendPurchaseThanks(db, { uid: 'u1', kind: 'premium', sessionId: 'cs_live_abc', now: Date.parse('2026-11-05T00:00:00Z') });
+  assert.equal(sent, true);
+  const id = thanksNoticeId('cs_live_abc');
+  assert.match(id, /^[A-Za-z0-9]{1,40}$/); // /admin can take it back
+  const n = db.docs[`notices/${id}`];
+  assert.equal(n.to, 'u1');
+  assert.equal(n.title, PURCHASE_THANKS.premium.title);
+  assert.equal(n.createdAt, '2026-11-05T00:00:00.000Z');
+  assert.ok(!n.body.includes('メールアドレスでログイン'));
+  assert.equal(await sendPurchaseThanks(db, { uid: 'u1', kind: 'premium', sessionId: 'cs_live_abc' }), false);
+  // the texts fit what /admin allows
+  for (const t of Object.values(PURCHASE_THANKS)) assert.ok(validateNotice({ to: 'u1', ...t }).value);
+});
+
+test('a guest purchase adds how to see it on another device; unknown kinds send nothing', async () => {
+  const db = mockDb();
+  await sendPurchaseThanks(db, { uid: 'g1', kind: 'pair', sessionId: 'cs_g', guest: true });
+  const n = db.docs[`notices/${thanksNoticeId('cs_g')}`];
+  assert.equal(n.title, PURCHASE_THANKS.pair.title);
+  assert.ok(n.body.includes('メールアドレスでログイン'));
+  assert.ok(validateNotice({ to: 'g1', ...n }).value);
+  assert.equal(await sendPurchaseThanks(db, { uid: 'g1', kind: 'other', sessionId: 'cs_x' }), false);
+  assert.equal(await sendPurchaseThanks(db, { uid: 'g1', kind: 'pair', sessionId: '' }), false);
 });

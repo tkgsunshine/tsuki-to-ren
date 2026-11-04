@@ -379,7 +379,7 @@ function App() {
           setPremiumEndsOn(status.active && status.cancelAtPeriodEnd ? status.currentPeriodEnd : null);
         }
         if (status?.active && back !== 'portal') {
-          if (back === 'success') { setWelcomePairPartner(null); setShowPremiumWelcome(true); }
+          if (back === 'success') { setWelcomePairPartner(null); setShowPremiumWelcome(true); void notices.reload(); } // お礼のお知らせを鈴に出す
           return;
         }
         if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
@@ -1208,6 +1208,7 @@ function App() {
           setPairReturn(null);
           setWelcomePairPartner(san(oppName));
           setShowPremiumWelcome(true);
+          void notices.reload(); // お礼のお知らせを鈴に出す
           return;
         }
         if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
