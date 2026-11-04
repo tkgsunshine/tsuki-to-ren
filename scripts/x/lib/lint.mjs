@@ -62,6 +62,7 @@ export function lintPost(post, history = [], opts = {}) {
   for (const w of STEALTH) if (text.includes(w)) problems.push(`第三者を装う表現「${w}」は使わない（ステマ防止）`);
   if (text.includes('見立て')) problems.push('「月の見立て」などの断り書きは書かない（2026-11-04 運営の指定）');
   for (const w of HEDGE) if (text.includes(w)) problems.push(`占いっぽい前置き・断り書き「${w}」は入れない。事実を語る温度感で書く（2026-11-04 運営の指定）`);
+  for (const w of ['人それぞれ', 'かもしれない', 'かもしれません']) if (text.includes(w)) problems.push(`ぼかしの「${w}」は書かない。事実を語る温度感で言い切る（2026-11-04 運営の指定）`);
 
   const urls = text.match(URL_RE) || [];
   // ランキングの返信（opts.siteUrl）は、サイトのURLを1つだけ入れる（2026-10-31〜）
