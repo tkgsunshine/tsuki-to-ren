@@ -294,17 +294,22 @@ export const BUZZ_SLOTS = ['noon', 'pm', 'evening', 'night', 'late']; // 2026-10
 
 /** 10日で一巡する、1日4本の型の並び（BUZZ_SLOTS の順: 昼12:15・格言15:15・夕18:15・夜20:15）。2026-10-08 が先頭。
  *  2026-10-22 の見直し: 運営がホームで却下した型（選択式の問いかけ・保存型の3つのコツ）を削除し、気持ちに名前をつける型（coined_feeling）・16タイプ別のクセ一覧（mbti_habit）・常識の理由を入れ替える型（flip）・厚い実用型（howto）・格言を増やした。
- *  格言（15:15）は毎日1本。そのうち10日に3回は、スピリチュアル寄りの「月のことば」（maxim_spirit）。10日で全13型が出る。 */
+ *  格言（15:15）は毎日1本。そのうち10日に1回は、スピリチュアル寄りの「月のことば」（maxim_spirit。2026-11-04 に3回→1回）。 */
+/** 2026-11-04 の見直し（運営の指示「ホームで投稿した型を増やし、却下した型を減らす」）。
+ *  ホームの x_posts（10/22〜11/4）の集計: 投稿された割合が高い型＝mbti_habit 2/2・coined_feeling 2/2（ほかに gap_rank・type_scene・maxim）。
+ *  却下・「やめる」が多い型＝howto 0/4・beast_pair_rank 0/3・card_voice 1/4・maxim_spirit 1/3。
+ *  → howto・beast_pair_rank・card_voice は並びから外し（RETIRED_FORMATS）、mbti_habit を10日に1回→3回、coined_feeling を1回→2回に増やした。maxim_spirit は10日に3回→1回。 */
+export const RETIRED_FORMATS = ['howto', 'beast_pair_rank', 'card_voice'];
 const PLAN_DAYS = [
   // 2026-10-31: 昼12:15=mbti_love（毎日）／15:15=格言／夕18:15=gap_rank（毎日。約14万表示の型。リプ欄にサイトのリンク）／夜20:15=long_deep（毎日）／22:15=日替わり
-  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'beast_pair_rank'],
-  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'howto'],
-  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'coined_feeling'],
-  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'card_voice'],
-  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'flip'],
   ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'mbti_habit'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'coined_feeling'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'flip'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'mbti_habit'],
+  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'coined_feeling'],
   ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'voice'],
-  ['mbti_love', 'maxim_spirit', 'gap_rank', 'long_deep', 'mbti_beast_rank'], // 2026-10-31: 2回目の守護獣ランキングを、MBTI×守護獣のランキングに
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'mbti_beast_rank'],
+  ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'mbti_habit'],
   ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'deep'],
   ['mbti_love', 'maxim', 'gap_rank', 'long_deep', 'pair_teaser'],
 ];
