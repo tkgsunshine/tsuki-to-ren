@@ -241,8 +241,9 @@ test('格言（maxim）: 15:15（pm）に毎日1本。10日に1回は、スピ�
 test('厚い実用型（howto）: 返信つき。月のことばの本文に、断定・予言・専門用語が入ると不合格', () => {
   const f = FORMATS.find((x) => x.id === 'howto');
   assert.ok(f && f.reply && f.replyGuide);
-  const ok = { slot: 'pm', kind: 'value', text: '満ちていく月みたいに、恋もゆっくり。\n焦らなくていい夜かもしれない。\n-月-' };
+  const ok = { slot: 'pm', kind: 'value', text: '満ちていく月みたいに、恋もゆっくり。\n焦らなくていい夜。\n-月-' };
   assert.deepEqual(lintPost(ok, [], OPTS), []);
+  assert.ok(lintPost({ ...ok, text: '焦らなくていい夜かもしれない。\n-月-' }, [], OPTS).length, 'ぼかしは不合格（2026-11-04 運営の指定）');
   assert.ok(lintPost({ ...ok, text: '今夜、運命が決まる。\n-月-' }, [], OPTS).length);
   assert.ok(lintPost({ ...ok, text: '日干が甲の人は、必ず叶う。\n-月-' }, [], OPTS).length);
 });
