@@ -30,7 +30,7 @@ export function san(name, fallback = 'お相手') {
     const n = (name || '').trim();
     if (!n)
         return fallback;
-    if (n === 'あなた' || n === 'お相手' || n === 'お友だち')
+    if (n === 'あなた' || n === 'お相手' || n === 'お友達')
         return n;
     if (/(さん|くん|ちゃん|様|君|さま|氏)$/.test(n))
         return n;
