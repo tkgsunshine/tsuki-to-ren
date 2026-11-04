@@ -977,14 +977,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           >
             <X size={20} />
           </button>
+          <p style={{ fontSize: '0.7rem', color: '#a9a49a', margin: '0 0 0.6rem', flexShrink: 0 }}>
+            ※ 画面はイメージです（表示している名前や内容はサンプルです）
+          </p>
           <img
             src={zoomShot.src}
             alt={zoomShot.alt}
             style={{ display: 'block', width: '100%', maxWidth: '440px', height: 'auto', borderRadius: '14px', flexShrink: 0 }}
           />
-          <p style={{ fontSize: '0.7rem', color: '#a9a49a', margin: '0.6rem 0 0', flexShrink: 0 }}>
-            ※ 画面はイメージです（表示している名前や内容はサンプルです）
-          </p>
         </div>
       )}
 
