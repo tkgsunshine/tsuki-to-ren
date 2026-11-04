@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
-import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog, toPrivateMetrics, looseKey, similarity, tweetText, FUZZY_MIN } from './metrics.mjs';
+import { pickTargets, applyMetrics, summarize, buildReport, toMetrics, labelOf, reconcileTimeline, normText, mergeRepliesLog, toPrivateMetrics, clickTotals, looseKey, similarity, tweetText, FUZZY_MIN } from './metrics.mjs';
 
 const now = new Date('2026-10-10T00:00:00Z');
 const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
@@ -238,4 +238,34 @@ test('照合: 下書きを作る前の投稿や、別の日の占いとは、似
 test('長い投稿は note_tweet の全文を使う', () => {
   assert.equal(tweetText({ text: '途中で…', note_tweet: { text: '全文です' } }), '全文です');
   assert.equal(tweetText({ text: '短い' }), '短い');
+});
+
+test('clickTotals: リンクのクリックは、親とリプ欄の返信（返信の返信も）の合計。プロフィールへのクリックは親の値', () => {
+  const pm = (i, pc, uc) => ({ at: 'x', impressions: i, profileClicks: pc, urlClicks: uc });
+  const q = [
+    { id: 'a', text: 'a', metricsPrivate: pm(1000, 12, 0) },
+    { id: 'a-r', replyTo: 'a', text: 'r', metricsPrivate: pm(80, 1, 9) },
+    { id: 'a-r2', replyTo: 'a-r', text: 'r2', metricsPrivate: pm(20, 0, 2) },
+    { id: 'b', text: 'b' },
+  ];
+  const t = clickTotals(q);
+  assert.deepEqual(t.get('a'), { impressions: 1000, profileClicks: 12, urlClicks: 11 });
+  assert.equal(t.has('b'), false);
+  assert.equal(t.has('a-r'), false);
+});
+
+test('add-manual: ホームで手で作った投稿を manual で記録し、タイムラインと照合できる（返信も親の返信として照合）', async () => {
+  const { addManual } = await import('./add-manual.mjs');
+  const q = [];
+  const text = '好きな人の前だと「急にポンコツになっちゃう」16タイプ（MBTI）\n\n5位：ISTJ 管理者\n→いつもの段取りが全部とぶ\n\n1位は...↓';
+  const n = addManual(q, [{ id: 'trend-1', text, replyText: '1位：INFP 仲介者\nhttps://www.tsuki-to-ren.com/?utm_source=x', format: 'rank5', createdAt: '2026-11-04T01:00:00Z' }]);
+  assert.equal(n, 1);
+  assert.deepEqual(q.map((p) => [p.id, p.status, p.replyTo]), [['trend-1', 'manual', undefined], ['trend-1-r', 'manual', 'trend-1']]);
+  assert.equal(addManual(q, [{ id: 'trend-1', text }]), 0);
+  const tweets = [
+    { id: '10', text, created_at: '2026-11-04T02:00:00Z' },
+    { id: '11', text: '1位：INFP 仲介者\nhttps://t.co/abc', created_at: '2026-11-04T02:01:00Z', referenced_tweets: [{ type: 'replied_to', id: '10' }] },
+  ];
+  reconcileTimeline(q, tweets);
+  assert.deepEqual(q.map((p) => [p.id, p.status, p.tweetId]), [['trend-1', 'posted', '10'], ['trend-1-r', 'posted', '11']]);
 });

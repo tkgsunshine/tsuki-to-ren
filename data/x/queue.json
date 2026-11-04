@@ -8090,5 +8090,55 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-11-03T19:26:36.403Z"
+  },
+  {
+    "id": "2026-11-03-trend1",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "value",
+    "format": "rank5",
+    "system": "trend",
+    "purpose": "app",
+    "status": "manual",
+    "createdAt": "2026-11-04T08:29:11.494Z",
+    "text": "好きな人の前だと「急に口数が減っちゃう」16タイプ（MBTI）\n\n5位：ISTJ 管理者\n→ちゃんとした言葉を選びたくて、つい黙っちゃう\n\n4位：INTP 論理学者\n→頭の中ではたくさん話してるのに、声が追いつかない\n\n3位：ISFJ 擁護者\n→相手が楽しめてるか気になって、聞き役にまわる\n\n2位：INFJ 提唱者\n→大事な人ほど、言葉を丁寧に扱いたくなる\n\n1位は...↓"
+  },
+  {
+    "id": "2026-11-03-trend1-r",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "promo",
+    "format": "rank5",
+    "system": "trend",
+    "purpose": "app",
+    "status": "manual",
+    "createdAt": "2026-11-04T08:29:11.494Z",
+    "text": "1位：INFP 仲介者\n好きな気持ちが大きすぎて、言葉にする前に胸がいっぱいになるタイプ。黙っていても、気持ちはちゃんと動いてるよ。\n\nあなたと好きな人の相性も、生年月日とMBTIで鑑定できます↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=trend",
+    "replyTo": "2026-11-03-trend1"
+  },
+  {
+    "id": "2026-11-03-trend5",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "value",
+    "format": "trend",
+    "system": "trend",
+    "purpose": "app",
+    "status": "manual",
+    "createdAt": "2026-11-04T08:29:11.494Z",
+    "text": "【16タイプ（MBTI）別「好きな人にだけ見せちゃう顔」】\n\n甘えんぼが出ちゃう16タイプ\n・ISTP 巨匠（ふたりきりだと急に距離が近い）\n・INTJ 建築家（スタンプの数がこっそり増える）\n・ESTJ 幹部（頼られるより頼りたい日がある）\n・ISFP 冒険家（気づいたら隣にいるの、かわいいね）\n\n心配性が出ちゃう16タイプ\n・INFP 仲介者（既読がつくまでそわそわ）\n・ISFJ 擁護者（体調のことばかり聞いちゃう）\n・ENFJ 主人公（相手の予定まで気にかける）\n・INFJ 提唱者（言葉の奥をそっと考える）\n\n素直になれなくなる16タイプ...↓"
+  },
+  {
+    "id": "2026-11-03-trend5-r",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "promo",
+    "format": "trend",
+    "system": "trend",
+    "purpose": "app",
+    "status": "manual",
+    "createdAt": "2026-11-04T08:29:11.494Z",
+    "text": "素直になれなくなる16タイプ\n・ENTP 討論者（好きほど冗談でごまかす）\n・ESTP 起業家（照れると話題を変える）\n・INTP 論理学者（ほめられると固まる）\n・ISTJ 管理者（うれしいのに「別に」って言っちゃう）\n\n好きが全部顔に出ちゃう16タイプ\n・ENFP 運動家（会えた瞬間から声が1トーン上がる）\n・ESFP エンターテイナー（好きな人の話だけ止まらない）\n・ESFJ 領事官（好きな人の好物は全部覚えてる）\n・ENTJ 指揮官（次に会う予定だけは即決する）\n\nどの顔も、好きだから出るものだよ。\n好きな人との相性も、生年月日とMBTIで鑑定できます↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=trend",
+    "replyTo": "2026-11-03-trend5"
   }
 ]
