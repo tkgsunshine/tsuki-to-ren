@@ -4,6 +4,7 @@ import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
 import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
+import { useBackForwardReset } from '../utils/useBackForwardReset';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
@@ -921,6 +922,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const deepLockWord = LOCK_WORD;
   const pairCardRef = React.useRef<HTMLDivElement>(null);
   const [buyingPair, setBuyingPair] = useState(false);
+  useBackForwardReset(() => setBuyingPair(false));
   // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
   const handleBuyPair = async () => {
     if (!onBuyPair || buyingPair) return;
