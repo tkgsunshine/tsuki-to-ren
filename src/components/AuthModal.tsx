@@ -519,12 +519,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
               <ShieldCheck size={13} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
               <span>機種変更や別端末でもデータを自動同期</span>
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <ShieldCheck size={13} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
+              <span>毎朝8時に、今日の運勢とLINEを送るのにいい時間をメールでお届け</span>
+            </div>
           </div>
         </div>
 
         {/* Privacy Note */}
         <div style={{ fontSize: '0.68rem', color: '#736e65', textAlign: 'center', lineHeight: '1.4' }}>
-          ※ 登録により、利用規約およびプライバシーポリシーに同意したものとみなされます。勝手にSNSへ投稿されることはありません。
+          ※ 登録により、利用規約およびプライバシーポリシーに同意したものとみなされます。勝手にSNSへ投稿されることはありません。毎朝の運勢メールは、マイページやメール内のリンクからいつでも止められます。
         </div>
       </div>
     </div>

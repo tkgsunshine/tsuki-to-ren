@@ -36,7 +36,7 @@ import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
 import { trackCheckout, trackFortune, trackPremiumView } from './services/analytics';
 import { signInWithCustomToken } from 'firebase/auth';
-import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
@@ -795,6 +795,8 @@ function App() {
   const [notifyTarget, setNotifyTarget] = useState<string>('self');
   const [notifySub, setNotifySub] = useState<EmailSubscriptionData | null>(null);
   const [notifyAfterPartnerAdd, setNotifyAfterPartnerAdd] = useState(false);
+  // The subscription this device just turned on for a new member, so a slower read can't show it as OFF
+  const defaultMailRef = useRef<{ uid: string; data: EmailSubscriptionData } | null>(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -802,8 +804,9 @@ function App() {
       return;
     }
     let cancelled = false;
-    getEmailSubscription().then((sub) => {
+    getEmailSubscription().then((found) => {
       if (cancelled) return;
+      const sub = found || (defaultMailRef.current?.uid === currentUser.uid ? defaultMailRef.current.data : null);
       setNotifySub(sub);
       // The subscription in Firestore decides delivery, so the ON/OFF shown here follows it (e.g. set on another device)
       if (sub) setNotifyDailyLuck(!!sub.enabled);
@@ -836,13 +839,13 @@ function App() {
   };
 
   // Saves the subscription with "me" from the profile and the chosen partner (null = solo fortune)
-  const saveNotifySubscription = async (email: string, partner: SavedPartner | 'keep' | null): Promise<boolean> => {
+  const buildNotifyData = (email: string, partner: SavedPartner | 'keep' | null): EmailSubscriptionData => {
     const opp = partner === 'keep' && notifySub
       ? { oppName: notifySub.oppName || '', oppBirth: notifySub.oppBirth || '', oppGender: notifySub.oppGender, oppMbti: notifySub.oppMbti || 'UNKNOWN', relationship: notifySub.relationship || '片思い中', mode: 'match' as const }
       : partner && partner !== 'keep'
         ? { oppName: partner.name, oppBirth: partner.birth.replace(/\//g, '-'), oppGender: partner.gender, oppMbti: partner.mbti, relationship: partner.relationship, mode: 'match' as const }
         : { oppName: '', oppBirth: '', oppGender: 'male' as const, oppMbti: 'UNKNOWN', relationship: relationship, mode: 'single' as const };
-    const data: EmailSubscriptionData = {
+    return {
       email,
       enabled: true,
       myName: myName || currentUser?.displayName || 'あなた',
@@ -852,10 +855,39 @@ function App() {
       ...opp,
       character: selectedCharacter
     };
+  };
+
+  const saveNotifySubscription = async (email: string, partner: SavedPartner | 'keep' | null): Promise<boolean> => {
+    const data = buildNotifyData(email, partner);
     const saved = await saveEmailSubscriptionData(data);
     if (saved) setNotifySub(data);
     return saved;
   };
+
+  // New members get the 8:00 mail ON by default (firebase.ts enableDailyMailForNewMember). It waits until the account
+  // has a verified email and the profile has a birth date. Whose fortune: the partner on screen, else the last saved
+  // partner, else the member's own fortune. Existing members and anyone who turned it OFF are left as they are.
+  const defaultMailBusyRef = useRef(false);
+  useEffect(() => {
+    if (!currentUser || defaultMailBusyRef.current) return;
+    if (!isValidBirthDate(myBirth)) return;
+    defaultMailBusyRef.current = true;
+    const uid = currentUser.uid;
+    const onScreen = mode === 'match' && isValidBirthDate(oppBirth)
+      ? (savedPartners.find(p => p.name === oppName && p.birth === oppBirth)
+        || { id: 'current', name: oppName || 'お相手', birth: oppBirth, mbti: oppMbti, gender: oppGender, relationship })
+      : null;
+    const partner = onScreen || (savedPartners.length > 0 ? savedPartners[savedPartners.length - 1] : null);
+    enableDailyMailForNewMember((email) => buildNotifyData(email, partner))
+      .then((r) => {
+        if (r.status !== 'enabled') return;
+        defaultMailRef.current = { uid, data: r.data };
+        setNotifySub(r.data);
+        setNotifyEmail(r.data.email);
+        setNotifyDailyLuck(true);
+      })
+      .finally(() => { defaultMailBusyRef.current = false; });
+  }, [currentUser, myBirth]);
 
   // Accounts without a verified email (X sign-in) can't get the daily mail; offer to add an address to the same account
   const askToAddEmail = async () => {
