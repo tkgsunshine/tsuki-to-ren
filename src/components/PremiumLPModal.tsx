@@ -396,8 +396,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '0.7rem' }}>
                 {([
-                  { who: 'ren', t: '絶対にやってはいけないこと 5選', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}に言うと一気に冷めてしまう一言や、やってしまいがちな行動。ここは知っておいたほうがいいです。` },
-                  { who: 'tsuki', t: '返信が遅いときの心理 ＆ 脈ありサイン 3段階', shot: '/assets/premium/edu-reply.webp', d: '既読のまま止まったとき、あの人が何を考えているのか。今どの段階にいるのか、少し離れかけたときの戻し方まで、一緒に見ていきましょうね。' },
+                  { who: 'tsuki', t: 'やってはいけないこと 5選 ＆ 返信が遅いときの心理・脈ありサイン', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}に言うと一気に冷めてしまう一言、既読のまま止まったときの本当の気持ち、今どの段階にいるのか、少し離れかけたときの戻し方まで。一緒に見ていきましょうね。` },
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
