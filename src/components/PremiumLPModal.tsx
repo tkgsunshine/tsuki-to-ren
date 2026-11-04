@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X, Lock } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
+import { useBackForwardReset } from '../utils/useBackForwardReset';
 
 const worries = [
   '既読のまま返事がこなくて、なかなか眠れない夜',
@@ -154,6 +155,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  // 決済画面からブラウザの「戻る」で戻ったとき、「移動しています…」のまま押せなくならないように
+  useBackForwardReset(() => setIsProcessing(false));
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [zoomShot, setZoomShot] = useState<{ src: string; alt: string } | null>(null);
   // 下の固定の購入ボタンは、いきなり出さない。説明（教育）を読み終えてプラン・料金の所まで来たら出す（一度出たら出たまま）
