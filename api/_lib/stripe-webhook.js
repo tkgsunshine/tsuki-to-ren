@@ -1,6 +1,6 @@
 import { getDb } from './firestore.js';
 import { PREMIUM, getStripe, premiumRecord } from './stripe.js';
-import { countPremium } from './analytics.js';
+import { checkoutAttribution, countPair, countPremium } from './analytics.js';
 import { recordPairPurchase } from './pair-unlock.js';
 import { resolveCheckoutAccount } from './checkout-claim.js';
 
@@ -43,6 +43,7 @@ export default async function handler(req, res, deps = {}) {
 
   let subscriptionId = null;
   let fallbackUid = null;
+  let checkoutSession = null;
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     if (session.mode === 'payment') {
@@ -53,7 +54,12 @@ export default async function handler(req, res, deps = {}) {
         const account = await resolveCheckoutAccount(db, deps.auth ?? null, session);
         if (!account) return res.status(200).json({ status: 'ignored' });
         const done = await recordPairPurchase(db, session, (event.created || 0) * 1000 || Date.now(), account.uid);
-        if (done) console.log(`💳 pair purchase recorded${account.created ? ' (new account)' : ''}`);
+        if (done) {
+          console.log(`💳 pair purchase recorded${account.created ? ' (new account)' : ''}`);
+          // For the admin page's counters (live payments only, once per session)
+          await countPair(db, { uid: account.uid, sessionId: session.id, livemode: session.livemode === true, amount: session.amount_total, fallback: checkoutAttribution(session.metadata) })
+            .catch((e) => console.error('⚠️ Could not count the pair purchase:', e?.message));
+        }
         return res.status(200).json({ status: done ? 'ok' : 'ignored' });
       } catch (e) {
         console.error('❌ Could not record the pair purchase:', e?.message);
@@ -61,6 +67,7 @@ export default async function handler(req, res, deps = {}) {
       }
     }
     if (session.mode !== 'subscription') return res.status(200).json({ status: 'ignored' });
+    checkoutSession = session;
     subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
     fallbackUid = session.client_reference_id || session.metadata?.uid || null;
     if (!fallbackUid) {
@@ -102,7 +109,7 @@ export default async function handler(req, res, deps = {}) {
     await ref.set({ ...record, uid });
     if (event.type === 'checkout.session.completed' && record.active) {
       // New paid member, for the admin page's counters
-      await countPremium(db, { uid, subscriptionId: sub.id, livemode: record.livemode }).catch((e) => console.error('⚠️ Could not count the new member:', e?.message));
+      await countPremium(db, { uid, subscriptionId: sub.id, livemode: record.livemode, amount: checkoutSession?.amount_total, fallback: checkoutAttribution(checkoutSession?.metadata) }).catch((e) => console.error('⚠️ Could not count the new member:', e?.message));
     }
     console.log(`💳 premium ${event.type}: status=${record.status} active=${record.active}`);
     return res.status(200).json({ status: 'ok' });

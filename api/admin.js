@@ -103,7 +103,7 @@ export default async function handler(req, res, deps = {}) {
     const from = jstDate(new Date(Date.now() - (offset + days - 1) * 86400 * 1000));
     const inPeriod = (d) => d.id <= to; // the query already starts at `from`; days after `to` are dropped here
 
-    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap] = await Promise.all([
+    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap, pairSnap] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection('subscriptions').get(),
       db.collection(ATTRIBUTION).get(),
@@ -111,12 +111,18 @@ export default async function handler(req, res, deps = {}) {
       db.collection(INQUIRIES).orderBy('createdAt', 'desc').limit(MAX_INQUIRIES).get(),
       db.collection('premium').get(), // _lib/stripe.js PREMIUM (not imported, to keep the Stripe library out of this function)
       db.collection(OWNERS).doc('owners').get(),
-      db.collection(NOTICES).orderBy('createdAt', 'desc').limit(MAX_NOTICES).get()
+      db.collection(NOTICES).orderBy('createdAt', 'desc').limit(MAX_NOTICES).get(),
+      db.collection('pairUnlocks').get() // _lib/pair-unlock.js PAIR_UNLOCKS（買い切りの購入）
     ]);
 
     const subs = new Map(subsSnap.docs.map((d) => [d.id, d.data()]));
     const attrib = new Map(attribSnap.docs.map((d) => [d.id, d.data()]));
     const premium = new Map(premiumSnap.docs.map((d) => [d.id, d.data()]));
+    // 買い切りの購入数（本番／テスト）。お相手ごとに1件
+    const pairs = new Map((pairSnap.docs || []).map((d) => {
+      const list = Object.values(d.data()?.partners || {});
+      return [d.id, { live: list.filter((e) => e?.livemode === true).length, test: list.filter((e) => e?.livemode !== true).length }];
+    }));
     const markedOwners = new Set(ownersSnap.data()?.uids || []);
     const adminBases = new Set(parseAdminEmails(deps.adminEmails ?? process.env.ADMIN_EMAILS).map(baseEmail));
 
@@ -143,6 +149,10 @@ export default async function handler(req, res, deps = {}) {
           device: at?.device || null,
           // 'live' = paying now, 'test' = a Stripe test-mode membership (not real money)
           premium: p?.active ? (p.livemode ? 'live' : 'test') : null,
+          // 買い切りで解放したお相手の数（本番・テスト）
+          pairs: pairs.get(u.uid) || { live: 0, test: 0 },
+          // 登録なしの購入で自動作成されたアカウント（メールなし・購入メールでログインし直すと本物のアカウントへ引き継ぐ）。会員数に入れない
+          guest: u.customClaims?.guest === true,
           // The owner's own account: 'auto' from ADMIN_EMAILS, 'marked' by hand on the admin page
           owner: email && adminBases.has(baseEmail(email)) ? 'auto' : markedOwners.has(u.uid) ? 'marked' : null
         });

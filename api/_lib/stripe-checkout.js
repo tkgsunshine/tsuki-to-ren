@@ -3,6 +3,7 @@ import { PREMIUM, getStripe, isLiveKey, parseBody, safeReturnPath, verifyUser, w
 import { PAIR_KIND, findPairUnlock } from './pair-unlock.js';
 import { partnerKey } from './partner-days.js';
 import { guestPurchaseEmail } from './checkout-claim.js';
+import { attributionMetadata } from './analytics.js';
 
 const BIRTH_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -41,12 +42,14 @@ export default async function handler(req, res, deps = {}) {
     // {CHECKOUT_SESSION_ID} must stay unencoded for Stripe to fill it in.
     const done = (key) => withParam(back, key, 'success') + (user ? '' : '&sid={CHECKOUT_SESSION_ID}');
     const stripe = deps.stripe || getStripe();
+    // この訪問の流入元（/admin の購入の内訳用）。登録なしの購入は会員の流入元がないので、これで数える
+    const attrib = attributionMetadata(body.attrib);
     if (pair) {
       if (user && await findPairUnlock(db, user.uid, oppBirth, live)) {
         return res.status(409).json({ status: 'error', message: 'このお相手の鑑定は解放済みです' });
       }
       // Only the partner's code goes to Stripe, not the birth date
-      const metadata = { ...(user ? { uid: user.uid } : { guest: '1' }), kind: PAIR_KIND, partner: partnerKey(oppBirth) };
+      const metadata = { ...(user ? { uid: user.uid } : { guest: '1' }), kind: PAIR_KIND, partner: partnerKey(oppBirth), ...attrib };
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
         line_items: [{ price: priceId, quantity: 1 }],
@@ -69,7 +72,7 @@ export default async function handler(req, res, deps = {}) {
       ...payer,
       // A guest subscription gets its uid after the webhook resolves the account (stripe-webhook.js)
       subscription_data: { metadata },
-      metadata,
+      metadata: { ...metadata, ...attrib },
       locale: 'ja',
       success_url: done('premium'),
       cancel_url: withParam(back, 'premium', 'cancel')
