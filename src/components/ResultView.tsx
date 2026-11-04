@@ -3048,8 +3048,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <span style={{ fontSize: '0.6rem', color: 'var(--color-gold)', letterSpacing: '1px', fontWeight: 'bold', background: 'rgba(226, 192, 116, 0.1)', padding: '2px 8px', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.2)' }}>
                     ✦ {partnerCall}の鑑定は解放済み ✦
                   </span>
-                  <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', margin: '0.5rem 0 0', lineHeight: '1.45', wordBreak: 'keep-all' }}>
-                    明日からも、{partnerCall}との毎日をそばで
+                  <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', margin: '0.5rem 0 0', lineHeight: '1.45', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>
+                    <span style={{ display: 'inline-block', maxWidth: '100%' }}>明日からも、</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>{partnerCall}との毎日をそばで</span>
                   </h3>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
@@ -3110,8 +3110,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   }}>
                     ✦ プレミアムプラン解放 ✦
                   </span>
-                  <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
-                    {san(oppNickname)}のトリセツ・6軸の詳しい相性・未来予測をすべて解禁
+                  <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>
+                    <span style={{ display: 'inline-block', maxWidth: '100%' }}>{san(oppNickname)}のトリセツ・</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>6軸の詳しい相性・</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>未来予測をすべて解禁</span>
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
@@ -3448,7 +3448,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}>
                   ✦ プレミアムプラン解放 ✦
                 </span>
-                <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all' }}>
+                <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>
                   {hasOpponent ? <>{san(oppNickname)}との<br />未来予測スケジュールをすべて解禁</> : 'あなたの未来予測スケジュールをすべて解禁'}
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
