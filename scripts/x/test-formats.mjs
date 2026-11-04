@@ -330,6 +330,7 @@ test('本文中の16タイプに、二つ名が足される（各タイプ最初
   const { addMbtiNicksInline } = await import('./lib/mbti-nick.mjs');
   assert.equal(addMbtiNicksInline('ESTJは、前の夜に。ESTJは'), 'ESTJ 幹部は、前の夜に。ESTJは');
   assert.equal(addMbtiNicksInline('INTJ：無表情\nINFP：泣く'), 'INTJ 建築家：無表情\nINFP 仲介者：泣く');
+  assert.equal(addMbtiNicksInline('❤️ ISFP×辛羊と相性\n10位 ISFP×辛猪 52点'), '❤️ ISFP 冒険家×辛羊と相性\n10位 ISFP 冒険家×辛猪 52点', 'ランキングの行は、前に同じタイプがあっても足す');
   assert.equal(addMbtiNicksInline('1位 ESTJ 幹部'), '1位 ESTJ 幹部');
   assert.equal(addMbtiNicksInline('ESTJ（幹部）'), 'ESTJ（幹部）');
   assert.equal(addMbtiNicksInline('#INFP の人'), '#INFP の人');
