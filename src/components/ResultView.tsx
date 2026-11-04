@@ -1133,7 +1133,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           boxShadow: '0 8px 24px rgba(0, 0, 0, 0.55)'
         }}>
           <span style={{ fontSize: '0.76rem', color: '#e2c074', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-            🔮 {sharedBy.name === 'あなた' ? 'お友だち' : san(sharedBy.name)}が共有した鑑定結果
+            🔮 {sharedBy.name === 'あなた' ? 'お友達' : san(sharedBy.name)}が共有した鑑定結果
           </span>
           {onReset && (
             <button type="button" className="consult-btn font-serif" onClick={onReset} style={{ flexShrink: 0, width: 'auto', padding: '0.5rem 1rem', fontSize: '0.8rem', margin: 0 }}>

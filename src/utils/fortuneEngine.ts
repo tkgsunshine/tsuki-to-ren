@@ -32,7 +32,7 @@ const elementRelations: Record<string, Record<string, 'producing' | 'same' | 'co
 export function san(name: string | null | undefined, fallback = 'お相手'): string {
   const n = (name || '').trim();
   if (!n) return fallback;
-  if (n === 'あなた' || n === 'お相手' || n === 'お友だち') return n;
+  if (n === 'あなた' || n === 'お相手' || n === 'お友達') return n;
   if (/(さん|くん|ちゃん|様|君|さま|氏)$/.test(n)) return n;
   return `${n}さん`;
 }

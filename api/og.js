@@ -77,21 +77,29 @@ export async function renderShareCard(params, { background = 'guardian' } = {}) 
       ])
     : el('div', { fontSize: 52, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }, [person(mName, 'mm', ' の今日の恋愛運')]);
 
+  const divider = el('div', { width: 1, height: 120, background: 'rgba(255,255,255,0.18)' }, []);
+  // 一人のときも、共有ページ（SharedResultView）と同じく「基本運勢」と「今日の運勢」を並べる（点数はリンクの値のまま）
   const scores = hasOpponent
-    ? [scoreBox('基本の相性', baseScore, '#e2c074'), el('div', { width: 1, height: 120, background: 'rgba(255,255,255,0.18)' }, []), scoreBox('今日の相性', dailyScore, '#93c5fd')]
-    : [scoreBox('今日の運勢', dailyScore, '#93c5fd')];
+    ? [scoreBox('基本の相性', baseScore, '#e2c074'), divider, scoreBox('今日の相性', dailyScore, '#93c5fd')]
+    : [...(baseScore !== '??' ? [scoreBox('基本運勢', baseScore, '#e2c074'), divider] : []), scoreBox('今日の運勢', dailyScore, '#93c5fd')];
 
   // 背景のキャラ: 左右の端に置き、中央は暗くして文字を読みやすくする。
   // 'guardian' は二人の守護獣（お相手なしは本人のみ右側）、'tsuki-ren' は月（左）と蓮（右）
   const left = background === 'tsuki-ren' ? 'tsuki.jpg' : hasOpponent ? guardianFile(params.get('ma')) : null;
   const right = background === 'tsuki-ren' ? 'ren.jpg' : guardianFile(hasOpponent ? params.get('oa') : params.get('ma'));
   // 画像の内側の端は背景色へなじませる（左の画像は右へ、右の画像は左へ向かって暗くなる）
-  const SIDE = 470;
+  // 一人のときは、キャラを右に大きく（明るめに）出し、文字は左側の空いた所にまとめる（中央に置くと左半分が空くため）
+  const solo = !hasOpponent && background !== 'tsuki-ren' && !!right;
+  const SIDE = solo ? 600 : 470;
+  const TEXT_W = solo ? W - SIDE + 90 : W;
+  const fade = solo
+    ? 'linear-gradient(270deg, rgba(5,5,12,0) 0%, rgba(5,5,12,0.1) 45%, rgba(5,5,12,0.75) 82%, rgba(5,5,12,1) 100%)'
+    : null;
   const side = (file, pos) =>
     file
       ? el('div', { position: 'absolute', top: 0, [pos]: 0, width: SIDE, height: H }, [
-          el('img', { width: SIDE, height: H, objectFit: 'cover' }, [], { src: jpgUri(file), width: SIDE, height: H }),
-          el('div', { position: 'absolute', top: 0, left: 0, width: SIDE, height: H, backgroundImage: `linear-gradient(${pos === 'left' ? 90 : 270}deg, rgba(5,5,12,0.25) 0%, rgba(5,5,12,0.55) 45%, rgba(5,5,12,1) 100%)` }, []),
+          el('img', { width: SIDE, height: H, objectFit: 'cover', objectPosition: 'center top' }, [], { src: jpgUri(file), width: SIDE, height: H }),
+          el('div', { position: 'absolute', top: 0, left: 0, width: SIDE, height: H, backgroundImage: fade || `linear-gradient(${pos === 'left' ? 90 : 270}deg, rgba(5,5,12,0.25) 0%, rgba(5,5,12,0.55) 45%, rgba(5,5,12,1) 100%)` }, []),
         ])
       : null;
 
@@ -120,7 +128,7 @@ export async function renderShareCard(params, { background = 'guardian' } = {}) 
       el(
         'div',
         // 下の約90pxは、Xがタイトルを重ねて表示するので空ける
-        { position: 'absolute', top: 0, left: 0, width: W, height: H, flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '34px 60px 92px' },
+        { position: 'absolute', top: 0, left: 0, width: TEXT_W, height: H, flexDirection: 'column', alignItems: 'center', justifyContent: solo ? 'space-around' : 'space-between', padding: solo ? '30px 40px 92px 50px' : '34px 60px 92px' },
         [
           el('div', { alignItems: 'center' }, [
             el('img', { width: 56, height: 56, marginRight: 12 }, [], { src: emblem(), width: 56, height: 56 }),
