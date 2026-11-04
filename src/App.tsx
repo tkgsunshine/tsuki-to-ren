@@ -649,8 +649,10 @@ function App() {
         setRelationship(rel);
         startDiagnosis(mName, mBirth, mMbti, mGender, '', '', 'UNKNOWN', 'female', rel, 'single', false, urlCharacter);
       }
-    } else if (!mBirth && !sharedTeaser && !sharedView && (initialRoute.tab === 'home' || initialRoute.tab === 'fortune') && !initialRoute.legal && !initialRoute.compatibilityPair) {
-      // 共有リンク（?shared= / ?from=share）を開いたときは戻さない。戻すと自分の結果の画面へ移って、共有された結果が見えなくなる
+    } else if (!mBirth && (initialRoute.tab === 'home' || initialRoute.tab === 'fortune') && !initialRoute.legal && !initialRoute.compatibilityPair) {
+      // 共有リンク（?shared= / ?from=share）を開いたときは、自分の結果を裏で用意するだけで画面は移さない
+      // （移すと共有された結果が見えなくなる）。自分の結果は「鑑定結果」タブで見られる
+      const restoreInBackground = !!(sharedTeaser || sharedView);
       // 前回の結果を戻すのは、トップ（/）と鑑定結果（/result）を開いたときだけ。コラム・日柱ページ・/about などを開いたときは、そのページを見せる。
       // 生年月日だけのリンク（日柱ページからの ?mb=）でも戻さず、入力画面のままにする（生年月日は UnifiedInputView が入れる）
       // Restore last diagnosis result when returning from 2-step email verification link
@@ -682,7 +684,8 @@ function App() {
                 lastInput.rel || '片思い中',
                 'match',
                 true,
-                lastInput.selectedCharacter
+                lastInput.selectedCharacter,
+                restoreInBackground
               );
             } else {
               setMode('single');
@@ -699,7 +702,8 @@ function App() {
                 lastInput.rel || '片思い中',
                 'single',
                 true,
-                lastInput.selectedCharacter
+                lastInput.selectedCharacter,
+                restoreInBackground
               );
             }
           }
@@ -1282,7 +1286,9 @@ function App() {
     rel: string,
     runMode: 'single' | 'match',
     skipLoading = false,
-    presetCharacter?: 'ren' | 'tsuki'
+    presetCharacter?: 'ren' | 'tsuki',
+    // true: 結果を用意するだけで、画面（タブ・履歴・スクロール・キャラ）は変えない（共有リンクを開いたときの前回結果の復元）
+    background = false
   ) => {
     const execute = () => {
       const input = {
@@ -1298,7 +1304,7 @@ function App() {
       };
 
       const targetChar = presetCharacter || selectedCharacter;
-      if (presetCharacter) {
+      if (presetCharacter && !background) {
         setSelectedCharacter(presetCharacter);
       }
 
@@ -1335,6 +1341,7 @@ function App() {
         setSoloRenResult(resRen);
         setSoloTsukiResult(resTsuki);
       }
+      if (background) return;
       
       setFlowStep('result');
       // 結果はいつも「鑑定結果」タブ（/result）で見せ、下のメニューと表示中の画面をそろえる。
