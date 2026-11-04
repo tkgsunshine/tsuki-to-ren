@@ -119,12 +119,8 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth, unreadN
           >
             {currentUser ? (
               <>
-                {currentUser.photoURL ? (
-                  <img src={currentUser.photoURL} alt="Avatar" style={{ width: '16px', height: '16px', borderRadius: '50%' }} />
-                ) : (
-                  <User size={13} />
-                )}
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser.displayName || 'マイページ'}</span>
+                <User size={13} />
+                <span>マイページ</span>
               </>
             ) : (
               <>
