@@ -649,7 +649,8 @@ function App() {
         setRelationship(rel);
         startDiagnosis(mName, mBirth, mMbti, mGender, '', '', 'UNKNOWN', 'female', rel, 'single', false, urlCharacter);
       }
-    } else if (!mBirth && (initialRoute.tab === 'home' || initialRoute.tab === 'fortune') && !initialRoute.legal && !initialRoute.compatibilityPair) {
+    } else if (!mBirth && !sharedTeaser && !sharedView && (initialRoute.tab === 'home' || initialRoute.tab === 'fortune') && !initialRoute.legal && !initialRoute.compatibilityPair) {
+      // 共有リンク（?shared= / ?from=share）を開いたときは戻さない。戻すと自分の結果の画面へ移って、共有された結果が見えなくなる
       // 前回の結果を戻すのは、トップ（/）と鑑定結果（/result）を開いたときだけ。コラム・日柱ページ・/about などを開いたときは、そのページを見せる。
       // 生年月日だけのリンク（日柱ページからの ?mb=）でも戻さず、入力画面のままにする（生年月日は UnifiedInputView が入れる）
       // Restore last diagnosis result when returning from 2-step email verification link
