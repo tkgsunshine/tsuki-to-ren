@@ -26,6 +26,10 @@ export default async function handler(req, res, deps = {}) {
   const type = String(body.type || '');
   if (type === 'inquiry') return handleInquiry(req, res, body, { getDb, getAdminAuth, ...deps });
   if (!CLIENT_TYPES.has(type)) return res.status(400).json({ status: 'error', message: 'Unknown type' });
+  // Preview（PRごとの確認用URL）は本番と同じFirestoreに書くが、/admin の「自分の端末を除外」が効かない
+  // （除外の印はURLごと、ADMIN_EMAILS は本番だけ）。確認の操作が本番の数字に混ざらないよう、本番以外は数えない
+  const env = deps.vercelEnv ?? process.env.VERCEL_ENV;
+  if (env && env !== 'production') return res.status(204).end();
   const source = normalizeSource(body.source);
   const landing = normalizeLanding(body.landing);
   const device = normalizeDevice(body.device);

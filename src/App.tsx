@@ -650,6 +650,9 @@ function App() {
         startDiagnosis(mName, mBirth, mMbti, mGender, '', '', 'UNKNOWN', 'female', rel, 'single', false, urlCharacter);
       }
     } else if (!mBirth && (initialRoute.tab === 'home' || initialRoute.tab === 'fortune') && !initialRoute.legal && !initialRoute.compatibilityPair) {
+      // 共有リンク（?shared= / ?from=share）を開いたときは、自分の結果を裏で用意するだけで画面は移さない
+      // （移すと共有された結果が見えなくなる）。自分の結果は「鑑定結果」タブで見られる
+      const restoreInBackground = !!(sharedTeaser || sharedView);
       // 前回の結果を戻すのは、トップ（/）と鑑定結果（/result）を開いたときだけ。コラム・日柱ページ・/about などを開いたときは、そのページを見せる。
       // 生年月日だけのリンク（日柱ページからの ?mb=）でも戻さず、入力画面のままにする（生年月日は UnifiedInputView が入れる）
       // Restore last diagnosis result when returning from 2-step email verification link
@@ -681,7 +684,8 @@ function App() {
                 lastInput.rel || '片思い中',
                 'match',
                 true,
-                lastInput.selectedCharacter
+                lastInput.selectedCharacter,
+                restoreInBackground
               );
             } else {
               setMode('single');
@@ -698,7 +702,8 @@ function App() {
                 lastInput.rel || '片思い中',
                 'single',
                 true,
-                lastInput.selectedCharacter
+                lastInput.selectedCharacter,
+                restoreInBackground
               );
             }
           }
@@ -1282,7 +1287,9 @@ function App() {
     rel: string,
     runMode: 'single' | 'match',
     skipLoading = false,
-    presetCharacter?: 'ren' | 'tsuki'
+    presetCharacter?: 'ren' | 'tsuki',
+    // true: 結果を用意するだけで、画面（タブ・履歴・スクロール・キャラ）は変えない（共有リンクを開いたときの前回結果の復元）
+    background = false
   ) => {
     const execute = () => {
       const input = {
@@ -1298,7 +1305,7 @@ function App() {
       };
 
       const targetChar = presetCharacter || selectedCharacter;
-      if (presetCharacter) {
+      if (presetCharacter && !background) {
         setSelectedCharacter(presetCharacter);
       }
 
@@ -1335,6 +1342,7 @@ function App() {
         setSoloRenResult(resRen);
         setSoloTsukiResult(resTsuki);
       }
+      if (background) return;
       
       setFlowStep('result');
       // 結果はいつも「鑑定結果」タブ（/result）で見せ、下のメニューと表示中の画面をそろえる。
@@ -1444,6 +1452,22 @@ function App() {
       .catch(() => {});
     return () => { active = false; };
   }, [showShareCard, renResult, tsukiResult]);
+  // お相手ありの鑑定でも、共有カードの「自分の運勢」タブのリンクは、自分だけの鑑定結果を保存して普段の結果画面で開けるようにする。
+  // 自分だけの結果にはお相手の情報が入らないので、今日の相性を隠している日でも保存してよい
+  const [savedSoloShare, setSavedSoloShare] = useState<{ id: string; result: FortuneResult } | null>(null);
+  useEffect(() => {
+    if (!showShareCard || mode !== 'match' || !soloRenResult || !soloTsukiResult || savedSoloShare?.result === soloTsukiResult) return;
+    let active = true;
+    fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'single', myName, oppName: '', character: selectedCharacter, tsuki: soloTsukiResult, ren: soloRenResult }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (active && d && typeof d.id === 'string') setSavedSoloShare({ id: d.id, result: soloTsukiResult }); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [showShareCard, soloRenResult, soloTsukiResult]);
 
   // 対話ロビーで選んだお相手（または自分だけ）の鑑定を、チャット用にその場で出す。点数の出し方は鑑定と同じ generateFortuneResult
   const chatResult = useMemo(() => {
@@ -3253,6 +3277,7 @@ function App() {
           selectedChar={selectedCharacter}
           result={activeResult}
           soloResult={selectedCharacter === 'ren' ? soloRenResult : soloTsukiResult}
+          soloShareId={mode === 'match' && savedSoloShare && savedSoloShare.result === soloTsukiResult ? savedSoloShare.id : undefined}
           myName={myName}
           opponentName={mode === 'match' ? oppName : undefined}
           hasOpponent={mode === 'match'}
