@@ -1999,7 +1999,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
 
     const sType = stemComp?.type || '宿命';
     const sTitle = stemComp?.title || '【宿命の結びつき】';
-    const bType = branchComp?.type || '調和';
+    // 【】の言葉は点数帯に合わせる（以前は55〜69点で生まれた日の十二支の組み合わせ名を入れており、点数に入らない材料のため「【最高のフィーリング】なのに57点」と食い違っていた）
 
     if (character === 'tsuki') {
       if (baseScore >= 85) {
@@ -2009,7 +2009,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         oneLiner = `${sTitle}。お互いを思いやることで絆がぐんと深まる好調期。素直な気持ちを届けましょう。`;
         summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 55) {
-        oneLiner = `【${bType}】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
+        oneLiner = `【ゆっくり育てる相性】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
         summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else {
         oneLiner = `【${sType}】焦らず穏やかに見守る時。お互いの違いをポジティブに楽しむ姿勢が大切です。`;
@@ -2023,7 +2023,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         oneLiner = `${sTitle}。関係性は着実に上昇中。相手の好む会話のペースに合わせるのが効果的です。`;
         summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 55) {
-        oneLiner = `【${bType}】相性は安定しています。無理にペースを変えず、今の心地よい関係を続けるのが正解です。`;
+        oneLiner = `【ゆっくり育てる相性】相性は安定しています。無理にペースを変えず、今の心地よい関係を続けるのが正解です。`;
         summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else {
         oneLiner = `【${sType}】少しすれ違いやすい時期。気持ちのままに何度も連絡せず、落ち着いて見守るのがいちばんです。`;
