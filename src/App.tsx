@@ -34,7 +34,7 @@ import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
-import { trackCheckout, trackFortune, trackPremiumView } from './services/analytics';
+import { trackCheckout, trackFortune, trackPremiumView, trackRegStep } from './services/analytics';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
@@ -58,6 +58,9 @@ const formatBirthDate = (val: string): string => {
 const NEW_PARTNER_ID = '__new__';
 
 // A complete, real calendar date (YYYY-MM-DD). The daily email cannot compute a fortune without one.
+// 決済の直前に控える鑑定の入力（このタブだけ）と、読み込んだ時点のURL（?pair= などはすぐ消すため）
+const CHECKOUT_READING_KEY = 'hasu_checkout_reading';
+const INITIAL_SEARCH = typeof window === 'undefined' ? '' : window.location.search;
 const isValidBirthDate = (val: string): boolean => {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(val || '');
   if (!m) return false;
@@ -267,9 +270,6 @@ function App() {
         if (parsed && parsed.uid) {
           setCurrentUser(parsed);
           setIsRegistered(true);
-          if (parsed.displayName && parsed.displayName !== 'Google ユーザー' && parsed.displayName !== 'Apple ユーザー' && parsed.displayName !== 'X ユーザー') {
-            setMyName(parsed.displayName);
-          }
         }
       }
     } catch {}
@@ -281,9 +281,6 @@ function App() {
         if (user) {
           setCurrentUser(user);
           setIsRegistered(true);
-          if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
-            setMyName(user.displayName);
-          }
         }
       });
 
@@ -321,9 +318,6 @@ function App() {
         if (user) {
           setCurrentUser(user);
           setIsRegistered(true);
-          if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
-            setMyName(user.displayName);
-          }
         } else {
           setCurrentUser(null);
           setIsRegistered(false);
@@ -379,7 +373,7 @@ function App() {
           setPremiumEndsOn(status.active && status.cancelAtPeriodEnd ? status.currentPeriodEnd : null);
         }
         if (status?.active && back !== 'portal') {
-          if (back === 'success') { setWelcomePairPartner(null); setShowPremiumWelcome(true); }
+          if (back === 'success') { setWelcomePairPartner(null); setShowPremiumWelcome(true); void notices.reload(); } // お礼のお知らせを鈴に出す
           return;
         }
         if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
@@ -391,9 +385,18 @@ function App() {
     return () => { cancelled = true; };
   }, [currentUser?.uid]);
 
+  // 画面に出している鑑定の入力（startDiagnosis が入れる）。決済へ移る直前に、このタブの sessionStorage にも控える。
+  // Stripe から戻ったとき、端末の記録（hasu_last_diagnosis_input）がログイン状態の変化で消えていても、同じ鑑定を出し直せるように
+  const lastReadingRef = useRef<Record<string, unknown> | null>(null);
+  const rememberReadingForCheckout = () => {
+    if (!lastReadingRef.current) return;
+    try { sessionStorage.setItem(CHECKOUT_READING_KEY, JSON.stringify(lastReadingRef.current)); } catch { /* blocked storage */ }
+  };
+
   // 登録なしでも申し込める（Stripeで入力したメールでアカウントを自動で作る）
   const handleStartCheckout = async () => {
     trackCheckout('monthly');
+    rememberReadingForCheckout();
     try {
       await startPremiumCheckout();
     } catch (e) {
@@ -650,11 +653,21 @@ function App() {
         startDiagnosis(mName, mBirth, mMbti, mGender, '', '', 'UNKNOWN', 'female', rel, 'single', false, urlCharacter);
       }
     } else if (!mBirth && (initialRoute.tab === 'home' || initialRoute.tab === 'fortune') && !initialRoute.legal && !initialRoute.compatibilityPair) {
+      // 共有リンク（?shared= / ?from=share）を開いたときは、自分の結果を裏で用意するだけで画面は移さない
+      // （移すと共有された結果が見えなくなる）。自分の結果は「鑑定結果」タブで見られる
+      const restoreInBackground = !!(sharedTeaser || sharedView);
       // 前回の結果を戻すのは、トップ（/）と鑑定結果（/result）を開いたときだけ。コラム・日柱ページ・/about などを開いたときは、そのページを見せる。
       // 生年月日だけのリンク（日柱ページからの ?mb=）でも戻さず、入力画面のままにする（生年月日は UnifiedInputView が入れる）
       // Restore last diagnosis result when returning from 2-step email verification link
       try {
-        const lastInputRaw = localStorage.getItem('hasu_last_diagnosis_input');
+        // Stripe から戻ったとき（?pair= / ?premium=。URLからはすぐ消すので、読み込んだ時点のURLで見る）は、決済の直前に控えた鑑定も使う
+        const fromCheckout = /[?&](pair|premium)=/.test(INITIAL_SEARCH);
+        let checkoutRaw: string | null = null;
+        try {
+          checkoutRaw = fromCheckout ? sessionStorage.getItem(CHECKOUT_READING_KEY) : null;
+          sessionStorage.removeItem(CHECKOUT_READING_KEY);
+        } catch { /* blocked storage */ }
+        const lastInputRaw = localStorage.getItem('hasu_last_diagnosis_input') || checkoutRaw;
         if (lastInputRaw) {
           const lastInput = JSON.parse(lastInputRaw);
           if (lastInput && lastInput.mName && lastInput.mBirth) {
@@ -681,7 +694,8 @@ function App() {
                 lastInput.rel || '片思い中',
                 'match',
                 true,
-                lastInput.selectedCharacter
+                lastInput.selectedCharacter,
+                restoreInBackground
               );
             } else {
               setMode('single');
@@ -698,7 +712,8 @@ function App() {
                 lastInput.rel || '片思い中',
                 'single',
                 true,
-                lastInput.selectedCharacter
+                lastInput.selectedCharacter,
+                restoreInBackground
               );
             }
           }
@@ -848,7 +863,7 @@ function App() {
     return {
       email,
       enabled: true,
-      myName: myName || currentUser?.displayName || 'あなた',
+      myName: myName || 'あなた',
       myBirth: myBirth || '',
       myGender: myGender,
       myMbti: myMbti,
@@ -1208,6 +1223,7 @@ function App() {
           setPairReturn(null);
           setWelcomePairPartner(san(oppName));
           setShowPremiumWelcome(true);
+          void notices.reload(); // お礼のお知らせを鈴に出す
           return;
         }
         if (i < tries - 1) await new Promise((r) => setTimeout(r, 2500));
@@ -1222,6 +1238,7 @@ function App() {
   // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
   const handleBuyPair = async () => {
     trackCheckout('pair');
+    rememberReadingForCheckout();
     try {
       await startPairCheckout(oppBirth);
     } catch (e) {
@@ -1281,7 +1298,9 @@ function App() {
     rel: string,
     runMode: 'single' | 'match',
     skipLoading = false,
-    presetCharacter?: 'ren' | 'tsuki'
+    presetCharacter?: 'ren' | 'tsuki',
+    // true: 結果を用意するだけで、画面（タブ・履歴・スクロール・キャラ）は変えない（共有リンクを開いたときの前回結果の復元）
+    background = false
   ) => {
     const execute = () => {
       const input = {
@@ -1297,10 +1316,11 @@ function App() {
       };
 
       const targetChar = presetCharacter || selectedCharacter;
-      if (presetCharacter) {
+      if (presetCharacter && !background) {
         setSelectedCharacter(presetCharacter);
       }
 
+      lastReadingRef.current = { mName, mBirth, mMbti, mGender, oName, oBirth, oMbti, oGender, rel, runMode, selectedCharacter: targetChar };
       // Save last diagnosis input payload to localStorage for email magic link 2-step verification restore
       try {
         localStorage.setItem('hasu_last_diagnosis_input', JSON.stringify({
@@ -1334,6 +1354,7 @@ function App() {
         setSoloRenResult(resRen);
         setSoloTsukiResult(resTsuki);
       }
+      if (background) return;
       
       setFlowStep('result');
       // 結果はいつも「鑑定結果」タブ（/result）で見せ、下のメニューと表示中の画面をそろえる。
@@ -1403,6 +1424,12 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPremiumLP]);
 
+  // ログインしていない人がログイン画面を開いた回数（会員登録までのどこで離れたかを見るため）
+  useEffect(() => {
+    if (showAuthModal && !currentUser) trackRegStep('auth_open');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAuthModal]);
+
   // チャット・プレミアム案内などの重ね表示を開いたら履歴を1件積み、閉じたら外す（戻るスワイプで閉じられるように）
   useEffect(() => {
     if (overlayBackPendingRef.current) return;
@@ -1443,6 +1470,22 @@ function App() {
       .catch(() => {});
     return () => { active = false; };
   }, [showShareCard, renResult, tsukiResult]);
+  // お相手ありの鑑定でも、共有カードの「自分の運勢」タブのリンクは、自分だけの鑑定結果を保存して普段の結果画面で開けるようにする。
+  // 自分だけの結果にはお相手の情報が入らないので、今日の相性を隠している日でも保存してよい
+  const [savedSoloShare, setSavedSoloShare] = useState<{ id: string; result: FortuneResult } | null>(null);
+  useEffect(() => {
+    if (!showShareCard || mode !== 'match' || !soloRenResult || !soloTsukiResult || savedSoloShare?.result === soloTsukiResult) return;
+    let active = true;
+    fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'single', myName, oppName: '', character: selectedCharacter, tsuki: soloTsukiResult, ren: soloRenResult }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (active && d && typeof d.id === 'string') setSavedSoloShare({ id: d.id, result: soloTsukiResult }); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [showShareCard, soloRenResult, soloTsukiResult]);
 
   // 対話ロビーで選んだお相手（または自分だけ）の鑑定を、チャット用にその場で出す。点数の出し方は鑑定と同じ generateFortuneResult
   const chatResult = useMemo(() => {
@@ -1919,9 +1962,7 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    {currentUser?.photoURL ? (
-                      <img src={currentUser.photoURL} alt="Avatar" style={{ width: '38px', height: '38px', borderRadius: '50%', border: '1.5px solid var(--color-gold)' }} />
-                    ) : (
+                    {(
                       <div style={{
                         width: '38px',
                         height: '38px',
@@ -1935,12 +1976,12 @@ function App() {
                         fontSize: '1rem',
                         border: '1.5px solid var(--color-gold)'
                       }}>
-                        {currentUser ? (currentUser.displayName || 'U').charAt(0) : <User size={20} />}
+                        <User size={20} />
                       </div>
                     )}
                     <div>
                       <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: currentUser ? '#ffffff' : '#f2e2b3' }}>
-                        {currentUser ? currentUser.displayName : 'Google / X で無料登録・ログイン'}
+                        {currentUser ? 'マイページ' : 'Google / X で無料登録・ログイン'}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: currentUser ? '#7dbb8a' : '#d8d2c6', marginTop: '2px' }}>
                         {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })()) ? 'メール認証完了' : 'Google 連携中'} (${currentUser.email || 'メール未登録'})` : '鑑定履歴・お相手データをクラウド保存'}
@@ -2164,7 +2205,8 @@ function App() {
                   </button>
                 </div>
 
-                {/* ホーム画面に追加（PWAインストール・案内） */}
+                {/* ホーム画面に追加（PWAインストール・案内）: 未登録のゲストには出さない（会員登録・有料会員になってから） */}
+                {(isRegistered || isSubscribed) && (
                 <div 
                   onClick={() => setShowInstallGuideModal(true)}
                   className="glass-panel" 
@@ -2192,6 +2234,7 @@ function App() {
                   </div>
                   <ChevronRight size={18} style={{ color: '#e2c074' }} />
                 </div>
+                )}
 
                 <div 
                   onClick={() => {
@@ -3252,6 +3295,7 @@ function App() {
           selectedChar={selectedCharacter}
           result={activeResult}
           soloResult={selectedCharacter === 'ren' ? soloRenResult : soloTsukiResult}
+          soloShareId={mode === 'match' && savedSoloShare && savedSoloShare.result === soloTsukiResult ? savedSoloShare.id : undefined}
           myName={myName}
           opponentName={mode === 'match' ? oppName : undefined}
           hasOpponent={mode === 'match'}
@@ -3573,7 +3617,7 @@ function App() {
               className="consult-btn font-serif"
               style={{ padding: '0.85rem', width: '100%', fontSize: '0.9rem', fontWeight: 'bold', borderRadius: '12px', cursor: 'pointer' }}
             >
-              認証を完了して解放する →
+              認証を完了して続きを見る →
             </button>
           </div>
         </div>

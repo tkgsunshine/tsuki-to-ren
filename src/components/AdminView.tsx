@@ -10,8 +10,9 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 
 // 有料は2プラン: 買い切り（お相手1人の深層鑑定 ¥680: pairCheckouts → pairs）と月額プレミアム（¥980: checkouts → premiums）。
 // *Sessions = ブラウザのセッションで最初の1回だけ数えた「人数」（流れの表はこちらで割る）。salesYen = 本番の購入額（円）
-const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewsPair',
-  'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds'] as const;
+const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'premiumViewsPair',
+  'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds',
+  'regViews', 'regClicks', 'regSubmits', 'authOpens'] as const; // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
 type FullCounts = Record<Metric, number>;
@@ -22,6 +23,7 @@ interface DailyDoc extends Counts {
   byLanding?: Record<string, Counts>;
   byDevice?: Record<string, Counts>;
   byShare?: Record<string, number>;
+  byReg?: Record<string, number>;
 }
 interface DayRow extends FullCounts {
   date: string;
@@ -146,6 +148,20 @@ const sumShares = (docs: DailyDoc[]) => {
   for (const d of docs) for (const [k, v] of Object.entries(d.byShare || {})) out.set(k, (out.get(k) || 0) + (v || 0));
   return [...out.entries()].sort((a, b) => b[1] - a[1]);
 };
+
+const sumReg = (docs: DailyDoc[]) => {
+  const out: Record<string, number> = {};
+  for (const d of docs) for (const [k, v] of Object.entries(d.byReg || {})) out[k] = (out[k] || 0) + (v || 0);
+  return out;
+};
+const REG_LABELS: Record<string, string> = {
+  click_top: '点数の下', click_bar: '画面下のバー', click_lock: '鍵のかかった所', click_other: 'その他',
+  submit_card_email: '結果画面・メール', submit_card_google: '結果画面・Google', submit_card_x: '結果画面・X',
+  submit_modal_email: 'ログイン画面・メール', submit_modal_google: 'ログイン画面・Google', submit_modal_x: 'ログイン画面・X', submit_other: 'その他',
+};
+const regDetail = (reg: Record<string, number>, prefix: string) =>
+  Object.entries(reg).filter(([k, n]) => k.startsWith(prefix) && n).sort((a, b) => b[1] - a[1])
+    .map(([k, n]) => `${REG_LABELS[k] || k} ${n}`).join('・');
 
 const toCsv = (rows: Member[]) => {
   const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', 'プレミアム', '買い切り(人)', '流入元', '入口ページ', '端末'];
@@ -437,12 +453,16 @@ function DailyChart({ days }: { days: DayRow[] }) {
 // 訪問 → 鑑定した → 有料プランの案内を見た → 支払い画面（買い切り / 月額）→ 購入（買い切り / 月額）。
 // 鑑定・案内は「セッションで最初の1回」の人数で割るので、1人が何度開いても100%を超えない。
 // 会員登録は購入の前提ではない（登録なしでも買える）ので、流れの外に別に出す。
-function Funnel({ t, since }: { t: FullCounts; since: string | null }) {
+// 「鑑定した → 案内を見た」は、同じ訪問で鑑定したあとに案内を開いた人（premiumViewFortuneSessions、2026-11-05〜）で割る。
+// 案内を見た人の全体（premiumViewSessions）には、前回の結果が自動で出た人・共有リンクで結果を見た人・マイページのバナーから
+// 開いた人も入り、鑑定した人の一部ではないので、参考として別の行に出す（支払い画面はこちらで割る）。
+function Funnel({ t, since, ffSince }: { t: FullCounts; since: string | null; ffSince: string | null }) {
   type Row = { label: string; n: number; prev?: number; indent?: boolean };
   const rows: Row[] = [
     { label: '訪問', n: t.visits },
     { label: '鑑定した', n: t.fortuneSessions, prev: t.visits },
-    { label: '有料プランの案内を見た', n: t.premiumViewSessions, prev: t.fortuneSessions },
+    { label: '鑑定したあと、有料プランの案内を見た', n: t.premiumViewFortuneSessions, prev: t.fortuneSessions },
+    { label: '有料プランの案内を見た（全体）', n: t.premiumViewSessions },
     { label: '支払い画面へ：買い切り ¥680', n: t.pairCheckouts, prev: t.premiumViewSessions, indent: true },
     { label: '支払い画面へ：月額 ¥980', n: t.checkouts, prev: t.premiumViewSessions, indent: true },
     { label: '購入：買い切り', n: t.pairs, prev: t.pairCheckouts, indent: true },
@@ -486,7 +506,9 @@ function Funnel({ t, since }: { t: FullCounts; since: string | null }) {
         </table>
       </div>
       <div style={{ ...c.muted, marginTop: 8, lineHeight: 1.7 }}>
-        「鑑定した」「有料プランの案内を見た」は、1回の訪問（ブラウザのセッション）で何度しても1人と数えます{since ? `（${since} から計測）` : '（まだ計測前です）'}。
+        「鑑定した」「有料プランの案内を見た」は、1回の訪問（ブラウザのセッション）で何度しても1人と数えます{since ? `（${since === '2026-11-04' ? '2026-11-04 の12時50分ごろ' : since} から計測。その前の分は「鑑定（回）」「有料案内（回）」にだけ入っています）` : '（まだ計測前です）'}。
+        「鑑定したあと、案内を見た」は、同じ訪問で入力画面から鑑定したあとに案内を開いた人です{ffSince ? `（${ffSince} から計測）` : '（まだ計測前です）'}。
+        「案内を見た（全体）」には、前回の結果が自動で出た人・共有リンクから結果を見た人・マイページのバナーから開いた人も入ります（鑑定した人の一部ではないので、割合は出しません）。
         案内を開いた回数は「日ごとの数字」にあります。支払い画面は、案内を通らずに鑑定結果の「¥680で解放」から直接進んだ分も含みます。
         購入はStripeの本番決済だけで、月額は新しく始めた分（毎月の更新は入りません）。売上は購入時の金額の合計です。
         会員登録なしでも買えるので、会員登録は流れの外に出しています（購入のときに自動で作られるアカウントは会員登録に数えません）。
@@ -498,7 +520,7 @@ function Funnel({ t, since }: { t: FullCounts; since: string | null }) {
 function DailyTable({ days }: { days: DayRow[] }) {
   const cols: [keyof DayRow, string][] = [
     ['visits', '訪問'], ['fortunes', '鑑定（回）'], ['fortuneSessions', '鑑定した人'], ['signups', '会員登録'], ['shares', '共有'],
-    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['premiumViewsPair', 'うち買い切りから'],
+    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['premiumViewFortuneSessions', 'うち鑑定のあと'], ['premiumViewsPair', 'うち買い切りから'],
     ['pairCheckouts', '支払い画面 買い切り'], ['checkouts', '支払い画面 月額'], ['pairs', '購入 買い切り'], ['premiums', '購入 月額'],
     ['salesYen', '売上'], ['aiCalls', 'AIチャット'],
     ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'], ['columnCtaMids', 'コラム途中→鑑定へ'], ['columnCtaEnds', 'コラム最後→鑑定へ'],
@@ -524,6 +546,48 @@ function DailyTable({ days }: { days: DayRow[] }) {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+// 鑑定 → 会員登録 のどこで離れたか（2026-11 から計測。それより前の日は 0）
+function SignupFunnel({ t, reg }: { t: FullCounts; reg: Record<string, number> }) {
+  const steps: [string, number, string][] = [
+    ['鑑定した人', t.fortuneSessions, `鑑定の回数は ${t.fortunes}`],
+    ['結果画面の登録の箱が見えた', t.regViews, ''],
+    ['登録へのボタンを押した', t.regClicks, regDetail(reg, 'click_')],
+    ['ログイン画面を開いた', t.authOpens, 'メニュー・チャットなどから'],
+    ['登録を始めた（メール送信・Google・X）', t.regSubmits, regDetail(reg, 'submit_')],
+    ['会員登録', t.signups, ''],
+  ];
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>鑑定から会員登録まで</h2>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={c.table}>
+          <thead>
+            <tr>
+              <th style={c.th}></th>
+              <th style={{ ...c.th, ...c.num }}>数</th>
+              <th style={{ ...c.th, ...c.num }}>鑑定した人から</th>
+              <th style={c.th}>内訳</th>
+            </tr>
+          </thead>
+          <tbody>
+            {steps.map(([label, n, note], i) => (
+              <tr key={label}>
+                <td style={c.td}>{label}</td>
+                <td style={{ ...c.td, ...c.num }}>{n}</td>
+                <td style={{ ...c.td, ...c.num }}>{i ? pct(n, steps[0][1]) : ''}</td>
+                <td style={{ ...c.td, ...c.muted }}>{note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        「鑑定した人」は、1回の訪問で何度鑑定しても1人です。会員登録はメニューやチャットからの登録も含みます。途中の段（登録の箱・ボタン・ログイン画面・登録開始）は、この表を入れた日から数えています。
       </div>
     </div>
   );
@@ -563,7 +627,7 @@ const PERIODS = [
 
 export default function AdminView() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
-  const [days, setDays] = useState(30);
+  const [days, setDays] = useState(1); // 開いたときは「今日」
   const [offset, setOffset] = useState(0); // 1 = the period ends yesterday（「昨日」）
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState('');
@@ -629,6 +693,7 @@ export default function AdminView() {
   const [showGuests, setShowGuests] = useState(false);
   // The first day the per-session counters (鑑定した人・案内を見た人) have data
   const sessionSince = useMemo(() => daily.find((d) => d.fortuneSessions || d.premiumViewSessions)?.date || null, [daily]);
+  const ffSince = useMemo(() => daily.find((d) => d.premiumViewFortuneSessions)?.date || null, [daily]);
 
   const setOwnerMark = async (uid: string, owner: boolean) => {
     if (!user) return;
@@ -795,7 +860,9 @@ export default function AdminView() {
 
             <DailyTable days={daily} />
 
-            <Funnel t={totals} since={sessionSince} />
+            <Funnel t={totals} since={sessionSince} ffSince={ffSince} />
+
+            <SignupFunnel t={totals} reg={sumReg(data.daily)} />
 
             <Inquiries items={data.inquiries || []} members={allMembers} onStatus={setInquiryStatus} />
 

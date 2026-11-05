@@ -35,7 +35,7 @@ const emblem = () => (emblemUri ??= `data:image/png;base64,${fs.readFileSync(pat
 /** 本文（と返信）から、タイトルのテーマと順位（1〜16位）を読み取る。足りない・重なりがあれば problems に入れる */
 export function parseRanking(text, replyText = '') {
   const lines = `${text}\n${replyText}`.split('\n');
-  const title = String(text).split('\n')[0].replace(/^【MBTI別】/, '').trim();
+  const title = String(text).split('\n')[0].replace(/^【MBTI(?:（16タイプ）)?別】/, '').trim();
   const ranks = {};
   const problems = [];
   for (const l of lines) {
@@ -149,7 +149,7 @@ export async function renderRankCard({ text, replyText = '', reveal = false, wid
 
 /** 16タイプのランキング（gap_rank と、手で足した -rank）の投稿か。本文に3位〜14位の行がそろっているもの */
 export function isRankPost(item) {
-  if (!item || item.replyTo || !/^【MBTI別】/.test(String(item.text || ''))) return false;
+  if (!item || item.replyTo || !/^【MBTI(?:（16タイプ）)?別】/.test(String(item.text || ''))) return false;
   const { ranks } = parseRanking(item.text);
   return Array.from({ length: 12 }, (_, i) => i + 3).every((n) => ranks[n]);
 }

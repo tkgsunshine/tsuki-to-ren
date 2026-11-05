@@ -51,6 +51,8 @@ test('client source / landing detection', () => {
   assert.equal(sourceFrom('', 'https://t.co/abc', 'www.tsuki-to-ren.com'), 'x');
   assert.equal(sourceFrom('', 'https://chatgpt.com/', 'www.tsuki-to-ren.com'), 'chatgpt');
   assert.equal(sourceFrom('?utm_source=chatgpt.com', '', 'www.tsuki-to-ren.com'), 'chatgpt');
+  assert.equal(sourceFrom('?utm_source=x&utm_medium=trend&utm_content=trend-20261104-r7', '', 'www.tsuki-to-ren.com'), 'utm:x_trend-20261104-r7');
+  assert.equal(sourceFrom('?utm_source=x&utm_medium=trend', '', 'www.tsuki-to-ren.com'), 'utm:x');
   assert.equal(sourceFrom('', 'https://www.perplexity.ai/', 'www.tsuki-to-ren.com'), 'perplexity');
   assert.equal(sourceFrom('', 'https://gemini.google.com/', 'www.tsuki-to-ren.com'), 'gemini');
   assert.equal(sourceFrom('', 'https://copilot.microsoft.com/', 'www.tsuki-to-ren.com'), 'copilot');
@@ -99,6 +101,29 @@ test('track: the column boxes that lead to the fortune are counted by position (
   assert.ok(db.writes[0].data.columnCtaMids);
   assert.ok(db.writes[1].data.columnCtaEnds);
   assert.deepEqual(Object.keys(db.writes[1].data.byLanding), ['column:line-timing']);
+});
+
+test('track: steps toward a free account are counted, with where they happened', async () => {
+  const db = mockDb();
+  const send = async (body) => {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { source: 'x', landing: 'home', device: 'mobile_browser', ...body } }, res, { db });
+    return res.code;
+  };
+  assert.equal(await send({ type: 'reg_view' }), 204);
+  assert.equal(await send({ type: 'reg_click', place: 'top' }), 204);
+  assert.equal(await send({ type: 'reg_submit', place: 'card_google' }), 204);
+  assert.equal(await send({ type: 'auth_open' }), 204);
+  assert.equal(await send({ type: 'reg_click', place: '<script>' }), 204);
+  const [view, click, submit, auth, odd] = db.writes.map((w) => w.data);
+  assert.ok(view.regViews);
+  assert.equal(view.byReg, undefined);
+  assert.ok(click.regClicks);
+  assert.deepEqual(Object.keys(click.byReg), ['click_top']);
+  assert.ok(submit.regSubmits);
+  assert.deepEqual(Object.keys(submit.byReg), ['submit_card_google']);
+  assert.ok(auth.authOpens);
+  assert.deepEqual(Object.keys(odd.byReg), ['click_other'], 'an unknown place cannot add its own key');
 });
 
 test('countPremium: counted once per live subscription, under the member\'s first source', async () => {
@@ -243,14 +268,14 @@ test('track: the first fortune / first paid-plan page of a session also counts a
   const send = (body) => track({ method: 'POST', headers: { 'user-agent': UA }, body: { source: 'x', landing: 'home', device: 'mobile_browser', ...body } }, mockRes(), { db });
   await send({ type: 'fortune', first: '1' });
   await send({ type: 'fortune', first: '0' });
-  await send({ type: 'premium_view', plan: 'pair', first: '1' });
-  await send({ type: 'premium_view', plan: 'monthly', first: '0' });
+  await send({ type: 'premium_view', plan: 'pair', first: '1', ff: '1' });
+  await send({ type: 'premium_view', plan: 'monthly', first: '0', ff: '0' });
   await send({ type: 'checkout_pair' });
   assert.equal(db.writes.length, 5, 'still one write per event');
   const keys = db.writes.map((w) => Object.keys(w.data).filter((k) => !['date', 'bySource', 'byLanding', 'byDevice'].includes(k)).sort());
   assert.deepEqual(keys, [
     ['fortuneSessions', 'fortunes'], ['fortunes'],
-    ['premiumViewSessions', 'premiumViews', 'premiumViewsPair'], ['premiumViews'],
+    ['premiumViewFortuneSessions', 'premiumViewSessions', 'premiumViews', 'premiumViewsPair'], ['premiumViews'],
     ['pairCheckouts'],
   ]);
   assert.deepEqual(Object.keys(db.writes[0].data.bySource.x).sort(), ['fortuneSessions', 'fortunes']);
@@ -315,4 +340,16 @@ test('admin: purchase-made accounts are flagged guest, with each account\'s pair
   assert.deepEqual(by.g.pairs, { live: 1, test: 1 });
   assert.equal(by.m.guest, false);
   assert.deepEqual(by.m.pairs, { live: 0, test: 0 });
+});
+
+test('track: Preview deployments are not counted (same database as production, but the owner\'s devices are not excluded there)', async () => {
+  const db = mockDb();
+  let res = mockRes();
+  await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'fortune', first: '1' } }, res, { db, vercelEnv: 'preview' });
+  assert.equal(res.code, 204);
+  assert.equal(db.writes.length, 0);
+  res = mockRes();
+  await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'fortune', first: '1' } }, res, { db, vercelEnv: 'production' });
+  assert.equal(res.code, 204);
+  assert.equal(db.writes.length, 1);
 });

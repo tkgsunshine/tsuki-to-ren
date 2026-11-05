@@ -56,6 +56,9 @@ export const sourceFrom = (search: string, referrer: string, ownHost: string): s
   if (utm) {
     const clean = utm.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 30);
     if (clean === 'chatgptcom') return 'chatgpt'; // ChatGPT が付ける utm_source=chatgpt.com
+    // Xの投稿ごとの計測（2026-11-04）: utm_content=投稿ID があれば utm:x_<投稿ID> として数える（管理画面の流入元に投稿ごとに出る）
+    const content = (new URLSearchParams(search).get('utm_content') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (clean === 'x' && content) return `utm:x_${content}`.slice(0, 34);
     if (clean) return `utm:${clean}`;
   }
   if (!referrer) return 'direct';
@@ -165,6 +168,18 @@ export const trackFortune = () => {
   void send({ type: 'fortune', first: firstInSession('fortune'), ...current() });
 };
 
+/**
+ * Steps toward a free account, so the admin page shows where guests drop off:
+ * reg_view   = the sign-up box on the result page came into view (once per result shown)
+ * reg_click  = a button that leads to sign-up was pressed: top (under the scores), bar (bottom bar), lock (a locked part)
+ * reg_submit = a sign-up was started: card_* (the box on the result page) / modal_* (the sign-in window), by email / google / x
+ * auth_open  = the sign-in window opened for someone not signed in
+ */
+export type RegPlace = 'top' | 'bar' | 'lock' | `${'card' | 'modal'}_${'email' | 'google' | 'x'}`;
+export const trackRegStep = (type: 'reg_view' | 'reg_click' | 'reg_submit' | 'auth_open', place?: RegPlace) => {
+  void send({ type, ...current(), ...(place ? { place } : {}) });
+};
+
 export type ShareChannel = 'x' | 'line' | 'link' | 'image';
 
 /** A result shared: posted to X / LINE, link copied, or card image saved. */
@@ -172,9 +187,17 @@ export const trackShare = (channel: ShareChannel) => {
   void send({ type: 'share', channel, ...current() });
 };
 
+// Whether this browser session has run a fortune from the input form (trackFortune marks it)
+const fortunedInSession = () => {
+  try { return Boolean(session()?.getItem('hasu_first_fortune')); } catch { return false; }
+};
+
 /** The paid-plan page opened, with the plan it led with: 'pair' from a lock the one-time purchase opens, else 'monthly'. */
+// ff = '1' the first time in this session the page is opened after a fortune from the input form, so /admin can divide
+// "saw the page" by "ran a fortune" with people who did both (a restored result or the My Page banner does not count as a fortune)
 export const trackPremiumView = (plan: 'pair' | 'monthly') => {
-  void send({ type: 'premium_view', plan, first: firstInSession('premium_view'), ...current() });
+  const ff = fortunedInSession() ? firstInSession('premium_view_ff') : '0';
+  void send({ type: 'premium_view', plan, first: firstInSession('premium_view'), ff, ...current() });
 };
 
 /** The button to Stripe's payment page pressed: monthly Premium (checkout) or the one-time pair purchase (checkout_pair). */

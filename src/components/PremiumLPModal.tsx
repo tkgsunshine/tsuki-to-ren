@@ -204,7 +204,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
   const priceCardLabel = !isSubscribed
-    ? 'すべての機能を解放する'
+    ? 'すべての続きを見る'
     : premiumEndsOn ? 'プレミアムを続ける' : 'お支払い・プランの確認';
   const handlePriceCardAction = () => {
     if (!isSubscribed) return handleSubscribeAction();
@@ -929,7 +929,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 padding: '0.1rem'
               }}
             >
-              {pairWho}だけ 買い切り680円で解放する
+              {pairWho}だけ 買い切り680円で続きを見る
             </button>
           )}
         </div>
@@ -977,14 +977,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           >
             <X size={20} />
           </button>
+          <p style={{ fontSize: '0.7rem', color: '#a9a49a', margin: '0 0 0.6rem', flexShrink: 0 }}>
+            ※ 画面はイメージです（表示している名前や内容はサンプルです）
+          </p>
           <img
             src={zoomShot.src}
             alt={zoomShot.alt}
             style={{ display: 'block', width: '100%', maxWidth: '440px', height: 'auto', borderRadius: '14px', flexShrink: 0 }}
           />
-          <p style={{ fontSize: '0.7rem', color: '#a9a49a', margin: '0.6rem 0 0', flexShrink: 0 }}>
-            ※ 画面はイメージです（表示している名前や内容はサンプルです）
-          </p>
         </div>
       )}
 

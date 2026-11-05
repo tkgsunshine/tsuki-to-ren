@@ -1,5 +1,5 @@
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, FIRST_METRICS, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeSource, recordEvent } from './_lib/analytics.js';
+import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeRegPlace, normalizeSource, recordEvent } from './_lib/analytics.js';
 import { handleInquiry } from './_lib/inquiry.js';
 
 // Receives the site's own counters: a visit (once per browser session), a fortune (each time the form is submitted),
@@ -26,10 +26,15 @@ export default async function handler(req, res, deps = {}) {
   const type = String(body.type || '');
   if (type === 'inquiry') return handleInquiry(req, res, body, { getDb, getAdminAuth, ...deps });
   if (!CLIENT_TYPES.has(type)) return res.status(400).json({ status: 'error', message: 'Unknown type' });
+  // Preview（PRごとの確認用URL）は本番と同じFirestoreに書くが、/admin の「自分の端末を除外」が効かない
+  // （除外の印はURLごと、ADMIN_EMAILS は本番だけ）。確認の操作が本番の数字に混ざらないよう、本番以外は数えない
+  const env = deps.vercelEnv ?? process.env.VERCEL_ENV;
+  if (env && env !== 'production') return res.status(204).end();
   const source = normalizeSource(body.source);
   const landing = normalizeLanding(body.landing);
   const device = normalizeDevice(body.device);
   const channel = type === 'share' ? normalizeChannel(body.channel) : undefined;
+  const regPlace = normalizeRegPlace(type, body.place);
 
   try {
     const db = deps.db || getDb();
@@ -59,7 +64,8 @@ export default async function handler(req, res, deps = {}) {
     const also = [];
     if (body.first === '1' && FIRST_METRICS[type]) also.push(FIRST_METRICS[type]);
     if (type === 'premium_view' && body.plan === 'pair') also.push(PAIR_VIEW_METRIC);
-    await recordEvent(db, { type, source, landing, device, channel, also });
+    if (type === 'premium_view' && body.ff === '1') also.push(FORTUNE_VIEW_METRIC); // 鑑定したあと、初めて案内を開いた
+    await recordEvent(db, { type, source, landing, device, channel, regPlace, also });
     return res.status(204).end();
   } catch (e) {
     console.error('⚠️ Could not record the event:', e?.message);
