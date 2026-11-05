@@ -2954,7 +2954,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ background: 'rgba(226, 139, 170, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 139, 170, 0.22)', position: 'relative' }}>
                   <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f6c6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     <HangerMark size={18} />
-                    <span>惹かれるファッション ＆ グッとくる仕草</span>
+                    <span>惹かれるファッション ＆ ドキッとさせる仕草</span>
                   </div>
                   <div className="font-serif" style={{ fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
@@ -2980,7 +2980,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         <div style={lockStyle}><span style={label}>【{at.mbtiType}タイプのお相手に効く一工夫】</span>{lockedText(at.mbtiTip, locked)}</div>
                       )}
                       <div style={lockStyle}>
-                        <span style={label}>【グッとくる仕草】</span>
+                        <span style={label}>【ドキッとさせる仕草】</span>
                         <ul style={{ margin: '0.15rem 0 0 0', paddingLeft: '1.2rem' }}>
                           {at.gestures.map((g, i) => <li key={i}>{lockedText(g, locked)}</li>)}
                         </ul>

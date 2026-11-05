@@ -1636,7 +1636,7 @@ const mbtiFashionTip = (mbti) => {
         : 'きっちりしすぎず、袖をまくるなど少しの抜け感があると距離が縮まります。';
     return `${sn}。${tf}。${ei}。${jp}`;
 };
-// 16タイプ（4つの気質）から、グッとくる仕草を1つ足す
+// 16タイプ（4つの気質）から、ドキッとさせる仕草を1つ足す
 const mbtiAttractionGesture = (mbti) => {
     if (!isMbtiType(mbti))
         return null;

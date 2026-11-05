@@ -1682,7 +1682,7 @@ export interface AttractionStyle {
   styleTag?: string;   // ひと言の系統（清楚系・ギャル系など。あなたの性別向け）
   colors: string;      // 好みの色
   outfit: string;      // あなた（の性別）向けの服装・髪・小物
-  gestures: string[];  // グッとくる仕草
+  gestures: string[];  // ドキッとさせる仕草
   mbtiType?: string;   // お相手の16タイプ（入力があるときだけ）
   mbtiTip?: string;    // お相手の16タイプに合わせた、服装の一工夫
   ngStyle: string;     // 冷めやすい見た目・ふるまい
@@ -1824,7 +1824,7 @@ const mbtiFashionTip = (mbti: string): string | null => {
   return `${sn}。${tf}。${ei}。${jp}`;
 };
 
-// 16タイプ（4つの気質）から、グッとくる仕草を1つ足す
+// 16タイプ（4つの気質）から、ドキッとさせる仕草を1つ足す
 const mbtiAttractionGesture = (mbti: string): string | null => {
   if (!isMbtiType(mbti)) return null;
   const t = mbti.toUpperCase();
