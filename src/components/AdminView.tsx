@@ -490,7 +490,7 @@ function Funnel({ t, since, ffSince }: { t: FullCounts; since: string | null; ff
         </table>
       </div>
       <div style={{ ...c.muted, marginTop: 8, lineHeight: 1.7 }}>
-        「鑑定した」「有料プランの案内を見た」は、1回の訪問（ブラウザのセッション）で何度しても1人と数えます{since ? `（${since} から計測）` : '（まだ計測前です）'}。
+        「鑑定した」「有料プランの案内を見た」は、1回の訪問（ブラウザのセッション）で何度しても1人と数えます{since ? `（${since === '2026-11-04' ? '2026-11-04 の12時50分ごろ' : since} から計測。その前の分は「鑑定（回）」「有料案内（回）」にだけ入っています）` : '（まだ計測前です）'}。
         「鑑定したあと、案内を見た」は、同じ訪問で入力画面から鑑定したあとに案内を開いた人です{ffSince ? `（${ffSince} から計測）` : '（まだ計測前です）'}。
         「案内を見た（全体）」には、前回の結果が自動で出た人・共有リンクから結果を見た人・マイページのバナーから開いた人も入ります（鑑定した人の一部ではないので、割合は出しません）。
         案内を開いた回数は「日ごとの数字」にあります。支払い画面は、案内を通らずに鑑定結果の「¥680で解放」から直接進んだ分も含みます。
@@ -569,7 +569,7 @@ const PERIODS = [
 
 export default function AdminView() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
-  const [days, setDays] = useState(30);
+  const [days, setDays] = useState(1); // 開いたときは「今日」
   const [offset, setOffset] = useState(0); // 1 = the period ends yesterday（「昨日」）
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState('');

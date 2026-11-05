@@ -318,3 +318,15 @@ test('admin: purchase-made accounts are flagged guest, with each account\'s pair
   assert.equal(by.m.guest, false);
   assert.deepEqual(by.m.pairs, { live: 0, test: 0 });
 });
+
+test('track: Preview deployments are not counted (same database as production, but the owner\'s devices are not excluded there)', async () => {
+  const db = mockDb();
+  let res = mockRes();
+  await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'fortune', first: '1' } }, res, { db, vercelEnv: 'preview' });
+  assert.equal(res.code, 204);
+  assert.equal(db.writes.length, 0);
+  res = mockRes();
+  await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'fortune', first: '1' } }, res, { db, vercelEnv: 'production' });
+  assert.equal(res.code, 204);
+  assert.equal(db.writes.length, 1);
+});

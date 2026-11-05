@@ -267,9 +267,6 @@ function App() {
         if (parsed && parsed.uid) {
           setCurrentUser(parsed);
           setIsRegistered(true);
-          if (parsed.displayName && parsed.displayName !== 'Google ユーザー' && parsed.displayName !== 'Apple ユーザー' && parsed.displayName !== 'X ユーザー') {
-            setMyName(parsed.displayName);
-          }
         }
       }
     } catch {}
@@ -281,9 +278,6 @@ function App() {
         if (user) {
           setCurrentUser(user);
           setIsRegistered(true);
-          if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
-            setMyName(user.displayName);
-          }
         }
       });
 
@@ -321,9 +315,6 @@ function App() {
         if (user) {
           setCurrentUser(user);
           setIsRegistered(true);
-          if (user.displayName && user.displayName !== 'Google ユーザー' && user.displayName !== 'Apple ユーザー' && user.displayName !== 'X ユーザー') {
-            setMyName(user.displayName);
-          }
         } else {
           setCurrentUser(null);
           setIsRegistered(false);
@@ -853,7 +844,7 @@ function App() {
     return {
       email,
       enabled: true,
-      myName: myName || currentUser?.displayName || 'あなた',
+      myName: myName || 'あなた',
       myBirth: myBirth || '',
       myGender: myGender,
       myMbti: myMbti,
@@ -1943,9 +1934,7 @@ function App() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
-                    {currentUser?.photoURL ? (
-                      <img src={currentUser.photoURL} alt="Avatar" style={{ width: '38px', height: '38px', borderRadius: '50%', border: '1.5px solid var(--color-gold)' }} />
-                    ) : (
+                    {(
                       <div style={{
                         width: '38px',
                         height: '38px',
@@ -1959,12 +1948,12 @@ function App() {
                         fontSize: '1rem',
                         border: '1.5px solid var(--color-gold)'
                       }}>
-                        {currentUser ? (currentUser.displayName || 'U').charAt(0) : <User size={20} />}
+                        <User size={20} />
                       </div>
                     )}
                     <div>
                       <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: currentUser ? '#ffffff' : '#f2e2b3' }}>
-                        {currentUser ? currentUser.displayName : 'Google / X で無料登録・ログイン'}
+                        {currentUser ? 'マイページ' : 'Google / X で無料登録・ログイン'}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: currentUser ? '#7dbb8a' : '#d8d2c6', marginTop: '2px' }}>
                         {currentUser ? `${currentUser.providerId === 'twitter.com' ? 'X 連携中' : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })()) ? 'メール認証完了' : 'Google 連携中'} (${currentUser.email || 'メール未登録'})` : '鑑定履歴・お相手データをクラウド保存'}
