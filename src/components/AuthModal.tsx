@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail } from 'lucide-react';
+import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail, User } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, accountNeedsEmail, sendAddEmailLink, isGuestAccount, type UserProfile } from '../services/firebase';
 import { trackRegStep } from '../services/analytics';
@@ -228,13 +228,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
             padding: '1.25rem',
             borderRadius: '18px'
           }}>
-            {currentUser.photoURL ? (
-              <img
-                src={currentUser.photoURL}
-                alt="Profile"
-                style={{ width: '64px', height: '64px', borderRadius: '50%', border: '2px solid var(--color-gold)' }}
-              />
-            ) : (
+            {(
               <div style={{
                 width: '64px',
                 height: '64px',
@@ -248,13 +242,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 fontWeight: 'bold',
                 border: '2px solid var(--color-gold)'
               }}>
-                {(currentUser.displayName || 'U').charAt(0)}
+                <User size={28} />
               </div>
             )}
 
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: 'white' }}>
-                {currentUser.displayName || 'ユーザー'}
+                ログイン中
               </div>
               <div style={{ fontSize: '0.78rem', color: '#a39d91', marginTop: '2px' }}>
                 {currentUser.email ? currentUser.email : (currentUser.providerId === 'twitter.com' ? 'X連携アカウント' : 'アカウント連携完了')}

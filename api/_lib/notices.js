@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { getDb, getAdminAuth } from './firestore.js';
 
 // stripe.js / user-data.js は読み込まない（/api/admin からも使うので、Stripeのライブラリを持ち込まないため）
@@ -52,6 +53,63 @@ export function validateNotice(body) {
   const link = cleanLink(b.link);
   if (link === null) return { error: 'リンクは「/」で始まるサイト内のパスか、https:// のURLにしてください' };
   return { value: { to, title, body: text, link } };
+}
+
+// 購入直後のお礼（Stripe Webhook が自動で送る、その会員だけへのお知らせ）。
+//   kind = 'premium' … 月額プレミアムの申し込み / 'pair' … 買い切り「お相手1人の深層鑑定」
+//   ID は Checkout の session id から決める（Webhook が再送されても1通だけ。/admin の取り消しで使える英数字40文字以内）
+//   guest = 登録なしの購入で自動で作ったアカウント。別の端末ではメールでログインすると引き継げることを添える
+const GUEST_NOTE = '\n\n※ 別のスマホやパソコンで見るときは、お支払いのときに入力したメールアドレスでログインしてください。購入がそのまま引き継がれます。';
+export const PURCHASE_THANKS = {
+  premium: {
+    title: 'プレミアムへようこそ。ご登録ありがとうございます',
+    body: [
+      'プレミアムに登録してくれて、本当にありがとう。月（ツキ）です。',
+      '',
+      '今日から、気になるお相手との毎日の相性や7日間・月ごとの流れ、深層鑑定のすべて、私たちとのチャットまで、ぜんぶ使えます。毎朝の運勢メールも全文で届きます。',
+      '',
+      '迷ったときや、ちょっと話を聞いてほしいときは、いつでもチャットで声をかけてね。',
+      '蓮（レン）からもひとこと。「焦らなくていい。これから一歩ずつ、一緒に進んでいこう」',
+      '',
+      'これから、どうぞよろしくお願いします。',
+      '月と蓮'
+    ].join('\n'),
+    link: '/chat'
+  },
+  pair: {
+    title: '深層鑑定のご購入ありがとうございます',
+    body: [
+      'お相手の深層鑑定を選んでくれて、ありがとう。月（ツキ）です。',
+      '',
+      'このお相手のトリセツ、LINEのテンプレート、惹かれ合うポイントと地雷、二人のこれから、相性グラフは、これからずっと見られます。',
+      '今日の相性や、本日のアプローチ助言・LINEのコツは、買ってくれた今日だけ特別に見られるので、ぜひ今日のうちにのぞいてみてね。',
+      '',
+      '蓮（レン）からもひとこと。「知ることは、相手を大切にする第一歩。読んだことを一つだけ、次のLINEで試してみて」',
+      '',
+      'これからも、二人のことを一緒に見守らせてね。',
+      '月と蓮'
+    ].join('\n'),
+    link: ''
+  }
+};
+
+export const thanksNoticeId = (sessionId) => `thx${createHash('sha256').update(String(sessionId)).digest('hex').slice(0, 32)}`;
+
+/** Sends the thank-you notice for one paid checkout, once (a retried webhook finds it already there). Returns true when sent now. */
+export async function sendPurchaseThanks(db, { uid, kind, sessionId, guest = false, now = Date.now() }) {
+  const t = PURCHASE_THANKS[kind];
+  if (!t || typeof uid !== 'string' || !uid || !sessionId) return false;
+  const ref = db.collection(NOTICES).doc(thanksNoticeId(sessionId));
+  if ((await ref.get()).data()) return false;
+  await ref.set({
+    to: uid,
+    title: t.title,
+    body: guest ? t.body + GUEST_NOTE : t.body,
+    link: t.link,
+    auto: `thanks-${kind}`,
+    createdAt: new Date(now).toISOString()
+  });
+  return true;
 }
 
 const view = (id, v) => ({

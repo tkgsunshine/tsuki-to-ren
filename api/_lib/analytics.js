@@ -31,6 +31,10 @@ export const REG_PLACES = {
 export const FIRST_METRICS = { fortune: 'fortuneSessions', premium_view: 'premiumViewSessions' };
 // 案内（LP）をどのロックから開いたか: 買い切りで解放できる項目（pair）なら premiumViewsPair も数える。月額側は premiumViews との差
 export const PAIR_VIEW_METRIC = 'premiumViewsPair';
+// 同じセッションで入力画面から鑑定したあとに、初めて案内を開いた人数（ff='1'）。「鑑定した人 → 案内を見た人」の割合はこれで割る。
+// premiumViewSessions は、前回の結果が自動で出た人・共有リンクで結果を見た人・マイページのバナーから開いた人も含むので、
+// 鑑定した人（入力画面から鑑定した人だけ）の一部になっていない（2026-11-05）
+export const FORTUNE_VIEW_METRIC = 'premiumViewFortuneSessions';
 export const SALES_METRIC = 'salesYen'; // 本番の購入額（円、Stripe の amount_total）。月額は初回分のみ（更新の請求は入らない）
 export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'auth_open']);
 

@@ -226,6 +226,7 @@ test('a verified sign-in with the purchase email takes over the guest purchases'
   db.docs[`premium/${account.uid}`] = { active: true, subscriptionId: 'sub_g1', livemode: true };
   const retagged = [];
   const stripe = { subscriptions: { update: async (id, params) => retagged.push([id, params.metadata.uid]) } };
+  db.docs['notices/thxguest'] = { to: account.uid, title: 't', body: 'b' };
   // the real owner of the email signs in (verified); the attacker's orphan account loses the purchases
   await transferGuestPurchases(db, { uid: 'u_real', email: 'Victim@example.com' }, { stripe });
   assert.ok(db.docs['pairUnlocks/u_real'].partners[KEY]);
@@ -233,6 +234,8 @@ test('a verified sign-in with the purchase email takes over the guest purchases'
   assert.equal(db.docs['premium/u_real'].subscriptionId, 'sub_g1');
   assert.equal(db.docs[`premium/${account.uid}`], undefined);
   assert.deepEqual(retagged, [['sub_g1', 'u_real']]);
+  // notices to the auto-created account (the purchase thanks) follow the purchase
+  assert.equal(db.docs['notices/thxguest'].to, 'u_real');
   assert.equal(db.docs[`${CLAIMS}/cs_tr_000000000001`].transferred, true);
   // marked transferred: a second verified sign-in with the same email moves nothing
   await transferGuestPurchases(db, { uid: 'u_other', email: 'victim@example.com' }, { stripe });
@@ -267,6 +270,15 @@ test('the webhook records a guest pair purchase under the new account', async ()
   assert.equal(res.code, 200);
   assert.ok(db.docs['pairUnlocks/new_u1'].partners[KEY]);
   assert.equal(db.docs[`${CLAIMS}/cs_1`].created, true);
+  // a thank-you notice to the new account, with how to see it on another device
+  const thanks = Object.entries(db.docs).filter(([k]) => k.startsWith('notices/')).map(([, v]) => v);
+  assert.equal(thanks.length, 1);
+  assert.equal(thanks[0].to, 'new_u1');
+  assert.equal(thanks[0].auto, 'thanks-pair');
+  assert.ok(thanks[0].body.includes('メールアドレスでログイン'));
+  // Stripe retries the same event: still one notice
+  await webhook({ ...req, body: Buffer.from(payload) }, mockRes(), { webhookSecret: SECRET, stripe: { webhooks: real.webhooks }, db, auth: guestAuth() });
+  assert.equal(Object.keys(db.docs).filter((k) => k.startsWith('notices/')).length, 1);
 });
 
 test('an unpaid payment session is ignored and makes no account', async () => {
@@ -297,6 +309,10 @@ test('a guest subscription gets an account and the subscription is tagged with i
   assert.equal(res.code, 200);
   assert.equal(tagged, 'new_u1');
   assert.equal(db.docs['premium/new_u1'].active, true);
+  const thanks = Object.entries(db.docs).filter(([k]) => k.startsWith('notices/')).map(([, v]) => v);
+  assert.equal(thanks.length, 1);
+  assert.equal(thanks[0].to, 'new_u1');
+  assert.equal(thanks[0].auto, 'thanks-premium');
 });
 
 test('claim signs in only the account this purchase created, and only once', async () => {
