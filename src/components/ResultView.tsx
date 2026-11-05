@@ -412,7 +412,7 @@ const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
 // 同じお相手との「今日の相性」を無料で見られる日数の状態（App.tsx が api/stripe/partner で数える）。null = 制限なし。
 export type PartnerLock = { status: 'checking' | 'free' | 'locked'; daysLeft: number; guest: boolean } | null;
 export type PairUnlock = { unlocked: boolean; today: boolean } | null;
-export const LOCK_WORD = '解放する';
+export const LOCK_WORD = '続きを見る';
 export const PAIR_PRICE_LABEL = '¥680';
 
 interface ResultViewProps {
@@ -918,7 +918,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
-  // ロックの文言は全部「解放する」に統一（料金・違いは開いた先の購入LPで説明する）
+  // ロックの文言は全部「続きを見る」に統一（料金・違いは開いた先の購入LPで説明する）
   const deepLockWord = LOCK_WORD;
   const pairCardRef = React.useRef<HTMLDivElement>(null);
   const [buyingPair, setBuyingPair] = useState(false);
@@ -1507,7 +1507,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       onClick={() => onOpenPremiumLP && onOpenPremiumLP('pair')}
                       style={{ background: 'none', border: 'none', color: '#d8d2c6', fontSize: '0.7rem', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
                     >
-                      {PAIR_PRICE_LABEL}/買い切りで解放する（今日の相性つき）
+                      {PAIR_PRICE_LABEL}/買い切りで続きを見る（今日の相性つき）
                     </button>
                   )}
                 </div>
@@ -2293,7 +2293,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                   <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={handleLockTagClick}>
-                    <Lock size={11} /> {LOCK_WORD}
+                    {LOCK_WORD}
                   </button>
                 </div>
               );
@@ -2327,7 +2327,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       ))}
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                          <Lock size={11} /> {LOCK_WORD}
+                          {LOCK_WORD}
                         </button>
                       </div>
                     </div>
@@ -2335,7 +2335,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {adviceTeaser && parts.length === 2 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
                       <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                        <Lock size={11} /> {LOCK_WORD}
+                        {LOCK_WORD}
                       </button>
                     </div>
                   )}
@@ -2353,7 +2353,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && !preview && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <Lock size={11} /> {LOCK_WORD}
+                            {LOCK_WORD}
                           </button>
                         </div>
                       )}
@@ -3186,7 +3186,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         opacity: buyingPair ? 0.7 : 1
                       }}
                     >
-                      {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで解放する`}
+                      {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで続きを見る`}
                     </button>
                     <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
                       自動更新はありません。お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
@@ -3244,7 +3244,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     className="premium-lock-tag" 
                     onClick={handleLockTagClick}
                   >
-                    <Lock size={11} /> {LOCK_WORD}
+                    {LOCK_WORD}
                   </button>
                 </div>
               )}
@@ -3270,7 +3270,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       className="premium-lock-tag"
                       onClick={handleLockTagClick}
                     >
-                      <Lock size={11} /> {LOCK_WORD}
+                      {LOCK_WORD}
                     </button>
                   </div>
                 )}
@@ -3324,7 +3324,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" 
                             onClick={handleLockTagClick}
                           >
-                            <Lock size={11} /> {LOCK_WORD}
+                            {LOCK_WORD}
                           </button>
                         </div>
                       )}
@@ -3356,7 +3356,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       className="premium-lock-tag"
                       onClick={handleLockTagClick}
                     >
-                      <Lock size={11} /> {LOCK_WORD}
+                      {LOCK_WORD}
                     </button>
                   </div>
                 )}
@@ -3410,7 +3410,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" 
                             onClick={handleLockTagClick}
                           >
-                            <Lock size={11} /> {LOCK_WORD}
+                            {LOCK_WORD}
                           </button>
                         </div>
                       )}

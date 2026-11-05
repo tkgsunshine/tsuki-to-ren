@@ -6,10 +6,12 @@ interface PremiumUnlockButtonProps {
   className?: string;
   style?: React.CSSProperties;
   label?: string;
+  /** 鍵アイコンを出さない（「続きを見る」ボタン） */
+  hideIcon?: boolean;
 }
 
 // 「プレミアム登録で全解放（月額980円）」の金色ボタン。見た目をそろえるため、鍵つきの登録ボタンはこれを使う
-export const PremiumUnlockButton: React.FC<PremiumUnlockButtonProps> = ({ onClick, className, style, label = 'プレミアム登録で全解放 (月額980円)' }) => (
+export const PremiumUnlockButton: React.FC<PremiumUnlockButtonProps> = ({ onClick, className, style, label = 'プレミアム登録で全解放 (月額980円)', hideIcon }) => (
   <button
     type="button"
     onClick={onClick}
@@ -25,6 +27,6 @@ export const PremiumUnlockButton: React.FC<PremiumUnlockButtonProps> = ({ onClic
       ...style
     }}
   >
-    <span><Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />{label}</span>
+    <span>{!hideIcon && <Lock size={14} style={{ marginRight: '0.3rem', verticalAlign: '-2px' }} />}{label}</span>
   </button>
 );

@@ -3598,7 +3598,7 @@ function App() {
               className="consult-btn font-serif"
               style={{ padding: '0.85rem', width: '100%', fontSize: '0.9rem', fontWeight: 'bold', borderRadius: '12px', cursor: 'pointer' }}
             >
-              認証を完了して解放する →
+              認証を完了して続きを見る →
             </button>
           </div>
         </div>

@@ -204,7 +204,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
   const priceCardLabel = !isSubscribed
-    ? 'すべての機能を解放する'
+    ? 'すべての続きを見る'
     : premiumEndsOn ? 'プレミアムを続ける' : 'お支払い・プランの確認';
   const handlePriceCardAction = () => {
     if (!isSubscribed) return handleSubscribeAction();
@@ -929,7 +929,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 padding: '0.1rem'
               }}
             >
-              {pairWho}だけ 買い切り680円で解放する
+              {pairWho}だけ 買い切り680円で続きを見る
             </button>
           )}
         </div>
