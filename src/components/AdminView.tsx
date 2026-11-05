@@ -10,7 +10,7 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 
 // 有料は2プラン: 買い切り（お相手1人の深層鑑定 ¥680: pairCheckouts → pairs）と月額プレミアム（¥980: checkouts → premiums）。
 // *Sessions = ブラウザのセッションで最初の1回だけ数えた「人数」（流れの表はこちらで割る）。salesYen = 本番の購入額（円）
-const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'premiumViewsPair',
+const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'lockViewSessions', 'premiumViewsPair',
   'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds',
   'regViews', 'regClicks', 'regSubmits', 'authOpens'] as const; // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
 type Metric = typeof METRIC_KEYS[number];
@@ -456,12 +456,13 @@ function DailyChart({ days }: { days: DayRow[] }) {
 // 「鑑定した → 案内を見た」は、同じ訪問で鑑定したあとに案内を開いた人（premiumViewFortuneSessions、2026-11-05〜）で割る。
 // 案内を見た人の全体（premiumViewSessions）には、前回の結果が自動で出た人・共有リンクで結果を見た人・マイページのバナーから
 // 開いた人も入り、鑑定した人の一部ではないので、参考として別の行に出す（支払い画面はこちらで割る）。
-function Funnel({ t, since, ffSince }: { t: FullCounts; since: string | null; ffSince: string | null }) {
+function Funnel({ t, since, ffSince, lockSince }: { t: FullCounts; since: string | null; ffSince: string | null; lockSince: string | null }) {
   type Row = { label: string; n: number; prev?: number; indent?: boolean };
   const rows: Row[] = [
     { label: '訪問', n: t.visits },
     { label: '鑑定した', n: t.fortuneSessions, prev: t.visits },
-    { label: '鑑定したあと、有料プランの案内を見た', n: t.premiumViewFortuneSessions, prev: t.fortuneSessions },
+    { label: '鑑定したあと、有料のロックまで届いた', n: t.lockViewSessions, prev: t.fortuneSessions },
+    { label: '鑑定したあと、有料プランの案内を見た', n: t.premiumViewFortuneSessions, prev: t.lockViewSessions || t.fortuneSessions },
     { label: '有料プランの案内を見た（全体）', n: t.premiumViewSessions },
     { label: '支払い画面へ：買い切り ¥680', n: t.pairCheckouts, prev: t.premiumViewSessions, indent: true },
     { label: '支払い画面へ：月額 ¥980', n: t.checkouts, prev: t.premiumViewSessions, indent: true },
@@ -508,6 +509,7 @@ function Funnel({ t, since, ffSince }: { t: FullCounts; since: string | null; ff
       <div style={{ ...c.muted, marginTop: 8, lineHeight: 1.7 }}>
         「鑑定した」「有料プランの案内を見た」は、1回の訪問（ブラウザのセッション）で何度しても1人と数えます{since ? `（${since === '2026-11-04' ? '2026-11-04 の12時50分ごろ' : since} から計測。その前の分は「鑑定（回）」「有料案内（回）」にだけ入っています）` : '（まだ計測前です）'}。
         「鑑定したあと、案内を見た」は、同じ訪問で入力画面から鑑定したあとに案内を開いた人です{ffSince ? `（${ffSince} から計測）` : '（まだ計測前です）'}。
+        「ロックまで届いた」は、同じ訪問で鑑定したあと、押すと有料プランの案内が開く「続きを見る」が画面に入った人です{lockSince ? `（${lockSince} から計測）` : '（まだ計測前です）'}。マイページのバナーなどから直接開いた人もいるので、次の段が100%を超えることがあります。
         「案内を見た（全体）」には、前回の結果が自動で出た人・共有リンクから結果を見た人・マイページのバナーから開いた人も入ります（鑑定した人の一部ではないので、割合は出しません）。
         案内を開いた回数は「日ごとの数字」にあります。支払い画面は、案内を通らずに鑑定結果の「¥680で解放」から直接進んだ分も含みます。
         購入はStripeの本番決済だけで、月額は新しく始めた分（毎月の更新は入りません）。売上は購入時の金額の合計です。
@@ -520,7 +522,7 @@ function Funnel({ t, since, ffSince }: { t: FullCounts; since: string | null; ff
 function DailyTable({ days }: { days: DayRow[] }) {
   const cols: [keyof DayRow, string][] = [
     ['visits', '訪問'], ['fortunes', '鑑定（回）'], ['fortuneSessions', '鑑定した人'], ['signups', '会員登録'], ['shares', '共有'],
-    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['premiumViewFortuneSessions', 'うち鑑定のあと'], ['premiumViewsPair', 'うち買い切りから'],
+    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['lockViewSessions', 'ロックまで届いた'], ['premiumViewFortuneSessions', 'うち鑑定のあと'], ['premiumViewsPair', 'うち買い切りから'],
     ['pairCheckouts', '支払い画面 買い切り'], ['checkouts', '支払い画面 月額'], ['pairs', '購入 買い切り'], ['premiums', '購入 月額'],
     ['salesYen', '売上'], ['aiCalls', 'AIチャット'],
     ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'], ['columnCtaMids', 'コラム途中→鑑定へ'], ['columnCtaEnds', 'コラム最後→鑑定へ'],
@@ -694,6 +696,7 @@ export default function AdminView() {
   // The first day the per-session counters (鑑定した人・案内を見た人) have data
   const sessionSince = useMemo(() => daily.find((d) => d.fortuneSessions || d.premiumViewSessions)?.date || null, [daily]);
   const ffSince = useMemo(() => daily.find((d) => d.premiumViewFortuneSessions)?.date || null, [daily]);
+  const lockSince = useMemo(() => daily.find((d) => d.lockViewSessions)?.date || null, [daily]);
 
   const setOwnerMark = async (uid: string, owner: boolean) => {
     if (!user) return;
@@ -860,7 +863,7 @@ export default function AdminView() {
 
             <DailyTable days={daily} />
 
-            <Funnel t={totals} since={sessionSince} ffSince={ffSince} />
+            <Funnel t={totals} since={sessionSince} ffSince={ffSince} lockSince={lockSince} />
 
             <SignupFunnel t={totals} reg={sumReg(data.daily)} />
 

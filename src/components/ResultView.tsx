@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
-import { trackRegStep } from '../services/analytics';
+import { trackLockView, trackRegStep } from '../services/analytics';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
 import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
@@ -1129,6 +1129,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
     </ul>
   );
 
+  // 有料のロック（押すと購入LPが開く）が画面に入ったか: 鑑定したあとの訪問で1回だけ数える（/admin の流れの表）
+  useEffect(() => {
+    if (sharedBy || typeof IntersectionObserver === 'undefined') return;
+    const els = document.querySelectorAll('[data-paid-lock]');
+    if (!els.length) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        trackLockView();
+        io.disconnect();
+      }
+    });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [activeResult, isRegistered, isSubscribed, pairUnlock, sharedBy]);
+
   const registerEmailRef = useRef<HTMLInputElement>(null);
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
@@ -2118,7 +2133,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               const lockAt = tips ? tips.items.findIndex(it => it.label.startsWith('💡')) : -1;
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                  <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={handleLockTagClick}>
+                  <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} data-paid-lock onClick={handleLockTagClick}>
                     {LOCK_WORD}
                   </button>
                 </div>
@@ -2152,7 +2167,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, true)}</div>
                       ))}
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                        <button type="button" className="premium-lock-tag" data-paid-lock onClick={handleLockTagClick}>
                           {LOCK_WORD}
                         </button>
                       </div>
@@ -2160,7 +2175,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   )}
                   {adviceTeaser && parts.length === 2 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
-                      <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                      <button type="button" className="premium-lock-tag" data-paid-lock onClick={handleLockTagClick}>
                         {LOCK_WORD}
                       </button>
                     </div>
@@ -2178,7 +2193,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {preview && lockButton}
                       {locked && !preview && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                          <button type="button" className="premium-lock-tag" data-paid-lock onClick={handleLockTagClick}>
                             {LOCK_WORD}
                           </button>
                         </div>
@@ -2624,7 +2639,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  className="premium-lock-tag"
+                  className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
                   <Lock size={11} /> {deepLockWord}
@@ -2671,7 +2686,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  className="premium-lock-tag"
+                  className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
                   <Lock size={11} /> {deepLockWord}
@@ -2714,7 +2729,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  className="premium-lock-tag"
+                  className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
                   <Lock size={11} /> {deepLockWord}
@@ -2756,7 +2771,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  className="premium-lock-tag"
+                  className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
                   <Lock size={11} /> {deepLockWord}
@@ -2807,7 +2822,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  className="premium-lock-tag"
+                  className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
                   <Lock size={11} /> {deepLockWord}
@@ -2849,7 +2864,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <button
                   type="button"
-                  className="premium-lock-tag"
+                  className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
                   <Lock size={11} /> {deepLockWord}
@@ -3067,10 +3082,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }))}
               />
               {!isSubscribed && (
-                <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
+                <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} data-paid-lock onClick={handleLockTagClick}>
                   <button 
                     type="button"
-                    className="premium-lock-tag" 
+                    className="premium-lock-tag" data-paid-lock 
                     onClick={handleLockTagClick}
                   >
                     {LOCK_WORD}
@@ -3093,10 +3108,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }))}
               />
                 {!isSubscribed && (
-                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
+                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} data-paid-lock onClick={handleLockTagClick}>
                     <button
                       type="button"
-                      className="premium-lock-tag"
+                      className="premium-lock-tag" data-paid-lock
                       onClick={handleLockTagClick}
                     >
                       {LOCK_WORD}
@@ -3147,10 +3162,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {lockedText(m.text, !isSubscribed)}
                       </p>
                       {!isSubscribed && (
-                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
+                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} data-paid-lock onClick={handleLockTagClick}>
                           <button 
                             type="button"
-                            className="premium-lock-tag" 
+                            className="premium-lock-tag" data-paid-lock 
                             onClick={handleLockTagClick}
                           >
                             {LOCK_WORD}
@@ -3179,10 +3194,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }))}
               />
                 {!isSubscribed && (
-                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} onClick={handleLockTagClick}>
+                  <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} data-paid-lock onClick={handleLockTagClick}>
                     <button
                       type="button"
-                      className="premium-lock-tag"
+                      className="premium-lock-tag" data-paid-lock
                       onClick={handleLockTagClick}
                     >
                       {LOCK_WORD}
@@ -3233,10 +3248,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {lockedText(y.text, !isSubscribed)}
                       </p>
                       {!isSubscribed && (
-                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} onClick={handleLockTagClick}>
+                        <div className="premium-lock-overlay" style={{ borderRadius: '10px', background: 'rgba(11, 17, 27, 0.25)', backdropFilter: 'none' }} data-paid-lock onClick={handleLockTagClick}>
                           <button 
                             type="button"
-                            className="premium-lock-tag" 
+                            className="premium-lock-tag" data-paid-lock 
                             onClick={handleLockTagClick}
                           >
                             {LOCK_WORD}

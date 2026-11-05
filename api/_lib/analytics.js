@@ -19,7 +19,8 @@ export const METRICS = {
   tool_use: 'toolUses', tool_cta: 'toolCtas', // ツールページ（/tools/*）で結果を出した回数、結果から鑑定へ進んだ回数
   column_cta_mid: 'columnCtaMids', column_cta_end: 'columnCtaEnds', // コラムの途中・最後の案内から鑑定へ進んだ回数
   // 会員登録までの段階: 結果画面の登録の箱が見えた／登録へのボタンを押した／登録を始めた（メール送信・Google・X）／ログイン画面を開いた
-  reg_view: 'regViews', reg_click: 'regClicks', reg_submit: 'regSubmits', auth_open: 'authOpens'
+  reg_view: 'regViews', reg_click: 'regClicks', reg_submit: 'regSubmits', auth_open: 'authOpens',
+  lock_view: 'lockViewSessions' // 鑑定したあと、有料のロック（押すと購入LP）が画面に入った人。ブラウザが訪問ごとに1回だけ送る
 };
 // Where a reg_click / reg_submit happened (fixed list, kept in byReg as `${click|submit}_${place}`)
 export const REG_PLACES = {
@@ -36,7 +37,7 @@ export const PAIR_VIEW_METRIC = 'premiumViewsPair';
 // 鑑定した人（入力画面から鑑定した人だけ）の一部になっていない（2026-11-05）
 export const FORTUNE_VIEW_METRIC = 'premiumViewFortuneSessions';
 export const SALES_METRIC = 'salesYen'; // 本番の購入額（円、Stripe の amount_total）。月額は初回分のみ（更新の請求は入らない）
-export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'auth_open']);
+export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'auth_open', 'lock_view']);
 
 // Fixed list so a forged request cannot add arbitrary keys (utm:* is the one open slot, kept short).
 export const SOURCES = new Set([
