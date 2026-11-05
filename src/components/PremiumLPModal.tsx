@@ -142,6 +142,161 @@ interface PremiumLPModalProps {
   premiumEndsOn?: string | null;
 }
 
+// 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見られる。
+// 枠より長い画像のときだけ、開いた直後に少し動かして見せ、下に「スクロール」の案内を出す（下まで見たら消える）
+const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({ src, alt, onClose }) => {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [canScroll, setCanScroll] = useState(false);
+  const [atBottom, setAtBottom] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const nudgedRef = useRef(false);
+
+  const measure = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const over = el.scrollHeight - el.clientHeight > 8;
+    setCanScroll(over);
+    setAtBottom(!over || el.scrollTop + el.clientHeight >= el.scrollHeight - 8);
+    // 長い画像だけ、開いた直後に一度だけ少し下へ動かして戻す（中がスクロールできると伝える）
+    if (over && !nudgedRef.current) {
+      nudgedRef.current = true;
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) {
+        window.setTimeout(() => {
+          if (!scrollerRef.current || scrollerRef.current.scrollTop > 0) return;
+          scrollerRef.current.scrollTo({ top: 90, behavior: 'smooth' });
+          window.setTimeout(() => {
+            if (scrollerRef.current && scrollerRef.current.scrollTop <= 92) scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 550);
+        }, 450);
+      }
+    }
+  };
+  useEffect(() => {
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  return (
+    <div
+      role="dialog"
+      aria-label={alt}
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 200001,
+        background: 'rgba(5, 7, 10, 0.94)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 'calc(0.75rem + env(safe-area-inset-top, 0px)) 0.75rem calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+        boxSizing: 'border-box'
+      }}
+    >
+      {/* スマホの画面の枠（実機と同じ 390×844 を上限に、画面に収まる大きさ） */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '390px',
+          height: '100%',
+          maxHeight: '844px',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#080c11',
+          border: '1px solid rgba(255, 255, 255, 0.14)',
+          borderRadius: '22px',
+          overflow: 'hidden',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7)'
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.5rem',
+          padding: '0.55rem 0.6rem 0.55rem 0.9rem',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'rgba(17, 24, 35, 0.95)',
+          flexShrink: 0
+        }}>
+          <span style={{ fontSize: '0.66rem', color: '#a9a49a', lineHeight: 1.4 }}>
+            ※ 画面はイメージです（名前や内容はサンプルです）
+          </span>
+          <button
+            type="button"
+            aria-label="閉じる"
+            onClick={onClose}
+            style={{
+              flexShrink: 0,
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#e8e3d8',
+              cursor: 'pointer'
+            }}
+          >
+            <X size={19} />
+          </button>
+        </div>
+
+        <div
+          ref={scrollerRef}
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            if (el.scrollTop > 100) setScrolled(true);
+            setAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 8);
+          }}
+          style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
+        >
+          <img src={src} alt={alt} onLoad={measure} style={{ display: 'block', width: '100%', height: 'auto' }} />
+        </div>
+
+        {/* 続きがあることの案内: 下のぼかし＋はねる矢印。下まで見たら消す */}
+        {canScroll && !atBottom && (
+          <div aria-hidden="true" style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: '88px',
+            background: 'linear-gradient(180deg, rgba(8, 12, 17, 0) 0%, rgba(8, 12, 17, 0.92) 100%)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            paddingBottom: '0.7rem',
+            pointerEvents: 'none'
+          }}>
+            <span className="shot-scroll-hint" style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              padding: '4px 12px 4px 10px',
+              borderRadius: '9999px',
+              background: 'rgba(226, 192, 116, 0.92)',
+              color: '#1a1408',
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.45)',
+              opacity: scrolled ? 0.75 : 1
+            }}>
+              <ChevronDown size={15} />
+              {scrolled ? '続きがあります' : 'スクロールで全部見られます'}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   isOpen,
   onClose,
@@ -936,57 +1091,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
         )}
       </div>
 
-      {zoomShot && (
-        <div
-          role="dialog"
-          aria-label={zoomShot.alt}
-          onClick={() => setZoomShot(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 200001,
-            background: 'rgba(5, 7, 10, 0.94)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: 'calc(1rem + env(safe-area-inset-top, 0px)) 0.75rem calc(1rem + env(safe-area-inset-bottom, 0px))',
-            boxSizing: 'border-box',
-            overflowY: 'auto',
-            cursor: 'zoom-out'
-          }}
-        >
-          <button
-            type="button"
-            aria-label="閉じる"
-            onClick={() => setZoomShot(null)}
-            style={{
-              alignSelf: 'flex-end',
-              flexShrink: 0,
-              background: 'rgba(255, 255, 255, 0.12)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '36px',
-              height: '36px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#e8e3d8',
-              cursor: 'pointer',
-              marginBottom: '0.6rem'
-            }}
-          >
-            <X size={20} />
-          </button>
-          <p style={{ fontSize: '0.7rem', color: '#a9a49a', margin: '0 0 0.6rem', flexShrink: 0 }}>
-            ※ 画面はイメージです（表示している名前や内容はサンプルです）
-          </p>
-          <img
-            src={zoomShot.src}
-            alt={zoomShot.alt}
-            style={{ display: 'block', width: '100%', maxWidth: '440px', height: 'auto', borderRadius: '14px', flexShrink: 0 }}
-          />
-        </div>
-      )}
+      {zoomShot && <ShotZoom src={zoomShot.src} alt={zoomShot.alt} onClose={() => setZoomShot(null)} />}
 
       <SubscriptionCancelModal
         isOpen={showCancelModal}
