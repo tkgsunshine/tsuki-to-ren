@@ -1096,15 +1096,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
     registerCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  // 登録の箱が画面に入ったか: 1回の結果表示につき1回数える。入っている間は画面下の登録バーを隠す
-  const [registerCardInView, setRegisterCardInView] = useState(false);
-  const [regBarDismissed, setRegBarDismissed] = useState(false);
+  // 登録の箱が画面に入ったか: 1回の結果表示につき1回数える
   const regViewCounted = useRef(false);
   useEffect(() => {
     const el = registerCardRef.current;
     if (!el || isRegistered || typeof IntersectionObserver === 'undefined') return;
     const io = new IntersectionObserver(([entry]) => {
-      setRegisterCardInView(entry.isIntersecting);
       if (entry.isIntersecting && !regViewCounted.current) {
         regViewCounted.current = true;
         trackRegStep('reg_view');
@@ -1114,7 +1111,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     return () => io.disconnect();
   }, [isRegistered, activeResult]);
 
-  // 無料会員登録で見られるもの（点数の下の案内と、登録の箱で同じものを出す）
+  // 無料会員登録で見られるもの（登録の箱に出す）
   const lockedTopicNames = detailedTopics.slice(1, 3).map((t) => t.title.replace(/^\d+\.\s*/, ''));
   const registerBenefits: string[] = [
     `詳しい鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`,
@@ -1651,34 +1648,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
         )}
       </div>
 
-      {/* 点数のすぐ下（1画面目）に、無料会員登録で読める続きの案内。ボタンで登録の箱へ移動する */}
-      {!isRegistered && !sharedBy && (
-        <div className="glass-panel" style={{
-          padding: '1rem 1.1rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.7rem',
-          border: '1.5px solid rgba(226, 192, 116, 0.4)',
-          background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.08) 0%, rgba(11, 17, 27, 0.9) 100%)',
-          borderRadius: '16px'
-        }}>
-          <div className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', textAlign: 'center' }}>
-            この鑑定には続きがあります
-          </div>
-          {benefitList}
-          <button
-            type="button"
-            className="consult-btn"
-            onClick={() => handleScrollToRegister('top')}
-            style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem', fontWeight: 800 }}
-          >
-            無料で続きを見る →
-          </button>
-          <div style={{ fontSize: '0.66rem', color: '#a9a49a', textAlign: 'center' }}>
-            メールアドレス・Google・Xで登録できます（無料）
-          </div>
-        </div>
-      )}
       {/* あなたってこんな人: 本人の性格・恋愛の傾向を先に見せて「当たってる」と感じてもらう（点数には関わらない。文は utils/selfReading.ts） */}
       <SelfReadingCard
         pillar={activeResult.myPillar}
@@ -1720,11 +1689,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               border: '1.5px solid rgba(226, 192, 116, 0.45)',
               borderRadius: '20px',
               boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-              position: 'absolute',
-              top: '0.55rem',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              maxWidth: 'calc(100% - 1.5rem)',
+              position: 'relative',
+              margin: '0.7rem 0 0.3rem',
+              maxWidth: 'calc(100% - 0.5rem)',
               whiteSpace: 'nowrap',
               zIndex: 4
             }}>
@@ -1739,7 +1706,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </span>
             </div>
 
-            {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
+            {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の下側に重ねる。見出しは顔にかぶらないよう画像の外（上）に置く */}
             <div 
               className="guardian-hero"
               onClick={openMyGuardianSave}
@@ -1912,11 +1879,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 border: '1.5px solid rgba(226, 192, 116, 0.45)',
                 borderRadius: '20px',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                position: 'absolute',
-                top: '0.55rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                maxWidth: 'calc(100% - 1.5rem)',
+                position: 'relative',
+                margin: '0.7rem 0 0.3rem',
+                maxWidth: 'calc(100% - 0.5rem)',
                 whiteSpace: 'nowrap',
                 zIndex: 4
               }}>
@@ -1931,7 +1896,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </span>
               </div>
 
-              {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
+              {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の下側に重ねる。見出しは顔にかぶらないよう画像の外（上）に置く */}
               <div 
                 className="guardian-hero"
                 onClick={openOpponentGuardianSave}
@@ -3778,70 +3743,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
       )}
 
       {/* Floating Sticky Bottom Share CTA Bar */}
-      {/* 画面下のバー（ログインしていない人）: 登録の箱へ。箱が見えている間は隠す */}
-      {!isRegistered && !regBarDismissed && !sharedBy && !registerCardInView && (
-      <div className="result-floating-bar" style={{
-        position: 'fixed',
-        bottom: RESULT_BAR_BOTTOM,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 'calc(100% - 2rem)',
-        maxWidth: '320px',
-        zIndex: 9990,
-        boxSizing: 'border-box'
-      }}>
-        <button
-          type="button"
-          className="consult-btn"
-          onClick={() => handleScrollToRegister('bar')}
-          style={{
-            width: '100%',
-            padding: '0.7rem 1rem',
-            fontSize: '0.88rem',
-            fontWeight: '800',
-            letterSpacing: '0.04em',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.45rem',
-            background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 50%, #b8692d 100%)',
-            color: '#000000',
-            border: 'none',
-            borderRadius: '9999px',
-            boxShadow: '0 8px 30px rgba(217, 164, 65, 0.6), 0 4px 15px rgba(0,0,0,0.8)',
-            cursor: 'pointer'
-          }}
-        >
-          <Lock size={14} />
-          <span>無料で続きを見る</span>
-        </button>
-        <button
-          type="button"
-          aria-label="閉じる"
-          onClick={() => setRegBarDismissed(true)}
-          style={{
-            position: 'absolute',
-            top: '-10px',
-            right: '-6px',
-            width: '24px',
-            height: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 0,
-            borderRadius: '9999px',
-            border: '1px solid rgba(255,255,255,0.25)',
-            background: 'rgba(0,0,0,0.75)',
-            color: '#ffffff',
-            cursor: 'pointer'
-          }}
-        >
-          <X size={14} />
-        </button>
-      </div>
-      )}
-
-      {SHOW_SHARE_BUTTON && isRegistered && !isShareDismissed && !sharedBy && (
+      {/* 画面下のバー: 登録の有無にかかわらずシェア（2026-11-05 TAKASHI指示で #275 以前に戻す） */}
+      {SHOW_SHARE_BUTTON && !isShareDismissed && !sharedBy && (
       <div className="result-floating-bar" style={{
         position: 'fixed',
         bottom: RESULT_BAR_BOTTOM,
