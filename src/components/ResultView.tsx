@@ -450,6 +450,10 @@ interface ResultViewProps {
   sharedBy?: { name: string };
 }
 
+// 画面下のバー（無料で続きを見る／シェア）の位置: 下メニューのすぐ上（約6px空ける）。
+// 下メニューと同じく、ホーム画面アプリでシステム側にある余白（--pwa-bottom-gap）は差し引く（差し引かないと、メニューとの間が大きく空く）
+const RESULT_BAR_BOTTOM = 'calc(4.4rem + max(0px, calc(var(--safe-bottom, 0px) - var(--pwa-bottom-gap, 0px))))';
+
 export const ResultView: React.FC<ResultViewProps> = ({
   renResult,
   tsukiResult,
@@ -3989,7 +3993,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {!isRegistered && !regBarDismissed && !sharedBy && !registerCardInView && (
       <div className="result-floating-bar" style={{
         position: 'fixed',
-        bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
+        bottom: RESULT_BAR_BOTTOM,
         left: '50%',
         transform: 'translateX(-50%)',
         width: 'calc(100% - 2rem)',
@@ -4051,7 +4055,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {SHOW_SHARE_BUTTON && isRegistered && !isShareDismissed && !sharedBy && (
       <div className="result-floating-bar" style={{
         position: 'fixed',
-        bottom: 'calc(4.8rem + var(--safe-bottom, 0px))',
+        bottom: RESULT_BAR_BOTTOM,
         left: '50%',
         transform: 'translateX(-50%)',
         width: 'calc(100% - 2rem)',
