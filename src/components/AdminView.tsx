@@ -563,7 +563,7 @@ const PERIODS = [
 
 export default function AdminView() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
-  const [days, setDays] = useState(30);
+  const [days, setDays] = useState(1); // 開いたときは「今日」
   const [offset, setOffset] = useState(0); // 1 = the period ends yesterday（「昨日」）
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState('');
