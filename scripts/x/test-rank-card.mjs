@@ -19,6 +19,7 @@ test('本文と返信から、テーマと16の順位を読み取る', () => {
 test('ランキングの投稿だけを見分ける', () => {
   assert.ok(isRankPost({ id: 'a', text: body }));
   assert.ok(!isRankPost({ id: 'a-reply', text: body, replyTo: 'a' }));
+  assert.ok(isRankPost({ id: 'c', text: body.replace('【MBTI別】', '【MBTI（16タイプ）別】') }));
   assert.ok(!isRankPost({ id: 'b', text: '【MBTI別】〇〇な時の行動\nESTJ 幹部: ...' }));
 });
 
