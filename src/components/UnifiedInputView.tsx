@@ -721,8 +721,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             <MessageCircle size={18} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3efe6' }}>③ 心理統計学「16タイプ診断」で具体的アプローチを提示</span>
-            <span style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: '1.45' }}>西洋の心理統計学である16タイプ性格理論と相性論を融合し、日常の会話で生じる意思疎通のすれ違いや認知の癖を解剖。お相手のタイプに最も響くコミュニケーションの取り方を分析し、今日すぐにそのままコピー＆ペーストして送信できる具体的なLINEのメッセージ文案やアプローチ法を提示します。</span>
+            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3efe6' }}>③ 「16タイプ診断」で具体的アプローチを提示</span>
+            <span style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: '1.45' }}>16タイプ性格理論と相性論を組み合わせ、日常の会話で生じる意思疎通のすれ違いや認知の癖を解剖。お相手のタイプに最も響くコミュニケーションの取り方を分析し、今日すぐにそのままコピー＆ペーストして送信できる具体的なLINEのメッセージ文案やアプローチ法を提示します。</span>
           </div>
         </div>
       </div>

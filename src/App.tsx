@@ -34,6 +34,7 @@ import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
+import { ToolCompatView } from './components/ToolCompatView';
 import { trackCheckout, trackFortune, trackPremiumView, trackRegStep } from './services/analytics';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
@@ -93,6 +94,9 @@ const getInitialRoute = (): InitialRoute => {
   }
   if (path === '/tools/nicchu' || path === '/tools/nicchu/') {
     return { tab: 'tool', slug: 'nicchu', legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/compatibility' || path === '/compatibility/') {
+    return { tab: 'tool', slug: 'compat', legal: false, settingsSubView: 'main', compatibilityPair: null };
   }
   if (path === '/terms' || path === '/terms/' || path === '/privacy' || path === '/privacy/') {
     return { tab: 'home', slug: null, legal: true, settingsSubView: 'main', compatibilityPair: null };
@@ -1709,7 +1713,7 @@ function App() {
                   まだ鑑定結果がありません
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: '#d5cfc3', lineHeight: '1.6', maxWidth: '340px', margin: 0 }}>
-                  「恋愛診断」から生年月日を入力すると、約7,465万通りの条件の掛け合わせから二人の本音・相性スコア・LINE吉時間がここに表示されます。
+                  「恋愛診断」から生年月日を入力すると、二人の本音・相性スコア・LINE吉時間がここに表示されます。
                 </p>
                 <button 
                   className="consult-btn font-serif" 
@@ -1890,10 +1894,10 @@ function App() {
           </div>
         )}
 
-        {/* ツールページ（/tools/nicchu 日柱の調べ方） */}
+        {/* ツールページ（/tools/nicchu 日柱の調べ方、/compatibility 16タイプ恋愛相性表） */}
         {activeTab === 'tool' && (
           <div style={{ animation: 'fadeIn 0.4s ease', width: '100%' }}>
-            <ToolNicchuView />
+            {initialRoute.slug === 'compat' ? <ToolCompatView /> : <ToolNicchuView />}
           </div>
         )}
 
@@ -2940,20 +2944,20 @@ function App() {
                     </h3>
                   </div>
                   <p style={{ fontSize: '0.8rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
-                    『月と蓮』は、東洋最古にして最高峰の伝承占術「四柱推命」「九星気学」と、西洋の多角性格分類学「16タイプ心理診断」を独自アルゴリズムで統合した超精密相性鑑定エンジンです。感情の引き寄せから行動パターンの一致度、日々の運勢の波まで、約7,465万通りのマトリクスで多層的かつ論理的に解析します。
+                    『月と蓮』は、生年月日から見る「四柱推命」「九星気学」と、「16タイプ性格診断」を組み合わせた恋愛相性鑑定です。二人の生まれ持った星の関係と、16タイプから見たコミュニケーションの相性に、日々の運勢の波を重ねて鑑定します。
                   </p>
                 </div>
 
-                {/* 7,465万通り Calculation Matrix Card */}
+                {/* 相性の点数の出し方 */}
                 <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.08) 0%, rgba(159, 134, 192, 0.1) 100%)', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
                     <MoonMark size={18} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
                     <h4 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0 }}>
-                      約7,465万通りの条件の掛け合わせ
+                      相性の点数の出し方
                     </h4>
                   </div>
                   <p style={{ fontSize: '0.76rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
-                    『月と蓮』の鑑定結果は単なる属性の当てはめではありません。お二人それぞれの「四柱推命」「九星気学」「16タイプ性格」を掛け合わせた約7,465万通りの完全オーダーメイド判定プログラムです。
+                    二人の「基本の相性」は、四柱推命・九星気学・16タイプの3つの相性を組み合わせて、100点満点で出します。「今日の相性」は、その日の干支・九星と二人の星の関係を足して出すので、毎日変わります。
                   </p>
                 </div>
 

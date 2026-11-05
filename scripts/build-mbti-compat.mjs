@@ -1,6 +1,6 @@
 // 16タイプ（MBTI）の相性点の、16×16の表（男性のタイプ × 女性のタイプ、0〜100点）を作る。
 // 使い方: node scripts/build-mbti-compat.mjs  → src/data/mbti-compat.json を出力
-// 方針: アプリの旧採点（0・10・15・28・34・40点の6段階）では少なすぎるため、心の使い方（認知機能の並び）から、細かい点数を定義した、相性のデータベース。
+// 方針（2026-11 研究の傾向を追加・最低20点）: アプリの旧採点（0・10・15・28・34・40点の6段階）では少なすぎるため、心の使い方（認知機能の並び）から、細かい点数を定義した、相性のデータベース。
 //   ・同じ心の使い方を、同じように重んじる（機能と向きの一致度）
 //   ・文字（N/S/T/F）の一致度
 //   ・補い合い（自分の苦手を、相手の得意が補う）
@@ -41,7 +41,18 @@ function rawScore(m, f) {
   const sameLetter = L4.reduce((s, k) => s + la[k] * lb[k], 0) / (Math.sqrt(L4.reduce((s, k) => s + la[k] ** 2, 0)) * Math.sqrt(L4.reduce((s, k) => s + lb[k] ** 2, 0)));
   const comp = (cover(m, f) + cover(f, m)) / 2;
   const ei = m[0] !== f[0] ? 1 : 0, jp = m[3] !== f[3] ? 1 : 0, sn = m[1] === f[1] ? 1 : 0, tf = m[2] !== f[2] ? 1 : 0;
-  return 30 * sameLetter + 20 * same + 25 * comp + 6 * ei + 8 * sn + 4 * tf + 3 * jp;
+  return 30 * sameLetter + 20 * same + 25 * comp + 6 * ei + 8 * sn + 4 * tf + 3 * jp + research(m, f);
+}
+
+// 研究で分かっている傾向（2026-11 追加）。MBTIに公式・実証済みの相性表はないが、夫婦の調査では、
+//   ・実際の夫婦は、偶然より似たタイプどうしが多い（Lichtenberg ほか、375組。ERIC ED423453）
+//   ・S/N（ものの捉え方）が同じ夫婦は、夫の離婚傾向が低い（韓国の夫婦62組。PubMed 20634625）
+// という向きが報告されている。そこで、S/Nが同じ組と、共通する文字が多い組を加点する（重みはアプリが決めた値）。
+const RESEARCH_SN = 10;
+const RESEARCH_SHARED = 3;
+function research(m, f) {
+  const shared = [0, 1, 2, 3].filter((i) => m[i] === f[i]).length;
+  return (m[1] === f[1] ? RESEARCH_SN : 0) + RESEARCH_SHARED * shared;
 }
 
 export function buildTable() {
@@ -49,8 +60,9 @@ export function buildTable() {
   const lo = Math.min(...raws);
   const hi = Math.max(...raws);
   const scaled = (m, f) => ((rawScore(m, f) - lo) / (hi - lo)) * 100;
-  // 理想の組は、70〜100点の帯。それ以外は、0〜70点の帯（帯のなかは、心の使い方の一致度で細かく分かれる）
-  const score = (m, f) => Math.round(isIdeal(m, f) ? 70 + 0.3 * scaled(m, f) : 0.7 * scaled(m, f));
+  // 理想の組は、70〜100点の帯。それ以外は、20〜70点の帯（帯のなかは、心の使い方の一致度で細かく分かれる）。
+  // 最低点は20点（2026-11 変更。旧0点。16タイプは目安なので、0点＝「合わない」と言い切らない）
+  const score = (m, f) => Math.round(isIdeal(m, f) ? 70 + 0.3 * scaled(m, f) : 20 + 0.5 * scaled(m, f));
   return Object.fromEntries(TYPES.map((m) => [m, Object.fromEntries(TYPES.map((f) => [f, score(m, f)]))]));
 }
 

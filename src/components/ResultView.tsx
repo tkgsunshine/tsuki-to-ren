@@ -1406,7 +1406,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           <span>{hasOpponent ? `${myName} × ${oppNickname}` : `${myName} の全運勢`}</span>
         </div>
 
-        {/* 7,465万通り Custom Matrix Badge */}
+        {/* 鑑定の方式のバッジ */}
         <div style={{
           fontSize: '0.66rem',
           color: '#e2c074',
@@ -1419,7 +1419,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           fontWeight: '600',
           letterSpacing: '0.02em'
         }}>
-          約7,465万通りの組み合わせから読み解く鑑定
+          四柱推命・九星気学・16タイプから読み解く鑑定
         </div>
         
         {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}

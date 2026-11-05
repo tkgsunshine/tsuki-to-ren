@@ -160,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth, unreadN
       }}>
         <span className="font-serif gold-text" style={{ fontSize: '0.82rem', fontWeight: '700', letterSpacing: '0.03em', textAlign: 'center', lineHeight: '1.45' }}>
           <span className="nobr">四柱推命 × 九星気学 × 16タイプで</span><span className="nobr">解き明かす</span><br />
-          <span className="nobr">約7,465万通りの</span><span className="nobr">超精密本格恋愛診断</span>
+          <span className="nobr">生年月日でわかる</span><span className="nobr">本格恋愛相性診断</span>
         </span>
       </div>
 
@@ -183,8 +183,8 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth, unreadN
         WebkitBackdropFilter: 'blur(16px)'
       }}>
         <div style={{ fontWeight: 'bold', color: '#ffffff', marginBottom: '0.2rem', fontSize: '0.86rem', letterSpacing: '0.01em', lineHeight: '1.5' }}>
-          東洋の<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>命式</span>と西洋の<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>心理統計</span>が導く<br />
-          <span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>約7,465万通り</span>の運命マトリクス
+          東洋の<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>命式</span>と<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>16タイプ</span>で読み解く<br />
+          <span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>二人だけ</span>の相性
         </div>
         <div style={{ color: '#d8d2c6', fontSize: '0.78rem', fontWeight: '500', letterSpacing: '-0.01em', wordBreak: 'break-word' }}>
           <span className="nobr">二人の魂の相性・運気のバイオリズム・</span><span className="nobr">LINE攻略法を徹底鑑定します。</span>
