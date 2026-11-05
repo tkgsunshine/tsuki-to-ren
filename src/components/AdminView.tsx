@@ -11,7 +11,8 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 // 有料は2プラン: 買い切り（お相手1人の深層鑑定 ¥680: pairCheckouts → pairs）と月額プレミアム（¥980: checkouts → premiums）。
 // *Sessions = ブラウザのセッションで最初の1回だけ数えた「人数」（流れの表はこちらで割る）。salesYen = 本番の購入額（円）
 const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'premiumViewsPair',
-  'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds'] as const;
+  'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds',
+  'regViews', 'regClicks', 'regSubmits', 'authOpens'] as const; // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
 type FullCounts = Record<Metric, number>;
@@ -22,6 +23,7 @@ interface DailyDoc extends Counts {
   byLanding?: Record<string, Counts>;
   byDevice?: Record<string, Counts>;
   byShare?: Record<string, number>;
+  byReg?: Record<string, number>;
 }
 interface DayRow extends FullCounts {
   date: string;
@@ -146,6 +148,20 @@ const sumShares = (docs: DailyDoc[]) => {
   for (const d of docs) for (const [k, v] of Object.entries(d.byShare || {})) out.set(k, (out.get(k) || 0) + (v || 0));
   return [...out.entries()].sort((a, b) => b[1] - a[1]);
 };
+
+const sumReg = (docs: DailyDoc[]) => {
+  const out: Record<string, number> = {};
+  for (const d of docs) for (const [k, v] of Object.entries(d.byReg || {})) out[k] = (out[k] || 0) + (v || 0);
+  return out;
+};
+const REG_LABELS: Record<string, string> = {
+  click_top: '点数の下', click_bar: '画面下のバー', click_lock: '鍵のかかった所', click_other: 'その他',
+  submit_card_email: '結果画面・メール', submit_card_google: '結果画面・Google', submit_card_x: '結果画面・X',
+  submit_modal_email: 'ログイン画面・メール', submit_modal_google: 'ログイン画面・Google', submit_modal_x: 'ログイン画面・X', submit_other: 'その他',
+};
+const regDetail = (reg: Record<string, number>, prefix: string) =>
+  Object.entries(reg).filter(([k, n]) => k.startsWith(prefix) && n).sort((a, b) => b[1] - a[1])
+    .map(([k, n]) => `${REG_LABELS[k] || k} ${n}`).join('・');
 
 const toCsv = (rows: Member[]) => {
   const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', 'プレミアム', '買い切り(人)', '流入元', '入口ページ', '端末'];
@@ -535,6 +551,48 @@ function DailyTable({ days }: { days: DayRow[] }) {
   );
 }
 
+// 鑑定 → 会員登録 のどこで離れたか（2026-11 から計測。それより前の日は 0）
+function SignupFunnel({ t, reg }: { t: FullCounts; reg: Record<string, number> }) {
+  const steps: [string, number, string][] = [
+    ['鑑定した人', t.fortuneSessions, `鑑定の回数は ${t.fortunes}`],
+    ['結果画面の登録の箱が見えた', t.regViews, ''],
+    ['登録へのボタンを押した', t.regClicks, regDetail(reg, 'click_')],
+    ['ログイン画面を開いた', t.authOpens, 'メニュー・チャットなどから'],
+    ['登録を始めた（メール送信・Google・X）', t.regSubmits, regDetail(reg, 'submit_')],
+    ['会員登録', t.signups, ''],
+  ];
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>鑑定から会員登録まで</h2>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={c.table}>
+          <thead>
+            <tr>
+              <th style={c.th}></th>
+              <th style={{ ...c.th, ...c.num }}>数</th>
+              <th style={{ ...c.th, ...c.num }}>鑑定した人から</th>
+              <th style={c.th}>内訳</th>
+            </tr>
+          </thead>
+          <tbody>
+            {steps.map(([label, n, note], i) => (
+              <tr key={label}>
+                <td style={c.td}>{label}</td>
+                <td style={{ ...c.td, ...c.num }}>{n}</td>
+                <td style={{ ...c.td, ...c.num }}>{i ? pct(n, steps[0][1]) : ''}</td>
+                <td style={{ ...c.td, ...c.muted }}>{note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        「鑑定した人」は、1回の訪問で何度鑑定しても1人です。会員登録はメニューやチャットからの登録も含みます。途中の段（登録の箱・ボタン・ログイン画面・登録開始）は、この表を入れた日から数えています。
+      </div>
+    </div>
+  );
+}
+
 function ShareTable({ rows, total }: { rows: [string, number][]; total: number }) {
   return (
     <div style={c.card}>
@@ -803,6 +861,8 @@ export default function AdminView() {
             <DailyTable days={daily} />
 
             <Funnel t={totals} since={sessionSince} ffSince={ffSince} />
+
+            <SignupFunnel t={totals} reg={sumReg(data.daily)} />
 
             <Inquiries items={data.inquiries || []} members={allMembers} onStatus={setInquiryStatus} />
 

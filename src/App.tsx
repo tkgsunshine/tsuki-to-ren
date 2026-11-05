@@ -34,7 +34,7 @@ import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
-import { trackCheckout, trackFortune, trackPremiumView } from './services/analytics';
+import { trackCheckout, trackFortune, trackPremiumView, trackRegStep } from './services/analytics';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
@@ -1402,6 +1402,12 @@ function App() {
     if (showPremiumLP) trackPremiumView(premiumLPFocus);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPremiumLP]);
+
+  // ログインしていない人がログイン画面を開いた回数（会員登録までのどこで離れたかを見るため）
+  useEffect(() => {
+    if (showAuthModal && !currentUser) trackRegStep('auth_open');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAuthModal]);
 
   // チャット・プレミアム案内などの重ね表示を開いたら履歴を1件積み、閉じたら外す（戻るスワイプで閉じられるように）
   useEffect(() => {

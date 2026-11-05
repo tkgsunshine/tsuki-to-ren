@@ -1,5 +1,5 @@
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeSource, recordEvent } from './_lib/analytics.js';
+import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeRegPlace, normalizeSource, recordEvent } from './_lib/analytics.js';
 import { handleInquiry } from './_lib/inquiry.js';
 
 // Receives the site's own counters: a visit (once per browser session), a fortune (each time the form is submitted),
@@ -34,6 +34,7 @@ export default async function handler(req, res, deps = {}) {
   const landing = normalizeLanding(body.landing);
   const device = normalizeDevice(body.device);
   const channel = type === 'share' ? normalizeChannel(body.channel) : undefined;
+  const regPlace = normalizeRegPlace(type, body.place);
 
   try {
     const db = deps.db || getDb();
@@ -64,7 +65,7 @@ export default async function handler(req, res, deps = {}) {
     if (body.first === '1' && FIRST_METRICS[type]) also.push(FIRST_METRICS[type]);
     if (type === 'premium_view' && body.plan === 'pair') also.push(PAIR_VIEW_METRIC);
     if (type === 'premium_view' && body.ff === '1') also.push(FORTUNE_VIEW_METRIC); // 鑑定したあと、初めて案内を開いた
-    await recordEvent(db, { type, source, landing, device, channel, also });
+    await recordEvent(db, { type, source, landing, device, channel, regPlace, also });
     return res.status(204).end();
   } catch (e) {
     console.error('⚠️ Could not record the event:', e?.message);

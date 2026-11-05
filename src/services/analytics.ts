@@ -168,6 +168,18 @@ export const trackFortune = () => {
   void send({ type: 'fortune', first: firstInSession('fortune'), ...current() });
 };
 
+/**
+ * Steps toward a free account, so the admin page shows where guests drop off:
+ * reg_view   = the sign-up box on the result page came into view (once per result shown)
+ * reg_click  = a button that leads to sign-up was pressed: top (under the scores), bar (bottom bar), lock (a locked part)
+ * reg_submit = a sign-up was started: card_* (the box on the result page) / modal_* (the sign-in window), by email / google / x
+ * auth_open  = the sign-in window opened for someone not signed in
+ */
+export type RegPlace = 'top' | 'bar' | 'lock' | `${'card' | 'modal'}_${'email' | 'google' | 'x'}`;
+export const trackRegStep = (type: 'reg_view' | 'reg_click' | 'reg_submit' | 'auth_open', place?: RegPlace) => {
+  void send({ type, ...current(), ...(place ? { place } : {}) });
+};
+
 export type ShareChannel = 'x' | 'line' | 'link' | 'image';
 
 /** A result shared: posted to X / LINE, link copied, or card image saved. */

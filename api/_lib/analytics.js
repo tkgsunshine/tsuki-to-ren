@@ -17,7 +17,14 @@ export const METRICS = {
   premium_view: 'premiumViews', checkout: 'checkouts', premium: 'premiums',
   checkout_pair: 'pairCheckouts', pair: 'pairs', // 買い切りの支払い画面へ進んだ回数・買い切りの購入（Webhookだけが数える）
   tool_use: 'toolUses', tool_cta: 'toolCtas', // ツールページ（/tools/*）で結果を出した回数、結果から鑑定へ進んだ回数
-  column_cta_mid: 'columnCtaMids', column_cta_end: 'columnCtaEnds' // コラムの途中・最後の案内から鑑定へ進んだ回数
+  column_cta_mid: 'columnCtaMids', column_cta_end: 'columnCtaEnds', // コラムの途中・最後の案内から鑑定へ進んだ回数
+  // 会員登録までの段階: 結果画面の登録の箱が見えた／登録へのボタンを押した／登録を始めた（メール送信・Google・X）／ログイン画面を開いた
+  reg_view: 'regViews', reg_click: 'regClicks', reg_submit: 'regSubmits', auth_open: 'authOpens'
+};
+// Where a reg_click / reg_submit happened (fixed list, kept in byReg as `${click|submit}_${place}`)
+export const REG_PLACES = {
+  reg_click: new Set(['top', 'bar', 'lock']),
+  reg_submit: new Set(['card_email', 'card_google', 'card_x', 'modal_email', 'modal_google', 'modal_x'])
 };
 // 1つのブラウザのセッションで最初の1回（first='1'）のとき、回数に加えて人数（セッション数）も同じ書き込みで数える。
 // 「訪問から課金までの流れ」は人数どうしで割るので、1人が何度も鑑定・案内を開いても100%を超えない。
@@ -29,7 +36,7 @@ export const PAIR_VIEW_METRIC = 'premiumViewsPair';
 // 鑑定した人（入力画面から鑑定した人だけ）の一部になっていない（2026-11-05）
 export const FORTUNE_VIEW_METRIC = 'premiumViewFortuneSessions';
 export const SALES_METRIC = 'salesYen'; // 本番の購入額（円、Stripe の amount_total）。月額は初回分のみ（更新の請求は入らない）
-export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end']);
+export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'auth_open']);
 
 // Fixed list so a forged request cannot add arbitrary keys (utm:* is the one open slot, kept short).
 export const SOURCES = new Set([
@@ -58,6 +65,13 @@ export function normalizeLanding(v) {
 
 export const normalizeDevice = (v) => (DEVICES.has(String(v ?? '')) ? String(v) : 'unknown');
 export const normalizeChannel = (v) => (SHARE_CHANNELS.has(String(v ?? '')) ? String(v) : 'other');
+// reg_click / reg_submit → 'click_top' etc.; an unknown place is 'click_other'
+export const normalizeRegPlace = (type, v) => {
+  const places = REG_PLACES[type];
+  if (!places) return undefined;
+  const key = type === 'reg_click' ? 'click' : 'submit';
+  return `${key}_${places.has(String(v ?? '')) ? String(v) : 'other'}`;
+};
 
 // YYYY-MM-DD in Japan time
 export function jstDate(d = new Date()) {
@@ -66,7 +80,7 @@ export function jstDate(d = new Date()) {
 
 // Still one write per event: every breakdown is a field of the same day document
 // also = more counters bumped by the same event (first-of-session, plan); yen = purchase amount added to salesYen
-export async function recordEvent(db, { type, source, landing, device, channel, date = jstDate(), also = [], yen = 0 }) {
+export async function recordEvent(db, { type, source, landing, device, channel, regPlace, date = jstDate(), also = [], yen = 0 }) {
   const metric = METRICS[type];
   if (!metric) throw new Error(`Unknown event type: ${type}`);
   const inc = FieldValue.increment(1);
@@ -79,7 +93,8 @@ export async function recordEvent(db, { type, source, landing, device, channel, 
     bySource: { [source]: counts },
     byLanding: { [landing]: counts },
     ...(device ? { byDevice: { [device]: counts } } : {}),
-    ...(type === 'share' && channel ? { byShare: { [channel]: inc } } : {})
+    ...(type === 'share' && channel ? { byShare: { [channel]: inc } } : {}),
+    ...(regPlace ? { byReg: { [regPlace]: inc } } : {})
   }, { merge: true });
 }
 
