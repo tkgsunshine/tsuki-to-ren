@@ -36,7 +36,7 @@ export function readSharedResult(search: string): SharedResult | null {
   const pick = <T,>(list: readonly T[], s: string | null) => (/^\d{1,2}$/.test(s || '') ? list[Number(s)] : undefined);
   const oppName = clip(params.get('sp'), 8) || undefined;
   return {
-    myName: clip(params.get('sn'), 8) || 'お友だち',
+    myName: clip(params.get('sn'), 8) || 'お友達',
     oppName,
     baseScore: num(params.get('sb')),
     dailyScore: num(params.get('sd')),
@@ -76,6 +76,26 @@ const Person: React.FC<{ name: string; avatar?: string; mbti?: string }> = ({ na
   </div>
 );
 
+// 一人の結果は、鑑定結果画面（ResultView の guardian-hero）と同じく、キャラをカード幅いっぱいに大きく出して下へ溶かす
+const SoloHero: React.FC<{ name: string; avatar?: string; mbti?: string }> = ({ name, avatar, mbti }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}>
+    {avatar && (
+      <div className="guardian-hero" style={{ width: 'calc(100% + 2.2rem)', margin: '-0.4rem -1.1rem -2.2rem', cursor: 'default' }}>
+        <div className="guardian-hero-media">
+          <img src={avatar} alt={`${san(name)}の守護獣`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        </div>
+      </div>
+    )}
+    <div className="font-serif" style={{ position: 'relative', zIndex: 3, fontSize: '1.05rem', fontWeight: 700, color: '#f6e6c2', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>{san(name)}</div>
+    {mbti && (
+      <div style={{ position: 'relative', zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.3, color: '#e9d5ff', padding: '0.2rem 0.75rem', borderRadius: '12px', background: 'rgba(30, 20, 50, 0.85)', border: '1px solid rgba(192, 132, 252, 0.45)' }}>
+        <span style={{ fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.05em' }}>{mbti}</span>
+        <span style={{ fontSize: '0.62rem', whiteSpace: 'nowrap' }}>{MBTI_NAMES[mbti]}</span>
+      </div>
+    )}
+  </div>
+);
+
 const ScorePod: React.FC<{ label: string; score?: number; color: string; big?: boolean }> = ({ label, score, color, big }) => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', padding: '0 1rem' }}>
     <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: 600 }}>{label}</span>
@@ -88,7 +108,7 @@ const ScorePod: React.FC<{ label: string; score?: number; color: string; big?: b
 export const SharedResultView: React.FC<Props> = ({ shared, onStart }) => {
   const { myName, oppName, baseScore, dailyScore, myAvatar, oppAvatar, title, oneLiner, myMbti, oppMbti } = shared;
   const hasOpponent = !!oppName;
-  const baseLabel = hasOpponent ? '基本相性' : '基本運勢';
+  const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
   const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
   const mood = baseScore !== undefined && dailyScore !== undefined ? getScoreMood(baseScore, dailyScore) : null;
   const cta = (
@@ -129,15 +149,15 @@ export const SharedResultView: React.FC<Props> = ({ shared, onStart }) => {
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: '0.6rem' }}>
-          <Person name={myName} avatar={myAvatar} mbti={myMbti} />
-          {hasOpponent && (
-            <>
-              <span className="font-serif" style={{ color: '#e2c074', fontSize: '1.3rem', alignSelf: 'center', marginTop: '-2.5rem' }}>×</span>
-              <Person name={oppName} avatar={oppAvatar} mbti={oppMbti} />
-            </>
-          )}
-        </div>
+        {hasOpponent ? (
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: '0.6rem' }}>
+            <Person name={myName} avatar={myAvatar} mbti={myMbti} />
+            <span className="font-serif" style={{ color: '#e2c074', fontSize: '1.3rem', alignSelf: 'center', marginTop: '-2.5rem' }}>×</span>
+            <Person name={oppName} avatar={oppAvatar} mbti={oppMbti} />
+          </div>
+        ) : (
+          <SoloHero name={myName} avatar={myAvatar} mbti={myMbti} />
+        )}
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.6rem 0.4rem', borderRadius: '18px', background: 'rgba(10,10,22,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
           {baseScore !== undefined && (

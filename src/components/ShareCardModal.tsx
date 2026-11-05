@@ -4,10 +4,15 @@ import type { FortuneResult } from '../utils/fortuneEngine';
 import { getPillarWithReading } from '../utils/fortuneEngine';
 import { showAlert } from './AppDialog';
 import { trackShare } from '../services/analytics';
+import { shareLineCode } from '../../api/_lib/share-card-text.js';
 
 interface ShareCardModalProps {
   selectedChar: 'ren' | 'tsuki';
   result: FortuneResult;
+  /** お相手ありの鑑定で「自分の運勢」タブに出す、自分だけの鑑定結果（一人で占ったときと同じもの） */
+  soloResult?: FortuneResult | null;
+  /** 「自分の運勢」タブのリンクに付ける、保存した自分だけの結果のID（開いた人は普段の結果画面で見られる） */
+  soloShareId?: string;
   myName: string;
   opponentName?: string;
   hasOpponent: boolean;
@@ -34,7 +39,9 @@ const xTextWeight = (text: string) => {
 
 export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   selectedChar,
-  result,
+  result: pairResult,
+  soloResult,
+  soloShareId,
   myName,
   opponentName,
   hasOpponent,
@@ -43,11 +50,14 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   onClose
 }) => {
   const oppNickname = opponentName || 'お相手';
-  const dailyScoreLabel = hideDailyScore ? '??' : String(result.dailyScore);
   const isRen = selectedChar === 'ren';
 
   const [activeTab, setActiveTab] = useState<'match' | 'single'>('match');
   const showOpponent = hasOpponent && activeTab === 'match';
+  // 「自分の運勢」タブは、二人の相性の結果ではなく、自分だけの鑑定結果（一人で占ったときと同じ文・点数）を出す
+  const result = showOpponent ? pairResult : (soloResult ?? pairResult);
+  // 「??点」は、無料の日数を使い切ったお相手との今日の相性だけ。自分の運勢は一人の鑑定と同じく見せる
+  const dailyScoreLabel = (hideDailyScore && (showOpponent || !soloResult)) ? '??' : String(result.dailyScore);
 
   const myTagColor = isRen ? '#9cc6d8' : '#cdbfe2';
   const myTagBg = isRen ? 'rgba(58, 134, 171, 0.12)' : 'rgba(159, 134, 192, 0.12)';
@@ -102,8 +112,20 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       const u = new URL(shareUrl);
       if (!showOpponent) {
         u.searchParams.set('mode', 'single');
-        // 保存した結果（r）は二人の相性なので、「自分だけ」のカードのリンクには付けない
-        if (hasOpponent) u.searchParams.delete('r');
+        // 保存した結果（r）は二人の相性なので、「自分だけ」のカードのリンクには、自分だけの結果を保存したID（あれば）に差し替える
+        if (hasOpponent) {
+          if (soloShareId) u.searchParams.set('r', soloShareId); else u.searchParams.delete('r');
+          // 点数とひとことも、自分だけの鑑定のものに差し替える（共有ページ・カード画像に二人の相性の文や点数が出ないように）
+          for (const k of ['on', 'oa', 'om', 'c']) u.searchParams.delete(k);
+          if (soloResult) {
+            u.searchParams.set('bs', String(soloResult.baseScore));
+            u.searchParams.set('ds', String(soloResult.dailyScore));
+            const l = shareLineCode(soloResult.oneLiner);
+            if (l >= 0) u.searchParams.set('l', String(l)); else u.searchParams.delete('l');
+          } else {
+            for (const k of ['bs', 'ds', 'l']) u.searchParams.delete(k);
+          }
+        }
       } else {
         u.searchParams.delete('mode');
       }
@@ -355,7 +377,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 gap: '10px',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.5)'
               }}>
-                <span style={{ fontSize: '15px', color: '#d8d2c6' }}>基本相性</span>
+                <span style={{ fontSize: '15px', color: '#d8d2c6' }}>基本の相性</span>
                 <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#e8a93a', lineHeight: '1' }}>
                   {result.baseScore}<span style={{ fontSize: '16px' }}>点</span>
                 </span>
@@ -713,7 +735,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   gap: '4px',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
                 }}>
-                  <span style={{ fontSize: '0.55rem', color: '#d8d2c6' }}>基本相性</span>
+                  <span style={{ fontSize: '0.55rem', color: '#d8d2c6' }}>基本の相性</span>
                   <span className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold', lineHeight: '1' }}>
                     {result.baseScore}<span style={{ fontSize: '0.55rem' }}>点</span>
                   </span>

@@ -1,29 +1,41 @@
 import React from 'react';
-import { Crown, LineChart, BookHeart, Mail, Users, MessageCircleHeart } from 'lucide-react';
+import { Crown, LineChart, BookHeart, Mail, Users, MessageCircleHeart, Unlock, Radar, Heart } from 'lucide-react';
 
-// プレミアムのお支払いが反映されたときのお祝い画面（Stripe から戻ってきたとき App が出す）
+// プレミアムのお支払い／買い切り（お相手1人）が反映されたときのお祝い画面（Stripe から戻ってきたとき App が出す）
 
 const UNLOCKED = [
   { icon: LineChart, text: '7日間の相性バイオリズムと、月ごと・10年の運勢の流れ' },
   { icon: BookHeart, text: 'お相手の「取扱説明書」と6軸の詳しい相性' },
-  { icon: Mail, text: '毎朝届く「運勢とLINEの吉時間」のメール' },
+  { icon: Mail, text: '毎朝の運勢メールが全文に（アプローチのコツを最後まで・同じ人との相性も毎日）' },
   { icon: Users, text: 'お相手を最大10人まで保存' },
   { icon: MessageCircleHeart, text: '月・蓮への相談が無制限に' }
+];
+
+// 買い切り（¥680）で解放されたもの
+const PAIR_UNLOCKED = [
+  { icon: BookHeart, text: 'トリセツと深層鑑定が、ずっと読める' },
+  { icon: Radar, text: '6つの相性グラフも、ずっと見られる' },
+  { icon: Heart, text: '今日の相性・LINEの送り方（今日だけ）' },
+  { icon: Users, text: '「保存したお相手」に追加済み' }
 ];
 
 interface PremiumWelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** 買い切りで解放したとき、そのお相手の呼び方（例: けんとさん）。なしならプレミアムのお祝い */
+  pairPartner?: string | null;
 }
 
-export const PremiumWelcomeModal: React.FC<PremiumWelcomeModalProps> = ({ isOpen, onClose }) => {
+export const PremiumWelcomeModal: React.FC<PremiumWelcomeModalProps> = ({ isOpen, onClose, pairPartner }) => {
   if (!isOpen) return null;
+  const pair = Boolean(pairPartner);
+  const items = pair ? PAIR_UNLOCKED : UNLOCKED;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="プレミアムへようこそ"
+      aria-label={pair ? '鑑定を解放しました' : 'プレミアムへようこそ'}
       onClick={onClose}
       style={{
         position: 'fixed',
@@ -105,23 +117,25 @@ export const PremiumWelcomeModal: React.FC<PremiumWelcomeModalProps> = ({ isOpen
         />
 
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginTop: '1.1rem', padding: '0.25rem 0.75rem', borderRadius: '999px', background: 'rgba(226, 192, 116, 0.15)', border: '1px solid rgba(226, 192, 116, 0.5)', color: '#f2e2b3', fontSize: '0.72rem', fontWeight: 'bold', letterSpacing: '0.08em' }}>
-          <Crown size={13} /> PREMIUM MEMBER
+          {pair ? <><Unlock size={13} /> UNLOCKED</> : <><Crown size={13} /> PREMIUM MEMBER</>}
         </div>
 
         <h2 className="font-serif gold-text" style={{ fontSize: '1.45rem', fontWeight: 'bold', margin: '0.7rem 0 0.4rem', lineHeight: 1.4 }}>
-          プレミアムへようこそ
+          {pair ? <>{pairPartner}の鑑定が<br />解放されました</> : 'プレミアムへようこそ'}
         </h2>
         <p style={{ fontSize: '0.84rem', color: '#e6dff0', lineHeight: 1.8, margin: '0 0 1.2rem' }}>
-          来てくれて、ありがとう。<br />
-          これから毎日、<br />
-          あなたの恋をそばで見守らせてね。
+          {pair ? (
+            <>来てくれて、ありがとう。<br />{pairPartner}の心の奥まで、<br />一緒にのぞいていきましょうね。</>
+          ) : (
+            <>来てくれて、ありがとう。<br />これから毎日、<br />あなたの恋をそばで見守らせてね。</>
+          )}
         </p>
 
         <div style={{ textAlign: 'left', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', padding: '0.9rem 1rem', marginBottom: '1.3rem' }}>
           <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold', marginBottom: '0.6rem' }}>
-            今日から使えるようになったこと
+            {pair ? '読めるようになったこと' : '今日から使えるようになったこと'}
           </div>
-          {UNLOCKED.map(({ icon: Icon, text }) => (
+          {items.map(({ icon: Icon, text }) => (
             <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.8rem', lineHeight: 1.6, color: '#f3efe6', padding: '0.3rem 0' }}>
               <Icon size={16} style={{ color: '#e2c074', flexShrink: 0, marginTop: '0.15rem' }} />
               <span>{text}</span>
@@ -147,7 +161,7 @@ export const PremiumWelcomeModal: React.FC<PremiumWelcomeModalProps> = ({ isOpen
             boxShadow: '0 8px 24px rgba(217, 164, 65, 0.35)'
           }}
         >
-          さっそく見てみる
+          {pair ? '解放された鑑定を見る' : 'さっそく見てみる'}
         </button>
       </div>
     </div>

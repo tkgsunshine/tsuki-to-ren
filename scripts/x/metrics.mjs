@@ -54,7 +54,8 @@ export function similarity(a, b) {
   return (2 * both) / (na + nb);
 }
 export const FUZZY_MIN = 0.6; // これ以上の重なりで、同じ投稿とみなす
-const OPEN = ['scheduled', 'expired', 'failed'];
+// manual: ホームで手で作った投稿（キューの生成を通らない型・X記事など）を、反応の集計のために記録したもの。投稿の仕組み（post.mjs）は扱わない（2026-11-04）
+const OPEN = ['scheduled', 'expired', 'failed', 'manual'];
 const jstDay = (iso) => new Date(new Date(iso).getTime() + 9 * HOUR).toISOString().slice(0, 10);
 
 export function reconcileTimeline(queue, tweets) {
@@ -68,7 +69,7 @@ export function reconcileTimeline(queue, tweets) {
   const taken = new Set(queue.filter((p) => p.tweetId).map((p) => p.tweetId));
   let n = 0;
   for (const p of queue) {
-    if (!['scheduled', 'expired', 'failed'].includes(p.status) || p.tweetId) continue;
+    if (!OPEN.includes(p.status) || p.tweetId) continue;
     let t = (byText.get(normText(p.text)) || []).find((x) => !taken.has(x.id));
     if (!t) {
       // 署名・空白の違いを無視して、もう一度（本文が十分に長いときだけ。先頭40文字が同じで、全体も同じ）
@@ -140,7 +141,7 @@ export function reconcileTimeline(queue, tweets) {
   for (const c of queue) {
     if (!c.replyTo || !c.tweetId) continue;
     const parent = queue.find((x) => x.id === c.replyTo);
-    if (!parent || parent.tweetId || !['scheduled', 'expired', 'failed'].includes(parent.status)) continue;
+    if (!parent || parent.tweetId || !OPEN.includes(parent.status)) continue;
     const ct = byId.get(c.tweetId);
     const pid = ct?.referenced_tweets?.find((r) => r.type === 'replied_to')?.id;
     const pt = pid && byId.get(pid);
@@ -206,10 +207,27 @@ export function applyMetrics(queue, byTweetId, now = new Date()) {
 export const labelOf = (p) => p.format || (/-chara-/.test(p.id) ? 'beast' : p.kind);
 
 const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+
+/** 親の投稿ごとのクリック（non_public_metrics）。プロフィールへのクリックは親の投稿の値、リンクのクリックは親と、その返信（リプ欄のURL）の合計。
+ *  取れていない投稿は入れない。返り値: Map(親id → { impressions, profileClicks, urlClicks }) */
+export function clickTotals(queue) {
+  const kids = new Map();
+  for (const p of queue) if (p.replyTo) { if (!kids.has(p.replyTo)) kids.set(p.replyTo, []); kids.get(p.replyTo).push(p); }
+  const out = new Map();
+  for (const p of queue) {
+    if (p.replyTo || !p.metricsPrivate || p.metricsPrivate.profileClicks == null) continue;
+    let url = p.metricsPrivate.urlClicks ?? 0;
+    const stack = [...(kids.get(p.id) || [])];
+    while (stack.length) { const c = stack.pop(); url += c.metricsPrivate?.urlClicks ?? 0; stack.push(...(kids.get(c.id) || [])); }
+    out.set(p.id, { impressions: p.metricsPrivate.impressions ?? null, profileClicks: p.metricsPrivate.profileClicks, urlClicks: url });
+  }
+  return out;
+}
 const fmt = (x) => (Number.isInteger(x) ? String(x) : x.toFixed(1));
 
 /** 型ごと・枠ごとの集計（metrics24 がある親の投稿のみ。返信は含めない） */
 export function summarize(queue, keyOf = labelOf) {
+  const clicks = clickTotals(queue);
   const groups = new Map();
   for (const p of queue) {
     if (!p.metrics24 || p.replyTo) continue;
@@ -226,20 +244,25 @@ export function summarize(queue, keyOf = labelOf) {
       replies: avg(ps.map((p) => p.metrics24.replies)),
       reposts: avg(ps.map((p) => p.metrics24.reposts + p.metrics24.quotes)),
       bookmarks: avg(ps.map((p) => p.metrics24.bookmarks)),
+      // プロフィールへのクリック・リンクのクリック（取れた投稿だけの平均。取れた本数は nClicks）
+      nClicks: ps.filter((p) => clicks.has(p.id)).length,
+      profileClicks: avg(ps.filter((p) => clicks.has(p.id)).map((p) => clicks.get(p.id).profileClicks)),
+      urlClicks: avg(ps.filter((p) => clicks.has(p.id)).map((p) => clicks.get(p.id).urlClicks)),
     }))
     .sort((a, b) => b.impressions - a.impressions);
 }
 
 const table = (rows) =>
-  ['| 区分 | 本数 | 表示回数(平均) | いいね | 返信 | リポスト+引用 | ブックマーク |', '|---|---|---|---|---|---|---|']
-    .concat(rows.map((r) => `| ${r.key} | ${r.n} | ${fmt(r.impressions)} | ${fmt(r.likes)} | ${fmt(r.replies)} | ${fmt(r.reposts)} | ${fmt(r.bookmarks)} |`))
+  ['| 区分 | 本数 | 表示回数(平均) | いいね | 返信 | リポスト+引用 | ブックマーク | プロフィールクリック | リンククリック |', '|---|---|---|---|---|---|---|---|---|']
+    .concat(rows.map((r) => `| ${r.key} | ${r.n} | ${fmt(r.impressions)} | ${fmt(r.likes)} | ${fmt(r.replies)} | ${fmt(r.reposts)} | ${fmt(r.bookmarks)} | ${r.nClicks ? fmt(r.profileClicks) : '—'} | ${r.nClicks ? fmt(r.urlClicks) : '—'} |`))
     .join('\n');
 
 /** data/x/report.md の本文 */
 /** クリックの表（プロフィールへのクリック率＝クリック÷表示）。取れていなければ、その旨を書く */
 function clickLines(queue, extras = {}) {
-  const rows = queue.filter((p) => p.metricsPrivate && !p.replyTo && p.metricsPrivate.profileClicks != null)
-    .sort((a, b) => (b.metricsPrivate.impressions ?? 0) - (a.metricsPrivate.impressions ?? 0)).slice(0, 8);
+  const clicks = clickTotals(queue);
+  const rows = queue.filter((p) => clicks.has(p.id))
+    .sort((a, b) => (clicks.get(b.id).impressions ?? 0) - (clicks.get(a.id).impressions ?? 0)).slice(0, 8);
   const pct = (c, i) => (i ? `${((c / i) * 100).toFixed(2)}%` : '—');
   const out = [];
   if (extras.pinned) {
@@ -248,7 +271,7 @@ function clickLines(queue, extras = {}) {
   }
   if (!rows.length) return [...out, extras.privateError ? `（取得できませんでした: ${extras.privateError}）` : '（まだデータがありません）'];
   return [...out, '| 投稿 | 型 | 表示 | プロフィールクリック | (率) | リンククリック | (率) |', '|---|---|---|---|---|---|---|',
-    ...rows.map((p) => { const m = p.metricsPrivate; return `| ${p.id} | ${labelOf(p)} | ${m.impressions ?? '—'} | ${m.profileClicks} | ${pct(m.profileClicks, m.impressions)} | ${m.urlClicks ?? '—'} | ${pct(m.urlClicks ?? 0, m.impressions)} |`; })];
+    ...rows.map((p) => { const m = clicks.get(p.id); return `| ${p.id} | ${labelOf(p)} | ${m.impressions ?? '—'} | ${m.profileClicks} | ${pct(m.profileClicks, m.impressions)} | ${m.urlClicks} | ${pct(m.urlClicks, m.impressions)} |`; })];
 }
 
 export function buildReport(queue, followers = [], now = new Date(), extras = {}) {
@@ -270,7 +293,7 @@ export function buildReport(queue, followers = [], now = new Date(), extras = {}
     '## 表示回数の上位5本',
     ...(top.length ? top.map((p, i) => `${i + 1}. ${p.metrics24.impressions ?? '—'}回 ／ ${labelOf(p)} ／ ${p.id} ／ ${p.text.split('\n')[0]}`) : [none]),
     '',
-    '## プロフィール・リンクのクリック（X API の non_public_metrics。取れた投稿だけ。投稿から30日以内）',
+    '## プロフィール・リンクのクリック（X API の non_public_metrics。取れた投稿だけ。投稿から30日以内。リンクのクリックは、リプ欄の返信のURLも合計）',
     ...clickLines(queue, extras),
     '',
     '## フォロワー数（直近）',
@@ -362,7 +385,8 @@ async function main() {
   }
   // プロフィールへのクリック・リンクのクリック（non_public_metrics。投稿から30日以内の自分の投稿だけ取れる）。取れなくても、ほかの処理は続ける
   const extras = {};
-  const recent = queue.filter((p) => p.tweetId && !p.replyTo && p.createdAt !== undefined && (now - new Date(p.postedAt || p.createdAt)) < 29 * 86400000);
+  // 返信も取る（URLはリプ欄に入れるので、リンクのクリックは返信の側に付く。2026-11-04）
+  const recent = queue.filter((p) => p.tweetId && (p.postedAt || p.createdAt) && (now - new Date(p.postedAt || p.createdAt)) < 29 * 86400000);
   const privIds = [...new Set([...recent.map((p) => p.tweetId), ...(me?.pinned_tweet_id ? [me.pinned_tweet_id] : [])])];
   const priv = new Map();
   for (let i = 0; i < privIds.length; i += 100) {

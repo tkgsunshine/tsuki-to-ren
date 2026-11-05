@@ -211,3 +211,69 @@ test('16タイプの相性: 表（src/data/mbti-compat.json）と一致し、順
   }
   assert.equal(getMBTICompatibilityScore('ENFP', 'UNKNOWN'), 20);
 });
+
+// ───────── 今日の点数の偏り（＋に偏らない・100点に張り付かない） ─────────
+import { getBranchImpact } from '../src/utils/fortuneEngine.ts';
+
+test('同じ十二支どうしは三合ではない（比和の+2）。異なる三合の支は+12', () => {
+  for (const b of '子丑寅卯辰巳午未申酉戌亥') assert.equal(getBranchImpact(b, b), 2, `${b}${b}`);
+  assert.equal(getBranchImpact('申', '子'), 12);
+  assert.equal(getBranchImpact('寅', '戌'), 12);
+});
+
+test('今日の点数は、基本の点より＋の日と−の日がおおよそ半々で、100点に張り付かない', () => {
+  const births = [];
+  const d = new Date(1980, 0, 1);
+  for (let i = 0; i < 160; i++, d.setDate(d.getDate() + 67)) births.push(iso(d));
+  const days = [];
+  const t = new Date(2026, 10, 3);
+  for (let i = 0; i < 60; i++, t.setDate(t.getDate() + 1)) days.push(iso(t));
+  for (const pair of [false, true]) {
+    let plus = 0, minus = 0, sum = 0, at100 = 0, n = 0;
+    for (let i = 0; i < births.length; i += pair ? 2 : 1) {
+      for (const day of days.filter((_, k) => k % 3 === 0)) {
+        const input = { myName: 'a', myBirth: births[i], myMbti: 'ENFP', myGender: 'female', relationship: 'single' };
+        if (pair) Object.assign(input, { opponentName: 'b', opponentBirth: births[(i + 1) % births.length], opponentMbti: 'ISFJ', opponentGender: 'male' });
+        const x = withNow(day, () => generateFortuneResult(input, 'tsuki'));
+        const diff = x.dailyScore - x.baseScore;
+        if (diff > 0) plus++;
+        if (diff < 0) minus++;
+        if (x.dailyScore === 100) at100++;
+        sum += diff;
+        n++;
+      }
+    }
+    const label = pair ? '二人' : '一人';
+    assert.ok(plus / n < 0.6 && minus / n < 0.6, `${label}: ＋${plus}／−${minus}／全${n}`);
+    assert.ok(Math.abs(sum / n) < 3, `${label}: 差の平均 ${(sum / n).toFixed(2)}`);
+    assert.ok(at100 / n < 0.08, `${label}: 100点 ${at100}/${n}`);
+  }
+});
+
+test('月次・年次の点数も、基本の点より＋と−がおおよそ半々で、100点に張り付かない（二人分は平均）', () => {
+  const births = [];
+  const d = new Date(1980, 0, 1);
+  for (let i = 0; i < 200; i++, d.setDate(d.getDate() + 53)) births.push(iso(d));
+  for (const pair of [false, true]) {
+    for (const key of ['monthlyPreviews', 'yearlyPreviews']) {
+      let plus = 0, minus = 0, sum = 0, at100 = 0, n = 0;
+      for (let i = 0; i < births.length; i += pair ? 2 : 1) {
+        const input = { myName: 'a', myBirth: births[i], myMbti: 'ENFP', myGender: 'female', relationship: 'single' };
+        if (pair) Object.assign(input, { opponentName: 'b', opponentBirth: births[(i + 1) % births.length], opponentMbti: 'ISFJ', opponentGender: 'male' });
+        const x = withNow('2026-11-04', () => generateFortuneResult(input, 'tsuki'));
+        for (const p of x[key]) {
+          const diff = p.score - x.baseScore;
+          if (diff > 0) plus++;
+          if (diff < 0) minus++;
+          if (p.score === 100) at100++;
+          sum += diff;
+          n++;
+        }
+      }
+      const label = `${pair ? '二人' : '一人'} ${key}`;
+      assert.ok(plus / n < 0.62 && minus / n < 0.62, `${label}: ＋${plus}／−${minus}／全${n}`);
+      assert.ok(Math.abs(sum / n) < 3, `${label}: 差の平均 ${(sum / n).toFixed(2)}`);
+      assert.ok(at100 / n < 0.05, `${label}: 100点 ${at100}/${n}`);
+    }
+  }
+});

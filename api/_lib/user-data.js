@@ -27,7 +27,9 @@ export function cleanPartners(list) {
       birth: str(p.birth, 10),
       mbti: str(p.mbti, 10) || 'UNKNOWN',
       gender: gender(p.gender),
-      relationship: str(p.relationship, 20) || 'single'
+      relationship: str(p.relationship, 20) || 'single',
+      // 買い切り（お相手1人の深層鑑定）で解放したお相手の印。保存上限に数えない
+      ...(p.unlocked === true ? { unlocked: true } : {})
     }));
 }
 

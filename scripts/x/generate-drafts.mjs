@@ -9,10 +9,11 @@ import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
 import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, PAIR_LINK, GAP_CTA, withLink, withProfileCta } from './lib/teasers.mjs';
-import { addMbtiNicks } from './lib/mbti-nick.mjs';
+import { addMbtiNicks, addMbtiNicksInline } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 import { parseCardText, renderCard, EXPRESSIONS } from './lib/card.mjs';
+import { attachRankImages } from './lib/rank-card.mjs';
 import { pickColumn, COLUMN_GUIDE, withColumnUrl } from './lib/column-post.mjs';
 import fs from 'node:fs';
 
@@ -32,7 +33,11 @@ const missing = (id) => !fillMissing || !haveIds.has(`${date}-${id}`);
 const slotMissing = (slot) => !haveIds.has(`${date}-${slot}`);
 // --redo-beast-reply: その日の守護獣のリプ欄だけを、Claudeで書き直す（本文は変えない。2通→1通への移行用）
 const redoBeast = args.includes('--redo-beast-reply');
-if (haveIds.size && !redoBeast && !(fillMissing && (slotMissing('am') || slotMissing('chara-1') || BUZZ_SLOTS.some(slotMissing)))) {
+// 運営が手で足した投稿（ランキング・長文・16タイプ別の行動など。id が -rank / -long2 / -scene など）は、
+// 自動の枠（朝・守護獣・バズ枠）とは別なので、「その日の投稿が既にある」の判定に数えない（2026-11-01: 手で先の日に足した投稿のせいで、毎晩の下書きが止まっていた）
+const genSlots = ['am', 'chara-1', ...BUZZ_SLOTS];
+const hasGenerated = genSlots.some((s) => !slotMissing(s));
+if (hasGenerated && !redoBeast && !(fillMissing && genSlots.some(slotMissing))) {
   console.log(`${date} の投稿は既にキューにあります。何もしません。`);
   process.exit(0);
 }
@@ -55,6 +60,7 @@ const system = `あなたは占いサービス「月と蓮」のX運用担当で
 - 専門用語は出さない（比和・支合・相生・相剋・干合・三合・六沖・日干・十干・地支・通変星・蔵干・心理機能、および「干支」「五行」も使わない）。ブリーフの internal は参考情報で、本文に出さない
 - 恋愛以外（仕事・お金・健康）の話題は書かない。相手の気持ちや関係の結末を断定しない。浮気・不倫・復縁の強要など、人を傷つける行動をすすめない。性的な表現は使わない
 - 占いは傾向・ヒントとして書く。「必ず」「絶対」「確実に」「〜が決まる」などの断定・保証はしない。医療・健康・金銭の助言はしない
+- **「月の見立て」「月と蓮の見立てでは」「少しだけ占いの話をするね」「当てはまったら教えてね」のような、占いっぽい前置き・断り書き・ことわりのニュアンスは入れない**。タイプの特徴や恋愛の行動は、事実を語っている温度感で、そのまま言い切る（2026-11-04 運営の指定）
 - 日本語は約140字（X の重み付き280）以内。改行はOK。ハッシュタグは最大2個。**ただし、型の指定に字数がある型（長文の型）は、その指定に従う（運営はXプレミアムなので、長文を投稿できる）**
 - 口調は、月（寄り添うタイプ。共感を先に置き、「〜だよ」「〜してね」とやさしく包む、温かなお姉さん）に統一する。**X もアプリも、すべて月が話している世界観**なので、投稿は常に月の一人称の語りかけ（「月だよ」のように名乗る必要はない）。蓮の声は使わない。末尾に、改行して「-月-」（半角ハイフンで挟む）を付ける
 - 「16タイプ」は、各投稿で最初に出すときだけ「16タイプ（MBTI）」と書いてよい（検索されやすくするため）。「MBTI診断」「公式MBTI」とは書かない（独自の診断のため）
@@ -163,6 +169,8 @@ function validate(posts) {
 const detPosts = detSlots.map((slot) => {
   const f = planned[slot];
   const out = f.build(date);
+  // 二つ名を足す（「ISFP×辛羊」→「ISFP 冒険家×辛羊」。2026-11-03〜）
+  for (const k of ['text', 'replyText', 'replyText2']) if (typeof out[k] === 'string') out[k] = addMbtiNicksInline(out[k]);
   const problems = lintPost({ slot, kind: f.kind || 'value', text: out.text }, history, { allowLinks, maxWeight: f.maxWeight });
   if (out.replyText) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText }, history, { allowLinks, maxWeight: f.maxWeight, reply: true }).map((x) => `返信: ${x}`));
   if (out.replyText2) problems.push(...lintPost({ slot, kind: 'value', text: out.replyText2 }, history, { allowLinks, siteUrl: true, maxWeight: f.maxWeight }).map((x) => `返信2: ${x}`));
@@ -198,11 +206,15 @@ if (llmSlots.length) {
     try {
       candidate = extractJson(text);
       // 16タイプのランキングの行に、二つ名（冒険家など）を足す（アプリと同じ一覧から。AIには書かせない）
+      // 2026-11-03〜: ほかの型も、本文中の「ESTJ」を「ESTJ 幹部」の形にする（運営の指定。各タイプの最初の1回だけ）
       for (const c of candidate) {
-        if (c && planned[c.slot]?.rank16) {
+        if (!c) continue;
+        if (planned[c.slot]?.rank16) {
           c.text = addMbtiNicks(c.text);
           if (c.replyText) c.replyText = addMbtiNicks(c.replyText);
         }
+        if (typeof c.text === 'string') c.text = addMbtiNicksInline(c.text);
+        if (typeof c.replyText === 'string') c.replyText = addMbtiNicksInline(c.replyText);
       }
     } catch (e) {
       feedback = `\n\n# 前回の出力は不正でした: ${e.message}。JSON配列のみを出力してください。`;
@@ -229,7 +241,8 @@ if (llmSlots.length) {
 posts = [...detPosts, ...posts];
 
 // 守護獣の1本（朝 08:15）。署名は常に「-月-」（話し手は月だけ）
-const beastItems = missing('chara-1') && !redoBeast ? buildBeastItems(all, date, history, { allowLinks }) : [];
+// config.dailyBeast が false のときは、毎日の占い（守護獣）を作らない（2026-11-02: 運営の判断で終了）
+const beastItems = config.dailyBeast !== false && missing('chara-1') && !redoBeast ? buildBeastItems(all, date, history, { allowLinks }) : [];
 // 守護獣のリプ欄（2通）は、アプリの鑑定の解説（facts.advice）をもとに、Claudeが書く。検査に通らなければ、定型文のまま（保険）
 const BEAST_REPLY_SPEC = `守護獣の今日の恋愛運の投稿への、スレッド返信を2通書く。恋愛に共感してもらえて、保存・引用したくなる内容にする（薄い一般論にしない）。
 # replyText（1通目）
@@ -355,7 +368,7 @@ if (col) {
     let text;
     try {
       const out = extractJson(res.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
-      text = withColumnUrl(out[0].text, col);
+      text = addMbtiNicksInline(withColumnUrl(out[0].text, col));
     } catch (e) {
       const raw = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('').slice(0, 300).replace(/\n/g, '\\n');
       console.warn(`コラム紹介 attempt ${attempt}: 出力を読めません（${e.message}、stop_reason=${res.stop_reason}）。出力の先頭: ${raw}`);
@@ -388,6 +401,12 @@ for (const it of items.filter((x) => x.card)) {
   const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(it.image));
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, await renderCard(it.card));
+}
+// 16タイプのランキングに画像を付ける（投稿用＝1・2・15・16位を隠す／返信用＝全順位。2026-11-03 運営の承認）
+for (const f of await attachRankImages(items)) {
+  const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(f.image));
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, f.png);
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);

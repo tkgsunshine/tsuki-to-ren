@@ -40,6 +40,24 @@ export const COLOR_SWATCHES: Record<string, string> = {
   紺: '#23356b', 青: '#3f72c4', 蒼: '#2f7f8f', 水色: '#8fd0e8',
 };
 
+/**
+ * 鑑定結果の「守護カラー」の値（例「赤・金」）を、色名ごとにその色の文字で出すための色。
+ * 色見本（COLOR_SWATCHES）と同じ色みのまま、暗い背景で読めるよう明るさだけ上げている。
+ * 黒・紺のように明るくすると別の色に見えてしまうものは、色はそのままにして、文字のまわりを白く光らせて読ませる（halo）。
+ */
+export const COLOR_TEXT_STYLES: Record<string, { color: string; halo?: boolean }> = {
+  深緑: { color: '#4fae7d' }, 金: { color: '#e8c24a' }, 黄緑: { color: '#a8d84a' }, 白: { color: '#f7f5ef' },
+  赤: { color: '#f0574a' }, 紫: { color: '#b88ae6' }, 橙: { color: '#f39a48' }, 黄土: { color: '#d8aa58' },
+  黒: { color: '#141414', halo: true }, 茶: { color: '#b98058' }, 生成: { color: '#efe6d2' }, 銀: { color: '#c9cdd5' },
+  白銀: { color: '#e6eaf1' }, 紺: { color: '#2a3f86', halo: true }, 青: { color: '#5a92ec' }, 蒼: { color: '#3fb0c0' },
+  水色: { color: '#94d6ee' },
+};
+
+/** 「赤・金」を色名ごとに分ける。未知の色名は既定色（呼び出し側の色）のまま */
+export function splitGuardianColors(value: string): { name: string; color?: string; halo?: boolean }[] {
+  return value.split('・').map((name) => ({ name, ...(COLOR_TEXT_STYLES[name] || {}) }));
+}
+
 const BRANCH_ORDER = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 const STEM_ORDER = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 

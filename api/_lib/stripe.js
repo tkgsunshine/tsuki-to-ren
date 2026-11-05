@@ -22,11 +22,27 @@ export function getStripe() {
   return client;
 }
 
+/** Signs every session of a purchase account out and takes the email off it. */
+export async function quarantineGuest(auth, uid) {
+  try {
+    await auth.revokeRefreshTokens(uid);
+    await auth.updateUser(uid, { email: null });
+  } catch (e) {
+    console.error('⚠️ Could not quarantine a purchase account:', e?.message);
+  }
+}
+
 export async function verifyUser(req, auth) {
   const token = /^Bearer (.+)$/.exec(String(req.headers.authorization || ''))?.[1];
   if (!token) return { error: { status: 401, message: 'ログインが必要です' } };
   try {
     const decoded = await auth.verifyIdToken(token);
+    if (decoded.guest === true && decoded.email) {
+      // An auto-created purchase account (checkout-claim.js) never has an email. One that got an email (e.g. the
+      // buyer called updateEmail with someone else's address) would let the buyer into that person's account.
+      await quarantineGuest(auth, decoded.uid);
+      return { error: { status: 401, message: 'ログインし直してください' } };
+    }
     return { uid: decoded.uid, email: decoded.email_verified ? decoded.email : undefined };
   } catch {
     return { error: { status: 401, message: 'ログインの有効期限が切れています。再読み込みしてください' } };

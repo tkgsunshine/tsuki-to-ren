@@ -35,9 +35,14 @@ const stripBirth = (v) => {
 };
 
 const isScore = (n) => Number.isFinite(n) && n >= 0 && n <= 100;
+// The avatars are always this site's own images (fortuneEngine getAstrologyAvatar). Anything else — another site's URL,
+// javascript:, data: — is refused, so a forged save cannot make the visitor's browser load or open a URL of the sender's choosing.
+const AVATAR_RE = /^\/assets\/[a-z0-9_-]{1,80}\.(?:jpg|webp|png)$/;
+export const isAvatarPath = (v) => typeof v === 'string' && AVATAR_RE.test(v);
 const isResult = (r) => !!r && typeof r === 'object' && !Array.isArray(r)
   && isScore(r.baseScore) && isScore(r.dailyScore)
-  && typeof r.oneLiner === 'string' && typeof r.myAvatarUrl === 'string';
+  && typeof r.oneLiner === 'string' && isAvatarPath(r.myAvatarUrl)
+  && (r.opponentAvatarUrl === undefined || r.opponentAvatarUrl === null || r.opponentAvatarUrl === '' || isAvatarPath(r.opponentAvatarUrl));
 
 const jstDate = (ms) => new Date(ms + 9 * 3600 * 1000).toISOString().slice(0, 10);
 

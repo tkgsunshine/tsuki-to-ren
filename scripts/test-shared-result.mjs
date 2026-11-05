@@ -108,3 +108,15 @@ test('new saves are capped per sender per day, and the same result again does no
   assert.equal(again.code, 200);
   assert.equal(again.body.id, other.body.id);
 });
+
+test('a result whose avatar is not one of the site images is refused', async () => {
+  for (const bad of ['https://evil.example/a.jpg', 'javascript:alert(1)', 'data:image/png;base64,AAAA', '//evil.example/a.jpg', '/assets/../x.jpg']) {
+    const sent = body();
+    sent.tsuki.myAvatarUrl = bad;
+    assert.equal(cleanShared(sent), null, bad);
+    const sent2 = body();
+    sent2.ren.opponentAvatarUrl = bad;
+    assert.equal(cleanShared(sent2), null, bad);
+  }
+  assert.ok(cleanShared(body()));
+});
