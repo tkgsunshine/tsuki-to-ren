@@ -8686,5 +8686,30 @@
     "purpose": "app",
     "status": "scheduled",
     "createdAt": "2026-11-04T19:41:26.889Z"
+  },
+  {
+    "id": "tree-20261104-3",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "value",
+    "format": "mbti_tree",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "manual",
+    "createdAt": "2026-11-04T03:07:38.913Z",
+    "text": "MBTI（16タイプ）別「失恋した時の立ち直り方」\n\n【次の日にはもう前を向く】\n・ESTP 起業家\n失恋の翌日に予定を詰め込む\n\n・ENTJ 指揮官\n反省会を開いて次の戦略を立てる\n\n・ESTJ 幹部\n仕事に打ち込んで忘れる\n\n・ESFP エンターテイナー\n友達と朝まで騒いで終わらせる\n\n【何年も引きずる】\n・INFP 仲介者\n思い出の曲が一生聴けない\n\n・INFJ 提唱者\nあの時の言葉を何度も再生する\n\n・ISFJ 擁護者\nもらった物がまだ捨てられない\n\n・ISFP 冒険家\n失恋ソングを作り始める\n\n...↓"
+  },
+  {
+    "id": "tree-20261104-3-r",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "promo",
+    "format": "mbti_tree",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "manual",
+    "createdAt": "2026-11-04T03:07:38.913Z",
+    "text": "【原因を分析し始める】\n・INTJ 建築家\nどこで判断を誤ったか整理する\n\n・INTP 論理学者\n失恋を研究テーマにする\n\n・ISTJ 管理者\nやりとりを最初から読み返す\n\n・ISTP 巨匠\n一人で遠出して黙って考える\n\n【周りに支えられて立ち直る】\n・ENFP 運動家\n全員に話を聞いてもらう\n\n・ENFJ 主人公\n人の恋愛相談に乗って元気を取り戻す\n\n・ESFJ 領事官\n友達からの連絡で一日が埋まる\n\n・ENTP 討論者\n失恋をネタにして笑いに変える\n\n次の恋は、相性から見てみるのもおすすめです。\nMBTIと生年月日だけで、あなたと好きな人の相性を鑑定できます↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=tree&utm_content=tree-20261104-3\n\n16タイプ別の恋愛の話は、プロフィールにまとめてあるよ。",
+    "replyTo": "tree-20261104-3"
   }
 ]
