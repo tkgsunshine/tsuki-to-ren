@@ -140,6 +140,7 @@ export const SeoFooterSection: React.FC = () => {
         }}>
           <a href="/" style={{ color: '#d8d2c6', textDecoration: 'none' }}>恋愛診断ホーム</a>
           <a href="/column" style={{ color: '#d8d2c6', textDecoration: 'none' }}>開運コラム</a>
+          <a href="/compatibility" style={{ color: '#d8d2c6', textDecoration: 'none' }}>16タイプ恋愛相性表</a>
           <a href="/terms" style={{ color: '#a39d91', textDecoration: 'none' }}>利用規約</a>
           <a href="/privacy" style={{ color: '#a39d91', textDecoration: 'none' }}>プライバシーポリシー</a>
           <a href="/tokushoho" style={{ color: '#a39d91', textDecoration: 'none' }}>特定商取引法に基づく表記</a>
