@@ -594,7 +594,7 @@ writePage(
       </nav>
       <header>
         <h1 style="font-size: 1.8rem; color: #fef08a; margin-bottom: 0.5rem;">16タイプ（MBTI）全256通り 恋愛相性・トリセツ完全一覧</h1>
-        <p style="font-size: 0.9rem; color: #cbd5e1;">東洋の最高峰「四柱推命」と西洋の「16タイプ心理学」を融合させた精密相性診断。気になる組み合わせをクリックして、二人の相性スコアやLINE吉時間をチェックしてください。</p>
+        <p style="font-size: 0.9rem; color: #cbd5e1;">「四柱推命」と「16タイプ性格診断」を組み合わせた相性診断。気になる組み合わせをクリックして、二人の相性スコアやLINE吉時間をチェックしてください。</p>
       </header>
       ${hubLinksHtml}
       <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: rgba(226,192,116,0.06); border: 1px solid rgba(226,192,116,0.3); border-radius: 16px;">
