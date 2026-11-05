@@ -257,7 +257,7 @@ test('clickTotals: リンクのクリックは、親とリプ欄の返信（返�
 test('add-manual: ホームで手で作った投稿を manual で記録し、タイムラインと照合できる（返信も親の返信として照合）', async () => {
   const { addManual } = await import('./add-manual.mjs');
   const q = [];
-  const text = '好きな人の前だと「急にポンコツになっちゃう」16タイプ（MBTI）\n\n5位：ISTJ 管理者\n→いつもの段取りが全部とぶ\n\n1位は...↓';
+  const text = '好きな人の前だと「急にポンコツになっちゃう」MBTI（16タイプ）\n\n5位：ISTJ 管理者\n→いつもの段取りが全部とぶ\n\n1位は...↓';
   const n = addManual(q, [{ id: 'trend-1', text, replyText: '1位：INFP 仲介者\nhttps://www.tsuki-to-ren.com/?utm_source=x', format: 'rank5', createdAt: '2026-11-04T01:00:00Z' }]);
   assert.equal(n, 1);
   assert.deepEqual(q.map((p) => [p.id, p.status, p.replyTo]), [['trend-1', 'manual', undefined], ['trend-1-r', 'manual', 'trend-1']]);
