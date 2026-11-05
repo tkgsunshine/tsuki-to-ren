@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { getPillarWithReading } from '../utils/fortuneEngine';
 import { showAlert } from './AppDialog';
+import { saveImageBlob } from '../utils/saveImage';
 import { trackShare } from '../services/analytics';
 import { shareLineCode } from '../../api/_lib/share-card-text.js';
 
@@ -214,35 +215,9 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('Blob creation failed');
 
-      // 1. Try Native Web Share API (Files API) for native iOS / Android photo saving
-      if (navigator.canShare) {
-        try {
-          const file = new File([blob], filename, { type: 'image/png' });
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: '月と蓮 鑑定カード'
-            });
-            setSavedSuccess(true);
-            setTimeout(() => setSavedSuccess(false), 2500);
-            return;
-          }
-        } catch (shareErr: any) {
-          if (shareErr?.name === 'AbortError') {
-            return;
-          }
-        }
-      }
-
-      // 2. Direct instant download via Object URL
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = blobUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      // 共有シート → ダウンロード。アプリ内ブラウザ（X等）・iPhoneでは画面の上に出して長押しで保存（utils/saveImage.ts）
+      const saved = await saveImageBlob(blob, filename, '月と蓮 鑑定カード');
+      if (saved === 'aborted' || saved === 'preview') return;
 
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 2500);

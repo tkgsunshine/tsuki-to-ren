@@ -12,6 +12,7 @@ import { PremiumUnlockButton } from './PremiumUnlockButton';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
+import { saveImageBlob } from '../utils/saveImage';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
 import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
 
@@ -1050,35 +1051,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
       if (!blob) throw new Error('Blob creation failed');
 
-      // 1. Try Native Web Share API (Direct save to Camera Roll)
-      if (navigator.canShare) {
-        try {
-          const file = new File([blob], filename, { type: 'image/jpeg' });
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: '月と蓮 守護獣カード'
-            });
-            setAvatarSavedSuccess(true);
-            setTimeout(() => setAvatarSavedSuccess(false), 2500);
-            return;
-          }
-        } catch (shareErr: any) {
-          if (shareErr?.name === 'AbortError') {
-            return;
-          }
-        }
-      }
-
-      // 2. Direct instant download via Object URL
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      // 共有シート → ダウンロード。アプリ内ブラウザ（X等）・iPhoneでは画面の上に出して長押しで保存（utils/saveImage.ts）
+      const saved = await saveImageBlob(blob, filename, '月と蓮 守護獣カード');
+      if (saved === 'aborted' || saved === 'preview') return;
 
       setAvatarSavedSuccess(true);
       setTimeout(() => setAvatarSavedSuccess(false), 2500);
