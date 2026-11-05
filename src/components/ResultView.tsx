@@ -3823,7 +3823,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
       </div>
       {/* Floating Sticky Bottom A2HS Prompt Banner (Above Share CTA) */}
-      {showA2hsBanner && !isA2hsDismissed && (
+      {/* 未登録のゲストには出さない（会員登録・有料会員になってから） */}
+      {(isRegistered || isSubscribed) && showA2hsBanner && !isA2hsDismissed && (
         <div className="result-floating-bar" style={{
           position: 'fixed',
           bottom: 'calc(8.6rem + var(--safe-bottom, 0px))',

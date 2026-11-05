@@ -2188,7 +2188,8 @@ function App() {
                   </button>
                 </div>
 
-                {/* ホーム画面に追加（PWAインストール・案内） */}
+                {/* ホーム画面に追加（PWAインストール・案内）: 未登録のゲストには出さない（会員登録・有料会員になってから） */}
+                {(isRegistered || isSubscribed) && (
                 <div 
                   onClick={() => setShowInstallGuideModal(true)}
                   className="glass-panel" 
@@ -2216,6 +2217,7 @@ function App() {
                   </div>
                   <ChevronRight size={18} style={{ color: '#e2c074' }} />
                 </div>
+                )}
 
                 <div 
                   onClick={() => {
