@@ -1283,6 +1283,35 @@ export function getDailyContactAndAdvice(dailyScore, hasOpponent, character, _my
         dailyActionAdviceParts: parts
     };
 }
+// 鑑定文で「根拠」として示す十干・十二支・五行のたとえ（文のみ。判定・点数には使わない）
+const STEM_IMAGE = {
+    '甲': '甲（きのえ）＝天へまっすぐ伸びる大樹',
+    '乙': '乙（きのと）＝しなやかな草花',
+    '丙': '丙（ひのえ）＝天を照らす太陽',
+    '丁': '丁（ひのと）＝闇を照らす灯火',
+    '戊': '戊（つちのえ）＝どっしりとそびえる山',
+    '己': '己（つちのと）＝命を育む田畑',
+    '庚': '庚（かのえ）＝鍛えられた鋼',
+    '辛': '辛（かのと）＝磨かれた宝石',
+    '壬': '壬（みずのえ）＝すべてを包む大海',
+    '癸': '癸（みずのと）＝大地を潤す雨露'
+};
+const BRANCH_READING = {
+    '子': 'ね', '丑': 'うし', '寅': 'とら', '卯': 'う', '辰': 'たつ', '巳': 'み',
+    '午': 'うま', '未': 'ひつじ', '申': 'さる', '酉': 'とり', '戌': 'いぬ', '亥': 'い'
+};
+const branchLabel = (b) => (BRANCH_READING[b] ? `${b}（${BRANCH_READING[b]}）` : b);
+// 相生：生む側→生まれる側
+const GENERATE_IMAGE = {
+    '木火': '木が燃えて火を生む', '火土': '火が燃え尽きて灰が土に還る', '土金': '土の中から金属が生まれる',
+    '金水': '冷えた金属の表面に水が生まれる', '水木': '水が木を育てる'
+};
+// 相剋：剋す側→剋される側
+const CONQUER_IMAGE = {
+    '木土': '木が根を張って土を締めつける', '土水': '土が水をせき止める', '水火': '水が火を消す',
+    '火金': '火が金属を溶かす', '金木': '金の斧が木を断つ'
+};
+const conquerImage = (a, b) => CONQUER_IMAGE[`${a}${b}`] || CONQUER_IMAGE[`${b}${a}`] || `「${a}」と「${b}」の気がぶつかり合う`;
 // 2. 日干（生まれ持ったエネルギー）の宿命相性判定
 export function getStemCompatibility(myStem, oppStem, myNick, oppNick) {
     const pairs = {
@@ -1297,46 +1326,59 @@ export function getStemCompatibility(myStem, oppStem, myNick, oppNick) {
         '戊癸': 'パズルのピースのようにぴったり重なる奇跡の相性',
         '癸戊': 'パズルのピースのようにぴったり重なる奇跡の相性'
     };
+    const me = san(myNick, 'あなた');
+    const opp = san(oppNick);
+    const myImg = STEM_IMAGE[myStem] || myStem;
+    const oppImg = STEM_IMAGE[oppStem] || oppStem;
+    const stemText = myStem === oppStem
+        ? `生まれた日の星（日干）は、${me}も${opp}も「${myImg}」。`
+        : `生まれた日の星（日干）は、${me}が「${myImg}」、${opp}が「${oppImg}」。`;
     const key = `${myStem}${oppStem}`;
     if (pairs[key]) {
         return {
             type: '運命の絆',
             title: `【運命の相性】${pairs[key]}`,
-            detail: `お二人は出会った瞬間から理屈や条件ではなく、心と心の深い部分で惹かれ合う特別な相性です。${san(myNick)}と${san(oppNick)}の間には言葉にしなくても伝わる安心感があり、どんな壁があっても自然と寄り添い合える強い絆で結ばれています。`
+            detail: `${stemText}陰と陽の星がぴたりと引き合う“干合（かんごう）”の組み合わせで、四柱推命では最も強い結びつきのひとつ。古くは“夫婦の縁”とも呼ばれてきました。理屈より先に魂が反応し合うため、言葉にしなくても伝わる安心感があり、どんな壁があっても自然と寄り添い合える強い絆で結ばれています。`
         };
     }
     const elA = stemElements[myStem] || '木';
     const elB = stemElements[oppStem] || '火';
     const rel = elementRelations[elA]?.[elB] || 'same';
+    // 相生は両方向とも 'producing'。点数・typeは向きで分けず、文だけ向きで分ける
+    if (rel === 'producing' && GENERATE_IMAGE[`${elA}${elB}`]) {
+        return {
+            type: '支え合い',
+            title: '【自然と惹かれ合う相性】自然にパワーを与え合える関係',
+            detail: `${stemText}${GENERATE_IMAGE[`${elA}${elB}`]}ように、${me}の気が${opp}へ注がれる“相生（そうじょう）”の流れです。${me}の優しさや気配りが${opp}の魅力を自然と引き出し、${opp}にとって${me}は「一緒にいると一番ほっとして、元気になれる存在」になっています。`
+        };
+    }
     if (rel === 'producing') {
         return {
             type: '支え合い',
             title: '【自然と惹かれ合う相性】自然にパワーを与え合える関係',
-            detail: `お二人は自然とお互いを高め合える、とても心地よい関係です。${san(myNick)}の優しさや気配りが、${san(oppNick)}の魅力を自然と引き出し、お相手にとってあなたは「一緒にいると一番ホッとして元気になれる特別な存在」になっています。`
-        };
-    }
-    if (elementRelations[elB]?.[elA] === 'producing') {
-        return {
-            type: '愛され運',
-            title: '【安心感に包まれる相性】相手からの優しさがあなたを満たす関係',
-            detail: `お相手からたくさんのエネルギーと愛情をもらえる相性です。${san(oppNick)}と一緒にいると、${san(myNick)}は自然体でいられて前向きな気持ちになれます。相手の優しさを素直に受け取ることで、二人の仲はどんどん深まっていきます。`
+            detail: `${stemText}${GENERATE_IMAGE[`${elB}${elA}`] || '相手の気が自分を育てる'}ように、${opp}の気が${me}へ注がれる“相生（そうじょう）”の流れです。${opp}といると自然体で前向きになれ、その優しさを素直に受け取るほど、二人の縁は深まっていきます。`
         };
     }
     if (rel === 'same') {
         return {
             type: '自然体',
             title: '【親友のように等身大でいられる相性】',
-            detail: `お互いのテンポや物事の感じ方がとてもよく似ている相性です。まるで昔からの大親友のように、飾らずに何でも本音で話せます。お互いに一人の時間も大切にしてあげることで、ずっと仲良しでいられる最高の関係になれます。`
+            detail: `${stemText}どちらも五行の「${elA}」の気を宿す、“比和（ひわ）”の組み合わせです。同じ気は共鳴し合うため、テンポや物事の感じ方が驚くほど似ていて、前世から知っていたかのように飾らない本音で語り合えます。ただ、同じ気は重なりすぎるとお互いの領域を取り合いやすいのが比和の課題。一人の時間という“余白”を尊重し合うことで、この縁はいつまでも澄んだまま育っていきます。`
         };
     }
     return {
         type: '刺激的',
         title: '【お互いを刺激し合うドラマティック相性】',
-        detail: `自分にはない新しい魅力や世界観を見せてくれる、ドキドキする相性です。正反対だからこそ強烈に惹かれ合いますが、お互いのやり方にこだわりすぎると小さなすれ違いが起きることも。「自分と違ってそこが素敵！」と面白がるゆとりを持つことが、ずっとラブラブでいるコツです。`
+        detail: `${stemText}${conquerImage(elA, elB)}ように気がぶつかり合う“相剋（そうこく）”の関係です。ただ相剋は、砥石が刃を研ぐようにお互いを磨き上げる力も持ちます。正反対だからこそ強く惹かれ合う一方、自分のやり方にこだわると小さなすれ違いも。「自分と違ってそこが素敵」と面白がる余裕が、この縁を長く結ぶ鍵です。`
     };
 }
 // 3. 生まれ月・十二支の波長判定
-export function getBranchCompatibility(myBranch, oppBranch) {
+export function getBranchCompatibility(myBranch, oppBranch, myNick = 'あなた', oppNick = 'お相手') {
+    const me = san(myNick, 'あなた');
+    const opp = san(oppNick);
+    const pairText = myBranch === oppBranch
+        ? `生まれ日の十二支（日支）は、${me}も${opp}も「${branchLabel(myBranch)}」。`
+        : `生まれ日の十二支（日支）は、${me}が「${branchLabel(myBranch)}」、${opp}が「${branchLabel(oppBranch)}」。`;
     const sixHarmonies = {
         '子': '丑', '丑': '子', '寅': '亥', '亥': '寅',
         '卯': '戌', '戌': '卯', '辰': '酉', '酉': '辰',
@@ -1346,17 +1388,26 @@ export function getBranchCompatibility(myBranch, oppBranch) {
         return {
             type: '最高のフィーリング',
             title: '【以心伝心】言葉にしなくても伝わる空気感',
-            detail: 'お二人は言葉にしなくても空気感や生活リズムがぴったり一致する相性です。一緒にいるだけで不思議と緊張が解けて、深い安心感に包まれます。'
+            detail: `${pairText}十二支が陰陽でひと組になる“支合（しごう）”の関係で、見えない糸で結ばれた縁とされます。空気感や生活リズムが言葉なしでも重なり、一緒にいるだけで不思議と緊張がほどけて、深い安心感に包まれます。`
         };
     }
     const threeHarmonies = [
         ['申', '子', '辰'], ['巳', '酉', '丑'], ['寅', '午', '戌'], ['亥', '卯', '未']
     ];
-    if (threeHarmonies.some(group => group.includes(myBranch) && group.includes(oppBranch))) {
+    const harmonyGroup = threeHarmonies.find(group => group.includes(myBranch) && group.includes(oppBranch));
+    if (harmonyGroup) {
+        const HARMONY_NAME = {
+            '申': ['水局', '大きな水の流れ'], '巳': ['金局', '強い金の輝き'], '寅': ['火局', '大きな炎'], '亥': ['木局', '豊かな森']
+        };
+        const [kyoku, image] = HARMONY_NAME[harmonyGroup[0]];
+        const groupText = harmonyGroup.join('・');
+        const memberText = myBranch === oppBranch
+            ? `「${groupText}」の三つがそろうと${image}を生む“三合（さんごう）${kyoku}”の一角を、二人で分け合っています。`
+            : `この二つは「${groupText}」の三つがそろうと${image}を生む、“三合（さんごう）${kyoku}”の仲間です。`;
         return {
             type: 'ベストパートナー',
             title: '【相乗効果バツグン】一緒に未来へ進める相性',
-            detail: '二人が同じ目標や楽しい計画に向かって力を合わせた時に、何倍ものパワーを発揮できる相性です。お互いを助け合いながら、理想の未来を一緒に作っていけます。'
+            detail: `${pairText}${memberText}三合は、別々の場所から集まった気がひとつの大きな流れになる縁。同じ目標や計画に向かって力を合わせたとき、二人の気はひとつに束ねられ、何倍もの力となって理想の未来を切り開いていきます。`
         };
     }
     const sixConflicts = {
@@ -1368,35 +1419,40 @@ export function getBranchCompatibility(myBranch, oppBranch) {
         return {
             type: '磁石のような魅力',
             title: '【真逆だから惹かれ合う】刺激的な相性',
-            detail: '磁石のプラスとマイナスのように、お互いにない部分に強く惹かれ合う関係です。意見が違う時は「相手の世界を知るチャンス」と捉えることで、深いつながりに変わります。'
+            detail: `${pairText}十二支の円でちょうど真向かいに立つ“冲（ちゅう）”の関係です。冲は磁石の両極のように、互いにない部分へ強く惹かれ合う縁。意見が違うときは「相手の世界を知るチャンス」と受け止めることで、ぶつかり合う気は深いつながりへと変わっていきます。`
         };
     }
     return {
         type: '穏やかな調和',
         title: '【居心地バツグン】ほっと落ち着く相性',
-        detail: '無理をせず自然体でいられる関係です。焦らずマイペースに日々のやり取りを楽しむことで、じわじわと確かな信頼関係を育てていけます。'
+        detail: `${pairText}強く結びつける“合”も、ぶつかる“冲”もない、風のない湖のように穏やかな配置です。焦らずマイペースに日々のやり取りを重ねることで、じわじわと確かな信頼が育っていきます。`
     };
 }
 // 4. 九星気学 本命星相性判定
-export function getStarCompatibility(myStar, oppStar) {
+export function getStarCompatibility(myStar, oppStar, myNick = 'あなた', oppNick = 'お相手') {
     const elA = starElements[myStar] || '水';
     const elB = starElements[oppStar] || '金';
     const rel = elementRelations[elA]?.[elB] || 'same';
+    const me = san(myNick, 'あなた');
+    const opp = san(oppNick);
+    const starText = myStar === oppStar
+        ? `九星気学の本命星は、${me}も${opp}も「${myStar}」。`
+        : `九星気学の本命星は、${me}が「${myStar}」、${opp}が「${oppStar}」。`;
     if (rel === 'producing' || elementRelations[elB]?.[elA] === 'producing') {
         return {
             type: '運気アップ',
-            detail: '一緒に過ごせば過ごすほど、自然とお互いの運気やモチベーションがアップしていくハッピーな組み合わせです。'
+            detail: `${starText}${GENERATE_IMAGE[`${elA}${elB}`] || GENERATE_IMAGE[`${elB}${elA}`]}ように、互いの気を生かし合う“相生”の組み合わせで、一緒に過ごすほど二人の運気とやる気が巡り、高め合っていきます。`
         };
     }
     if (rel === 'same') {
         return {
             type: '息ぴったり',
-            detail: '好きなことや休日の過ごし方の好みが似ていて、一緒にいて気疲れしないスムーズな関係です。'
+            detail: `${starText}同じ「${elA}」の星どうしの“比和”で、互いの運気を乱さず、穏やかに巡らせ合う相性とされます。好きなことや休日の過ごし方が自然と重なり、一緒にいても気疲れしない、風通しのよい関係です。`
         };
     }
     return {
         type: '新しい刺激',
-        detail: 'お互いに新しい発見やワクワクする体験を与え合える、前向きな刺激に満ちた組み合わせです。'
+        detail: `${starText}「${elA}」と「${elB}」の気が交わる“相剋”の組み合わせで、互いの気の流れが交差する分、新しい発見や心が動く体験を運び合う、刺激に満ちた縁です。`
     };
 }
 // 5. 16タイプ（MBTI）性格・コミュニケーション相性判定
@@ -1757,8 +1813,8 @@ export function generateFortuneResult(input, character) {
     const opponentMbtiText = input.opponentMbti ? (mbtiTexts[input.opponentMbti] || '自分のペースを守りながら少しずつ心を開くタイプ') : undefined;
     // 🌟 四柱推命・九星気学・16タイプ統合ダイナミクスの算出
     const stemComp = oppPillarObj ? getStemCompatibility(myPillarObj.stem, oppPillarObj.stem, myNickname, oppNickname) : null;
-    const branchComp = oppPillarObj ? getBranchCompatibility(myPillarObj.branch, oppPillarObj.branch) : null;
-    const starComp = opponentStarObj ? getStarCompatibility(myStarObj.name, opponentStarObj.name) : null;
+    const branchComp = oppPillarObj ? getBranchCompatibility(myPillarObj.branch, oppPillarObj.branch, myNickname, oppNickname) : null;
+    const starComp = opponentStarObj ? getStarCompatibility(myStarObj.name, opponentStarObj.name, myNickname, oppNickname) : null;
     // 未選択（空文字）でも文が欠けないよう、'UNKNOWN' として扱う
     const mbtiDyn = hasOpponent ? getMbtiCognitiveDynamics(input.myMbti || 'UNKNOWN', input.opponentMbti || 'UNKNOWN', myNickname, oppNickname) : null;
     const myStemTrait = getStemTraits(myPillarObj.stem, myNickname);
@@ -1801,19 +1857,19 @@ export function generateFortuneResult(input, character) {
         if (character === 'tsuki') {
             if (baseScore >= 85) {
                 oneLiner = `${sTitle}。心と心が深く通じ合い、自然と愛が深まる最高の幸運期です。`;
-                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+                summary = `${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else if (baseScore >= 70) {
                 oneLiner = `${sTitle}。お互いを思いやることで絆がぐんと深まる好調期。素直な気持ちを届けましょう。`;
-                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+                summary = `${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else if (baseScore >= 55) {
                 oneLiner = `【ゆっくり育てる相性】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
-                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+                summary = `${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else {
                 oneLiner = `【${sType}】焦らず穏やかに見守る時。お互いの違いをポジティブに楽しむ姿勢が大切です。`;
-                summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+                summary = `${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
         }
         else { // ren
@@ -2400,37 +2456,37 @@ export function generateFortuneResult(input, character) {
             if (character === 'tsuki') {
                 if (score >= 85) {
                     topic1Intro = `二人の生まれ持った星を重ねると、${sTitle}。${san(myNickname)}と${san(oppNick)}の間には、言葉がなくても惹かれ合う力と、深い信頼があります。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} さらに${starDetail}\n\n🌙 月からの導き：${san(oppNick)}にとって、${san(myNickname)}は「他では決して得られない深い安らぎ」を感じる存在です。お互いの弱さや本音を素直に打ち明け合うことで、二人の絆は一生ものになっていきます。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail}\n\nさらに${starDetail}\n\n🌙 月からの導き：${san(oppNick)}にとって、${san(myNickname)}は「他では決して得られない深い安らぎ」を感じる存在です。お互いの弱さや本音を素直に打ち明け合うことで、二人の絆は一生ものになっていきます。`;
                 }
                 else if (score >= 70) {
                     topic1Intro = `お互いの生まれ持った性質がちょうどよく補い合い、一緒にいる時間が長いほど信頼が深まる「大器晩成」の好相性です。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：${san(oppNick)}は${san(myNickname)}の持つ柔らかな包容力に安心感を覚えています。「私たちってどういう関係？」と急いで決めようとせず、二人の心地よいペースを大切にすることが、恋を実らせる近道です。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🌙 月からの導き：${san(oppNick)}は${san(myNickname)}の持つ柔らかな包容力に安心感を覚えています。「私たちってどういう関係？」と急いで決めようとせず、二人の心地よいペースを大切にすることが、恋を実らせる近道です。`;
                 }
                 else if (score >= 55) {
                     topic1Intro = `今の二人は、お互いが踏み込まれたくないところを大切にしながら、関係の土台をつくっている段階です。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：一時的にお相手が自分の世界に入り込んでいるように見えても、それはあなたを避けているのではなく、一人で元気を取り戻している最中です。焦らず温かく見守ることが、信頼につながります。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🌙 月からの導き：一時的にお相手が自分の世界に入り込んでいるように見えても、それはあなたを避けているのではなく、一人で元気を取り戻している最中です。焦らず温かく見守ることが、信頼につながります。`;
                 }
                 else {
                     topic1Intro = `今は二人の星のめぐりが一時的に「慎重に」の時期で、小さなすれ違いが起きやすくなっています。気持ちのままに動かず、様子を見ましょう。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：今は無理に白黒をつけようとせず、相手に一人の時間をあげることがいちばんです。まずはあなた自身の心を満たしてあげると、余計なぶつかり合いを防げて、運気も上向いていきます。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🌙 月からの導き：今は無理に白黒をつけようとせず、相手に一人の時間をあげることがいちばんです。まずはあなた自身の心を満たしてあげると、余計なぶつかり合いを防げて、運気も上向いていきます。`;
                 }
             }
             else { // ren
                 if (score >= 85) {
                     topic1Intro = `二人の命式と性格タイプを重ね合わせると、互いの足りない部分を補い合う、とても相性の良い組み合わせだと読み取れます。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の分析：生まれ持った星の相性と九星気学のめぐりから見て、二人が大きくぶつかる心配はほとんどありません。この追い風のうちに、これからのことや次の約束を、具体的に話し合っておきましょう。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🔮 蓮の分析：生まれ持った星の相性と九星気学のめぐりから見て、二人が大きくぶつかる心配はほとんどありません。この追い風のうちに、これからのことや次の約束を、具体的に話し合っておきましょう。`;
                 }
                 else if (score >= 70) {
                     topic1Intro = `二人の関係は着実に上向いています。相手の考え方や行動のくせをよく見ておけば、無理なく仲を深められます。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の分析：気持ちをぶつけるより、共通の目標や趣味、実際にあった出来事を話題にして会話を重ねると、自然と距離が縮まります。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🔮 蓮の分析：気持ちをぶつけるより、共通の目標や趣味、実際にあった出来事を話題にして会話を重ねると、自然と距離が縮まります。`;
                 }
                 else if (score >= 55) {
                     topic1Intro = `今の二人の運気は、大きな波のない穏やかな流れです。強引に動くより、今の関係を大切に育てるのが賢い選択です。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の分析：今のお相手は、心の余裕が少し落ちている時期です。返事の催促など押しすぎは禁物。3〜5日に1回くらい、近況などの気軽な連絡にとどめるのがいちばんです。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🔮 蓮の分析：今のお相手は、心の余裕が少し落ちている時期です。返事の催促など押しすぎは禁物。3〜5日に1回くらい、近況などの気軽な連絡にとどめるのがいちばんです。`;
                 }
                 else {
                     topic1Intro = `今の二人の星には、一時的にすれ違いやすいめぐりが出ています。相手が踏み込まれたくないところには、近づかないようにしてください。`;
-                    topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の分析：お相手${oppTypeParen}は今、心を守ろうとしている時期で、感情的な長文には強く反発しやすくなっています。連絡はいつもよりぐっと減らして、少し様子を見るのがいちばん安全です。`;
+                    topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🔮 蓮の分析：お相手${oppTypeParen}は今、心を守ろうとしている時期で、感情的な長文には強く反発しやすくなっています。連絡はいつもよりぐっと減らして、少し様子を見るのがいちばん安全です。`;
                 }
             }
             // Topic 2: 会話と伝わり方・LINE心理学
