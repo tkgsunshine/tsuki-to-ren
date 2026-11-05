@@ -2716,6 +2716,37 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
+            {/* 4.5 ドキッとさせる仕草（1つ目は誰でも見られ、2つ目以降はプレミアム限定。中身は fortuneEngine の getAttractionStyle） */}
+            {activeResult.opponentTorisetsu.attraction && activeResult.opponentTorisetsu.attraction.gestures.length > 0 && (() => {
+              const gs = activeResult.opponentTorisetsu.attraction.gestures;
+              const locked = !isSubscribed;
+              return (
+                <div style={{ background: 'rgba(226, 139, 170, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 139, 170, 0.22)', position: 'relative' }}>
+                  <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f6c6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <PiercedHeartMark size={18} />
+                    <span>ドキッとさせる仕草</span>
+                  </div>
+                  <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8' }}>
+                    <li>{gs[0]}</li>
+                  </ul>
+                  {gs.length > 1 && (
+                    <div style={{ position: 'relative' }}>
+                      <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 }}>
+                        {gs.slice(1).map((g, i) => <li key={i}>{lockedText(g, locked)}</li>)}
+                      </ul>
+                      {locked && (
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
+                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* 5. 脈なしサイン ＆ 挽回テクニック */}
             <div style={{ background: 'rgba(201, 86, 106, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(201, 86, 106, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fda4af', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -2808,7 +2839,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
-            {/* 7.5 お相手が惹かれるファッション＆仕草（イメージと系統は誰でも見られ、色・服装・仕草・NGはプレミアム限定） */}
+            {/* 7.5 お相手が惹かれるファッション（イメージと系統は誰でも見られ、色・服装・一工夫・NGはプレミアム限定） */}
             {activeResult.opponentTorisetsu.attraction && (() => {
               const at = activeResult.opponentTorisetsu.attraction;
               const locked = !isSubscribed;
@@ -2821,7 +2852,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ background: 'rgba(226, 139, 170, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 139, 170, 0.22)', position: 'relative' }}>
                   <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f6c6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     <HangerMark size={18} />
-                    <span>惹かれるファッション ＆ ドキッとさせる仕草</span>
+                    <span>惹かれるファッション</span>
                   </div>
                   <div className="font-serif" style={{ fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
@@ -2846,12 +2877,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {at.mbtiTip && (
                         <div style={lockStyle}><span style={label}>【{at.mbtiType}タイプのお相手に効く一工夫】</span>{lockedText(at.mbtiTip, locked)}</div>
                       )}
-                      <div style={lockStyle}>
-                        <span style={label}>【ドキッとさせる仕草】</span>
-                        <ul style={{ margin: '0.15rem 0 0 0', paddingLeft: '1.2rem' }}>
-                          {at.gestures.map((g, i) => <li key={i}>{lockedText(g, locked)}</li>)}
-                        </ul>
-                      </div>
                       <div style={lockStyle}><span style={label}>【冷めやすいポイント】</span>{lockedText(at.ngStyle, locked)}</div>
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>

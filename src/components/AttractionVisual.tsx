@@ -1,6 +1,6 @@
 import React from 'react';
 
-// 「惹かれるファッション ＆ ドキッとさせる仕草」を絵で見せる部品。
+// 「惹かれるファッション」を絵で見せる部品。
 // 写真やAI画像は使わず、SVGで描く（軽い・ブランドの線画と揃う・著作権の心配がない）。
 // key は、お相手が惹かれる相手の十干（fortuneEngine.ts の getAttractionStyle が返す attraction.key）。
 
