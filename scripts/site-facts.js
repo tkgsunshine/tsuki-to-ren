@@ -67,7 +67,7 @@ export const SERVICE = {
     { path: '/', title: '恋愛相性診断（トップ）', desc: '生年月日を入れて、二人の相性と今日の相性を占う' },
     { path: '/about', title: '月と蓮とは（このページ）', desc: '仕組み・料金・運営者の公式情報' },
     { path: '/tools/nicchu', title: '日柱の調べ方', desc: '生年月日から四柱推命の日柱（60通り）を調べるツール' },
-    { path: '/compatibility', title: '16タイプ相性一覧', desc: '16タイプどうしの恋愛相性の一覧' },
+    { path: '/compatibility', title: '16タイプ恋愛相性表', desc: '16タイプどうしの恋愛相性を0〜100点で全256通り' },
     { path: '/column', title: '恋愛コラム', desc: '16タイプ・四柱推命・九星気学・LINE・復縁などの記事' },
     { path: '/company', title: '運営会社', desc: 'Ill株式会社の会社概要' },
     { path: '/contact', title: 'お問い合わせ', desc: '' },

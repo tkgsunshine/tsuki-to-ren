@@ -34,6 +34,7 @@ import { SeoFooterSection } from './components/SeoFooterSection';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
+import { ToolCompatView } from './components/ToolCompatView';
 import { trackCheckout, trackFortune, trackPremiumView, trackRegStep } from './services/analytics';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
@@ -90,6 +91,9 @@ const getInitialRoute = (): InitialRoute => {
   }
   if (path === '/tools/nicchu' || path === '/tools/nicchu/') {
     return { tab: 'tool', slug: 'nicchu', legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/compatibility' || path === '/compatibility/') {
+    return { tab: 'tool', slug: 'compat', legal: false, settingsSubView: 'main', compatibilityPair: null };
   }
   if (path === '/terms' || path === '/terms/' || path === '/privacy' || path === '/privacy/') {
     return { tab: 'home', slug: null, legal: true, settingsSubView: 'main', compatibilityPair: null };
@@ -1869,10 +1873,10 @@ function App() {
           </div>
         )}
 
-        {/* ツールページ（/tools/nicchu 日柱の調べ方） */}
+        {/* ツールページ（/tools/nicchu 日柱の調べ方、/compatibility 16タイプ恋愛相性表） */}
         {activeTab === 'tool' && (
           <div style={{ animation: 'fadeIn 0.4s ease', width: '100%' }}>
-            <ToolNicchuView />
+            {initialRoute.slug === 'compat' ? <ToolCompatView /> : <ToolNicchuView />}
           </div>
         )}
 
