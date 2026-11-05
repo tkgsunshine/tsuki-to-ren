@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Copy, Check } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { LoveLetterMark } from './icons/BrandIcons';
 import type { LineKit } from '../utils/lineKit';
 
@@ -23,11 +23,13 @@ interface Props {
   isSubscribed: boolean;
   isRegistered: boolean;
   onLockClick: () => void;
+  // ロックのボタンの文字（買い切りが買えるときは「¥680で解放」）
+  lockWord?: string;
   /** 見出しに出すお相手の呼び方（例: ゆうとさん） */
   partnerLabel?: string;
 }
 
-export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, isRegistered, onLockClick, partnerLabel = 'お相手' }) => {
+export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick, lockWord = '続きを見る', partnerLabel = 'お相手' }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const locked = !isSubscribed;
   const blurred: React.CSSProperties = locked ? { filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65 } : {};
@@ -47,7 +49,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, isRegistere
     // ぼかす部分は縦に長いので、ボタンは中央ではなく上のほう（すぐ目に入る位置）に置く
     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '3.2rem', pointerEvents: 'none', zIndex: 10 }}>
       <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={onLockClick}>
-        <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+        {lockWord}
       </button>
     </div>
   );

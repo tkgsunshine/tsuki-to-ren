@@ -202,3 +202,19 @@ export const RoadmapMark: React.FC<BrandIconProps> = (props) => (
     <path d="M18.5 3.6l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9Z" fill="currentColor" />
   </LineIcon>
 );
+
+// 吹き出しにきらめき。響くほめ言葉。
+export const PraiseSparkMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M5.5 4.5h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H11l-4.5 3.5v-3.5h-1a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z" />
+    <path d="M12 6.8l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9Z" fill="currentColor" stroke="none" />
+  </LineIcon>
+);
+
+// 星を抱いた地図のピン。おすすめの場所。
+export const SpotPinMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z" />
+    <path d="M12 6.6l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8Z" fill="currentColor" stroke="none" />
+  </LineIcon>
+);

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail, User } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
-import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, type UserProfile } from '../services/firebase';
+import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, accountNeedsEmail, sendAddEmailLink, isGuestAccount, type UserProfile } from '../services/firebase';
+import { trackRegStep } from '../services/analytics';
 
 interface AuthModalProps {
   currentUser: UserProfile | null;
@@ -14,6 +15,41 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
   const [emailInput, setEmailInput] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // "メールアドレスを追加" for signed-in accounts without a verified email (X sign-in)
+  const [addEmailInput, setAddEmailInput] = useState(() => (currentUser?.email || ''));
+  const [addEmailSending, setAddEmailSending] = useState(false);
+  const [addEmailSent, setAddEmailSent] = useState<string | null>(null);
+  const [addEmailError, setAddEmailError] = useState<string | null>(null);
+  // A purchase-only account (bought without signing in) can't get an email attached: it signs in with the purchase email instead
+  const [isGuest, setIsGuest] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    if (currentUser) isGuestAccount().then((g) => { if (alive) setIsGuest(g); });
+    return () => { alive = false; };
+  }, [currentUser?.uid]);
+  const needsEmail = !!currentUser && !isGuest && accountNeedsEmail();
+
+  const handleAddEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = addEmailInput.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+      setAddEmailError('有効なメールアドレスを入力してください。');
+      return;
+    }
+    setAddEmailSending(true);
+    setAddEmailError(null);
+    try {
+      await sendAddEmailLink(clean);
+      setAddEmailSent(clean);
+    } catch (err: any) {
+      console.error('Add email send error:', err?.code, err?.message);
+      setAddEmailError(err?.code === 'auth/too-many-requests'
+        ? '送信回数が多すぎます。しばらく時間をおいてからお試しください。'
+        : 'メールの送信に失敗しました。メールアドレスを確認して、もう一度お試しください。');
+    } finally {
+      setAddEmailSending(false);
+    }
+  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +62,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
     setErrorMsg(null);
     try {
       await sendEmailMagicLink(cleanEmail);
+      trackRegStep('reg_submit', 'modal_email');
       setEmailSent(true);
     } catch (err: any) {
       console.error('Email signin error:', err);
@@ -39,6 +76,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
   const handleGoogleSignIn = async () => {
     setLoading('google');
     setErrorMsg(null);
+    if (!currentUser) trackRegStep('reg_submit', 'modal_google');
     try {
       const user = await signInWithGoogle();
       if (user && user.uid) {
@@ -65,6 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
   const handleXSignIn = async () => {
     setLoading('x');
     setErrorMsg(null);
+    if (!currentUser) trackRegStep('reg_submit', 'modal_x');
     try {
       const user = await signInWithX();
       if (user && user.uid) {
@@ -189,13 +228,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
             padding: '1.25rem',
             borderRadius: '18px'
           }}>
-            {currentUser.photoURL ? (
-              <img
-                src={currentUser.photoURL}
-                alt="Profile"
-                style={{ width: '64px', height: '64px', borderRadius: '50%', border: '2px solid var(--color-gold)' }}
-              />
-            ) : (
+            {(
               <div style={{
                 width: '64px',
                 height: '64px',
@@ -209,13 +242,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 fontWeight: 'bold',
                 border: '2px solid var(--color-gold)'
               }}>
-                {(currentUser.displayName || 'U').charAt(0)}
+                <User size={28} />
               </div>
             )}
 
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: 'white' }}>
-                {currentUser.displayName || 'ユーザー'}
+                ログイン中
               </div>
               <div style={{ fontSize: '0.78rem', color: '#a39d91', marginTop: '2px' }}>
                 {currentUser.email ? currentUser.email : (currentUser.providerId === 'twitter.com' ? 'X連携アカウント' : 'アカウント連携完了')}
@@ -234,7 +267,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
               }}>
                 <CheckCircle size={12} />
                 <span>
-                  {currentUser.providerId === 'twitter.com'
+                  {isGuest
+                    ? '購入用のアカウント'
+                    : currentUser.providerId === 'twitter.com'
                     ? 'X 連携中'
                     : (currentUser.providerId === 'email' || (() => { try { return localStorage.getItem('hasu_to_tsuki_registered') === 'email_verified'; } catch { return false; } })())
                     ? 'メール認証完了'
@@ -242,6 +277,80 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 </span>
               </div>
             </div>
+
+            {isGuest && (
+              <div style={{ width: '100%', boxSizing: 'border-box', padding: '0.9rem 1rem', borderRadius: '14px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>
+                  <Mail size={15} />
+                  <span>購入したときのメールアドレスでログイン</span>
+                </div>
+                {emailSent ? (
+                  <p style={{ fontSize: '0.78rem', color: '#d8d2c6', lineHeight: 1.7, margin: '0.5rem 0 0' }}>
+                    ログイン用のメールを送りました。メールのリンクを開くとログインでき、購入した鑑定もそのまま引き継がれます。届かないときは迷惑メールフォルダもご確認ください。
+                  </p>
+                ) : (
+                  <form onSubmit={handleEmailSignIn} style={{ marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#a9a49a', lineHeight: 1.7, margin: '0 0 0.6rem' }}>
+                      今は、購入のときに自動で作られたアカウントで見ています。購入したときのメールアドレスでログインすると、購入した鑑定がそのアカウントに引き継がれ、ほかの端末でも見られて、毎朝の運勢メールも受け取れます。
+                    </p>
+                    <input
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="購入したときのメールアドレス"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '0.7rem 0.85rem', borderRadius: '12px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.15)', color: '#f3efe6', fontSize: '16px' }}
+                    />
+                    {errorMsg && <p style={{ fontSize: '0.75rem', color: '#e6a99c', margin: '0.4rem 0 0' }}>{errorMsg}</p>}
+                    <button
+                      type="submit"
+                      disabled={loading === 'email'}
+                      style={{ width: '100%', marginTop: '0.6rem', padding: '0.7rem', borderRadius: '12px', background: 'linear-gradient(135deg, #e2c074 0%, #b8862d 100%)', border: 'none', color: '#1c1a22', fontSize: '0.85rem', fontWeight: 'bold', cursor: loading === 'email' ? 'wait' : 'pointer' }}
+                    >
+                      {loading === 'email' ? '送信中...' : 'ログイン用のメールを送る'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {needsEmail && (
+              <div style={{ width: '100%', boxSizing: 'border-box', padding: '0.9rem 1rem', borderRadius: '14px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>
+                  <Mail size={15} />
+                  <span>メールアドレスを追加</span>
+                </div>
+                {addEmailSent ? (
+                  <p style={{ fontSize: '0.78rem', color: '#d8d2c6', lineHeight: 1.7, margin: '0.5rem 0 0' }}>
+                    {addEmailSent} に確認メールを送りました。メールのリンクを、<strong style={{ color: '#f2e2b3' }}>このブラウザ（アプリ）で</strong>開くと追加が完了します。届かないときは迷惑メールフォルダもご確認ください。
+                  </p>
+                ) : (
+                  <form onSubmit={handleAddEmail} style={{ marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#a9a49a', lineHeight: 1.7, margin: '0 0 0.6rem' }}>
+                      追加すると、毎朝の運勢メールが受け取れます。Xにログインできなくなったときも、このメールで今のアカウントにログインできます。
+                    </p>
+                    <input
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      value={addEmailInput}
+                      onChange={(e) => setAddEmailInput(e.target.value)}
+                      placeholder="example@email.com"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '0.7rem 0.85rem', borderRadius: '12px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.15)', color: '#f3efe6', fontSize: '16px' }}
+                    />
+                    {addEmailError && <p style={{ fontSize: '0.75rem', color: '#e6a99c', margin: '0.4rem 0 0' }}>{addEmailError}</p>}
+                    <button
+                      type="submit"
+                      disabled={addEmailSending}
+                      style={{ width: '100%', marginTop: '0.6rem', padding: '0.7rem', borderRadius: '12px', background: 'linear-gradient(135deg, #e2c074 0%, #b8862d 100%)', border: 'none', color: '#1c1a22', fontSize: '0.85rem', fontWeight: 'bold', cursor: addEmailSending ? 'wait' : 'pointer' }}
+                    >
+                      {addEmailSending ? '送信中...' : '確認メールを送る'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
 
             <button
               onClick={handleLogOut}
@@ -408,12 +517,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
               <ShieldCheck size={13} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
               <span>機種変更や別端末でもデータを自動同期</span>
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <ShieldCheck size={13} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
+              <span>毎朝8時に、今日の運勢とLINEを送るのにいい時間をメールでお届け</span>
+            </div>
           </div>
         </div>
 
         {/* Privacy Note */}
         <div style={{ fontSize: '0.68rem', color: '#736e65', textAlign: 'center', lineHeight: '1.4' }}>
-          ※ 登録により、利用規約およびプライバシーポリシーに同意したものとみなされます。勝手にSNSへ投稿されることはありません。
+          ※ 登録により、利用規約およびプライバシーポリシーに同意したものとみなされます。勝手にSNSへ投稿されることはありません。毎朝の運勢メールは、マイページやメール内のリンクからいつでも止められます。
         </div>
       </div>
     </div>

@@ -56,6 +56,9 @@ export const sourceFrom = (search: string, referrer: string, ownHost: string): s
   if (utm) {
     const clean = utm.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 30);
     if (clean === 'chatgptcom') return 'chatgpt'; // ChatGPT が付ける utm_source=chatgpt.com
+    // Xの投稿ごとの計測（2026-11-04）: utm_content=投稿ID があれば utm:x_<投稿ID> として数える（管理画面の流入元に投稿ごとに出る）
+    const content = (new URLSearchParams(search).get('utm_content') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (clean === 'x' && content) return `utm:x_${content}`.slice(0, 34);
     if (clean) return `utm:${clean}`;
   }
   if (!referrer) return 'direct';
@@ -147,9 +150,34 @@ export const initAttribution = () => {
 
 const current = (): Attribution => ({ source: 'direct', landing: 'other', ...read(session(), SESSION_KEY), device: currentDevice() });
 
+/** This visit's source / landing page / device, sent with a checkout so a purchase without sign-up is counted under it. */
+export const currentAttribution = (): Attribution => current();
+
+// '1' the first time this browser session does `type` (the funnel on /admin counts people, not repeats)
+const firstInSession = (type: string): '1' | '0' => {
+  const key = `hasu_first_${type}`;
+  try {
+    if (session()?.getItem(key)) return '0';
+    session()?.setItem(key, '1');
+  } catch {}
+  return '1';
+};
+
 /** One fortune run from the input form. */
 export const trackFortune = () => {
-  void send({ type: 'fortune', ...current() });
+  void send({ type: 'fortune', first: firstInSession('fortune'), ...current() });
+};
+
+/**
+ * Steps toward a free account, so the admin page shows where guests drop off:
+ * reg_view   = the sign-up box on the result page came into view (once per result shown)
+ * reg_click  = a button that leads to sign-up was pressed: top (under the scores), bar (bottom bar), lock (a locked part)
+ * reg_submit = a sign-up was started: card_* (the box on the result page) / modal_* (the sign-in window), by email / google / x
+ * auth_open  = the sign-in window opened for someone not signed in
+ */
+export type RegPlace = 'top' | 'bar' | 'lock' | `${'card' | 'modal'}_${'email' | 'google' | 'x'}`;
+export const trackRegStep = (type: 'reg_view' | 'reg_click' | 'reg_submit' | 'auth_open', place?: RegPlace) => {
+  void send({ type, ...current(), ...(place ? { place } : {}) });
 };
 
 export type ShareChannel = 'x' | 'line' | 'link' | 'image';
@@ -159,9 +187,28 @@ export const trackShare = (channel: ShareChannel) => {
   void send({ type: 'share', channel, ...current() });
 };
 
-/** The premium page opened (premium_view), or the button to Stripe's payment page pressed (checkout). */
-export const trackPremiumStep = (type: 'premium_view' | 'checkout') => {
-  void send({ type, ...current() });
+// Whether this browser session has run a fortune from the input form (trackFortune marks it)
+const fortunedInSession = () => {
+  try { return Boolean(session()?.getItem('hasu_first_fortune')); } catch { return false; }
+};
+
+/** A paid lock (its button opens the paid-plan page) came into view on the result, after a fortune in this session. Once per session. */
+export const trackLockView = () => {
+  if (!fortunedInSession() || firstInSession('lock_view') !== '1') return;
+  void send({ type: 'lock_view', ...current() });
+};
+
+/** The paid-plan page opened, with the plan it led with: 'pair' from a lock the one-time purchase opens, else 'monthly'. */
+// ff = '1' the first time in this session the page is opened after a fortune from the input form, so /admin can divide
+// "saw the page" by "ran a fortune" with people who did both (a restored result or the My Page banner does not count as a fortune)
+export const trackPremiumView = (plan: 'pair' | 'monthly') => {
+  const ff = fortunedInSession() ? firstInSession('premium_view_ff') : '0';
+  void send({ type: 'premium_view', plan, first: firstInSession('premium_view'), ff, ...current() });
+};
+
+/** The button to Stripe's payment page pressed: monthly Premium (checkout) or the one-time pair purchase (checkout_pair). */
+export const trackCheckout = (plan: 'pair' | 'monthly') => {
+  void send({ type: plan === 'pair' ? 'checkout_pair' : 'checkout', ...current() });
 };
 
 /** A tool page (/tools/*) showed a result (tool_use), or its result's button to the fortune was pressed (tool_cta). */
@@ -175,6 +222,7 @@ export const trackColumnCta = (position: 'mid' | 'end') => {
 };
 
 /** Counts a newly created account once, with the source of its first visit. */
+// The account made automatically by a purchase without sign-up (custom claim guest) is not a sign-up; the server checks too.
 export const trackSignupIfNew = async (user: User) => {
   const created = Date.parse(user.metadata.creationTime || '');
   if (!created || Date.now() - created > SIGNUP_WINDOW_MS) return;
@@ -182,7 +230,8 @@ export const trackSignupIfNew = async (user: User) => {
     if (local()?.getItem(`${SIGNUP_KEY}_${user.uid}`)) return;
   } catch {}
   try {
-    const token = await user.getIdToken();
+    const { token, claims } = await user.getIdTokenResult();
+    if (claims.guest === true) return;
     await send({ type: 'signup', ...current(), ...read(local(), FIRST_KEY) }, token);
     write(local(), `${SIGNUP_KEY}_${user.uid}`, '1');
   } catch {}

@@ -8,7 +8,11 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 // broken down by source / landing page / device, and the member list.
 // The data comes from /api/admin, which only answers accounts listed in ADMIN_EMAILS (Vercel env).
 
-const METRIC_KEYS = ['visits', 'fortunes', 'signups', 'shares', 'premiumViews', 'checkouts', 'premiums', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds'] as const;
+// 有料は2プラン: 買い切り（お相手1人の深層鑑定 ¥680: pairCheckouts → pairs）と月額プレミアム（¥980: checkouts → premiums）。
+// *Sessions = ブラウザのセッションで最初の1回だけ数えた「人数」（流れの表はこちらで割る）。salesYen = 本番の購入額（円）
+const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'lockViewSessions', 'premiumViewsPair',
+  'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds',
+  'regViews', 'regClicks', 'regSubmits', 'authOpens'] as const; // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
 type FullCounts = Record<Metric, number>;
@@ -19,6 +23,7 @@ interface DailyDoc extends Counts {
   byLanding?: Record<string, Counts>;
   byDevice?: Record<string, Counts>;
   byShare?: Record<string, number>;
+  byReg?: Record<string, number>;
 }
 interface DayRow extends FullCounts {
   date: string;
@@ -37,6 +42,8 @@ interface Member {
   landing: string | null;
   device: string | null;
   premium: 'live' | 'test' | null;
+  pairs?: { live: number; test: number }; // 買い切りで解放したお相手の数
+  guest?: boolean; // 登録なしの購入で自動作成されたアカウント（メールなし）。会員数に入れない
   owner: 'auto' | 'marked' | null; // the owner's own account, left out of the member counts
 }
 interface ChatDay {
@@ -121,7 +128,8 @@ const jstDay = (iso: string | null) => (iso ? jst(iso).slice(0, 10) : '');
 const premiumLabel = (p: Member['premium']) => (p === 'live' ? '有料' : p === 'test' ? 'テスト' : '');
 const pct = (num: number, den: number) => (den ? `${((num / den) * 100).toFixed(1)}%` : '—');
 
-const zero = (): FullCounts => ({ visits: 0, fortunes: 0, signups: 0, shares: 0, premiumViews: 0, checkouts: 0, premiums: 0, toolUses: 0, toolCtas: 0, columnCtaMids: 0, columnCtaEnds: 0 });
+const zero = (): FullCounts => Object.fromEntries(METRIC_KEYS.map((k) => [k, 0])) as FullCounts;
+const salesYen = (n: number) => `¥${n.toLocaleString('ja-JP')}`;
 const addCounts = (a: FullCounts, v: Counts) => {
   for (const m of METRIC_KEYS) a[m] += v[m] || 0;
   return a;
@@ -141,12 +149,26 @@ const sumShares = (docs: DailyDoc[]) => {
   return [...out.entries()].sort((a, b) => b[1] - a[1]);
 };
 
+const sumReg = (docs: DailyDoc[]) => {
+  const out: Record<string, number> = {};
+  for (const d of docs) for (const [k, v] of Object.entries(d.byReg || {})) out[k] = (out[k] || 0) + (v || 0);
+  return out;
+};
+const REG_LABELS: Record<string, string> = {
+  click_top: '点数の下', click_bar: '画面下のバー', click_lock: '鍵のかかった所', click_other: 'その他',
+  submit_card_email: '結果画面・メール', submit_card_google: '結果画面・Google', submit_card_x: '結果画面・X',
+  submit_modal_email: 'ログイン画面・メール', submit_modal_google: 'ログイン画面・Google', submit_modal_x: 'ログイン画面・X', submit_other: 'その他',
+};
+const regDetail = (reg: Record<string, number>, prefix: string) =>
+  Object.entries(reg).filter(([k, n]) => k.startsWith(prefix) && n).sort((a, b) => b[1] - a[1])
+    .map(([k, n]) => `${REG_LABELS[k] || k} ${n}`).join('・');
+
 const toCsv = (rows: Member[]) => {
-  const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', 'プレミアム', '流入元', '入口ページ', '端末'];
+  const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', 'プレミアム', '買い切り(人)', '流入元', '入口ページ', '端末'];
   const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
   const lines = rows.map((m) => [
-    jst(m.createdAt), m.email || '', m.name || '', PROVIDER_LABELS[m.provider] || m.provider, jst(m.lastSignInAt),
-    m.dailyMail ? 'ON' : 'OFF', m.mbti || '', premiumLabel(m.premium), m.source ? sourceLabel(m.source) : '', m.landing ? landingLabel(m.landing) : '',
+    jst(m.createdAt), m.email || '', m.name || '', m.guest ? '購入用（自動）' : PROVIDER_LABELS[m.provider] || m.provider, jst(m.lastSignInAt),
+    m.dailyMail ? 'ON' : 'OFF', m.mbti || '', premiumLabel(m.premium), String(m.pairs?.live || 0), m.source ? sourceLabel(m.source) : '', m.landing ? landingLabel(m.landing) : '',
     m.device ? deviceLabel(m.device) : '',
   ].map(esc).join(','));
   return '﻿' + [head.map(esc).join(','), ...lines].join('\n');
@@ -377,8 +399,9 @@ function BreakdownTable({ title, rows, label, note }: { title: string; rows: [st
                 <th style={{ ...c.th, ...c.num }}>鑑定/訪問</th>
                 <th style={{ ...c.th, ...c.num }}>会員登録</th>
                 <th style={{ ...c.th, ...c.num }}>共有</th>
-                <th style={{ ...c.th, ...c.num }}>プレミアム案内</th>
-                <th style={{ ...c.th, ...c.num }}>課金</th>
+                <th style={{ ...c.th, ...c.num }}>有料案内</th>
+                <th style={{ ...c.th, ...c.num }}>買い切り</th>
+                <th style={{ ...c.th, ...c.num }}>月額</th>
               </tr>
             </thead>
             <tbody>
@@ -391,6 +414,7 @@ function BreakdownTable({ title, rows, label, note }: { title: string; rows: [st
                   <td style={{ ...c.td, ...c.num }}>{v.signups}</td>
                   <td style={{ ...c.td, ...c.num }}>{v.shares}</td>
                   <td style={{ ...c.td, ...c.num }}>{v.premiumViews}</td>
+                  <td style={{ ...c.td, ...c.num }}>{v.pairs}</td>
                   <td style={{ ...c.td, ...c.num }}>{v.premiums}</td>
                 </tr>
               ))}
@@ -426,15 +450,28 @@ function DailyChart({ days }: { days: DayRow[] }) {
   );
 }
 
-// Visit → fortune → sign-up → premium page → payment page → paid, over the selected period
-function Funnel({ t }: { t: FullCounts }) {
-  const steps: [string, number][] = [
-    ['訪問', t.visits], ['鑑定', t.fortunes], ['会員登録', t.signups],
-    ['プレミアム案内を開いた', t.premiumViews], ['支払い画面へ進んだ', t.checkouts], ['課金', t.premiums],
+// 訪問 → 鑑定した → 有料プランの案内を見た → 支払い画面（買い切り / 月額）→ 購入（買い切り / 月額）。
+// 鑑定・案内は「セッションで最初の1回」の人数で割るので、1人が何度開いても100%を超えない。
+// 会員登録は購入の前提ではない（登録なしでも買える）ので、流れの外に別に出す。
+// 「鑑定した → 案内を見た」は、同じ訪問で鑑定したあとに案内を開いた人（premiumViewFortuneSessions、2026-11-05〜）で割る。
+// 案内を見た人の全体（premiumViewSessions）には、前回の結果が自動で出た人・共有リンクで結果を見た人・マイページのバナーから
+// 開いた人も入り、鑑定した人の一部ではないので、参考として別の行に出す（支払い画面はこちらで割る）。
+function Funnel({ t, since, ffSince, lockSince }: { t: FullCounts; since: string | null; ffSince: string | null; lockSince: string | null }) {
+  type Row = { label: string; n: number; prev?: number; indent?: boolean };
+  const rows: Row[] = [
+    { label: '訪問', n: t.visits },
+    { label: '鑑定した', n: t.fortuneSessions, prev: t.visits },
+    { label: '鑑定したあと、有料のロックまで届いた', n: t.lockViewSessions, prev: t.fortuneSessions },
+    { label: '鑑定したあと、有料プランの案内を見た', n: t.premiumViewFortuneSessions, prev: t.lockViewSessions || t.fortuneSessions },
+    { label: '有料プランの案内を見た（全体）', n: t.premiumViewSessions },
+    { label: '支払い画面へ：買い切り ¥680', n: t.pairCheckouts, prev: t.premiumViewSessions, indent: true },
+    { label: '支払い画面へ：月額 ¥980', n: t.checkouts, prev: t.premiumViewSessions, indent: true },
+    { label: '購入：買い切り', n: t.pairs, prev: t.pairCheckouts, indent: true },
+    { label: '購入：月額', n: t.premiums, prev: t.checkouts, indent: true },
   ];
   return (
     <div style={c.card}>
-      <h2 style={c.h2}>訪問から課金までの流れ</h2>
+      <h2 style={c.h2}>訪問から購入までの流れ</h2>
       <div style={{ overflowX: 'auto' }}>
         <table style={c.table}>
           <thead>
@@ -446,19 +483,37 @@ function Funnel({ t }: { t: FullCounts }) {
             </tr>
           </thead>
           <tbody>
-            {steps.map(([label, n], i) => (
-              <tr key={label}>
-                <td style={c.td}>{label}</td>
-                <td style={{ ...c.td, ...c.num }}>{n}</td>
-                <td style={{ ...c.td, ...c.num }}>{i ? pct(n, steps[i - 1][1]) : ''}</td>
-                <td style={{ ...c.td, ...c.num }}>{i ? pct(n, t.visits) : ''}</td>
+            {rows.map((r, i) => (
+              <tr key={r.label}>
+                <td style={{ ...c.td, ...(r.indent ? { paddingLeft: 20 } : {}) }}>{r.label}</td>
+                <td style={{ ...c.td, ...c.num }}>{r.n}</td>
+                <td style={{ ...c.td, ...c.num }}>{r.prev === undefined ? '' : pct(r.n, r.prev)}</td>
+                <td style={{ ...c.td, ...c.num }}>{i ? pct(r.n, t.visits) : ''}</td>
               </tr>
             ))}
+            <tr>
+              <td style={{ ...c.td, fontWeight: 700 }}>売上（本番の購入額）</td>
+              <td style={{ ...c.td, ...c.num, fontWeight: 700 }}>{salesYen(t.salesYen)}</td>
+              <td style={c.td}></td>
+              <td style={{ ...c.td, ...c.num, ...c.muted }}>{t.visits ? `訪問1件あたり ${salesYen(Math.round(t.salesYen / t.visits))}` : ''}</td>
+            </tr>
+            <tr>
+              <td style={{ ...c.td, ...c.muted }}>（流れの外）会員登録</td>
+              <td style={{ ...c.td, ...c.num }}>{t.signups}</td>
+              <td style={c.td}></td>
+              <td style={{ ...c.td, ...c.num }}>{pct(t.signups, t.visits)}</td>
+            </tr>
           </tbody>
         </table>
       </div>
-      <div style={{ ...c.muted, marginTop: 8 }}>
-        別々に数えた回数どうしの割合です（同じ人を追いかけてはいません）。鑑定は1人が何度もできるので、100%を超えることがあります。
+      <div style={{ ...c.muted, marginTop: 8, lineHeight: 1.7 }}>
+        「鑑定した」「有料プランの案内を見た」は、1回の訪問（ブラウザのセッション）で何度しても1人と数えます{since ? `（${since === '2026-11-04' ? '2026-11-04 の12時50分ごろ' : since} から計測。その前の分は「鑑定（回）」「有料案内（回）」にだけ入っています）` : '（まだ計測前です）'}。
+        「鑑定したあと、案内を見た」は、同じ訪問で入力画面から鑑定したあとに案内を開いた人です{ffSince ? `（${ffSince} から計測）` : '（まだ計測前です）'}。
+        「ロックまで届いた」は、同じ訪問で鑑定したあと、押すと有料プランの案内が開く「続きを見る」が画面に入った人です{lockSince ? `（${lockSince} から計測）` : '（まだ計測前です）'}。マイページのバナーなどから直接開いた人もいるので、次の段が100%を超えることがあります。
+        「案内を見た（全体）」には、前回の結果が自動で出た人・共有リンクから結果を見た人・マイページのバナーから開いた人も入ります（鑑定した人の一部ではないので、割合は出しません）。
+        案内を開いた回数は「日ごとの数字」にあります。支払い画面は、案内を通らずに鑑定結果の「¥680で解放」から直接進んだ分も含みます。
+        購入はStripeの本番決済だけで、月額は新しく始めた分（毎月の更新は入りません）。売上は購入時の金額の合計です。
+        会員登録なしでも買えるので、会員登録は流れの外に出しています（購入のときに自動で作られるアカウントは会員登録に数えません）。
       </div>
     </div>
   );
@@ -466,13 +521,16 @@ function Funnel({ t }: { t: FullCounts }) {
 
 function DailyTable({ days }: { days: DayRow[] }) {
   const cols: [keyof DayRow, string][] = [
-    ['visits', '訪問'], ['fortunes', '鑑定'], ['signups', '会員登録'], ['shares', '共有'],
-    ['premiumViews', 'プレミアム案内'], ['checkouts', '支払い画面'], ['premiums', '課金'], ['aiCalls', 'AIチャット'],
+    ['visits', '訪問'], ['fortunes', '鑑定（回）'], ['fortuneSessions', '鑑定した人'], ['signups', '会員登録'], ['shares', '共有'],
+    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['lockViewSessions', 'ロックまで届いた'], ['premiumViewFortuneSessions', 'うち鑑定のあと'], ['premiumViewsPair', 'うち買い切りから'],
+    ['pairCheckouts', '支払い画面 買い切り'], ['checkouts', '支払い画面 月額'], ['pairs', '購入 買い切り'], ['premiums', '購入 月額'],
+    ['salesYen', '売上'], ['aiCalls', 'AIチャット'],
     ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'], ['columnCtaMids', 'コラム途中→鑑定へ'], ['columnCtaEnds', 'コラム最後→鑑定へ'],
   ];
   return (
     <div style={c.card}>
       <h2 style={c.h2}>日ごとの数字</h2>
+      <div style={{ ...c.muted, marginBottom: 8 }}>「有料案内（回）」は開いた回数、「案内を見た人」は1回の訪問で1人。「うち買い切りから」は、買い切りで見られる項目のロックから案内を開いた回数です。</div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ ...c.table, minWidth: 640 }}>
           <thead>
@@ -485,11 +543,53 @@ function DailyTable({ days }: { days: DayRow[] }) {
             {[...days].reverse().map((d) => (
               <tr key={d.date}>
                 <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{d.date}</td>
-                {cols.map(([k]) => <td key={k} style={{ ...c.td, ...c.num }}>{d[k]}</td>)}
+                {cols.map(([k]) => <td key={k} style={{ ...c.td, ...c.num }}>{k === 'salesYen' ? salesYen(d.salesYen) : d[k]}</td>)}
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+// 鑑定 → 会員登録 のどこで離れたか（2026-11 から計測。それより前の日は 0）
+function SignupFunnel({ t, reg }: { t: FullCounts; reg: Record<string, number> }) {
+  const steps: [string, number, string][] = [
+    ['鑑定した人', t.fortuneSessions, `鑑定の回数は ${t.fortunes}`],
+    ['結果画面の登録の箱が見えた', t.regViews, ''],
+    ['登録へのボタンを押した', t.regClicks, regDetail(reg, 'click_')],
+    ['ログイン画面を開いた', t.authOpens, 'メニュー・チャットなどから'],
+    ['登録を始めた（メール送信・Google・X）', t.regSubmits, regDetail(reg, 'submit_')],
+    ['会員登録', t.signups, ''],
+  ];
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>鑑定から会員登録まで</h2>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={c.table}>
+          <thead>
+            <tr>
+              <th style={c.th}></th>
+              <th style={{ ...c.th, ...c.num }}>数</th>
+              <th style={{ ...c.th, ...c.num }}>鑑定した人から</th>
+              <th style={c.th}>内訳</th>
+            </tr>
+          </thead>
+          <tbody>
+            {steps.map(([label, n, note], i) => (
+              <tr key={label}>
+                <td style={c.td}>{label}</td>
+                <td style={{ ...c.td, ...c.num }}>{n}</td>
+                <td style={{ ...c.td, ...c.num }}>{i ? pct(n, steps[0][1]) : ''}</td>
+                <td style={{ ...c.td, ...c.muted }}>{note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        「鑑定した人」は、1回の訪問で何度鑑定しても1人です。会員登録はメニューやチャットからの登録も含みます。途中の段（登録の箱・ボタン・ログイン画面・登録開始）は、この表を入れた日から数えています。
       </div>
     </div>
   );
@@ -529,7 +629,7 @@ const PERIODS = [
 
 export default function AdminView() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
-  const [days, setDays] = useState(30);
+  const [days, setDays] = useState(1); // 開いたときは「今日」
   const [offset, setOffset] = useState(0); // 1 = the period ends yesterday（「昨日」）
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState('');
@@ -587,9 +687,16 @@ export default function AdminView() {
   const totals = useMemo(() => daily.reduce((a, d) => addCounts(a, d), zero()), [daily]);
 
   const allMembers = useMemo(() => data?.users || [], [data]);
-  // Counts and the list leave out the owner's own accounts
-  const members = useMemo(() => allMembers.filter((m) => !m.owner), [allMembers]);
-  const ownerCount = allMembers.length - members.length;
+  // Counts and the list leave out the owner's own accounts, and the accounts made automatically by a purchase without
+  // sign-up (no email; the buyer signs in with the purchase email and the purchase moves to that real account)
+  const members = useMemo(() => allMembers.filter((m) => !m.owner && !m.guest), [allMembers]);
+  const ownerCount = allMembers.filter((m) => m.owner).length;
+  const guests = useMemo(() => allMembers.filter((m) => m.guest && !m.owner), [allMembers]);
+  const [showGuests, setShowGuests] = useState(false);
+  // The first day the per-session counters (鑑定した人・案内を見た人) have data
+  const sessionSince = useMemo(() => daily.find((d) => d.fortuneSessions || d.premiumViewSessions)?.date || null, [daily]);
+  const ffSince = useMemo(() => daily.find((d) => d.premiumViewFortuneSessions)?.date || null, [daily]);
+  const lockSince = useMemo(() => daily.find((d) => d.lockViewSessions)?.date || null, [daily]);
 
   const setOwnerMark = async (uid: string, owner: boolean) => {
     if (!user) return;
@@ -664,13 +771,15 @@ export default function AdminView() {
   };
   const newMembers = useMemo(() => (data ? members.filter((m) => (jstDay(m.createdAt) >= data.from && jstDay(m.createdAt) <= data.to)).length : 0), [data, members]);
   const mailOn = members.filter((m) => m.dailyMail).length;
-  const paying = members.filter((m) => m.premium === 'live').length;
+  // 有料会員には、登録なしで月額を始めた人（自動作成アカウント）も入れる
+  const paying = [...members, ...guests].filter((m) => m.premium === 'live').length;
+  const pairBuyers = [...members, ...guests].filter((m) => (m.pairs?.live || 0) > 0).length;
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const list = showOwners ? allMembers : members;
+    const list = allMembers.filter((m) => (showOwners || !m.owner) && (showGuests || !m.guest || m.owner));
     if (!q) return list;
     return list.filter((m) => [m.email, m.name, m.mbti].some((v) => v?.toLowerCase().includes(q)));
-  }, [allMembers, members, showOwners, query]);
+  }, [allMembers, showOwners, showGuests, query]);
 
   const downloadCsv = () => {
     const blob = new Blob([toCsv(filtered)], { type: 'text/csv;charset=utf-8' });
@@ -733,14 +842,16 @@ export default function AdminView() {
           <>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
               <Tile label="訪問" value={totals.visits} sub="ブラウザのセッション単位" />
-              <Tile label="鑑定" value={totals.fortunes} sub={`訪問あたり ${pct(totals.fortunes, totals.visits)}`} />
+              <Tile label="鑑定" value={totals.fortunes} sub={`鑑定した人 ${totals.fortuneSessions}（訪問の ${pct(totals.fortuneSessions, totals.visits)}）`} />
               <Tile label="会員登録（期間内）" value={newMembers} sub={`計測分 ${totals.signups} 件`} />
               <Tile label="共有" value={totals.shares} sub="X・LINE・リンク・画像" />
               <Tile label="ツール使用" value={totals.toolUses} sub={`鑑定へ進んだ ${totals.toolCtas} 回`} />
               <Tile label="コラム→鑑定へ" value={totals.columnCtaMids + totals.columnCtaEnds} sub={`途中 ${totals.columnCtaMids} 回・最後 ${totals.columnCtaEnds} 回`} />
-              <Tile label="課金（期間内）" value={totals.premiums} sub={`支払い画面へ ${totals.checkouts} 回`} />
+              <Tile label="買い切り購入（期間内）" value={totals.pairs} sub={`支払い画面へ ${totals.pairCheckouts} 回`} />
+              <Tile label="月額の新規（期間内）" value={totals.premiums} sub={`支払い画面へ ${totals.checkouts} 回`} />
+              <Tile label="売上（期間内）" value={salesYen(totals.salesYen)} sub="本番の購入額（月額の更新分は除く）" />
               <Tile label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
-              <Tile label="有料会員" value={paying} sub={`会員の ${pct(paying, members.length)}`} />
+              <Tile label="月額プレミアム" value={paying} sub={`買い切りを買った人 ${pairBuyers} 人`} />
             </div>
 
             {days > 1 && (
@@ -752,7 +863,9 @@ export default function AdminView() {
 
             <DailyTable days={daily} />
 
-            <Funnel t={totals} />
+            <Funnel t={totals} since={sessionSince} ffSince={ffSince} lockSince={lockSince} />
+
+            <SignupFunnel t={totals} reg={sumReg(data.daily)} />
 
             <Inquiries items={data.inquiries || []} members={allMembers} onStatus={setInquiryStatus} />
 
@@ -761,7 +874,7 @@ export default function AdminView() {
             <ChatCost days={data.chat || []} />
 
             <BreakdownTable title="流入元" rows={sumBy(data.daily, 'bySource')} label={sourceLabel}
-              note="訪問はそのときの流入元、会員登録と課金はその人が最初に来たときの流入元で数えています" />
+              note="訪問はそのときの流入元、会員登録と購入はその人が最初に来たときの流入元（登録なしの購入は、支払い画面を開いたときの流入元）で数えています" />
             <BreakdownTable title="入口ページ（最初に開いたページ）" rows={sumBy(data.daily, 'byLanding')} label={landingLabel} />
             <BreakdownTable title="端末" rows={sumBy(data.daily, 'byDevice')} label={deviceLabel}
               note="「ホーム画面のアプリ」は、ホーム画面に追加した月と蓮から開いたもの" />
@@ -773,10 +886,12 @@ export default function AdminView() {
                 <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="メール・名前・タイプで検索"
                   style={{ background: '#0d0b19', color: '#ece8f6', border: '1px solid #3a3460', borderRadius: 8, padding: '6px 10px', fontSize: 13, minWidth: 0, flex: '0 1 220px' }} />
                 <button style={{ ...c.btn, ...(showOwners ? c.btnOn : {}) }} onClick={() => setShowOwners((v) => !v)}>自分のアカウントも表示（{ownerCount}）</button>
+                <button style={{ ...c.btn, ...(showGuests ? c.btnOn : {}) }} onClick={() => setShowGuests((v) => !v)}>購入用の自動アカウントも表示（{guests.length}）</button>
                 <button style={c.btn} onClick={downloadCsv}>CSVで保存</button>
               </div>
               <div style={{ ...c.muted, marginBottom: 8 }}>
                 自分のアカウントは、会員数・会員リストに入れていません。管理者のメール（+付きの別名も）は自動で、それ以外は右端の「自分」ボタンで外せます。
+                会員登録せずに購入したときに自動で作られるアカウント（メールなし）も、会員ではないので外しています。購入した人がそのメールでログインすると、購入はその人の本物のアカウントへ移ります。
               </div>
               {data.truncated && <div style={{ ...c.muted, marginBottom: 8 }}>人数が多いため、先頭の20,000人だけを表示しています。</div>}
               <div style={{ overflowX: 'auto' }}>
@@ -791,21 +906,25 @@ export default function AdminView() {
                       <th style={c.th}>毎朝メール</th>
                       <th style={c.th}>タイプ</th>
                       <th style={c.th}>プレミアム</th>
+                      <th style={c.th}>買い切り</th>
                       <th style={c.th}>流入元 / 入口 / 端末</th>
                       <th style={c.th}></th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.map((m) => (
-                      <tr key={m.uid} style={m.owner ? { opacity: 0.55 } : undefined}>
+                      <tr key={m.uid} style={m.owner || m.guest ? { opacity: 0.55 } : undefined}>
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{jst(m.createdAt)}</td>
                         <td style={c.td}>{m.email || '—'}</td>
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{m.name || '—'}</td>
-                        <td style={c.td}>{PROVIDER_LABELS[m.provider] || m.provider}</td>
+                        <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{m.guest ? '購入用（自動）' : PROVIDER_LABELS[m.provider] || m.provider}</td>
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{jst(m.lastSignInAt)}</td>
                         <td style={c.td}>{m.dailyMail ? 'ON' : '—'}</td>
                         <td style={c.td}>{m.mbti || '—'}</td>
                         <td style={{ ...c.td, ...(m.premium === 'live' ? { color: '#e2c074', fontWeight: 700 } : c.muted) }}>{premiumLabel(m.premium) || '—'}</td>
+                        <td style={{ ...c.td, ...((m.pairs?.live || 0) > 0 ? { color: '#e2c074', fontWeight: 700 } : c.muted) }}>
+                          {m.pairs?.live ? `${m.pairs.live}人` : m.pairs?.test ? `テスト${m.pairs.test}` : '—'}
+                        </td>
                         <td style={{ ...c.td, ...c.muted, minWidth: 240 }}>
                           {m.source ? [sourceLabel(m.source), landingLabel(m.landing || 'other'), ...(m.device ? [deviceLabel(m.device)] : [])].join(' / ') : '計測前'}
                         </td>
@@ -829,8 +948,8 @@ export default function AdminView() {
             <p style={c.muted}>
               訪問・鑑定・流入元は、この計測を入れた日から数えています（それより前の分はありません）。会員リストは、これまでに登録した全員です（自分のアカウントを除く）。
               鑑定は入力フォームから鑑定した回数で、共有リンクや毎朝メールのリンクから結果を開いた回数は含みません。
-              共有・プレミアム案内・支払い画面・課金・端末・共有リンクの入口は、今回の計測を追加した日（2026年10月下旬）から数えています。
-              課金はStripeの本番決済だけで、テスト決済は数えません。AIチャットは、AIが答えた回数です。
+              共有・有料案内・月額の支払い画面と購入・端末・共有リンクの入口は、2026年10月下旬から数えています。買い切りの支払い画面と購入・売上・鑑定した人・案内を見た人は、2026年11月の計測見直しから数えています。
+              購入はStripeの本番決済だけで、テスト決済は数えません。AIチャットは、AIが答えた回数です。
               この管理画面を開いたブラウザは、自動で集計から外れます（外す前の分は残ります）。管理者のアカウントでログインしたブラウザやホーム画面のアプリも、自動で外れます。
             </p>
           </>

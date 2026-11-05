@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { calculateDayPillar } from '../api/_lib/fortuneEngine.js';
+import { calculateDayPillar, MBTI_COMPAT_TYPES, MBTI_COMPAT_100 } from '../api/_lib/fortuneEngine.js';
+import { SERVICE, ABOUT_FAQS, loadColumns } from './site-facts.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -331,39 +332,113 @@ writePage(
   ]
 );
 
-// 8. /about
-writePage(
-  'about',
-  '【全7,465万通り】四柱推命×九星気学×16タイプの精密ハイブリッド鑑定ロジック | 月と蓮',
-  '東洋最高峰の四柱推命（日柱天干地支3,600通り）、九星気学（81通り）、西洋16タイプ心理学（256通り）を融合した約7,465万通りの完全オーダーメイド鑑定ロジックを解説。',
-  '月と蓮, 約7,465万通り, 四柱推命ロジック, 魁罡, 極星, 16タイプ 心理学, 九星気学',
-  `${BASE_URL}/about`,
-  `
+// 8. /about 月と蓮とは（公式情報。AIの検索・Google向けに、仕組み・料金・運営者を事実だけで書く。文は scripts/site-facts.js）
+{
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const h2 = 'font-size: 1.15rem; color: #e2c074; margin: 2rem 0 0.5rem;';
+  const li = (items) => `<ul style="padding-left: 1.2rem;">${items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  const td = 'padding: 0.6rem 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: top;';
+  const aboutHtml = `
     <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
       <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
-        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>占い解説</span>
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>月と蓮とは</span>
       </nav>
       <article>
-        <h1 style="font-size: 1.6rem; color: #fef08a; border-bottom: 1px solid rgba(226,192,116,0.3); padding-bottom: 0.5rem;">月と蓮の占術ロジック解説</h1>
-        <section style="margin-top: 1.5rem;">
-          <h2 style="font-size: 1.15rem; color: #e2c074;">約7,465万通りの条件の掛け合わせ</h2>
-          <p>四柱推命（日柱の組み合わせ60×60＝3,600通り）× 九星気学（本命星の組み合わせ9×9＝81通り）× 西洋16タイプ理論（16×16＝256通り）＝ 約7,465万通りの多角アプローチを完全自動算出するオーダーメイド相性鑑定エンジンです。</p>
-        </section>
-        <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
+        <h1 style="font-size: 1.6rem; color: #fef08a; border-bottom: 1px solid rgba(226,192,116,0.3); padding-bottom: 0.5rem;">月と蓮とは｜仕組みと料金</h1>
+        <p><strong>${esc(SERVICE.summary)}</strong></p>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 1rem;">
+          <tbody>
+            <tr><th style="${td} text-align: left; color: #9ca3af; width: 120px;">サービス名</th><td style="${td}">${esc(SERVICE.name)}（${esc(SERVICE.nameEn)}）</td></tr>
+            <tr><th style="${td} text-align: left; color: #9ca3af;">運営</th><td style="${td}"><a href="/company" style="color: #e2c074;">${esc(SERVICE.operator)}</a></td></tr>
+            <tr><th style="${td} text-align: left; color: #9ca3af;">URL</th><td style="${td}">${BASE_URL}/</td></tr>
+            <tr><th style="${td} text-align: left; color: #9ca3af;">使い方</th><td style="${td}">ブラウザで開くだけ（スマホのホーム画面にも追加できます）</td></tr>
+            <tr><th style="${td} text-align: left; color: #9ca3af;">料金</th><td style="${td}">鑑定は無料。プレミアムプラン 月額980円／お相手1人の買い切り 680円</td></tr>
+          </tbody>
+        </table>
+
+        <h2 style="${h2}">入力するもの</h2>
+        ${li(SERVICE.inputs)}
+
+        <h2 style="${h2}">占いの仕組み</h2>
+        ${SERVICE.methods.map((m) => `<h3 style="font-size: 1rem; color: #fef08a; margin: 1rem 0 0.25rem;">${esc(m.title)}</h3><p style="margin: 0;">${esc(m.body)}</p>`).join('')}
+
+        <h2 style="${h2}">相性の点数の出し方</h2>
+        ${li(SERVICE.scoring)}
+
+        <h2 style="${h2}">無料でできること</h2>
+        ${li(SERVICE.freeFeatures)}
+
+        <h2 style="${h2}">料金</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+          <thead><tr><th style="${td} text-align: left; color: #9ca3af;">プラン</th><th style="${td} text-align: left; color: #9ca3af;">料金</th><th style="${td} text-align: left; color: #9ca3af;">内容</th></tr></thead>
+          <tbody>${SERVICE.plans.map((p) => `<tr><td style="${td}">${esc(p.name)}</td><td style="${td} white-space: nowrap;">${esc(p.price)}</td><td style="${td}">${esc(p.body)}</td></tr>`).join('')}</tbody>
+        </table>
+        <p style="font-size: 0.85rem; color: #cbd5e1;">お支払い方法: ${esc(SERVICE.payment)}</p>
+
+        <h2 style="${h2}">ご利用にあたって</h2>
+        ${li(SERVICE.notes)}
+
+        <h2 style="${h2}">よくある質問</h2>
+        ${ABOUT_FAQS.map((f) => `<h3 style="font-size: 0.95rem; color: #fef08a; margin: 1rem 0 0.25rem;">${esc(f.q)}</h3><p style="margin: 0;">${esc(f.a)}</p>`).join('')}
+
+        <h2 style="${h2}">関連ページ</h2>
+        <ul style="padding-left: 1.2rem;">${SERVICE.links.filter((l) => l.path !== '/about').map((l) => `<li><a href="${l.path}" style="color: #e2c074;">${esc(l.title)}</a>${l.desc ? `：${esc(l.desc)}` : ''}</li>`).join('')}</ul>
+
+        <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">無料で相性を占う</a></p>
       </article>
     </div>
-  `,
-  [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      'itemListElement': [
-        { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
-        { '@type': 'ListItem', 'position': 2, 'name': '占い解説', 'item': `${BASE_URL}/about` }
-      ]
-    }
-  ]
-);
+  `;
+
+  writePage(
+    'about',
+    '月と蓮とは｜四柱推命・九星気学・16タイプで占う恋愛相性診断の仕組みと料金',
+    '月と蓮は、生年月日から見る四柱推命・九星気学と16タイプ性格診断（MBTI）を組み合わせた恋愛相性診断です。占いの仕組み、点数の出し方、無料でできること、料金（月額980円・買い切り680円）、運営会社をまとめています。',
+    '月と蓮, 恋愛相性診断, 四柱推命, 九星気学, 16タイプ, MBTI 相性, 生年月日 相性',
+    `${BASE_URL}/about`,
+    aboutHtml,
+    [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'AboutPage',
+        'name': '月と蓮とは',
+        'url': `${BASE_URL}/about`,
+        'description': SERVICE.summary,
+        'inLanguage': 'ja',
+        'about': {
+          '@type': 'WebApplication',
+          'name': SERVICE.name,
+          'alternateName': SERVICE.nameEn,
+          'url': `${BASE_URL}/`,
+          'applicationCategory': 'LifestyleApplication',
+          'operatingSystem': 'Web',
+          'publisher': { '@type': 'Organization', 'name': SERVICE.operator, 'url': `${BASE_URL}/company` },
+          'offers': [
+            { '@type': 'Offer', 'name': '鑑定（無料）', 'price': '0', 'priceCurrency': 'JPY' },
+            { '@type': 'Offer', 'name': 'プレミアムプラン（月額）', 'price': '980', 'priceCurrency': 'JPY' },
+            { '@type': 'Offer', 'name': 'お相手1人の買い切り', 'price': '680', 'priceCurrency': 'JPY' }
+          ]
+        }
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': ABOUT_FAQS.map((f) => ({
+          '@type': 'Question',
+          'name': f.q,
+          'acceptedAnswer': { '@type': 'Answer', 'text': f.a }
+        }))
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
+          { '@type': 'ListItem', 'position': 2, 'name': '月と蓮とは', 'item': `${BASE_URL}/about` }
+        ]
+      }
+    ]
+  );
+}
 
 console.log('✅ Pre-rendered Legal, Company, Result, Chat, Mypage & About pages successfully.');
 
@@ -454,107 +529,88 @@ console.log('✅ Pre-rendered Legal, Company, Result, Chat, Mypage & About pages
   console.log('✅ Pre-rendered /tools/nicchu');
 }
 
-// MBTI Types Data
-const MBTI_TYPES = [
-  { code: 'INFJ', name: '提唱者', tag: '理想主義・深い洞察', element: '内向的直観', loveStyle: '魂の深いつながりを重視し、時間をかけて本物の信頼を築く誠実な愛' },
-  { code: 'INFP', name: '仲介者', tag: '純粋・深い共感', element: '内向的感情', loveStyle: '言葉のニュアンスや感受性を大切にし、ありのままを受け入れ合うロマンチックな愛' },
-  { code: 'ENFJ', name: '主人公', tag: '情熱・献身リーダー', element: '外向的感情', loveStyle: 'パートナーを温かく導き、相手の幸せを自分の喜びにできる惜しみない愛' },
-  { code: 'ENFP', name: '運動家', tag: '天真爛漫・ひらめき', element: '外向的直観', loveStyle: '自由とワクワクを共有し、お互いの可能性を無限に広げ合う情熱的な愛' },
-  { code: 'INTJ', name: '建築家', tag: '戦略家・知性独立', element: '内向的直観', loveStyle: 'べたべたした依存を嫌い、知的な刺激と将来を見据えた確固たる大人の絆' },
-  { code: 'INTP', name: '論理学者', tag: 'マイペース・探求者', element: '内向的思考', loveStyle: '自分の世界を尊重し合い、知的な対話で静かに心を通わせる穏やかな愛' },
-  { code: 'ENTJ', name: '指揮官', tag: '決断力・カリスマ統率', element: '外向的思考', loveStyle: 'お互いを高め合える高みを目指し、誠実かつ堂々と未来を切り開くパートナーシップ' },
-  { code: 'ENTP', name: '討論者', tag: '独創的・ユーモア', element: '外向的直観', loveStyle: '刺激的な会話と新しい挑戦で飽きさせず、お互いに自由を尊重し合うエキサイティングな恋' },
-  { code: 'ISFJ', name: '擁護者', tag: '誠実・細やかな気配り', element: '内向的感覚', loveStyle: '相手の日常を献身的に支え、安心感と温もりに満ちた居心地の良い家庭的な愛' },
-  { code: 'ISFP', name: '冒険家', tag: '自然体・美意識', element: '内向的感情', loveStyle: '押し付けを嫌い、言葉よりも肌感覚の一致と穏やかな時間を慈しむピュアな愛' },
-  { code: 'ESFJ', name: '領事官', tag: '社交的・愛情豊か', element: '外向的感情', loveStyle: 'マメな連絡と周囲にも自慢できる温かな関係を大切にする安心のパートナーシップ' },
-  { code: 'ESFP', name: 'エンターテイナー', tag: 'ポジティブ・瞬間燃焼', element: '外向的感覚', loveStyle: '今この瞬間を最高に楽しく過ごし、笑顔とスキンシップが絶えない明るい恋' },
-  { code: 'ISTJ', name: '管理者', tag: '堅実・責任感抜群', element: '内向的感覚', loveStyle: '言葉よりも行動で示し、嘘をつかず約束を絶対に守る揺るぎない誠実な愛' },
-  { code: 'ISTP', name: '巨匠', tag: 'クール・臨機応変', element: '内向的思考', loveStyle: '過度な干渉を嫌い、ピンチの時に静かに頼りになる自然体の距離感' },
-  { code: 'ESTJ', name: '幹部', tag: '頼れるリーダー・秩序', element: '外向的思考', loveStyle: 'ストレートで分かりやすく、将来の人生設計をしっかりリードする心強い愛' },
-  { code: 'ESTP', name: '起業家', tag: '行動派・スリル追求', element: '外向的感覚', loveStyle: 'スピード感あふれるアプローチと直球勝負で、ドラマチックに相手を惹きつける恋' }
-];
-
-// 5. Generate /compatibility Hub Page
-console.log('🚀 Pre-rendering /compatibility Hub Page...');
-
-const hubTitle = '【16タイプ相性診断】MBTI全256通り恋愛相性・トリセツまとめ | 月と蓮';
-const hubDesc = '16タイプ（MBTI）全256通りの恋愛相性ランキング、惹かれ合う理由、すれ違いの防ぎ方、LINE吉時間を一覧網羅。四柱推命×16タイプであなたとお相手の真実の相性を完全鑑定。';
-const hubCanonical = `${BASE_URL}/compatibility`;
-
-let hubLinksHtml = `
-  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-`;
-
-for (const t1 of MBTI_TYPES) {
-  hubLinksHtml += `
-    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(226,192,116,0.2); border-radius: 12px; padding: 1rem;">
-      <h3 style="color: #fef08a; font-size: 1rem; margin: 0 0 0.5rem;">${t1.code}（${t1.name}）の相性一覧</h3>
-      <p style="font-size: 0.75rem; color: #9ca3af; margin: 0 0 0.75rem;">${t1.tag}</p>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-  `;
-  for (const t2 of MBTI_TYPES) {
-    hubLinksHtml += `
-      <a href="/compatibility/${t1.code.toLowerCase()}-${t2.code.toLowerCase()}" style="display: inline-block; font-size: 0.72rem; color: #cbd5e1; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 4px; text-decoration: none;">
-        ${t1.code}×${t2.code}
-      </a>
-    `;
-  }
-  hubLinksHtml += `
-      </div>
-    </div>
-  `;
-}
-hubLinksHtml += `</div>`;
-
-writePage(
-  'compatibility',
-  hubTitle,
-  hubDesc,
-  '16タイプ 相性, MBTI 相性, 16タイプ 恋愛, 相性ランキング, 四柱推命 16タイプ, 月と蓮',
-  hubCanonical,
-  `
+// 5. /compatibility 16タイプ恋愛相性表（画面 ToolCompatView と同じ文面・同じ表。点数は鑑定と同じ MBTI_COMPAT_100）
+console.log('🚀 Pre-rendering /compatibility (16タイプ恋愛相性表)...');
+{
+  const page = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../src/data/mbti-compat-page.json'), 'utf-8'));
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const name = (t) => page.types[t];
+  const types = MBTI_COMPAT_TYPES;
+  const pairs = [];
+  types.forEach((a, i) => { for (let j = i + 1; j < types.length; j++) pairs.push({ a, b: types[j], score: MBTI_COMPAT_100[i][j] }); });
+  const top = pairs.sort((x, y) => y.score - x.score).slice(0, 10);
+  const url = `${BASE_URL}/compatibility`;
+  const h2 = 'font-size: 1.2rem; color: #e2c074; margin-top: 2rem;';
+  const td = 'padding: 0.25rem; text-align: center; border: 1px solid rgba(255,255,255,0.1);';
+  const html = `
     <div style="max-width: 900px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
       <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
-        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>16タイプ恋愛相性一覧</span>
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>16タイプ恋愛相性表</span>
       </nav>
-      <header>
-        <h1 style="font-size: 1.8rem; color: #fef08a; margin-bottom: 0.5rem;">16タイプ（MBTI）全256通り 恋愛相性・トリセツ完全一覧</h1>
-        <p style="font-size: 0.9rem; color: #cbd5e1;">東洋の最高峰「四柱推命」と西洋の「16タイプ心理学」を融合させた精密相性診断。気になる組み合わせをクリックして、二人の相性スコアやLINE吉時間をチェックしてください。</p>
-      </header>
-      ${hubLinksHtml}
-      <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: rgba(226,192,116,0.06); border: 1px solid rgba(226,192,116,0.3); border-radius: 16px;">
-        <h2 style="color: #fef08a; font-size: 1.3rem; margin-bottom: 0.5rem;">お二人の生年月日を入力して精密鑑定</h2>
-        <p style="font-size: 0.85rem; color: #d1d5db; margin-bottom: 1.25rem;">16タイプだけでなく、生年月日から導く四柱推命の魂レベルの相性と、本日の返信率最大LINE吉時間もすべて無料で導き出します。</p>
-        <a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.8rem 2rem; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1rem;">今すぐ無料で恋愛相性を占う</a>
-      </div>
+      <article>
+        <h1 style="font-size: 1.6rem; color: #fef08a;">${esc(page.h1)}</h1>
+        ${page.conclusion.map((t) => `<p><strong>${esc(t)}</strong></p>`).join('\n        ')}
+        <h2 style="${h2}">点数が高い組み合わせ ベスト10</h2>
+        <ol>
+          ${top.map((p) => `<li>${p.a}（${esc(name(p.a))}）× ${p.b}（${esc(name(p.b))}）：${p.score}点</li>`).join('\n          ')}
+        </ol>
+        <p style="margin: 1.5rem 0;">16タイプだけでは分からない相性も、生年月日から見る四柱推命・九星気学と組み合わせて無料で鑑定できます。 <a href="/" style="color: #e2c074; font-weight: bold;">無料で相性を占う</a></p>
+        <h2 id="table" style="${h2}">全256通りの相性表（100点満点）</h2>
+        <p>行があなた、列がお相手のタイプです（入れ替えても同じ点数）。</p>
+        <div style="overflow-x: auto;">
+        <table style="border-collapse: collapse; font-size: 0.75rem;">
+          <thead><tr><th style="${td}">あなた＼お相手</th>${types.map((t) => `<th scope="col" style="${td}">${t}</th>`).join('')}</tr></thead>
+          <tbody>
+            ${types.map((r, i) => `<tr><th scope="row" style="${td}">${r}（${esc(name(r))}）</th>${MBTI_COMPAT_100[i].map((s) => `<td style="${td}">${s}</td>`).join('')}</tr>`).join('\n            ')}
+          </tbody>
+        </table>
+        </div>
+        <h2 style="${h2}">点数の決め方</h2>
+        ${page.howTo.map((t) => `<p>${esc(t)}</p>`).join('\n        ')}
+        ${page.notes.map((t) => `<p>${esc(t)}</p>`).join('\n        ')}
+        <h2 style="${h2}">よくある質問</h2>
+        ${page.faq.map((f) => `<h3 style="font-size: 1rem; color: #fef08a;">${esc(f.q)}</h3>\n        <p>${esc(f.a)}</p>`).join('\n        ')}
+        <h2 style="${h2}">関連する記事</h2>
+        <ul>
+          ${page.related.map((r) => `<li><a href="${r.href}" style="color: #e2c074;">${esc(r.label)}</a></li>`).join('\n          ')}
+        </ul>
+        <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.8rem 2rem; border-radius: 30px; text-decoration: none; font-weight: bold;">無料で相性を占う</a></p>
+      </article>
     </div>
-  `,
-  [
+  `;
+  writePage('compatibility', page.title, page.description, page.keywords, url, html, [
     {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       'itemListElement': [
         { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
-        { '@type': 'ListItem', 'position': 2, 'name': '16タイプ相性一覧', 'item': `${BASE_URL}/compatibility` }
+        { '@type': 'ListItem', 'position': 2, 'name': '16タイプ恋愛相性表', 'item': url }
       ]
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': page.faq.map((f) => ({ '@type': 'Question', 'name': f.q, 'acceptedAnswer': { '@type': 'Answer', 'text': f.a } }))
     }
-  ]
-);
+  ]);
+}
 
 // The 256 /compatibility/[type1]-[type2] pages are no longer pre-rendered (thin, near-duplicate content).
 // vercel.json rewrites them to the SPA, which reads the pair from the URL, and sends X-Robots-Tag: noindex.
 
 // 6. Pre-render root homepage (dist/index.html) with semantic HTML and internal link network
 console.log('🚀 Pre-rendering root homepage (dist/index.html)...');
+const escHome = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const homeColumnCount = loadColumns().length;
 const homeSemanticHtml = `
   <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
     <header style="text-align: center; margin-bottom: 2rem;">
-      <p style="color: #e2c074; font-size: 0.85rem; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 0.5rem;">四柱推命 × 九星気学 × 16タイプ心理学</p>
+      <p style="color: #e2c074; font-size: 0.85rem; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 0.5rem;">四柱推命 × 九星気学 × 16タイプ</p>
       <h1 style="font-size: 1.7rem; color: #fef08a; margin: 0 0 0.75rem 0; line-height: 1.35; font-weight: bold;">
-        【公式】月と蓮 | 約7,465万通りの四柱推命×九星気学×16タイプ本格恋愛相性診断
+        【公式】月と蓮｜生年月日と16タイプで占う恋愛相性診断（無料）
       </h1>
       <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; max-width: 580px; margin: 0 auto;">
-        東洋最高峰の四柱推命・九星気学と西洋の16タイプ（MBTI）心理統計学を融合した無料の本格恋愛占い『月と蓮』。片思い・復縁・好きな人との本日の相性バイオリズム、LINEを送るべき吉時間、お相手の取扱説明書（トリセツ）、奇跡のレア属性「魁罡（かいごう）」「極星」を即座に精密鑑定します。
+        ${escHome(SERVICE.summary)}
       </p>
       <div style="margin-top: 1.5rem;">
         <a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.85rem 2.2rem; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1.05rem; box-shadow: 0 4px 20px rgba(226,192,116,0.35);">
@@ -564,24 +620,25 @@ const homeSemanticHtml = `
     </header>
 
     <section style="margin-bottom: 2rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(226,192,116,0.2); border-radius: 16px; padding: 1.25rem;">
-      <h2 style="font-size: 1.15rem; color: #fef08a; margin-top: 0; margin-bottom: 0.5rem;">約7,465万通りの超精密マトリクス</h2>
-      <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.75rem;">
-        『月と蓮』は、単なる16タイプ診断や星座占いとは一線を画す、以下の多角算術プログラムを搭載しています。
-      </p>
+      <h2 style="font-size: 1.15rem; color: #fef08a; margin-top: 0; margin-bottom: 0.5rem;">占いの仕組み</h2>
       <ul style="padding-left: 1.2rem; font-size: 0.82rem; color: #cbd5e1; line-height: 1.8;">
-        <li><strong>四柱推命（日柱3,600通り）</strong>：魂の宿命、本質的な恋愛欲求、夜の相性を解明</li>
-        <li><strong>九星気学（81通り）</strong>：日々の運気バイオリズム、最も返信率が高まるLINE吉時間を算出</li>
-        <li><strong>16タイプ心理統計学（256通り）</strong>：会話のテンポ、すれ違いの防ぎ方、お相手の攻略トリセツを導出</li>
-        <li><strong>特殊星判定（魁罡・極星など9通り）</strong>：約3.3%のレア属性や運命のソウルメイト属性を自動検出</li>
+        ${SERVICE.methods.map((m) => `<li><strong>${escHome(m.title)}</strong>：${escHome(m.body)}</li>`).join('')}
       </ul>
+      <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0.5rem 0 0;">${escHome(SERVICE.scoring[0])}</p>
+      <p style="font-size: 0.8rem; margin: 0.75rem 0 0;"><a href="/about" style="color: #e2c074; text-decoration: underline;">仕組みと料金をくわしく見る →</a></p>
+    </section>
+
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.5rem;">料金</h2>
+      <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0;">鑑定は無料・会員登録なしで使えます。${SERVICE.plans.map((pl) => `${escHome(pl.name)}は${escHome(pl.price)}`).join('、')}です。</p>
     </section>
 
     <!-- Column Quick Links -->
     <section style="margin-bottom: 2rem;">
-      <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.75rem; text-align: center;">恋愛開運・相性コラム</h2>
-      <p style="text-align: center; font-size: 0.85rem; color: #cbd5e1;">四柱推命の特殊星やLINE攻略、ツインレイの深層知識を徹底解説。</p>
+      <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.75rem; text-align: center;">恋愛コラム</h2>
+      <p style="text-align: center; font-size: 0.85rem; color: #cbd5e1;">16タイプ・四柱推命・九星気学・LINE・復縁などの記事を公開しています。</p>
       <p style="text-align: center; margin-top: 0.5rem;">
-        <a href="/column" style="font-size: 0.8rem; color: #e2c074; font-weight: bold; text-decoration: underline;">開運コラム一覧を見る（全46記事） →</a>
+        <a href="/column" style="font-size: 0.8rem; color: #e2c074; font-weight: bold; text-decoration: underline;">コラム一覧を見る（全${homeColumnCount}記事） →</a>
       </p>
     </section>
 
@@ -590,8 +647,9 @@ const homeSemanticHtml = `
       <nav style="display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; justify-content: center; margin-bottom: 1rem;">
         <a href="/" style="color: #cbd5e1; text-decoration: none;">恋愛診断ホーム</a>
         <a href="/column" style="color: #cbd5e1; text-decoration: none;">開運コラム</a>
-        <a href="/about" style="color: #cbd5e1; text-decoration: none;">占い解説</a>
+        <a href="/about" style="color: #cbd5e1; text-decoration: none;">月と蓮とは</a>
         <a href="/tools/nicchu" style="color: #cbd5e1; text-decoration: none;">日柱の調べ方</a>
+        <a href="/compatibility" style="color: #cbd5e1; text-decoration: none;">16タイプ恋愛相性表</a>
         <a href="/terms" style="color: #9ca3af; text-decoration: none;">利用規約</a>
         <a href="/privacy" style="color: #9ca3af; text-decoration: none;">プライバシーポリシー</a>
         <a href="/tokushoho" style="color: #9ca3af; text-decoration: none;">特定商取引法に基づく表記</a>

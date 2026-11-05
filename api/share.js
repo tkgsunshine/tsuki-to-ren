@@ -26,7 +26,8 @@ export default async function handler(req, res, deps = {}) {
   const oName = get('on', 'oName') || '';
   const baseScore = get('bs', 'baseScore') || '??';
   const dailyScore = get('ds', 'dailyScore') || '??';
-  const oneLiner = get('ol', 'oneLiner') || '二人の運命を占いましょう';
+  const soloLink = !oName || params.get('mode') === 'single' || params.get('mode') === 's';
+  const oneLiner = get('ol', 'oneLiner') || (soloLink ? 'あなたの恋愛運を占いましょう' : '二人の運命を占いましょう');
   const rawTitle = get('t', 'title') || '';
   const cleanTitle = rawTitle.replace(/^[【\s]+|[】\s]+$/g, '').trim();
 
@@ -68,9 +69,11 @@ export default async function handler(req, res, deps = {}) {
     const rawOgTitle = hasOpponent
       ? `${mName} × ${oName} の相性鑑定結果 | 月と蓮`
       : `${mName} の恋愛運 | 月と蓮`;
-    const rawOgDescription = cleanTitle 
-      ? `【${cleanTitle}】今日の相性は${dailyScore}点✨ 「${oneLiner}」`
-      : `今日の相性は${dailyScore}点✨ 「${oneLiner}」`;
+    // 一人の運勢のリンクは「今日の運勢」（相性の名前も付けない）
+    const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
+    const rawOgDescription = (hasOpponent && cleanTitle)
+      ? `【${cleanTitle}】${todayLabel}は${dailyScore}点✨ 「${oneLiner}」`
+      : `${todayLabel}は${dailyScore}点✨ 「${oneLiner}」`;
 
     const ogTitle = escapeHtml(rawOgTitle);
     const ogDescription = escapeHtml(rawOgDescription);

@@ -30,7 +30,7 @@ export function san(name, fallback = 'お相手') {
     const n = (name || '').trim();
     if (!n)
         return fallback;
-    if (n === 'あなた' || n === 'お相手' || n === 'お友だち')
+    if (n === 'あなた' || n === 'お相手' || n === 'お友達')
         return n;
     if (/(さん|くん|ちゃん|様|君|さま|氏)$/.test(n))
         return n;
@@ -51,27 +51,27 @@ export const stars = [
     { num: 9, name: '九紫火星', element: '火' }
 ];
 // 16タイプの相性（0〜100点の表。性別を入れ替えても同じ点数＝対称）。
-// 心の使い方（認知機能の並び）の一致・補い合いと、従来の「理想の組み合わせ」から定義した表（docs/design/mbti-compat-table.md）。
+// 心の使い方（認知機能の並び）の一致・補い合いと、従来の「理想の組み合わせ」、夫婦の調査で報告された傾向（S/Nが同じ・似た者どうし）から定義した表（docs/design/mbti-compat-table.md）。最低20点。
 // 点数への換算の重みは、アプリが決めた値（オリジナル）。ペア鑑定の基本点（最大40点）には、×0.4 して四捨五入して使う。
 // 元データ: src/data/mbti-compat.json（scripts/build-mbti-compat.mjs で生成）。このファイルは import を持てないため、同じ値をここに置く（test:engine で一致を確認）。
 export const MBTI_COMPAT_TYPES = ['INFP', 'ENFP', 'INFJ', 'ENFJ', 'INTJ', 'ENTJ', 'INTP', 'ENTP', 'ISFP', 'ESFP', 'ISTP', 'ESTP', 'ISFJ', 'ESFJ', 'ISTJ', 'ESTJ'];
 export const MBTI_COMPAT_100 = [
-    [38, 41, 0, 77, 42, 55, 46, 54, 25, 31, 32, 44, 19, 32, 61, 70], // INFP
-    [41, 38, 77, 0, 94, 42, 54, 48, 31, 22, 44, 32, 32, 19, 70, 61], // ENFP
-    [0, 77, 38, 41, 48, 54, 42, 94, 19, 32, 61, 70, 22, 31, 32, 44], // INFJ
-    [77, 0, 41, 38, 54, 46, 55, 42, 32, 19, 70, 61, 31, 25, 44, 32], // ENFJ
-    [42, 94, 48, 54, 38, 41, 0, 17, 61, 70, 19, 32, 32, 44, 22, 31], // INTJ
-    [55, 42, 54, 46, 41, 38, 77, 0, 70, 61, 32, 19, 44, 32, 31, 25], // ENTJ
-    [46, 54, 42, 55, 0, 77, 38, 41, 32, 44, 25, 31, 61, 70, 19, 32], // INTP
-    [54, 48, 94, 42, 17, 0, 41, 38, 44, 32, 31, 22, 70, 61, 32, 19], // ENTP
-    [25, 31, 19, 32, 61, 70, 32, 44, 38, 41, 46, 54, 0, 77, 42, 55], // ISFP
-    [31, 22, 32, 19, 70, 61, 44, 32, 41, 38, 54, 48, 77, 0, 94, 42], // ESFP
-    [32, 44, 61, 70, 19, 32, 25, 31, 46, 54, 38, 41, 42, 55, 0, 77], // ISTP
-    [44, 32, 70, 61, 32, 19, 31, 22, 54, 48, 41, 38, 55, 42, 17, 0], // ESTP
-    [19, 32, 22, 31, 32, 44, 61, 70, 0, 77, 42, 55, 38, 41, 48, 54], // ISFJ
-    [32, 19, 31, 25, 44, 32, 70, 61, 77, 0, 55, 42, 41, 38, 54, 46], // ESFJ
-    [61, 70, 32, 44, 22, 31, 19, 32, 42, 94, 0, 17, 48, 54, 38, 41], // ISTJ
-    [70, 61, 44, 32, 31, 25, 32, 19, 55, 42, 77, 0, 54, 46, 41, 38], // ESTJ
+    [66, 63, 26, 80, 59, 66, 68, 70, 31, 31, 32, 37, 20, 26, 53, 56], // INFP
+    [63, 66, 80, 26, 97, 59, 70, 70, 31, 29, 37, 32, 26, 20, 56, 53], // ENFP
+    [26, 80, 66, 63, 70, 70, 59, 97, 20, 26, 53, 56, 29, 31, 32, 37], // INFJ
+    [80, 26, 63, 66, 70, 68, 66, 59, 26, 20, 56, 53, 31, 31, 37, 32], // ENFJ
+    [59, 97, 70, 70, 66, 63, 26, 36, 53, 56, 20, 26, 32, 37, 29, 31], // INTJ
+    [66, 59, 70, 68, 63, 66, 80, 26, 56, 53, 26, 20, 37, 32, 31, 31], // ENTJ
+    [68, 70, 59, 66, 26, 80, 66, 63, 32, 37, 31, 31, 53, 56, 20, 26], // INTP
+    [70, 70, 97, 59, 36, 26, 63, 66, 37, 32, 31, 29, 56, 53, 26, 20], // ENTP
+    [31, 31, 20, 26, 53, 56, 32, 37, 66, 63, 68, 70, 26, 80, 59, 66], // ISFP
+    [31, 29, 26, 20, 56, 53, 37, 32, 63, 66, 70, 70, 80, 26, 97, 59], // ESFP
+    [32, 37, 53, 56, 20, 26, 31, 31, 68, 70, 66, 63, 59, 66, 26, 80], // ISTP
+    [37, 32, 56, 53, 26, 20, 31, 29, 70, 70, 63, 66, 66, 59, 36, 26], // ESTP
+    [20, 26, 29, 31, 32, 37, 53, 56, 26, 80, 59, 66, 66, 63, 70, 70], // ISFJ
+    [26, 20, 31, 31, 37, 32, 56, 53, 80, 26, 66, 59, 63, 66, 70, 68], // ESFJ
+    [53, 56, 32, 37, 29, 31, 20, 26, 59, 97, 26, 36, 70, 70, 66, 63], // ISTJ
+    [56, 53, 37, 32, 31, 31, 26, 20, 66, 59, 80, 26, 70, 68, 63, 66], // ESTJ
 ];
 /** 16タイプ相性（0〜100点）。タイプが不明なら null */
 export function getMBTICompatibility100(mbtiA, mbtiB) {
@@ -140,6 +140,10 @@ export const SOLO_BASE_CONSTANT = 70;
 // 今日の点数に足す4つの項目（天干・十二支・十二運・日の九星）は、どれも平均がプラスなので、
 // そのままだと「基本の相性より今日の方が高い」日が7割になっていた。平均（約+4.8点）を引いて、＋と−がおおよそ半々になるようにする。
 export const DAILY_CENTER_OFFSET = -5;
+// 月次・年次の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
+// 月次・年次は天干と十二支の2項目だけを足す（十二運・九星は入れていない）。2項目の平均は1人あたり約+4.1点（天干+2.3、十二支+1.8）なので、-4 で戻す。
+// 旧版は、二人分を合計（平均でなく）し、補正もなかったため、二人の鑑定で月次の100点が約7%・90点以上が約17%と出すぎていた。
+export const PERIOD_CENTER_OFFSET = -4;
 // 地支の相性・生剋影響度算出 (支合・三合・六沖・五行生剋)
 export const getBranchImpact = (branchA, branchB) => {
     if (!branchA || !branchB)
@@ -1974,7 +1978,7 @@ export function generateFortuneResult(input, character) {
         relAdviceText = character === 'tsuki' ? curRelAdvice.tsuki : curRelAdvice.ren;
         const sType = stemComp?.type || '宿命';
         const sTitle = stemComp?.title || '【宿命の結びつき】';
-        const bType = branchComp?.type || '調和';
+        // 【】の言葉は点数帯に合わせる（以前は55〜69点で生まれた日の十二支の組み合わせ名を入れており、点数に入らない材料のため「【最高のフィーリング】なのに57点」と食い違っていた）
         if (character === 'tsuki') {
             if (baseScore >= 85) {
                 oneLiner = `${sTitle}。心と心が深く通じ合い、自然と愛が深まる最高の幸運期です。`;
@@ -1985,7 +1989,7 @@ export function generateFortuneResult(input, character) {
                 summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else if (baseScore >= 55) {
-                oneLiner = `【${bType}】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
+                oneLiner = `【ゆっくり育てる相性】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
                 summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else {
@@ -2003,7 +2007,7 @@ export function generateFortuneResult(input, character) {
                 summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else if (baseScore >= 55) {
-                oneLiner = `【${bType}】相性は安定しています。無理にペースを変えず、今の心地よい関係を続けるのが正解です。`;
+                oneLiner = `【ゆっくり育てる相性】相性は安定しています。無理にペースを変えず、今の心地よい関係を続けるのが正解です。`;
                 summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
             }
             else {
@@ -3047,7 +3051,8 @@ export function generateFortuneResult(input, character) {
         const oppStemImpact = hasOpponent ? getDailyStemImpact(mPillar.stem, oppPillarObj.stem) : 0;
         const myBranchImpact = getBranchImpact(mPillar.branch, myPillarObj.branch);
         const oppBranchImpact = hasOpponent ? getBranchImpact(mPillar.branch, oppPillarObj.branch) : 0;
-        let score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact);
+        // 今日・7日間と同じく、相手がいる場合は二人の平均にし、＋への偏りを PERIOD_CENTER_OFFSET で戻す。
+        let score = Math.floor(baseScore + pairAvg(myStemImpact, oppStemImpact) + pairAvg(myBranchImpact, oppBranchImpact) + PERIOD_CENTER_OFFSET);
         if (score > 100)
             score = 100;
         if (score < 40)
@@ -3074,7 +3079,8 @@ export function generateFortuneResult(input, character) {
         const oppStemImpact = hasOpponent ? getDailyStemImpact(yPillar.stem, oppPillarObj.stem) : 0;
         const myBranchImpact = getBranchImpact(yPillar.branch, myPillarObj.branch);
         const oppBranchImpact = hasOpponent ? getBranchImpact(yPillar.branch, oppPillarObj.branch) : 0;
-        let score = Math.floor(baseScore + myStemImpact + oppStemImpact + myBranchImpact + oppBranchImpact);
+        // 月次と同じ式（二人の平均＋偏りの補正）。
+        let score = Math.floor(baseScore + pairAvg(myStemImpact, oppStemImpact) + pairAvg(myBranchImpact, oppBranchImpact) + PERIOD_CENTER_OFFSET);
         if (score > 100)
             score = 100;
         if (score < 40)

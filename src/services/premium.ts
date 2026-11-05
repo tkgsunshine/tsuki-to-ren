@@ -1,4 +1,5 @@
 import { getFirebaseAuth } from './firebase';
+import { currentAttribution } from './analytics';
 
 // Premium (月額980円) through Stripe: the app sends the member to Stripe's pages for paying and cancelling,
 // and reads the membership the webhook recorded (api/stripe/*).
@@ -40,11 +41,14 @@ const authHeader = async (): Promise<string> => {
 
 const currentPath = () => window.location.pathname + window.location.search;
 
+// ログインしていなくても呼べる（登録なしの購入）。ログイン中はアカウントに紐づける
 const postForUrl = async (endpoint: string, body: Record<string, unknown>): Promise<never> => {
+  const auth = getFirebaseAuth();
+  await auth.authStateReady();
   const res = await fetch(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: await authHeader() },
-    body: JSON.stringify({ returnPath: currentPath(), ...body })
+    headers: { 'Content-Type': 'application/json', ...(auth.currentUser ? { Authorization: await authHeader() } : {}) },
+    body: JSON.stringify({ returnPath: currentPath(), attrib: currentAttribution(), ...body })
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.url) throw new Error(data.message || 'うまく開けませんでした。時間をおいてもう一度お試しください。');
@@ -55,6 +59,23 @@ const postForUrl = async (endpoint: string, body: Record<string, unknown>): Prom
 
 /** Sends the signed-in member to Stripe's payment page. Throws with a message to show when it cannot. */
 export const startPremiumCheckout = () => postForUrl('/api/stripe/checkout', {});
+
+/** 登録なしの購入のあと、この端末をログイン状態にする（checkout-claim.js）。
+ * この購入で新しく作られたアカウントのときだけ token が入る。pending = Webhook 待ち（少しあとに再度呼ぶ）。 */
+export const claimCheckout = async (sessionId: string): Promise<{ pending: boolean; token: string | null; email: string | null }> => {
+  const res = await fetch('/api/stripe/claim', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId })
+  });
+  if (res.status === 404) return { pending: true, token: null, email: null };
+  if (!res.ok) throw new Error('購入の確認ができませんでした');
+  const data = await res.json();
+  return { pending: false, token: data.token ?? null, email: data.email ?? null };
+};
+
+/** One-time purchase (¥680) of one partner's reading, identified by the partner's birth date. */
+export const startPairCheckout = (oppBirth: string) => postForUrl('/api/stripe/checkout', { kind: 'pair', oppBirth });
 
 /** Sends the member to Stripe's page for cancelling, changing the card and receipts. */
 export const openBillingPortal = (reasons: string[] = [], note = '') => postForUrl('/api/stripe/portal', { reasons, note });
