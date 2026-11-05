@@ -327,6 +327,18 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>ニックネーム (任意)</label>
+            <input
+              type="text"
+              maxLength={8}
+              placeholder="あなた (最大8文字)"
+              value={myName}
+              onChange={(e) => setMyName(e.target.value.slice(0, 8))}
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
             <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>生年月日 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
             <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
               <input
@@ -350,18 +362,6 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 </button>
               </div>
             </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>ニックネーム (任意)</label>
-            <input
-              type="text"
-              maxLength={8}
-              placeholder="あなた (最大8文字)"
-              value={myName}
-              onChange={(e) => setMyName(e.target.value.slice(0, 8))}
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
-            />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
