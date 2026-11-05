@@ -41,6 +41,17 @@ export const ToolCompatView: React.FC = () => {
 
   const option = (t: string) => <option key={t} value={t} style={{ color: '#000' }}>{t}（{TYPE_NAMES[t]}）</option>;
 
+  // 無料の相性鑑定への案内（相性表の上と、ページの下の2か所に出す）
+  const fortuneCta = (
+        <section className="glass-panel" style={{ ...panelStyle, textAlign: 'center', border: '1.5px solid rgba(217, 164, 65, 0.5)' }}>
+          <h2 className="font-serif gold-text" style={{ ...h2Style, fontSize: '1.05rem' }}>16タイプだけでは分からない相性も</h2>
+          <p style={textStyle}>月と蓮では、生年月日から見る四柱推命・九星気学と16タイプを組み合わせて、二人の相性を無料で鑑定できます。</p>
+          <a href="/" style={{ display: 'inline-block', background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 100%)', color: '#000', padding: '0.75rem 1.8rem', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>
+            無料で相性を占う
+          </a>
+        </section>
+  );
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box', paddingBottom: '2rem' }}>
       <nav aria-label="パンくずリスト" style={{ fontSize: '0.72rem', color: '#9ca3af' }}>
@@ -99,6 +110,9 @@ export const ToolCompatView: React.FC = () => {
         </ol>
       </section>
 
+      {/* 無料の相性鑑定へ（相性表の上） */}
+      {fortuneCta}
+
       {/* 256通りの表 */}
       <section id="table" className="glass-panel" style={panelStyle}>
         <h2 className="font-serif gold-text" style={h2Style}>全256通りの相性表</h2>
@@ -149,13 +163,7 @@ export const ToolCompatView: React.FC = () => {
       </section>
 
       {/* 無料の相性鑑定へ */}
-      <section className="glass-panel" style={{ ...panelStyle, textAlign: 'center', border: '1.5px solid rgba(217, 164, 65, 0.5)' }}>
-        <h2 className="font-serif gold-text" style={{ ...h2Style, fontSize: '1.05rem' }}>16タイプだけでは分からない相性も</h2>
-        <p style={textStyle}>月と蓮では、生年月日から見る四柱推命・九星気学と16タイプを組み合わせて、二人の相性を無料で鑑定できます。</p>
-        <a href="/" style={{ display: 'inline-block', background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 100%)', color: '#000', padding: '0.75rem 1.8rem', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>
-          無料で相性を占う
-        </a>
-      </section>
+      {fortuneCta}
 
       {/* 関連記事 */}
       <section style={{ ...panelStyle, padding: '0 0.25rem' }}>

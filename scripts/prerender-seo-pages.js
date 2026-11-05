@@ -554,6 +554,7 @@ console.log('🚀 Pre-rendering /compatibility (16タイプ恋愛相性表)...')
         <ol>
           ${top.map((p) => `<li>${p.a}（${esc(name(p.a))}）× ${p.b}（${esc(name(p.b))}）：${p.score}点</li>`).join('\n          ')}
         </ol>
+        <p style="margin: 1.5rem 0;">16タイプだけでは分からない相性も、生年月日から見る四柱推命・九星気学と組み合わせて無料で鑑定できます。 <a href="/" style="color: #e2c074; font-weight: bold;">無料で相性を占う</a></p>
         <h2 id="table" style="${h2}">全256通りの相性表（0〜100点）</h2>
         <p>行があなた、列がお相手のタイプです（入れ替えても同じ点数）。</p>
         <div style="overflow-x: auto;">
