@@ -859,6 +859,39 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const [isShareDismissed, setIsShareDismissed] = useState(() => {
     try { return sessionStorage.getItem('shareBtnDismissed') === '1'; } catch { return false; }
   });
+  // 守護獣カードの命式（日柱・本命星・16タイプ）。縦を詰めるため、五行などと同じ横並びの小さな枠にする
+  const renderMeishikiChips = (pillar: string, star: string, mbtiCode?: string, mbtiName?: string) => {
+    const hasMbti = !!mbtiCode && mbtiCode !== 'UNKNOWN';
+    const chip: React.CSSProperties = { background: 'rgba(11, 15, 21, 0.62)', borderRadius: '10px', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px', font: 'inherit', width: '100%', minWidth: 0, textAlign: 'center' };
+    const label: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.68rem', color: '#d5cfc3', whiteSpace: 'nowrap' };
+    const q = <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>;
+    const reading: React.CSSProperties = { fontSize: '0.6rem', color: '#a9a49a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' };
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: hasMbti ? '1fr 1fr 1fr' : '1fr 1fr', gap: '8px', width: '100%' }}>
+        <button type="button" aria-label="日柱の説明を見る" onClick={() => handleShowPillarExplanation(pillar)} className="font-serif" style={{ ...chip, border: '1px dashed rgba(226, 192, 116, 0.6)', cursor: 'pointer' }}>
+          <span style={label}>日柱{q}</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--color-gold)' }}>{pillar}</span>
+          <span style={reading}>{getKanjiReading(pillar)}</span>
+        </button>
+        <button type="button" aria-label="本命星の説明を見る" onClick={() => handleShowStarExplanation(star)} className="font-serif" style={{ ...chip, border: '1px dashed rgba(255,255,255,0.4)', cursor: 'pointer' }}>
+          <span style={label}>本命星{q}</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f3efe6', whiteSpace: 'nowrap' }}>{star.split(' ')[0]}</span>
+          <span style={reading}>{getHonmeiStarReading(star)}</span>
+        </button>
+        {hasMbti && (
+          <div style={{ ...chip, border: '1px solid rgba(255,255,255,0.2)' }}>
+            <span style={label}>16タイプ診断</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem', fontWeight: 'bold', color: getMbtiColor(mbtiCode!) }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: `1.2px solid ${getMbtiColor(mbtiCode!)}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{getMbtiEmblem(mbtiCode!, 8)}</span>
+              {mbtiCode}
+            </span>
+            <span style={reading}>{mbtiName}</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const myAstrologyRef = useRef<HTMLDivElement>(null);
 
   // 最上部の丸いメーター: 表示時・点数が変わったときに 0 から点数まで伸ばす（0〜1）
@@ -1658,6 +1691,168 @@ export const ResultView: React.FC<ResultViewProps> = ({
         oppName={oppNickname}
       />
 
+      {/* 自分の守護獣: 「こんな人」のすぐ下に出す（2026-11 TAKASHI指示）。お相手の守護獣は下の運命の詳細のまま */}
+      {(() => {
+        const colors = getAstrologyColors(activeResult.myAstrologyColor, activeResult.myAstrologyElement);
+        return (
+          <div 
+            className={activeResult.isKaigo ? 'kaigo-border' : (activeResult.isRare ? 'rare-rainbow-border' : 'glass-panel')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'rgba(255,255,255,0.01)',
+              border: (activeResult.isKaigo || activeResult.isRare) ? 'none' : '1px solid rgba(226, 192, 116, 0.15)',
+              borderRadius: '24px',
+              padding: '0 1.25rem 1.5rem',
+              textAlign: 'center',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem',
+              padding: '0.25rem 0.95rem',
+              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%), rgba(11, 15, 21, 0.72)',
+              border: '1.5px solid rgba(226, 192, 116, 0.45)',
+              borderRadius: '20px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
+              position: 'absolute',
+              top: '0.55rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              maxWidth: 'calc(100% - 1.5rem)',
+              whiteSpace: 'nowrap',
+              zIndex: 4
+            }}>
+              <span className="font-serif" style={{
+                fontSize: '0.9rem',
+                fontWeight: 'bold',
+                color: '#f2e2b3',
+                textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
+                letterSpacing: '0.05em'
+              }}>
+                ✦ {san(myName, 'あなた')}の守護獣 ✦
+              </span>
+            </div>
+
+            {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
+            <div 
+              className="guardian-hero"
+              onClick={openMyGuardianSave}
+            >
+              <div className="guardian-hero-media">
+                <img 
+                  src={activeResult.myAvatarUrl} 
+                  alt={activeResult.myAstrologyName} 
+                  className={activeResult.isKaigo ? 'kaigo-img-glow' : (activeResult.isRare ? 'rare-holographic-img' : '')}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 8%', display: 'block' }} 
+                />
+                {(activeResult.isKaigo || activeResult.isRare) && (
+                  <>
+                    <div className="avatar-shimmer-overlay" />
+                    <div className="avatar-halo-spotlight" />
+                  </>
+                )}
+              </div>
+
+              <div className="guardian-hero-caption">
+                {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
+                  <span className="astro-title-badge font-serif">
+                    {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
+                  <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
+                    {activeResult.myAstrologyName}
+                  </span>
+                  {getAstrologyNameReading(activeResult.myAstrologyName) && (
+                    <span style={{ fontSize: '0.72rem', color: '#d8d2c6', marginLeft: '-0.3rem' }}>（{getAstrologyNameReading(activeResult.myAstrologyName)}）</span>
+                  )}
+                  <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
+                    fontSize: '0.72rem',
+                    padding: '2px 7px',
+                    borderRadius: '4px',
+                    background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
+                    color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
+                    border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
+                  }}>
+                    {activeResult.isKaigo ? '魁罡' : (activeResult.isRare ? '選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-text explaining tap to save（文言もタップで保存できる） */}
+            <button type="button" onClick={openMyGuardianSave} style={{
+              background: 'none',
+              border: 'none',
+              padding: '0.25rem 0.5rem',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              fontSize: '0.68rem',
+              color: '#a9a49a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.3rem',
+              marginTop: '0.1rem',
+              marginBottom: '0.35rem',
+              opacity: 0.85
+            }}>
+              <Download size={11} style={{ color: 'var(--color-gold)' }} />
+              <span>※タップで守護獣画像を保存できます</span>
+            </button>
+
+            {/* Dynamic Attributes Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '0.85rem', zIndex: 1 }}>
+              <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '6px 4px', gap: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
+                  五行 (陰陽)
+                  <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
+                </span>
+                {(() => {
+                  const [el, yy] = (activeResult.myAstrologyElement || '火・陰').split('・');
+                  return (
+                    <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#d5cfc3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                      <span style={{ color: ELEMENT_COLORS[el] || colors.primary }}>{el}</span>{yy ? `・${yy}` : ''}
+                    </span>
+                  );
+                })()}
+              </button>
+              <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '6px 4px', gap: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
+                  性格分類
+                  <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
+                </span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
+              </button>
+              <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '6px 4px', gap: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
+                  守護カラー
+                  <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
+                </span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.myAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
+              </button>
+            </div>
+
+            {/* Destiny Chart (命式表示) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
+              <span style={{ fontSize: '0.86rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● {san(myName, 'あなた')}の命式</span>
+              {renderMeishikiChips(activeResult.myPillar, activeResult.myStar, activeResult.myMbtiCode, activeResult.myMbtiName)}
+              <span style={{ fontSize: '0.9rem', color: '#f1f5f9', lineHeight: '1.65', marginTop: '0.2rem', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
+                {activeResult.myMbtiText}
+              </span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Free Summary Section (Fully Visible) */}
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
         <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
@@ -1671,7 +1866,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
       </div>
 
       {/* Character Advice Cards (100% visible, no lock) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* 月/蓮タブはここを過ぎたら隠す（守護獣を上へ移す前と同じ位置） */}
+        <div ref={myAstrologyRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {activeResult.topics.map((topic) => (
             <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
               <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
@@ -1684,294 +1880,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
           ))}
         </div>
 
-      {/* Astrology Guardian & Destiny Details Section */}
+      {/* Astrology Guardian & Destiny Details Section（お相手の守護獣） */}
+      {hasOpponent && activeResult.opponentAstrologyName && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        {/* User Card */}
-        {(() => {
-          const colors = getAstrologyColors(activeResult.myAstrologyColor, activeResult.myAstrologyElement);
-          return (
-            <div 
-              ref={myAstrologyRef}
-              className={activeResult.isKaigo ? 'kaigo-border' : (activeResult.isRare ? 'rare-rainbow-border' : 'glass-panel')}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                background: 'rgba(255,255,255,0.01)',
-                border: (activeResult.isKaigo || activeResult.isRare) ? 'none' : '1px solid rgba(226, 192, 116, 0.15)',
-                borderRadius: '24px',
-                padding: '0 1.25rem 1.5rem',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                margin: '1.25rem 0 0.85rem',
-                whiteSpace: 'nowrap',
-                zIndex: 1
-              }}>
-                <span className="font-serif" style={{
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  color: '#f2e2b3',
-                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.05em'
-                }}>
-                  ✦ {san(myName, 'あなた')}の守護獣 ✦
-                </span>
-              </div>
-
-              {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の上に重ねる（見出しは顔にかぶるので画像の上に出す） */}
-              <div 
-                className="guardian-hero"
-                onClick={openMyGuardianSave}
-              >
-                <div className="guardian-hero-media">
-                  <img 
-                    src={activeResult.myAvatarUrl} 
-                    alt={activeResult.myAstrologyName} 
-                    className={activeResult.isKaigo ? 'kaigo-img-glow' : (activeResult.isRare ? 'rare-holographic-img' : '')}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
-                  />
-                  {(activeResult.isKaigo || activeResult.isRare) && (
-                    <>
-                      <div className="avatar-shimmer-overlay" />
-                      <div className="avatar-halo-spotlight" />
-                    </>
-                  )}
-                </div>
-
-                {/* Subtle Glass Save Badge */}
-                <div style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  zIndex: 3,
-                  background: 'rgba(0, 0, 0, 0.65)',
-                  border: '1px solid rgba(226, 192, 116, 0.4)',
-                  borderRadius: '12px',
-                  padding: '3px 8px',
-                  color: '#f2e2b3',
-                  fontSize: '0.62rem',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  backdropFilter: 'blur(4px)',
-                  WebkitBackdropFilter: 'blur(4px)',
-                  pointerEvents: 'none'
-                }}>
-                  <Download size={10} />
-                  <span>保存</span>
-                </div>
-                <div className="guardian-hero-caption">
-                  {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
-                    <span className="astro-title-badge font-serif">
-                      {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', justifyContent: 'center' }}>
-                    <span className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold' }}>
-                      {activeResult.myAstrologyName}
-                    </span>
-                    {getAstrologyNameReading(activeResult.myAstrologyName) && (
-                      <span style={{ fontSize: '0.72rem', color: '#d8d2c6', marginLeft: '-0.3rem' }}>（{getAstrologyNameReading(activeResult.myAstrologyName)}）</span>
-                    )}
-                    <span className={activeResult.isKaigo ? 'kaigo-badge' : (activeResult.isRare ? 'rare-badge' : '')} style={{
-                      fontSize: '0.72rem',
-                      padding: '2px 7px',
-                      borderRadius: '4px',
-                      background: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(58, 134, 171, 0.15)'),
-                      color: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '#cdbfe2' : '#9cc6d8'),
-                      border: (activeResult.isKaigo || activeResult.isRare) ? undefined : (activeResult.myGender === 'female' ? '1px solid rgba(159, 134, 192, 0.3)' : '1px solid rgba(58, 134, 171, 0.3)')
-                    }}>
-                      {activeResult.isKaigo ? '魁罡' : (activeResult.isRare ? '選ばれし極星' : (activeResult.myGender === 'female' ? '女性' : '男性'))}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sub-text explaining tap to save（文言もタップで保存できる） */}
-              <button type="button" onClick={openMyGuardianSave} style={{
-                background: 'none',
-                border: 'none',
-                padding: '0.25rem 0.5rem',
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                fontSize: '0.68rem',
-                color: '#a9a49a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.3rem',
-                marginTop: '0.35rem',
-                marginBottom: '0.5rem',
-                opacity: 0.85
-              }}>
-                <Download size={11} style={{ color: 'var(--color-gold)' }} />
-                <span>※タップで守護獣画像を保存できます</span>
-              </button>
-
-              {/* Dynamic Attributes Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.myPillar, activeResult.myAstrologyElement || '火・陰'); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
-                    五行 (陰陽)
-                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
-                  </span>
-                  {(() => {
-                    const [el, yy] = (activeResult.myAstrologyElement || '火・陰').split('・');
-                    return (
-                      <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#d5cfc3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
-                        <span style={{ color: ELEMENT_COLORS[el] || colors.primary }}>{el}</span>{yy ? `・${yy}` : ''}
-                      </span>
-                    );
-                  })()}
-                </button>
-                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
-                    性格分類
-                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.myBranchPersonality}</span>
-                </button>
-                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.myPillar); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
-                    守護カラー
-                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
-                  </span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: colors.primary }}><GuardianColorText value={activeResult.myAstrologyColor || '紫・橙'} fallbackColor={colors.primary} /></span>
-                </button>
-              </div>
-
-              {/* Visual Divider to separate Avatar and Destiny Chart */}
-              <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '0.5rem 0 1rem 0', zIndex: 1 }} />
-
-              {/* Destiny Chart (命式表示) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
-                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● {san(myName, 'あなた')}の命式</span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    onClick={() => handleShowPillarExplanation(activeResult.myPillar)}
-                    className="font-serif"
-                    style={{
-                      background: 'rgba(14, 20, 29, 0.72)',
-                      border: '1px dashed rgba(226, 192, 116, 0.6)',
-                      padding: '6px 11px',
-                      borderRadius: '8px',
-                      fontSize: '0.86rem',
-                      color: 'var(--color-gold)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(226, 192, 116, 0.15)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(14, 20, 29, 0.72)'}
-                  >
-                    日柱: {activeResult.myPillar} ({getKanjiReading(activeResult.myPillar)}) <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      border: '1px solid currentColor',
-                      fontSize: '0.65rem',
-                      fontWeight: 'bold',
-                      marginLeft: '5px',
-                      lineHeight: 1,
-                      opacity: 0.8
-                    }}>?</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleShowStarExplanation(activeResult.myStar)}
-                    className="font-serif"
-                    style={{
-                      background: 'rgba(11, 15, 21, 0.72)',
-                      border: '1px dashed rgba(255,255,255,0.4)',
-                      padding: '6px 11px',
-                      borderRadius: '8px',
-                      fontSize: '0.86rem',
-                      color: '#f3efe6',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(11, 15, 21, 0.72)'}
-                  >
-                    本命星: {activeResult.myStar.split(' ')[0]} ({getHonmeiStarReading(activeResult.myStar)}) <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      border: '1px solid currentColor',
-                      fontSize: '0.65rem',
-                      fontWeight: 'bold',
-                      marginLeft: '5px',
-                      lineHeight: 1,
-                      opacity: 0.8
-                    }}>?</span>
-                  </button>
-                  {activeResult.myMbtiCode !== 'UNKNOWN' && (
-                    <div style={{
-                      background: 'rgba(11, 15, 21, 0.72)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      padding: '6px 12px 6px 7px',
-                      borderRadius: '8px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      minHeight: '30px'
-                    }}>
-                      <div style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '50%',
-                        background: 'rgba(255,255,255,0.06)',
-                        border: `1.2px solid ${getMbtiColor(activeResult.myMbtiCode)}`,
-                        boxShadow: `0 0 6px ${getMbtiColor(activeResult.myMbtiCode)}50`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}>
-                        {getMbtiEmblem(activeResult.myMbtiCode, 10)}
-                      </div>
-                      <span style={{ fontSize: '0.84rem', fontWeight: '500', color: '#f3efe6', whiteSpace: 'nowrap' }}>
-                        16タイプ診断: <span style={{ fontWeight: 'bold', color: getMbtiColor(activeResult.myMbtiCode) }}>{activeResult.myMbtiCode}</span> ({activeResult.myMbtiName})
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <span style={{ fontSize: '0.9rem', color: '#f1f5f9', lineHeight: '1.65', marginTop: '0.2rem', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
-                  {activeResult.myMbtiText}
-                </span>
-              </div>
-            </div>
-          );
-        })()}
-
         {/* Opponent Card */}
         {hasOpponent && activeResult.opponentAstrologyName && (() => {
           const colors = getAstrologyColors(activeResult.opponentAstrologyColor, activeResult.opponentAstrologyElement);
@@ -1996,17 +1907,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.4rem',
-                padding: '0.35rem 1.1rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%)',
+                padding: '0.25rem 0.95rem',
+                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%), rgba(11, 15, 21, 0.72)',
                 border: '1.5px solid rgba(226, 192, 116, 0.45)',
                 borderRadius: '20px',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                margin: '1.25rem 0 0.85rem',
+                position: 'absolute',
+                top: '0.55rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                maxWidth: 'calc(100% - 1.5rem)',
                 whiteSpace: 'nowrap',
-                zIndex: 1
+                zIndex: 4
               }}>
                 <span className="font-serif" style={{
-                  fontSize: '1rem',
+                  fontSize: '0.9rem',
                   fontWeight: 'bold',
                   color: '#f2e2b3',
                   textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
@@ -2026,7 +1941,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     src={activeResult.opponentAvatarUrl} 
                     alt={activeResult.opponentAstrologyName} 
                     className={activeResult.opponentIsKaigo ? 'kaigo-img-glow' : (activeResult.opponentIsRare ? 'rare-holographic-img' : '')}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 8%', display: 'block' }} 
                   />
                   {(activeResult.opponentIsKaigo || activeResult.opponentIsRare) && (
                     <>
@@ -2036,29 +1951,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   )}
                 </div>
 
-                {/* Subtle Glass Save Badge */}
-                <div style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  zIndex: 3,
-                  background: 'rgba(0, 0, 0, 0.65)',
-                  border: '1px solid rgba(226, 192, 116, 0.4)',
-                  borderRadius: '12px',
-                  padding: '3px 8px',
-                  color: '#f2e2b3',
-                  fontSize: '0.62rem',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  backdropFilter: 'blur(4px)',
-                  WebkitBackdropFilter: 'blur(4px)',
-                  pointerEvents: 'none'
-                }}>
-                  <Download size={10} />
-                  <span>保存</span>
-                </div>
                 <div className="guardian-hero-caption">
                   {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
@@ -2101,8 +1993,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.3rem',
-                marginTop: '0.35rem',
-                marginBottom: '0.5rem',
+                marginTop: '0.1rem',
+                marginBottom: '0.35rem',
                 opacity: 0.85
               }}>
                 <Download size={11} style={{ color: 'var(--color-gold)' }} />
@@ -2110,8 +2002,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </button>
 
               {/* Dynamic Attributes Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '1.25rem', zIndex: 1 }}>
-                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%', maxWidth: '340px', marginBottom: '0.85rem', zIndex: 1 }}>
+                <button type="button" aria-label="五行（陰陽）の説明を見る" onClick={(e) => { e.stopPropagation(); handleShowElementExplanation(activeResult.opponentPillar || '', activeResult.opponentAstrologyElement || '火・陰', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '6px 4px', gap: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3' }}>
                     五行 (陰陽)
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>?</span>
@@ -2125,14 +2017,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     );
                   })()}
                 </button>
-                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                <button type="button" aria-label="性格分類の説明と全12タイプを見る" onClick={(e) => { e.stopPropagation(); handleShowPersonalityExplanation(activeResult.opponentPillar || '', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '6px 4px', gap: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     性格分類
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
                   </span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#f2e2b3', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>{activeResult.opponentBranchPersonality}</span>
                 </button>
-                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '8px 4px', gap: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
+                <button type="button" aria-label="守護カラーの説明と全10種類を見る" onClick={(e) => { e.stopPropagation(); handleShowColorExplanation(activeResult.opponentPillar || '', san(oppNickname)); }} style={{ background: 'rgba(11, 15, 21, 0.62)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', padding: '6px 4px', gap: '1px', display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', font: 'inherit', width: '100%', minWidth: 0 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: '#d5cfc3', whiteSpace: 'nowrap' }}>
                     守護カラー
                     <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1px solid rgba(226, 192, 116, 0.7)', color: '#e2c074', fontSize: '0.6rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>?</span>
@@ -2141,114 +2033,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </button>
               </div>
 
-              {/* Visual Divider to separate Avatar and Destiny Chart */}
-              <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '0.5rem 0 1rem 0', zIndex: 1 }} />
-
               {/* Destiny Chart (命式表示) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
-                <span style={{ fontSize: '0.92rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● {san(oppNickname)}の命式</span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    onClick={() => handleShowPillarExplanation(activeResult.opponentPillar || '')}
-                    className="font-serif"
-                    style={{
-                      background: 'rgba(14, 20, 29, 0.72)',
-                      border: '1px dashed rgba(226, 192, 116, 0.6)',
-                      padding: '6px 11px',
-                      borderRadius: '8px',
-                      fontSize: '0.86rem',
-                      color: 'var(--color-gold)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(226, 192, 116, 0.15)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(14, 20, 29, 0.72)'}
-                  >
-                    日柱: {activeResult.opponentPillar} ({getKanjiReading(activeResult.opponentPillar || '')}) <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      border: '1px solid currentColor',
-                      fontSize: '0.65rem',
-                      fontWeight: 'bold',
-                      marginLeft: '5px',
-                      lineHeight: 1,
-                      opacity: 0.8
-                    }}>?</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleShowStarExplanation(activeResult.opponentStar || '')}
-                    className="font-serif"
-                    style={{
-                      background: 'rgba(11, 15, 21, 0.72)',
-                      border: '1px dashed rgba(255,255,255,0.4)',
-                      padding: '6px 11px',
-                      borderRadius: '8px',
-                      fontSize: '0.86rem',
-                      color: '#f3efe6',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(11, 15, 21, 0.72)'}
-                  >
-                    本命星: {activeResult.opponentStar ? activeResult.opponentStar.split(' ')[0] : ''} ({getHonmeiStarReading(activeResult.opponentStar || '')}) <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      border: '1px solid currentColor',
-                      fontSize: '0.65rem',
-                      fontWeight: 'bold',
-                      marginLeft: '5px',
-                      lineHeight: 1,
-                      opacity: 0.8
-                    }}>?</span>
-                  </button>
-                  {activeResult.opponentMbtiCode && activeResult.opponentMbtiCode !== 'UNKNOWN' && (
-                    <div style={{
-                      background: 'rgba(11, 15, 21, 0.72)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      padding: '6px 12px 6px 7px',
-                      borderRadius: '8px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      minHeight: '30px'
-                    }}>
-                      <div style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '50%',
-                        background: 'rgba(255,255,255,0.06)',
-                        border: `1.2px solid ${getMbtiColor(activeResult.opponentMbtiCode)}`,
-                        boxShadow: `0 0 6px ${getMbtiColor(activeResult.opponentMbtiCode)}50`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}>
-                        {getMbtiEmblem(activeResult.opponentMbtiCode, 10)}
-                      </div>
-                      <span style={{ fontSize: '0.84rem', fontWeight: '500', color: '#f3efe6', whiteSpace: 'nowrap' }}>
-                        16タイプ診断: <span style={{ fontWeight: 'bold', color: getMbtiColor(activeResult.opponentMbtiCode) }}>{activeResult.opponentMbtiCode}</span> ({activeResult.opponentMbtiName})
-                      </span>
-                    </div>
-                  )}
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', width: '100%', textAlign: 'left', zIndex: 1 }}>
+                <span style={{ fontSize: '0.86rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em' }}>● {san(oppNickname)}の命式</span>
+                {renderMeishikiChips(activeResult.opponentPillar || '', activeResult.opponentStar || '', activeResult.opponentMbtiCode, activeResult.opponentMbtiName)}
                 {activeResult.opponentMbtiText && (
                   <span style={{ fontSize: '0.9rem', color: '#f1f5f9', lineHeight: '1.65', marginTop: '0.2rem', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
                     {activeResult.opponentMbtiText}
@@ -2259,6 +2047,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           );
         })()}
       </div>
+      )}
 
       {/* Main Content Area */}
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
