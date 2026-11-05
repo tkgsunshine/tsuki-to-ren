@@ -58,6 +58,9 @@ const formatBirthDate = (val: string): string => {
 const NEW_PARTNER_ID = '__new__';
 
 // A complete, real calendar date (YYYY-MM-DD). The daily email cannot compute a fortune without one.
+// 決済の直前に控える鑑定の入力（このタブだけ）と、読み込んだ時点のURL（?pair= などはすぐ消すため）
+const CHECKOUT_READING_KEY = 'hasu_checkout_reading';
+const INITIAL_SEARCH = typeof window === 'undefined' ? '' : window.location.search;
 const isValidBirthDate = (val: string): boolean => {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(val || '');
   if (!m) return false;
@@ -391,9 +394,18 @@ function App() {
     return () => { cancelled = true; };
   }, [currentUser?.uid]);
 
+  // 画面に出している鑑定の入力（startDiagnosis が入れる）。決済へ移る直前に、このタブの sessionStorage にも控える。
+  // Stripe から戻ったとき、端末の記録（hasu_last_diagnosis_input）がログイン状態の変化で消えていても、同じ鑑定を出し直せるように
+  const lastReadingRef = useRef<Record<string, unknown> | null>(null);
+  const rememberReadingForCheckout = () => {
+    if (!lastReadingRef.current) return;
+    try { sessionStorage.setItem(CHECKOUT_READING_KEY, JSON.stringify(lastReadingRef.current)); } catch { /* blocked storage */ }
+  };
+
   // 登録なしでも申し込める（Stripeで入力したメールでアカウントを自動で作る）
   const handleStartCheckout = async () => {
     trackCheckout('monthly');
+    rememberReadingForCheckout();
     try {
       await startPremiumCheckout();
     } catch (e) {
@@ -654,7 +666,14 @@ function App() {
       // 生年月日だけのリンク（日柱ページからの ?mb=）でも戻さず、入力画面のままにする（生年月日は UnifiedInputView が入れる）
       // Restore last diagnosis result when returning from 2-step email verification link
       try {
-        const lastInputRaw = localStorage.getItem('hasu_last_diagnosis_input');
+        // Stripe から戻ったとき（?pair= / ?premium=。URLからはすぐ消すので、読み込んだ時点のURLで見る）は、決済の直前に控えた鑑定も使う
+        const fromCheckout = /[?&](pair|premium)=/.test(INITIAL_SEARCH);
+        let checkoutRaw: string | null = null;
+        try {
+          checkoutRaw = fromCheckout ? sessionStorage.getItem(CHECKOUT_READING_KEY) : null;
+          sessionStorage.removeItem(CHECKOUT_READING_KEY);
+        } catch { /* blocked storage */ }
+        const lastInputRaw = localStorage.getItem('hasu_last_diagnosis_input') || checkoutRaw;
         if (lastInputRaw) {
           const lastInput = JSON.parse(lastInputRaw);
           if (lastInput && lastInput.mName && lastInput.mBirth) {
@@ -1219,6 +1238,7 @@ function App() {
   // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
   const handleBuyPair = async () => {
     trackCheckout('pair');
+    rememberReadingForCheckout();
     try {
       await startPairCheckout(oppBirth);
     } catch (e) {
@@ -1298,6 +1318,7 @@ function App() {
         setSelectedCharacter(presetCharacter);
       }
 
+      lastReadingRef.current = { mName, mBirth, mMbti, mGender, oName, oBirth, oMbti, oGender, rel, runMode, selectedCharacter: targetChar };
       // Save last diagnosis input payload to localStorage for email magic link 2-step verification restore
       try {
         localStorage.setItem('hasu_last_diagnosis_input', JSON.stringify({
