@@ -30,6 +30,7 @@ const GuardianColorText: React.FC<{ value: string; fallbackColor: string }> = ({
 import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
 import { SelfReadingCard } from './SelfReadingCard';
+import { LuckyDaysSection } from './LuckyDaysSection';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -3036,6 +3037,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
         partnerLabel={san(oppNickname)}
       />
       )}
+
+        {/* 最強の日（根拠・珍しさは全員に、日付は月額プレミアムだけ） */}
+        <LuckyDaysSection
+          result={activeResult}
+          isSubscribed={isSubscribed}
+          myName={myName}
+          oppName={oppNickname}
+          onLockClick={handleLockTagClick}
+          lockWord={LOCK_WORD}
+        />
 
         {/* 10. Future Timeline Schedule Preview */}
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
