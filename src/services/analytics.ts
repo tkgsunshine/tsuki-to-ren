@@ -192,6 +192,12 @@ const fortunedInSession = () => {
   try { return Boolean(session()?.getItem('hasu_first_fortune')); } catch { return false; }
 };
 
+/** A paid lock (its button opens the paid-plan page) came into view on the result, after a fortune in this session. Once per session. */
+export const trackLockView = () => {
+  if (!fortunedInSession() || firstInSession('lock_view') !== '1') return;
+  void send({ type: 'lock_view', ...current() });
+};
+
 /** The paid-plan page opened, with the plan it led with: 'pair' from a lock the one-time purchase opens, else 'monthly'. */
 // ff = '1' the first time in this session the page is opened after a fortune from the input form, so /admin can divide
 // "saw the page" by "ran a fortune" with people who did both (a restored result or the My Page banner does not count as a fortune)

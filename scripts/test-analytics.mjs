@@ -353,3 +353,10 @@ test('track: Preview deployments are not counted (same database as production, b
   assert.equal(res.code, 204);
   assert.equal(db.writes.length, 1);
 });
+
+test('track: a paid lock seen after a fortune is counted as one person (lockViewSessions)', async () => {
+  const db = mockDb();
+  await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'lock_view', source: 'x', landing: 'home', device: 'mobile_browser' } }, mockRes(), { db });
+  assert.equal(db.writes.length, 1);
+  assert.equal(Object.keys(db.writes[0].data).filter((k) => !['date', 'bySource', 'byLanding', 'byDevice'].includes(k)).join(), 'lockViewSessions');
+});
