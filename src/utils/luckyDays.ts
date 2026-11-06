@@ -1,4 +1,4 @@
-// 「最強の日」: 生年月日（日柱・本命星）と性別から、その人だけ・その二人だけに良い日を出す。
+// 「恋愛運が最高の日」: 生年月日（日柱・本命星）と性別から、その人だけ・その二人だけに良い日を出す。
 // 鑑定の点数（dailyScore など）には足さない（点数は変えない。2026-11-05 TAKASHI 判断の「案A」）。
 //
 // 一人ずつの「良い日」の印は、四柱推命・九星気学の伝統的な決まり:
@@ -12,7 +12,7 @@
 // 注意の日（どちらかに当たれば外す）:
 //  ・空亡: 自分の日柱の旬で欠ける2つの十二支の日
 //  ・六沖: その日の十二支が自分の日支と真逆
-// 印をどう重ねると「最強」とするか（下の isPersonalBest / 二人の最強の日）は伝統に決まりがないので、アプリのオリジナル。
+// 印をどう重ねると「最高の日」とするか（下の isPersonalBest / 二人の恋愛運が最高の日）は伝統に決まりがないので、アプリのオリジナル。
 import { calculateDayPillar, getDayStarNumber, getJuniUn, getTenGod } from './fortuneEngine.ts';
 
 const STEMS = '甲乙丙丁戊己庚辛壬癸';
@@ -141,7 +141,7 @@ export interface LuckyDay {
 
 const addDays = (from: Date, n: number) => new Date(from.getFullYear(), from.getMonth(), from.getDate() + n);
 
-/** あなただけの最強の日（天地徳合。60日に1度）。from から days 日のうち */
+/** あなたの恋愛運が最高の日（天地徳合。60日に1度）。from から days 日のうち */
 export function findSoloBestDays(me: LuckPerson, from: Date, days: number): LuckyDay[] {
   const out: LuckyDay[] = [];
   for (let i = 0; i < days; i++) {
@@ -153,7 +153,7 @@ export function findSoloBestDays(me: LuckPerson, from: Date, days: number): Luck
 }
 
 /**
- * 二人の最強の日。どちらも注意の日でなく、
+ * 二人の恋愛運が最高の日。どちらも注意の日でなく、
  *  ・片方が勝負の日で、もう片方も良い日、または
  *  ・三合がそろう日で、二人とも良い日
  */

@@ -2204,7 +2204,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         </div>
 
-        {/* 最強の日（LINEの吉時間・コツの欄のすぐ下。根拠・珍しさは全員に、日付は月額プレミアムだけ） */}
+        {/* 恋愛運が最高の日（LINEの吉時間・コツの欄のすぐ下。根拠・珍しさは全員に、日付は月額プレミアムだけ） */}
         <LuckyDaysSection
           result={activeResult}
           isSubscribed={isSubscribed}
