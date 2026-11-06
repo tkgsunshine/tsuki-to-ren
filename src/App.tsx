@@ -1743,7 +1743,7 @@ function App() {
                 display: 'flex',
                 padding: '1.25rem 1rem',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: '0.9rem',
                 cursor: 'pointer',
                 border: '1px solid rgba(159, 134, 192,0.15)',
                 transition: 'all 0.3s ease',
@@ -1774,22 +1774,24 @@ function App() {
                     </div>
                   )}
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#cdbfe2', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     月の温室 (🌙)
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「不安な気持ち、そのまま話してくださいね。ちゃんと受けとめますよ。」</div>
+                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem', lineHeight: 1.6, textIndent: '-0.5em' }}>「不安な気持ち、そのまま話してくださいね。ちゃんと受けとめますよ。」</div>
+                  <div style={{ marginTop: '0.55rem', display: 'flex' }}>
+                  {isRegistered ? (
+                    <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
+                      待機中
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
+                      無料登録して開放
+                    </span>
+                  )}
+                  </div>
                 </div>
-                {isRegistered ? (
-                  <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
-                    待機中
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
-                    無料登録して開放
-                  </span>
-                )}
               </div>
 
               {/* Ren Lobby Card */}
@@ -1797,7 +1799,7 @@ function App() {
                 display: 'flex',
                 padding: '1.25rem 1rem',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: '0.9rem',
                 cursor: 'pointer',
                 border: '1px solid rgba(58, 134, 171,0.15)',
                 transition: 'all 0.3s ease',
@@ -1828,22 +1830,24 @@ function App() {
                     </div>
                   )}
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#9cc6d8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     蓮の書斎
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
+                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem', lineHeight: 1.6, textIndent: '-0.5em' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
+                  <div style={{ marginTop: '0.55rem', display: 'flex' }}>
+                  {isRegistered ? (
+                    <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
+                      待機中
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
+                      無料登録して開放
+                    </span>
+                  )}
+                  </div>
                 </div>
-                {isRegistered ? (
-                  <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
-                    待機中
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
-                    無料登録して開放
-                  </span>
-                )}
               </div>
             </div>
             
