@@ -1,9 +1,10 @@
 // node --experimental-strip-types --test scripts/test-lucky-days.mjs  （npm run test:engine に含む）
-// 「2人の最高シンクロ日・あなたの恋愛運MAX日」: 伝統の決まりどおりに印がつくこと、日数がおおよそ想定どおりであること。点数には関わらない。
+// 「2人の最高シンクロ日・あなたの恋愛運MAX日」: 伝統の決まりどおりに印がつくこと、日数がおおよそ想定どおりであること。
+// 2026-11 から今日の点数にも入る（シンクロ日・恋の星が点数でも高く出ること）。
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getKuubou, getPersonDay, getDayInfo, findSoloBestDays, findPairBestDays, getSangoBranch, toLuckPerson } from '../src/utils/luckyDays.ts';
-import { calculateDayPillar } from '../src/utils/fortuneEngine.ts';
+import { calculateDayPillar, generateFortuneResult, getDailyMarkedStemImpact, getDailyStemImpact, LOVE_STAR_DAILY_POINTS } from '../src/utils/fortuneEngine.ts';
 
 const STEMS = '甲乙丙丁戊己庚辛壬癸';
 const BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
@@ -70,4 +71,53 @@ test('結果の表記から読める', () => {
   const p = calculateDayPillar(d);
   const info = getDayInfo(d);
   assert.equal(info.stem + info.branch, p.stem + p.branch);
+});
+
+const pad = (n) => String(n).padStart(2, '0');
+const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+test('今日の点数: 恋の星の日は、通変星の点数（正官のマイナス）ではなく恋の星の点数になる。干合の日は干合のまま', () => {
+  // 甲の女性: 辛の日が正官（恋の星）
+  const f = { stem: '甲', branch: '寅', starElement: '木', gender: 'female' };
+  let checked = 0;
+  for (let i = 0; i < 60; i++) {
+    const day = getDayInfo(new Date(2027, 0, 1 + i));
+    const pd = getPersonDay(f, day);
+    const v = getDailyMarkedStemImpact(f, pd, day.stem, f.stem);
+    if (day.stem === '辛' && !pd.marks.includes('tenotsu') && !pd.kuubou) {
+      assert.equal(v, LOVE_STAR_DAILY_POINTS);
+      assert.ok(getDailyStemImpact(day.stem, f.stem) < 0);
+      checked++;
+    }
+    // 甲の男性なら己の日は恋の星（正財）かつ干合。干合の点数のまま（恋の星で下げない）
+    const m = { ...f, gender: 'male' };
+    const pm = getPersonDay(m, day);
+    if (day.stem === '己' && !pm.marks.includes('tenotsu') && !pm.kuubou) assert.equal(getDailyMarkedStemImpact(m, pm, day.stem, m.stem), getDailyStemImpact('己', '甲'));
+  }
+  assert.ok(checked > 0);
+});
+
+test('今日の点数: 2人の最高シンクロ日は、その二人の90日の中央値以上で、7日グラフとも同じ点数', () => {
+  const from = new Date(2027, 0, 1);
+  let syncDays = 0;
+  const d = new Date(1982, 2, 3);
+  for (let i = 0; i < 40; i++, d.setDate(d.getDate() + 97)) {
+    const e = new Date(d.getTime());
+    e.setDate(e.getDate() + 1234 + i * 13);
+    const input = { myName: 'a', myBirth: iso(d), myMbti: 'INFP', myGender: i % 2 ? 'male' : 'female', opponentName: 'b', opponentBirth: iso(e), opponentMbti: 'ENFJ', opponentGender: i % 2 ? 'female' : 'male', relationship: 'single' };
+    const r0 = generateFortuneResult(input, 'ren', from);
+    const me = toLuckPerson(r0.myPillar, r0.myStar, r0.myGender);
+    const pa = toLuckPerson(r0.opponentPillar, r0.opponentStar, r0.opponentGender);
+    const scores = [];
+    for (let k = 0; k < 90; k++) scores.push(generateFortuneResult(input, 'ren', new Date(2027, 0, 1 + k)).dailyScore);
+    const median = [...scores].sort((a, b) => a - b)[45];
+    for (const x of findPairBestDays(me, pa, from, 90)) {
+      const k = Math.round((new Date(x.day.y, x.day.m - 1, x.day.d) - from) / 86400000);
+      assert.ok(scores[k] >= median, `${iso(d)}×${iso(e)} ${x.day.m}/${x.day.d}: ${scores[k]} < 中央値 ${median}`);
+      syncDays++;
+    }
+    // 7日グラフの2日目以降は、その日の今日の点数と同じ（グラフの下限30を除く）
+    for (let k = 1; k < 7; k++) assert.equal(r0.weeklyScores[k].score, Math.max(30, scores[k]));
+  }
+  assert.ok(syncDays > 20, `シンクロ日 ${syncDays}`);
 });

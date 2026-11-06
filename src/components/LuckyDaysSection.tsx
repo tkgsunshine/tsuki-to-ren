@@ -9,7 +9,7 @@ import type { LuckyDay, LuckMark } from '../utils/luckyDays';
 
 // 「2人の最高シンクロ日・あなたの恋愛運MAX日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
 // 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日は月額だけ（2026-11-06 TAKASHI）。
-// 日付はロック中は DOM に出さない（ダミーの「●月●日」を出す）。点数には関わらない。
+// 日付はロック中は DOM に出さない（ダミーの「●月●日」を出す）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDay）。
 const PAIR_WINDOW_DAYS = 90;
 const SOLO_WINDOW_DAYS = 365;
 
