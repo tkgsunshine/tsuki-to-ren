@@ -7,7 +7,8 @@ import {
 } from '../utils/luckyDays';
 import type { LuckyDay, LuckMark } from '../utils/luckyDays';
 
-// 「最強の日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは月額プレミアムだけに見せる（2026-11-05 TAKASHI）。
+// 「最強の日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
+// 二人の最強の日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなただけの最強の日は月額だけ（2026-11-06 TAKASHI）。
 // 日付はロック中は DOM に出さない（ダミーの「●月●日」を出す）。点数には関わらない。
 const PAIR_WINDOW_DAYS = 90;
 const SOLO_WINDOW_DAYS = 365;
@@ -15,9 +16,13 @@ const SOLO_WINDOW_DAYS = 365;
 interface Props {
   result: FortuneResult;
   isSubscribed: boolean;
+  /** そのお相手を買い切りで解放済み（二人の最強の日だけ開く） */
+  pairOpen?: boolean;
   myName?: string;
   oppName?: string;
   onLockClick: (e?: React.MouseEvent) => void;
+  /** 二人の最強の日のロックを押したとき（買い切りも選べる購入画面へ） */
+  onPairLockClick?: (e?: React.MouseEvent) => void;
   lockWord: string;
 }
 
@@ -79,7 +84,7 @@ function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockW
   );
 }
 
-export function LuckyDaysSection({ result, isSubscribed, myName, oppName, onLockClick, lockWord }: Props) {
+export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myName, oppName, onLockClick, onPairLockClick, lockWord }: Props) {
   const me = useMemo(() => toLuckPerson(result.myPillar, result.myStar, result.myGender), [result.myPillar, result.myStar, result.myGender]);
   const partner = useMemo(() => toLuckPerson(result.opponentPillar, result.opponentStar, result.opponentGender), [result.opponentPillar, result.opponentStar, result.opponentGender]);
   const today = useMemo(() => {
@@ -95,6 +100,7 @@ export function LuckyDaysSection({ result, isSubscribed, myName, oppName, onLock
   if (!me) return null;
 
   const locked = !isSubscribed;
+  const pairLocked = !(isSubscribed || pairOpen);
   const myLabel = san(myName, 'あなた');
   const oppLabel = san(oppName);
   const hasSango = Boolean(me && partner && getSangoBranch(me, partner));
@@ -108,14 +114,14 @@ export function LuckyDaysSection({ result, isSubscribed, myName, oppName, onLock
 
       {partner && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <span style={subHead}>● 二人の最強の日 {locked && '(プレミアム限定)'}</span>
-          <span style={badgeStyle}>年に約17日・月に1〜2日だけ</span>
+          <span style={subHead}>● 二人の最強の日</span>
+          <span style={badgeStyle}>平均で年に17日・月に1〜2日だけ</span>
           <p style={bodyText}>
             {myLabel}と{oppLabel}、一人ずつの生年月日から「良い日」を毎日調べました（惹きつける力が強い日・恋の星が回ってくる日・助けが入る日など、四柱推命と九星気学の昔からの決まりどおり）。そのうえで、<strong>二人の良い日がぴったり重なる日だけ</strong>を選び、どちらかの運気が空白になる日・ぶつかりやすい日は外しています。
           </p>
           {hasSango && (
             <p style={{ ...bodyText, color: '#f5d77a' }}>
-              さらに二人は、約16%の組にしかない「二人の絆が完成する日」がある組み合わせです。
+              さらに二人は、16%の組にしかない「二人の絆が完成する日」がある組み合わせです。
             </p>
           )}
           <p style={{ ...bodyText, fontWeight: 'bold' }}>
@@ -123,7 +129,7 @@ export function LuckyDaysSection({ result, isSubscribed, myName, oppName, onLock
               ? `これから${PAIR_WINDOW_DAYS}日のうち、二人の最強の日は${pairDays.length}日あります。`
               : `これから${PAIR_WINDOW_DAYS}日のうちにはありません。この1年では${pairYearCount}日あります。`}
           </p>
-          <DayList days={pairDays} locked={locked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onLockClick} lockWord={lockWord} />
+          <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
         </div>
       )}
 
@@ -131,8 +137,8 @@ export function LuckyDaysSection({ result, isSubscribed, myName, oppName, onLock
         display: 'flex', flexDirection: 'column', gap: '0.55rem',
         ...(partner ? { borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.9rem' } : {})
       }}>
-        <span style={subHead}>● {myLabel}だけの最強の日 {locked && '(プレミアム限定)'}</span>
-        <span style={badgeStyle}>60日に1度・年に約6日だけ</span>
+        <span style={subHead}>● {myLabel}だけの最強の日</span>
+        <span style={badgeStyle}>60日に1度・年に6〜7日だけ</span>
         <p style={bodyText}>
           生まれた日の星（干支）と、その日の干支が<strong>上と下の両方で結びつく日</strong>です。60日に1度しか巡ってこない、四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
         </p>

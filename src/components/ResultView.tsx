@@ -2204,6 +2204,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         </div>
 
+        {/* 最強の日（LINEの吉時間・コツの欄のすぐ下。根拠・珍しさは全員に、日付は月額プレミアムだけ） */}
+        <LuckyDaysSection
+          result={activeResult}
+          isSubscribed={isSubscribed}
+          pairOpen={pairOpen}
+          myName={myName}
+          oppName={oppNickname}
+          onLockClick={handleLockTagClick}
+          onPairLockClick={handleDeepLockClick}
+          lockWord={LOCK_WORD}
+        />
+
         {/* Daily Notification Prompt: マイページの「毎朝8時の運勢・吉時間通知」と同じ設定を表示する */}
         {!sharedBy && (() => {
           const notifyOn = !!notifyStatus?.on;
@@ -3037,16 +3049,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
         partnerLabel={san(oppNickname)}
       />
       )}
-
-        {/* 最強の日（根拠・珍しさは全員に、日付は月額プレミアムだけ） */}
-        <LuckyDaysSection
-          result={activeResult}
-          isSubscribed={isSubscribed}
-          myName={myName}
-          oppName={oppNickname}
-          onLockClick={handleLockTagClick}
-          lockWord={LOCK_WORD}
-        />
 
         {/* 10. Future Timeline Schedule Preview */}
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
