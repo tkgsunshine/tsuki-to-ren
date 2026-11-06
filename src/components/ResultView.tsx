@@ -1827,7 +1827,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* Character Advice Cards (100% visible, no lock) */}
       {/* 月/蓮タブはここを過ぎたら隠す（守護獣を上へ移す前と同じ位置） */}
         <div ref={myAstrologyRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {activeResult.topics.map((topic) => (
+          {/* 2枚目（月「恋愛運をひらく鍵」／蓮「うまくいくためのアドバイス」）は表示しない（TAKASHI判断 2026-11-06） */}
+          {activeResult.topics.slice(0, 1).map((topic) => (
             <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
               <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
                 {renderCharHeading(topic.title, 36)}
