@@ -1456,7 +1456,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </svg>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   {opts.icon}
-                  <span style={{ fontSize: opts.size > 130 ? '0.74rem' : '0.66rem', color: '#e8e3d8', fontWeight: 600, marginTop: '0.1rem' }}>{opts.label}</span>
+                  <span style={{ fontSize: opts.size > 130 ? '1.02rem' : '0.86rem', color: opts.numColor, fontWeight: 800, letterSpacing: '0.06em', marginTop: '0.15rem', textShadow: `0 0 10px ${opts.glow}, 0 1px 3px rgba(0,0,0,0.6)` }}>{opts.label}</span>
                   <div className="font-serif" style={{
                     fontSize: `${opts.size * 0.3}px`,
                     fontWeight: 800,
@@ -1512,11 +1512,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ position: 'absolute', top: '50%', left: `${clamp(daily)}%`, width: '16px', height: '16px', transform: 'translate(-50%, -50%)', borderRadius: '50%', background: '#9cc6d8', border: '3px solid #151827', boxShadow: '0 0 10px rgba(156,198,216,0.8)' }} />
                 </div>
                 <div style={{ position: 'absolute', bottom: '14px', left: `${labelPos(daily)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
-                  <div style={{ fontSize: '0.62rem', color: '#d6e8f0' }}>{todayLabel}</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', color: '#d6e8f0' }}>{todayLabel}</div>
                   <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#9cc6d8' }}>{daily}<span style={{ fontSize: '0.65rem' }}>点</span></div>
                 </div>
                 <div style={{ position: 'absolute', ...(labelsCollide ? { top: '14px' } : { bottom: '14px' }), left: `${labelPos(base)}%`, transform: 'translateX(-50%)', textAlign: 'center', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
-                  <div style={{ fontSize: '0.62rem', color: '#e8dcc0' }}>{baseLabel}</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', color: '#e8dcc0' }}>{baseLabel}</div>
                   <div className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f6e6c2' }}>{base}<span style={{ fontSize: '0.65rem' }}>点</span></div>
                 </div>
               </div>}
