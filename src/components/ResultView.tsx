@@ -3,11 +3,12 @@ import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { trackLockView, trackRegStep } from '../services/analytics';
 import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
-import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
+import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
@@ -2715,6 +2716,37 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
+            {/* 4.5 ドキッとさせる仕草（1つ目は誰でも見られ、2つ目以降はプレミアム限定。中身は fortuneEngine の getAttractionStyle） */}
+            {activeResult.opponentTorisetsu.attraction && activeResult.opponentTorisetsu.attraction.gestures.length > 0 && (() => {
+              const gs = activeResult.opponentTorisetsu.attraction.gestures;
+              const locked = !isSubscribed;
+              return (
+                <div style={{ background: 'rgba(226, 139, 170, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 139, 170, 0.22)', position: 'relative' }}>
+                  <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f6c6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <PiercedHeartMark size={18} />
+                    <span>ドキッとさせる仕草</span>
+                  </div>
+                  <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8' }}>
+                    <li>{gs[0]}</li>
+                  </ul>
+                  {gs.length > 1 && (
+                    <div style={{ position: 'relative' }}>
+                      <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 }}>
+                        {gs.slice(1).map((g, i) => <li key={i}>{lockedText(g, locked)}</li>)}
+                      </ul>
+                      {locked && (
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
+                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* 5. 脈なしサイン ＆ 挽回テクニック */}
             <div style={{ background: 'rgba(201, 86, 106, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(201, 86, 106, 0.2)', position: 'relative' }}>
               <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fda4af', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -2806,6 +2838,58 @@ export const ResultView: React.FC<ResultViewProps> = ({
             )}
               </div>
             </div>
+
+            {/* 7.5 お相手が惹かれるファッション（イメージと系統は誰でも見られ、色・服装・一工夫・NGはプレミアム限定） */}
+            {activeResult.opponentTorisetsu.attraction && (() => {
+              const at = activeResult.opponentTorisetsu.attraction;
+              const locked = !isSubscribed;
+              const lockStyle: React.CSSProperties = { filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 };
+              const label: React.CSSProperties = { color: '#f6c6d8', fontWeight: 'bold' };
+              // 絵と色見本（古い保存データには key が無いので、そのときは文字だけ）。見られない人には絵も出さない（ぼかしの下で中身がわからないように）
+              const vis = at.key ? ATTRACTION_VISUALS[at.key] : undefined;
+              const myIsMale = activeResult.myGender === 'male';
+              return (
+                <div style={{ background: 'rgba(226, 139, 170, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 139, 170, 0.22)', position: 'relative' }}>
+                  <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f6c6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <HangerMark size={18} />
+                    <span>惹かれるファッション</span>
+                  </div>
+                  <div className="font-serif" style={{ fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                      {vis && <AttractionMotif stemKey={at.key!} size={60} />}
+                      <div><span style={label}>【惹かれるイメージ】</span>「{at.imageName}」のような人。{at.imageNote}</div>
+                    </div>
+                    <div>
+                      <span style={label}>【好みの系統】</span>
+                      {at.styleTag && <span style={{ display: 'inline-block', margin: '0 0.35rem 0.15rem 0', padding: '0.05rem 0.6rem', borderRadius: '999px', background: 'rgba(226, 139, 170, 0.22)', border: '1px solid rgba(246, 198, 216, 0.55)', color: '#fff', fontWeight: 'bold', fontSize: '0.86rem' }}>{at.styleTag}</span>}
+                      {!at.styleTag && at.styleName}
+                    </div>
+                    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <div style={lockStyle}>
+                        <span style={label}>【好きな色】</span>{vis && !locked ? null : lockedText(at.colors, locked)}
+                        {vis && !locked && <ColorSwatches hexes={vis.swatches} names={at.colors} />}
+                      </div>
+                      <div style={lockStyle}>
+                        <span style={label}>【会う日の服装】</span>
+                        {vis && !locked && <div style={{ margin: '0.35rem 0' }}><CoordFlatLay coord={myIsMale ? vis.male : vis.female} /></div>}
+                        {lockedText(at.outfit, locked)}
+                      </div>
+                      {at.mbtiTip && (
+                        <div style={lockStyle}><span style={label}>【{at.mbtiType}タイプのお相手に効く一工夫】</span>{lockedText(at.mbtiTip, locked)}</div>
+                      )}
+                      <div style={lockStyle}><span style={label}>【冷めやすいポイント】</span>{lockedText(at.ngStyle, locked)}</div>
+                      {locked && (
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
+                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
+                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* 8. 蓮と月からの最終攻略アドバイス */}
             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
