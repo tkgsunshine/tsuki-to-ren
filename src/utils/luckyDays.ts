@@ -29,14 +29,14 @@ export type LuckMark = 'tentoku' | 'kango' | 'shigo' | 'teio' | 'kenroku' | 'ten
 
 /** 画面に出す言い方（専門用語を使わない） */
 export const LUCK_MARK_LABELS: Record<LuckMark | 'sango', string> = {
-  tentoku: '生まれた日の星と上下とも結びつく日',
-  kango: '惹きつける力が強い日',
-  shigo: '心が通じやすい日',
-  teio: 'いちばん力が出る日',
-  kenroku: '自分らしくいられる日',
-  tenotsu: '助けが入る日',
-  love: '恋の星が回ってくる日',
-  seiki: '星が味方する日',
+  tentoku: '運命の星と結ばれる',
+  kango: '惹きつける力がピーク',
+  shigo: '心がつながりやすい',
+  teio: '魅力が全開',
+  kenroku: '素のままで輝ける',
+  tenotsu: '助けが入る',
+  love: '恋の星が輝く',
+  seiki: '星が背中を押す',
   sango: '二人の絆が完成する日'
 };
 const MARK_ORDER: LuckMark[] = ['tentoku', 'love', 'kango', 'shigo', 'tenotsu', 'teio', 'kenroku', 'seiki'];

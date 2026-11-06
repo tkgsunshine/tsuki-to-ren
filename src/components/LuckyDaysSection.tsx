@@ -27,15 +27,31 @@ interface Props {
 }
 
 // 「上下とも結びつく日」は「惹きつける力」「心が通じやすい」を含むので、重ねて書かない
-const labelOf = (marks: LuckMark[] | undefined) => {
+const labelsOf = (marks: LuckMark[] | undefined): string[] => {
   const list = marks || [];
-  const shown = list.includes('tentoku') ? list.filter((k) => k !== 'kango' && k !== 'shigo') : list;
-  return shown.map((k) => LUCK_MARK_LABELS[k]).join('・');
+  // 「助けが入る」は長いので出さない（2026-11-06 TAKASHI）。日の選び方には使う
+  const shown = (list.includes('tentoku') ? list.filter((k) => k !== 'kango' && k !== 'shigo') : list).filter((k) => k !== 'tenotsu');
+  return shown.length > 0 ? shown.map((k) => LUCK_MARK_LABELS[k]) : ['運気が追い風'];
 };
 
+const chipStyle: React.CSSProperties = {
+  fontSize: '0.72rem', fontWeight: 'bold', color: '#f5d77a', lineHeight: 1.4,
+  border: '1px solid rgba(245, 215, 122, 0.55)', background: 'rgba(212, 175, 55, 0.12)',
+  borderRadius: '999px', padding: '0.12rem 0.55rem', whiteSpace: 'nowrap'
+};
+
+function Chips({ who, marks }: { who?: string; marks: LuckMark[] | undefined }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.3rem' }}>
+      {who && <span style={{ fontSize: '0.74rem', color: '#f3efe6', fontWeight: 'bold', marginRight: '0.15rem' }}>{who}</span>}
+      {labelsOf(marks).map((t) => <span key={t} style={chipStyle}>✦ {t}</span>)}
+    </div>
+  );
+}
+
 const rowStyle: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', gap: '0.2rem',
-  padding: '0.55rem 0.75rem', borderRadius: '8px',
+  display: 'flex', flexDirection: 'column', gap: '0.35rem',
+  padding: '0.6rem 0.75rem', borderRadius: '8px',
   background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.25)'
 };
 const badgeStyle: React.CSSProperties = {
@@ -50,35 +66,36 @@ function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockW
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
 }) {
   if (days.length === 0) return null;
-  const shown = days.slice(0, locked ? 3 : 8); // ロック中は3行だけ（中身はダミー）
+  // ロック中も理由は見せ、日付だけぼかす（2026-11-06 TAKASHI）。日付はダミーの「●月●日」で、本当の日付は DOM に出さない
+  const shown = days.slice(0, locked ? 3 : 8); // ロック中は3行だけ
   return (
-    <div style={{ position: 'relative' }}>
-      <div style={{
-        display: 'flex', flexDirection: 'column', gap: '0.45rem',
-        filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1
-      }}>
-        {shown.map((x, i) => (
-          <div key={locked ? i : `${x.day.y}-${x.day.m}-${x.day.d}`} style={rowStyle}>
-            <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f5d77a' }}>
-              {locked ? '●月●日(●)' : formatLuckyDate(x.day)}
-              {!locked && x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
-            </span>
-            <span style={{ fontSize: '0.74rem', color: '#cfc7b4', lineHeight: 1.6 }}>
-              {locked
-                ? '●●●●●●●●・●●●●●●●'
-                : showPair
-                  ? `${myLabel}: ${labelOf(x.me) || 'おだやかな日'} ／ ${oppLabel}: ${labelOf(x.partner) || 'おだやかな日'}`
-                  : labelOf(x.me)}
-            </span>
-          </div>
-        ))}
-      </div>
-      {locked && (
-        <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} data-paid-lock onClick={onLockClick}>
-          <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>
-            {lockWord}
-          </button>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+      {shown.map((x, i) => (
+        <div
+          key={locked ? i : `${x.day.y}-${x.day.m}-${x.day.d}`}
+          style={{ ...rowStyle, cursor: locked ? 'pointer' : 'auto' }}
+          {...(locked ? { 'data-paid-lock': true, onClick: onLockClick } : {})}
+        >
+          <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f5d77a', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+            {locked
+              ? <span style={{ filter: 'blur(5px)', userSelect: 'none' }} aria-hidden="true">●月●日(●)</span>
+              : formatLuckyDate(x.day)}
+            {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
+          </span>
+          {showPair ? (
+            <>
+              <Chips who={myLabel} marks={x.me} />
+              <Chips who={oppLabel} marks={x.partner} />
+            </>
+          ) : (
+            <Chips marks={x.me} />
+          )}
         </div>
+      ))}
+      {locked && (
+        <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick} style={{ alignSelf: 'center', marginTop: '0.2rem' }}>
+          {lockWord}
+        </button>
       )}
     </div>
   );
@@ -117,7 +134,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           <span style={subHead}>● 2人の最高シンクロ日</span>
           <span style={badgeStyle}>平均で年に17日・月に1〜2日だけ</span>
           <p style={bodyText}>
-            {myLabel}と{oppLabel}、一人ずつの生年月日から「良い日」を毎日調べました（惹きつける力が強い日・恋の星が回ってくる日・助けが入る日など、四柱推命と九星気学の昔からの決まりどおり）。そのうえで、<strong>二人の良い日がぴったり重なる日だけ</strong>を選び、どちらかの運気が空白になる日・ぶつかりやすい日は外しています。
+            {myLabel}と{oppLabel}の恋愛運の波が、<strong>同じ日にぴったり重なる日</strong>です。一人ずつの生年月日から恋愛運が高まる日を調べ、二人そろって上向く日だけを選びました。月に1〜2日しかない、二人だけの特別な日。デートのお誘いや気持ちを伝えるなら、この日に。
           </p>
           {hasSango && (
             <p style={{ ...bodyText, color: '#f5d77a' }}>
