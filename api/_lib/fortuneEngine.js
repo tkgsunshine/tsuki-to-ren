@@ -138,8 +138,9 @@ export const juniUnPoints = (stem, branch) => JUNIUN_POINTS[getJuniUn(stem, bran
 export const SOLO_BASE_CONSTANT = 70;
 // 今日の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
 // 今日の点数に足す4つの項目（天干・十二支・十二運・日の九星）は、どれも平均がプラスなので、
-// そのままだと「基本の相性より今日の方が高い」日が7割になっていた。平均（約+4.8点）を引いて、＋と−がおおよそ半々になるようにする。
-export const DAILY_CENTER_OFFSET = -5;
+// そのままだと「基本の相性より今日の方が高い」日が7割になっていた。平均を引いて、＋と−がおおよそ半々になるようにする。
+// 2026-11 に恋の星・天乙貴人・空亡・2人の最高シンクロ日を足したので、-5 から -6 に合わせ直した。
+export const DAILY_CENTER_OFFSET = -6;
 // 月次・年次の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
 // 月次・年次は天干と十二支の2項目だけを足す（十二運・九星は入れていない）。2項目の平均は1人あたり約+4.1点（天干+2.3、十二支+1.8）なので、-4 で戻す。
 // 旧版は、二人分を合計（平均でなく）し、補正もなかったため、二人の鑑定で月次の100点が約7%・90点以上が約17%と出すぎていた。
@@ -227,6 +228,119 @@ export const getDailyStemImpact = (dayStem, personStem) => {
         return 0;
     return TEN_GOD_POINTS[getTenGod(personStem, dayStem)];
 };
+// ───────── 一人ずつの「良い日」の印（「2人の最高シンクロ日・あなたの恋愛運MAX日」と今日の点数で共通） ─────────
+// 印そのものは、四柱推命・九星気学の伝統的な決まり:
+//  ・天地徳合: その日の十干が自分の日干と干合し、十二支も自分の日支と支合（60日に1度）
+//  ・干合: その日の十干が自分の日干と干合
+//  ・支合: その日の十二支が自分の日支と支合
+//  ・十二運の帝旺・建禄: 自分の日干が、その日の十二支で帝旺・建禄
+//  ・天乙貴人: 自分の日干ごとに決まる2つの十二支の日（甲戊庚=丑未、乙己=子申、丙丁=亥酉、辛=寅午、壬癸=巳卯）
+//  ・恋の星: その日の十干が、女性には正官、男性には正財（恋愛・異性を表す星）
+//  ・生気: その日の日盤の九星が、自分の本命星を生む（九星気学）
+// 注意の日（どちらかに当たれば外す）:
+//  ・空亡: 自分の日柱の旬で欠ける2つの十二支の日
+//  ・六沖: その日の十二支が自分の日支と真逆
+// 印をどう重ねると「最高の日」とするか（isPersonalBest / isPairSyncDay）は伝統に決まりがないので、アプリのオリジナル。
+const LUCK_STEMS = '甲乙丙丁戊己庚辛壬癸';
+const LUCK_BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
+const LUCK_SHIGO = { 子: '丑', 丑: '子', 寅: '亥', 亥: '寅', 卯: '戌', 戌: '卯', 辰: '酉', 酉: '辰', 巳: '申', 申: '巳', 午: '未', 未: '午' };
+const LUCK_ROKUCHU = { 子: '午', 午: '子', 丑: '未', 未: '丑', 寅: '申', 申: '寅', 卯: '酉', 酉: '卯', 辰: '戌', 戌: '辰', 巳: '亥', 亥: '巳' };
+const LUCK_SANGO = ['申子辰', '巳酉丑', '寅午戌', '亥卯未'];
+const LUCK_TENOTSU = { 甲: '丑未', 戊: '丑未', 庚: '丑未', 乙: '子申', 己: '子申', 丙: '亥酉', 丁: '亥酉', 辛: '寅午', 壬: '巳卯', 癸: '巳卯' };
+const LUCK_STAR_ELEMENT = ['', '水', '土', '木', '木', '土', '金', '金', '土', '火']; // 一白〜九紫
+const LUCK_ELEMENT_ORDER = '木火土金水';
+const LUCK_MARK_ORDER = ['tentoku', 'love', 'kango', 'shigo', 'tenotsu', 'teio', 'kenroku', 'seiki'];
+/** 自分の日柱の旬で欠ける2つの十二支（空亡） */
+export function getKuubou(stem, branch) {
+    const s = LUCK_STEMS.indexOf(stem);
+    const b = LUCK_BRANCHES.indexOf(branch);
+    // 60干支の番号 i は i%10=s, i%12=b。旬の始まり（甲の日）から見た十二支のずれで、欠ける2支が決まる
+    const start = (b - s + 12) % 12; // 旬の始まり（甲）の十二支
+    return [LUCK_BRANCHES[(start + 10) % 12], LUCK_BRANCHES[(start + 11) % 12]];
+}
+export function getDayInfo(date) {
+    const y = date.getFullYear();
+    const m = date.getMonth() + 1;
+    const d = date.getDate();
+    const p = calculateDayPillar(new Date(y, m - 1, d));
+    return { y, m, d, weekday: new Date(y, m - 1, d).getDay(), stem: p.stem, branch: p.branch, star: getDayStarNumber(y, m, d) };
+}
+export function getPersonDay(person, day) {
+    const marks = [];
+    const kango = STEM_COMBINATIONS[day.stem] === person.stem;
+    const shigo = LUCK_SHIGO[day.branch] === person.branch;
+    if (kango && shigo)
+        marks.push('tentoku');
+    if (kango)
+        marks.push('kango');
+    if (shigo)
+        marks.push('shigo');
+    const juni = getJuniUn(person.stem, day.branch);
+    if (juni === '帝旺')
+        marks.push('teio');
+    if (juni === '建禄')
+        marks.push('kenroku');
+    if ((LUCK_TENOTSU[person.stem] || '').includes(day.branch))
+        marks.push('tenotsu');
+    const tenGod = getTenGod(person.stem, day.stem);
+    if (person.gender === 'female' ? tenGod === '正官' : tenGod === '正財')
+        marks.push('love');
+    const dayEl = LUCK_STAR_ELEMENT[day.star];
+    if (person.starElement && dayEl && (LUCK_ELEMENT_ORDER.indexOf(person.starElement) - LUCK_ELEMENT_ORDER.indexOf(dayEl) + 5) % 5 === 1)
+        marks.push('seiki');
+    const kuubou = getKuubou(person.stem, person.branch).includes(day.branch);
+    const caution = kuubou || LUCK_ROKUCHU[day.branch] === person.branch;
+    marks.sort((a, b) => LUCK_MARK_ORDER.indexOf(a) - LUCK_MARK_ORDER.indexOf(b));
+    return { marks, caution, kuubou };
+}
+const hasMark = (pd, k) => pd.marks.includes(k);
+/** 良い日: 注意の日でなく、主な印（九星の生気以外）が1つ以上 */
+export const isPersonalGood = (pd) => !pd.caution && pd.marks.some((k) => k !== 'seiki');
+/** 勝負の日: 天地徳合、または印が強く重なる日（注意の日は除く） */
+export const isPersonalBest = (pd) => !pd.caution &&
+    (hasMark(pd, 'tentoku') ||
+        (hasMark(pd, 'kango') && (hasMark(pd, 'tenotsu') || hasMark(pd, 'teio') || hasMark(pd, 'kenroku') || hasMark(pd, 'seiki'))) ||
+        (hasMark(pd, 'love') && (hasMark(pd, 'tenotsu') || hasMark(pd, 'shigo'))));
+/** 二人の十二支とその日の十二支で、三合がそろう日か（二人の十二支が同じ三合の、違う2支のときだけ起こる） */
+export function getSangoBranch(a, b) {
+    if (a.branch === b.branch)
+        return null;
+    const g = LUCK_SANGO.find((x) => x.includes(a.branch) && x.includes(b.branch));
+    return g ? g.replace(a.branch, '').replace(b.branch, '') : null;
+}
+/**
+ * 2人の最高シンクロ日か。どちらも注意の日でなく、
+ *  ・片方が勝負の日で、もう片方も良い日、または
+ *  ・三合がそろう日で、二人とも良い日
+ */
+export function isPairSyncDay(a, b, sango) {
+    return (isPersonalBest(a) && isPersonalGood(b)) || (isPersonalBest(b) && isPersonalGood(a)) || (sango && isPersonalGood(a) && isPersonalGood(b));
+}
+// ───────── 今日の点数に足す、印の点数（2026-11 見直し） ─────────
+// 「2人の最高シンクロ日」「恋の星が輝く」と出る日の点数が、ふつうの日より低く出ることがあったため、印を今日の点数にも入れる。
+//  ・恋の星（女性の正官・男性の正財）: 伝統では正官・正財はどちらも吉の星（四吉神）で、恋愛では異性・恋人を表す星。
+//    TEN_GOD_POINTS（基本の相性にも使う）は男女を区別しないため、正官をマイナスにしていた。今日の点数では、恋の星の日だけ下の値に置き換える。
+//  ・天乙貴人: 伝統では最も強い吉の星の一つ。今日の点数には入っていなかった。
+//  ・空亡: 伝統では運の空白の日（凶）。今日の点数には入っていなかった。六沖は getBranchImpact で既にマイナス。
+//  ・2人の最高シンクロ日: 印の重なり方の判定（isPairSyncDay）はアプリのオリジナルなので、ボーナスもアプリが決めた値。
+// 点数への換算の重みは、すべてアプリが決めた値。
+export const LOVE_STAR_DAILY_POINTS = 10;
+export const TENOTSU_DAILY_POINTS = 6;
+export const KUUBOU_DAILY_POINTS = -6;
+export const SYNC_DAY_BONUS = 10;
+/** その日の天干（＋印）が一人に与える点数。恋の星の日は通変星の点数を置き換え、天乙貴人・空亡を足す */
+export function getDailyMarkedStemImpact(person, pd, dayStem, personStem) {
+    let points = getDailyStemImpact(dayStem, personStem);
+    if (!person || !pd)
+        return points;
+    if (hasMark(pd, 'love') && !hasMark(pd, 'kango'))
+        points = LOVE_STAR_DAILY_POINTS;
+    if (hasMark(pd, 'tenotsu'))
+        points += TENOTSU_DAILY_POINTS;
+    if (pd.kuubou)
+        points += KUUBOU_DAILY_POINTS;
+    return points;
+}
 // 深層鑑定「二人の間で踏みやすい地雷3選」。
 // トリセツの「やってはいけないこと5選」は、お相手本人が嫌がること（お相手の日干・16タイプ）。
 // こちらは、二人の組み合わせで「あなた」がやりがちなこと。
@@ -1830,7 +1944,7 @@ export function getScoreMood(baseScore, dailyScore) {
         return { phase: 'crescent', title: '今日はひと休み', diff, sign, trend: 'down' };
     return { phase: 'thin', title: '今日は充電の日', diff, sign, trend: 'down' };
 }
-export function generateFortuneResult(input, character) {
+export function generateFortuneResult(input, character, now = new Date()) {
     const myNickname = input.myName || 'あなた';
     const oppNickname = input.opponentName || 'お相手';
     const myDate = new Date(input.myBirth);
@@ -1944,19 +2058,16 @@ export function generateFortuneResult(input, character) {
     if (baseScore < 30)
         baseScore = 30;
     // 日次スコア (その日の日干干支のエネルギーと自身の宿命日干の相互作用から論理的に算出)
-    const today = new Date();
+    const today = now;
     const todayPillar = calculateDayPillar(today);
-    const myDailyImpact = getDailyStemImpact(todayPillar.stem, myPillarObj.stem);
-    const oppDailyImpact = hasOpponent ? getDailyStemImpact(todayPillar.stem, oppPillarObj.stem) : 0;
-    // 今日の十二支が、自分（と相手）の日主にとってどの運の段階か（十二運）。日ごとの運気の波として足す。
-    // 旧版は、日付から作った疑似的な揺らぎ（sin関数）を足していた。相手がいる場合は、二人の平均。
-    const myJuniUnDaily = juniUnPoints(myPillarObj.stem, todayPillar.branch);
-    const juniUnDaily = hasOpponent ? (myJuniUnDaily + juniUnPoints(oppPillarObj.stem, todayPillar.branch)) / 2 : myJuniUnDaily;
-    // 今日の十二支と、自分（と相手）の十二支の関係（支合・三合・六沖・五行の生剋）も足す。
-    // 週次スコア（weeklyScores の2日目以降）と同じ式・同じ強度に揃えている。0 にすると十二支の影響なし（旧仕様）。
-    const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
-    const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
-    // 相手がいる場合、天干と十二支も（十二運・日の九星と同じく）二人の平均にする。旧版は二人分を合計しており、振れ幅と＋への偏りが2倍になっていた。
+    // 一人ずつの「良い日」の印（恋の星・天乙貴人・空亡）と、2人の最高シンクロ日を、今日の点数にも入れる（2026-11 見直し）。
+    // 「2人の最高シンクロ日」欄（LuckyDaysSection）と同じく、性別が分からない人は印を使わない。
+    const myLuck = input.myGender ? { stem: myPillarObj.stem, branch: myPillarObj.branch, starElement: myStarObj.element, gender: input.myGender } : null;
+    const oppLuck = hasOpponent && oppPillarObj && opponentStarObj && input.opponentGender
+        ? { stem: oppPillarObj.stem, branch: oppPillarObj.branch, starElement: opponentStarObj.element, gender: input.opponentGender }
+        : null;
+    const pairSangoBranch = myLuck && oppLuck ? getSangoBranch(myLuck, oppLuck) : null;
+    // 相手がいる場合、天干・十二支・十二運・日の九星はどれも二人の平均にする。旧版は天干と十二支を二人分合計しており、振れ幅と＋への偏りが2倍になっていた。
     const pairAvg = (mine, opp) => (hasOpponent ? (mine + opp) / 2 : mine);
     // 今日の日盤の中宮の星（日の九星）と、本命星の関係（九星気学）。相手がいる場合は、二人の平均。
     const dayStarOf = (d) => {
@@ -1965,12 +2076,37 @@ export function generateFortuneResult(input, character) {
             ? (mine + getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), opponentStarObj.element)) / 2
             : mine;
     };
-    const dayStarDaily = dayStarOf(today);
-    let dailyScore = Math.floor(baseScore + pairAvg(myDailyImpact, oppDailyImpact) + pairAvg(myBranchDaily, oppBranchDaily) + juniUnDaily + dayStarDaily + DAILY_CENTER_OFFSET);
+    /** その日の点数（今日の点数と、7日間のグラフで共通）。上限・下限で止める前の値 */
+    const rawDayScore = (d) => {
+        const dayInfo = getDayInfo(d);
+        const dp = { stem: dayInfo.stem, branch: dayInfo.branch };
+        const myDay = myLuck ? getPersonDay(myLuck, dayInfo) : null;
+        const oppDay = oppLuck ? getPersonDay(oppLuck, dayInfo) : null;
+        // 天干: 通変星・干合（＋恋の星・天乙貴人・空亡）
+        const myStem = getDailyMarkedStemImpact(myLuck, myDay, dp.stem, myPillarObj.stem);
+        const oppStem = hasOpponent ? getDailyMarkedStemImpact(oppLuck, oppDay, dp.stem, oppPillarObj.stem) : 0;
+        // 十二支: その日の十二支と、自分（と相手）の十二支の関係（支合・三合・六沖・五行の生剋）
+        const myBranch = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(dp.branch, myPillarObj.branch));
+        const oppBranch = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(dp.branch, oppPillarObj.branch)) : 0;
+        // 十二運: その日の十二支が、自分（と相手）の日主にとってどの運の段階か
+        const myJuni = juniUnPoints(myPillarObj.stem, dp.branch);
+        const juni = hasOpponent ? (myJuni + juniUnPoints(oppPillarObj.stem, dp.branch)) / 2 : myJuni;
+        // 2人の最高シンクロ日（LuckyDaysSection と同じ判定）
+        const sync = myDay && oppDay ? isPairSyncDay(myDay, oppDay, pairSangoBranch === dp.branch) : false;
+        return baseScore + pairAvg(myStem, oppStem) + pairAvg(myBranch, oppBranch) + juni + dayStarOf(d) + DAILY_CENTER_OFFSET + (sync ? SYNC_DAY_BONUS : 0);
+    };
+    let dailyScore = Math.floor(rawDayScore(today));
     if (dailyScore > 100)
         dailyScore = 100;
     if (dailyScore < 0)
         dailyScore = 0;
+    // 相性レーダーの「日々の運気の波」用（印は入れない。従来どおり）
+    const myDailyImpact = getDailyStemImpact(todayPillar.stem, myPillarObj.stem);
+    const oppDailyImpact = hasOpponent ? getDailyStemImpact(todayPillar.stem, oppPillarObj.stem) : 0;
+    const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
+    const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
+    const myJuniUnDaily = juniUnPoints(myPillarObj.stem, todayPillar.branch);
+    const juniUnDaily = hasOpponent ? (myJuniUnDaily + juniUnPoints(oppPillarObj.stem, todayPillar.branch)) / 2 : myJuniUnDaily;
     // 16タイプ和名マッピング
     const mbtiNames = {
         'INFJ': '提唱者',
@@ -2217,23 +2353,16 @@ export function generateFortuneResult(input, character) {
     // 週次スコア (7日間 - 日柱干支の生剋・支合・三合・六沖から論理的に算出)
     const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
     const weeklyScores = Array.from({ length: 7 }).map((_, idx) => {
-        const d = new Date();
+        const d = new Date(today.getTime());
         d.setDate(today.getDate() + idx);
         const dayLabel = weekdays[d.getDay()];
         const dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
-        const dayPillar = calculateDayPillar(d);
-        const myStemImpact = getDailyStemImpact(dayPillar.stem, myPillarObj.stem);
-        const oppStemImpact = hasOpponent ? getDailyStemImpact(dayPillar.stem, oppPillarObj.stem) : 0;
-        const myBranchImpact = getBranchImpact(dayPillar.branch, myPillarObj.branch);
-        const oppBranchImpact = hasOpponent ? getBranchImpact(dayPillar.branch, oppPillarObj.branch) : 0;
         let score;
         if (idx === 0) {
             score = dailyScore;
         }
         else {
-            const myJuniUn = juniUnPoints(myPillarObj.stem, dayPillar.branch);
-            const dayJuniUn = hasOpponent ? (myJuniUn + juniUnPoints(oppPillarObj.stem, dayPillar.branch)) / 2 : myJuniUn;
-            score = Math.floor(baseScore + pairAvg(myStemImpact, oppStemImpact) + pairAvg(myBranchImpact, oppBranchImpact) + dayJuniUn + dayStarOf(d) + DAILY_CENTER_OFFSET);
+            score = Math.floor(rawDayScore(d));
             if (score > 100)
                 score = 100;
             if (score < 30)
@@ -3138,7 +3267,7 @@ export function generateFortuneResult(input, character) {
         return { month: monthName, label, text, score };
     });
     // 年次プレビュー (歳運・流年柱干支の生剋・支合沖害から動的に算出)
-    const currentYear = new Date().getFullYear();
+    const currentYear = now.getFullYear();
     const yearlyPreviews = [1, 2, 3, 4, 5, 10].map((yearsLater) => {
         const calendarYear = currentYear + yearsLater;
         const displayYear = `${calendarYear}年`;
