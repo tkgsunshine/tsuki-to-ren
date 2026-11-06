@@ -27,16 +27,31 @@ interface Props {
 }
 
 // 「上下とも結びつく日」は「惹きつける力」「心が通じやすい」を含むので、重ねて書かない
-const labelOf = (marks: LuckMark[] | undefined) => {
+const labelsOf = (marks: LuckMark[] | undefined): string[] => {
   const list = marks || [];
-  // 「助けが入る日」は長いので出さない（2026-11-06 TAKASHI）。日の選び方には使う
+  // 「助けが入る」は長いので出さない（2026-11-06 TAKASHI）。日の選び方には使う
   const shown = (list.includes('tentoku') ? list.filter((k) => k !== 'kango' && k !== 'shigo') : list).filter((k) => k !== 'tenotsu');
-  return shown.map((k) => LUCK_MARK_LABELS[k]).join('・');
+  return shown.length > 0 ? shown.map((k) => LUCK_MARK_LABELS[k]) : ['運気が追い風'];
 };
 
+const chipStyle: React.CSSProperties = {
+  fontSize: '0.72rem', fontWeight: 'bold', color: '#f5d77a', lineHeight: 1.4,
+  border: '1px solid rgba(245, 215, 122, 0.55)', background: 'rgba(212, 175, 55, 0.12)',
+  borderRadius: '999px', padding: '0.12rem 0.55rem', whiteSpace: 'nowrap'
+};
+
+function Chips({ who, marks }: { who?: string; marks: LuckMark[] | undefined }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.3rem' }}>
+      {who && <span style={{ fontSize: '0.74rem', color: '#f3efe6', fontWeight: 'bold', marginRight: '0.15rem' }}>{who}</span>}
+      {labelsOf(marks).map((t) => <span key={t} style={chipStyle}>✦ {t}</span>)}
+    </div>
+  );
+}
+
 const rowStyle: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', gap: '0.2rem',
-  padding: '0.55rem 0.75rem', borderRadius: '8px',
+  display: 'flex', flexDirection: 'column', gap: '0.35rem',
+  padding: '0.6rem 0.75rem', borderRadius: '8px',
   background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.25)'
 };
 const badgeStyle: React.CSSProperties = {
@@ -67,11 +82,14 @@ function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockW
               : formatLuckyDate(x.day)}
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
           </span>
-          <span style={{ fontSize: '0.74rem', color: '#cfc7b4', lineHeight: 1.6 }}>
-            {showPair
-              ? `${myLabel}: ${labelOf(x.me) || 'おだやかな日'} ／ ${oppLabel}: ${labelOf(x.partner) || 'おだやかな日'}`
-              : labelOf(x.me)}
-          </span>
+          {showPair ? (
+            <>
+              <Chips who={myLabel} marks={x.me} />
+              <Chips who={oppLabel} marks={x.partner} />
+            </>
+          ) : (
+            <Chips marks={x.me} />
+          )}
         </div>
       ))}
       {locked && (
