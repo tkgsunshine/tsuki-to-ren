@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X, Lock } from 'lucide-react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X, Lock, Star } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
@@ -19,6 +19,15 @@ const benefits = [
     shotAlt: '本日のLINE吉時間とアプローチ助言、二人のLINEのコツの画面',
     pairNote: 'pairToday',
     body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。返信が遅いときの理由や気持ちが伝わるコツも、二人に合わせてお伝えしますね。'
+  },
+  {
+    Icon: Star,
+    color: '#e2c074',
+    title: '2人の最高シンクロ日と、あなたの恋愛運MAX日',
+    shot: '/assets/premium/lucky-days.webp',
+    shotAlt: '2人の最高シンクロ日とあなたの恋愛運MAX日の画面',
+    pairNote: 'pairLucky',
+    body: '二人の生年月日から一人ずつの「良い日」を毎日調べ、二人の良い日がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（平均で年に17日）と、60日に1度しか巡ってこない「あなたの恋愛運MAX日」の日付がわかります。告白やデートのお誘いは、この日に。'
   },
   {
     Icon: Calendar,
@@ -370,7 +379,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const faqs = [
     ...(pair ? [{
       q: '買い切り（680円）と月額の違いは？',
-      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
@@ -558,6 +567,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
+                  { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の良い日がぴったり重なる、平均で年に17日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかがわかります。` },
                   { who: 'tsuki', t: '7日間の波から、10年先の二人の未来まで', shot: '/assets/premium/edu-future.webp', d: '明日からの7日間・月ごとの相性の波と、この先10年の年ごとの流れ。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' }
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
@@ -610,6 +620,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
+                  { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
+                  { label: 'あなたの恋愛運MAX日（日付）', pair: null, monthly: '◯' },
                   { label: '7日間・月ごと・10年先までの流れ（結婚・転機の年）', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
@@ -773,7 +785,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
                       {pairNote === 'pairAll'
                         ? `¥680の買い切りでも見られます（${pair ? pairWho : "お相手1人"}だけ）`
-                        : '¥680の買い切りは購入日だけ'}
+                        : pairNote === 'pairLucky'
+                          ? `¥680の買い切りでも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見られます`
+                          : '¥680の買い切りは購入日だけ'}
                     </span>
                   )}
                   <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>

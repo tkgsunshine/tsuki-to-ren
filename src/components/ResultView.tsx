@@ -31,6 +31,7 @@ const GuardianColorText: React.FC<{ value: string; fallbackColor: string }> = ({
 import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
 import { SelfReadingCard } from './SelfReadingCard';
+import { LuckyDaysSection } from './LuckyDaysSection';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -2203,6 +2204,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
             })()}
           </div>
         </div>
+
+        {/* 最高シンクロ日・恋愛運MAX日（LINEの吉時間・コツの欄のすぐ下。根拠・珍しさは全員に、日付は月額プレミアムだけ） */}
+        <LuckyDaysSection
+          result={activeResult}
+          isSubscribed={isSubscribed}
+          pairOpen={pairOpen}
+          myName={myName}
+          oppName={oppNickname}
+          onLockClick={handleLockTagClick}
+          onPairLockClick={handleDeepLockClick}
+          lockWord={LOCK_WORD}
+        />
 
         {/* Daily Notification Prompt: マイページの「毎朝8時の運勢・吉時間通知」と同じ設定を表示する */}
         {!sharedBy && (() => {
