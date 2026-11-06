@@ -7,8 +7,8 @@ import {
 } from '../utils/luckyDays';
 import type { LuckyDay, LuckMark } from '../utils/luckyDays';
 
-// 「恋愛運が最高の日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
-// 二人の恋愛運が最高の日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運が最高の日は月額だけ（2026-11-06 TAKASHI）。
+// 「2人の最高シンクロ日・あなたの恋愛運MAX日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
+// 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日は月額だけ（2026-11-06 TAKASHI）。
 // 日付はロック中は DOM に出さない（ダミーの「●月●日」を出す）。点数には関わらない。
 const PAIR_WINDOW_DAYS = 90;
 const SOLO_WINDOW_DAYS = 365;
@@ -16,12 +16,12 @@ const SOLO_WINDOW_DAYS = 365;
 interface Props {
   result: FortuneResult;
   isSubscribed: boolean;
-  /** そのお相手を買い切りで解放済み（二人の恋愛運が最高の日だけ開く） */
+  /** そのお相手を買い切りで解放済み（2人の最高シンクロ日だけ開く） */
   pairOpen?: boolean;
   myName?: string;
   oppName?: string;
   onLockClick: (e?: React.MouseEvent) => void;
-  /** 二人の恋愛運が最高の日のロックを押したとき（買い切りも選べる購入画面へ） */
+  /** 2人の最高シンクロ日のロックを押したとき（買い切りも選べる購入画面へ） */
   onPairLockClick?: (e?: React.MouseEvent) => void;
   lockWord: string;
 }
@@ -109,12 +109,12 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
     <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
       <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
         <Star size={16} />
-        {partner ? `${oppLabel}との恋愛運が最高の日` : `${myLabel}の恋愛運が最高の日`}
+        {partner ? `${oppLabel}との最高シンクロ日` : `${myLabel}の恋愛運MAX日`}
       </h2>
 
       {partner && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          <span style={subHead}>● 二人の恋愛運が最高の日</span>
+          <span style={subHead}>● 2人の最高シンクロ日</span>
           <span style={badgeStyle}>平均で年に17日・月に1〜2日だけ</span>
           <p style={bodyText}>
             {myLabel}と{oppLabel}、一人ずつの生年月日から「良い日」を毎日調べました（惹きつける力が強い日・恋の星が回ってくる日・助けが入る日など、四柱推命と九星気学の昔からの決まりどおり）。そのうえで、<strong>二人の良い日がぴったり重なる日だけ</strong>を選び、どちらかの運気が空白になる日・ぶつかりやすい日は外しています。
@@ -126,7 +126,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           )}
           <p style={{ ...bodyText, fontWeight: 'bold' }}>
             {pairDays.length > 0
-              ? `これから${PAIR_WINDOW_DAYS}日のうち、二人の恋愛運が最高の日は${pairDays.length}日あります。`
+              ? `これから${PAIR_WINDOW_DAYS}日のうち、2人の最高シンクロ日は${pairDays.length}日あります。`
               : `これから${PAIR_WINDOW_DAYS}日のうちにはありません。この1年では${pairYearCount}日あります。`}
           </p>
           <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
@@ -137,13 +137,13 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         display: 'flex', flexDirection: 'column', gap: '0.55rem',
         ...(partner ? { borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.9rem' } : {})
       }}>
-        <span style={subHead}>● {myLabel}の恋愛運が最高の日</span>
+        <span style={subHead}>● {myLabel}の恋愛運MAX日</span>
         <span style={badgeStyle}>60日に1度・年に6〜7日だけ</span>
         <p style={bodyText}>
           生まれた日の星（干支）と、その日の干支が<strong>上と下の両方で結びつく日</strong>です。60日に1度しか巡ってこない、四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
         </p>
         <p style={{ ...bodyText, fontWeight: 'bold' }}>
-          これから1年のうち、{myLabel}の恋愛運が最高の日は{soloDays.length}日あります。
+          これから1年のうち、{myLabel}の恋愛運MAX日は{soloDays.length}日あります。
         </p>
         <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={onLockClick} lockWord={lockWord} />
       </div>

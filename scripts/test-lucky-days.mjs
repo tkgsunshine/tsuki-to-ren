@@ -1,5 +1,5 @@
 // node --experimental-strip-types --test scripts/test-lucky-days.mjs  （npm run test:engine に含む）
-// 「恋愛運が最高の日」: 伝統の決まりどおりに印がつくこと、日数がおおよそ想定どおりであること。点数には関わらない。
+// 「2人の最高シンクロ日・あなたの恋愛運MAX日」: 伝統の決まりどおりに印がつくこと、日数がおおよそ想定どおりであること。点数には関わらない。
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getKuubou, getPersonDay, getDayInfo, findSoloBestDays, findPairBestDays, getSangoBranch, toLuckPerson } from '../src/utils/luckyDays.ts';
@@ -41,7 +41,7 @@ test('三合がそろう十二支: 申と辰なら子、同じ十二支や三合
   assert.equal(getSangoBranch(p('子'), p('丑')), null);
 });
 
-test('二人の恋愛運が最高の日は、どちらの注意の日（空亡・六沖）も含まない／年に数日〜数十日', () => {
+test('2人の最高シンクロ日は、どちらの注意の日（空亡・六沖）も含まない／年に数日〜数十日', () => {
   let total = 0;
   let n = 0;
   for (let i = 0; i < 60; i += 7) {
