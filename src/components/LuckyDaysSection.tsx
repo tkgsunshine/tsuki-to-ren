@@ -117,7 +117,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           <span style={subHead}>● 2人の最高シンクロ日</span>
           <span style={badgeStyle}>平均で年に17日・月に1〜2日だけ</span>
           <p style={bodyText}>
-            {myLabel}と{oppLabel}、一人ずつの生年月日から「良い日」を毎日調べました（惹きつける力が強い日・恋の星が回ってくる日・助けが入る日など、四柱推命と九星気学の昔からの決まりどおり）。そのうえで、<strong>二人の良い日がぴったり重なる日だけ</strong>を選び、どちらかの運気が空白になる日・ぶつかりやすい日は外しています。
+            {myLabel}と{oppLabel}、一人ずつの生年月日から「恋愛運が高まる日」を毎日調べました（惹きつける力が強い日・恋の星が回ってくる日など、四柱推命と九星気学の昔からの決まりどおり）。そのうえで、<strong>二人の恋愛運がぴったり重なる日だけ</strong>を選んでいます。
           </p>
           {hasSango && (
             <p style={{ ...bodyText, color: '#f5d77a' }}>
