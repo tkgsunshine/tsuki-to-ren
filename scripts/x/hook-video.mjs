@@ -20,9 +20,9 @@ const arg = (name, def) => {
   return i >= 0 && process.argv[i + 1] !== undefined ? process.argv[i + 1] : def;
 };
 
-// 台本。hook: 最初の画面の言葉（行ごと）。picks: 結果の中で大きく見せる項目（find=見出しの文字、caption=上の字幕）
+// 台本。hook / end: 最初と最後の言葉の画面（行ごと。空なら入れない。2026-11-06 運営の判断で既定は入れない）。picks: 結果の中で大きく見せる項目（find=見出しの文字、caption=上の字幕）
 export const SCRIPT = {
-  hook: ['好きな人の既読スルー、', '脈なしって', '決めつけてない？'],
+  hook: [], // 例: ['好きな人の既読スルー、', '脈なしって', '決めつけてない？']
   input: '好きな人の生年月日とMBTIを入れると…',
   score: '二人の相性と、',
   picks: [
@@ -30,8 +30,8 @@ export const SCRIPT = {
     { find: '脈ありサイン 3段階', caption: '今どの段階？脈ありサイン', pick: 'Lv\\.3[^\\n]+' },
     { find: 'キラーテンプレート', caption: 'そのまま送れるLINE文まで', pick: '「[^」\\n]{8,60}」' },
   ],
-  end: ['あなたと好きな人なら、', 'どう出る？'],
-  brand: '月と蓮',
+  end: [], // 例: ['あなたと好きな人なら、', 'どう出る？']
+  brand: '月と蓮', // end があるときだけ出す
 };
 
 const ME = { birth: '20040203', mbti: 'ENFP' };
@@ -203,7 +203,7 @@ async function main() {
   const bar = 'drawbox=x=0:y=0:w=iw:h=230:color=0x0b0d1f@0.9:t=fill';
   const seg = [];
   // 1. つかみ: ホーム画面をぼかして暗くし、悩みの言葉を大きく
-  seg.push(`[0:v]trim=${m.hook[0].toFixed(2)}:${(m.hook[0] + 2.6).toFixed(2)},setpts=PTS-STARTPTS,boxblur=18:2,drawbox=x=0:y=0:w=iw:h=ih:color=0x05060f@0.55:t=fill,`
+  if (SCRIPT.hook.length) seg.push(`[0:v]trim=${m.hook[0].toFixed(2)}:${(m.hook[0] + 2.6).toFixed(2)},setpts=PTS-STARTPTS,boxblur=18:2,drawbox=x=0:y=0:w=iw:h=ih:color=0x05060f@0.55:t=fill,`
     + SCRIPT.hook.map((l, i) => text(l, i === SCRIPT.hook.length - 1 ? 104 : 88, i === SCRIPT.hook.length - 1 ? '0xF2D27A' : 'white', 700 + i * 150)).join(',') + '[s0]');
   // 2. 入力（1.6倍速）
   seg.push(`[0:v]trim=${m.input[0].toFixed(2)}:${m.input[1].toFixed(2)},setpts=(PTS-STARTPTS)/1.6,${bar},${text(SCRIPT.input, 54, 'white', 90)}[s1]`);
@@ -218,11 +218,10 @@ async function main() {
       + lines.map((l, j) => text(l, 70, 'white', y0 + j * 92, `:enable='gte(t,0.6)'`)).join(',') + `[s${3 + i}]`);
   });
   // 5. 締め: 最後の画面をぼかして
-  const n = 3 + m.picks.length;
-  seg.push(`[0:v]trim=${(m.end - 0.1).toFixed(2)}:${m.end.toFixed(2)},setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=${END},boxblur=18:2,drawbox=x=0:y=0:w=iw:h=ih:color=0x05060f@0.6:t=fill,`
-    + SCRIPT.end.map((l, i) => text(l, 84, 'white', 700 + i * 130)).join(',') + `,${text(SCRIPT.brand, 130, '0xF2D27A', 1000)}[s${n}]`);
-  const labels = Array.from({ length: n + 1 }, (_, i) => `[s${i}]`).join('');
-  const graph = seg.join(';') + `;${labels}concat=n=${n + 1}:v=1:a=0,fps=30[v]`;
+  if (SCRIPT.end.length) seg.push(`[0:v]trim=${(m.end - 0.1).toFixed(2)}:${m.end.toFixed(2)},setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=${END},boxblur=18:2,drawbox=x=0:y=0:w=iw:h=ih:color=0x05060f@0.6:t=fill,`
+    + SCRIPT.end.map((l, i) => text(l, 84, 'white', 700 + i * 130)).join(',') + `,${text(SCRIPT.brand, 130, '0xF2D27A', 1000)}[s${3 + m.picks.length}]`);
+  const labels = seg.map(x => x.match(/\[s\d+\]$/)[0]).join('');
+  const graph = seg.join(';') + `;${labels}concat=n=${seg.length}:v=1:a=0,fps=30[v]`;
 
   mkdirSync(dirname(out), { recursive: true });
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-filter_complex', graph, '-map', '[v]',
