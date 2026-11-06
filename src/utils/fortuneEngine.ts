@@ -1485,7 +1485,8 @@ export function getStemCompatibility(myStem: string, oppStem: string, myNick: st
     return {
       type: '運命の絆',
       title: `【運命の相性】${pairs[key]}`,
-      detail: `${stemText}陰と陽の星がぴたりと引き合う“干合（かんごう）”の組み合わせで、四柱推命では最も強い結びつきのひとつ。古くは“夫婦の縁”とも呼ばれてきました。理屈より先に魂が反応し合うため、言葉にしなくても伝わる安心感があり、どんな壁があっても自然と寄り添い合える強い絆で結ばれています。`
+      detail: `${stemText}陰と陽の星がぴたりと引き合う“干合（かんごう）”の組み合わせで、四柱推命では最も強い結びつきのひとつ。古くは“夫婦の縁”とも呼ばれてきました。理屈より先に魂が反応し合うため、言葉にしなくても伝わる安心感があり、どんな壁があっても自然と寄り添い合える強い絆で結ばれています。`,
+      short: `${stemText}陰と陽が引き合う“干合（かんごう）”。四柱推命で最も強い結びつきのひとつです。`
     };
   }
 
@@ -1498,27 +1499,31 @@ export function getStemCompatibility(myStem: string, oppStem: string, myNick: st
     return {
       type: '支え合い',
       title: '【自然と惹かれ合う相性】自然にパワーを与え合える関係',
-      detail: `${stemText}${GENERATE_IMAGE[`${elA}${elB}`]}ように、${me}の気が${opp}へ注がれる“相生（そうじょう）”の流れです。${me}の優しさや気配りが${opp}の魅力を自然と引き出し、${opp}にとって${me}は「一緒にいると一番ほっとして、元気になれる存在」になっています。`
+      detail: `${stemText}${GENERATE_IMAGE[`${elA}${elB}`]}ように、${me}の気が${opp}へ注がれる“相生（そうじょう）”の流れです。${me}の優しさや気配りが${opp}の魅力を自然と引き出し、${opp}にとって${me}は「一緒にいると一番ほっとして、元気になれる存在」になっています。`,
+      short: `${stemText}${me}の「${elA}」が${opp}の「${elB}」を生み育てる“相生（そうじょう）”。${me}が${opp}を元気にする関係です。`
     };
   }
   if (rel === 'producing') {
     return {
       type: '支え合い',
       title: '【自然と惹かれ合う相性】自然にパワーを与え合える関係',
-      detail: `${stemText}${GENERATE_IMAGE[`${elB}${elA}`] || '相手の気が自分を育てる'}ように、${opp}の気が${me}へ注がれる“相生（そうじょう）”の流れです。${opp}といると自然体で前向きになれ、その優しさを素直に受け取るほど、二人の縁は深まっていきます。`
+      detail: `${stemText}${GENERATE_IMAGE[`${elB}${elA}`] || '相手の気が自分を育てる'}ように、${opp}の気が${me}へ注がれる“相生（そうじょう）”の流れです。${opp}といると自然体で前向きになれ、その優しさを素直に受け取るほど、二人の縁は深まっていきます。`,
+      short: `${stemText}${opp}の「${elB}」が${me}の「${elA}」を生み育てる“相生（そうじょう）”。${opp}といると${me}が満たされる関係です。`
     };
   }
   if (rel === 'same') {
     return {
       type: '自然体',
       title: '【親友のように等身大でいられる相性】',
-      detail: `${stemText}どちらも五行の「${elA}」の気を宿す、“比和（ひわ）”の組み合わせです。同じ気は共鳴し合うため、テンポや物事の感じ方が驚くほど似ていて、前世から知っていたかのように飾らない本音で語り合えます。ただ、同じ気は重なりすぎるとお互いの領域を取り合いやすいのが比和の課題。一人の時間という“余白”を尊重し合うことで、この縁はいつまでも澄んだまま育っていきます。`
+      detail: `${stemText}どちらも五行の「${elA}」の気を宿す、“比和（ひわ）”の組み合わせです。同じ気は共鳴し合うため、テンポや物事の感じ方が驚くほど似ていて、前世から知っていたかのように飾らない本音で語り合えます。ただ、同じ気は重なりすぎるとお互いの領域を取り合いやすいのが比和の課題。一人の時間という“余白”を尊重し合うことで、この縁はいつまでも澄んだまま育っていきます。`,
+      short: `${stemText}同じ「${elA}」の気どうしの“比和（ひわ）”。飾らない本音で語り合える関係です。`
     };
   }
   return {
     type: '刺激的',
     title: '【お互いを刺激し合うドラマティック相性】',
-    detail: `${stemText}${conquerImage(elA, elB)}ように気がぶつかり合う“相剋（そうこく）”の関係です。ただ相剋は、砥石が刃を研ぐようにお互いを磨き上げる力も持ちます。正反対だからこそ強く惹かれ合う一方、自分のやり方にこだわると小さなすれ違いも。「自分と違ってそこが素敵」と面白がる余裕が、この縁を長く結ぶ鍵です。`
+    detail: `${stemText}${conquerImage(elA, elB)}ように気がぶつかり合う“相剋（そうこく）”の関係です。ただ相剋は、砥石が刃を研ぐようにお互いを磨き上げる力も持ちます。正反対だからこそ強く惹かれ合う一方、自分のやり方にこだわると小さなすれ違いも。「自分と違ってそこが素敵」と面白がる余裕が、この縁を長く結ぶ鍵です。`,
+    short: `${stemText}「${elA}」と「${elB}」がぶつかり合う“相剋（そうこく）”。違いがお互いを磨く、刺激的な関係です。`
   };
 }
 
@@ -1538,7 +1543,8 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string, myNi
     return {
       type: '最高のフィーリング',
       title: '【以心伝心】言葉にしなくても伝わる空気感',
-      detail: `${pairText}十二支が陰陽でひと組になる“支合（しごう）”の関係で、見えない糸で結ばれた縁とされます。空気感や生活リズムが言葉なしでも重なり、一緒にいるだけで不思議と緊張がほどけて、深い安心感に包まれます。`
+      detail: `${pairText}十二支が陰陽でひと組になる“支合（しごう）”の関係で、見えない糸で結ばれた縁とされます。空気感や生活リズムが言葉なしでも重なり、一緒にいるだけで不思議と緊張がほどけて、深い安心感に包まれます。`,
+      short: `${pairText}陰陽でひと組になる“支合（しごう）”。言葉にしなくても空気感が重なる縁です。`
     };
   }
 
@@ -1558,7 +1564,8 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string, myNi
     return {
       type: 'ベストパートナー',
       title: '【相乗効果バツグン】一緒に未来へ進める相性',
-      detail: `${pairText}${memberText}三合は、別々の場所から集まった気がひとつの大きな流れになる縁。同じ目標や計画に向かって力を合わせたとき、二人の気はひとつに束ねられ、何倍もの力となって理想の未来を切り開いていきます。`
+      detail: `${pairText}${memberText}三合は、別々の場所から集まった気がひとつの大きな流れになる縁。同じ目標や計画に向かって力を合わせたとき、二人の気はひとつに束ねられ、何倍もの力となって理想の未来を切り開いていきます。`,
+      short: `${pairText}“三合（さんごう）${kyoku}”の仲間。力を合わせるほど何倍もの力になる縁です。`
     };
   }
 
@@ -1571,14 +1578,16 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string, myNi
     return {
       type: '磁石のような魅力',
       title: '【真逆だから惹かれ合う】刺激的な相性',
-      detail: `${pairText}十二支の円でちょうど真向かいに立つ“冲（ちゅう）”の関係です。冲は磁石の両極のように、互いにない部分へ強く惹かれ合う縁。意見が違うときは「相手の世界を知るチャンス」と受け止めることで、ぶつかり合う気は深いつながりへと変わっていきます。`
+      detail: `${pairText}十二支の円でちょうど真向かいに立つ“冲（ちゅう）”の関係です。冲は磁石の両極のように、互いにない部分へ強く惹かれ合う縁。意見が違うときは「相手の世界を知るチャンス」と受け止めることで、ぶつかり合う気は深いつながりへと変わっていきます。`,
+      short: `${pairText}十二支の円で真向かいに立つ“冲（ちゅう）”。互いにない部分に強く惹かれ合う縁です。`
     };
   }
 
   return {
     type: '穏やかな調和',
     title: '【居心地バツグン】ほっと落ち着く相性',
-    detail: `${pairText}強く結びつける“合”も、ぶつかる“冲”もない、風のない湖のように穏やかな配置です。焦らずマイペースに日々のやり取りを重ねることで、じわじわと確かな信頼が育っていきます。`
+    detail: `${pairText}強く結びつける“合”も、ぶつかる“冲”もない、風のない湖のように穏やかな配置です。焦らずマイペースに日々のやり取りを重ねることで、じわじわと確かな信頼が育っていきます。`,
+    short: `${pairText}強い“合”も“冲”もない穏やかな配置。じわじわと信頼が育つ縁です。`
   };
 }
 
@@ -1596,18 +1605,21 @@ export function getStarCompatibility(myStar: string, oppStar: string, myNick = '
   if (rel === 'producing' || elementRelations[elB]?.[elA] === 'producing') {
     return {
       type: '運気アップ',
-      detail: `${starText}${GENERATE_IMAGE[`${elA}${elB}`] || GENERATE_IMAGE[`${elB}${elA}`]}ように、互いの気を生かし合う“相生”の組み合わせで、一緒に過ごすほど二人の運気とやる気が巡り、高め合っていきます。`
+      detail: `${starText}${GENERATE_IMAGE[`${elA}${elB}`] || GENERATE_IMAGE[`${elB}${elA}`]}ように、互いの気を生かし合う“相生”の組み合わせで、一緒に過ごすほど二人の運気とやる気が巡り、高め合っていきます。`,
+      short: `${starText}「${elA}」と「${elB}」の“相生”。一緒にいるほど運気が巡る組み合わせです。`
     };
   }
   if (rel === 'same') {
     return {
       type: '息ぴったり',
-      detail: `${starText}同じ「${elA}」の星どうしの“比和”で、互いの運気を乱さず、穏やかに巡らせ合う相性とされます。好きなことや休日の過ごし方が自然と重なり、一緒にいても気疲れしない、風通しのよい関係です。`
+      detail: `${starText}同じ「${elA}」の星どうしの“比和”で、互いの運気を乱さず、穏やかに巡らせ合う相性とされます。好きなことや休日の過ごし方が自然と重なり、一緒にいても気疲れしない、風通しのよい関係です。`,
+      short: `${starText}同じ「${elA}」の星どうしの“比和”。気疲れしない、穏やかな組み合わせです。`
     };
   }
   return {
     type: '新しい刺激',
-    detail: `${starText}「${elA}」と「${elB}」の気が交わる“相剋”の組み合わせで、互いの気の流れが交差する分、新しい発見や心が動く体験を運び合う、刺激に満ちた縁です。`
+    detail: `${starText}「${elA}」と「${elB}」の気が交わる“相剋”の組み合わせで、互いの気の流れが交差する分、新しい発見や心が動く体験を運び合う、刺激に満ちた縁です。`,
+    short: `${starText}「${elA}」と「${elB}」が交わる“相剋”。新しい発見を運び合う組み合わせです。`
   };
 }
 
@@ -2061,30 +2073,30 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     if (character === 'tsuki') {
       if (baseScore >= 85) {
         oneLiner = `${sTitle}。心と心が深く通じ合い、自然と愛が深まる最高の幸運期です。`;
-        summary = `${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。お互いを思いやることで絆がぐんと深まる好調期。素直な気持ちを届けましょう。`;
-        summary = `${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 55) {
         oneLiner = `【ゆっくり育てる相性】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
-        summary = `${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else {
         oneLiner = `【${sType}】焦らず穏やかに見守る時。お互いの違いをポジティブに楽しむ姿勢が大切です。`;
-        summary = `${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       }
     } else { // ren
       if (baseScore >= 85) {
         oneLiner = `${sTitle}。星が示す抜群の相性。具体的なお誘いに進むベストタイミングです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。関係性は着実に上昇中。相手の好む会話のペースに合わせるのが効果的です。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 55) {
         oneLiner = `【ゆっくり育てる相性】相性は安定しています。無理にペースを変えず、今の心地よい関係を続けるのが正解です。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else {
         oneLiner = `【${sType}】少しすれ違いやすい時期。気持ちのままに何度も連絡せず、落ち着いて見守るのがいちばんです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       }
     }
   } else {
