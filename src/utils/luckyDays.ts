@@ -2,9 +2,9 @@
 // 一人ずつの「良い日」の印（天地徳合・干合・支合・帝旺・建禄・天乙貴人・恋の星・生気、注意の日＝空亡・六沖）と、
 // 「勝負の日」「2人の最高シンクロ日」の判定は、今日の点数（dailyScore）でも使うため fortuneEngine.ts にある（2026-11 見直し）。
 // 2人の最高シンクロ日・恋の星・天乙貴人・空亡は、今日の点数にも入る（以前の「点数には足さない」案Aから変更）。
-import { getDayInfo, getPersonDay, getSangoBranch, isPairSyncDay } from './fortuneEngine.ts';
+import { getDayInfo, getPersonDay, getSangoBranch, isPairSyncDate } from './fortuneEngine.ts';
 import type { DayInfo, LuckMark, LuckPerson } from './fortuneEngine.ts';
-export { getKuubou, getDayInfo, getPersonDay, isPersonalGood, isPersonalBest, getSangoBranch, isPairSyncDay } from './fortuneEngine.ts';
+export { getKuubou, getDayInfo, getPersonDay, isPersonalGood, isPersonalBest, getSangoBranch, isPairSyncDay, isPairSyncDate, getPairSyncDaysOfYear, PAIR_SYNC_DAYS_PER_YEAR } from './fortuneEngine.ts';
 export type { LuckMark, LuckPerson, DayInfo, PersonDay } from './fortuneEngine.ts';
 
 const STEMS = '甲乙丙丁戊己庚辛壬癸';
@@ -58,6 +58,7 @@ export function findSoloBestDays(me: LuckPerson, from: Date, days: number): Luck
  * 2人の最高シンクロ日。どちらも注意の日でなく、
  *  ・片方が勝負の日で、もう片方も良い日、または
  *  ・三合がそろう日で、二人とも良い日
+ * の候補から、暦年ごとに強い順で最大4日（fortuneEngine.ts の isPairSyncDate。今日の点数と同じ判定）
  */
 export function findPairBestDays(me: LuckPerson, partner: LuckPerson, from: Date, days: number): LuckyDay[] {
   const sangoBranch = getSangoBranch(me, partner);
@@ -67,7 +68,7 @@ export function findPairBestDays(me: LuckPerson, partner: LuckPerson, from: Date
     const a = getPersonDay(me, day);
     const b = getPersonDay(partner, day);
     const sango = sangoBranch === day.branch;
-    if (isPairSyncDay(a, b, sango)) out.push({ day, me: a.marks, partner: b.marks, sango });
+    if (isPairSyncDate(me, partner, day)) out.push({ day, me: a.marks, partner: b.marks, sango });
   }
   return out;
 }

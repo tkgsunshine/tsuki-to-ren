@@ -9,8 +9,8 @@ import type { LuckyDay, LuckMark } from '../utils/luckyDays';
 
 // 「2人の最高シンクロ日・あなたの恋愛運MAX日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
 // 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日は月額だけ（2026-11-06 TAKASHI）。
-// 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDay）。
-const PAIR_WINDOW_DAYS = 90;
+// 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDate。暦年ごとに強い順で最大4日）。
+const PAIR_WINDOW_DAYS = 365; // 90日の表示はやめ、1年ぶんだけ出す（2026-11-07 TAKASHI）
 const SOLO_WINDOW_DAYS = 365;
 
 interface Props {
@@ -31,7 +31,13 @@ const labelsOf = (marks: LuckMark[] | undefined): string[] => {
   const list = marks || [];
   // 「助けが入る」は長いので出さない（2026-11-06 TAKASHI）。日の選び方には使う
   const shown = (list.includes('tentoku') ? list.filter((k) => k !== 'kango' && k !== 'shigo') : list).filter((k) => k !== 'tenotsu');
-  return shown.length > 0 ? shown.map((k) => LUCK_MARK_LABELS[k]) : ['運気が追い風'];
+  return shown.length > 0 ? shown.map((k) => LUCK_MARK_LABELS[k]) : [FALLBACK_LABEL];
+};
+
+const FALLBACK_LABEL = '運気が追い風';
+const pairLabels = (x: LuckyDay): string[] => {
+  const all = [...new Set([...labelsOf(x.me), ...labelsOf(x.partner)])];
+  return all.length > 1 ? all.filter((t) => t !== FALLBACK_LABEL) : all;
 };
 
 const chipStyle: React.CSSProperties = {
@@ -63,7 +69,7 @@ const badgeStyle: React.CSSProperties = {
 const bodyText: React.CSSProperties = { fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4', margin: 0 };
 const subHead: React.CSSProperties = { fontSize: '0.85rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' };
 
-function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockWord, commonLabels = [] }: {
+function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels = [] }: {
   days: LuckyDay[]; locked: boolean; showPair: boolean; myLabel: string; oppLabel: string;
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
   /** 一覧の上にまとめて出したタグ。各行からは外し、日によって違うタグだけ残す */
@@ -87,10 +93,8 @@ function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockW
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
           </span>
           {showPair ? (
-            <>
-              <Chips who={myLabel} marks={x.me} />
-              <Chips who={oppLabel} marks={x.partner} />
-            </>
+            // あなた・お相手で分けず、二人ぶんのタグをまとめて出す（2026-11-07 TAKASHI）
+            <Chips labels={pairLabels(x)} />
           ) : (
             <Chips labels={labelsOf(x.me).filter((t) => !commonLabels.includes(t))} />
           )}
@@ -114,10 +118,6 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
   }, []);
   const soloDays = useMemo(() => (me ? findSoloBestDays(me, today, SOLO_WINDOW_DAYS) : []), [me, today]);
   const pairDays = useMemo(() => (me && partner ? findPairBestDays(me, partner, today, PAIR_WINDOW_DAYS) : []), [me, partner, today]);
-  const pairYearCount = useMemo(
-    () => (me && partner && pairDays.length === 0 ? findPairBestDays(me, partner, today, 365).length : 0),
-    [me, partner, today, pairDays.length]
-  );
   // あなたの恋愛運MAX日は毎回同じ干支の日なので、タグもほぼ同じ。共通のタグは一覧の上に1回だけ出す（2026-11-07 TAKASHI）
   const soloCommon = soloDays.length > 0
     ? labelsOf(soloDays[0].me).filter((t) => soloDays.every((x) => labelsOf(x.me).includes(t)))
@@ -128,7 +128,8 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
   const pairLocked = !(isSubscribed || pairOpen);
   const myLabel = san(myName, 'あなた');
   const oppLabel = san(oppName);
-  const hasSango = Boolean(me && partner && getSangoBranch(me, partner));
+  // 「二人の絆が完成する日」の一言は、一覧にその日が入っているときだけ（年4日に絞ったため、入らない組もある）
+  const hasSango = Boolean(me && partner && getSangoBranch(me, partner)) && pairDays.some((x) => x.sango);
 
   return (
     <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
@@ -140,9 +141,9 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
       {partner && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
           <span style={subHead}>● 2人の最高シンクロ日</span>
-          <span style={badgeStyle}>平均で年に17日・月に1〜2日だけ</span>
+          <span style={badgeStyle}>1年に数日だけ</span>
           <p style={bodyText}>
-            {myLabel}と{oppLabel}の恋愛運の波が、<strong>同じ日にぴったり重なる日</strong>です。一人ずつの生年月日から恋愛運が高まる日を調べ、二人そろって上向く日だけを選びました。月に1〜2日しかない、二人だけの特別な日。デートのお誘いや気持ちを伝えるなら、この日に。
+            {myLabel}と{oppLabel}の恋愛運の波が、<strong>同じ日にぴったり重なる日</strong>です。二人だけの特別な日。デートのお誘いや気持ちを伝えるなら、この日に。
           </p>
           {hasSango && (
             <p style={{ ...bodyText, color: '#f5d77a' }}>
@@ -151,8 +152,8 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           )}
           <p style={{ ...bodyText, fontWeight: 'bold' }}>
             {pairDays.length > 0
-              ? `これから${PAIR_WINDOW_DAYS}日のうち、2人の最高シンクロ日は${pairDays.length}日あります。`
-              : `これから${PAIR_WINDOW_DAYS}日のうちにはありません。この1年では${pairYearCount}日あります。`}
+              ? `これから1年のうち、2人の最高シンクロ日は${pairDays.length}日あります。`
+              : 'これから1年のうちには、2人の最高シンクロ日はありません。'}
           </p>
           <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
         </div>
@@ -163,9 +164,9 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         ...(partner ? { borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.9rem' } : {})
       }}>
         <span style={subHead}>● {myLabel}の恋愛運MAX日</span>
-        <span style={badgeStyle}>60日に1度・年に6〜7日だけ</span>
+        <span style={badgeStyle}>年に6〜7日だけ</span>
         <p style={bodyText}>
-          生まれた日の星（干支）と、その日の干支が<strong>上と下の両方で結びつく日</strong>です。60日に1度しか巡ってこない、四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
+          生まれた日の星（干支）と、その日の干支が<strong>上と下の両方で結びつく日</strong>です。四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
         </p>
         <p style={{ ...bodyText, fontWeight: 'bold' }}>
           これから1年のうち、{myLabel}の恋愛運MAX日は{soloDays.length}日あります。
