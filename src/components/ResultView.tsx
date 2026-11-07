@@ -260,6 +260,42 @@ const lockedText = (text: string | undefined, locked: boolean): string => {
   const n = Math.max(24, (text ?? '').length);
   return LOCKED_FILLER.repeat(Math.ceil(n / LOCKED_FILLER.length)).slice(0, n);
 };
+// 会員登録で開く文: 冒頭の visibleLines 行（画面の見た目の行数）だけ本物を見せ、4行目以降はダミー文にしてぼかす。
+// 本物の文は冒頭の数行ぶん（headChars 文字）しか画面に渡さない。押すと onUnlock（登録の箱へ移動など）。
+// 親の文字サイズ・行の高さをそのまま使う（lineHeight は行数の計算用）。
+export const RegisterMosaicText: React.FC<{
+  text: string;
+  onUnlock: () => void;
+  visibleLines?: number;
+  lineHeight?: number;
+  headChars?: number;
+  buttonLabel?: string;
+}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = '無料会員登録で続きを見る' }) => {
+  const restLength = Math.max(60, text.length - Math.min(text.length, headChars));
+  return (
+    <span style={{ display: 'block' }}>
+      <span style={{ display: 'block', maxHeight: `${visibleLines * lineHeight}em`, overflow: 'hidden', lineHeight }}>
+        {text.slice(0, headChars)}
+      </span>
+      <span
+        role="button"
+        tabIndex={0}
+        onClick={onUnlock}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onUnlock(); } }}
+        style={{ display: 'block', position: 'relative', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden' }}
+      >
+        <span aria-hidden="true" style={{ display: 'block', filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65, lineHeight }}>
+          {lockedText(' '.repeat(restLength), true)}
+        </span>
+        <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+          <span className="premium-lock-tag" style={{ pointerEvents: 'auto' }}>
+            <Lock size={11} /> {buttonLabel}
+          </span>
+        </span>
+      </span>
+    </span>
+  );
+};
 // 無料会員には、ぼかす前に冒頭（約半分・最大2行ほど）だけ本物を見せる。続きはダミー文にしてぼかす。
 // 区切りがよいように、読点・句点の直後で切れるならそこで切る。
 const TEASER_MAX_CHARS = 50;
@@ -1820,7 +1856,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
         </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
-          {renderTextWithCharHeadings(formatAppraisalText(activeResult.summary))}
+          {(() => {
+            const text = formatAppraisalText(activeResult.summary);
+            // 未登録の人は「二人の性格・コミュニケーションの相性」の本文を3行だけ見せ、4行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07）
+            const marker = '【二人の性格・コミュニケーションの相性】';
+            const at = text.indexOf(marker);
+            if (isRegistered || at < 0) return renderTextWithCharHeadings(text);
+            const before = text.slice(0, at + marker.length);
+            const body = text.slice(at + marker.length).replace(/^\n/, '');
+            return (
+              <>
+                {renderTextWithCharHeadings(before)}
+                <RegisterMosaicText text={body} onUnlock={() => handleScrollToRegister('lock')} />
+              </>
+            );
+          })()}
         </p>
       </div>
 
@@ -1834,7 +1884,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {renderCharHeading(topic.title, 36)}
               </h3>
               <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
-                {formatAppraisalText(topic.text)}
+                {/* 未登録の人は3行だけ見せ、4行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07） */}
+                {isRegistered
+                  ? formatAppraisalText(topic.text)
+                  : <RegisterMosaicText text={formatAppraisalText(topic.text)} onUnlock={() => handleScrollToRegister('lock')} />}
               </p>
             </div>
           ))}
