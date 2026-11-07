@@ -114,8 +114,9 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
   }, []);
   const soloDays = useMemo(() => (me ? findSoloBestDays(me, today, SOLO_WINDOW_DAYS) : []), [me, today]);
   const pairDays = useMemo(() => (me && partner ? findPairBestDays(me, partner, today, PAIR_WINDOW_DAYS) : []), [me, partner, today]);
-  const pairYearCount = useMemo(
-    () => (me && partner && pairDays.length === 0 ? findPairBestDays(me, partner, today, 365).length : 0),
+  // 90日のうちに無い組は、1年ぶんの日を一覧に出す（2026-11-07 TAKASHI「シンクロ日表示されてない」）
+  const pairYearDays = useMemo(
+    () => (me && partner && pairDays.length === 0 ? findPairBestDays(me, partner, today, 365) : []),
     [me, partner, today, pairDays.length]
   );
   // あなたの恋愛運MAX日は毎回同じ干支の日なので、タグもほぼ同じ。共通のタグは一覧の上に1回だけ出す（2026-11-07 TAKASHI）
@@ -152,9 +153,9 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           <p style={{ ...bodyText, fontWeight: 'bold' }}>
             {pairDays.length > 0
               ? `これから${PAIR_WINDOW_DAYS}日のうち、2人の最高シンクロ日は${pairDays.length}日あります。`
-              : `これから${PAIR_WINDOW_DAYS}日のうちにはありません。この1年では${pairYearCount}日あります。`}
+              : `これから${PAIR_WINDOW_DAYS}日のうちにはありませんが、この1年では${pairYearDays.length}日あります。`}
           </p>
-          <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
+          <DayList days={pairDays.length > 0 ? pairDays : pairYearDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
         </div>
       )}
 
