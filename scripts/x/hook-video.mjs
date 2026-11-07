@@ -25,11 +25,21 @@ export const SCRIPT = {
   hook: [], // 例: ['好きな人の既読スルー、', '脈なしって', '決めつけてない？']
   input: '好きな人の生年月日とMBTIを入れると…',
   score: '二人の相性と、',
+  // pick: カードの文字から抜き出す正規表現（( ) があれば、その部分をつなげる）。fmt: 抜き出した文の形（$1 など）。無ければ本文の最初の一文
   picks: [
-    { find: '返信が遅いときの本当の理由', caption: '返信が遅い“本当の理由”' },
+    { find: 'ふだんのあなた', caption: 'あなたってこんな人', pick: 'ふだんのあなた\\n+([^。\\n]+。)' },
+    { find: 'あなたの守護獣', caption: 'あなたの守護獣', pick: 'あなたの守護獣 ✦\\n([^\\n]+)' },
+    { find: '本日のLINE吉時間', caption: '今日のLINEの送りどき', pick: '推奨送信タイミング\\n([^\\n]+)\\n([^\\n]+)', fmt: '$1\n$2' },
+    { find: '地雷3選', caption: '二人の間で踏みやすい地雷', pick: '1\\. ([^\\n]+)' },
+    { find: 'おすすめのお誘いフレーズ', caption: '好きな人の誘い方', pick: '「[^」\\n]+」' },
+    { find: '絶対にやってはいけないこと', caption: '絶対にやってはいけないこと', pick: '5選\\n([^\\n]+)' },
+    { find: '返信が遅いときの本当の理由', caption: '返信が遅い“本当の理由”', pick: '【本当の理由】\\s*([^。\\n]+。)' },
     { find: '脈ありサイン 3段階', caption: '今どの段階？脈ありサイン', pick: 'Lv\\.3[^\\n]+' },
-    { find: 'キラーテンプレート', caption: 'そのまま送れるLINE文まで', pick: '「[^」\\n]{8,60}」' },
+    { find: 'キラーテンプレート', caption: 'そのまま送れるLINE文', pick: '「[^」\\n]{8,60}」' },
+    { find: '詳細相性レーダー', caption: '6つの軸で相性を点数に', pick: '運命の引き寄せ\\n(\\d+)\\n点[\\s\\S]*?信頼・安心感\\n(\\d+)\\n点', fmt: '運命の引き寄せ $1点\n信頼・安心感 $2点' },
+    { find: '未来予測スケジュール', caption: '二人のこれからの運気', pick: '(\\d+月)：([^\\n]+)\\n+([^。\\n]+。)', fmt: '$1：$2\n$3' },
   ],
+
   end: [], // 例: ['あなたと好きな人なら、', 'どう出る？']
   brand: '月と蓮', // end があるときだけ出す
 };
@@ -48,7 +58,7 @@ const HIDE_FLOATING = `() => {
 
 // 見出しの文字を含む「カード」（高さ140px以上の一番近い祖先）を画面の中央に送り、まわりを暗くして目立たせる。
 // 戻り値: カードの本文の最初の一文（字幕に使う）
-const SPOTLIGHT = `({ text, ms, pick }) => new Promise(done => {
+const SPOTLIGHT = `({ text, ms, pick, fmt }) => new Promise(done => {
   document.querySelectorAll('[data-spot]').forEach(e => { e.style.boxShadow = e.dataset.spot; e.removeAttribute('data-spot'); });
   const box = document.querySelector('.main-content') || document.scrollingElement;
   const has = e => (e.textContent || '').includes(text);
@@ -57,7 +67,8 @@ const SPOTLIGHT = `({ text, ms, pick }) => new Promise(done => {
   let card = head;
   while (card.parentElement && card.getBoundingClientRect().height < 140) card = card.parentElement;
   const r = card.getBoundingClientRect();
-  const target = Math.max(0, r.top + box.scrollTop - (innerHeight - Math.min(r.height, innerHeight * 0.7)) / 2 + 40);
+  // 見出しを、上の帯（字幕）のすぐ下に置く
+  const target = Math.max(0, head.getBoundingClientRect().top + box.scrollTop - innerHeight * 0.33);
   const from = box.scrollTop, dy = target - from, start = performance.now();
   const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   const step = now => {
@@ -69,8 +80,12 @@ const SPOTLIGHT = `({ text, ms, pick }) => new Promise(done => {
     card.style.position = card.style.position || 'relative';
     card.style.zIndex = '30';
     if (pick) {
-      const hit = (card.innerText || '').match(new RegExp(pick));
-      if (hit) return done(hit[0].replace(/\\s+/g, '').replace(/コピー$/, ''));
+      const re = new RegExp(pick);
+      const hit = (card.innerText || '').match(re);
+      if (hit) {
+        const raw = fmt ? hit[0].replace(re, fmt) : (hit.length > 1 ? hit.slice(1).join(' ') : hit[0]);
+        return done(raw.split('\\n').map(x => x.replace(/\\s+/g, ' ').trim().replace(/コピー$/, '')).join('\\n'));
+      }
     }
     const body = (card.innerText || '').replace(head.innerText || '', '').replace(/\\s+/g, '');
     const m = body.match(/^.*?[。！？]/);
@@ -160,9 +175,9 @@ async function record({ base, dir, W, H, scale }) {
   m.picks = [];
   for (const p of SCRIPT.picks) {
     const start = now();
-    const line = await page.evaluate(`(${SPOTLIGHT})(${JSON.stringify({ text: p.find, ms: 600, pick: p.pick })})`);
+    const line = await page.evaluate(`(${SPOTLIGHT})(${JSON.stringify({ text: p.find, ms: 550, pick: p.pick, fmt: p.fmt })})`);
     if (line === null) { console.warn(`見つからない項目を飛ばしました: ${p.find}`); continue; }
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2500);
     m.picks.push({ ...p, line, start, end: now() });
   }
   m.end = now();
@@ -209,13 +224,15 @@ async function main() {
   seg.push(`[0:v]trim=${m.input[0].toFixed(2)}:${m.input[1].toFixed(2)},setpts=(PTS-STARTPTS)/1.6,${bar},${text(SCRIPT.input, 54, 'white', 90)}[s1]`);
   // 3. 点数
   seg.push(`[0:v]trim=${m.score[0].toFixed(2)}:${m.score[1].toFixed(2)},setpts=PTS-STARTPTS,${bar},${text(SCRIPT.score, 62, 'white', 86)}[s2]`);
-  // 4. 刺さる一文: 上に項目名、下に結果の一文を大きく
+  // 4. 刺さる一文: 上の帯に、項目名と結果の一文をまとめて出す（2026-11-07 運営の指定で、下には字幕を置かない）
   m.picks.forEach((p, i) => {
-    const lines = wrapJa(p.line, 13);
-    const y0 = OH - 140 - lines.length * 92;
-    seg.push(`[0:v]trim=${p.start.toFixed(2)}:${p.end.toFixed(2)},setpts=PTS-STARTPTS,${bar},${text(p.caption, 66, '0xF2D27A', 84)},`
-      + `drawbox=x=0:y=${y0 - 50}:w=iw:h=${lines.length * 92 + 100}:color=0x0b0d1f@0.92:t=fill:enable='gte(t,0.6)',`
-      + lines.map((l, j) => text(l, 70, 'white', y0 + j * 92, `:enable='gte(t,0.6)'`)).join(',') + `[s${3 + i}]`);
+    const lines = p.line.split('\n').flatMap(x => wrapJa(x, 15)).slice(0, 4);
+    const h = 190 + lines.length * 84 + 30;
+    seg.push(`[0:v]trim=${p.start.toFixed(2)}:${p.end.toFixed(2)},setpts=PTS-STARTPTS,`
+      + `drawbox=x=0:y=0:w=iw:h=230:color=0x0b0d1f@0.92:t=fill:enable='lt(t,0.6)',`
+      + `drawbox=x=0:y=0:w=iw:h=${h}:color=0x0b0d1f@0.92:t=fill:enable='gte(t,0.6)',`
+      + `${text(p.caption, 62, '0xF2D27A', 80)},`
+      + lines.map((l, j) => text(l, 60, 'white', 190 + j * 84, `:enable='gte(t,0.6)'`)).join(',') + `[s${3 + i}]`);
   });
   // 5. 締め: 最後の画面をぼかして
   if (SCRIPT.end.length) seg.push(`[0:v]trim=${(m.end - 0.1).toFixed(2)}:${m.end.toFixed(2)},setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=${END},boxblur=18:2,drawbox=x=0:y=0:w=iw:h=ih:color=0x05060f@0.6:t=fill,`
