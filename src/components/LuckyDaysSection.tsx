@@ -67,6 +67,8 @@ const badgeStyle: React.CSSProperties = {
   background: 'linear-gradient(135deg, #f5d77a, #d4af37)', borderRadius: '999px', padding: '0.15rem 0.6rem'
 };
 const bodyText: React.CSSProperties = { fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4', margin: 0 };
+// 日数は金色に（2026-11-07 TAKASHI）
+const goldCount: React.CSSProperties = { color: '#f5d77a' };
 const subHead: React.CSSProperties = { fontSize: '0.85rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' };
 
 function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels = [] }: {
@@ -152,7 +154,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           )}
           <p style={{ ...bodyText, fontWeight: 'bold' }}>
             {pairDays.length > 0
-              ? `これから1年のうち、2人の最高シンクロ日は${pairDays.length}日あります。`
+              ? <>これから1年のうち、2人の最高シンクロ日は<span style={goldCount}>{pairDays.length}日</span>あります。</>
               : 'これから1年のうちには、2人の最高シンクロ日はありません。'}
           </p>
           <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
@@ -169,7 +171,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           生まれた日の星（干支）と、その日の干支が<strong>上と下の両方で結びつく日</strong>です。四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
         </p>
         <p style={{ ...bodyText, fontWeight: 'bold' }}>
-          これから1年のうち、{myLabel}の恋愛運MAX日は{soloDays.length}日あります。
+          これから1年のうち、{myLabel}の恋愛運MAX日は<span style={goldCount}>{soloDays.length}日</span>あります。
         </p>
         {soloCommon.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
