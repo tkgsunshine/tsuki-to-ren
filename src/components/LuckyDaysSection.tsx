@@ -145,7 +145,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
       {partner && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
           <span style={subHead}>● 2人の最高シンクロ日</span>
-          <span style={badgeStyle}>年間数日だけ</span>
+          <span style={badgeStyle}>年に数日だけ</span>
           <p style={bodyText}>
             {myLabel}と{oppLabel}の恋愛運の波が、<strong>同じ日にぴったり重なる日</strong>です。二人だけの特別な日。デートのお誘いや気持ちを伝えるなら、この日に。
           </p>
