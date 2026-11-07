@@ -299,27 +299,21 @@ export const RegisterMosaicText: React.FC<{
   );
 };
 // 無料会員には、ぼかす前に冒頭（約半分・最大2行ほど）だけ本物を見せる。続きはダミー文にしてぼかす。
-// 区切りがよいように、読点・句点の直後で切れるならそこで切る。
+// 文の区切りには合わせず、文字数で切る（文の途中からぼかすほうがよい。TAKASHI判断 2026-11-07）。
 const TEASER_MAX_CHARS = 50;
 const splitTeaser = (text: string | undefined): { head: string; restLength: number } => {
   const t = text ?? '';
   const limit = Math.min(TEASER_MAX_CHARS, Math.ceil(t.length * 0.5));
-  let cut = limit;
-  for (let i = limit; i >= Math.floor(limit * 0.6); i--) {
-    if ('、。！？'.includes(t[i - 1])) { cut = i; break; }
-  }
+  const cut = limit;
   return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
 };
 // 「本日のアプローチ助言」は、未登録・無料会員とも、1段落目（約2行）に続けて2段落目の冒頭を約3行ぶん見せる（スマホ幅で合計約5行）。
-// 短い段落は全部見せる。長いときは読点・句点の直後で切れるならそこで切り、続きはダミー文にしてぼかす。
+// 短い段落は全部見せる。長いときは文の区切りに合わせず文字数で切り、続きはダミー文にしてぼかす（TAKASHI判断 2026-11-07）。
 const ADVICE_PREVIEW_CHARS = 50;
 const splitAdvicePreview = (text: string | undefined): { head: string; restLength: number } => {
   const t = text ?? '';
   if (t.length <= ADVICE_PREVIEW_CHARS) return { head: t, restLength: 0 };
-  let cut = ADVICE_PREVIEW_CHARS;
-  for (let i = ADVICE_PREVIEW_CHARS; i >= Math.floor(ADVICE_PREVIEW_CHARS * 0.75); i--) {
-    if ('、。！？'.includes(t[i - 1])) { cut = i; break; }
-  }
+  const cut = ADVICE_PREVIEW_CHARS;
   return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
 };
 // 7日間・月次・年次の点数も、見られない人にはダミーの値で描く（本物の点数を画面に置かない）
