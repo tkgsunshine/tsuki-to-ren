@@ -9036,5 +9036,92 @@
     "purpose": "follow",
     "status": "scheduled",
     "createdAt": "2026-11-06T19:17:05.382Z"
+  },
+  {
+    "id": "article-20261105-1",
+    "date": "2026-11-05",
+    "slot": "manual",
+    "kind": "value",
+    "format": "x_article",
+    "system": "article",
+    "purpose": "app",
+    "status": "manual",
+    "createdAt": "2026-11-05T13:10:38.936676Z",
+    "text": "なぜMBTIだけでは、恋愛の相性がわからないのか。\n\n相性表では「最悪」の二人が、なぜか一番長く続いている。\n「理想の組み合わせ」のはずの二人が、3か月で終わってしまう。\nそんなカップルに、心当たりはない？\n\nMBTIが間違っているのではない。\nMBTIは、あなたが自分で選んだ答えでできている。だからわかるのは、表に出る考え方や話し方まで。\n理屈抜きで惹かれてしまう理由や、好きな人の前でだけ出てしまう素顔は、その外にある。\n\n恋愛で二人を本当に左右するのは、相性表の「合う・合わない」ではない。\n好きになったとき、その人がどうなるか。つまり、恋愛の本性だ。\n\nそして本性は、選んだ答えには出ない。\n生年月日のように、あなたが選べなかったものに出る。\n\nだから『月と蓮』は、MBTIに、生年月日から人を読み解く四柱推命と九星気学を加えている。\n月と蓮の相性鑑定は、この3つを重ねて出している。\n\n・MBTI：二人がどう話し、どう考えるか\n・四柱推命：二人がなぜ惹かれ合うのか\n・九星気学：二人がどう支え合い、どんな流れの中にいるのか\n\n「最悪」の二人が長続きするのは、型が真逆でも、本性が深いところで噛み合っているから。\n「理想」の二人が終わるのは、型がぴったりでも、本性がすれ違っているから。\n\n月と蓮は、あなたが選んだ答えだけでなく、選べなかったものまで見る。\n知ってほしいのは、二人の相性の、その先にある恋愛の本性だから。\n\n---\n\nあなたと好きな人の恋愛の本性は、生年月日とMBTIから無料で鑑定できる。\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=article&utm_campaign=why-not-mbti\n\nあなたと好きな人の恋愛の本性は、生年月日とMBTIから鑑定できる。アプリはプロフィールのリンクから。"
+  },
+  {
+    "id": "tree-20261104-10",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "value",
+    "format": "mbti_tree",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "manual",
+    "createdAt": "2026-11-04T07:16:56.482Z",
+    "text": "MBTI（16タイプ）別「本当はさみしい時の行動」\n\n【さみしいと素直に言える】\n・ENFP 運動家\n「会いたい」を一日に何回も送る\n\n・ESFP エンターテイナー\nすぐ電話して声を聞きたがる\n\n・ESFJ 領事官\n「さみしかった」と会った瞬間に言う\n\n・ENFJ 主人公\n会えない分、長文で気持ちを伝える\n\n【さみしさを隠して強がる】\n・INFP 仲介者\n「大丈夫」と送って、ひとりで泣く\n\n・ISFJ 擁護者\n相手の忙しさを気づかって我慢する\n\n・INFJ 提唱者\n平気なふりが上手すぎて気づかれない\n\n・ISFP 冒険家\n好きな人の写真をずっと見返してる\n\n...↓"
+  },
+  {
+    "id": "tree-20261104-10-r",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "promo",
+    "format": "mbti_tree",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "manual",
+    "createdAt": "2026-11-04T07:16:56.482Z",
+    "text": "【さみしいと急に口数が減る】\n・ISTJ 管理者\n返信がいつもより短くなる\n\n・ISTP 巨匠\nひとりで出かけて気をまぎらわす\n\n・INTP 論理学者\n関係ない話題をいきなり振ってくる\n\n・INTJ 建築家\n自分でもさみしいと気づくのが遅い\n\n【さみしさを行動で埋めようとする】\n・ESTP 起業家\n理由をつけて会いに行っちゃう\n\n・ENTP 討論者\nかまってほしくて、ちょっかいを出す\n\n・ESTJ 幹部\n次に会う日をすぐ決めようとする\n\n・ENTJ 指揮官\n会える時間を作るために予定を組み直す\n\nあなたと好きな人の相性は、MBTIと生年月日で鑑定できます↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=tree&utm_content=tree-20261104-10\n\n16タイプ別の恋愛の話は、プロフィールにまとめてあるよ。",
+    "replyTo": "tree-20261104-10"
+  },
+  {
+    "id": "tree-20261104-2",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "value",
+    "format": "mbti_tree",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "manual",
+    "createdAt": "2026-11-04T03:07:38.912Z",
+    "text": "MBTI（16タイプ）別「脈ありサインの出し方」\n\n【好意がダダ漏れ】\n・ENFP 運動家\n返信が秒で来るのがもう答え\n\n・ESFP エンターテイナー\n会うたびに距離が近くなってる\n\n・ENFJ 主人公\nあなたの話だけ覚えすぎてる\n\n・ESTP 起業家\nとりあえず二人で出かけようとする\n\n【好意が遠回しすぎる】\n・INFP 仲介者\n好きな曲を送ってくるのが告白\n\n・INFJ 提唱者\n深い話をするのはあなたにだけ\n\n・ISFP 冒険家\n気づいたら隣に座ってる\n\n・ISFJ 擁護者\n体調の変化に誰より先に気づく\n\n...↓"
+  },
+  {
+    "id": "tree-20261104-2-r",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "promo",
+    "format": "mbti_tree",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "manual",
+    "createdAt": "2026-11-04T03:07:38.912Z",
+    "text": "【好意が行動でしか出ない】\n・ISTP 巨匠\n困った時にはちゃんと現れる\n\n・ISTJ 管理者\n約束の時間に一度も遅れない\n\n・ESTJ 幹部\nあなたの予定を自分のより優先する\n\n・ESFJ 領事官\nあなたの好物を覚えて買ってくる\n\n【好意がわかりにくすぎる】\n・INTJ 建築家\n質問攻めは興味がある証拠\n\n・INTP 論理学者\n好きなことを語り出したら脈あり\n\n・ENTJ 指揮官\n将来の話にあなたが入ってる\n\n・ENTP 討論者\nからかってくるのは気になってるから\n\n気になる人の脈あり度は、二人の相性からも見えてきます。\nMBTIと生年月日だけで、あなたと好きな人の相性を鑑定できます↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=tree&utm_content=tree-20261104-2\n\n16タイプ別の恋愛の話は、プロフィールにまとめてあるよ。",
+    "replyTo": "tree-20261104-2"
+  },
+  {
+    "id": "trend-20261104-r1",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "value",
+    "format": "rank5",
+    "system": "trend",
+    "purpose": "app",
+    "status": "manual",
+    "createdAt": "2026-11-04T06:04:50.174Z",
+    "text": "好きな人の前だと「急にポンコツになっちゃう」MBTI（16タイプ）\n\n5位：ESTJ 幹部\n→いつもはしっかり者なのに、言葉が出てこない\n\n4位：ENTJ 指揮官\n→完璧に話そうとして、かえって噛んじゃう\n\n3位：ISTJ 管理者\n→予定外の会話に、頭が真っ白になる\n\n2位：INTJ 建築家\n→脳内シミュレーションが、本番で全部消える\n\n1位は...↓"
+  },
+  {
+    "id": "trend-20261104-r1-r",
+    "date": "2026-11-04",
+    "slot": "manual",
+    "kind": "promo",
+    "format": "rank5",
+    "system": "trend",
+    "purpose": "app",
+    "status": "manual",
+    "createdAt": "2026-11-04T06:04:50.174Z",
+    "text": "1位：ISFP 冒険家\n好きな人の前だと、自分でもびっくりするくらい不器用になるタイプ。それだけ心が素直に動いてる証拠だよ。\n\nあなたと好きな人の相性も、生年月日とMBTIで鑑定できます↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=trend&utm_content=trend-20261104-r1\n\n16タイプ別の恋愛の話は、プロフィールにまとめてあるよ。",
+    "replyTo": "trend-20261104-r1"
   }
 ]
