@@ -408,6 +408,7 @@ export const logOutUser = async (): Promise<void> => {
   safeRemoveItem('hasu_to_tsuki_user');
   safeRemoveItem('hasu_to_tsuki_registered');
   safeRemoveItem('emailForSignIn');
+  safeRemoveItem('hasu_tsuki_premium'); // 前回のプレミアムの控え（premium.ts）
   try { sessionStorage.clear(); } catch {}
   // 端末に残したチャットの会話も消す（端末を共有していても次の人に見えないように）
   clearAllChatHistory();

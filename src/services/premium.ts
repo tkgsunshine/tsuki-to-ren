@@ -80,12 +80,16 @@ export const startPairCheckout = (oppBirth: string) => postForUrl('/api/stripe/c
 /** Sends the member to Stripe's page for cancelling, changing the card and receipts. */
 export const openBillingPortal = (reasons: string[] = [], note = '') => postForUrl('/api/stripe/portal', { reasons, note });
 
-/** The signed-in account's membership, or null when it cannot be read (signed out, offline). */
+/** The signed-in account's membership, or null when it cannot be read (offline, server error). */
 export const fetchPremiumStatus = async (): Promise<PremiumStatus | null> => {
   const auth = getFirebaseAuth();
   await auth.authStateReady();
   const user = auth.currentUser;
-  if (!user) return null;
+  if (!user) {
+    // ログインが切れている（端末の記録だけ残っている）。前回の「プレミアム」の控えを信じて有料部分を見せ続けないよう、無料として返す
+    try { localStorage.removeItem(CACHE_KEY); } catch {}
+    return { active: false, subscriptionStatus: null, currentPeriodEnd: null, cancelAtPeriodEnd: false, hasBilling: false };
+  }
   try {
     const res = await fetch('/api/stripe/status', { headers: { Authorization: await authHeader() } });
     if (!res.ok) return null;
