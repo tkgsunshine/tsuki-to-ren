@@ -9,7 +9,7 @@ import type { LuckyDay, LuckMark } from '../utils/luckyDays';
 
 // 「2人の最高シンクロ日・あなたの恋愛運MAX日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
 // 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日は月額だけ（2026-11-06 TAKASHI）。
-// 日付はロック中は DOM に出さない（ダミーの「●月●日」を出す）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDay）。
+// 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDay）。
 const PAIR_WINDOW_DAYS = 90;
 const SOLO_WINDOW_DAYS = 365;
 
@@ -66,7 +66,7 @@ function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockW
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
 }) {
   if (days.length === 0) return null;
-  // ロック中も理由は見せ、日付だけぼかす（2026-11-06 TAKASHI）。日付はダミーの「●月●日」で、本当の日付は DOM に出さない
+  // ロック中も理由は見せ、日付だけぼかす（2026-11-06 TAKASHI）。年と月は見せ、日と曜日はダミーの「●●日(●)」をぼかす（2026-11-07 TAKASHI）。本当の日は DOM に出さない
   const shown = days.slice(0, locked ? 3 : 8); // ロック中は3行だけ
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
@@ -78,7 +78,7 @@ function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockW
         >
           <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f5d77a', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
             {locked
-              ? <span style={{ filter: 'blur(5px)', userSelect: 'none' }} aria-hidden="true">●月●日(●)</span>
+              ? <span>{x.day.y}年{x.day.m}月<span style={{ filter: 'blur(5px)', userSelect: 'none' }} aria-hidden="true">●●日(●)</span></span>
               : formatLuckyDate(x.day)}
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
           </span>
