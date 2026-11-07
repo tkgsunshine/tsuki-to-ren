@@ -1117,7 +1117,8 @@ body.chat-keyboard-open .chat-partner-picker {
 .accordion-section.expanded {
   max-height: 1500px;
   opacity: 1;
-  margin-top: 1.25rem;
+  /* フォームの gap(1.25rem) だけで「あなたの情報」との間を空ける */
+  margin-top: 0;
 }
 
 /* Premium Mosaic & Blur Overlay Styles */
