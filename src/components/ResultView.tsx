@@ -270,8 +270,10 @@ export const RegisterMosaicText: React.FC<{
   lineHeight?: number;
   headChars?: number;
   buttonLabel?: string;
-}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = LOCK_WORD }) => {
-  const restLength = Math.max(60, text.length - Math.min(text.length, headChars));
+  maxRestChars?: number;
+}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = LOCK_WORD, maxRestChars = Infinity }) => {
+  // ぼかす部分の長さ（長い文でも maxRestChars までに抑えて、ぼかしの箱が縦に長くなりすぎないようにする）
+  const restLength = Math.min(maxRestChars, Math.max(60, text.length - Math.min(text.length, headChars)));
   return (
     <span style={{ display: 'block' }}>
       <span style={{ display: 'block', maxHeight: `${visibleLines * lineHeight}em`, overflow: 'hidden', lineHeight }}>
@@ -2075,10 +2077,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {renderCharHeading(topic.title, 36)}
               </h3>
               <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
-                {/* 未登録の人は3行だけ見せ、4行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07） */}
+                {/* 未登録の人は1行だけ見せ、2行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07） */}
                 {isRegistered
                   ? formatAppraisalText(topic.text)
-                  : <RegisterMosaicText text={formatAppraisalText(topic.text)} onUnlock={() => handleScrollToRegister('lock')} />}
+                  : <RegisterMosaicText text={formatAppraisalText(topic.text)} visibleLines={1} headChars={40} onUnlock={() => handleScrollToRegister('lock')} />}
               </p>
             </div>
           ))}
@@ -2460,6 +2462,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3" }}>
                   {renderDeepTopicText(`${topic.intro}\n\n${topic.detail}`)}
                 </div>
+              ) : !isRegistered ? (
+                // 未登録の人: 各項目は3行だけ見せて4行目以降をぼかす。「チャンスの日」は見出しだけ見せて本文はすべてぼかす（TAKASHI判断 2026-11-07）
+                <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
+                  <RegisterMosaicText
+                    text={formatAppraisalText(`${topic.intro}\n${topic.detail}`)}
+                    visibleLines={topic.title.includes('チャンスの日') ? 0 : 3}
+                    headChars={topic.title.includes('チャンスの日') ? 0 : 120}
+                    buttonLabel={deepLockWord}
+                    maxRestChars={160}
+                    onUnlock={premiumOnly ? () => handleDeepLockClick() : () => handleScrollToRegister('lock')}
+                  />
+                </p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
