@@ -73,17 +73,24 @@ const OpponentReadingCard: React.FC<{
   const accent = char === 'ren' ? '#9cc6d8' : '#cdbfe2';
   const intro = char === 'ren' ? `次は、${who}がどんな人かを見ておこう。` : `次は、${who}のことも見てみましょう。`;
   const label = (l: string) => l.replace('あなた', who);
+  // 見出し＋月/蓮のひとことは、自分の「こんな人」と同じ形にそろえる（2026-11-07 TAKASHI指示）
   const heading = (
-    <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.55rem', fontWeight: 'bold', textAlign: 'center', letterSpacing: '0.05em' }}>
-      {who}ってこんな人
-    </h2>
+    <>
+      <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.55rem', fontWeight: 'bold', textAlign: 'center', letterSpacing: '0.05em' }}>
+        {who}ってこんな人
+      </h2>
+      <p className="font-serif" style={{ display: 'flex', alignItems: 'center', fontSize: '0.84rem', color: accent, margin: '0 0 0.85rem', lineHeight: 1.6 }}>
+        {charIcon}
+        <span>{intro}</span>
+      </p>
+    </>
   );
 
   if (locked) {
     // 未登録: 全文だと長いので、見出し2つ＋1行ずつだけを小さくぼかして見せる
     const preview = reading.items.slice(0, 2);
     return (
-      <div className="glass-panel" style={{ padding: '1rem 1.2rem 0.9rem', border: '1px solid rgba(226,192,116,0.3)' }}>
+      <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
         {heading}
         <div
           className="premium-blur-container"
@@ -101,10 +108,7 @@ const OpponentReadingCard: React.FC<{
               </div>
             ))}
           </div>
-          <div className="premium-lock-overlay" style={{ gap: '0.4rem' }}>
-            <span className="font-serif" style={{ fontSize: '0.76rem', color: '#f2ead8', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
-              無料会員登録で{who}のことも読めます
-            </span>
+          <div className="premium-lock-overlay">
             <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); onUnlock?.(); }}>
               <Lock size={11} /> 続きを見る
             </button>
@@ -117,10 +121,6 @@ const OpponentReadingCard: React.FC<{
   return (
     <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
       {heading}
-      <p className="font-serif" style={{ display: 'flex', alignItems: 'center', fontSize: '0.84rem', color: accent, margin: '0 0 0.85rem', lineHeight: 1.6 }}>
-        {charIcon}
-        <span>{intro}</span>
-      </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {reading.items.map((item) => (
           <div key={item.label} style={{ borderLeft: '2px solid rgba(226,192,116,0.55)', paddingLeft: '0.75rem' }}>
