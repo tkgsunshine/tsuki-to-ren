@@ -1,10 +1,15 @@
 import React from 'react';
+import { Lock } from 'lucide-react';
 import { getSelfReading } from '../utils/selfReading';
 import { san } from '../utils/fortuneEngine';
 
 // 鑑定結果の冒頭（点数のすぐ下）に出す「あなたってこんな人」。
 // 本人の性格・恋愛の傾向を先に見せて「当たってる」と感じてもらい、その先の相性・運勢を読む気持ちにつなげる。
 // 点数には関わらない。文は utils/selfReading.ts。
+// subject='opponent' でお相手版（「〇〇さんってこんな人」）。locked のときは短く縮めてぼかし、タップで会員登録へ（2026-11-07 TAKASHI指示）。
+
+// ぼかす部分に置くダミー文（本物の文は画面に置かない。ぼかしは見た目だけで「検証」から読めてしまうため）
+const LOCKED_FILLER = '無料会員登録をすると、お相手がふだんどんな人で、恋をするとどう変わるのかが読めるようになります。';
 
 export const SelfReadingCard: React.FC<{
   pillar: string;
@@ -15,9 +20,16 @@ export const SelfReadingCard: React.FC<{
   charIcon: React.ReactNode;
   hasOpponent: boolean;
   oppName: string;
-}> = ({ pillar, star, mbti, name, char, charIcon, hasOpponent, oppName }) => {
+  // お相手版: name にお相手の名前を渡す。oppName は使わない
+  subject?: 'self' | 'opponent';
+  locked?: boolean;
+  onUnlock?: () => void;
+}> = ({ pillar, star, mbti, name, char, charIcon, hasOpponent, oppName, subject = 'self', locked = false, onUnlock }) => {
   const reading = getSelfReading(pillar, star, mbti);
   if (!reading) return null;
+  if (subject === 'opponent') {
+    return <OpponentReadingCard reading={reading} name={name} char={char} charIcon={charIcon} locked={locked} onUnlock={onUnlock} />;
+  }
 
   // 見出しの呼び方のルール: 自分＝ニックネーム（空欄なら「あなた」）、お相手＝「〇〇さん」、二人のこと＝「〇〇さんとの」
   const who = san(name, 'あなた');
@@ -40,6 +52,79 @@ export const SelfReadingCard: React.FC<{
         {reading.items.map((item) => (
           <div key={item.label} style={{ borderLeft: '2px solid rgba(226,192,116,0.55)', paddingLeft: '0.75rem' }}>
             <div style={{ fontSize: '0.74rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>{item.label.replace('あなた', who)}</div>
+            <p className="font-serif" style={{ fontSize: '0.88rem', lineHeight: 1.85, letterSpacing: '0.02em', color: '#e8e3d8', margin: 0 }}>{item.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// お相手版の「〇〇さんってこんな人」。文は本人版と同じ（お相手の日柱・本命星・16タイプから）
+const OpponentReadingCard: React.FC<{
+  reading: NonNullable<ReturnType<typeof getSelfReading>>;
+  name?: string;
+  char: 'tsuki' | 'ren';
+  charIcon: React.ReactNode;
+  locked: boolean;
+  onUnlock?: () => void;
+}> = ({ reading, name, char, charIcon, locked, onUnlock }) => {
+  const who = san(name);
+  const accent = char === 'ren' ? '#9cc6d8' : '#cdbfe2';
+  const intro = char === 'ren' ? `次は、${who}がどんな人かを見ておこう。` : `次は、${who}のことも見てみましょう。`;
+  const label = (l: string) => l.replace('あなた', who);
+  // 見出し＋月/蓮のひとことは、自分の「こんな人」と同じ形にそろえる（2026-11-07 TAKASHI指示）
+  const heading = (
+    <>
+      <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.55rem', fontWeight: 'bold', textAlign: 'center', letterSpacing: '0.05em' }}>
+        {who}ってこんな人
+      </h2>
+      <p className="font-serif" style={{ display: 'flex', alignItems: 'center', fontSize: '0.84rem', color: accent, margin: '0 0 0.85rem', lineHeight: 1.6 }}>
+        {charIcon}
+        <span>{intro}</span>
+      </p>
+    </>
+  );
+
+  if (locked) {
+    // 未登録: 全文だと長いので、見出し2つ＋1行ずつだけを小さくぼかして見せる
+    const preview = reading.items.slice(0, 2);
+    return (
+      <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
+        {heading}
+        <div
+          className="premium-blur-container"
+          role="button"
+          tabIndex={0}
+          onClick={onUnlock}
+          onKeyDown={(e) => { if (e.key === 'Enter') onUnlock?.(); }}
+          style={{ minHeight: 0, cursor: 'pointer', borderRadius: '8px' }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none', opacity: 0.7 }} aria-hidden="true">
+            {preview.map((item) => (
+              <div key={item.label} style={{ borderLeft: '2px solid rgba(226,192,116,0.55)', paddingLeft: '0.75rem' }}>
+                <div style={{ fontSize: '0.74rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>{label(item.label)}</div>
+                <p className="font-serif" style={{ fontSize: '0.84rem', lineHeight: 1.7, color: '#e8e3d8', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'clip' }}>{LOCKED_FILLER}</p>
+              </div>
+            ))}
+          </div>
+          <div className="premium-lock-overlay">
+            <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); onUnlock?.(); }}>
+              <Lock size={11} /> 続きを見る
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
+      {heading}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {reading.items.map((item) => (
+          <div key={item.label} style={{ borderLeft: '2px solid rgba(226,192,116,0.55)', paddingLeft: '0.75rem' }}>
+            <div style={{ fontSize: '0.74rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>{label(item.label)}</div>
             <p className="font-serif" style={{ fontSize: '0.88rem', lineHeight: 1.85, letterSpacing: '0.02em', color: '#e8e3d8', margin: 0 }}>{item.text}</p>
           </div>
         ))}

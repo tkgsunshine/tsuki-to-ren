@@ -1652,6 +1652,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
         oppName={oppNickname}
       />
 
+      {/* お相手ってこんな人: 自分の「こんな人」のすぐ下（2026-11-07 TAKASHI指示）。未登録は短くぼかして会員登録へ、無料会員以上は全文 */}
+      {hasOpponent && activeResult.opponentPillar && (
+        <SelfReadingCard
+          subject="opponent"
+          pillar={activeResult.opponentPillar}
+          star={activeResult.opponentStar || ''}
+          mbti={activeResult.opponentMbtiCode}
+          name={opponentName}
+          char={selectedChar}
+          charIcon={<CharHeadingIcon char={selectedChar === 'ren' ? '蓮' : '月'} size={30} />}
+          hasOpponent={hasOpponent}
+          oppName={oppNickname}
+          locked={!isRegistered}
+          onUnlock={() => handleScrollToRegister('lock')}
+        />
+      )}
+
       {/* 自分の守護獣: 「こんな人」のすぐ下に出す（2026-11 TAKASHI指示）。お相手の守護獣は下の運命の詳細のまま */}
       {(() => {
         const colors = getAstrologyColors(activeResult.myAstrologyColor, activeResult.myAstrologyElement);
