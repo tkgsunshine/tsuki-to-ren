@@ -2478,13 +2478,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 margin: '0.5rem 0'
               }}>
                 <div>
-                  <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', fontWeight: 'bold', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', whiteSpace: 'nowrap' }}>
+                  <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', fontWeight: 'bold', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', whiteSpace: 'nowrap' }}>
                     <MoonMark size={16} style={{ flexShrink: 0 }} />
                     無料会員登録で鑑定結果の続きを開く
                   </h2>
-                  <p style={{ fontSize: '0.75rem', color: '#d5cfc3', lineHeight: '1.5', margin: '0 0 0.75rem' }}>
-                    ぼかした部分は、無料登録ですぐに読めます。
-                  </p>
                   {benefitList}
                 </div>
 
