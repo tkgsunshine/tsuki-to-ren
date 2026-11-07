@@ -67,6 +67,7 @@ const badgeStyle: React.CSSProperties = {
   background: 'linear-gradient(135deg, #f5d77a, #d4af37)', borderRadius: '999px', padding: '0.15rem 0.6rem'
 };
 const bodyText: React.CSSProperties = { fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4', margin: 0 };
+const blurDummy: React.CSSProperties = { filter: 'blur(5px)', userSelect: 'none' };
 // 日数は金色に（2026-11-07 TAKASHI）
 const goldCount: React.CSSProperties = { color: '#f5d77a' };
 const subHead: React.CSSProperties = { fontSize: '0.85rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' };
@@ -78,7 +79,7 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
   commonLabels?: string[];
 }) {
   if (days.length === 0) return null;
-  // ロック中も理由は見せ、日付だけぼかす（2026-11-06 TAKASHI）。年と月は見せ、日と曜日はダミーの「●●日(●)」をぼかす（2026-11-07 TAKASHI）。本当の日は DOM に出さない
+  // ロック中も理由は見せ、日付だけぼかす（2026-11-06 TAKASHI）。年と月は見せ、日の数字と曜日だけダミーの「●●」「(●)」をぼかし、「日」の字は見せる（2026-11-07 TAKASHI）。本当の日は DOM に出さない
   const shown = days.slice(0, locked ? 3 : 8); // ロック中は3行だけ
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
@@ -90,7 +91,7 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
         >
           <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f5d77a', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
             {locked
-              ? <span>{x.day.y}年{x.day.m}月<span style={{ filter: 'blur(5px)', userSelect: 'none' }} aria-hidden="true">●●日(●)</span></span>
+              ? <span>{x.day.y}年{x.day.m}月<span style={blurDummy} aria-hidden="true">●●</span>日<span style={blurDummy} aria-hidden="true">(●)</span></span>
               : formatLuckyDate(x.day)}
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
           </span>
