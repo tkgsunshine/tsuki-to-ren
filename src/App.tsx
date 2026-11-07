@@ -3274,7 +3274,8 @@ function App() {
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={(user) => {
             setCurrentUser(user);
-            setIsRegistered(true);
+            // ログアウトのときは user が null。true のままだと、ログアウト後も無料会員向けの部分が見えたままになる
+            setIsRegistered(Boolean(user));
             setShowAuthModal(false);
           }}
         />
