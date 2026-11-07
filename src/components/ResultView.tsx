@@ -1017,6 +1017,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
     }
     handleLockTagClick();
   };
+  // お相手ありの「性格・コミュニケーションの相性」「月/蓮から〇〇さんへ」「深層鑑定」: 未登録・無料会員はぼかし、プレミアム（月額・買い切り）で開く（TAKASHI判断 2026-11-07）。
+  // 押すと、未登録は会員登録の箱へ、無料会員はプレミアムの案内へ。お相手なし（一人の鑑定）は従来どおり会員登録で開く。
+  const readingOpen = hasOpponent ? deepOpen : isRegistered;
+  const handleReadingLockClick = () => { if (isRegistered) handleDeepLockClick(); else handleScrollToRegister('lock'); };
 
   // 無料の日数を使い切ったお相手（または確認中）: 今日の点数と助言はダミーで描く。今日の流れ（月の形と一言）は見せる。
   const dailyHidden = hasOpponent && !isSubscribed && partnerLock !== null && partnerLock.status !== 'free';
@@ -1135,9 +1139,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const registerBenefits: string[] = [
     // 画面の上から順に並べる。お相手の「こんな人」は未登録だとぼかしている（2026-11-07 TAKASHI指示で一覧に追加）
     ...(hasOpponent && activeResult?.opponentPillar ? [`${partnerCall}ってこんな人（性格・恋愛の傾向）`] : []),
-    ...(hasCommSection ? ['二人の性格・コミュニケーションの相性の全文'] : []),
-    '月・蓮からのメッセージの全文',
-    `深層鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`,
+    // お相手ありの「性格・コミュニケーションの相性」「月/蓮からのメッセージ」「深層鑑定」は、無料会員でもぼかす（プレミアムで開く。TAKASHI判断 2026-11-07）ので、登録の箱には出さない
+    ...(!hasOpponent && hasCommSection ? ['二人の性格・コミュニケーションの相性の全文'] : []),
+    ...(!hasOpponent ? ['月・蓮からのメッセージの全文', `深層鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`] : []),
     ...(hasOpponent ? [`${partnerCall}との今日の相性を7日間`] : []),
     '月・蓮へのチャット相談（1日2回）',
   ];
@@ -2051,16 +2055,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
           {(() => {
             const text = formatAppraisalText(activeResult.summary);
-            // 未登録の人は「二人の性格・コミュニケーションの相性」の本文を3行だけ見せ、4行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07）
+            // 未登録・無料会員は「二人の性格・コミュニケーションの相性」の本文を3行だけ見せ、4行目以降をぼかす（TAKASHI判断 2026-11-07）
             const marker = '【二人の性格・コミュニケーションの相性】';
             const at = text.indexOf(marker);
-            if (isRegistered || at < 0) return renderTextWithCharHeadings(text);
+            if (readingOpen || at < 0) return renderTextWithCharHeadings(text);
             const before = text.slice(0, at + marker.length);
             const body = text.slice(at + marker.length).replace(/^\n/, '');
             return (
               <>
                 {renderTextWithCharHeadings(before)}
-                <RegisterMosaicText text={body} onUnlock={() => handleScrollToRegister('lock')} />
+                <RegisterMosaicText text={body} onUnlock={handleReadingLockClick} />
               </>
             );
           })()}
@@ -2077,10 +2081,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 {renderCharHeading(topic.title, 36)}
               </h3>
               <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
-                {/* 未登録の人は1行だけ見せ、2行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07） */}
-                {isRegistered
+                {/* 未登録・無料会員は1行だけ見せ、2行目以降をぼかす（TAKASHI判断 2026-11-07） */}
+                {readingOpen
                   ? formatAppraisalText(topic.text)
-                  : <RegisterMosaicText text={formatAppraisalText(topic.text)} visibleLines={1} headChars={40} onUnlock={() => handleScrollToRegister('lock')} />}
+                  : <RegisterMosaicText text={formatAppraisalText(topic.text)} visibleLines={1} headChars={40} onUnlock={handleReadingLockClick} />}
               </p>
             </div>
           ))}
@@ -2448,7 +2452,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {detailedTopics.map((topic, index) => {
           // 「惹かれ合うポイント＆地雷行動3選」「二人のこれから」はプレミアム限定（無料会員も冒頭の1文だけ）。他の項目は無料会員なら全文。
           const premiumOnly = hasOpponent && (topic.title.includes('惹かれ合うポイント') || topic.title.includes('二人のこれから'));
-          const topicOpen = premiumOnly ? deepOpen : isRegistered;
+          const topicOpen = premiumOnly ? deepOpen : readingOpen;
           return (
           <React.Fragment key={topic.title}>
 
@@ -2462,8 +2466,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div className="font-serif" style={{ fontSize: "0.86rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3" }}>
                   {renderDeepTopicText(`${topic.intro}\n\n${topic.detail}`)}
                 </div>
-              ) : !isRegistered ? (
-                // 未登録の人: 各項目は3行だけ見せて4行目以降をぼかす。「チャンスの日」は見出しだけ見せて本文はすべてぼかす（TAKASHI判断 2026-11-07）
+              ) : (!isRegistered || hasOpponent) ? (
+                // 未登録・無料会員（お相手あり）: 各項目は3行だけ見せて4行目以降をぼかす。「チャンスの日」は見出しだけ見せて本文はすべてぼかす（TAKASHI判断 2026-11-07）
                 <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                   <RegisterMosaicText
                     text={formatAppraisalText(`${topic.intro}\n${topic.detail}`)}
@@ -2471,7 +2475,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     headChars={topic.title.includes('チャンスの日') ? 0 : 120}
                     buttonLabel={deepLockWord}
                     maxRestChars={160}
-                    onUnlock={premiumOnly ? () => handleDeepLockClick() : () => handleScrollToRegister('lock')}
+                    onUnlock={premiumOnly ? () => handleDeepLockClick() : handleReadingLockClick}
                   />
                 </p>
               ) : (
