@@ -3,13 +3,13 @@ import { Star } from 'lucide-react';
 import { san } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import {
-  toLuckPerson, findSoloBestDays, findPairBestDays, getSangoBranch, formatLuckyDate, LUCK_MARK_LABELS
+  toLuckPerson, findSoloBestDays, findPairBestDays, getSangoBranch, formatLuckyDate, LUCK_MARK_LABELS, WEEKDAYS
 } from '../utils/luckyDays';
 import type { LuckyDay, LuckMark } from '../utils/luckyDays';
 
 // 「2人の最高シンクロ日・あなたの恋愛運MAX日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
 // 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日は月額だけ（2026-11-06 TAKASHI）。
-// 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDate。暦年ごとに強い順で最大4日）。
+// 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す。曜日は見せる 2026-11-07 TAKASHI）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDate。暦年ごとに強い順で最大4日）。
 const PAIR_WINDOW_DAYS = 365; // 90日の表示はやめ、1年ぶんだけ出す（2026-11-07 TAKASHI）
 const SOLO_WINDOW_DAYS = 365;
 
@@ -91,7 +91,7 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
         >
           <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f5d77a', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
             {locked
-              ? <span>{x.day.y}年{x.day.m}月<span style={blurDummy} aria-hidden="true">●●</span>日<span style={blurDummy} aria-hidden="true">(●)</span></span>
+              ? <span>{x.day.y}年{x.day.m}月<span style={blurDummy} aria-hidden="true">●●</span>日({WEEKDAYS[x.day.weekday]})</span>
               : formatLuckyDate(x.day)}
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
           </span>
@@ -169,7 +169,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         <span style={subHead}>● {myLabel}の恋愛運MAX日</span>
         <span style={badgeStyle}>年に6〜7日だけ</span>
         <p style={bodyText}>
-          生まれた日の星（干支）と、その日の干支が<strong>上と下の両方で結びつく日</strong>です。四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
+          {myLabel}が生まれた日の星と、その日の星が<strong>がっちり手をつなぐ日</strong>です。四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
         </p>
         <p style={{ ...bodyText, fontWeight: 'bold' }}>
           これから1年のうち、{myLabel}の恋愛運MAX日は<span style={goldCount}>{soloDays.length}日</span>あります。
