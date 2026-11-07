@@ -270,7 +270,7 @@ export const RegisterMosaicText: React.FC<{
   lineHeight?: number;
   headChars?: number;
   buttonLabel?: string;
-}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = '無料会員登録で続きを見る' }) => {
+}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = LOCK_WORD }) => {
   const restLength = Math.max(60, text.length - Math.min(text.length, headChars));
   return (
     <span style={{ display: 'block' }}>
@@ -1125,9 +1125,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
   }, [isRegistered, activeResult]);
 
   // 無料会員登録で見られるもの（登録の箱に出す）
-  const lockedTopicNames = detailedTopics.slice(1, 3).map((t) => t.title.replace(/^\d+\.\s*/, ''));
+  // 深層鑑定のうち、プレミアム限定（惹かれ合うポイント・二人のこれから）は登録しても開かないので出さない
+  const lockedTopicNames = detailedTopics
+    .filter((t) => !(hasOpponent && (t.title.includes('惹かれ合うポイント') || t.title.includes('二人のこれから'))))
+    .map((t) => t.title.replace(/^\d+\.\s*/, ''));
+  const hasCommSection = Boolean(activeResult?.summary?.includes('【二人の性格・コミュニケーションの相性】'));
   const registerBenefits: string[] = [
-    `詳しい鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`,
+    ...(hasCommSection ? ['二人の性格・コミュニケーションの相性の全文'] : []),
+    '月・蓮からのメッセージの全文',
+    `深層鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`,
     ...(hasOpponent ? [`${partnerCall}との今日の相性を7日間`] : []),
     '月・蓮へのチャット相談（1日2回）',
   ];
@@ -2477,7 +2483,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     無料会員登録で鑑定結果の続きを開く
                   </h2>
                   <p style={{ fontSize: '0.75rem', color: '#d5cfc3', lineHeight: '1.5', margin: '0 0 0.75rem' }}>
-                    会員登録をいただくと深層鑑定結果の続きをご覧になれます。
+                    ぼかした部分は、無料登録ですぐに読めます。
                   </p>
                   {benefitList}
                 </div>
