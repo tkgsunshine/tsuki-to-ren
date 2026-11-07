@@ -31,7 +31,13 @@ const labelsOf = (marks: LuckMark[] | undefined): string[] => {
   const list = marks || [];
   // 「助けが入る」は長いので出さない（2026-11-06 TAKASHI）。日の選び方には使う
   const shown = (list.includes('tentoku') ? list.filter((k) => k !== 'kango' && k !== 'shigo') : list).filter((k) => k !== 'tenotsu');
-  return shown.length > 0 ? shown.map((k) => LUCK_MARK_LABELS[k]) : ['運気が追い風'];
+  return shown.length > 0 ? shown.map((k) => LUCK_MARK_LABELS[k]) : [FALLBACK_LABEL];
+};
+
+const FALLBACK_LABEL = '運気が追い風';
+const pairLabels = (x: LuckyDay): string[] => {
+  const all = [...new Set([...labelsOf(x.me), ...labelsOf(x.partner)])];
+  return all.length > 1 ? all.filter((t) => t !== FALLBACK_LABEL) : all;
 };
 
 const chipStyle: React.CSSProperties = {
@@ -63,7 +69,7 @@ const badgeStyle: React.CSSProperties = {
 const bodyText: React.CSSProperties = { fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4', margin: 0 };
 const subHead: React.CSSProperties = { fontSize: '0.85rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' };
 
-function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockWord, commonLabels = [] }: {
+function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels = [] }: {
   days: LuckyDay[]; locked: boolean; showPair: boolean; myLabel: string; oppLabel: string;
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
   /** 一覧の上にまとめて出したタグ。各行からは外し、日によって違うタグだけ残す */
@@ -87,10 +93,8 @@ function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockW
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
           </span>
           {showPair ? (
-            <>
-              <Chips who={myLabel} marks={x.me} />
-              <Chips who={oppLabel} marks={x.partner} />
-            </>
+            // あなた・お相手で分けず、二人ぶんのタグをまとめて出す（2026-11-07 TAKASHI）
+            <Chips labels={pairLabels(x)} />
           ) : (
             <Chips labels={labelsOf(x.me).filter((t) => !commonLabels.includes(t))} />
           )}
@@ -141,7 +145,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
       {partner && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
           <span style={subHead}>● 2人の最高シンクロ日</span>
-          <span style={badgeStyle}>平均で年に17日だけ</span>
+          <span style={badgeStyle}>年間数日だけ</span>
           <p style={bodyText}>
             {myLabel}と{oppLabel}の恋愛運の波が、<strong>同じ日にぴったり重なる日</strong>です。二人だけの特別な日。デートのお誘いや気持ちを伝えるなら、この日に。
           </p>
@@ -153,7 +157,9 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           <p style={{ ...bodyText, fontWeight: 'bold' }}>
             {pairDays.length > 0
               ? `これから${PAIR_WINDOW_DAYS}日のうち、2人の最高シンクロ日は${pairDays.length}日あります。`
-              : `これから${PAIR_WINDOW_DAYS}日のうちにはありませんが、この1年では${pairYearDays.length}日あります。`}
+              : pairYearDays.length > 0
+                ? `これから${PAIR_WINDOW_DAYS}日のうちにはありませんが、この1年では${pairYearDays.length}日あります。`
+                : 'これから1年のうちには、2人の最高シンクロ日はありません。'}
           </p>
           <DayList days={pairDays.length > 0 ? pairDays : pairYearDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
         </div>
