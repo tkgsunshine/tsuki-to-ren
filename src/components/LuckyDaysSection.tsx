@@ -170,9 +170,9 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         ...(partner ? { borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.9rem' } : {})
       }}>
         <span style={subHead}>● {myLabel}の恋愛運MAX日</span>
-        <span style={badgeStyle}>60日に1度・年に6〜7日だけ</span>
+        <span style={badgeStyle}>年に6〜7日だけ</span>
         <p style={bodyText}>
-          生まれた日の星（干支）と、その日の干支が<strong>上と下の両方で結びつく日</strong>です。60日に1度しか巡ってこない、四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
+          生まれた日の星（干支）と、その日の干支が<strong>上と下の両方で結びつく日</strong>です。四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
         </p>
         <p style={{ ...bodyText, fontWeight: 'bold' }}>
           これから1年のうち、{myLabel}の恋愛運MAX日は{soloDays.length}日あります。
