@@ -27,7 +27,7 @@ const benefits = [
     shot: '/assets/premium/lucky-days.webp',
     shotAlt: '2人の最高シンクロ日とあなたの恋愛運MAX日の画面',
     pairNote: 'pairLucky',
-    body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日）と、「あなたの恋愛運MAX日」の日付がわかります。告白やデートのお誘いは、この日に。'
+    body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付がわかります。告白やデートのお誘いは、この日に。'
   },
   {
     Icon: Calendar,
@@ -567,7 +567,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
-                  { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日の日。${pair.name}への告白やお誘いを、いつにすればいいかがわかります。` },
+                  { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかがわかります。` },
                   { who: 'tsuki', t: '7日間の波から、10年先の二人の未来まで', shot: '/assets/premium/edu-future.webp', d: '明日からの7日間・月ごとの相性の波と、この先10年の年ごとの流れ。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' }
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
