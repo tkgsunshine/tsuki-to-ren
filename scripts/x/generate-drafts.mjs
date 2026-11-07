@@ -13,7 +13,6 @@ import { addMbtiNicks, addMbtiNicksInline } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
 import { parseCardText, renderCard, EXPRESSIONS } from './lib/card.mjs';
-import { attachRankImages } from './lib/rank-card.mjs';
 import { pickColumn, COLUMN_GUIDE, withColumnUrl } from './lib/column-post.mjs';
 import fs from 'node:fs';
 
@@ -402,12 +401,7 @@ for (const it of items.filter((x) => x.card)) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, await renderCard(it.card));
 }
-// 16タイプのランキングに画像を付ける（投稿用＝1・2・15・16位を隠す／返信用＝全順位。2026-11-03 運営の承認）
-for (const f of await attachRankImages(items)) {
-  const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(f.image));
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, f.png);
-}
+// 16タイプのランキングの画像は付けない（2026-11-07 運営「画像はあまり反応良くない」。手で付けるときは scripts/x/rank-images.mjs）
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);
 console.log(`${date} の${items.filter((x) => !x.replyTo).length}本（守護獣1・バズ検証4: ${BUZZ_SLOTS.map((k) => planned[k].id).join(' / ')}）と、答え合わせの返信${items.filter((x) => x.replyTo).length}本をキューに追記しました。`);
