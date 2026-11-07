@@ -40,11 +40,13 @@ const chipStyle: React.CSSProperties = {
   borderRadius: '999px', padding: '0.12rem 0.55rem', whiteSpace: 'nowrap'
 };
 
-function Chips({ who, marks }: { who?: string; marks: LuckMark[] | undefined }) {
+function Chips({ who, marks, labels }: { who?: string; marks?: LuckMark[]; labels?: string[] }) {
+  const list = labels ?? labelsOf(marks);
+  if (list.length === 0) return null;
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.3rem' }}>
       {who && <span style={{ fontSize: '0.74rem', color: '#f3efe6', fontWeight: 'bold', marginRight: '0.15rem' }}>{who}</span>}
-      {labelsOf(marks).map((t) => <span key={t} style={chipStyle}>✦ {t}</span>)}
+      {list.map((t) => <span key={t} style={chipStyle}>✦ {t}</span>)}
     </div>
   );
 }
@@ -61,9 +63,11 @@ const badgeStyle: React.CSSProperties = {
 const bodyText: React.CSSProperties = { fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4', margin: 0 };
 const subHead: React.CSSProperties = { fontSize: '0.85rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' };
 
-function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockWord }: {
+function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockWord, commonLabels = [] }: {
   days: LuckyDay[]; locked: boolean; showPair: boolean; myLabel: string; oppLabel: string;
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
+  /** 一覧の上にまとめて出したタグ。各行からは外し、日によって違うタグだけ残す */
+  commonLabels?: string[];
 }) {
   if (days.length === 0) return null;
   // ロック中も理由は見せ、日付だけぼかす（2026-11-06 TAKASHI）。年と月は見せ、日と曜日はダミーの「●●日(●)」をぼかす（2026-11-07 TAKASHI）。本当の日は DOM に出さない
@@ -88,7 +92,7 @@ function DayList({ days, locked, showPair, myLabel, oppLabel, onLockClick, lockW
               <Chips who={oppLabel} marks={x.partner} />
             </>
           ) : (
-            <Chips marks={x.me} />
+            <Chips labels={labelsOf(x.me).filter((t) => !commonLabels.includes(t))} />
           )}
         </div>
       ))}
@@ -114,6 +118,10 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
     () => (me && partner && pairDays.length === 0 ? findPairBestDays(me, partner, today, 365).length : 0),
     [me, partner, today, pairDays.length]
   );
+  // あなたの恋愛運MAX日は毎回同じ干支の日なので、タグもほぼ同じ。共通のタグは一覧の上に1回だけ出す（2026-11-07 TAKASHI）
+  const soloCommon = soloDays.length > 0
+    ? labelsOf(soloDays[0].me).filter((t) => soloDays.every((x) => labelsOf(x.me).includes(t)))
+    : [];
   if (!me) return null;
 
   const locked = !isSubscribed;
@@ -162,7 +170,13 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         <p style={{ ...bodyText, fontWeight: 'bold' }}>
           これから1年のうち、{myLabel}の恋愛運MAX日は{soloDays.length}日あります。
         </p>
-        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={onLockClick} lockWord={lockWord} />
+        {soloCommon.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+            <span style={{ fontSize: '0.74rem', color: '#f3efe6', fontWeight: 'bold' }}>どの日も</span>
+            <Chips labels={soloCommon} />
+          </div>
+        )}
+        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={onLockClick} lockWord={lockWord} commonLabels={soloCommon} />
       </div>
     </div>
   );
