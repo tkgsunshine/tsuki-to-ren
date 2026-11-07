@@ -1131,6 +1131,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
     .map((t) => t.title.replace(/^\d+\.\s*/, ''));
   const hasCommSection = Boolean(activeResult?.summary?.includes('【二人の性格・コミュニケーションの相性】'));
   const registerBenefits: string[] = [
+    // 画面の上から順に並べる。お相手の「こんな人」は未登録だとぼかしている（2026-11-07 TAKASHI指示で一覧に追加）
+    ...(hasOpponent && activeResult?.opponentPillar ? [`${partnerCall}ってこんな人（性格・恋愛の傾向）`] : []),
     ...(hasCommSection ? ['二人の性格・コミュニケーションの相性の全文'] : []),
     '月・蓮からのメッセージの全文',
     `深層鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`,
