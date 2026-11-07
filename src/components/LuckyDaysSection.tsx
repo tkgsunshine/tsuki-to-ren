@@ -8,7 +8,7 @@ import {
 import type { LuckyDay, LuckMark } from '../utils/luckyDays';
 
 // 「2人の最高シンクロ日・あなたの恋愛運MAX日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
-// 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日は月額だけ（2026-11-06 TAKASHI）。
+// 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日も同じ（買い切りでも開く。2026-11-07 TAKASHI）。
 // 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す。曜日は見せる 2026-11-07 TAKASHI）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDate。暦年ごとに強い順で最大4日）。
 const PAIR_WINDOW_DAYS = 365; // 90日の表示はやめ、1年ぶんだけ出す（2026-11-07 TAKASHI）
 const SOLO_WINDOW_DAYS = 365;
@@ -127,7 +127,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
     : [];
   if (!me) return null;
 
-  const locked = !isSubscribed;
+  const locked = !(isSubscribed || pairOpen); // あなたの恋愛運MAX日も、買い切りで開く（2026-11-07 TAKASHI）
   const pairLocked = !(isSubscribed || pairOpen);
   const myLabel = san(myName, 'あなた');
   const oppLabel = san(oppName);
@@ -180,7 +180,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
             <Chips labels={soloCommon} />
           </div>
         )}
-        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={onLockClick} lockWord={lockWord} commonLabels={soloCommon} />
+        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={partner ? (onPairLockClick || onLockClick) : onLockClick} lockWord={lockWord} commonLabels={soloCommon} />
       </div>
     </div>
   );
