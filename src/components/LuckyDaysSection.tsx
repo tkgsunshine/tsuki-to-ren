@@ -9,8 +9,8 @@ import type { LuckyDay, LuckMark } from '../utils/luckyDays';
 
 // 「2人の最高シンクロ日・あなたの恋愛運MAX日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
 // 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日は月額だけ（2026-11-06 TAKASHI）。
-// 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDay）。
-const PAIR_WINDOW_DAYS = 90;
+// 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDate。暦年ごとに強い順で最大4日）。
+const PAIR_WINDOW_DAYS = 365; // 90日の表示はやめ、1年ぶんだけ出す（2026-11-07 TAKASHI）
 const SOLO_WINDOW_DAYS = 365;
 
 interface Props {
@@ -118,11 +118,6 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
   }, []);
   const soloDays = useMemo(() => (me ? findSoloBestDays(me, today, SOLO_WINDOW_DAYS) : []), [me, today]);
   const pairDays = useMemo(() => (me && partner ? findPairBestDays(me, partner, today, PAIR_WINDOW_DAYS) : []), [me, partner, today]);
-  // 90日のうちに無い組は、1年ぶんの日を一覧に出す（2026-11-07 TAKASHI「シンクロ日表示されてない」）
-  const pairYearDays = useMemo(
-    () => (me && partner && pairDays.length === 0 ? findPairBestDays(me, partner, today, 365) : []),
-    [me, partner, today, pairDays.length]
-  );
   // あなたの恋愛運MAX日は毎回同じ干支の日なので、タグもほぼ同じ。共通のタグは一覧の上に1回だけ出す（2026-11-07 TAKASHI）
   const soloCommon = soloDays.length > 0
     ? labelsOf(soloDays[0].me).filter((t) => soloDays.every((x) => labelsOf(x.me).includes(t)))
@@ -133,7 +128,8 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
   const pairLocked = !(isSubscribed || pairOpen);
   const myLabel = san(myName, 'あなた');
   const oppLabel = san(oppName);
-  const hasSango = Boolean(me && partner && getSangoBranch(me, partner));
+  // 「二人の絆が完成する日」の一言は、一覧にその日が入っているときだけ（年4日に絞ったため、入らない組もある）
+  const hasSango = Boolean(me && partner && getSangoBranch(me, partner)) && pairDays.some((x) => x.sango);
 
   return (
     <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
@@ -156,12 +152,10 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
           )}
           <p style={{ ...bodyText, fontWeight: 'bold' }}>
             {pairDays.length > 0
-              ? `これから${PAIR_WINDOW_DAYS}日のうち、2人の最高シンクロ日は${pairDays.length}日あります。`
-              : pairYearDays.length > 0
-                ? `これから${PAIR_WINDOW_DAYS}日のうちにはありませんが、この1年では${pairYearDays.length}日あります。`
-                : 'これから1年のうちには、2人の最高シンクロ日はありません。'}
+              ? `これから1年のうち、2人の最高シンクロ日は${pairDays.length}日あります。`
+              : 'これから1年のうちには、2人の最高シンクロ日はありません。'}
           </p>
-          <DayList days={pairDays.length > 0 ? pairDays : pairYearDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
+          <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
         </div>
       )}
 

@@ -316,6 +316,44 @@ export function getSangoBranch(a, b) {
 export function isPairSyncDay(a, b, sango) {
     return (isPersonalBest(a) && isPersonalGood(b)) || (isPersonalBest(b) && isPersonalGood(a)) || (sango && isPersonalGood(a) && isPersonalGood(b));
 }
+// 2人の最高シンクロ日は、上の isPairSyncDay を満たす日（候補）のうち、暦の1年ごとに強い順で最大4日だけ（2026-11-07 TAKASHI
+// 「1人の恋愛運MAX日（年6〜7日）より少なく」）。強さ＝二人の印の数（九星の生気は0.5）＋三合がそろう日・上下とも結びつく日の上乗せ。
+// 同じ強さなら早い日。並べ方は伝統に決まりがないのでアプリのオリジナル。
+export const PAIR_SYNC_DAYS_PER_YEAR = 4;
+export const pairSyncStrength = (a, b, sango) => {
+    const main = (pd) => pd.marks.filter((k) => k !== 'seiki').length;
+    const seiki = (pd) => (pd.marks.includes('seiki') ? 0.5 : 0);
+    const tentoku = a.marks.includes('tentoku') || b.marks.includes('tentoku');
+    return main(a) + main(b) + seiki(a) + seiki(b) + (sango ? 2 : 0) + (tentoku ? 2 : 0);
+};
+const pairSyncYearCache = new Map();
+const dayKey = (y, m, d) => `${y}-${m}-${d}`;
+/** その暦年の2人の最高シンクロ日（"y-m-d" の集合）。二人の順番は関係ない */
+export function getPairSyncDaysOfYear(me, partner, year) {
+    const pk = (p) => `${p.stem}${p.branch}${p.starElement}${p.gender}`;
+    const key = [pk(me), pk(partner)].sort().join('|') + `|${year}`;
+    const hit = pairSyncYearCache.get(key);
+    if (hit)
+        return hit;
+    const sangoBranch = getSangoBranch(me, partner);
+    const cands = [];
+    for (let dt = new Date(year, 0, 1); dt.getFullYear() === year; dt = new Date(year, dt.getMonth(), dt.getDate() + 1)) {
+        const day = getDayInfo(dt);
+        const a = getPersonDay(me, day);
+        const b = getPersonDay(partner, day);
+        const sango = sangoBranch === day.branch;
+        if (isPairSyncDay(a, b, sango))
+            cands.push({ k: dayKey(day.y, day.m, day.d), t: dt.getTime(), st: pairSyncStrength(a, b, sango) });
+    }
+    cands.sort((x, y) => y.st - x.st || x.t - y.t);
+    const set = new Set(cands.slice(0, PAIR_SYNC_DAYS_PER_YEAR).map((c) => c.k));
+    if (pairSyncYearCache.size > 500)
+        pairSyncYearCache.clear();
+    pairSyncYearCache.set(key, set);
+    return set;
+}
+/** その日が2人の最高シンクロ日か（暦年ごとに強い順で最大4日） */
+export const isPairSyncDate = (me, partner, day) => getPairSyncDaysOfYear(me, partner, day.y).has(dayKey(day.y, day.m, day.d));
 // ───────── 今日の点数に足す、印の点数（2026-11 見直し） ─────────
 // 「2人の最高シンクロ日」「恋の星が輝く」と出る日の点数が、ふつうの日より低く出ることがあったため、印を今日の点数にも入れる。
 //  ・恋の星（女性の正官・男性の正財）: 伝統では正官・正財はどちらも吉の星（四吉神）で、恋愛では異性・恋人を表す星。
@@ -2066,7 +2104,6 @@ export function generateFortuneResult(input, character, now = new Date()) {
     const oppLuck = hasOpponent && oppPillarObj && opponentStarObj && input.opponentGender
         ? { stem: oppPillarObj.stem, branch: oppPillarObj.branch, starElement: opponentStarObj.element, gender: input.opponentGender }
         : null;
-    const pairSangoBranch = myLuck && oppLuck ? getSangoBranch(myLuck, oppLuck) : null;
     // 相手がいる場合、天干・十二支・十二運・日の九星はどれも二人の平均にする。旧版は天干と十二支を二人分合計しており、振れ幅と＋への偏りが2倍になっていた。
     const pairAvg = (mine, opp) => (hasOpponent ? (mine + opp) / 2 : mine);
     // 今日の日盤の中宮の星（日の九星）と、本命星の関係（九星気学）。相手がいる場合は、二人の平均。
@@ -2092,7 +2129,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
         const myJuni = juniUnPoints(myPillarObj.stem, dp.branch);
         const juni = hasOpponent ? (myJuni + juniUnPoints(oppPillarObj.stem, dp.branch)) / 2 : myJuni;
         // 2人の最高シンクロ日（LuckyDaysSection と同じ判定）
-        const sync = myDay && oppDay ? isPairSyncDay(myDay, oppDay, pairSangoBranch === dp.branch) : false;
+        const sync = myLuck && oppLuck ? isPairSyncDate(myLuck, oppLuck, dayInfo) : false;
         return baseScore + pairAvg(myStem, oppStem) + pairAvg(myBranch, oppBranch) + juni + dayStarOf(d) + DAILY_CENTER_OFFSET + (sync ? SYNC_DAY_BONUS : 0);
     };
     let dailyScore = Math.floor(rawDayScore(today));

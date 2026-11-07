@@ -42,7 +42,7 @@ test('三合がそろう十二支: 申と辰なら子、同じ十二支や三合
   assert.equal(getSangoBranch(p('子'), p('丑')), null);
 });
 
-test('2人の最高シンクロ日は、どちらの注意の日（空亡・六沖）も含まない／年に数日〜数十日', () => {
+test('2人の最高シンクロ日は、どちらの注意の日（空亡・六沖）も含まない／暦の1年に最大4日（1人の恋愛運MAX日より少ない）', () => {
   let total = 0;
   let n = 0;
   for (let i = 0; i < 60; i += 7) {
@@ -54,12 +54,13 @@ test('2人の最高シンクロ日は、どちらの注意の日（空亡・六�
         assert.equal(getPersonDay(a, x.day).caution, false);
         assert.equal(getPersonDay(b, x.day).caution, false);
       }
+      assert.ok(days.length <= 4, `1年に${days.length}日`);
       total += days.length;
       n++;
     }
   }
   const avg = total / n;
-  assert.ok(avg > 5 && avg < 40, `平均 ${avg}`);
+  assert.ok(avg > 2 && avg <= 4, `平均 ${avg}`);
 });
 
 test('結果の表記から読める', () => {
