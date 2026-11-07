@@ -1695,25 +1695,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         hasOpponent={hasOpponent}
         oppName={oppNickname}
       />
-
-      {/* お相手ってこんな人: 自分の「こんな人」のすぐ下（2026-11-07 TAKASHI指示）。未登録は短くぼかして会員登録へ、無料会員以上は全文 */}
-      {hasOpponent && activeResult.opponentPillar && (
-        <SelfReadingCard
-          subject="opponent"
-          pillar={activeResult.opponentPillar}
-          star={activeResult.opponentStar || ''}
-          mbti={activeResult.opponentMbtiCode}
-          name={opponentName}
-          char={selectedChar}
-          charIcon={<CharHeadingIcon char={selectedChar === 'ren' ? '蓮' : '月'} size={30} />}
-          hasOpponent={hasOpponent}
-          oppName={oppNickname}
-          locked={!isRegistered}
-          onUnlock={() => handleScrollToRegister('lock')}
-        />
-      )}
-
-      {/* 自分の守護獣: 「こんな人」のすぐ下に出す（2026-11 TAKASHI指示）。お相手の守護獣は下の運命の詳細のまま */}
+      {/* 自分の守護獣: 自分の「こんな人」のすぐ下に出す（2026-11 TAKASHI指示）。お相手の「こんな人」と守護獣はこの下 */}
       {(() => {
         const colors = getAstrologyColors(activeResult.myAstrologyColor, activeResult.myAstrologyElement);
         return (
@@ -1873,52 +1855,24 @@ export const ResultView: React.FC<ResultViewProps> = ({
         );
       })()}
 
-      {/* Free Summary Section (Fully Visible) */}
-      <div className="glass-panel" style={{ padding: '1.25rem' }}>
-        <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-          <MoonMark size={16} />
-          {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる */}
-          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
-        </h2>
-        <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
-          {(() => {
-            const text = formatAppraisalText(activeResult.summary);
-            // 未登録の人は「二人の性格・コミュニケーションの相性」の本文を3行だけ見せ、4行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07）
-            const marker = '【二人の性格・コミュニケーションの相性】';
-            const at = text.indexOf(marker);
-            if (isRegistered || at < 0) return renderTextWithCharHeadings(text);
-            const before = text.slice(0, at + marker.length);
-            const body = text.slice(at + marker.length).replace(/^\n/, '');
-            return (
-              <>
-                {renderTextWithCharHeadings(before)}
-                <RegisterMosaicText text={body} onUnlock={() => handleScrollToRegister('lock')} />
-              </>
-            );
-          })()}
-        </p>
-      </div>
+      {/* お相手ってこんな人: 自分の守護獣の下（2026-11-07 TAKASHI指示）。未登録は短くぼかして会員登録へ、無料会員以上は全文 */}
+      {hasOpponent && activeResult.opponentPillar && (
+        <SelfReadingCard
+          subject="opponent"
+          pillar={activeResult.opponentPillar}
+          star={activeResult.opponentStar || ''}
+          mbti={activeResult.opponentMbtiCode}
+          name={opponentName}
+          char={selectedChar}
+          charIcon={<CharHeadingIcon char={selectedChar === 'ren' ? '蓮' : '月'} size={30} />}
+          hasOpponent={hasOpponent}
+          oppName={oppNickname}
+          locked={!isRegistered}
+          onUnlock={() => handleScrollToRegister('lock')}
+        />
+      )}
 
-      {/* Character Advice Cards (100% visible, no lock) */}
-      {/* 月/蓮タブはここを過ぎたら隠す（守護獣を上へ移す前と同じ位置） */}
-        <div ref={myAstrologyRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* 2枚目（月「恋愛運をひらく鍵」／蓮「うまくいくためのアドバイス」）は表示しない（TAKASHI判断 2026-11-06） */}
-          {activeResult.topics.slice(0, 1).map((topic) => (
-            <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
-              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                {renderCharHeading(topic.title, 36)}
-              </h3>
-              <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
-                {/* 未登録の人は3行だけ見せ、4行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07） */}
-                {isRegistered
-                  ? formatAppraisalText(topic.text)
-                  : <RegisterMosaicText text={formatAppraisalText(topic.text)} onUnlock={() => handleScrollToRegister('lock')} />}
-              </p>
-            </div>
-          ))}
-        </div>
-
-      {/* Astrology Guardian & Destiny Details Section（お相手の守護獣） */}
+      {/* お相手の守護獣: お相手の「こんな人」のすぐ下（2026-11-07 TAKASHI指示「それぞれの結果の下にそれぞれの守護獣」） */}
       {hasOpponent && activeResult.opponentAstrologyName && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* Opponent Card */}
@@ -2084,6 +2038,51 @@ export const ResultView: React.FC<ResultViewProps> = ({
         })()}
       </div>
       )}
+
+      {/* Free Summary Section (Fully Visible) */}
+      <div className="glass-panel" style={{ padding: '1.25rem' }}>
+        <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
+          <MoonMark size={16} />
+          {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる */}
+          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
+        </h2>
+        <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
+          {(() => {
+            const text = formatAppraisalText(activeResult.summary);
+            // 未登録の人は「二人の性格・コミュニケーションの相性」の本文を3行だけ見せ、4行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07）
+            const marker = '【二人の性格・コミュニケーションの相性】';
+            const at = text.indexOf(marker);
+            if (isRegistered || at < 0) return renderTextWithCharHeadings(text);
+            const before = text.slice(0, at + marker.length);
+            const body = text.slice(at + marker.length).replace(/^\n/, '');
+            return (
+              <>
+                {renderTextWithCharHeadings(before)}
+                <RegisterMosaicText text={body} onUnlock={() => handleScrollToRegister('lock')} />
+              </>
+            );
+          })()}
+        </p>
+      </div>
+
+      {/* Character Advice Cards (100% visible, no lock) */}
+      {/* 月/蓮タブはここを過ぎたら隠す（守護獣を上へ移す前と同じ位置） */}
+        <div ref={myAstrologyRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* 2枚目（月「恋愛運をひらく鍵」／蓮「うまくいくためのアドバイス」）は表示しない（TAKASHI判断 2026-11-06） */}
+          {activeResult.topics.slice(0, 1).map((topic) => (
+            <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
+              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                {renderCharHeading(topic.title, 36)}
+              </h3>
+              <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
+                {/* 未登録の人は3行だけ見せ、4行目以降をぼかす（会員登録で開く。TAKASHI判断 2026-11-07） */}
+                {isRegistered
+                  ? formatAppraisalText(topic.text)
+                  : <RegisterMosaicText text={formatAppraisalText(topic.text)} onUnlock={() => handleScrollToRegister('lock')} />}
+              </p>
+            </div>
+          ))}
+        </div>
 
       {/* Main Content Area */}
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
