@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { trackLockView, trackRegStep } from '../services/analytics';
-import { Lock, Calendar, Download, X, Heart, Bell, Smartphone, Share } from 'lucide-react';
+import { Lock, Calendar, Download, X, Heart, Smartphone, Share } from 'lucide-react';
 import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
@@ -12,7 +12,7 @@ import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from
 import { PremiumUnlockButton } from './PremiumUnlockButton';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
-import { showAlert, showConfirm, showFieldError } from './AppDialog';
+import { showAlert, showFieldError } from './AppDialog';
 import { saveImageBlob } from '../utils/saveImage';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
 import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
@@ -478,9 +478,6 @@ interface ResultViewProps {
   // チャット相談を開く。質問ボタンから開いたときは、その質問を最初に送る
   onOpenChat?: (question?: string) => void;
   // 毎朝8時のメール通知の実際の状態（マイページと同じ設定）。isCurrentReading: いま見ている鑑定が配信内容と同じ
-  notifyStatus?: { on: boolean; targetLabel: string; isCurrentReading: boolean };
-  onOpenNotifySettings?: () => void;
-  onSwitchNotifyToCurrent?: () => void;
   // 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。保存・通知・チャット・シェアは出さず、onReset は「自分も鑑定する」になる
   sharedBy?: { name: string };
 }
@@ -511,9 +508,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   isPartnerSaved = false,
   onShowLegal,
   onOpenChat,
-  notifyStatus,
-  onOpenNotifySettings,
-  onSwitchNotifyToCurrent,
   sharedBy
 }) => {
   const [email, setEmail] = useState('');
@@ -2294,75 +2288,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           onPairLockClick={handleDeepLockClick}
           lockWord={LOCK_WORD}
         />
-
-        {/* Daily Notification Prompt: マイページの「毎朝8時の運勢・吉時間通知」と同じ設定を表示する */}
-        {!sharedBy && (() => {
-          const notifyOn = !!notifyStatus?.on;
-          const isCurrent = notifyOn && notifyStatus!.isCurrentReading;
-          const currentLabel = hasOpponent ? `${san(oppNickname)}との相性` : 'あなたの運勢';
-          const title = !notifyOn ? '毎朝8時に運勢＆LINE吉時間をお届け' : isCurrent ? '毎朝8時の通知はON' : `毎朝8時の通知：${notifyStatus!.targetLabel}`;
-          const sub = !notifyOn ? '相性と運気は毎日変化します' : isCurrent ? `${notifyStatus!.targetLabel}を配信中` : `${currentLabel}に切り替えられます`;
-          const buttonLabel = !notifyOn ? '通知を設定' : isCurrent ? '変更' : (hasOpponent ? 'この人に切替' : 'こちらに切替');
-          const quiet = isCurrent;
-          return (
-            <div style={{
-              marginTop: '0.25rem',
-              padding: '0.85rem',
-              background: isCurrent
-                ? 'linear-gradient(90deg, rgba(106, 169, 124, 0.1) 0%, rgba(106, 169, 124, 0.04) 100%)'
-                : 'linear-gradient(90deg, rgba(226, 192, 116, 0.08) 0%, rgba(159, 134, 192, 0.08) 100%)',
-              border: isCurrent ? '1px solid rgba(106, 169, 124, 0.35)' : '1px dashed rgba(226, 192, 116, 0.3)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '0.5rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, flex: 1 }}>
-                <Bell size={16} style={{ color: isCurrent ? '#8fd0a0' : 'var(--color-gold)', flexShrink: 0 }} />
-                <div style={{ fontSize: '0.7rem', color: '#e8e3d8', lineHeight: '1.45', minWidth: 0 }}>
-                  <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                    {title}
-                  </div>
-                  <div style={{ color: isCurrent ? '#a8d3b0' : '#a9a49a', fontSize: '0.66rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                    {sub}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (notifyOn) {
-                    if (isCurrent) onOpenNotifySettings?.();
-                    else onSwitchNotifyToCurrent?.();
-                  } else if (!isRegistered) {
-                    // 毎朝のメールは無料会員から受け取れる（api/cron/daily-luck.js。無料はアドバイス1段落・同じお相手は7日分まで）
-                    showConfirm('毎朝8時の運勢メールは、無料会員登録（アカウント作成）で受け取れます。\n無料登録しますか？', { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
-                      if (ok) handleScrollToRegister();
-                    });
-                  } else {
-                    onOpenNotifySettings?.();
-                  }
-                }}
-                style={{
-                  background: quiet ? 'transparent' : 'linear-gradient(135deg, #f2e2b3 0%, #e2c074 50%, #b8692d 100%)',
-                  border: quiet ? '1px solid rgba(168, 211, 176, 0.6)' : 'none',
-                  borderRadius: '20px',
-                  color: quiet ? '#a8d3b0' : '#0e141d',
-                  padding: '0.5rem 0.95rem',
-                  fontSize: '0.75rem',
-                  fontWeight: '900',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                  boxShadow: quiet ? 'none' : '0 4px 12px rgba(226,192,116,0.5)',
-                  letterSpacing: '0.02em'
-                }}
-              >
-                {buttonLabel}
-              </button>
-            </div>
-          );
-        })()}
       </div>
 
         {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ */}
