@@ -28,6 +28,8 @@ interface Props {
   lockWord: string;
   /** 友達紹介（2026-11-08 TAKASHI）。soloOpen = 友達が招待URLから占ったので、あなたの恋愛運MAX日がすべて開く */
   soloOpen?: boolean;
+  /** 招待URL（またはコード）から占った友達: 恋愛運MAX日のいちばん近い1日だけ開く（2026-11-08 TAKASHI） */
+  soloGift?: boolean;
   /** 渡したときだけ、恋愛運MAX日のロックの下に紹介の欄と「招待コードをお持ちの方」を出す */
   referral?: {
     isRegistered: boolean;
@@ -88,8 +90,10 @@ const blurDummy: React.CSSProperties = { filter: 'blur(5px)', userSelect: 'none'
 const goldCount: React.CSSProperties = { color: '#f5d77a' };
 const subHead: React.CSSProperties = { fontSize: '0.85rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' };
 
-function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels = [] }: {
+function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels = [], openCount = 0 }: {
   days: LuckyDay[]; locked: boolean; showPair: boolean; myLabel: string; oppLabel: string;
+  /** ロック中でも、上から何行の日付を見せるか（招待で占った友達へのプレゼント＝1） */
+  openCount?: number;
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
   /** 一覧の上にまとめて出したタグ。各行からは外し、日によって違うタグだけ残す */
   commonLabels?: string[];
@@ -99,14 +103,14 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
   const shown = days.slice(0, locked ? 3 : 8); // ロック中は3行だけ
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-      {shown.map((x, i) => (
+      {shown.map((x, i) => { const rowLocked = locked && i >= openCount; return (
         <div
-          key={locked ? i : `${x.day.y}-${x.day.m}-${x.day.d}`}
-          style={{ ...rowStyle, cursor: locked ? 'pointer' : 'auto' }}
-          {...(locked ? { 'data-paid-lock': true, onClick: onLockClick } : {})}
+          key={rowLocked ? i : `${x.day.y}-${x.day.m}-${x.day.d}`}
+          style={{ ...rowStyle, cursor: rowLocked ? 'pointer' : 'auto' }}
+          {...(rowLocked ? { 'data-paid-lock': true, onClick: onLockClick } : {})}
         >
           <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f5d77a', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-            {locked
+            {rowLocked
               ? <span>{x.day.y}年{x.day.m}月<span style={blurDummy} aria-hidden="true">●●</span>日({WEEKDAYS[x.day.weekday]})</span>
               : formatLuckyDate(x.day)}
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
@@ -117,8 +121,9 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
           ) : (
             <Chips labels={labelsOf(x.me).filter((t) => !commonLabels.includes(t))} />
           )}
+          {locked && !rowLocked && <span style={{ fontSize: '0.7rem', color: '#bfb8a8' }}>🎁 お友達の招待のプレゼント</span>}
         </div>
-      ))}
+      ); })}
       {locked && (
         <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick} style={{ alignSelf: 'center', marginTop: '0.2rem' }}>
           {lockWord}
@@ -128,7 +133,7 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
   );
 }
 
-export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myName, oppName, onLockClick, onPairLockClick, lockWord, soloOpen = false, referral }: Props) {
+export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myName, oppName, onLockClick, onPairLockClick, lockWord, soloOpen = false, soloGift = false, referral }: Props) {
   const me = useMemo(() => toLuckPerson(result.myPillar, result.myStar, result.myGender), [result.myPillar, result.myStar, result.myGender]);
   const partner = useMemo(() => toLuckPerson(result.opponentPillar, result.opponentStar, result.opponentGender), [result.opponentPillar, result.opponentStar, result.opponentGender]);
   const today = useMemo(() => {
@@ -197,11 +202,11 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
             <Chips labels={soloCommon} />
           </div>
         )}
-        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={partner ? (onPairLockClick || onLockClick) : onLockClick} lockWord={lockWord} commonLabels={soloCommon} />
+        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={partner ? (onPairLockClick || onLockClick) : onLockClick} lockWord={lockWord} commonLabels={soloCommon} openCount={soloGift ? 1 : 0} />
         {locked && referral && (
           <>
             <ReferralInvite isRegistered={referral.isRegistered} status={referral.status} loading={referral.loading} onRegister={referral.onRegister} onOpen={referral.onOpen} />
-            {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。お友達に届きました" />}
+            {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。恋愛運MAX日のいちばん近い1日が見られます" />}
           </>
         )}
         {!locked && soloOpen && !isSubscribed && !pairOpen && (

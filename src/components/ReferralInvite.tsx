@@ -60,6 +60,7 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
         <li>返信が遅いときの、おすすめの返し方</li>
         <li>生まれ持った星から見た二人の相性</li>
       </ul>
+      <p style={{ ...text, fontSize: '0.76rem' }}>お友達にも、恋愛運MAX日のいちばん近い1日をプレゼント。</p>
       {!isRegistered ? (
         <button type="button" style={goldBtn} onClick={onRegister}>無料登録して、お友達に送る</button>
       ) : !open ? (

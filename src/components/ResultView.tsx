@@ -489,6 +489,8 @@ interface ResultViewProps {
   // 毎朝8時のメール通知の実際の状態（マイページと同じ設定）。isCurrentReading: いま見ている鑑定が配信内容と同じ
   // 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。保存・通知・チャット・シェアは出さず、onReset は「自分も鑑定する」になる
   sharedBy?: { name: string };
+  /** 招待URL（またはコード）から占った友達: 恋愛運MAX日のいちばん近い1日だけ開く（お相手の有無にかかわらず） */
+  referralGift?: boolean;
   /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
   referral?: {
     status: ReferralStatus | null;
@@ -529,7 +531,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onShowLegal,
   onOpenChat,
   sharedBy,
-  referral
+  referral,
+  referralGift = false
 }) => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -2312,6 +2315,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           onPairLockClick={handleDeepLockClick}
           lockWord={LOCK_WORD}
           soloOpen={!sharedBy && referral?.unlocked === true}
+          soloGift={!sharedBy && referralGift}
           referral={!sharedBy && referral ? {
             isRegistered,
             status: referral.status,
