@@ -320,14 +320,22 @@ const splitAdvicePreview = (text: string | undefined): { head: string; restLengt
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
 
-// 未来予測スケジュール（7日間・月次・年次）の点数の折れ線グラフ。点の高さは 40点（下限）〜100点 で決める
-const SCORE_LINE_HEIGHT_PX = 64;
-const SCORE_LINE_MIN = 40;
+// 未来予測スケジュール（7日間・月次・年次）の点数の折れ線グラフ。
+// 縦軸は、そのグラフに出る点数の最低〜最高に合わせる（旧版は40〜100点固定で、6点差が約6pxにしかならず平らに見えた）。
+// 差が小さいときに大げさに見えないよう、縦軸の幅は最低 SCORE_LINE_MIN_SPAN 点ぶん取る。各点の上に点数を出しているので、数字で差は読める。
+const SCORE_LINE_HEIGHT_PX = 84;
+const SCORE_LINE_MIN_SPAN = 20;
+const SCORE_LINE_PAD = 0.12; // 上下の端に点が張り付かないよう、高さの12%ずつ空ける
 const ScoreLineChart = ({ items, locked }: { items: { key: string; label: string; score: number }[]; locked: boolean }) => {
   const n = items.length;
+  const scores = items.map((item) => item.score);
+  const lo = Math.min(...scores);
+  const hi = Math.max(...scores);
+  const span = Math.max(hi - lo, SCORE_LINE_MIN_SPAN);
+  const axisMin = (lo + hi) / 2 - span / 2;
   const pos = items.map((item, i) => {
-    const clamped = Math.max(SCORE_LINE_MIN, Math.min(100, item.score));
-    return { x: ((i + 0.5) / n) * 100, y: (1 - (clamped - SCORE_LINE_MIN) / (100 - SCORE_LINE_MIN)) * SCORE_LINE_HEIGHT_PX };
+    const t = (item.score - axisMin) / span; // 0（下）〜1（上）
+    return { x: ((i + 0.5) / n) * 100, y: (1 - (SCORE_LINE_PAD + t * (1 - 2 * SCORE_LINE_PAD))) * SCORE_LINE_HEIGHT_PX };
   });
   const gradId = `scoreLineFill-${items.map((i) => i.key).join('-').replace(/[^A-Za-z0-9-]/g, '')}`;
   return (
