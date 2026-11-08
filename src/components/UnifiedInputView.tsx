@@ -31,12 +31,15 @@ interface UnifiedInputViewProps {
   isSubscribed?: boolean;
   /** コラムの案内で入れてもらった生年月日（YYYY-MM-DD）。入っていれば最初からその値を入れておく */
   prefill?: { myBirth?: string; oppBirth?: string } | null;
+  /** 「鑑定を開始する」のすぐ下に出すもの（友達紹介の一言・招待コード欄） */
+  afterSubmit?: React.ReactNode;
 }
 
 export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   selectedCharacter,
   setSelectedCharacter,
   onSubmit,
+  afterSubmit,
   savedPartners = [],
   loadedPartner = null,
   onSelectPartner = () => {},
@@ -650,6 +653,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           <MoonMark size={16} style={{ marginLeft: '0.5rem' }} />
         </button>
       </form>
+      {afterSubmit && <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '0.6rem' }}>{afterSubmit}</div>}
 
       {/* Differentiators & Rare Showcase */}
       <div className="lp-features" style={{ width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.1rem' }}>

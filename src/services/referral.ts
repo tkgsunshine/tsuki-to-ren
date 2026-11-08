@@ -1,0 +1,104 @@
+import { getFirebaseAuth } from './firebase';
+
+// 友達紹介（api/_lib/referral.js）。会員の招待URL（/?ref=コード）から友達が鑑定すると、
+// 送った会員の「あなたの恋愛運MAX日」の日付がすべて開く。友達には、いちばん近い1日だけ見せる（この端末に覚える）。
+// 招待コードはURLを開いた時に端末に覚え、鑑定し終えた時にサーバーへ送る。
+// LINEの「ブラウザで開く」でSafariへ移っても読めるよう、URLの ?ref= は消さない。
+
+const ENDPOINT = '/api/stripe/referral';
+const PENDING_KEY = 'hasu_ref_pending';
+const GIFT_KEY = 'hasu_ref_gift';
+const VISITOR_KEY = 'hasu_visitor_id';
+const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+export interface ReferralStatus {
+  code: string;
+  count: number;
+  unlocked: boolean;
+  need: number;
+}
+
+export const cleanCode = (raw: string | null | undefined): string | null => {
+  const c = String(raw ?? '').toUpperCase().replace(/[\s-]/g, '');
+  return c.length === 6 && [...c].every((ch) => ALPHABET.includes(ch)) ? c : null;
+};
+
+const read = (key: string) => { try { return localStorage.getItem(key); } catch { return null; } };
+const write = (key: string, v: string | null) => {
+  try { if (v === null) localStorage.removeItem(key); else localStorage.setItem(key, v); } catch { /* blocked storage */ }
+};
+
+/** Remembers ?ref= from the address (called once when the app opens). Returns the code, if any. */
+export const captureRefFromUrl = (search: string = window.location.search): string | null => {
+  const code = cleanCode(new URLSearchParams(search).get('ref'));
+  if (code) write(PENDING_KEY, code);
+  return code;
+};
+export const getPendingRef = () => cleanCode(read(PENDING_KEY));
+export const setPendingRef = (code: string) => write(PENDING_KEY, code);
+export const hasRefGift = () => read(GIFT_KEY) === '1';
+
+const visitorId = () => {
+  let id = read(VISITOR_KEY);
+  if (!id || !/^[A-Za-z0-9_-]{16,64}$/.test(id)) {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    id = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    write(VISITOR_KEY, id);
+  }
+  return id;
+};
+
+const token = async () => {
+  const auth = getFirebaseAuth();
+  await auth.authStateReady();
+  return auth.currentUser ? auth.currentUser.getIdToken().catch(() => null) : null;
+};
+
+/**
+ * Tells the server that this browser finished a reading with this code.
+ * ok → the friend's gift (the nearest day) opens on this device. The pending code is cleared either way,
+ * except on a network error (it is tried again after the next reading).
+ */
+export const completeRef = async (code: string, birth?: string): Promise<{ ok: boolean; message?: string }> => {
+  try {
+    const t = await token();
+    const res = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(t ? { Authorization: `Bearer ${t}` } : {}) },
+      body: JSON.stringify({ op: 'complete', code, visitor: visitorId(), ...(birth ? { birth } : {}) })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status >= 500) return { ok: false, message: data.message || '通信に失敗しました。もう一度お試しください' };
+    write(PENDING_KEY, null);
+    if (data.ok === true) {
+      write(GIFT_KEY, '1');
+      return { ok: true };
+    }
+    return { ok: false, message: data.message || '招待コードを確認できませんでした' };
+  } catch {
+    return { ok: false, message: '通信に失敗しました。通信環境を確かめて、もう一度お試しください' };
+  }
+};
+
+/** The signed-in member's own code and how many friends have read with it (null when not signed in or on error). */
+export const fetchMyReferral = async (): Promise<ReferralStatus | null> => {
+  const t = await token();
+  if (!t) return null;
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
+      body: JSON.stringify({ op: 'me' })
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    return d.code ? { code: d.code, count: Number(d.count) || 0, unlocked: d.unlocked === true, need: Number(d.need) || 1 } : null;
+  } catch {
+    return null;
+  }
+};
+
+export const inviteUrl = (code: string) => `${window.location.origin}/?ref=${code}`;
+// 共有文は TAKASHI さんが後で確認する（2026-11-08）
+export const inviteText = (code: string) => `当たりすぎて怖い相性占い見つけた🌙 このURLから占ってみて！\n${inviteUrl(code)}`;

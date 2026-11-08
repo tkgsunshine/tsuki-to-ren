@@ -32,6 +32,7 @@ import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
 import { SelfReadingCard } from './SelfReadingCard';
 import { LuckyDaysSection } from './LuckyDaysSection';
+import type { ReferralStatus } from '../services/referral';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -488,6 +489,17 @@ interface ResultViewProps {
   // 毎朝8時のメール通知の実際の状態（マイページと同じ設定）。isCurrentReading: いま見ている鑑定が配信内容と同じ
   // 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。保存・通知・チャット・シェアは出さず、onReset は「自分も鑑定する」になる
   sharedBy?: { name: string };
+  /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
+  referral?: {
+    status: ReferralStatus | null;
+    loading?: boolean;
+    /** 送った側: 友達が占ったので恋愛運MAX日がすべて開く */
+    unlocked: boolean;
+    /** 招待で占った友達側: いちばん近い1日だけ開く */
+    gift: boolean;
+    onOpen: () => void;
+    onRedeem: (code: string) => Promise<string | null>;
+  };
 }
 
 // 画面下のバー（無料で続きを見る／シェア）の位置: 下メニューのすぐ上（約6px空ける）。
@@ -516,7 +528,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   isPartnerSaved = false,
   onShowLegal,
   onOpenChat,
-  sharedBy
+  sharedBy,
+  referral
 }) => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -2295,6 +2308,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
           onLockClick={handleLockTagClick}
           onPairLockClick={handleDeepLockClick}
           lockWord={LOCK_WORD}
+          soloOpen={!sharedBy && referral?.unlocked === true}
+          soloGift={!sharedBy && referral?.gift === true}
+          referral={!sharedBy && referral ? {
+            isRegistered,
+            status: referral.status,
+            loading: referral.loading,
+            onRegister: () => handleScrollToRegister('lock'),
+            onOpen: referral.onOpen,
+            onRedeem: referral.onRedeem
+          } : undefined}
         />
       </div>
 
