@@ -51,7 +51,7 @@ export const TOPICS = [
   { key: 'kyusei', label: '九星気学', icon: 'star', re: /九星/, bg: ['fourpillars-02', 'daily-01'] },
   { key: 'marriage', label: '結婚・将来', icon: 'ring', re: /結婚|同棲|将来|紹介/, bg: ['marriage-01', 'marriage-03', 'marriage-04', 'marriage-02'] },
   { key: 'date', label: 'デート', icon: 'calendar', re: /デート|クリスマス|記念日|誘い方|会いたい|マンネリ/, bg: ['love-03', 'marriage-04', 'mbti-02', 'elements-02'] },
-  { key: 'talk', label: '会話・伝え方', icon: 'talk', re: /会話|話し方|仲直り|喧嘩|伝え方|伝える|切り出し|ほめ方|謝り方|本音|告白|断る|話し合/, bg: ['elements-02', 'calm-02', 'love-02'] },
+  { key: 'talk', label: '会話・伝え方', icon: 'talk', re: /会話|話し方|仲直り|喧嘩|伝え方|伝える|切り出し|褒め方|謝り方|本音|告白|断る|話し合/, bg: ['elements-02', 'calm-02', 'love-02'] },
   { key: 'crush', label: '片思い・出会い', icon: 'heart', re: /片思い|出会い|マッチング|好きな人|友達から恋人|友達止まり|初めての恋人|職場の人/, bg: ['love-01', 'calm-03', 'love-03'] },
   { key: 'work', label: '友達・学校・仕事', icon: 'bag', re: /友達との|友情|苦手な人|バイト|学校|仕事|職場|第一印象/, bg: ['work-02', 'love-02', 'work-03'] },
   { key: 'luck', label: '運勢・運気', icon: 'sun', re: /運勢|運気|占い|振り返り|年末/, bg: ['daily-01', 'work-04', 'elements-03'] },
