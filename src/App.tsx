@@ -1499,8 +1499,9 @@ function App() {
   const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
     && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
 
-  // 診断（入力）画面では下メニューを出さない（TAKASHI判断 2026-11-08）。共有リンクの結果表示・読み込み中・鑑定結果では出す
-  const hideNavbar = activeTab === 'home' && !sharedView && !sharedTeaser && flowStep === 'input';
+  // 初めて鑑定する人（未登録で、まだ鑑定結果が無い人）の診断（入力）画面では、下メニューを雑音として出さない（TAKASHI判断 2026-11-08）。
+  // 無料会員・プレミアム会員と、一度鑑定した人は従来どおり出す。共有リンクの結果表示・読み込み中・鑑定結果でも出す
+  const hideNavbar = !isRegistered && !isSubscribed && !renResult && activeTab === 'home' && !sharedView && !sharedTeaser && flowStep === 'input';
 
   return (
     <div className={`app-container${activeTab === 'home' && flowStep !== 'result' ? ' bg-cosmos' : ''}`} style={{
@@ -3596,7 +3597,7 @@ function App() {
         onClose={() => setShowInstallGuideModal(false)}
       />
 
-      {/* Global Bottom Navbar（診断の入力画面だけは出さない） */}
+      {/* Global Bottom Navbar（初めて鑑定する人の診断の入力画面だけは出さない） */}
       {!hideNavbar && <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />}
     </div>
   );
