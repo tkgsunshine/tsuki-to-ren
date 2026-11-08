@@ -103,4 +103,4 @@ export const fetchMyReferral = async (oppBirth: string): Promise<ReferralStatus 
 export const inviteUrl = (code: string) => `${window.location.origin}/?ref=${code}`;
 // 共有文は TAKASHI さんが決めた文（2026-11-09）
 export const inviteText = (code: string) =>
-  `【月と蓮】お友達から招待が届いています。誕生日とMBTIで好きな人との相性を無料鑑定。招待のお礼にあなたの恋愛運MAX日をプレゼント🎁\n${inviteUrl(code)}`;
+  `【月と蓮】お友達から招待が届いています。誕生日とMBTIで好きな人との相性を無料鑑定。あなたの恋愛運MAX日をプレゼント🎁\n${inviteUrl(code)}`;
