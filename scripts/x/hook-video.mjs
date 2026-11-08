@@ -23,21 +23,22 @@ const arg = (name, def) => {
 // 台本。hook / end: 最初と最後の言葉の画面（行ごと。空なら入れない。2026-11-06 運営の判断で既定は入れない）。picks: 結果の中で大きく見せる項目（find=見出しの文字、caption=上の字幕）
 export const SCRIPT = {
   hook: [], // 例: ['好きな人の既読スルー、', '脈なしって', '決めつけてない？']
-  input: '好きな人の生年月日とMBTIを入れると…',
-  score: '二人の相性と、',
+  input: '好きな人の生年月日とMBTIを入れるだけ',
+  score: '二人の相性が点数でわかる',
+  // benefit: 上の帯に大きく出す「この機能で何ができるか」（2026-11-08 運営の指定。結果の文そのものは出さない）。
   // pick: カードの文字から抜き出す正規表現（( ) があれば、その部分をつなげる）。fmt: 抜き出した文の形（$1 など）。無ければ本文の最初の一文
   picks: [
-    { find: 'ふだんのあなた', caption: 'あなたってこんな人', pick: 'ふだんのあなた\\n+([^。\\n]+。)' },
-    { find: 'あなたの守護獣', caption: 'あなたの守護獣', pick: 'あなたの守護獣 ✦\\n([^\\n]+)' },
-    { find: '本日のLINE吉時間', caption: '今日のLINEの送りどき', pick: '推奨送信タイミング\\n([^\\n]+)\\n([^\\n]+)', fmt: '$1\n$2' },
-    { find: '地雷3選', caption: '二人の間で踏みやすい地雷', pick: '1\\. ([^\\n]+)' },
-    { find: 'おすすめのお誘いフレーズ', caption: '好きな人の誘い方', pick: '「[^」\\n]+」' },
-    { find: '絶対にやってはいけないこと', caption: '絶対にやってはいけないこと', pick: '5選\\n([^\\n]+)' },
-    { find: '返信が遅いときの本当の理由', caption: '返信が遅い“本当の理由”', pick: '【本当の理由】\\s*([^。\\n]+。)' },
-    { find: '脈ありサイン 3段階', caption: '今どの段階？脈ありサイン', pick: 'Lv\\.3[^\\n]+' },
-    { find: 'キラーテンプレート', caption: 'そのまま送れるLINE文', pick: '「[^」\\n]{8,60}」' },
-    { find: '詳細相性レーダー', caption: '6つの軸で相性を点数に', pick: '運命の引き寄せ\\n(\\d+)\\n点[\\s\\S]*?信頼・安心感\\n(\\d+)\\n点', fmt: '運命の引き寄せ $1点\n信頼・安心感 $2点' },
-    { find: '未来予測スケジュール', caption: '二人のこれからの運気', pick: '(\\d+月)：([^\\n]+)\\n+([^。\\n]+。)', fmt: '$1：$2\n$3' },
+    { find: 'ふだんのあなた', caption: 'あなたってこんな人', benefit: '自分の恋のクセがわかる', pick: 'ふだんのあなた\\n+([^。\\n]+。)' },
+    { find: 'あなたの守護獣', caption: 'あなたの守護獣', benefit: '二人の守護獣から相性の土台がわかる', pick: 'あなたの守護獣 ✦\\n([^\\n]+)' },
+    { find: '本日のLINE吉時間', caption: '今日のLINEの送りどき', benefit: '好きな人にLINEを送るベストな時間がわかる', pick: '推奨送信タイミング\\n([^\\n]+)\\n([^\\n]+)', fmt: '$1\n$2' },
+    { find: '地雷3選', caption: '二人の間で踏みやすい地雷', benefit: 'ケンカになりやすいポイントを先回りで避けられる', pick: '1\\. ([^\\n]+)' },
+    { find: 'おすすめのお誘いフレーズ', caption: '好きな人の誘い方', benefit: '誘うならどこへ、どう言えばいいかわかる', pick: '「[^」\\n]+」' },
+    { find: '絶対にやってはいけないこと', caption: '絶対にやってはいけないこと', benefit: '好きな人に冷められる行動を先に知れる', pick: '5選\\n([^\\n]+)' },
+    { find: '返信が遅いときの本当の理由', caption: '返信が遅い“本当の理由”', benefit: '返信が遅くても、理由がわかるから不安にならない', pick: '【本当の理由】\\s*([^。\\n]+。)' },
+    { find: '脈ありサイン 3段階', caption: '今どの段階？脈ありサイン', benefit: '好きな人の脈あり度を3段階で確かめられる', pick: 'Lv\\.3[^\\n]+' },
+    { find: 'キラーテンプレート', caption: 'そのまま送れるLINE文', benefit: '送るLINEに迷ったら、そのまま使える文がある', pick: '「[^」\\n]{8,60}」' },
+    { find: '詳細相性レーダー', caption: '6つの軸で相性を点数に', benefit: '会話・将来・安心感など6つの相性を点数で見られる', pick: '運命の引き寄せ\\n(\\d+)\\n点[\\s\\S]*?信頼・安心感\\n(\\d+)\\n点', fmt: '運命の引き寄せ $1点\n信頼・安心感 $2点' },
+    { find: '未来予測スケジュール', caption: '二人のこれからの運気', benefit: '運気がいい月がわかるから、動くタイミングを決められる', pick: '(\\d+月)：([^\\n]+)\\n+([^。\\n]+。)', fmt: '$1：$2\n$3' },
   ],
 
   end: [], // 例: ['あなたと好きな人なら、', 'どう出る？']
@@ -224,15 +225,14 @@ async function main() {
   seg.push(`[0:v]trim=${m.input[0].toFixed(2)}:${m.input[1].toFixed(2)},setpts=(PTS-STARTPTS)/1.6,${bar},${text(SCRIPT.input, 54, 'white', 90)}[s1]`);
   // 3. 点数
   seg.push(`[0:v]trim=${m.score[0].toFixed(2)}:${m.score[1].toFixed(2)},setpts=PTS-STARTPTS,${bar},${text(SCRIPT.score, 62, 'white', 86)}[s2]`);
-  // 4. 刺さる一文: 上の帯に、項目名と結果の一文をまとめて出す（2026-11-07 運営の指定で、下には字幕を置かない）
+  // 4. 機能: 上の帯に、小さく項目名、大きく「この機能で何ができるか」
   m.picks.forEach((p, i) => {
-    const lines = p.line.split('\n').flatMap(x => wrapJa(x, 15)).slice(0, 4);
-    const h = 190 + lines.length * 84 + 30;
+    const lines = wrapJa(p.benefit || p.caption, 13);
+    const h = 150 + lines.length * 92 + 40;
     seg.push(`[0:v]trim=${p.start.toFixed(2)}:${p.end.toFixed(2)},setpts=PTS-STARTPTS,`
-      + `drawbox=x=0:y=0:w=iw:h=230:color=0x0b0d1f@0.92:t=fill:enable='lt(t,0.6)',`
-      + `drawbox=x=0:y=0:w=iw:h=${h}:color=0x0b0d1f@0.92:t=fill:enable='gte(t,0.6)',`
-      + `${text(p.caption, 62, '0xF2D27A', 80)},`
-      + lines.map((l, j) => text(l, 60, 'white', 190 + j * 84, `:enable='gte(t,0.6)'`)).join(',') + `[s${3 + i}]`);
+      + `drawbox=x=0:y=0:w=iw:h=${h}:color=0x0b0d1f@0.92:t=fill,`
+      + `${text(p.caption, 44, '0xF2D27A', 72)},`
+      + lines.map((l, j) => text(l, 72, 'white', 150 + j * 92)).join(',') + `[s${3 + i}]`);
   });
   // 5. 締め: 最後の画面をぼかして
   if (SCRIPT.end.length) seg.push(`[0:v]trim=${(m.end - 0.1).toFixed(2)}:${m.end.toFixed(2)},setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=${END},boxblur=18:2,drawbox=x=0:y=0:w=iw:h=ih:color=0x05060f@0.6:t=fill,`
