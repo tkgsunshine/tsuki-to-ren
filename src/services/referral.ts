@@ -1,6 +1,6 @@
 import { getFirebaseAuth } from './firebase';
 
-// 友達紹介（api/_lib/referral.js）。会員の招待URL（/?ref=コード）から友達が鑑定すると、
+// 友達紹介（api/_lib/referral.js）。招待URL（/?ref=コード）はお相手ごと。友達がそこから鑑定すると、そのお相手との
 // 送った会員の結果の一部（恋愛運MAX日の日付・返信が遅いときのおすすめの返し方・生まれ持った星から見た二人の相性）が開く。
 // 友達側の特典はなし（2026-11-08 TAKASHI「一旦友達はメリットなしでいい」）。
 // 招待コードはURLを開いた時に端末に覚え、鑑定し終えた時にサーバーへ送る。
@@ -82,15 +82,15 @@ export const completeRef = async (code: string, birth?: string): Promise<{ ok: b
   }
 };
 
-/** The signed-in member's own code and how many friends have read with it (null when not signed in or on error). */
-export const fetchMyReferral = async (): Promise<ReferralStatus | null> => {
+/** The signed-in member's code for this partner and how many friends have read with it (null when not signed in or on error). */
+export const fetchMyReferral = async (oppBirth: string): Promise<ReferralStatus | null> => {
   const t = await token();
   if (!t) return null;
   try {
     const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
-      body: JSON.stringify({ op: 'me' })
+      body: JSON.stringify({ op: 'me', oppBirth })
     });
     if (!res.ok) return null;
     const d = await res.json();

@@ -1100,19 +1100,25 @@ function App() {
   const [pairUnlock, setPairUnlock] = useState<PairUnlock>(null);
 
   // 友達紹介（2026-11-08 TAKASHI、src/services/referral.ts）。招待URL（?ref=）で来た人は、鑑定し終えたらサーバーへ送る。
-  // 送った会員は、友達が1人占うと結果の一部が開く。友達側の特典はなし（2026-11-08 TAKASHI）
+  // 送った会員は、友達が1人占うと、招待URLを作ったお相手との結果の一部が開く（お相手ごと）。友達側の特典はなし（2026-11-08 TAKASHI）
   const [pendingRef, setPendingRef] = useState<string | null>(() => captureRefFromUrl() || getPendingRef());
   const [refSent, setRefSent] = useState(() => hasSentRef());
   const [referralStatus, setReferralStatus] = useState<ReferralStatus | null>(null);
   const [referralLoading, setReferralLoading] = useState(false);
+  const referralBirth = mode === 'match' && /^\d{4}-\d{2}-\d{2}$/.test(oppBirth) ? oppBirth : '';
+  const referralBirthRef = useRef(referralBirth);
+  referralBirthRef.current = referralBirth;
   const loadReferral = useCallback(async () => {
+    if (!referralBirth) return;
     setReferralLoading(true);
-    const r = await fetchMyReferral();
+    const r = await fetchMyReferral(referralBirth);
     setReferralLoading(false);
-    if (r) setReferralStatus(r);
-  }, []);
+    // 読み込み中にお相手が変わっていたら捨てる
+    if (r && referralBirthRef.current === referralBirth) setReferralStatus(r);
+  }, [referralBirth]);
   useEffect(() => {
-    if (!currentUser?.uid) { setReferralStatus(null); return; }
+    setReferralStatus(null);
+    if (!currentUser?.uid || !referralBirth) return;
     void loadReferral();
     // お友達が占ったあとに戻ってきたら、開いたことが分かるように読み直す
     let last = Date.now();
@@ -1123,7 +1129,7 @@ function App() {
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
-  }, [currentUser?.uid, loadReferral]);
+  }, [currentUser?.uid, referralBirth, loadReferral]);
   const sendRef = async (code: string, birth: string): Promise<string | null> => {
     const r = await completeRef(code, birth);
     setPendingRef(getPendingRef());
@@ -1689,7 +1695,7 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
-                referral={referralProp}
+                referral={mode === 'match' ? referralProp : undefined}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -1729,7 +1735,7 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
-                referral={referralProp}
+                referral={mode === 'match' ? referralProp : undefined}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
