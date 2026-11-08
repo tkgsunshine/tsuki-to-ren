@@ -51,21 +51,11 @@ export function buildDailyContent(sub, access = { premium: true }) {
     hasOpponent: isMatch && !locked,
     score: result.dailyScore,
     baseScore: result.baseScore,
-    mbtiCode: result.myMbtiCode && result.myMbtiCode !== 'UNKNOWN' ? result.myMbtiCode : '',
-    mbtiName: result.myMbtiName && result.myMbtiName !== '未選択' ? result.myMbtiName : '',
     hourMain: hour.split(/[（(]/)[0].trim(),
     hourNote: note ? note[1] : '',
     // Paragraphs of the approach advice (the result screen shows the same paragraphs; free members see the first one).
     adviceParts: free ? allAdvice.slice(0, 1) : allAdvice,
-    adviceMore: free && allAdvice.length > 1,
-    // The user's own profile card from the result screen (never the partner's: the mail stays about "you").
-    profile: {
-      title: (result.myAstrologyTheme || '').replace(/[【】]/g, ''),
-      beast: result.myAstrologyName || '',
-      img: /^\/assets\/[\w-]+\.jpg$/.test(result.myAvatarUrl || '') ? result.myAvatarUrl : '',
-      star: (result.myStar || '').split(' ')[0],
-      color: result.myAstrologyColor || ''
-    }
+    adviceMore: free && allAdvice.length > 1
   };
   if (isMatch && free && !locked && Number.isFinite(access.daysLeft)) content.freeDaysLeft = access.daysLeft;
   if (isMatch && free && !locked && canPromotePair(access) && PAIR_PROMO_DAYS.includes(access.daysUsed)) content.pairPromo = true;
@@ -227,12 +217,7 @@ export function renderPartnerTeaser(sub, teaser) {
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
   const oppLabel = content.hasOpponent && sub.oppName ? `と${esc(san(sub.oppName))}` : '';
-  const { score, baseScore, hourMain, hourNote, adviceParts = [], mbtiCode, mbtiName, profile = {} } = content;
-  const facts = [
-    profile.star && ['本命星', esc(profile.star)],
-    profile.color && ['守護カラー', esc(profile.color)],
-    mbtiCode && ['16タイプ', `${esc(mbtiCode)}${mbtiName ? `<span style="color: #a8a3bd; font-weight: normal;">（${esc(mbtiName)}）</span>` : ''}`]
-  ].filter(Boolean);
+  const { score, baseScore, hourMain, hourNote, adviceParts = [] } = content;
   const hourTitle = content.hasOpponent ? '本日のLINE吉時間' : '本日の恋の開運時間';
   // Dark-green card with a bright green border (matches the app's golden-hour card); single mode keeps the gold/purple look.
   const hourBg = content.hasOpponent ? '#0b2e22' : '#1d1733';
@@ -365,37 +350,6 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
               </table>
             </td>
           </tr>
-
-          <!-- The user's own profile (same as the result screen's guardian-beast card) -->
-          ${profile.beast || facts.length ? `
-          <tr>
-            <td style="padding: 16px 25px 0;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
-                <tr>
-                  <td style="padding: 16px 18px;">
-                    <div style="font-size: 11px; font-weight: bold; color: ${GOLD}; letter-spacing: 0.1em; margin-bottom: 10px;">あなたの守護獣と星</div>
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                      <tr>
-                        ${profile.img ? `<td width="76" valign="middle" style="width: 76px; padding-right: 12px;">
-                          <img src="${SITE}${profile.img}" width="64" height="64" alt="${esc(profile.beast)}" style="display: block; width: 64px; height: 64px; border-radius: 12px; border: 1px solid rgba(226, 192, 116, 0.5); object-fit: cover; object-position: top;">
-                        </td>` : ''}
-                        <td valign="middle" style="font-size: 13px; line-height: 1.6; color: #e2e8f0;">
-                          ${profile.title ? `<div style="font-size: 14px; font-weight: bold; color: #fef08a;">${esc(profile.title)}</div>` : ''}
-                          ${profile.beast ? `<div style="color: #cbd5e1;">${esc(profile.beast)}</div>` : ''}
-                        </td>
-                      </tr>
-                    </table>
-                    ${facts.length ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top: 12px; border-top: 1px solid #2a2342;">
-                      ${facts.map(([k, v]) => `<tr>
-                        <td width="84" style="width: 84px; padding: 7px 0 0; font-size: 11px; color: #a8a3bd; white-space: nowrap;">${k}</td>
-                        <td style="padding: 7px 0 0; font-size: 13px; font-weight: bold; color: #f3f4f6;">${v}</td>
-                      </tr>`).join('')}
-                    </table>` : ''}
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>` : ''}
 
           ${content.pairPromo ? renderPairPromo(sub) : ''}
 
