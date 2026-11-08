@@ -38,3 +38,12 @@ test('無料の日数が残っている買い切り購入者は、今までど�
   assert.equal(c.freeDaysLeft, 3);
   assert.equal(c.adviceParts.length, 1);
 });
+
+test('無料の日数が終わったお相手の箱に、月額プランの案内を開くリンク（lp=m）', () => {
+  for (const unlocked of [true, false]) {
+    const h = html({ premium: false, locked: true, daysLeft: 0, pair: { unlocked, today: false } });
+    assert.match(h, /href="https:\/\/www\.tsuki-to-ren\.com\/\?[^"]*ob=19970928[^"]*&amp;lp=m"[^>]*>プレミアムの詳細を見る/);
+  }
+  // 点数が見られる日は出さない
+  assert.doesNotMatch(html({ premium: false, locked: false, daysLeft: 3 }), /lp=m/);
+});

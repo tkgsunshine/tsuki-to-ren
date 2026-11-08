@@ -106,6 +106,9 @@ export function resultUrlFor(sub, hasOpponent) {
   return `${SITE}/?${params.toString()}`; // "/" like the share links: the loading screen, then the result
 }
 
+/** The partner's result screen, then the monthly plan's page on top of it (App.tsx reads lp=m). */
+export const premiumLpUrlFor = (sub) => `${resultUrlFor(sub, true)}&lp=m`;
+
 // 点数ブロック: 鑑定結果画面と同じ「基本（小）と今日（大）の丸いメーター」と「今日の流れ」。
 // 二人の相性は「基本の相性／今日の相性」、一人で占う人は「基本運勢／今日の運勢」（画像の種類 -solo）。
 // メールでは SVG もアニメーションも使えないため、点数ごとの画像（scripts/build-mail-score-images.mjs で作成）を並べる。
@@ -175,6 +178,9 @@ export function renderPartnerTeaser(sub, teaser) {
                       ${teaser.pair
                         ? `${who}のトリセツと深層鑑定は、これからもずっと見られます。<br>二人の今日の点数と助言を毎日見るには、プレミアム（月額980円）が必要です。`
                         : `${who}との無料の期間が終わりました。<br>二人の今日の点数と助言は、プレミアム（月額980円）で見られます。`}
+                    </div>
+                    <div style="margin-top: 12px;">
+                      <a href="${esc(premiumLpUrlFor(sub))}" style="display: inline-block; padding: 9px 20px; border: 1px solid ${GOLD}; color: ${GOLD}; font-size: 12px; font-weight: bold; text-decoration: none; border-radius: 20px; letter-spacing: 0.04em;">プレミアムの詳細を見る &#10132;</a>
                     </div>
                   </td>
                 </tr>
