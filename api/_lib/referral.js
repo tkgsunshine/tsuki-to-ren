@@ -6,8 +6,8 @@ import { NOTICES } from './notices.js';
 import { USER_DATA } from './user-data.js';
 
 // 友達紹介（2026-11-08 TAKASHI）。会員が自分専用の招待URL（/?ref=コード）を友達に送り、友達がそこから鑑定すると、
-// 送った会員の「あなたの恋愛運MAX日」の日付が開く（REFERRALS_TO_UNLOCK 人で、ずっと）。
-// 友達は登録なしでよい。友達側の特典（いちばん近い1日だけ見られる）は友達の端末に覚える（src/services/referral.ts）。
+// 送った会員の結果の一部が開く（REFERRALS_TO_UNLOCK 人で、ずっと）: 恋愛運MAX日の日付・返信が遅いときのおすすめの返し方・
+// 生まれ持った星から見た二人の相性（2026-11-08 TAKASHI）。友達は登録なしでよい。友達側の特典はなし。
 //   referralCodes/{code}  { uid, createdAt }               コード → 会員
 //   referrals/{uid}       { code, count, friends: { <端末の記号>: 日付 }, unlockedAt, createdAt }
 // 書くのはサーバーだけ（firestore.rules で端末からは読み書き不可）。友達の生年月日やIPはそのまま保存しない。
@@ -41,7 +41,7 @@ export const REFERRAL_NOTICE = {
   body: [
     'あなたが送った招待URLから、お友達が鑑定してくれました。月（ツキ）です。',
     '',
-    'お礼に「あなたの恋愛運MAX日」の日付が、これからずっと見られるようになりました。鑑定結果の「恋愛運MAX日」の欄からのぞいてみてね。',
+    'お礼に、「恋愛運MAX日」の日付、「返信が遅いときのおすすめの返し方」、「生まれ持った星から見た二人の相性」が、これからずっと見られるようになりました。鑑定結果からのぞいてみてね。',
     '',
     '蓮（レン）からもひとこと。「大事な一歩は、その日に。準備はもうできているはずだ」',
     '',
@@ -92,7 +92,7 @@ async function consumeIp(db, ipKey, now) {
 /**
  * A friend finished a reading with this code. Returns { ok, reason?, unlockedNow? }.
  * reason: 'unknown' (no such code), 'self' (the member's own account or birth date), 'limit' (too many from one IP).
- * The same browser counts once; it still gets ok (so its own one-day gift stays open).
+ * The same browser counts once; it still gets ok.
  */
 export async function completeReferral(db, { code, visitor, birth, uid, ipKey, now = Date.now() }) {
   const owner = (await db.collection(REFERRAL_CODES).doc(code).get()).data()?.uid;

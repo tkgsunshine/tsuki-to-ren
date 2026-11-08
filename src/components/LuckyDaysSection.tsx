@@ -28,8 +28,6 @@ interface Props {
   lockWord: string;
   /** 友達紹介（2026-11-08 TAKASHI）。soloOpen = 友達が招待URLから占ったので、あなたの恋愛運MAX日がすべて開く */
   soloOpen?: boolean;
-  /** 招待URLから占った友達側: いちばん近い1日だけ開く */
-  soloGift?: boolean;
   /** 渡したときだけ、恋愛運MAX日のロックの下に紹介の欄と「招待コードをお持ちの方」を出す */
   referral?: {
     isRegistered: boolean;
@@ -37,6 +35,8 @@ interface Props {
     loading?: boolean;
     onRegister: () => void;
     onOpen?: () => void;
+    /** 「招待コードをお持ちの方」を出すか（この端末から送り終えたら出さない） */
+    showCodeEntry: boolean;
     /** 招待コードを手で入れたとき。エラーの文か null（受け付けた） */
     onRedeem: (code: string) => Promise<string | null>;
   };
@@ -88,10 +88,8 @@ const blurDummy: React.CSSProperties = { filter: 'blur(5px)', userSelect: 'none'
 const goldCount: React.CSSProperties = { color: '#f5d77a' };
 const subHead: React.CSSProperties = { fontSize: '0.85rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' };
 
-function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels = [], openCount = 0 }: {
+function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels = [] }: {
   days: LuckyDay[]; locked: boolean; showPair: boolean; myLabel: string; oppLabel: string;
-  /** ロック中でも、上から何行の日付を見せるか（紹介された友達へのプレゼント＝1） */
-  openCount?: number;
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
   /** 一覧の上にまとめて出したタグ。各行からは外し、日によって違うタグだけ残す */
   commonLabels?: string[];
@@ -101,14 +99,14 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
   const shown = days.slice(0, locked ? 3 : 8); // ロック中は3行だけ
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-      {shown.map((x, i) => { const rowLocked = locked && i >= openCount; return (
+      {shown.map((x, i) => (
         <div
-          key={rowLocked ? i : `${x.day.y}-${x.day.m}-${x.day.d}`}
-          style={{ ...rowStyle, cursor: rowLocked ? 'pointer' : 'auto' }}
-          {...(rowLocked ? { 'data-paid-lock': true, onClick: onLockClick } : {})}
+          key={locked ? i : `${x.day.y}-${x.day.m}-${x.day.d}`}
+          style={{ ...rowStyle, cursor: locked ? 'pointer' : 'auto' }}
+          {...(locked ? { 'data-paid-lock': true, onClick: onLockClick } : {})}
         >
           <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f5d77a', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-            {rowLocked
+            {locked
               ? <span>{x.day.y}年{x.day.m}月<span style={blurDummy} aria-hidden="true">●●</span>日({WEEKDAYS[x.day.weekday]})</span>
               : formatLuckyDate(x.day)}
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
@@ -119,9 +117,8 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
           ) : (
             <Chips labels={labelsOf(x.me).filter((t) => !commonLabels.includes(t))} />
           )}
-          {locked && !rowLocked && <span style={{ fontSize: '0.7rem', color: '#bfb8a8' }}>🎁 お友達の招待のプレゼント</span>}
         </div>
-      ); })}
+      ))}
       {locked && (
         <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick} style={{ alignSelf: 'center', marginTop: '0.2rem' }}>
           {lockWord}
@@ -131,7 +128,7 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
   );
 }
 
-export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myName, oppName, onLockClick, onPairLockClick, lockWord, soloOpen = false, soloGift = false, referral }: Props) {
+export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myName, oppName, onLockClick, onPairLockClick, lockWord, soloOpen = false, referral }: Props) {
   const me = useMemo(() => toLuckPerson(result.myPillar, result.myStar, result.myGender), [result.myPillar, result.myStar, result.myGender]);
   const partner = useMemo(() => toLuckPerson(result.opponentPillar, result.opponentStar, result.opponentGender), [result.opponentPillar, result.opponentStar, result.opponentGender]);
   const today = useMemo(() => {
@@ -200,11 +197,11 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
             <Chips labels={soloCommon} />
           </div>
         )}
-        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={partner ? (onPairLockClick || onLockClick) : onLockClick} lockWord={lockWord} commonLabels={soloCommon} openCount={soloGift ? 1 : 0} />
+        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={partner ? (onPairLockClick || onLockClick) : onLockClick} lockWord={lockWord} commonLabels={soloCommon} />
         {locked && referral && (
           <>
             <ReferralInvite isRegistered={referral.isRegistered} status={referral.status} loading={referral.loading} onRegister={referral.onRegister} onOpen={referral.onOpen} />
-            {!soloGift && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。いちばん近い1日が見られます" />}
+            {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。お友達に届きました" />}
           </>
         )}
         {!locked && soloOpen && !isSubscribed && !pairOpen && (

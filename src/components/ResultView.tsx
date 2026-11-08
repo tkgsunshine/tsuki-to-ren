@@ -493,10 +493,10 @@ interface ResultViewProps {
   referral?: {
     status: ReferralStatus | null;
     loading?: boolean;
-    /** 送った側: 友達が占ったので恋愛運MAX日がすべて開く */
+    /** 送った側: 友達が占ったので、恋愛運MAX日・返信が遅いときのおすすめの返し方・生まれ持った星から見た二人の相性が開く */
     unlocked: boolean;
-    /** 招待で占った友達側: いちばん近い1日だけ開く */
-    gift: boolean;
+    /** 「招待コードをお持ちの方」を出すか */
+    showCodeEntry: boolean;
     onOpen: () => void;
     onRedeem: (code: string) => Promise<string | null>;
   };
@@ -1003,6 +1003,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // 毎日変わる内容（本日のアプローチ助言・二人のLINEのコツ）は todayOpen で開く。7日間・月次・朝メール・チャットは月額だけ。
   const pairOpen = hasOpponent && !sharedBy && pairUnlock?.unlocked === true;
   const deepOpen = isSubscribed || pairOpen;
+  // 友達紹介で開く項目（2026-11-08 TAKASHI）: 返信が遅いときのおすすめの返し方・生まれ持った星から見た二人の相性（恋愛運MAX日は LuckyDaysSection）
+  const referralOpen = !sharedBy && referral?.unlocked === true;
+  const slowReplyOpen = deepOpen || referralOpen;
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
@@ -2309,13 +2312,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
           onPairLockClick={handleDeepLockClick}
           lockWord={LOCK_WORD}
           soloOpen={!sharedBy && referral?.unlocked === true}
-          soloGift={!sharedBy && referral?.gift === true}
           referral={!sharedBy && referral ? {
             isRegistered,
             status: referral.status,
             loading: referral.loading,
             onRegister: () => handleScrollToRegister('lock'),
             onOpen: referral.onOpen,
+            showCodeEntry: referral.showCodeEntry,
             onRedeem: referral.onRedeem
           } : undefined}
         />
@@ -2402,7 +2405,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         {detailedTopics.map((topic, index) => {
           // 「惹かれ合うポイント＆地雷行動3選」「二人のこれから」はプレミアム限定（無料会員も冒頭の1文だけ）。他の項目は無料会員なら全文。
           const premiumOnly = hasOpponent && (topic.title.includes('惹かれ合うポイント') || topic.title.includes('二人のこれから'));
-          const topicOpen = premiumOnly ? deepOpen : readingOpen;
+          const topicOpen = premiumOnly ? deepOpen : (readingOpen || (referralOpen && topic.title.includes('生まれ持った星から見た')));
           return (
           <React.Fragment key={topic.title}>
 
@@ -2700,11 +2703,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <p style={{
                     margin: 0,
                     color: '#5d9fc0',
-                    filter: !deepOpen ? 'blur(4.5px)' : 'none',
-                    userSelect: !deepOpen ? 'none' : 'auto',
-                    opacity: !deepOpen ? 0.65 : 1
-                  }}><strong>【おすすめの返し方】</strong> {lockedText(activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</p>
-                  {!deepOpen && (
+                    filter: !slowReplyOpen ? 'blur(4.5px)' : 'none',
+                    userSelect: !slowReplyOpen ? 'none' : 'auto',
+                    opacity: !slowReplyOpen ? 0.65 : 1
+                  }}><strong>【おすすめの返し方】</strong> {lockedText(activeResult.opponentTorisetsu.slowReplyAction?.replace(/〇〇/g, oppNickname || 'お相手'), !slowReplyOpen)}</p>
+                  {!slowReplyOpen && (
               <div style={{
                 position: 'absolute',
                 top: '50%',

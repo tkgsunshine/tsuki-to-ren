@@ -1,13 +1,14 @@
 import { getFirebaseAuth } from './firebase';
 
 // 友達紹介（api/_lib/referral.js）。会員の招待URL（/?ref=コード）から友達が鑑定すると、
-// 送った会員の「あなたの恋愛運MAX日」の日付がすべて開く。友達には、いちばん近い1日だけ見せる（この端末に覚える）。
+// 送った会員の結果の一部（恋愛運MAX日の日付・返信が遅いときのおすすめの返し方・生まれ持った星から見た二人の相性）が開く。
+// 友達側の特典はなし（2026-11-08 TAKASHI「一旦友達はメリットなしでいい」）。
 // 招待コードはURLを開いた時に端末に覚え、鑑定し終えた時にサーバーへ送る。
 // LINEの「ブラウザで開く」でSafariへ移っても読めるよう、URLの ?ref= は消さない。
 
 const ENDPOINT = '/api/stripe/referral';
 const PENDING_KEY = 'hasu_ref_pending';
-const GIFT_KEY = 'hasu_ref_gift';
+const SENT_KEY = 'hasu_ref_sent'; // この端末から招待コードを送り終えた（コード欄をもう出さない）
 const VISITOR_KEY = 'hasu_visitor_id';
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
@@ -36,7 +37,7 @@ export const captureRefFromUrl = (search: string = window.location.search): stri
 };
 export const getPendingRef = () => cleanCode(read(PENDING_KEY));
 export const setPendingRef = (code: string) => write(PENDING_KEY, code);
-export const hasRefGift = () => read(GIFT_KEY) === '1';
+export const hasSentRef = () => read(SENT_KEY) === '1';
 
 const visitorId = () => {
   let id = read(VISITOR_KEY);
@@ -57,7 +58,7 @@ const token = async () => {
 
 /**
  * Tells the server that this browser finished a reading with this code.
- * ok → the friend's gift (the nearest day) opens on this device. The pending code is cleared either way,
+ * ok → remembered on this device so the code box is not shown again. The pending code is cleared either way,
  * except on a network error (it is tried again after the next reading).
  */
 export const completeRef = async (code: string, birth?: string): Promise<{ ok: boolean; message?: string }> => {
@@ -72,7 +73,7 @@ export const completeRef = async (code: string, birth?: string): Promise<{ ok: b
     if (res.status >= 500) return { ok: false, message: data.message || '通信に失敗しました。もう一度お試しください' };
     write(PENDING_KEY, null);
     if (data.ok === true) {
-      write(GIFT_KEY, '1');
+      write(SENT_KEY, '1');
       return { ok: true };
     }
     return { ok: false, message: data.message || '招待コードを確認できませんでした' };

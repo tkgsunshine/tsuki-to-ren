@@ -50,11 +50,16 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
   return (
     <div style={box}>
       <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 'bold', color: '#f5d77a' }}>
-        <Gift size={16} /> お友達に送ると、日付が見られる
+        <Gift size={16} /> お友達に送ると、続きが見られる
       </span>
       <p style={text}>
-        お友達1人が招待URLから占うと、恋愛運MAX日の日付が<strong>すべて</strong>、これからずっと見られます。お友達にも、いちばん近い1日をプレゼント。
+        お友達1人が招待URLから占うと、次の3つが<strong>これからずっと</strong>見られます。
       </p>
+      <ul style={{ ...text, paddingLeft: '1.2rem' }}>
+        <li>恋愛運MAX日の日付（すべて）</li>
+        <li>返信が遅いときの、おすすめの返し方</li>
+        <li>生まれ持った星から見た二人の相性（お相手を占ったとき）</li>
+      </ul>
       {!isRegistered ? (
         <button type="button" style={goldBtn} onClick={onRegister}>無料登録して、お友達に送る</button>
       ) : !open ? (
@@ -75,7 +80,7 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
           <p style={{ ...text, fontSize: '0.74rem' }}>
             {status && status.count > 0
               ? `${status.count}人のお友達が占ってくれました。`
-              : 'まだお友達の鑑定はありません。お友達が占い終わると、ここが開きます。'}
+              : 'まだお友達の鑑定はありません。'}
           </p>
         </>
       )}

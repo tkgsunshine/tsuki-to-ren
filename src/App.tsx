@@ -38,7 +38,7 @@ import { ToolCompatView } from './components/ToolCompatView';
 import { lpExitAnswered, trackCheckout, trackFortune, trackLpExit, trackPremiumView, trackRegStep } from './services/analytics';
 import { LpExitSurvey } from './components/LpExitSurvey';
 import { ReferralCodeEntry } from './components/ReferralInvite';
-import { captureRefFromUrl, completeRef, fetchMyReferral, getPendingRef, hasRefGift, setPendingRef as savePendingRef, type ReferralStatus } from './services/referral';
+import { captureRefFromUrl, completeRef, fetchMyReferral, getPendingRef, hasSentRef, setPendingRef as savePendingRef, type ReferralStatus } from './services/referral';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
@@ -1100,9 +1100,9 @@ function App() {
   const [pairUnlock, setPairUnlock] = useState<PairUnlock>(null);
 
   // 友達紹介（2026-11-08 TAKASHI、src/services/referral.ts）。招待URL（?ref=）で来た人は、鑑定し終えたらサーバーへ送る。
-  // 送った会員は、友達が1人占うと恋愛運MAX日がすべて開く。友達には、いちばん近い1日を見せる（この端末に覚える）
+  // 送った会員は、友達が1人占うと結果の一部が開く。友達側の特典はなし（2026-11-08 TAKASHI）
   const [pendingRef, setPendingRef] = useState<string | null>(() => captureRefFromUrl() || getPendingRef());
-  const [refGift, setRefGift] = useState(() => hasRefGift());
+  const [refSent, setRefSent] = useState(() => hasSentRef());
   const [referralStatus, setReferralStatus] = useState<ReferralStatus | null>(null);
   const [referralLoading, setReferralLoading] = useState(false);
   const loadReferral = useCallback(async () => {
@@ -1127,7 +1127,7 @@ function App() {
   const sendRef = async (code: string, birth: string): Promise<string | null> => {
     const r = await completeRef(code, birth);
     setPendingRef(getPendingRef());
-    if (r.ok) { setRefGift(true); return null; }
+    if (r.ok) { setRefSent(true); return null; }
     return r.message || '招待コードを確認できませんでした';
   };
   // Stripe の決済から戻ったとき（?pair=success|cancel）。Webhook が数秒遅れることがあるので、解放されるまで何度か読み直す
@@ -1561,7 +1561,7 @@ function App() {
     status: referralStatus,
     loading: referralLoading,
     unlocked: referralStatus?.unlocked === true,
-    gift: refGift,
+    showCodeEntry: !refSent,
     onOpen: () => { if (!referralStatus) void loadReferral(); },
     onRedeem: (code: string) => sendRef(code, myBirth)
   };
@@ -1650,9 +1650,9 @@ function App() {
                   afterSubmit={pendingRef ? (
                     // 友達紹介: 招待URLで来た人には一言、そうでなければ目立たない「招待コードをお持ちの方」
                     <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#f5d77a', lineHeight: 1.7, margin: 0 }}>
-                      🎁 お友達からの招待です。占い終わると、恋愛運MAX日のいちばん近い1日が見られます
+                      🌙 お友達からの招待です
                     </p>
-                  ) : !refGift ? (
+                  ) : !refSent ? (
                     <ReferralCodeEntry
                       onSubmit={async (code) => { savePendingRef(code); setPendingRef(code); return null; }}
                       doneText="招待コードを預かりました。このまま占うとお友達に届きます"
