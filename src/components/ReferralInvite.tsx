@@ -48,7 +48,7 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
   };
 
   return (
-    <div style={box}>
+    <div id="referral-invite" style={{ ...box, scrollMarginTop: '5rem' }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 'bold', color: '#f5d77a' }}>
         <Gift size={16} /> お友達も鑑定すると続きが見れます
       </span>

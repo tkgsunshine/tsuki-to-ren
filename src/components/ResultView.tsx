@@ -1013,6 +1013,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // 友達紹介で開く項目（2026-11-08 TAKASHI）: 返信が遅いときのおすすめの返し方・生まれ持った星から見た二人の相性（恋愛運MAX日は LuckyDaysSection）
   const referralOpen = !sharedBy && referral?.unlocked === true;
   const slowReplyOpen = deepOpen || referralOpen;
+  // 紹介で開く項目のロックの下に「お友達の紹介でも見られます」。押すと恋愛運MAX日の下の紹介の欄へ移動（欄は1か所だけ。2026-11-08 TAKASHI）
+  const showReferralHint = !sharedBy && Boolean(referral) && hasOpponent && !deepOpen && !referralOpen;
+  const referralHint = showReferralHint ? (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); document.getElementById('referral-invite')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}
+      style={{ display: 'block', margin: '0.45rem auto 0', background: 'none', border: 'none', color: '#f5d77a', fontSize: '0.74rem', textDecoration: 'underline', cursor: 'pointer', padding: '0.2rem' }}
+    >
+      🎁 お友達の紹介でも見られます
+    </button>
+  ) : null;
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
@@ -2468,6 +2479,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </div>
                 </div>
               )}
+              {!topicOpen && topic.title.includes('生まれ持った星から見た') && referralHint}
             </div>
 
             {/* Inline Registration Card after Topic 2 (index 1) */}
@@ -2748,6 +2760,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             )}
                 </div>
+                {!slowReplyOpen && referralHint}
               </div>
             </div>
 
