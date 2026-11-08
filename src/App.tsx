@@ -17,6 +17,7 @@ import { UnifiedInputView } from './components/UnifiedInputView';
 import { mbtiOptions } from './constants/mbti';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ResultView } from './components/ResultView';
+import { PartnerReplaceModal } from './components/PartnerReplaceModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult, san } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
@@ -1046,19 +1047,55 @@ function App() {
     return true;
   };
 
-  // Returns the saved partner, or undefined when nothing was saved
+  const partnerLimit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+  // 保存済みかどうか。名前が空のお相手は「お相手」で保存されるのでそれとも比べる。
+  // 買い切りで解放したお相手は生年月日で決まるので、生年月日が同じなら保存済み扱い
+  const isSamePartner = (p: SavedPartner, name: string, birth: string) =>
+    p.birth === birth && (p.name === name || p.name === (name || 'お相手') || Boolean(p.unlocked));
+  const currentPartnerSaved = savedPartners.some(p => isSamePartner(p, oppName, oppBirth));
+
+  // 上限に達しているときの「入れ替えて保存しますか？」。manual: 保存ボタンから開いたとき
+  const [replaceCandidate, setReplaceCandidate] = useState<{ partner: SavedPartner; manual: boolean } | null>(null);
+  // 「今回は保存しない」を選んだお相手には、自動では聞き直さない（保存ボタンからはいつでも保存できる）
+  const declinedAutoSaveRef = useRef<Set<string>>(new Set());
+
+  // 鑑定したお相手を自動で保存する。上限に達していたら入れ替えるかを聞く（聞くのは結果画面が出てから）
+  const autoSavePartner = (fields: Omit<SavedPartner, 'id'>) => {
+    const list = savedPartnersRef.current;
+    if (list.some(p => isSamePartner(p, fields.name, fields.birth))) return;
+    const newPartner: SavedPartner = { id: `${fields.name}_${fields.birth}_${Date.now()}`, ...fields };
+    if (list.filter((x) => !x.unlocked).length < partnerLimit) {
+      setSavedPartners([...list, newPartner]);
+      return;
+    }
+    if (declinedAutoSaveRef.current.has(`${fields.name}_${fields.birth}`)) return;
+    setReplaceCandidate({ partner: newPartner, manual: false });
+  };
+
+  const replaceSavedPartner = (removeId: string) => {
+    if (!replaceCandidate) return;
+    const { partner } = replaceCandidate;
+    setSavedPartners([...savedPartners.filter(p => p.id !== removeId), partner]);
+    if (loadedPartner && loadedPartner.id === removeId) setLoadedPartner(null);
+    setReplaceCandidate(null);
+    if (replaceCandidate.manual && isChatOpen && chatTarget === 'pick') setChatTarget(partner);
+  };
+
+  const skipReplacePartner = () => {
+    if (replaceCandidate) declinedAutoSaveRef.current.add(`${replaceCandidate.partner.name}_${replaceCandidate.partner.birth}`);
+    setReplaceCandidate(null);
+  };
+
+  // Returns the saved partner, or undefined when nothing was saved (or the replace prompt was opened)
   const handleSavePartner = (): SavedPartner | undefined => {
     if (!oppBirth) {
       showAlert('保存するお相手の情報がありません。');
       return;
     }
-    const exists = savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
-    if (exists) {
+    if (currentPartnerSaved) {
       showAlert('このお相手は既に保存されています。');
       return;
     }
-    if (!canAddPartner()) return;
-
     const newPartner: SavedPartner = {
       id: `${oppName}_${oppBirth}_${Date.now()}`,
       name: oppName || 'お相手',
@@ -1067,6 +1104,11 @@ function App() {
       gender: oppGender,
       relationship: relationship
     };
+    // 上限なら、どのお相手と入れ替えるかを選んでもらう
+    if (savedPartners.filter((x) => !x.unlocked).length >= partnerLimit) {
+      setReplaceCandidate({ partner: newPartner, manual: true });
+      return;
+    }
 
     setSavedPartners([...savedPartners, newPartner]);
     showAlert(`${san(newPartner.name)}の情報を保存しました。`);
@@ -1252,6 +1294,15 @@ function App() {
     setMode(data.mode);
     pushProfile(); // the input form has just saved the profile on this device
     trackFortune();
+    if (data.mode === 'match' && data.oppBirth) {
+      autoSavePartner({
+        name: data.oppName || 'お相手',
+        birth: data.oppBirth,
+        mbti: data.oppMbti,
+        gender: data.oppGender,
+        relationship: data.relationship
+      });
+    }
 
     startDiagnosis(
       data.myName,
@@ -1529,8 +1580,7 @@ function App() {
     : chatTarget === 'self' ? 'self'
     : chatTarget !== null ? `p:${chatTarget.birth}:${chatTarget.name}`
     : (mode === 'match' && oppBirth ? `p:${oppBirth}:${oppName}` : 'self');
-  const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
-    && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
+  const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth && !currentPartnerSaved;
 
   // 初めて鑑定する人（未登録で、まだ鑑定結果が無い人）の診断（入力）画面では、下メニューを雑音として出さない（TAKASHI判断 2026-11-08）。
   // 無料会員・プレミアム会員と、一度鑑定した人は従来どおり出す。共有リンクの結果表示・読み込み中・鑑定結果でも出す
@@ -1646,7 +1696,7 @@ function App() {
                 hasOpponent={mode === 'match'}
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
-                isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                isPartnerSaved={currentPartnerSaved}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -1685,7 +1735,7 @@ function App() {
                 hasOpponent={mode === 'match'}
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
-                isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
+                isPartnerSaved={currentPartnerSaved}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -3286,6 +3336,25 @@ function App() {
               handleTabChange('home');
             }
           } : undefined}
+        />
+      )}
+
+      {/* 鑑定したお相手の自動保存で上限に達したとき: 入れ替えて保存するか（自動のときは、結果画面で解放の確認が済んでから） */}
+      {replaceCandidate && !savedPartners.some(p => isSamePartner(p, replaceCandidate.partner.name, replaceCandidate.partner.birth))
+        && (replaceCandidate.manual || (flowStep === 'result' && partnerLock?.status !== 'checking' && !pairUnlock?.unlocked)) && (
+        <PartnerReplaceModal
+          candidate={replaceCandidate.partner}
+          partners={savedPartners.filter((x) => !x.unlocked)}
+          limit={partnerLimit}
+          isRegistered={isRegistered}
+          isSubscribed={isSubscribed}
+          onReplace={replaceSavedPartner}
+          onSkip={skipReplacePartner}
+          onUpgrade={() => {
+            skipReplacePartner();
+            if (!isRegistered) openSubView('profile');
+            else openPremiumLP('monthly');
+          }}
         />
       )}
 
