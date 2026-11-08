@@ -423,8 +423,10 @@ function App() {
     setPremiumLPFocus(focus);
     setShowPremiumLP(true);
   };
-  // 毎朝メールの「プレミアムの詳細を見る」（?lp=m）: 鑑定結果を出したあとに、月額プランの案内を開く
-  const pendingLPRef = useRef<'monthly' | null>(null);
+  // 毎朝メールのリンク（?lp=m 月額 / ?lp=p 買い切り）: 鑑定結果を出したあとに、そのプランを先に見せる案内を開く
+  const pendingLPRef = useRef<'pair' | 'monthly' | null>(null);
+  // 次に開く案内がメールのリンクからか（管理画面で「メールから」を分けて数える）
+  const lpFromMailRef = useRef(false);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news'>(initialRoute.settingsSubView);
@@ -642,8 +644,9 @@ function App() {
     }
 
     if (mName && mBirth && mMbti && mGender) {
-      if (params.get('lp') === 'm') {
-        pendingLPRef.current = 'monthly';
+      const lp = params.get('lp');
+      if (lp === 'm' || lp === 'p') {
+        pendingLPRef.current = lp === 'p' ? 'pair' : 'monthly';
         // 読み込み直しや「戻る」で何度も開かないよう、URLから外す
         params.delete('lp');
         const qs = params.toString();
@@ -1349,6 +1352,7 @@ function App() {
       }
       scrollMainTo(0);
       if (pendingLPRef.current) {
+        lpFromMailRef.current = true;
         openPremiumLP(pendingLPRef.current);
         pendingLPRef.current = null;
       }
@@ -1405,7 +1409,10 @@ function App() {
 
   // 有料プランの案内を開いた回数（管理画面の集計用）。買い切りで解放できるロックから開いたか（pair）、月額側か（monthly）も送る
   useEffect(() => {
-    if (showPremiumLP) trackPremiumView(premiumLPFocus);
+    if (showPremiumLP) {
+      trackPremiumView(premiumLPFocus, lpFromMailRef.current);
+      lpFromMailRef.current = false;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPremiumLP]);
 
