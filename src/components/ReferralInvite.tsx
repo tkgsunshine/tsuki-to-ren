@@ -77,11 +77,6 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
             <button type="button" style={ghostBtn} onClick={copy}>{copied ? 'コピーしました' : 'リンクをコピー'}</button>
           </div>
           <p style={{ ...text, fontSize: '0.72rem', color: '#bfb8a8', wordBreak: 'break-all' }}>{inviteUrl(code)}</p>
-          <p style={{ ...text, fontSize: '0.74rem' }}>
-            {status && status.count > 0
-              ? `${status.count}人のお友達が占ってくれました。`
-              : 'まだお友達の鑑定はありません。'}
-          </p>
         </>
       )}
     </div>
