@@ -291,7 +291,7 @@ export const RegisterMosaicText: React.FC<{
         </span>
         <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
           <span className="premium-lock-tag" style={{ pointerEvents: 'auto' }}>
-            <Lock size={11} /> {buttonLabel}
+            {buttonLabel}
           </span>
         </span>
       </span>
@@ -2410,7 +2410,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
                       <button className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); if (premiumOnly) handleDeepLockClick(e); else handleScrollToRegister(); }}>
-                        <Lock size={11} /> {deepLockWord}
+                        {deepLockWord}
                       </button>
                     </div>
                   </div>
@@ -2643,7 +2643,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2690,7 +2690,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2733,7 +2733,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2762,7 +2762,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                            {LOCK_WORD}
                           </button>
                         </div>
                       )}
@@ -2806,7 +2806,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2857,7 +2857,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2906,7 +2906,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                            {LOCK_WORD}
                           </button>
                         </div>
                       )}
@@ -2951,7 +2951,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}

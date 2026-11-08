@@ -1,5 +1,4 @@
 import React from 'react';
-import { Lock } from 'lucide-react';
 import { getSelfReading } from '../utils/selfReading';
 import { san } from '../utils/fortuneEngine';
 
@@ -110,7 +109,7 @@ const OpponentReadingCard: React.FC<{
           </div>
           <div className="premium-lock-overlay">
             <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); onUnlock?.(); }}>
-              <Lock size={11} /> 続きを見る
+              続きを見る
             </button>
           </div>
         </div>
