@@ -1602,8 +1602,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
               </div>}
 
-              {/* 今日の流れ: 枠で囲まず、光る天気アイコン＋グラデーション文字で見せる */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', marginTop: '0.1rem' }}>
+              {/* 今日の流れ: 枠で囲まず、光る天気アイコン＋グラデーション文字で見せる。
+                  見られない日は出さない（本当の点数から決まるので、良し悪しがわかってしまう。2026-11-09 TAKASHI） */}
+              {!dailyHidden && <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', marginTop: '0.1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', width: '100%' }}>
                   <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226,192,116,0.5))' }} />
                   <MoonPhaseMark size={34} phase={mood.phase} />
@@ -1621,12 +1622,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 }}>
                   {mood.title}
                 </div>
-                {!dailyHidden && (
                 <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
                   {baseLabel}より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
                 </div>
-                )}
-              </div>
+              </div>}
 
               {/* 同じお相手の「今日の相性」: 無料の残り日数、使い切った日はプレミアム（ログインなしは無料登録）へ */}
               {partnerLock?.status === 'free' && (
