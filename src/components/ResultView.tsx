@@ -32,6 +32,7 @@ import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
 import { SelfReadingCard } from './SelfReadingCard';
 import { LuckyDaysSection } from './LuckyDaysSection';
+import { LockLabel, countChars, clampLines } from './LockRest';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -260,20 +261,23 @@ const lockedText = (text: string | undefined, locked: boolean): string => {
   const n = Math.max(24, (text ?? '').length);
   return LOCKED_FILLER.repeat(Math.ceil(n / LOCKED_FILLER.length)).slice(0, n);
 };
-// 会員登録で開く文: 冒頭の visibleLines 行（画面の見た目の行数）だけ本物を見せ、4行目以降はダミー文にしてぼかす。
+// 会員登録で開く文: 冒頭の visibleLines 行（画面の見た目の行数）だけ本物を見せ、続きはダミー文にしてぼかす。
+// ぼかしは blurLines 行ぶんだけ（結果画面が縦に長くなりすぎないよう、残りの量はボタンの「約〇文字」で伝える）。
 // 本物の文は冒頭の数行ぶん（headChars 文字）しか画面に渡さない。押すと onUnlock（登録の箱へ移動など）。
 // 親の文字サイズ・行の高さをそのまま使う（lineHeight は行数の計算用）。
+// スマホ幅で1行あたりの目安の文字数（「約〇文字」の計算用。見えている冒頭を引く）
+const CHARS_PER_LINE = 22;
 export const RegisterMosaicText: React.FC<{
   text: string;
   onUnlock: () => void;
   visibleLines?: number;
   lineHeight?: number;
   headChars?: number;
-  buttonLabel?: string;
-  maxRestChars?: number;
-}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = LOCK_WORD, maxRestChars = Infinity }) => {
-  // ぼかす部分の長さ（長い文でも maxRestChars までに抑えて、ぼかしの箱が縦に長くなりすぎないようにする）
-  const restLength = Math.min(maxRestChars, Math.max(60, text.length - Math.min(text.length, headChars)));
+  buttonLabel?: React.ReactNode;
+  blurLines?: number;
+}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = LOCK_WORD, blurLines = 2 }) => {
+  const shownChars = Math.min(headChars, visibleLines * CHARS_PER_LINE);
+  const restChars = Math.max(0, countChars(text) - countChars(text.slice(0, shownChars)));
   return (
     <span style={{ display: 'block' }}>
       <span style={{ display: 'block', maxHeight: `${visibleLines * lineHeight}em`, overflow: 'hidden', lineHeight }}>
@@ -286,12 +290,12 @@ export const RegisterMosaicText: React.FC<{
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onUnlock(); } }}
         style={{ display: 'block', position: 'relative', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden' }}
       >
-        <span aria-hidden="true" style={{ display: 'block', filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65, lineHeight }}>
-          {lockedText(' '.repeat(restLength), true)}
+        <span aria-hidden="true" style={{ display: 'block', filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.65, lineHeight, ...clampLines(blurLines, lineHeight) }}>
+          {lockedText(' '.repeat(blurLines * CHARS_PER_LINE + 10), true)}
         </span>
         <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
           <span className="premium-lock-tag" style={{ pointerEvents: 'auto' }}>
-            {buttonLabel}
+            <LockLabel word={buttonLabel} chars={restChars} />
           </span>
         </span>
       </span>
@@ -2188,10 +2192,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
               // 「本日のアプローチ助言」の見せ方（未登録・無料会員とも約5行）。お相手の鑑定自体が隠れているときは見せない。
               const adviceTeaser = locked && !dailyHidden && parts.length > 1;
               const lockAt = tips ? tips.items.findIndex(it => it.label.startsWith('💡')) : -1;
+              // ぼかす部分は数行に縮め、隠れている文字数をボタンに出す（結果画面が縦に長くなりすぎないように）
+              const previewChars = (text: string | undefined) => (preview ? countChars(splitTeaser(text).head) : 0);
+              const adviceRestChars = adviceTeaser
+                ? Math.max(0, countChars(parts[1]) - countChars(splitAdvicePreview(parts[1]).head)) + countChars(...parts.slice(2))
+                : parts.slice(1).reduce((sum, p, i) => sum + countChars(p) - (preview && i === 0 ? previewChars(p) : 0), 0);
+              const tipsRestChars = tips
+                ? countChars(tips.intro) - previewChars(tips.intro)
+                  + tips.items.filter(it => !it.label.startsWith('📱')).reduce((sum, it) => sum + countChars(it.text) - previewChars(it.text), 0)
+                : 0;
+              // 「二人のLINEのコツ」の本文は、ぼかすときは1行（ボタンを重ねる項目は2行、無料会員は冒頭が見えるので3行）まで
+              const tipClamp: React.CSSProperties = locked ? clampLines(preview ? 3 : 1, 1.65) : {};
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
                   <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} data-paid-lock onClick={handleLockTagClick}>
-                    {LOCK_WORD}
+                    <LockLabel word={LOCK_WORD} chars={tipsRestChars} />
                   </button>
                 </div>
               );
@@ -2204,7 +2219,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {adviceTeaser && (() => {
                     const { head, restLength } = splitAdvicePreview(parts[1]);
                     return (
-                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', marginTop: '0.35rem' }}>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', marginTop: '0.35rem', ...clampLines(3, 1.65) }}>
                         {head}
                         {restLength > 0 && (
                           <span
@@ -2217,7 +2232,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   })()}
                   {adviceTeaser && parts.length > 2 && (
                     <div
-                      style={{ position: 'relative', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: 'pointer' }}
+                      style={{ position: 'relative', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: 'pointer', ...clampLines(2, 1.65) }}
                       onClick={handleLockTagClick}
                     >
                       {parts.slice(2).map((p, i) => (
@@ -2225,7 +2240,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       ))}
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <button type="button" className="premium-lock-tag" data-paid-lock onClick={handleLockTagClick}>
-                          {LOCK_WORD}
+                          <LockLabel word={LOCK_WORD} chars={adviceRestChars} />
                         </button>
                       </div>
                     </div>
@@ -2233,13 +2248,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {adviceTeaser && parts.length === 2 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
                       <button type="button" className="premium-lock-tag" data-paid-lock onClick={handleLockTagClick}>
-                        {LOCK_WORD}
+                        <LockLabel word={LOCK_WORD} chars={adviceRestChars} />
                       </button>
                     </div>
                   )}
                   {!adviceTeaser && parts.length > 1 && (
                     <div
-                      style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined }}
+                      style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined, ...(locked ? clampLines(preview ? 4 : 2, 1.65) : {}) }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       {parts.slice(1).map((p, i) => (
@@ -2247,11 +2262,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           ? <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65' }}>{lockedBody(p)}</div>
                           : <div key={i} style={{ color: '#e8e3d8', lineHeight: '1.65', ...blurred }}>{lockedText(p, locked)}</div>
                       ))}
-                      {preview && lockButton}
-                      {locked && !preview && (
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <button type="button" className="premium-lock-tag" data-paid-lock onClick={handleLockTagClick}>
-                            {LOCK_WORD}
+                      {locked && (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: preview ? 'none' : undefined }}>
+                          <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} data-paid-lock onClick={handleLockTagClick}>
+                            <LockLabel word={LOCK_WORD} chars={adviceRestChars} />
                           </button>
                         </div>
                       )}
@@ -2263,7 +2277,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       <div style={{ color: '#f2e2b3', fontWeight: 'bold' }}>💬 {san(oppNickname)}とのLINEのコツ</div>
-                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...(preview ? {} : blurred) }}>{lockedBody(tips.intro)}</div>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', ...(preview ? {} : blurred), ...tipClamp }}>{lockedBody(tips.intro)}</div>
                       {tips.items.map((it, i) => (
                         <div key={i} style={{ lineHeight: '1.65' }}>
                           <div style={{ color: '#a8d3b0', fontWeight: 'bold' }}>{it.label}</div>
@@ -2271,7 +2285,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             {/* 「お相手のLINEのくせ」は無料（未登録・無料会員とも）で全文を見せる。他の項目はこれまでどおり。 */}
                             {it.label.startsWith('📱')
                               ? <div style={{ color: '#e8e3d8' }}>{it.text}</div>
-                              : <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred) }}>{lockedBody(it.text)}</div>}
+                              : <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred), ...(locked && i === lockAt && !preview ? clampLines(2, 1.65) : tipClamp) }}>{lockedBody(it.text)}</div>}
                             {locked && i === lockAt && lockButton}
                           </div>
                         </div>
@@ -2401,7 +2415,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     visibleLines={topic.title.includes('チャンスの日') ? 0 : 3}
                     headChars={topic.title.includes('チャンスの日') ? 0 : 120}
                     buttonLabel={deepLockWord}
-                    maxRestChars={160}
                     onUnlock={premiumOnly ? () => handleDeepLockClick() : handleReadingLockClick}
                   />
                 </p>
@@ -2410,15 +2423,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                     {formatAppraisalText(topic.intro)}
                   </p>
-                  <div className="premium-blur-container" style={{ maxHeight: "150px", cursor: "pointer", borderRadius: '8px' }} onClick={premiumOnly ? handleDeepLockClick : () => handleScrollToRegister()}>
-                    <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
-                      {lockedText(`${topic.detail} ${topic.detail}`, true)}
+                  {/* ぼかしは2行ぶんだけ。残りの量はボタンの「約〇文字」で伝える */}
+                  <div className="premium-blur-container" style={{ minHeight: 0, cursor: "pointer", borderRadius: '8px' }} onClick={premiumOnly ? handleDeepLockClick : () => handleScrollToRegister()}>
+                    <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap", display: 'block', ...clampLines(2, 1.85) }}>
+                      {lockedText(' '.repeat(60), true)}
                     </p>
                     
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
                       <button className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); if (premiumOnly) handleDeepLockClick(e); else handleScrollToRegister(); }}>
-                        {deepLockWord}
+                        <LockLabel word={deepLockWord} chars={countChars(topic.detail)} />
                       </button>
                     </div>
                   </div>
@@ -2626,7 +2640,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 lineHeight: '1.75',
                 filter: !deepOpen ? 'blur(4.5px)' : 'none',
                 userSelect: !deepOpen ? 'none' : 'auto',
-                opacity: !deepOpen ? 0.6 : 1
+                opacity: !deepOpen ? 0.6 : 1,
+                ...(!deepOpen ? clampLines(2, 1.75) : {})
               }}>
                 {activeResult.opponentTorisetsu.ngBehaviors.slice(1).map((ng, idx) => (
                   <li key={idx} style={{ marginBottom: '0.2rem' }}>
@@ -2651,7 +2666,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  {deepLockWord}
+                  <LockLabel word={deepLockWord} chars={countChars(...activeResult.opponentTorisetsu.ngBehaviors.slice(1))} />
                 </button>
               </div>
             )}
@@ -2698,7 +2713,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  {deepLockWord}
+                  <LockLabel word={deepLockWord} chars={countChars(activeResult.opponentTorisetsu.slowReplyAction)} />
                 </button>
               </div>
             )}
@@ -2721,7 +2736,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 gap: '0.3rem'
               }}>
                 <div><strong>Lv.1 (初期):</strong> {activeResult.opponentTorisetsu.greenFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
-                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem', ...(!deepOpen ? clampLines(2, 1.8) : {}) }}>
                   <div style={{ filter: !deepOpen ? 'blur(4.5px)' : 'none', opacity: !deepOpen ? 0.65 : 1 }}><strong>Lv.2 (本気):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel2 || '好みや過去の言動を細かく覚えていて会話に出す').replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</div>
                   <div style={{ filter: !deepOpen ? 'blur(4.5px)' : 'none', opacity: !deepOpen ? 0.65 : 1 }}><strong>Lv.3 (大好き):</strong> {lockedText((activeResult.opponentTorisetsu.greenFlagLevel3 || '二人きりの特別な場所へ積極的に誘ってくる').replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</div>
                   {!deepOpen && (
@@ -2741,7 +2756,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  {deepLockWord}
+                  <LockLabel word={deepLockWord} chars={countChars(activeResult.opponentTorisetsu.greenFlagLevel2, activeResult.opponentTorisetsu.greenFlagLevel3)} />
                 </button>
               </div>
             )}
@@ -2764,13 +2779,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </ul>
                   {gs.length > 1 && (
                     <div style={{ position: 'relative' }}>
-                      <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 }}>
+                      <ul className="font-serif" style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.78rem', color: '#fdeef3', lineHeight: '1.8', filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1, ...(locked ? clampLines(2, 1.8) : {}) }}>
                         {gs.slice(1).map((g, i) => <li key={i}>{lockedText(g, locked)}</li>)}
                       </ul>
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            {LOCK_WORD}
+                            <LockLabel word={LOCK_WORD} chars={countChars(...gs.slice(1))} />
                           </button>
                         </div>
                       )}
@@ -2796,7 +2811,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               }}>
                 <div><strong>【危険サイン】</strong> {activeResult.opponentTorisetsu.redFlagSign?.replace(/〇〇/g, oppNickname || 'お相手')}</div>
                 <div style={{ position: 'relative' }}>
-                  <div style={{ filter: !deepOpen ? 'blur(4.5px)' : 'none', opacity: !deepOpen ? 0.65 : 1 }}><strong>【立て直し方】</strong> {lockedText((activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</div>
+                  <div style={{ filter: !deepOpen ? 'blur(4.5px)' : 'none', opacity: !deepOpen ? 0.65 : 1, ...(!deepOpen ? clampLines(2, 1.8) : {}) }}><strong>【立て直し方】</strong> {lockedText((activeResult.opponentTorisetsu.redFlagRecovery || '追わずに間を置き、明るく軽やかな話題で再アプローチ').replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}</div>
                   {!deepOpen && (
               <div style={{
                 position: 'absolute',
@@ -2814,7 +2829,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  {deepLockWord}
+                  <LockLabel word={deepLockWord} chars={countChars(activeResult.opponentTorisetsu.redFlagRecovery)} />
                 </button>
               </div>
             )}
@@ -2865,7 +2880,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  {deepLockWord}
+                  <LockLabel word={deepLockWord} chars={countChars(activeResult.opponentTorisetsu.idealDateSpot)} />
                 </button>
               </div>
             )}
@@ -2897,7 +2912,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {at.styleTag && <span style={{ display: 'inline-block', margin: '0 0.35rem 0.15rem 0', padding: '0.05rem 0.6rem', borderRadius: '999px', background: 'rgba(226, 139, 170, 0.22)', border: '1px solid rgba(246, 198, 216, 0.55)', color: '#fff', fontWeight: 'bold', fontSize: '0.86rem' }}>{at.styleTag}</span>}
                       {!at.styleTag && at.styleName}
                     </div>
-                    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem', ...(locked ? clampLines(3, 1.8) : {}) }}>
                       <div style={lockStyle}>
                         <span style={label}>【好きな色】</span>{vis && !locked ? null : lockedText(at.colors, locked)}
                         {vis && !locked && <ColorSwatches hexes={vis.swatches} names={at.colors} />}
@@ -2914,7 +2929,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            {LOCK_WORD}
+                            <LockLabel word={LOCK_WORD} chars={countChars(at.colors, at.outfit, at.mbtiTip, at.ngStyle)} />
                           </button>
                         </div>
                       )}
@@ -2938,7 +2953,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   lineHeight: '1.8',
                   filter: !deepOpen ? 'blur(4.5px)' : 'none',
                   userSelect: !deepOpen ? 'none' : 'auto',
-                  opacity: !deepOpen ? 0.65 : 1
+                  opacity: !deepOpen ? 0.65 : 1,
+                  ...(!deepOpen ? clampLines(2, 1.8) : {})
                 }}>
                   {lockedText(activeResult.opponentTorisetsu.approachTip?.replace(/〇〇/g, oppNickname || 'お相手'), !deepOpen)}
                 </p>
@@ -2959,7 +2975,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  {deepLockWord}
+                  <LockLabel word={deepLockWord} chars={countChars(activeResult.opponentTorisetsu.approachTip)} />
                 </button>
               </div>
             )}
@@ -3249,7 +3265,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         letterSpacing: '0.03em',
                         filter: isSubscribed ? 'none' : 'blur(4.5px)',
                         userSelect: isSubscribed ? 'auto' : 'none',
-                        pointerEvents: isSubscribed ? 'auto' : 'none'
+                        pointerEvents: isSubscribed ? 'auto' : 'none',
+                        ...(isSubscribed ? {} : clampLines(2, 1.6))
                       }}>
                         {lockedText(m.text, !isSubscribed)}
                       </p>
@@ -3260,7 +3277,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" data-paid-lock 
                             onClick={handleLockTagClick}
                           >
-                            {LOCK_WORD}
+                            <LockLabel word={LOCK_WORD} chars={countChars(m.text)} />
                           </button>
                         </div>
                       )}
@@ -3335,7 +3352,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         letterSpacing: '0.03em',
                         filter: isSubscribed ? 'none' : 'blur(4.5px)',
                         userSelect: isSubscribed ? 'auto' : 'none',
-                        pointerEvents: isSubscribed ? 'auto' : 'none'
+                        pointerEvents: isSubscribed ? 'auto' : 'none',
+                        ...(isSubscribed ? {} : clampLines(2, 1.6))
                       }}>
                         {lockedText(y.text, !isSubscribed)}
                       </p>
@@ -3346,7 +3364,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             className="premium-lock-tag" data-paid-lock 
                             onClick={handleLockTagClick}
                           >
-                            {LOCK_WORD}
+                            <LockLabel word={LOCK_WORD} chars={countChars(y.text)} />
                           </button>
                         </div>
                       )}

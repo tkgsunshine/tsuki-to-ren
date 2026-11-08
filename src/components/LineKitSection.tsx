@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { LoveLetterMark } from './icons/BrandIcons';
 import type { LineKit } from '../utils/lineKit';
+import { LockLabel, countChars, clampLines } from './LockRest';
 
 // トリセツの「そのまま使えるLINEキラーテンプレート」。
 // 誰でも読めるのは、送り方の分析の1行目と、場面別の最初の1通だけ。残りはプレミアム限定でぼかす。
@@ -45,11 +46,18 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
     }
   };
 
+  const [firstStyle, ...restStyle] = kit.style;
+  const [firstScene, ...restScenes] = kit.scenes;
+  // ぼかす部分は約4行ぶんに縮め、隠れている文字数をボタンに出す（結果画面が縦に長くなりすぎないように）
+  const restChars = countChars(
+    ...restScenes.flatMap(sc => [sc.label, sc.message, sc.why]),
+    ...restStyle.flatMap(st => [st.label, st.text]),
+    ...kit.fixes.flatMap(f => [f.ng, f.ok, f.why])
+  );
   const lockButton = (
-    // ぼかす部分は縦に長いので、ボタンは中央ではなく上のほう（すぐ目に入る位置）に置く
-    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '3.2rem', pointerEvents: 'none', zIndex: 10 }}>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 10 }}>
       <button type="button" className="premium-lock-tag" style={{ pointerEvents: 'auto' }} onClick={onLockClick}>
-        {lockWord}
+        <LockLabel word={lockWord} chars={restChars} />
       </button>
     </div>
   );
@@ -79,9 +87,6 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
     </div>
   );
 
-  const [firstStyle, ...restStyle] = kit.style;
-  const [firstScene, ...restScenes] = kit.scenes;
-
   return (
     <div style={{ background: 'rgba(159, 134, 192, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(159, 134, 192, 0.2)', position: 'relative' }}>
       <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#b9a3d6', marginBottom: '0.15rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -103,7 +108,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
 
         {/* ここから下はプレミアム限定 */}
         <div
-          style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.6rem', cursor: locked ? 'pointer' : undefined }}
+          style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.6rem', cursor: locked ? 'pointer' : undefined, ...(locked ? clampLines(4, 1.65) : {}) }}
           onClick={locked ? onLockClick : undefined}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', ...blurred }}>
