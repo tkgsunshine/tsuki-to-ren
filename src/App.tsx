@@ -1499,6 +1499,9 @@ function App() {
   const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
     && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
 
+  // 診断（入力）画面では下メニューを出さない（TAKASHI判断 2026-11-08）。共有リンクの結果表示・読み込み中・鑑定結果では出す
+  const hideNavbar = activeTab === 'home' && !sharedView && !sharedTeaser && flowStep === 'input';
+
   return (
     <div className={`app-container${activeTab === 'home' && flowStep !== 'result' ? ' bg-cosmos' : ''}`} style={{
       '--color-theme': selectedCharacter === 'tsuki' ? '#cdbfe2' : '#9cc6d8',
@@ -1523,7 +1526,7 @@ function App() {
         transition: 'all 1.0s cubic-bezier(0.25, 0.8, 0.25, 1)'
       }} />
       {/* Scrollable Main Area */}
-      <main className="main-content no-scrollbar">
+      <main className={`main-content no-scrollbar${hideNavbar ? ' no-navbar' : ''}`}>
         
         {/* 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。「あなたも無料で鑑定する」で自分の入力画面へ */}
         {activeTab === 'home' && sharedView?.status === 'loading' && <LoadingScreen />}
@@ -3593,8 +3596,8 @@ function App() {
         onClose={() => setShowInstallGuideModal(false)}
       />
 
-      {/* Global Bottom Navbar (Always visible on top of all pages) */}
-      <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />
+      {/* Global Bottom Navbar（診断の入力画面だけは出さない） */}
+      {!hideNavbar && <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />}
     </div>
   );
 }
