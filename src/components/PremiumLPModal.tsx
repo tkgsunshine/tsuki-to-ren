@@ -366,6 +366,72 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
 
+  // 上（2プランの比べ方）と下（画面下に固定）で同じボタンを出す。下では「解放済み」は出さない
+  const renderPlanButtons = (showUnlocked: boolean) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+      {(pair ? (['monthly', 'pair'] as const) : (['monthly'] as const)).map((kind) =>
+        kind === 'monthly' ? (
+          <button
+            key="monthly"
+            type="button"
+            disabled={isProcessing}
+            onClick={handleSubscribeAction}
+            style={{
+              width: '100%',
+              padding: '0.8rem 1rem',
+              background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
+              color: '#000',
+              border: 'none',
+              borderRadius: '9999px',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              letterSpacing: '0.03em',
+              boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+              cursor: 'pointer'
+            }}
+          >
+            {isProcessing ? '決済画面へ移動しています...' : '誰でも無制限に鑑定を見る（980円/月）'}
+          </button>
+        ) : pair!.unlocked ? (
+          !showUnlocked ? null : <div key="pair" style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            padding: '0.75rem 1rem',
+            borderRadius: '9999px',
+            border: '1px solid rgba(111, 176, 143, 0.5)',
+            background: 'rgba(111, 176, 143, 0.08)',
+            color: '#8ecaa5',
+            fontSize: '0.82rem',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            ✓ {pair!.name}の鑑定は解放済みです
+          </div>
+        ) : (
+          <button
+            key="pair"
+            type="button"
+            disabled={isProcessing}
+            onClick={handlePairAction}
+            style={{
+              width: '100%',
+              padding: '0.8rem 1rem',
+              borderRadius: '9999px',
+              border: '1.5px solid rgba(226, 192, 116, 0.6)',
+              background: 'rgba(226, 192, 116, 0.07)',
+              color: '#f2e2b3',
+              fontSize: '0.88rem',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（680円/買い切り）`}
+          </button>
+        )
+      )}
+    </div>
+  );
+
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
   const priceCardLabel = !isSubscribed
     ? 'すべての続きを見る'
@@ -648,68 +714,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   どちらも会員登録なしで購入できます。
                 </CharBubble>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-                {(['monthly', 'pair'] as const).map((kind) =>
-                  kind === 'monthly' ? (
-                    <button
-                      key="monthly"
-                      type="button"
-                      disabled={isProcessing}
-                      onClick={handleSubscribeAction}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
-                        color: '#000',
-                        border: 'none',
-                        borderRadius: '9999px',
-                        fontSize: '0.9rem',
-                        fontWeight: 800,
-                        letterSpacing: '0.03em',
-                        boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {isProcessing ? '決済画面へ移動しています...' : '誰でも無制限に鑑定を見る（980円/月）'}
-                    </button>
-                  ) : pair.unlocked ? (
-                    <div key="pair" style={{
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '9999px',
-                      border: '1px solid rgba(111, 176, 143, 0.5)',
-                      background: 'rgba(111, 176, 143, 0.08)',
-                      color: '#8ecaa5',
-                      fontSize: '0.82rem',
-                      fontWeight: 'bold',
-                      textAlign: 'center'
-                    }}>
-                      ✓ {pair.name}の鑑定は解放済みです
-                    </div>
-                  ) : (
-                    <button
-                      key="pair"
-                      type="button"
-                      disabled={isProcessing}
-                      onClick={handlePairAction}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        borderRadius: '9999px',
-                        border: '1.5px solid rgba(226, 192, 116, 0.6)',
-                        background: 'rgba(226, 192, 116, 0.07)',
-                        color: '#f2e2b3',
-                        fontSize: '0.88rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（680円/買い切り）`}
-                    </button>
-                  )
-                )}
-              </div>
+              {renderPlanButtons(true)}
               <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
                 ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります。
               </p>
@@ -1046,60 +1051,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              className="consult-btn"
-              disabled={isProcessing}
-              onClick={handleSubscribeAction}
-              style={{
-                width: '100%',
-                padding: '0.85rem 1.25rem',
-                fontSize: '0.98rem',
-                fontWeight: '800',
-                letterSpacing: '0.03em',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.45rem',
-                background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
-                color: '#000000',
-                border: 'none',
-                borderRadius: '9999px',
-                boxShadow: '0 6px 20px rgba(217, 164, 65, 0.55)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              {isProcessing ? (
-                <span>決済画面へ移動しています...</span>
-              ) : (
-                <>
-                  <Moon size={18} style={{ fill: 'currentColor' }} />
-                  <span>月額980円ではじめる</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          )}
-          {!isSubscribed && pair && !pair.unlocked && (
-            <button
-              type="button"
-              disabled={isProcessing}
-              onClick={handlePairAction}
-              style={{
-                width: '100%',
-                marginTop: '0.5rem',
-                background: 'none',
-                border: 'none',
-                color: '#d8d2c6',
-                fontSize: '0.74rem',
-                textDecoration: 'underline',
-                cursor: 'pointer',
-                padding: '0.1rem'
-              }}
-            >
-              {pairWho}だけ 買い切り680円で続きを見る
-            </button>
+            renderPlanButtons(false)
           )}
         </div>
         )}
