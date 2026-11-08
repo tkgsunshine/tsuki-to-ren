@@ -32,7 +32,7 @@ import { buildLineKit } from '../utils/lineKit';
 import { LineKitSection } from './LineKitSection';
 import { SelfReadingCard } from './SelfReadingCard';
 import { LuckyDaysSection } from './LuckyDaysSection';
-import { LockLabel, countChars, clampLines } from './LockRest';
+import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -262,7 +262,7 @@ const lockedText = (text: string | undefined, locked: boolean): string => {
   return LOCKED_FILLER.repeat(Math.ceil(n / LOCKED_FILLER.length)).slice(0, n);
 };
 // 会員登録で開く文: 冒頭の visibleLines 行（画面の見た目の行数）だけ本物を見せ、続きはダミー文にしてぼかす。
-// ぼかしは blurLines 行ぶんだけ（結果画面が縦に長くなりすぎないよう、残りの量はボタンの「約〇文字」で伝える）。
+// ぼかしは2〜4行（隠れている文字数に合わせる。blurLinesFor）。残りの量はボタンの「約〇文字」で伝える。
 // 本物の文は冒頭の数行ぶん（headChars 文字）しか画面に渡さない。押すと onUnlock（登録の箱へ移動など）。
 // 親の文字サイズ・行の高さをそのまま使う（lineHeight は行数の計算用）。
 // スマホ幅で1行あたりの目安の文字数（「約〇文字」の計算用。見えている冒頭を引く）
@@ -274,10 +274,10 @@ export const RegisterMosaicText: React.FC<{
   lineHeight?: number;
   headChars?: number;
   buttonLabel?: React.ReactNode;
-  blurLines?: number;
-}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = LOCK_WORD, blurLines = 2 }) => {
+}> = ({ text, onUnlock, visibleLines = 3, lineHeight = 1.85, headChars = 120, buttonLabel = LOCK_WORD }) => {
   const shownChars = Math.min(headChars, visibleLines * CHARS_PER_LINE);
   const restChars = Math.max(0, countChars(text) - countChars(text.slice(0, shownChars)));
+  const blurLines = blurLinesFor(restChars);
   return (
     <span style={{ display: 'block' }}>
       <span style={{ display: 'block', maxHeight: `${visibleLines * lineHeight}em`, overflow: 'hidden', lineHeight }}>
@@ -2201,7 +2201,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 ? countChars(tips.intro) - previewChars(tips.intro)
                   + tips.items.filter(it => !it.label.startsWith('📱')).reduce((sum, it) => sum + countChars(it.text) - previewChars(it.text), 0)
                 : 0;
-              // 「二人のLINEのコツ」の本文は、ぼかすときは1行（ボタンを重ねる項目は2行、無料会員は冒頭が見えるので3行）まで
+              // 「二人のLINEのコツ」の本文は、ぼかすときは1行（ボタンを重ねる項目は文字数に合わせて2〜4行、無料会員は冒頭が見えるので3行）まで
               const tipClamp: React.CSSProperties = locked ? clampLines(preview ? 3 : 1, 1.65) : {};
               const lockButton = (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
@@ -2219,7 +2219,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {adviceTeaser && (() => {
                     const { head, restLength } = splitAdvicePreview(parts[1]);
                     return (
-                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', marginTop: '0.35rem', ...clampLines(3, 1.65) }}>
+                      <div style={{ color: '#e8e3d8', lineHeight: '1.65', marginTop: '0.35rem', ...clampLines(2, 1.65) }}>
                         {head}
                         {restLength > 0 && (
                           <span
@@ -2232,7 +2232,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   })()}
                   {adviceTeaser && parts.length > 2 && (
                     <div
-                      style={{ position: 'relative', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: 'pointer', ...clampLines(2, 1.65) }}
+                      style={{ position: 'relative', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: 'pointer', ...clampLines(blurLinesFor(adviceRestChars), 1.65) }}
                       onClick={handleLockTagClick}
                     >
                       {parts.slice(2).map((p, i) => (
@@ -2254,7 +2254,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   )}
                   {!adviceTeaser && parts.length > 1 && (
                     <div
-                      style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined, ...(locked ? clampLines(preview ? 4 : 2, 1.65) : {}) }}
+                      style={{ position: 'relative', marginTop: '0.35rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', cursor: locked ? 'pointer' : undefined, ...(locked ? clampLines(preview ? 4 : blurLinesFor(adviceRestChars), 1.65) : {}) }}
                       onClick={locked ? handleLockTagClick : undefined}
                     >
                       {parts.slice(1).map((p, i) => (
@@ -2285,7 +2285,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                             {/* 「お相手のLINEのくせ」は無料（未登録・無料会員とも）で全文を見せる。他の項目はこれまでどおり。 */}
                             {it.label.startsWith('📱')
                               ? <div style={{ color: '#e8e3d8' }}>{it.text}</div>
-                              : <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred), ...(locked && i === lockAt && !preview ? clampLines(2, 1.65) : tipClamp) }}>{lockedBody(it.text)}</div>}
+                              : <div style={{ color: '#e8e3d8', ...(preview ? {} : blurred), ...(locked && i === lockAt && !preview ? clampLines(blurLinesFor(tipsRestChars), 1.65) : tipClamp) }}>{lockedBody(it.text)}</div>}
                             {locked && i === lockAt && lockButton}
                           </div>
                         </div>
@@ -2423,10 +2423,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <p className="font-serif" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap" }}>
                     {formatAppraisalText(topic.intro)}
                   </p>
-                  {/* ぼかしは2行ぶんだけ。残りの量はボタンの「約〇文字」で伝える */}
+                  {/* ぼかしは文字数に合わせて2〜4行。残りの量はボタンの「約〇文字」で伝える */}
                   <div className="premium-blur-container" style={{ minHeight: 0, cursor: "pointer", borderRadius: '8px' }} onClick={premiumOnly ? handleDeepLockClick : () => handleScrollToRegister()}>
-                    <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap", display: 'block', ...clampLines(2, 1.85) }}>
-                      {lockedText(' '.repeat(60), true)}
+                    <p className="font-serif mosaic-blurred-text" style={{ fontSize: "0.84rem", lineHeight: "1.85", letterSpacing: "0.025em", color: "#d5cfc3", margin: 0, whiteSpace: "pre-wrap", display: 'block', ...clampLines(blurLinesFor(countChars(topic.detail)), 1.85) }}>
+                      {lockedText(' '.repeat(110), true)}
                     </p>
                     
                     {/* Glowing Lock Overlay */}
@@ -2912,7 +2912,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {at.styleTag && <span style={{ display: 'inline-block', margin: '0 0.35rem 0.15rem 0', padding: '0.05rem 0.6rem', borderRadius: '999px', background: 'rgba(226, 139, 170, 0.22)', border: '1px solid rgba(246, 198, 216, 0.55)', color: '#fff', fontWeight: 'bold', fontSize: '0.86rem' }}>{at.styleTag}</span>}
                       {!at.styleTag && at.styleName}
                     </div>
-                    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem', ...(locked ? clampLines(3, 1.8) : {}) }}>
+                    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.3rem', ...(locked ? clampLines(blurLinesFor(countChars(at.colors, at.outfit, at.mbtiTip, at.ngStyle)) + 1, 1.8) : {}) }}>
                       <div style={lockStyle}>
                         <span style={label}>【好きな色】</span>{vis && !locked ? null : lockedText(at.colors, locked)}
                         {vis && !locked && <ColorSwatches hexes={vis.swatches} names={at.colors} />}

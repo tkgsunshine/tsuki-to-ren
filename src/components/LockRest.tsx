@@ -25,6 +25,12 @@ export const LockLabel: React.FC<{ word: React.ReactNode; chars?: number }> = ({
   );
 };
 
+/**
+ * ぼかしの行数を、隠れている文字数に合わせて決める（文字数が多いのにぼかしが小さく見える、をなくす）。
+ * 200文字未満は2行、500文字未満は3行、それ以上は4行。
+ */
+export const blurLinesFor = (chars: number): number => (chars < 200 ? 2 : chars < 500 ? 3 : 4);
+
 /** ぼかす部分を lines 行ぶんの高さに縮める（はみ出した分は切る） */
 export const clampLines = (lines: number, lineHeight: number): React.CSSProperties => ({
   maxHeight: `${lines * lineHeight}em`,

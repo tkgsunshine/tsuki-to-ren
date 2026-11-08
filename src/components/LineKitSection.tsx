@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { LoveLetterMark } from './icons/BrandIcons';
 import type { LineKit } from '../utils/lineKit';
-import { LockLabel, countChars, clampLines } from './LockRest';
+import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
 
 // トリセツの「そのまま使えるLINEキラーテンプレート」。
 // 誰でも読めるのは、送り方の分析の1行目と、場面別の最初の1通だけ。残りはプレミアム限定でぼかす。
@@ -48,7 +48,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
 
   const [firstStyle, ...restStyle] = kit.style;
   const [firstScene, ...restScenes] = kit.scenes;
-  // ぼかす部分は約4行ぶんに縮め、隠れている文字数をボタンに出す（結果画面が縦に長くなりすぎないように）
+  // ぼかす部分は文字数に合わせて2〜4行に縮め、隠れている文字数をボタンに出す（結果画面が縦に長くなりすぎないように）
   const restChars = countChars(
     ...restScenes.flatMap(sc => [sc.label, sc.message, sc.why]),
     ...restStyle.flatMap(st => [st.label, st.text]),
@@ -108,7 +108,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
 
         {/* ここから下はプレミアム限定 */}
         <div
-          style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.6rem', cursor: locked ? 'pointer' : undefined, ...(locked ? clampLines(4, 1.65) : {}) }}
+          style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.6rem', cursor: locked ? 'pointer' : undefined, ...(locked ? clampLines(blurLinesFor(restChars), 1.65) : {}) }}
           onClick={locked ? onLockClick : undefined}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', ...blurred }}>
