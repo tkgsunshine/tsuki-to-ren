@@ -50,7 +50,7 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
   return (
     <div style={box}>
       <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 'bold', color: '#f5d77a' }}>
-        <Gift size={16} /> お友達に送ると、続きが見られる
+        <Gift size={16} /> お友達も鑑定すると続きが見れます
       </span>
       <p style={text}>
         お友達1人が招待URLから占うと、<strong>このお相手との結果</strong>で、次の3つが解放されます。
@@ -60,7 +60,7 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
         <li>返信が遅いときの、おすすめの返し方</li>
         <li>生まれ持った星から見た二人の相性</li>
       </ul>
-      <p style={{ ...text, fontSize: '0.76rem' }}>お友達にも、恋愛運MAX日のいちばん近い1日をプレゼント。</p>
+      <p style={{ ...text, fontSize: '0.76rem' }}>お友達にも、恋愛運MAX日の直近の1日をプレゼント。</p>
       {!isRegistered ? (
         <button type="button" style={goldBtn} onClick={onRegister}>無料登録して、お友達に送る</button>
       ) : !open ? (

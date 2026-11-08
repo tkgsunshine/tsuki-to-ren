@@ -28,7 +28,7 @@ interface Props {
   lockWord: string;
   /** 友達紹介（2026-11-08 TAKASHI）。soloOpen = 友達が招待URLから占ったので、あなたの恋愛運MAX日がすべて開く */
   soloOpen?: boolean;
-  /** 招待URL（またはコード）から占った友達: 恋愛運MAX日のいちばん近い1日だけ開く（2026-11-08 TAKASHI） */
+  /** 招待URL（またはコード）から占った友達: 恋愛運MAX日の直近の1日だけ開く（2026-11-08 TAKASHI） */
   soloGift?: boolean;
   /** 渡したときだけ、恋愛運MAX日のロックの下に紹介の欄と「招待コードをお持ちの方」を出す */
   referral?: {
@@ -206,7 +206,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         {locked && referral && (
           <>
             <ReferralInvite isRegistered={referral.isRegistered} status={referral.status} loading={referral.loading} onRegister={referral.onRegister} onOpen={referral.onOpen} />
-            {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。恋愛運MAX日のいちばん近い1日が見られます" />}
+            {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。恋愛運MAX日の直近の1日が見られます" />}
           </>
         )}
         {!locked && soloOpen && !isSubscribed && !pairOpen && (

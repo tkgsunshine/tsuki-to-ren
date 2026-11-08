@@ -1101,7 +1101,7 @@ function App() {
 
   // 友達紹介（2026-11-08 TAKASHI、src/services/referral.ts）。招待URL（?ref=）で来た人は、鑑定し終えたらサーバーへ送る。
   // 送った会員は、友達が1人占うと、招待URLを作ったお相手との結果の一部が開く（お相手ごと）。
-  // 招待で占った友達には、恋愛運MAX日のいちばん近い1日を見せる（この端末に覚える。2026-11-08 TAKASHI）
+  // 招待で占った友達には、恋愛運MAX日の直近の1日を見せる（この端末に覚える。2026-11-08 TAKASHI）
   const [pendingRef, setPendingRef] = useState<string | null>(() => captureRefFromUrl() || getPendingRef());
   const [refSent, setRefSent] = useState(() => hasSentRef());
   const [referralStatus, setReferralStatus] = useState<ReferralStatus | null>(null);
@@ -1657,7 +1657,7 @@ function App() {
                   afterSubmit={pendingRef ? (
                     // 友達紹介: 招待URLで来た人には一言、そうでなければ目立たない「招待コードをお持ちの方」
                     <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#f5d77a', lineHeight: 1.7, margin: 0 }}>
-                      🎁 お友達からの招待です。占い終わると、恋愛運MAX日のいちばん近い1日が見られます
+                      🎁 お友達からの招待です。占い終わると、恋愛運MAX日の直近の1日が見られます
                     </p>
                   ) : !refSent ? (
                     <ReferralCodeEntry
