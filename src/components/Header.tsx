@@ -160,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth, unreadN
       }}>
         <span className="font-serif gold-text" style={{ fontSize: '0.82rem', fontWeight: '700', letterSpacing: '0.03em', textAlign: 'center', lineHeight: '1.45' }}>
           <span className="nobr">四柱推命 × 九星気学 × 16タイプで</span><span className="nobr">解き明かす</span><br />
-          <span className="nobr">生年月日でわかる</span><span className="nobr">本格恋愛相性診断</span>
+          <span className="nobr">生年月日で分かる</span><span className="nobr">本格恋愛相性診断</span>
         </span>
       </div>
 

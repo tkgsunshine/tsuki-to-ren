@@ -1,5 +1,5 @@
 export const mbtiOptions = [
-  { value: 'UNKNOWN', label: 'わからない / 未設定' },
+  { value: 'UNKNOWN', label: '分からない / 未設定' },
   { value: 'INFJ', label: 'INFJ（提唱者）' },
   { value: 'INFP', label: 'INFP（仲介者）' },
   { value: 'ENFJ', label: 'ENFJ（主人公）' },

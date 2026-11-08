@@ -14,7 +14,7 @@ const BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
 export const LUCK_MARK_LABELS: Record<LuckMark | 'sango', string> = {
   tentoku: '運命の星と結ばれる',
   kango: '惹きつける力がピーク',
-  shigo: '心がつながりやすい',
+  shigo: '心が繋がりやすい',
   teio: '魅力が全開',
   kenroku: '素のままで輝ける',
   tenotsu: '助けが入る',

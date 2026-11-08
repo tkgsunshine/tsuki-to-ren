@@ -194,7 +194,7 @@ export const SharedResultView: React.FC<Props> = ({ shared, onStart }) => {
           あなたも、気になる人との相性を<br />無料で鑑定してみませんか？
         </p>
         <p style={{ margin: 0, fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.6 }}>
-          生年月日を入れるだけで、二人の相性の点数、相手の本音、LINEを送るのにいい時間がわかります。
+          生年月日を入れるだけで、二人の相性の点数、相手の本音、LINEを送るのにいい時間が分かります。
         </p>
         {cta}
       </div>

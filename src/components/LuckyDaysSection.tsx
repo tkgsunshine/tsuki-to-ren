@@ -169,7 +169,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         <span style={subHead}>● {myLabel}の恋愛運MAX日</span>
         <span style={badgeStyle}>年に6〜7日だけ</span>
         <p style={bodyText}>
-          {myLabel}が生まれた日の星と、その日の星が<strong>がっちり手をつなぐ日</strong>です。四柱推命でいちばん強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
+          {myLabel}が生まれた日の星と、その日の星が<strong>がっちり手をつなぐ日</strong>です。四柱推命で一番強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
         </p>
         <p style={{ ...bodyText, fontWeight: 'bold' }}>
           これから1年のうち、{myLabel}の恋愛運MAX日は<span style={goldCount}>{soloDays.length}日</span>あります。

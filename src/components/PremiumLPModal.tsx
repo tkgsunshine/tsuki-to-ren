@@ -27,7 +27,7 @@ const benefits = [
     shot: '/assets/premium/lucky-days.webp',
     shotAlt: '2人の最高シンクロ日とあなたの恋愛運MAX日の画面',
     pairNote: 'pairLucky',
-    body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付がわかります。告白やデートのお誘いは、この日に。'
+    body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付が分かります。告白やデートのお誘いは、この日に。'
   },
   {
     Icon: Calendar,
@@ -35,7 +35,7 @@ const benefits = [
     title: '7日間の波から、10年先の二人の未来まで',
     shot: '/assets/premium/timeline-line.webp',
     shotAlt: '7日間・月ごと・年ごとの相性の折れ線グラフの画面',
-    body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目でわかるので、先を見すえて動けますよ。'
+    body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かるので、先を見すえて動けますよ。'
   },
   {
     Icon: BookOpen,
@@ -44,7 +44,7 @@ const benefits = [
     shot: '/assets/premium/torisetsu.webp',
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
     pairNote: 'pairAll',
-    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、ぜんぶ見られます。'
+    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、全部見られます。'
   },
   {
     Icon: Bell,
@@ -52,7 +52,7 @@ const benefits = [
     title: '毎朝の運勢メールが、全文で届く',
     shot: '/assets/premium/mail.webp',
     shotAlt: '毎朝届く運勢メールの画面',
-    body: 'その日の運勢と相性の点数、あの人にLINEを送るのにいちばんいい時間に加えて、今日のアプローチのコツを最後まで毎朝お届けします。同じ人との相性も、日数を気にせず毎日届きます（無料会員はコツが冒頭だけ、同じ人は7日分まで）。'
+    body: 'その日の運勢と相性の点数、あの人にLINEを送るのに一番いい時間に加えて、今日のアプローチのコツを最後まで毎朝お届けします。同じ人との相性も、日数を気にせず毎日届きます（無料会員はコツが冒頭だけ、同じ人は7日分まで）。'
   },
   {
     Icon: Heart,
@@ -445,7 +445,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const faqs = [
     ...(pair ? [{
       q: '買い切り（680円）と月額の違いは？',
-      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      a: `買い切りは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
@@ -621,7 +621,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
-          {/* 教育: 無料で見えているのは入り口だけで、この先に何がわかるのかを、お相手の名前で具体的に見せる */}
+          {/* 教育: 無料で見えているのは入り口だけで、この先に何が分かるのかを、お相手の名前で具体的に見せる */}
           {showPlans && pair && !pair.unlocked && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -633,7 +633,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
-                  { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかがわかります。` },
+                  { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかが分かります。` },
                   { who: 'tsuki', t: '7日間の波から、10年先の二人の未来まで', shot: '/assets/premium/edu-future.webp', d: '明日からの7日間・月ごとの相性の波と、この先10年の年ごとの流れ。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' }
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
@@ -906,7 +906,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             )}
             <div style={{ marginTop: (showPlans && pair) ? 0 : '0.8rem' }}>
               <CharBubble who="ren" small>
-                毎朝のおまもりとして、気軽に使ってみてください。<br />
+                毎朝のお守りとして、気軽に使ってみてください。<br />
                 合わないと感じたら、マイページからいつでも解約できますよ。
               </CharBubble>
             </div>

@@ -88,7 +88,7 @@ export function NoticesView({ items, readAt, loaded, onOpened }: Props) {
                 onClick={() => openLink(n.link)}
                 style={{ marginTop: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226, 192, 116, 0.12)', border: '1px solid rgba(226, 192, 116, 0.4)', borderRadius: '999px', padding: '0.5rem 1rem', color: '#f2e2b3', fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer' }}
               >
-                くわしく見る<ChevronRight size={15} />
+                詳しく見る<ChevronRight size={15} />
               </button>
             )}
           </div>
