@@ -1713,7 +1713,7 @@ function App() {
                 }
               }}>
                 <div style={{ position: 'relative' }}>
-                  <img src="/assets/tsuki.jpg" alt="月" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-tsuki)', boxShadow: 'var(--shadow-tsuki)', filter: isRegistered ? 'none' : 'grayscale(25%) blur(0.3px)' }} />
+                  <img src="/assets/tsuki.jpg" alt="月" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-tsuki)', boxShadow: 'var(--shadow-tsuki)' }} />
                   {!isRegistered && (
                     <div style={{
                       position: 'absolute',
@@ -1769,7 +1769,7 @@ function App() {
                 }
               }}>
                 <div style={{ position: 'relative' }}>
-                  <img src="/assets/ren.jpg" alt="蓮" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-ren)', boxShadow: 'var(--shadow-ren)', filter: isRegistered ? 'none' : 'grayscale(25%) blur(0.3px)' }} />
+                  <img src="/assets/ren.jpg" alt="蓮" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-ren)', boxShadow: 'var(--shadow-ren)' }} />
                   {!isRegistered && (
                     <div style={{
                       position: 'absolute',
