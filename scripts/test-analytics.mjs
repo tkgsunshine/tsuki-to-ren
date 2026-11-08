@@ -135,13 +135,30 @@ test('track: the reason for leaving the paid-plan page is one of three, with whe
   };
   assert.equal(await send({ reason: 'price', seen: '1' }), 204);
   assert.equal(await send({ reason: 'free_enough', seen: '0' }), 204);
-  assert.equal(await send({ reason: 'other' }), 400, 'only the three answers are accepted');
+  assert.equal(await send({ reason: 'skip', seen: '0' }), 204);
+  assert.equal(await send({ reason: 'other' }), 400, 'only the three answers and skip are accepted');
   assert.equal(await send({}), 400);
-  assert.equal(db.writes.length, 2, 'one write per answer');
-  const [price, free] = db.writes.map((w) => w.data);
+  assert.equal(db.writes.length, 3, 'one write per answer');
+  const [price, free, skip] = db.writes.map((w) => w.data);
+  assert.deepEqual(Object.keys(skip.byLpExit), ['skip']);
   assert.ok(price.lpExits);
   assert.deepEqual(Object.keys(price.byLpExit).sort(), ['price', 'seen_price']);
   assert.deepEqual(Object.keys(free.byLpExit), ['free_enough']);
+});
+
+test('track: leaving the paid-plan page records how far it was read, for how long, and how it was closed', async () => {
+  const db = mockDb();
+  const send = async (body) => {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { source: 'x', landing: 'home', device: 'mobile_browser', type: 'lp_leave', ...body } }, res, { db });
+    return res.code;
+  };
+  assert.equal(await send({ layout: 'pair', reached: 'price', time: '30_60', close: 'x' }), 204);
+  assert.equal(await send({ layout: '<b>', reached: 'evil', time: '9999', close: 'swipe' }), 204);
+  const [a, b] = db.writes.map((w) => w.data);
+  assert.ok(a.lpLeaves);
+  assert.deepEqual(Object.keys(a.byLpLeave).sort(), ['close_x', 'pair_price', 'time_30_60']);
+  assert.deepEqual(Object.keys(b.byLpLeave).sort(), ['close_other', 'monthly_top', 'time_lt10'], 'unknown values cannot add their own keys');
 });
 
 test('countPremium: counted once per live subscription, under the member\'s first source', async () => {

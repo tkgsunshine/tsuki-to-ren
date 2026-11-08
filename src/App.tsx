@@ -1396,7 +1396,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPremiumLP]);
 
-  // 購入LPを買わずに閉じたら（×・戻る・下メニュー、どの閉じ方でも）、見送った理由を1問だけ聞く。選ぶまで閉じられない。
+  // 購入LPを買わずに閉じたら（×・戻る・下メニュー、どの閉じ方でも）、見送った理由を1問だけ聞く（3択＋スキップ）。
   // 訪問ごとに1回だけ。有料会員と、LPの「お相手との鑑定へ」で移動したときは聞かない
   const [showLpExitSurvey, setShowLpExitSurvey] = useState(false);
   const lpWasOpenRef = useRef(false);
