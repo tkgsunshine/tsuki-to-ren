@@ -63,7 +63,8 @@ export function buildDailyContent(sub, access = { premium: true }) {
     // Only today's flow (the weather word and moon) — the same thing the locked result screen still shows
     const match = generateFortuneResult(buildInput(sub, true), character);
     const mood = getScoreMood(match.baseScore, match.dailyScore);
-    content.partnerTeaser = { title: mood.title, phase: mood.phase, pair: access.pair?.unlocked === true, pairOffer: canPromotePair(access) };
+    // baseScore / dailyScore: the pair's, for the rings (today's is drawn blurred, never as a number)
+    content.partnerTeaser = { title: mood.title, phase: mood.phase, baseScore: match.baseScore, dailyScore: match.dailyScore, pair: access.pair?.unlocked === true, pairOffer: canPromotePair(access) };
   }
   return content;
 }
@@ -115,7 +116,8 @@ export const premiumLpUrlFor = (sub, plan = 'monthly') => `${resultUrlFor(sub, t
 const clampScore = (v) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
 const MOOD_COLORS = { up: '#8fd3ae', flat: '#d8cfb8', down: '#e0a9a0' };
 
-export function renderScoreRings(baseScore, dailyScore, hasOpponent) {
+// locked: the partner's free days are used up → today's ring is the blurred "プレミアム限定" image (like the app), no difference line
+export function renderScoreRings(baseScore, dailyScore, hasOpponent, locked = false) {
   const base = clampScore(baseScore);
   const daily = clampScore(dailyScore);
   const mood = getScoreMood(base, daily);
@@ -131,16 +133,16 @@ export function renderScoreRings(baseScore, dailyScore, hasOpponent) {
                     <table role="presentation" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto;">
                       <tr>
                         <td valign="middle" style="padding: 0 2px;">${img(`base${suffix}-${base}.png`, 116, `${baseLabel} ${base}点`)}</td>
-                        <td valign="middle" style="padding: 0 2px;">${img(`today${suffix}-${daily}.png`, 156, `${todayLabel} ${daily}点`)}</td>
+                        <td valign="middle" style="padding: 0 2px;">${locked ? img('today-locked.png', 156, `${todayLabel} プレミアム限定`) : img(`today${suffix}-${daily}.png`, 156, `${todayLabel} ${daily}点`)}</td>
                       </tr>
                     </table>
                     <div style="line-height: 0; font-size: 0; margin-top: 6px;">
                       <img src="${SITE}/assets/mail/score/moon-${mood.phase}.png" width="48" height="48" alt="" style="display: inline-block; width: 48px; height: 48px; border: 0;">
                     </div>
                     <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(mood.title)}</div>
-                    <div style="font-size: 12px; color: #a9a293; letter-spacing: 0.05em; margin-top: 4px;">
+                    ${locked ? '' : `<div style="font-size: 12px; color: #a9a293; letter-spacing: 0.05em; margin-top: 4px;">
                       ${baseLabel}より <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
-                    </div>
+                    </div>`}
                   </td>
                 </tr>
               </table>
@@ -191,12 +193,7 @@ export function renderPartnerTeaser(sub, teaser) {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
                 <tr>
                   <td align="center" style="padding: 16px 18px 18px; text-align: center;">
-                    <div style="font-size: 12px; color: #cbd5e1; letter-spacing: 0.08em;">${who}との今日の流れ</div>
-                    <div style="line-height: 0; font-size: 0; margin-top: 8px;">
-                      <img src="${SITE}/assets/mail/score/moon-${esc(teaser.phase)}.png" width="48" height="48" alt="" style="display: inline-block; width: 48px; height: 48px; border: 0;">
-                    </div>
-                    <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(teaser.title)}</div>
-                    <div style="font-size: 12px; color: #a9a293; line-height: 1.7; margin-top: 8px;">
+                    <div style="font-size: 12px; color: #cbd5e1; line-height: 1.7;">
                       ${teaser.pair
                         ? `${who}のトリセツと深層鑑定は、これからもずっと見られます。<br>二人の今日の点数と助言を毎日見るには、プレミアム（月額980円）が必要です。`
                         : `${who}との無料の期間が終わりました。<br>二人の今日の点数と助言は、プレミアム（月額980円）で見られます。`}
@@ -216,7 +213,9 @@ export function renderPartnerTeaser(sub, teaser) {
 
 export function renderEmailHtml(sub, content, date, stopUrl) {
   const name = sub.myName || 'あなた';
-  const oppLabel = content.hasOpponent && sub.oppName ? `と${esc(san(sub.oppName))}` : '';
+  // The pair's rings are shown (also when the partner's free days are used up: today's ring is blurred)
+  const pairView = content.hasOpponent || Boolean(content.partnerTeaser);
+  const oppLabel = pairView && sub.oppName ? `と${esc(san(sub.oppName))}` : '';
   const { score, baseScore, hourMain, hourNote, adviceParts = [] } = content;
   const hourTitle = content.hasOpponent ? '本日のLINE吉時間' : '本日の恋の開運時間';
   // Dark-green card with a bright green border (matches the app's golden-hour card); single mode keeps the gold/purple look.
@@ -272,7 +271,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           <tr>
             <td align="center" style="padding: 20px 25px 4px; text-align: center;">
               <span style="display: inline-block; padding: 5px 16px; background-color: #201a36; border: 1px solid rgba(226, 192, 116, 0.35); border-radius: 15px; color: ${GOLD}; font-size: 12px; font-weight: bold; letter-spacing: 0.04em;">
-                ${date.year}年${date.month}月${date.day}日（本日）の${content.hasOpponent ? '相性' : '運勢'}
+                ${date.year}年${date.month}月${date.day}日（本日）の${pairView ? '相性' : '運勢'}
               </span>
             </td>
           </tr>
@@ -288,7 +287,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
                   <td valign="top" style="font-size: 14px; line-height: 1.7; color: #e2e8f0;">
                     <div style="font-size: 11px; font-weight: bold; color: ${accent}; letter-spacing: 0.1em; margin-bottom: 2px;">${charName}より</div>
                     ${esc(san(name, 'あなた'))}${oppLabel}<br>
-                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、月と蓮より、${content.hasOpponent ? '本日のお二人の相性' : '本日のあなたの運勢'}をお届けします。
+                    おはようございます。本日も素敵な一日をお過ごしいただけますよう、月と蓮より、${pairView ? '本日のお二人の相性' : '本日のあなたの運勢'}をお届けします。
                   </td>
                 </tr>
               </table>
@@ -296,7 +295,7 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
           </tr>
 
           <!-- Score -->
-          ${Number.isFinite(Number(baseScore)) ? renderScoreRings(Number(baseScore), Number(score), content.hasOpponent) : `<tr>
+          ${content.partnerTeaser ? renderScoreRings(Number(content.partnerTeaser.baseScore), Number(content.partnerTeaser.dailyScore), true, true) : Number.isFinite(Number(baseScore)) ? renderScoreRings(Number(baseScore), Number(score), content.hasOpponent) : `<tr>
             <td style="padding: 14px 25px 12px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
                 <tr>
