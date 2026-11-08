@@ -48,12 +48,12 @@ const ring = ({ size, score, from, to, glow, icon, label, caption, numColor, id,
     <svg width="${size}" height="${size}" style="position:absolute;inset:0;transform:rotate(-90deg);filter:drop-shadow(0 0 6px ${glow})">
       <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${from}"/><stop offset="100%" stop-color="${to}"/></linearGradient></defs>
       <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="#15142a" stroke="rgba(255,255,255,0.08)" stroke-width="${stroke}"/>
-      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="url(#${id})" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(c * score) / 100} ${c}"/>
+      ${hidden ? '' : `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="url(#${id})" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(c * score) / 100} ${c}"/>`}
     </svg>
     <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
       ${icon}
       <span style="font-family:'Zen Kaku Gothic New',sans-serif;font-size:${size > 130 ? 11.8 : 10.6}px;color:#e8e3d8;font-weight:700;margin-top:1.6px">${label}</span>
-      <div style="font-family:'Shippori Mincho',serif;font-size:${size * 0.3}px;font-weight:800;color:${numColor};line-height:1.05;text-shadow:0 0 14px ${glow},0 2px 4px rgba(0,0,0,0.5);display:flex;align-items:baseline;gap:1px${hidden ? ';filter:blur(6px)' : ''}">${score}<span style="font-size:${size * 0.1}px;font-weight:700">点</span></div>
+      <div style="font-family:'Shippori Mincho',serif;font-size:${size * 0.3}px;font-weight:800;color:${numColor};line-height:1.05;text-shadow:0 0 14px ${glow},0 2px 4px rgba(0,0,0,0.5);display:flex;align-items:baseline;gap:1px${hidden ? ';filter:blur(9px);opacity:0.8' : ''}">${score}<span style="font-size:${size * 0.1}px;font-weight:700">点</span></div>
       ${caption ? `<span style="font-family:'Zen Kaku Gothic New',sans-serif;font-size:${Math.round(size * 0.072)}px;color:#a9a293;margin-top:2.4px">${caption}</span>` : ''}
     </div></div></div>`;
 };
@@ -85,9 +85,10 @@ for (const [name, render] of Object.entries(SETS)) {
     written.push(file);
   }
 }
-// 無料の日数を使い切ったお相手の「今日の相性」: アプリと同じく、ダミーの点数をぼかして「プレミアム限定」（1枚だけ）
+// 無料の日数を使い切ったお相手の「今日の相性」: アプリと同じく、ぼかして「プレミアム限定」（1枚だけ）
 if (!only.length || only.includes('today-locked')) {
-  await page.setContent(shell(ring({ size: 156, score: 72, id: 't', from: '#9cc6d8', to: '#3a86ab', glow: 'rgba(156, 198, 216, 0.55)', icon: moonSvg(18, 'full', 'blue'), label: '今日の相性', caption: 'プレミアム限定', numColor: '#e8f3f8', hidden: true })), { waitUntil: 'networkidle' });
+  // 点数が読めないよう、ゲージは空（0）、数字の代わりに「??」を強くぼかす
+  await page.setContent(shell(ring({ size: 156, score: 0, id: 't', from: '#9cc6d8', to: '#3a86ab', glow: 'rgba(156, 198, 216, 0.55)', icon: moonSvg(18, 'full', 'blue'), label: '今日の相性', caption: 'プレミアム限定', numColor: '#e8f3f8', hidden: true }).replace('>0<span', '>??<span')), { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   const file = path.join(outDir, 'today-locked.png');
   await page.locator('.ring').screenshot({ path: file, omitBackground: true });
