@@ -285,6 +285,11 @@ h1, h2, h3, h4, button, label {
   box-sizing: border-box;
 }
 
+/* 下メニューを出さない画面（診断の入力画面）は、メニュー分の下余白を詰める */
+.main-content.no-navbar {
+  padding-bottom: max(1.5rem, calc(1rem + env(safe-area-inset-bottom, 0px)));
+}
+
 .main-content > * {
   flex-shrink: 0;
   width: 100%;

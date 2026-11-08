@@ -1,5 +1,4 @@
 import React from 'react';
-import { Lock } from 'lucide-react';
 import { getSelfReading } from '../utils/selfReading';
 import { san } from '../utils/fortuneEngine';
 
@@ -9,7 +8,7 @@ import { san } from '../utils/fortuneEngine';
 // subject='opponent' でお相手版（「〇〇さんってこんな人」）。locked のときは短く縮めてぼかし、タップで会員登録へ（2026-11-07 TAKASHI指示）。
 
 // ぼかす部分に置くダミー文（本物の文は画面に置かない。ぼかしは見た目だけで「検証」から読めてしまうため）
-const LOCKED_FILLER = '無料会員登録をすると、お相手がふだんどんな人で、恋をするとどう変わるのかが読めるようになります。';
+const LOCKED_FILLER = '無料会員登録をすると、お相手が普段どんな人で、恋をするとどう変わるのかが読めるようになります。';
 
 export const SelfReadingCard: React.FC<{
   pillar: string;
@@ -110,7 +109,7 @@ const OpponentReadingCard: React.FC<{
           </div>
           <div className="premium-lock-overlay">
             <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); onUnlock?.(); }}>
-              <Lock size={11} /> 続きを見る
+              続きを見る
             </button>
           </div>
         </div>

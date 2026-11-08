@@ -4,9 +4,10 @@ import { getDb } from '../_lib/firestore.js';
 import { signUid } from '../_lib/unsubscribe-token.js';
 import { recordRun } from '../_lib/cron-run.js';
 import { buildDailyContent, renderEmailHtml, subjectFor } from '../_lib/daily-mail.js';
-import { PREMIUM } from '../_lib/stripe.js';
+import { PREMIUM, isLiveKey } from '../_lib/stripe.js';
 import { isPremiumRecord, countPartnerDay } from '../_lib/partner-days.js';
 import { isOverrideEmail } from '../_lib/premium-override.js';
+import { findPairUnlock, pairAccess } from '../_lib/pair-unlock.js';
 
 const SITE = 'https://www.tsuki-to-ren.com';
 const BATCH_SIZE = 100; // Resend batch limit
@@ -39,7 +40,12 @@ const accessFor = async (db, sub, isPremium, today) => {
   if (!isMatchSub(sub) || !/^\d{4}-\d{2}-\d{2}$/.test(String(sub.oppBirth))) return { premium: false };
   try {
     const r = await countPartnerDay(db, sub.uid, sub.oppBirth, today);
-    return { premium: false, locked: r.locked, daysLeft: r.daysLeft };
+    // 買い切り（お相手1人の深層鑑定）を買った相手か。読めなくても、普段の無料の案内で送る（有料の中身は増えない）。
+    const pair = await findPairUnlock(db, sub.uid, sub.oppBirth, isLiveKey()).then((u) => pairAccess(u, today)).catch((e) => {
+      console.error('⚠️ Could not read the pair purchase:', e?.message);
+      return { unlocked: false, today: false };
+    });
+    return { premium: false, locked: r.locked && !pair.today, daysLeft: r.daysLeft, pair };
   } catch (e) {
     // Counting failed: our fault, so this day is not held against the member (sent as a free day, uncounted)
     console.error('⚠️ Could not count the partner day:', e?.message);

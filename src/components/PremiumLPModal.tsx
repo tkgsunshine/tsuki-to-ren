@@ -3,6 +3,7 @@ import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpe
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
+import { trackLpLeave, type LpSection } from '../services/analytics';
 
 const worries = [
   '既読のまま返事がこなくて、なかなか眠れない夜',
@@ -27,7 +28,7 @@ const benefits = [
     shot: '/assets/premium/lucky-days.webp',
     shotAlt: '2人の最高シンクロ日とあなたの恋愛運MAX日の画面',
     pairNote: 'pairLucky',
-    body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付がわかります。告白やデートのお誘いは、この日に。'
+    body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付が分かります。告白やデートのお誘いは、この日に。'
   },
   {
     Icon: Calendar,
@@ -35,7 +36,7 @@ const benefits = [
     title: '7日間の波から、10年先の二人の未来まで',
     shot: '/assets/premium/timeline-line.webp',
     shotAlt: '7日間・月ごと・年ごとの相性の折れ線グラフの画面',
-    body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目でわかるので、先を見すえて動けますよ。'
+    body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かるので、先を見すえて動けますよ。'
   },
   {
     Icon: BookOpen,
@@ -44,7 +45,7 @@ const benefits = [
     shot: '/assets/premium/torisetsu.webp',
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
     pairNote: 'pairAll',
-    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、ぜんぶ見られます。'
+    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、全部見られます。'
   },
   {
     Icon: Bell,
@@ -52,7 +53,7 @@ const benefits = [
     title: '毎朝の運勢メールが、全文で届く',
     shot: '/assets/premium/mail.webp',
     shotAlt: '毎朝届く運勢メールの画面',
-    body: 'その日の運勢と相性の点数、あの人にLINEを送るのにいちばんいい時間に加えて、今日のアプローチのコツを最後まで毎朝お届けします。同じ人との相性も、日数を気にせず毎日届きます（無料会員はコツが冒頭だけ、同じ人は7日分まで）。'
+    body: 'その日の運勢と相性の点数、あの人にLINEを送るのに一番いい時間に加えて、今日のアプローチのコツを最後まで毎朝お届けします。同じ人との相性も、日数を気にせず毎日届きます（無料会員はコツが冒頭だけ、同じ人は7日分まで）。'
   },
   {
     Icon: Heart,
@@ -149,6 +150,8 @@ interface PremiumLPModalProps {
   onCancelSubscription?: (reasons: string[], note: string) => void | Promise<void>;
   /** 解約済み（更新日で終了）のとき、その終了日（ISO）。この場合は解約アンケートを出さず、お支払い画面へ直接進む */
   premiumEndsOn?: string | null;
+  /** 料金・プランのところまで読んだ（閉じたときのアンケートの集計で、料金を見てから閉じたかを分ける） */
+  onPlansSeen?: () => void;
 }
 
 // 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見られる。
@@ -315,7 +318,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   onCancelSubscription,
   premiumEndsOn,
   pair = null,
-  focus = 'monthly'
+  focus = 'monthly',
+  onPlansSeen
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -344,6 +348,34 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     root.addEventListener('scroll', check, { passive: true });
     return () => root.removeEventListener('scroll', check);
   }, [isOpen, Boolean(pair)]);
+  // 閉じたときに、一番下まで届いたまとまり（data-lp-sec の並び）・いた時間・閉じ方を1回送る（有料会員は送らない）
+  const leaveRef = useRef({ reached: 'top' as LpSection, idx: -1, openedAt: 0, byX: false, layout: 'monthly' as 'pair' | 'monthly', subscribed: false });
+  leaveRef.current.layout = Boolean(pair) && !isSubscribed ? 'pair' : 'monthly';
+  leaveRef.current.subscribed = isSubscribed;
+  useEffect(() => {
+    if (!isOpen) return;
+    const st = leaveRef.current;
+    Object.assign(st, { reached: 'top', idx: -1, openedAt: Date.now(), byX: false });
+    const root = scrollRef.current;
+    const update = () => {
+      if (!root) return;
+      const bottom = root.getBoundingClientRect().bottom;
+      root.querySelectorAll<HTMLElement>('[data-lp-sec]').forEach((el, i) => {
+        if (i > st.idx && el.getBoundingClientRect().top < bottom) { st.idx = i; st.reached = el.dataset.lpSec as LpSection; }
+      });
+    };
+    update();
+    root?.addEventListener('scroll', update, { passive: true });
+    return () => {
+      root?.removeEventListener('scroll', update);
+      if (!st.subscribed) trackLpLeave(st.layout, st.reached, Date.now() - st.openedAt, st.byX ? 'x' : 'other');
+    };
+  }, [isOpen]);
+  const closeByX = () => { leaveRef.current.byX = true; onClose(); };
+  useEffect(() => {
+    if (isOpen && ctaReady) onPlansSeen?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, ctaReady]);
 
   if (!isOpen) return null;
 
@@ -366,6 +398,72 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
 
+  // 上（2プランの比べ方）と下（画面下に固定）で同じボタンを出す。下では「解放済み」は出さない
+  const renderPlanButtons = (showUnlocked: boolean) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+      {(pair ? (['monthly', 'pair'] as const) : (['monthly'] as const)).map((kind) =>
+        kind === 'monthly' ? (
+          <button
+            key="monthly"
+            type="button"
+            disabled={isProcessing}
+            onClick={handleSubscribeAction}
+            style={{
+              width: '100%',
+              padding: '0.8rem 1rem',
+              background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
+              color: '#000',
+              border: 'none',
+              borderRadius: '9999px',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              letterSpacing: '0.03em',
+              boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+              cursor: 'pointer'
+            }}
+          >
+            {isProcessing ? '決済画面へ移動しています...' : '誰でも無制限に鑑定を見る（980円/月）'}
+          </button>
+        ) : pair!.unlocked ? (
+          !showUnlocked ? null : <div key="pair" style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            padding: '0.75rem 1rem',
+            borderRadius: '9999px',
+            border: '1px solid rgba(111, 176, 143, 0.5)',
+            background: 'rgba(111, 176, 143, 0.08)',
+            color: '#8ecaa5',
+            fontSize: '0.82rem',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            ✓ {pair!.name}の鑑定は解放済みです
+          </div>
+        ) : (
+          <button
+            key="pair"
+            type="button"
+            disabled={isProcessing}
+            onClick={handlePairAction}
+            style={{
+              width: '100%',
+              padding: '0.8rem 1rem',
+              borderRadius: '9999px',
+              border: '1.5px solid rgba(226, 192, 116, 0.6)',
+              background: 'rgba(226, 192, 116, 0.07)',
+              color: '#f2e2b3',
+              fontSize: '0.88rem',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（680円/買い切り）`}
+          </button>
+        )
+      )}
+    </div>
+  );
+
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
   const priceCardLabel = !isSubscribed
     ? 'すべての続きを見る'
@@ -379,7 +477,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const faqs = [
     ...(pair ? [{
       q: '買い切り（680円）と月額の違いは？',
-      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      a: `買い切りは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
@@ -449,7 +547,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             type="button"
             className="tap-target"
             aria-label="閉じる"
-            onClick={onClose}
+            onClick={closeByX}
             style={{
               background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
@@ -555,7 +653,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
-          {/* 教育: 無料で見えているのは入り口だけで、この先に何がわかるのかを、お相手の名前で具体的に見せる */}
+          {showPlans && pair && !pair.unlocked && <div data-lp-sec="intro" />}
+          {/* 教育: 無料で見えているのは入り口だけで、この先に何が分かるのかを、お相手の名前で具体的に見せる */}
           {showPlans && pair && !pair.unlocked && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -567,7 +666,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
-                  { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかがわかります。` },
+                  { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかが分かります。` },
                   { who: 'tsuki', t: '7日間の波から、10年先の二人の未来まで', shot: '/assets/premium/edu-future.webp', d: '明日からの7日間・月ごとの相性の波と、この先10年の年ごとの流れ。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' }
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
@@ -595,6 +694,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
           {showPlans && pair && <div ref={ctaMarkerRef} />}
 
+          {showPlans && pair && <div data-lp-sec="plans" />}
           {/* プランを選ぶ（買い切り ¥680 と 月額 ¥980 を1枚で見比べる） */}
           {showPlans && pair && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
@@ -648,74 +748,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   どちらも会員登録なしで購入できます。
                 </CharBubble>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-                {(['monthly', 'pair'] as const).map((kind) =>
-                  kind === 'monthly' ? (
-                    <button
-                      key="monthly"
-                      type="button"
-                      disabled={isProcessing}
-                      onClick={handleSubscribeAction}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
-                        color: '#000',
-                        border: 'none',
-                        borderRadius: '9999px',
-                        fontSize: '0.9rem',
-                        fontWeight: 800,
-                        letterSpacing: '0.03em',
-                        boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {isProcessing ? '決済画面へ移動しています...' : '誰でも無制限に鑑定を見る（980円/月）'}
-                    </button>
-                  ) : pair.unlocked ? (
-                    <div key="pair" style={{
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '9999px',
-                      border: '1px solid rgba(111, 176, 143, 0.5)',
-                      background: 'rgba(111, 176, 143, 0.08)',
-                      color: '#8ecaa5',
-                      fontSize: '0.82rem',
-                      fontWeight: 'bold',
-                      textAlign: 'center'
-                    }}>
-                      ✓ {pair.name}の鑑定は解放済みです
-                    </div>
-                  ) : (
-                    <button
-                      key="pair"
-                      type="button"
-                      disabled={isProcessing}
-                      onClick={handlePairAction}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        borderRadius: '9999px',
-                        border: '1.5px solid rgba(226, 192, 116, 0.6)',
-                        background: 'rgba(226, 192, 116, 0.07)',
-                        color: '#f2e2b3',
-                        fontSize: '0.88rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（680円/買い切り）`}
-                    </button>
-                  )
-                )}
-              </div>
+              {renderPlanButtons(true)}
               <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
                 ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります。
               </p>
             </div>
           )}
 
+          <div data-lp-sec="worries" />
           {/* こんなときに */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -748,6 +788,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           </div>
 
+          <div data-lp-sec="benefits" />
           {/* できること */}
           <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -837,6 +878,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           </div>
 
           {!(showPlans && pair) && <div ref={ctaMarkerRef} />}
+          <div data-lp-sec="price" />
           {/* 料金 */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き）。
@@ -901,12 +943,13 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             )}
             <div style={{ marginTop: (showPlans && pair) ? 0 : '0.8rem' }}>
               <CharBubble who="ren" small>
-                毎朝のおまもりとして、気軽に使ってみてください。<br />
+                毎朝のお守りとして、気軽に使ってみてください。<br />
                 合わないと感じたら、マイページからいつでも解約できますよ。
               </CharBubble>
             </div>
           </div>
 
+          <div data-lp-sec="faq" />
           {/* FAQ Accordion Section */}
           <div style={{ padding: '0 1.15rem 1rem' }}>
             <h3 className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold', textAlign: 'center', margin: '0 0 0.75rem 0' }}>
@@ -992,6 +1035,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <span>•</span>
             <span>カード / Apple Pay / Google Pay</span>
           </div>
+          <div data-lp-sec="end" />
         </div>
 
         {/* PINNED FIXED BOTTOM CTA FOOTER（未購読の人には、説明を読み終えてから出す） */}
@@ -1046,60 +1090,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              className="consult-btn"
-              disabled={isProcessing}
-              onClick={handleSubscribeAction}
-              style={{
-                width: '100%',
-                padding: '0.85rem 1.25rem',
-                fontSize: '0.98rem',
-                fontWeight: '800',
-                letterSpacing: '0.03em',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.45rem',
-                background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
-                color: '#000000',
-                border: 'none',
-                borderRadius: '9999px',
-                boxShadow: '0 6px 20px rgba(217, 164, 65, 0.55)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              {isProcessing ? (
-                <span>決済画面へ移動しています...</span>
-              ) : (
-                <>
-                  <Moon size={18} style={{ fill: 'currentColor' }} />
-                  <span>月額980円ではじめる</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          )}
-          {!isSubscribed && pair && !pair.unlocked && (
-            <button
-              type="button"
-              disabled={isProcessing}
-              onClick={handlePairAction}
-              style={{
-                width: '100%',
-                marginTop: '0.5rem',
-                background: 'none',
-                border: 'none',
-                color: '#d8d2c6',
-                fontSize: '0.74rem',
-                textDecoration: 'underline',
-                cursor: 'pointer',
-                padding: '0.1rem'
-              }}
-            >
-              {pairWho}だけ 買い切り680円で続きを見る
-            </button>
+            renderPlanButtons(false)
           )}
         </div>
         )}

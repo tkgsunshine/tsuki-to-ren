@@ -126,7 +126,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const hasHistory = messages.some(m => m.sender === 'user');
   const startNewConsultation = async () => {
     if (isTyping) return;
-    const ok = await showConfirm('今の会話を消して、新しい相談をはじめますか？', { okLabel: 'はじめる', cancelLabel: 'やめる' });
+    const ok = await showConfirm('今の会話を消して、新しい相談を始めますか？', { okLabel: 'はじめる', cancelLabel: 'やめる' });
     if (!ok) return;
     clearChatHistory(storageKey);
     loadedKeyRef.current = storageKey;
@@ -666,7 +666,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
             <div className="chat-bubble bot">
               {partnerPicker.partners.length > 0
                 ? '今日は、誰のことを相談しますか？'
-                : 'お相手を保存すると、二人の相性をふまえて、もっと具体的にお答えできます。'}
+                : 'お相手を保存すると、二人の相性を踏まえて、もっと具体的にお答えできます。'}
             </div>
 
             {partnerPicker.partners.length > 0 && (

@@ -14,7 +14,7 @@ const BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
 export const LUCK_MARK_LABELS: Record<LuckMark | 'sango', string> = {
   tentoku: '運命の星と結ばれる',
   kango: '惹きつける力がピーク',
-  shigo: '心がつながりやすい',
+  shigo: '心が繋がりやすい',
   teio: '魅力が全開',
   kenroku: '素のままで輝ける',
   tenotsu: '助けが入る',
@@ -74,4 +74,4 @@ export function findPairBestDays(me: LuckPerson, partner: LuckPerson, from: Date
 }
 
 export const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
-export const formatLuckyDate = (day: DayInfo): string => `${day.m}月${day.d}日(${WEEKDAYS[day.weekday]})`;
+export const formatLuckyDate = (day: DayInfo): string => `${day.y}年${day.m}月${day.d}日(${WEEKDAYS[day.weekday]})`;

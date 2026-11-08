@@ -84,7 +84,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.82rem', color: '#d5cfc3', lineHeight: '1.7' }}>
             <Article title="第1条（サービスの概要）">
-              本サービス「月と蓮（つきとれん）」（以下「本サービス」）は、四柱推命をベースとした恋愛相性鑑定、運勢予測、およびAIチャットによるアドバイス機能を提供するウェブアプリケーションです。本サービスの利用をもって、本利用規約に同意したものとみなします。
+              本サービス「月と蓮（つきとれん）」（以下「本サービス」）は、四柱推命をベースとした恋愛相性鑑定、運勢予測、およびAIチャットによるアドバイス機能を提供するウェブアプリケーションです。本サービスの利用を持って、本利用規約に同意したものとみなします。
             </Article>
 
             <Article title="第2条（利用資格）">

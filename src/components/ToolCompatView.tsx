@@ -94,7 +94,7 @@ export const ToolCompatView: React.FC = () => {
               href={`/compatibility/${me.toLowerCase()}-${opp.toLowerCase()}`}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 100%)', color: '#000', padding: '0.8rem 1rem', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.95rem' }}
             >
-              生年月日を入れて、二人の相性をくわしく占う <ChevronRight size={16} />
+              生年月日を入れて、二人の相性を詳しく占う <ChevronRight size={16} />
             </a>
           </div>
         )}

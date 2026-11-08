@@ -291,7 +291,7 @@ export const RegisterMosaicText: React.FC<{
         </span>
         <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
           <span className="premium-lock-tag" style={{ pointerEvents: 'auto' }}>
-            <Lock size={11} /> {buttonLabel}
+            {buttonLabel}
           </span>
         </span>
       </span>
@@ -320,14 +320,22 @@ const splitAdvicePreview = (text: string | undefined): { head: string; restLengt
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
 
-// 未来予測スケジュール（7日間・月次・年次）の点数の折れ線グラフ。点の高さは 40点（下限）〜100点 で決める
-const SCORE_LINE_HEIGHT_PX = 64;
-const SCORE_LINE_MIN = 40;
+// 未来予測スケジュール（7日間・月次・年次）の点数の折れ線グラフ。
+// 縦軸は、そのグラフに出る点数の最低〜最高に合わせる（旧版は40〜100点固定で、6点差が約6pxにしかならず平らに見えた）。
+// 差が小さいときに大げさに見えないよう、縦軸の幅は最低 SCORE_LINE_MIN_SPAN 点ぶん取る。各点の上に点数を出しているので、数字で差は読める。
+const SCORE_LINE_HEIGHT_PX = 84;
+const SCORE_LINE_MIN_SPAN = 20;
+const SCORE_LINE_PAD = 0.12; // 上下の端に点が張り付かないよう、高さの12%ずつ空ける
 const ScoreLineChart = ({ items, locked }: { items: { key: string; label: string; score: number }[]; locked: boolean }) => {
   const n = items.length;
+  const scores = items.map((item) => item.score);
+  const lo = Math.min(...scores);
+  const hi = Math.max(...scores);
+  const span = Math.max(hi - lo, SCORE_LINE_MIN_SPAN);
+  const axisMin = (lo + hi) / 2 - span / 2;
   const pos = items.map((item, i) => {
-    const clamped = Math.max(SCORE_LINE_MIN, Math.min(100, item.score));
-    return { x: ((i + 0.5) / n) * 100, y: (1 - (clamped - SCORE_LINE_MIN) / (100 - SCORE_LINE_MIN)) * SCORE_LINE_HEIGHT_PX };
+    const t = (item.score - axisMin) / span; // 0（下）〜1（上）
+    return { x: ((i + 0.5) / n) * 100, y: (1 - (SCORE_LINE_PAD + t * (1 - 2 * SCORE_LINE_PAD))) * SCORE_LINE_HEIGHT_PX };
   });
   const gradId = `scoreLineFill-${items.map((i) => i.key).join('-').replace(/[^A-Za-z0-9-]/g, '')}`;
   return (
@@ -777,7 +785,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             );
           })}
-          <a href="/tools/nicchu" style={{ fontSize: '0.72rem', color: '#e2c074', marginTop: '0.35rem' }}>日柱を、60通りの一覧でくわしく見る</a>
+          <a href="/tools/nicchu" style={{ fontSize: '0.72rem', color: '#e2c074', marginTop: '0.35rem' }}>日柱を、60通りの一覧で詳しく見る</a>
         </div>
       )
     });
@@ -789,7 +797,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     const branch = pillar[1];
     const mine = PERSONALITY_NOTES.find((n) => n.branch === branch);
     if (!mine) return;
-    const body = `性格分類は、生まれた日の十二支で決まる、${who}の性格のいちばん大きな特徴です。日柱（にっちゅう：生まれた日を表す2文字）の2文字目で決まります。\n\n${pillar}（${getKanjiReading(pillar)}）の「${branch}（${mine.reading}）」は「${mine.name}」タイプです。${mine.note}${mine.love}\n\n※分類の名前は、十二支の動物の特徴をもとに、月と蓮が名づけたものです。`;
+    const body = `性格分類は、生まれた日の十二支で決まる、${who}の性格の一番大きな特徴です。日柱（にっちゅう：生まれた日を表す2文字）の2文字目で決まります。\n\n${pillar}（${getKanjiReading(pillar)}）の「${branch}（${mine.reading}）」は「${mine.name}」タイプです。${mine.note}${mine.love}\n\n※分類の名前は、十二支の動物の特徴をもとに、月と蓮が名づけたものです。`;
     setExplanation({
       title: `性格分類: ${mine.name}`,
       reading: '',
@@ -2062,7 +2070,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* Character Advice Cards (100% visible, no lock) */}
       {/* 月/蓮タブはここを過ぎたら隠す（守護獣を上へ移す前と同じ位置） */}
         <div ref={myAstrologyRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* 2枚目（月「恋愛運をひらく鍵」／蓮「うまくいくためのアドバイス」）は表示しない（TAKASHI判断 2026-11-06） */}
+          {/* 2枚目（月「恋愛運を開く鍵」／蓮「うまくいくためのアドバイス」）は表示しない（TAKASHI判断 2026-11-06） */}
           {activeResult.topics.slice(0, 1).map((topic) => (
             <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
               <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
@@ -2410,7 +2418,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     {/* Glowing Lock Overlay */}
                     <div className="premium-lock-overlay">
                       <button className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); if (premiumOnly) handleDeepLockClick(e); else handleScrollToRegister(); }}>
-                        <Lock size={11} /> {deepLockWord}
+                        {deepLockWord}
                       </button>
                     </div>
                   </div>
@@ -2643,7 +2651,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2690,7 +2698,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2733,7 +2741,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2762,7 +2770,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                            {LOCK_WORD}
                           </button>
                         </div>
                       )}
@@ -2806,7 +2814,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2857,7 +2865,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2906,7 +2914,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
                           <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <Lock size={11} /> {!isRegistered ? '無料会員登録' : 'プレミアム登録で全解放'}
+                            {LOCK_WORD}
                           </button>
                         </div>
                       )}
@@ -2951,7 +2959,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   className="premium-lock-tag" data-paid-lock
                   onClick={handleDeepLockClick}
                 >
-                  <Lock size={11} /> {deepLockWord}
+                  {deepLockWord}
                 </button>
               </div>
             )}
@@ -2993,7 +3001,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {[
                     `今日の相性とLINEの送り方が、今日だけでなく毎日読める`,
                     `送るタイミングを逃さない、これからの7日間・月ごとの流れ`,
-                    `結婚や大きな転機の年がわかる、10年先までの流れ`,
+                    `結婚や大きな転機の年が分かる、10年先までの流れ`,
                     `毎朝の運勢メールが全文で届く`,
                     `${partnerCall}のことを、月と蓮にいつでも相談`,
                     `気になる人を10人まで保存。ほかのお相手も全部読める`
@@ -3381,7 +3389,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
                   {pairOpen
-                    ? `月額980円で、明日からの7日間・月ごとの波から、結婚や大きな転機がわかる10年先の流れまで、${san(oppNickname)}との未来をいつでも確かめられます。`
+                    ? `月額980円で、明日からの7日間・月ごとの波から、結婚や大きな転機が分かる10年先の流れまで、${san(oppNickname)}との未来をいつでも確かめられます。`
                     : '月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。'}
                 </p>
               </div>

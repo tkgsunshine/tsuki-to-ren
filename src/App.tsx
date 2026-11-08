@@ -35,7 +35,8 @@ import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
 import { ToolCompatView } from './components/ToolCompatView';
-import { trackCheckout, trackFortune, trackPremiumView, trackRegStep } from './services/analytics';
+import { lpExitAnswered, trackCheckout, trackFortune, trackLpExit, trackPremiumView, trackRegStep } from './services/analytics';
+import { LpExitSurvey } from './components/LpExitSurvey';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
@@ -422,6 +423,8 @@ function App() {
     setPremiumLPFocus(focus);
     setShowPremiumLP(true);
   };
+  // 毎朝メールの「プレミアムの詳細を見る」（?lp=m）: 鑑定結果を出したあとに、月額プランの案内を開く
+  const pendingLPRef = useRef<'monthly' | null>(null);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news'>(initialRoute.settingsSubView);
@@ -639,6 +642,13 @@ function App() {
     }
 
     if (mName && mBirth && mMbti && mGender) {
+      if (params.get('lp') === 'm') {
+        pendingLPRef.current = 'monthly';
+        // 読み込み直しや「戻る」で何度も開かないよう、URLから外す
+        params.delete('lp');
+        const qs = params.toString();
+        window.history.replaceState(window.history.state, '', window.location.pathname + (qs ? `?${qs}` : ''));
+      }
       setMyName(mName);
       setMyBirth(mBirth);
       setMyMbti(mMbti);
@@ -1338,6 +1348,10 @@ function App() {
         pushNav({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' }, '/result' + window.location.search);
       }
       scrollMainTo(0);
+      if (pendingLPRef.current) {
+        openPremiumLP(pendingLPRef.current);
+        pendingLPRef.current = null;
+      }
     };
 
     if (skipLoading) {
@@ -1392,6 +1406,25 @@ function App() {
   // 有料プランの案内を開いた回数（管理画面の集計用）。買い切りで解放できるロックから開いたか（pair）、月額側か（monthly）も送る
   useEffect(() => {
     if (showPremiumLP) trackPremiumView(premiumLPFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPremiumLP]);
+
+  // 購入LPを買わずに閉じたら（×・戻る・下メニュー、どの閉じ方でも）、見送った理由を1問だけ聞く（3択＋スキップ）。
+  // 訪問ごとに1回だけ。有料会員と、LPの「お相手との鑑定へ」で移動したときは聞かない
+  const [showLpExitSurvey, setShowLpExitSurvey] = useState(false);
+  const lpWasOpenRef = useRef(false);
+  const lpPlansSeenRef = useRef(false);
+  const lpSkipSurveyRef = useRef(false);
+  useEffect(() => {
+    if (showPremiumLP) {
+      lpWasOpenRef.current = true;
+      lpPlansSeenRef.current = false;
+      lpSkipSurveyRef.current = false;
+      return;
+    }
+    if (!lpWasOpenRef.current) return;
+    lpWasOpenRef.current = false;
+    if (!isSubscribed && !lpSkipSurveyRef.current && !lpExitAnswered()) setShowLpExitSurvey(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPremiumLP]);
 
@@ -1499,6 +1532,10 @@ function App() {
   const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
     && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
 
+  // 初めて鑑定する人（未登録で、まだ鑑定結果が無い人）の診断（入力）画面では、下メニューを雑音として出さない（TAKASHI判断 2026-11-08）。
+  // 無料会員・プレミアム会員と、一度鑑定した人は従来どおり出す。共有リンクの結果表示・読み込み中・鑑定結果でも出す
+  const hideNavbar = !isRegistered && !isSubscribed && !renResult && activeTab === 'home' && !sharedView && !sharedTeaser && flowStep === 'input';
+
   return (
     <div className={`app-container${activeTab === 'home' && flowStep !== 'result' ? ' bg-cosmos' : ''}`} style={{
       '--color-theme': selectedCharacter === 'tsuki' ? '#cdbfe2' : '#9cc6d8',
@@ -1523,7 +1560,7 @@ function App() {
         transition: 'all 1.0s cubic-bezier(0.25, 0.8, 0.25, 1)'
       }} />
       {/* Scrollable Main Area */}
-      <main className="main-content no-scrollbar">
+      <main className={`main-content no-scrollbar${hideNavbar ? ' no-navbar' : ''}`}>
         
         {/* 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。「あなたも無料で鑑定する」で自分の入力画面へ */}
         {activeTab === 'home' && sharedView?.status === 'loading' && <LoadingScreen />}
@@ -1713,7 +1750,7 @@ function App() {
                 }
               }}>
                 <div style={{ position: 'relative' }}>
-                  <img src="/assets/tsuki.jpg" alt="月" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-tsuki)', boxShadow: 'var(--shadow-tsuki)', filter: isRegistered ? 'none' : 'grayscale(25%) blur(0.3px)' }} />
+                  <img src="/assets/tsuki.jpg" alt="月" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-tsuki)', boxShadow: 'var(--shadow-tsuki)' }} />
                   {!isRegistered && (
                     <div style={{
                       position: 'absolute',
@@ -1769,7 +1806,7 @@ function App() {
                 }
               }}>
                 <div style={{ position: 'relative' }}>
-                  <img src="/assets/ren.jpg" alt="蓮" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-ren)', boxShadow: 'var(--shadow-ren)', filter: isRegistered ? 'none' : 'grayscale(25%) blur(0.3px)' }} />
+                  <img src="/assets/ren.jpg" alt="蓮" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-ren)', boxShadow: 'var(--shadow-ren)' }} />
                   {!isRegistered && (
                     <div style={{
                       position: 'absolute',
@@ -3423,7 +3460,7 @@ function App() {
               <span style={{ fontSize: '0.75rem', color: '#a9a49a' }}>誰との運勢を届ける？</span>
               {[
                 { id: 'self', label: '🌙 自分だけの運勢' },
-                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${san(notifySub?.oppName)}との相性（いまの設定）` }] : []),
+                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${san(notifySub?.oppName)}との相性（今の設定）` }] : []),
                 ...savedPartners.map(p => ({ id: p.id, label: `💞 ${san(p.name)}との相性` }))
               ].map(opt => (
                 <button
@@ -3522,6 +3559,14 @@ function App() {
         </div>
       )}
 
+      <LpExitSurvey
+        isOpen={showLpExitSurvey}
+        onAnswer={(reason) => {
+          trackLpExit(reason, lpPlansSeenRef.current);
+          setShowLpExitSurvey(false);
+        }}
+      />
+
       <PremiumWelcomeModal isOpen={showPremiumWelcome} pairPartner={welcomePairPartner} onClose={() => setShowPremiumWelcome(false)} />
 
       {/* Premium LP Modal / Landing Page */}
@@ -3530,7 +3575,9 @@ function App() {
         onClose={() => setShowPremiumLP(false)}
         focus={premiumLPFocus}
         pair={mode === 'match' && oppBirth && renResult ? { name: san(oppName), unlocked: pairUnlock?.unlocked === true, onBuy: handleBuyPair } : null}
+        onPlansSeen={() => { lpPlansSeenRef.current = true; }}
         onStartPairReading={() => {
+          lpSkipSurveyRef.current = true;
           setMode('match');
           handleTabChange('home');
           window.scrollTo({ top: 0 });
@@ -3593,8 +3640,8 @@ function App() {
         onClose={() => setShowInstallGuideModal(false)}
       />
 
-      {/* Global Bottom Navbar (Always visible on top of all pages) */}
-      <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />
+      {/* Global Bottom Navbar（初めて鑑定する人の診断の入力画面だけは出さない） */}
+      {!hideNavbar && <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />}
     </div>
   );
 }
