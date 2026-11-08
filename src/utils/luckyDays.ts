@@ -74,4 +74,4 @@ export function findPairBestDays(me: LuckPerson, partner: LuckPerson, from: Date
 }
 
 export const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
-export const formatLuckyDate = (day: DayInfo): string => `${day.m}月${day.d}日(${WEEKDAYS[day.weekday]})`;
+export const formatLuckyDate = (day: DayInfo): string => `${day.y}年${day.m}月${day.d}日(${WEEKDAYS[day.weekday]})`;
