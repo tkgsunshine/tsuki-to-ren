@@ -173,7 +173,7 @@ export function renderPartnerTeaser(sub, teaser) {
                     <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(teaser.title)}</div>
                     <div style="font-size: 12px; color: #a9a293; line-height: 1.7; margin-top: 8px;">
                       ${teaser.pair
-                        ? `${who}のトリセツと深層鑑定は、これからもずっと見られます。<br>毎日の二人の点数と助言は、プレミアム（月額980円）で毎朝お届けします。`
+                        ? `${who}のトリセツと深層鑑定は、これからもずっと見られます。<br>二人の今日の点数と助言を毎日見るには、プレミアム（月額980円）が必要です。`
                         : `${who}との無料の期間が終わりました。<br>二人の今日の点数と助言は、プレミアム（月額980円）で見られます。`}
                     </div>
                   </td>

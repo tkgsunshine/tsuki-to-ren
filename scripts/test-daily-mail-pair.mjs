@@ -11,7 +11,7 @@ const html = (access) => renderEmailHtml(sub, buildDailyContent(sub, access), da
 test('無料の日数が終わった買い切り購入者: 「無料の期間が終わりました」ではなく、ずっと見られる物と月額で増える物を書く', () => {
   const h = html({ premium: false, locked: true, daysLeft: 0, pair: { unlocked: true, today: false } });
   assert.match(h, /ハルさんのトリセツと深層鑑定は、これからもずっと見られます。/);
-  assert.match(h, /毎日の二人の点数と助言は、プレミアム（月額980円）で毎朝お届けします。/);
+  assert.match(h, /二人の今日の点数と助言を毎日見るには、プレミアム（月額980円）が必要です。/);
   assert.doesNotMatch(h, /無料の期間が終わりました/);
 });
 
