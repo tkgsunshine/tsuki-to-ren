@@ -84,7 +84,7 @@ export default async function handler(req, res) {
   // GET only shows a confirmation (mail scanners prefetch links); the POST performs the change.
   if (req.method === 'GET') {
     return res.status(200).send(page('通知の停止', {
-      bubble: '運勢メール、ここで止めることもできるよ。あなたのペースがいちばん大事だから、決めたことなら応援するね。',
+      bubble: '運勢メール、ここで止めることもできるよ。あなたのペースが一番大事だから、決めたことなら応援するね。',
       heading: '毎朝の運勢メールを停止しますか？',
       body: '<p>停止すると、次の朝からメールが届かなくなります。</p>',
       actions: `<form method="POST" action="/api/unsubscribe?uid=${encodeURIComponent(uid)}&t=${encodeURIComponent(token)}">

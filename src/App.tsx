@@ -3423,7 +3423,7 @@ function App() {
               <span style={{ fontSize: '0.75rem', color: '#a9a49a' }}>誰との運勢を届ける？</span>
               {[
                 { id: 'self', label: '🌙 自分だけの運勢' },
-                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${san(notifySub?.oppName)}との相性（いまの設定）` }] : []),
+                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${san(notifySub?.oppName)}との相性（今の設定）` }] : []),
                 ...savedPartners.map(p => ({ id: p.id, label: `💞 ${san(p.name)}との相性` }))
               ].map(opt => (
                 <button

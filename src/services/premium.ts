@@ -35,7 +35,7 @@ const writeCachedPremium = (uid: string, active: boolean) => {
 
 const authHeader = async (): Promise<string> => {
   const user = getFirebaseAuth().currentUser;
-  if (!user) throw new Error('ログインの状態を確認できませんでした。いちどログインし直してから、もう一度お試しください。');
+  if (!user) throw new Error('ログインの状態を確認できませんでした。一度ログインし直してから、もう一度お試しください。');
   return `Bearer ${await user.getIdToken()}`;
 };
 

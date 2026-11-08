@@ -55,7 +55,7 @@ export const TOPICS = [
   { key: 'crush', label: '片思い・出会い', icon: 'heart', re: /片思い|出会い|マッチング|好きな人|友達から恋人|友達止まり|初めての恋人|職場の人/, bg: ['love-01', 'calm-03', 'love-03'] },
   { key: 'work', label: '友達・学校・仕事', icon: 'bag', re: /友達との|友情|苦手な人|バイト|学校|仕事|職場|第一印象/, bg: ['work-02', 'love-02', 'work-03'] },
   { key: 'luck', label: '運勢・運気', icon: 'sun', re: /運勢|運気|占い|振り返り|年末/, bg: ['daily-01', 'work-04', 'elements-03'] },
-  { key: 'mind', label: 'こころの整え方', icon: 'lotus', re: /不安|自信|嫉妬|依存|疲れ|心|優柔不断|短所|もやもや|寂しさ|気になる/, bg: ['calm-01', 'elements-01', 'calm-03'] },
+  { key: 'mind', label: '心の整え方', icon: 'lotus', re: /不安|自信|嫉妬|依存|疲れ|心|優柔不断|短所|もやもや|寂しさ|気になる/, bg: ['calm-01', 'elements-01', 'calm-03'] },
   { key: 'couple', label: '恋人との関係', icon: 'heart', re: /./, bg: ['calm-02', 'love-04', 'marriage-02'] },
 ];
 

@@ -111,7 +111,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
 
             {restStyle.length > 0 && (
               <>
-                <div style={sectionTitle}>【送り方の分析・つづき】</div>
+                <div style={sectionTitle}>【送り方の分析・続き】</div>
                 {restStyle.map(st => (
                   <div key={st.label}><strong style={{ color: '#e9defa' }}>{st.label}：</strong>{show(st.text, locked)}</div>
                 ))}
