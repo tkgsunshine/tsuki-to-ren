@@ -3,6 +3,7 @@ import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpe
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
+import { trackLpLeave, type LpSection } from '../services/analytics';
 
 const worries = [
   '既読のまま返事がこなくて、なかなか眠れない夜',
@@ -149,6 +150,8 @@ interface PremiumLPModalProps {
   onCancelSubscription?: (reasons: string[], note: string) => void | Promise<void>;
   /** 解約済み（更新日で終了）のとき、その終了日（ISO）。この場合は解約アンケートを出さず、お支払い画面へ直接進む */
   premiumEndsOn?: string | null;
+  /** 料金・プランのところまで読んだ（閉じたときのアンケートの集計で、料金を見てから閉じたかを分ける） */
+  onPlansSeen?: () => void;
 }
 
 // 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見られる。
@@ -315,7 +318,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   onCancelSubscription,
   premiumEndsOn,
   pair = null,
-  focus = 'monthly'
+  focus = 'monthly',
+  onPlansSeen
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -344,6 +348,34 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     root.addEventListener('scroll', check, { passive: true });
     return () => root.removeEventListener('scroll', check);
   }, [isOpen, Boolean(pair)]);
+  // 閉じたときに、一番下まで届いたまとまり（data-lp-sec の並び）・いた時間・閉じ方を1回送る（有料会員は送らない）
+  const leaveRef = useRef({ reached: 'top' as LpSection, idx: -1, openedAt: 0, byX: false, layout: 'monthly' as 'pair' | 'monthly', subscribed: false });
+  leaveRef.current.layout = Boolean(pair) && !isSubscribed ? 'pair' : 'monthly';
+  leaveRef.current.subscribed = isSubscribed;
+  useEffect(() => {
+    if (!isOpen) return;
+    const st = leaveRef.current;
+    Object.assign(st, { reached: 'top', idx: -1, openedAt: Date.now(), byX: false });
+    const root = scrollRef.current;
+    const update = () => {
+      if (!root) return;
+      const bottom = root.getBoundingClientRect().bottom;
+      root.querySelectorAll<HTMLElement>('[data-lp-sec]').forEach((el, i) => {
+        if (i > st.idx && el.getBoundingClientRect().top < bottom) { st.idx = i; st.reached = el.dataset.lpSec as LpSection; }
+      });
+    };
+    update();
+    root?.addEventListener('scroll', update, { passive: true });
+    return () => {
+      root?.removeEventListener('scroll', update);
+      if (!st.subscribed) trackLpLeave(st.layout, st.reached, Date.now() - st.openedAt, st.byX ? 'x' : 'other');
+    };
+  }, [isOpen]);
+  const closeByX = () => { leaveRef.current.byX = true; onClose(); };
+  useEffect(() => {
+    if (isOpen && ctaReady) onPlansSeen?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, ctaReady]);
 
   if (!isOpen) return null;
 
@@ -515,7 +547,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             type="button"
             className="tap-target"
             aria-label="閉じる"
-            onClick={onClose}
+            onClick={closeByX}
             style={{
               background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
@@ -621,6 +653,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
+          {showPlans && pair && !pair.unlocked && <div data-lp-sec="intro" />}
           {/* 教育: 無料で見えているのは入り口だけで、この先に何が分かるのかを、お相手の名前で具体的に見せる */}
           {showPlans && pair && !pair.unlocked && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
@@ -661,6 +694,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
           {showPlans && pair && <div ref={ctaMarkerRef} />}
 
+          {showPlans && pair && <div data-lp-sec="plans" />}
           {/* プランを選ぶ（買い切り ¥680 と 月額 ¥980 を1枚で見比べる） */}
           {showPlans && pair && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
@@ -721,6 +755,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
+          <div data-lp-sec="worries" />
           {/* こんなときに */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -753,6 +788,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           </div>
 
+          <div data-lp-sec="benefits" />
           {/* できること */}
           <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -842,6 +878,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           </div>
 
           {!(showPlans && pair) && <div ref={ctaMarkerRef} />}
+          <div data-lp-sec="price" />
           {/* 料金 */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き）。
@@ -912,6 +949,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           </div>
 
+          <div data-lp-sec="faq" />
           {/* FAQ Accordion Section */}
           <div style={{ padding: '0 1.15rem 1rem' }}>
             <h3 className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold', textAlign: 'center', margin: '0 0 0.75rem 0' }}>
@@ -997,6 +1035,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <span>•</span>
             <span>カード / Apple Pay / Google Pay</span>
           </div>
+          <div data-lp-sec="end" />
         </div>
 
         {/* PINNED FIXED BOTTOM CTA FOOTER（未購読の人には、説明を読み終えてから出す） */}
