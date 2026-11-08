@@ -29,10 +29,10 @@ export const LpExitSurvey: React.FC<{ isOpen: boolean; onAnswer: (reason: LpExit
         display: 'flex', flexDirection: 'column', gap: '0.9rem', textAlign: 'center'
       }}>
         <img
-          src="/assets/tsuki.webp"
+          src="/assets/tsuki-thinking.webp"
           alt="月"
           style={{
-            width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 12%',
+            width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover',
             border: '1.5px solid rgba(244, 114, 182, 0.6)', alignSelf: 'center'
           }}
         />
