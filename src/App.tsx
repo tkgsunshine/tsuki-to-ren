@@ -423,6 +423,8 @@ function App() {
     setPremiumLPFocus(focus);
     setShowPremiumLP(true);
   };
+  // 毎朝メールの「プレミアムの詳細を見る」（?lp=m）: 鑑定結果を出したあとに、月額プランの案内を開く
+  const pendingLPRef = useRef<'monthly' | null>(null);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news'>(initialRoute.settingsSubView);
@@ -640,6 +642,13 @@ function App() {
     }
 
     if (mName && mBirth && mMbti && mGender) {
+      if (params.get('lp') === 'm') {
+        pendingLPRef.current = 'monthly';
+        // 読み込み直しや「戻る」で何度も開かないよう、URLから外す
+        params.delete('lp');
+        const qs = params.toString();
+        window.history.replaceState(window.history.state, '', window.location.pathname + (qs ? `?${qs}` : ''));
+      }
       setMyName(mName);
       setMyBirth(mBirth);
       setMyMbti(mMbti);
@@ -1339,6 +1348,10 @@ function App() {
         pushNav({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' }, '/result' + window.location.search);
       }
       scrollMainTo(0);
+      if (pendingLPRef.current) {
+        openPremiumLP(pendingLPRef.current);
+        pendingLPRef.current = null;
+      }
     };
 
     if (skipLoading) {
