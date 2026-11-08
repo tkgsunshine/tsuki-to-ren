@@ -47,3 +47,35 @@ test('無料の日数が終わったお相手の箱に、月額プランの案�
   // 点数が見られる日は出さない
   assert.doesNotMatch(html({ premium: false, locked: false, daysLeft: 3 }), /lp=m/);
 });
+
+test('無料の3日目と6日目だけ、買い切り（680円）の案内の箱を出す。買った人・買ったか分からない人には出さない', () => {
+  const notBought = { unlocked: false, today: false };
+  for (let day = 1; day <= 7; day += 1) {
+    const h = html({ premium: false, locked: false, daysUsed: day, daysLeft: 7 - day, pair: notBought });
+    assert.equal(/のこと、もっと深く/.test(h), day === 3 || day === 6, `day ${day}`);
+  }
+  const h = html({ premium: false, locked: false, daysUsed: 3, daysLeft: 4, pair: notBought });
+  assert.match(h, /買い切り680円<\/strong>でずっと見られます/);
+  assert.match(h, /href="[^"]*&amp;lp=p"[^>]*>ハルさんの深層鑑定を見る/);
+  assert.doesNotMatch(html({ premium: false, locked: false, daysUsed: 3, daysLeft: 4, pair: { unlocked: true, today: false } }), /もっと深く/);
+  assert.doesNotMatch(html({ premium: false, locked: false, daysUsed: 3, daysLeft: 4, pair: { unlocked: false, today: false, unknown: true } }), /もっと深く/);
+  assert.doesNotMatch(html({ premium: true }), /もっと深く/);
+});
+
+test('無料の日数が終わったお相手: 買っていない人には買い切りのリンクも、買った人・分からない人には出さない', () => {
+  const link = /href="[^"]*&amp;lp=p"[^>]*>ハルさんのことだけ深く知るなら、買い切り680円も/;
+  assert.match(html({ premium: false, locked: true, daysUsed: 7, daysLeft: 0, pair: { unlocked: false, today: false } }), link);
+  assert.doesNotMatch(html({ premium: false, locked: true, daysUsed: 7, daysLeft: 0, pair: { unlocked: true, today: false } }), /lp=p/);
+  assert.doesNotMatch(html({ premium: false, locked: true, daysUsed: 7, daysLeft: 0, pair: { unlocked: false, today: false, unknown: true } }), /lp=p/);
+});
+
+test('無料の日数が終わったお相手: 二人の基本の相性は出し、今日の相性はぼかした画像（アプリと同じ）', () => {
+  const access = { premium: false, locked: true, daysUsed: 7, daysLeft: 0, pair: { unlocked: false, today: false } };
+  const c = buildDailyContent(sub, access);
+  const h = renderEmailHtml(sub, c, date, 'https://example.com/stop');
+  assert.match(h, new RegExp(`/assets/mail/score/base-${Math.round(c.partnerTeaser.baseScore)}\\.png`));
+  assert.match(h, /\/assets\/mail\/score\/today-locked\.png" width="156" height="156" alt="今日の相性 プレミアム限定"/);
+  assert.doesNotMatch(h, /\/assets\/mail\/score\/today(-solo)?-\d+\.png/, '今日の点数の画像は出さない');
+  assert.doesNotMatch(h, /基本の相性より/);
+  assert.match(h, /（本日）の相性/);
+});

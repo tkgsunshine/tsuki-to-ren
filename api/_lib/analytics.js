@@ -50,6 +50,9 @@ export const REG_PLACES = {
 export const FIRST_METRICS = { fortune: 'fortuneSessions', premium_view: 'premiumViewSessions' };
 // 案内（LP）をどのロックから開いたか: 買い切りで解放できる項目（pair）なら premiumViewsPair も数える。月額側は premiumViews との差
 export const PAIR_VIEW_METRIC = 'premiumViewsPair';
+// 毎朝メールのリンクから開いた案内（premiumViewsMail）と、そのうち買い切り側で開いた分（premiumViewsMailPair）
+export const MAIL_VIEW_METRIC = 'premiumViewsMail';
+export const MAIL_PAIR_VIEW_METRIC = 'premiumViewsMailPair';
 // 同じセッションで入力画面から鑑定したあとに、初めて案内を開いた人数（ff='1'）。「鑑定した人 → 案内を見た人」の割合はこれで割る。
 // premiumViewSessions は、前回の結果が自動で出た人・共有リンクで結果を見た人・マイページのバナーから開いた人も含むので、
 // 鑑定した人（入力画面から鑑定した人だけ）の一部になっていない（2026-11-05）

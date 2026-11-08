@@ -38,6 +38,8 @@ import { ToolNicchuView } from './components/ToolNicchuView';
 import { ToolCompatView } from './components/ToolCompatView';
 import { lpExitAnswered, trackCheckout, trackFortune, trackLpExit, trackPremiumView, trackRegStep } from './services/analytics';
 import { LpExitSurvey } from './components/LpExitSurvey';
+import { ReferralCodeEntry } from './components/ReferralInvite';
+import { captureRefFromUrl, completeRef, fetchMyReferral, getPendingRef, hasSentRef, setPendingRef as savePendingRef, type ReferralStatus } from './services/referral';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
@@ -424,8 +426,10 @@ function App() {
     setPremiumLPFocus(focus);
     setShowPremiumLP(true);
   };
-  // 毎朝メールの「プレミアムの詳細を見る」（?lp=m）: 鑑定結果を出したあとに、月額プランの案内を開く
-  const pendingLPRef = useRef<'monthly' | null>(null);
+  // 毎朝メールのリンク（?lp=m 月額 / ?lp=p 買い切り）: 鑑定結果を出したあとに、そのプランを先に見せる案内を開く
+  const pendingLPRef = useRef<'pair' | 'monthly' | null>(null);
+  // 次に開く案内がメールのリンクからか（管理画面で「メールから」を分けて数える）
+  const lpFromMailRef = useRef(false);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news'>(initialRoute.settingsSubView);
@@ -643,8 +647,9 @@ function App() {
     }
 
     if (mName && mBirth && mMbti && mGender) {
-      if (params.get('lp') === 'm') {
-        pendingLPRef.current = 'monthly';
+      const lp = params.get('lp');
+      if (lp === 'm' || lp === 'p') {
+        pendingLPRef.current = lp === 'p' ? 'pair' : 'monthly';
         // 読み込み直しや「戻る」で何度も開かないよう、URLから外す
         params.delete('lp');
         const qs = params.toString();
@@ -1072,6 +1077,18 @@ function App() {
     setReplaceCandidate({ partner: newPartner, manual: false });
   };
 
+  // 会員登録などで保存の枠が増えたら、入れ替えを待っていたお相手をそのまま保存する
+  useEffect(() => {
+    if (!replaceCandidate) return;
+    const { partner } = replaceCandidate;
+    if (savedPartners.some(p => isSamePartner(p, partner.name, partner.birth))) { setReplaceCandidate(null); return; }
+    if (savedPartners.filter((x) => !x.unlocked).length < partnerLimit) {
+      setSavedPartners([...savedPartners, partner]);
+      setReplaceCandidate(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [replaceCandidate, savedPartners, partnerLimit]);
+
   const replaceSavedPartner = (removeId: string) => {
     if (!replaceCandidate) return;
     const { partner } = replaceCandidate;
@@ -1147,6 +1164,45 @@ function App() {
   const [partnerLock, setPartnerLock] = useState<PartnerLock>(null);
   // 買い切り（お相手1人 ¥680）の状態。同じ /api/stripe/partner の答えに入っている
   const [pairUnlock, setPairUnlock] = useState<PairUnlock>(null);
+
+  // 友達紹介（2026-11-08 TAKASHI、src/services/referral.ts）。招待URL（?ref=）で来た人は、鑑定し終えたらサーバーへ送る。
+  // 送った会員は、友達が1人占うと、招待URLを作ったお相手との結果の一部が開く（お相手ごと）。
+  // 招待で占った友達には、恋愛運MAX日の直近の1日を見せる（この端末に覚える。2026-11-08 TAKASHI）
+  const [pendingRef, setPendingRef] = useState<string | null>(() => captureRefFromUrl() || getPendingRef());
+  const [refSent, setRefSent] = useState(() => hasSentRef());
+  const [referralStatus, setReferralStatus] = useState<ReferralStatus | null>(null);
+  const [referralLoading, setReferralLoading] = useState(false);
+  const referralBirth = mode === 'match' && /^\d{4}-\d{2}-\d{2}$/.test(oppBirth) ? oppBirth : '';
+  const referralBirthRef = useRef(referralBirth);
+  referralBirthRef.current = referralBirth;
+  const loadReferral = useCallback(async () => {
+    if (!referralBirth) return;
+    setReferralLoading(true);
+    const r = await fetchMyReferral(referralBirth);
+    setReferralLoading(false);
+    // 読み込み中にお相手が変わっていたら捨てる
+    if (r && referralBirthRef.current === referralBirth) setReferralStatus(r);
+  }, [referralBirth]);
+  useEffect(() => {
+    setReferralStatus(null);
+    if (!currentUser?.uid || !referralBirth) return;
+    void loadReferral();
+    // お友達が占ったあとに戻ってきたら、開いたことが分かるように読み直す
+    let last = Date.now();
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - last < 30_000) return;
+      last = Date.now();
+      void loadReferral();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [currentUser?.uid, referralBirth, loadReferral]);
+  const sendRef = async (code: string, birth: string): Promise<string | null> => {
+    const r = await completeRef(code, birth);
+    setPendingRef(getPendingRef());
+    if (r.ok) { setRefSent(true); return null; }
+    return r.message || '招待コードを確認できませんでした';
+  };
   // Stripe の決済から戻ったとき（?pair=success|cancel）。Webhook が数秒遅れることがあるので、解放されるまで何度か読み直す
   const [pairReturn, setPairReturn] = useState<string | null>(() => {
     const v = new URLSearchParams(window.location.search).get('pair');
@@ -1303,6 +1359,8 @@ function App() {
         relationship: data.relationship
       });
     }
+    // 招待URL（またはコード）で来た人が占い終えた: 招待した会員に数える
+    if (pendingRef) void sendRef(pendingRef, data.myBirth);
 
     startDiagnosis(
       data.myName,
@@ -1400,6 +1458,7 @@ function App() {
       }
       scrollMainTo(0);
       if (pendingLPRef.current) {
+        lpFromMailRef.current = true;
         openPremiumLP(pendingLPRef.current);
         pendingLPRef.current = null;
       }
@@ -1456,7 +1515,10 @@ function App() {
 
   // 有料プランの案内を開いた回数（管理画面の集計用）。買い切りで解放できるロックから開いたか（pair）、月額側か（monthly）も送る
   useEffect(() => {
-    if (showPremiumLP) trackPremiumView(premiumLPFocus);
+    if (showPremiumLP) {
+      trackPremiumView(premiumLPFocus, lpFromMailRef.current);
+      lpFromMailRef.current = false;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPremiumLP]);
 
@@ -1584,6 +1646,14 @@ function App() {
 
   // 初めて鑑定する人（未登録で、まだ鑑定結果が無い人）の診断（入力）画面では、下メニューを雑音として出さない（TAKASHI判断 2026-11-08）。
   // 無料会員・プレミアム会員と、一度鑑定した人は従来どおり出す。共有リンクの結果表示・読み込み中・鑑定結果でも出す
+  const referralProp = {
+    status: referralStatus,
+    loading: referralLoading,
+    unlocked: referralStatus?.unlocked === true,
+    showCodeEntry: !refSent,
+    onOpen: () => { if (!referralStatus) void loadReferral(); },
+    onRedeem: (code: string) => sendRef(code, myBirth)
+  };
   const hideNavbar = !isRegistered && !isSubscribed && !renResult && activeTab === 'home' && !sharedView && !sharedTeaser && flowStep === 'input';
 
   return (
@@ -1666,6 +1736,17 @@ function App() {
                   isRegistered={isRegistered}
                   isSubscribed={isSubscribed}
                   prefill={inputPrefill}
+                  afterSubmit={pendingRef ? (
+                    // 友達紹介: 招待URLで来た人には一言、そうでなければ目立たない「招待コードをお持ちの方」
+                    <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#f5d77a', lineHeight: 1.7, margin: 0 }}>
+                      🎁 お友達からの招待です。占い終わると、恋愛運MAX日の直近の1日が見られます
+                    </p>
+                  ) : !refSent ? (
+                    <ReferralCodeEntry
+                      onSubmit={async (code) => { savePendingRef(code); setPendingRef(code); return null; }}
+                      doneText="招待コードを預かりました。このまま占うとお友達に届きます"
+                    />
+                  ) : null}
                 />
                 </>
                 )}
@@ -1697,6 +1778,8 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={currentPartnerSaved}
+                referral={mode === 'match' ? referralProp : undefined}
+                referralGift={refSent}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -1736,6 +1819,8 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={currentPartnerSaved}
+                referral={mode === 'match' ? referralProp : undefined}
+                referralGift={refSent}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -3340,7 +3425,7 @@ function App() {
       )}
 
       {/* 鑑定したお相手の自動保存で上限に達したとき: 入れ替えて保存するか（自動のときは、結果画面で解放の確認が済んでから） */}
-      {replaceCandidate && !savedPartners.some(p => isSamePartner(p, replaceCandidate.partner.name, replaceCandidate.partner.birth))
+      {replaceCandidate && !showAuthModal && !savedPartners.some(p => isSamePartner(p, replaceCandidate.partner.name, replaceCandidate.partner.birth))
         && (replaceCandidate.manual || (flowStep === 'result' && partnerLock?.status !== 'checking' && !pairUnlock?.unlocked)) && (
         <PartnerReplaceModal
           candidate={replaceCandidate.partner}
@@ -3351,9 +3436,10 @@ function App() {
           onReplace={replaceSavedPartner}
           onSkip={skipReplacePartner}
           onUpgrade={() => {
-            skipReplacePartner();
-            if (!isRegistered) openSubView('profile');
-            else openPremiumLP('monthly');
+            // 未登録: 会員登録の画面を出す。お相手は持ったままにして、登録で枠が増えたら保存する（下の useEffect）
+            if (!isRegistered) { setShowAuthModal(true); return; }
+            setReplaceCandidate(null);
+            openPremiumLP('monthly');
           }}
         />
       )}
