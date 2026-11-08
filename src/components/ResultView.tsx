@@ -1532,7 +1532,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </linearGradient>
                   </defs>
                   <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="rgba(10,12,28,0.55)" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
-                  <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="none" stroke={`url(#${opts.gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * clamp(opts.score) * ringProgress) / 100} ${c}`} style={{ opacity: ringProgress > 0 ? 1 : 0 }} />
+                  {/* 見られない日はゲージを描かない（メールの today-locked.png と同じ。ゲージの長さで点数が読めないように） */}
+                  {!opts.hidden && <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="none" stroke={`url(#${opts.gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * clamp(opts.score) * ringProgress) / 100} ${c}`} style={{ opacity: ringProgress > 0 ? 1 : 0 }} />}
                 </svg>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   {opts.icon}
@@ -1543,12 +1544,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     color: opts.numColor,
                     lineHeight: 1.05,
                     textShadow: `0 0 14px ${opts.glow}, 0 2px 4px rgba(0,0,0,0.5)`,
-                    ...(opts.hidden ? { filter: 'blur(6px)', userSelect: 'none' as const } : {}),
+                    ...(opts.hidden ? { filter: 'blur(9px)', opacity: 0.8, userSelect: 'none' as const } : {}),
                     display: 'flex',
                     alignItems: 'baseline',
                     gap: '1px'
                   }}>
-                    {Math.round(opts.score * ringProgress)}<span style={{ fontSize: `${opts.size * 0.1}px`, fontWeight: 'bold' }}>点</span>
+                    {opts.hidden ? '??' : Math.round(opts.score * ringProgress)}<span style={{ fontSize: `${opts.size * 0.1}px`, fontWeight: 'bold' }}>点</span>
                   </div>
                   {opts.caption && <span style={{ fontSize: `${Math.round(opts.size * 0.072)}px`, color: '#a9a293', marginTop: '0.15rem' }}>{opts.caption}</span>}
                 </div>
