@@ -43,9 +43,9 @@ const accessFor = async (db, sub, isPremium, today) => {
     // 買い切り（お相手1人の深層鑑定）を買った相手か。読めなくても、普段の無料の案内で送る（有料の中身は増えない）。
     const pair = await findPairUnlock(db, sub.uid, sub.oppBirth, isLiveKey()).then((u) => pairAccess(u, today)).catch((e) => {
       console.error('⚠️ Could not read the pair purchase:', e?.message);
-      return { unlocked: false, today: false };
+      return { unlocked: false, today: false, unknown: true };
     });
-    return { premium: false, locked: r.locked && !pair.today, daysLeft: r.daysLeft, pair };
+    return { premium: false, locked: r.locked && !pair.today, daysUsed: r.daysUsed, daysLeft: r.daysLeft, pair };
   } catch (e) {
     // Counting failed: our fault, so this day is not held against the member (sent as a free day, uncounted)
     console.error('⚠️ Could not count the partner day:', e?.message);

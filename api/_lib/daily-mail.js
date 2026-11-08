@@ -28,7 +28,13 @@ const buildInput = (sub, isMatch) => ({
  * - pair: { unlocked, today } — the one-time purchase for this partner (api/_lib/pair-unlock.js).
  *   today = bought today: today's readings are open (full advice, like the result screen on the purchase day).
  *   unlocked + locked: the teaser thanks the buyer and says what stays open, instead of "the free days are over".
+ *   unknown: the purchase could not be read → nothing about the one-time purchase is shown (never sell it to a buyer).
+ * - daysUsed: free days used with this partner including today. On PAIR_PROMO_DAYS a small box suggests the one-time purchase.
  */
+// 無料の7日のうち、買い切り（¥680）の案内を出す日（毎日だと広告メールになるので2回だけ。7日目は「今日が最後」と重ねない）
+export const PAIR_PROMO_DAYS = [3, 6];
+// 買い切りを勧めてよいか（買った人・買ったか分からない人には出さない）
+const canPromotePair = (access) => Boolean(access.pair) && access.pair.unlocked !== true && access.pair.unknown !== true;
 export function buildDailyContent(sub, access = { premium: true }) {
   // "match" without a partner birth date (saved by older app versions) cannot be computed: send the solo fortune instead of nothing.
   const isMatch = !!sub.oppBirth && (sub.mode ? sub.mode === 'match' : true);
@@ -62,11 +68,12 @@ export function buildDailyContent(sub, access = { premium: true }) {
     }
   };
   if (isMatch && free && !locked && Number.isFinite(access.daysLeft)) content.freeDaysLeft = access.daysLeft;
+  if (isMatch && free && !locked && canPromotePair(access) && PAIR_PROMO_DAYS.includes(access.daysUsed)) content.pairPromo = true;
   if (locked) {
     // Only today's flow (the weather word and moon) — the same thing the locked result screen still shows
     const match = generateFortuneResult(buildInput(sub, true), character);
     const mood = getScoreMood(match.baseScore, match.dailyScore);
-    content.partnerTeaser = { title: mood.title, phase: mood.phase, pair: access.pair?.unlocked === true };
+    content.partnerTeaser = { title: mood.title, phase: mood.phase, pair: access.pair?.unlocked === true, pairOffer: canPromotePair(access) };
   }
   return content;
 }
@@ -106,8 +113,11 @@ export function resultUrlFor(sub, hasOpponent) {
   return `${SITE}/?${params.toString()}`; // "/" like the share links: the loading screen, then the result
 }
 
-/** The partner's result screen, then the monthly plan's page on top of it (App.tsx reads lp=m). */
-export const premiumLpUrlFor = (sub) => `${resultUrlFor(sub, true)}&lp=m`;
+/**
+ * The partner's result screen, then the paid-plan page on top of it (App.tsx reads lp=): m = led by the monthly plan,
+ * p = led by the one-time purchase for this partner. The app counts these opens as coming from the mail.
+ */
+export const premiumLpUrlFor = (sub, plan = 'monthly') => `${resultUrlFor(sub, true)}&lp=${plan === 'pair' ? 'p' : 'm'}`;
 
 // 点数ブロック: 鑑定結果画面と同じ「基本（小）と今日（大）の丸いメーター」と「今日の流れ」。
 // 二人の相性は「基本の相性／今日の相性」、一人で占う人は「基本運勢／今日の運勢」（画像の種類 -solo）。
@@ -162,6 +172,28 @@ export function renderFreeDaysNote(sub, daysLeft) {
 }
 
 // 無料の日数を使い切ったお相手: 点数は出さず、今日の流れ（月の形と一言）だけ見せ、点数と助言はプレミアムだと先に書く。
+// 無料の日数の途中（PAIR_PROMO_DAYS）に1つだけ出す、買い切り（¥680）の案内。点数ではなく、ずっと見られる中身で勧める。
+export function renderPairPromo(sub) {
+  const who = esc(partnerCall(sub));
+  return `<tr>
+            <td style="padding: 14px 25px 0;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#1a1530" style="background-color: #1a1530; border: 1px solid rgba(226, 192, 116, 0.25); border-radius: 16px;">
+                <tr>
+                  <td align="center" style="padding: 16px 18px 18px; text-align: center;">
+                    <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 15px; font-weight: bold; color: #f2c98a; letter-spacing: 0.08em;">${who}のこと、もっと深く</div>
+                    <div style="font-size: 12px; color: #cbd5e1; line-height: 1.8; margin-top: 8px;">
+                      ${who}のトリセツ（惹かれるファッション・ドキッとさせる仕草など）と深層鑑定を、<strong style="color: #fef08a;">買い切り680円</strong>でずっと見られます。
+                    </div>
+                    <div style="margin-top: 12px;">
+                      <a href="${esc(premiumLpUrlFor(sub, 'pair'))}" style="display: inline-block; padding: 9px 20px; border: 1px solid ${GOLD}; color: ${GOLD}; font-size: 12px; font-weight: bold; text-decoration: none; border-radius: 20px; letter-spacing: 0.04em;">${who}の深層鑑定を見る &#10132;</a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`;
+}
+
 export function renderPartnerTeaser(sub, teaser) {
   const who = esc(partnerCall(sub));
   return `<tr>
@@ -181,7 +213,10 @@ export function renderPartnerTeaser(sub, teaser) {
                     </div>
                     <div style="margin-top: 12px;">
                       <a href="${esc(premiumLpUrlFor(sub))}" style="display: inline-block; padding: 9px 20px; border: 1px solid ${GOLD}; color: ${GOLD}; font-size: 12px; font-weight: bold; text-decoration: none; border-radius: 20px; letter-spacing: 0.04em;">プレミアムの詳細を見る &#10132;</a>
-                    </div>
+                    </div>${teaser.pairOffer ? `
+                    <div style="font-size: 12px; line-height: 1.7; margin-top: 12px;">
+                      <a href="${esc(premiumLpUrlFor(sub, 'pair'))}" style="color: #cbd5e1; text-decoration: underline;">${who}のことだけ深く知るなら、買い切り680円も &#10132;</a>
+                    </div>` : ''}
                   </td>
                 </tr>
               </table>
@@ -361,6 +396,8 @@ export function renderEmailHtml(sub, content, date, stopUrl) {
               </table>
             </td>
           </tr>` : ''}
+
+          ${content.pairPromo ? renderPairPromo(sub) : ''}
 
           <!-- CTA -->
           <tr>

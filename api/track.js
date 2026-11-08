@@ -1,5 +1,5 @@
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeLpExit, normalizeLpLeave, normalizeRegPlace, normalizeSource, recordEvent } from './_lib/analytics.js';
+import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, MAIL_PAIR_VIEW_METRIC, MAIL_VIEW_METRIC, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeLpExit, normalizeLpLeave, normalizeRegPlace, normalizeSource, recordEvent } from './_lib/analytics.js';
 import { handleInquiry } from './_lib/inquiry.js';
 
 // Receives the site's own counters: a visit (once per browser session), a fortune (each time the form is submitted),
@@ -68,6 +68,10 @@ export default async function handler(req, res, deps = {}) {
     if (body.first === '1' && FIRST_METRICS[type]) also.push(FIRST_METRICS[type]);
     if (type === 'premium_view' && body.plan === 'pair') also.push(PAIR_VIEW_METRIC);
     if (type === 'premium_view' && body.ff === '1') also.push(FORTUNE_VIEW_METRIC); // 鑑定したあと、初めて案内を開いた
+    if (type === 'premium_view' && body.via === 'mail') { // 毎朝メールのリンクから開いた（買い切り側ならその内訳も）
+      also.push(MAIL_VIEW_METRIC);
+      if (body.plan === 'pair') also.push(MAIL_PAIR_VIEW_METRIC);
+    }
     await recordEvent(db, { type, source, landing, device, channel, regPlace, lpExit, lpLeave, also });
     return res.status(204).end();
   } catch (e) {
