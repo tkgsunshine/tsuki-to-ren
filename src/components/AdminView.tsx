@@ -24,6 +24,7 @@ interface DailyDoc extends Counts {
   byDevice?: Record<string, Counts>;
   byShare?: Record<string, number>;
   byReg?: Record<string, number>;
+  byLpExit?: Record<string, number>;
 }
 interface DayRow extends FullCounts {
   date: string;
@@ -154,6 +155,13 @@ const sumReg = (docs: DailyDoc[]) => {
   for (const d of docs) for (const [k, v] of Object.entries(d.byReg || {})) out[k] = (out[k] || 0) + (v || 0);
   return out;
 };
+const sumLpExit = (docs: DailyDoc[]) => {
+  const out: Record<string, number> = {};
+  for (const d of docs) for (const [k, v] of Object.entries(d.byLpExit || {})) out[k] = (out[k] || 0) + (v || 0);
+  return out;
+};
+const LP_EXIT_LABELS: [string, string][] = [['price', '金額が高い'], ['content', '内容がピンとこない'], ['free_enough', '無料の結果で十分']];
+
 const REG_LABELS: Record<string, string> = {
   click_top: '点数の下', click_bar: '画面下のバー', click_lock: '鍵のかかった所', click_other: 'その他',
   submit_card_email: '結果画面・メール', submit_card_google: '結果画面・Google', submit_card_x: '結果画面・X',
@@ -595,6 +603,59 @@ function SignupFunnel({ t, reg }: { t: FullCounts; reg: Record<string, number> }
   );
 }
 
+// 購入LPを買わずに閉じた人の「見送った理由」（閉じたときの1問アンケート、2026-11 から）
+function LpExitTable({ ex }: { ex: Record<string, number> }) {
+  const total = LP_EXIT_LABELS.reduce((n, [k]) => n + (ex[k] || 0), 0);
+  const seenTotal = LP_EXIT_LABELS.reduce((n, [k]) => n + (ex[`seen_${k}`] || 0), 0);
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>購入案内を閉じた理由（合計 {total} 人）</h2>
+      {total === 0 ? (
+        <div style={c.muted}>まだデータがありません</div>
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={c.table}>
+            <thead>
+              <tr>
+                <th style={c.th}></th>
+                <th style={{ ...c.th, ...c.num }}>人</th>
+                <th style={{ ...c.th, ...c.num }}>割合</th>
+                <th style={{ ...c.th, ...c.num }}>うち料金まで読んだ</th>
+                <th style={{ ...c.th, ...c.num }}>料金の前で閉じた</th>
+              </tr>
+            </thead>
+            <tbody>
+              {LP_EXIT_LABELS.map(([k, label]) => {
+                const n = ex[k] || 0;
+                const seen = ex[`seen_${k}`] || 0;
+                return (
+                  <tr key={k}>
+                    <td style={c.td}>{label}</td>
+                    <td style={{ ...c.td, ...c.num }}>{n}</td>
+                    <td style={{ ...c.td, ...c.num }}>{pct(n, total)}</td>
+                    <td style={{ ...c.td, ...c.num }}>{seen}</td>
+                    <td style={{ ...c.td, ...c.num }}>{n - seen}</td>
+                  </tr>
+                );
+              })}
+              <tr>
+                <td style={c.td}>合計</td>
+                <td style={{ ...c.td, ...c.num }}>{total}</td>
+                <td style={c.td}></td>
+                <td style={{ ...c.td, ...c.num }}>{seenTotal}</td>
+                <td style={{ ...c.td, ...c.num }}>{total - seenTotal}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        有料プランの案内を買わずに閉じたとき、3つから1つ選んでもらった答えです（1回の訪問で1度だけ聞きます。有料会員には聞きません）。「料金まで読んだ」は、料金・プランの所まで画面を進めてから閉じた人です。
+      </div>
+    </div>
+  );
+}
+
 function ShareTable({ rows, total }: { rows: [string, number][]; total: number }) {
   return (
     <div style={c.card}>
@@ -864,6 +925,8 @@ export default function AdminView() {
             <DailyTable days={daily} />
 
             <Funnel t={totals} since={sessionSince} ffSince={ffSince} lockSince={lockSince} />
+
+            <LpExitTable ex={sumLpExit(data.daily)} />
 
             <SignupFunnel t={totals} reg={sumReg(data.daily)} />
 

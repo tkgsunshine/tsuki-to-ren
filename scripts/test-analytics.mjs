@@ -126,6 +126,24 @@ test('track: steps toward a free account are counted, with where they happened',
   assert.deepEqual(Object.keys(odd.byReg), ['click_other'], 'an unknown place cannot add its own key');
 });
 
+test('track: the reason for leaving the paid-plan page is one of three, with whether the prices were seen', async () => {
+  const db = mockDb();
+  const send = async (body) => {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { source: 'x', landing: 'home', device: 'mobile_browser', type: 'lp_exit', ...body } }, res, { db });
+    return res.code;
+  };
+  assert.equal(await send({ reason: 'price', seen: '1' }), 204);
+  assert.equal(await send({ reason: 'free_enough', seen: '0' }), 204);
+  assert.equal(await send({ reason: 'other' }), 400, 'only the three answers are accepted');
+  assert.equal(await send({}), 400);
+  assert.equal(db.writes.length, 2, 'one write per answer');
+  const [price, free] = db.writes.map((w) => w.data);
+  assert.ok(price.lpExits);
+  assert.deepEqual(Object.keys(price.byLpExit).sort(), ['price', 'seen_price']);
+  assert.deepEqual(Object.keys(free.byLpExit), ['free_enough']);
+});
+
 test('countPremium: counted once per live subscription, under the member\'s first source', async () => {
   const db = mockDb(new Set(), { 'memberAttribution/u1': { source: 'x', landing: 'share_link', device: 'mobile_browser' } });
   assert.equal(await countPremium(db, { uid: 'u1', subscriptionId: 'sub_1', livemode: true }), true);

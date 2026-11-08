@@ -149,6 +149,8 @@ interface PremiumLPModalProps {
   onCancelSubscription?: (reasons: string[], note: string) => void | Promise<void>;
   /** 解約済み（更新日で終了）のとき、その終了日（ISO）。この場合は解約アンケートを出さず、お支払い画面へ直接進む */
   premiumEndsOn?: string | null;
+  /** 料金・プランのところまで読んだ（閉じたときのアンケートの集計で、料金を見てから閉じたかを分ける） */
+  onPlansSeen?: () => void;
 }
 
 // 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見られる。
@@ -315,7 +317,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   onCancelSubscription,
   premiumEndsOn,
   pair = null,
-  focus = 'monthly'
+  focus = 'monthly',
+  onPlansSeen
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -344,6 +347,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     root.addEventListener('scroll', check, { passive: true });
     return () => root.removeEventListener('scroll', check);
   }, [isOpen, Boolean(pair)]);
+  useEffect(() => {
+    if (isOpen && ctaReady) onPlansSeen?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, ctaReady]);
 
   if (!isOpen) return null;
 

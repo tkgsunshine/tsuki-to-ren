@@ -236,3 +236,14 @@ export const trackSignupIfNew = async (user: User) => {
     write(local(), `${SIGNUP_KEY}_${user.uid}`, '1');
   } catch {}
 };
+
+// 購入LPを買わずに閉じたときの1問アンケート（訪問ごとに1回だけ聞く）。seen = 料金・プランのところまで読んでいた
+export type LpExitReason = 'price' | 'content' | 'free_enough';
+const LP_EXIT_KEY = 'hasu_lp_exit_answered';
+export const lpExitAnswered = () => {
+  try { return Boolean(session()?.getItem(LP_EXIT_KEY)); } catch { return false; }
+};
+export const trackLpExit = (reason: LpExitReason, seen: boolean) => {
+  write(session(), LP_EXIT_KEY, '1');
+  void send({ type: 'lp_exit', reason, seen: seen ? '1' : '0', ...current() });
+};
