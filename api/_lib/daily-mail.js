@@ -25,6 +25,9 @@ const buildInput = (sub, isMatch) => ({
  * - daysLeft: free days left with this partner after today (shown in the mail)
  * - locked: the partner's free days are used up → the member's own fortune, plus a short teaser
  *   about the partner (today's flow only, no score) that links to the partner's result screen
+ * - pair: { unlocked, today } — the one-time purchase for this partner (api/_lib/pair-unlock.js).
+ *   today = bought today: today's readings are open (full advice, like the result screen on the purchase day).
+ *   unlocked + locked: the teaser thanks the buyer and says what stays open, instead of "the free days are over".
  */
 export function buildDailyContent(sub, access = { premium: true }) {
   // "match" without a partner birth date (saved by older app versions) cannot be computed: send the solo fortune instead of nothing.
@@ -36,7 +39,8 @@ export function buildDailyContent(sub, access = { premium: true }) {
   const hour = result.bestContactHour || '7:30 〜 8:30';
   const note = hour.match(/[（(](.*?)[）)]/);
   const allAdvice = result.dailyActionAdviceParts?.length ? result.dailyActionAdviceParts : [result.dailyActionAdvice || ''];
-  const free = access.premium !== true;
+  const pairToday = isMatch && !locked && access.pair?.today === true;
+  const free = access.premium !== true && !pairToday;
   const content = {
     hasOpponent: isMatch && !locked,
     score: result.dailyScore,
@@ -62,7 +66,7 @@ export function buildDailyContent(sub, access = { premium: true }) {
     // Only today's flow (the weather word and moon) — the same thing the locked result screen still shows
     const match = generateFortuneResult(buildInput(sub, true), character);
     const mood = getScoreMood(match.baseScore, match.dailyScore);
-    content.partnerTeaser = { title: mood.title, phase: mood.phase };
+    content.partnerTeaser = { title: mood.title, phase: mood.phase, pair: access.pair?.unlocked === true };
   }
   return content;
 }
@@ -101,6 +105,9 @@ export function resultUrlFor(sub, hasOpponent) {
   params.set('c', sub.character === 'ren' ? 'r' : 't');
   return `${SITE}/?${params.toString()}`; // "/" like the share links: the loading screen, then the result
 }
+
+/** The partner's result screen, then the monthly plan's page on top of it (App.tsx reads lp=m). */
+export const premiumLpUrlFor = (sub) => `${resultUrlFor(sub, true)}&lp=m`;
 
 // 点数ブロック: 鑑定結果画面と同じ「基本（小）と今日（大）の丸いメーター」と「今日の流れ」。
 // 二人の相性は「基本の相性／今日の相性」、一人で占う人は「基本運勢／今日の運勢」（画像の種類 -solo）。
@@ -168,7 +175,12 @@ export function renderPartnerTeaser(sub, teaser) {
                     </div>
                     <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(teaser.title)}</div>
                     <div style="font-size: 12px; color: #a9a293; line-height: 1.7; margin-top: 8px;">
-                      ${who}との無料の期間が終わりました。<br>二人の今日の点数と助言は、プレミアム（月額980円）で見られます。
+                      ${teaser.pair
+                        ? `${who}のトリセツと深層鑑定は、これからもずっと見られます。<br>二人の今日の点数と助言を毎日見るには、プレミアム（月額980円）が必要です。`
+                        : `${who}との無料の期間が終わりました。<br>二人の今日の点数と助言は、プレミアム（月額980円）で見られます。`}
+                    </div>
+                    <div style="margin-top: 12px;">
+                      <a href="${esc(premiumLpUrlFor(sub))}" style="display: inline-block; padding: 9px 20px; border: 1px solid ${GOLD}; color: ${GOLD}; font-size: 12px; font-weight: bold; text-decoration: none; border-radius: 20px; letter-spacing: 0.04em;">プレミアムの詳細を見る &#10132;</a>
                     </div>
                   </td>
                 </tr>
