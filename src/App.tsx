@@ -1037,12 +1037,12 @@ function App() {
       if (!isRegistered) {
         showConfirm(`非会員の保存上限（1人）に達しています。\n無料会員登録を行うと最大2人まで保存できます。無料登録しますか？`, { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
-          openSubView('profile');
+          setShowAuthModal(true);
         });
       } else if (!isSubscribed) {
         showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
-          handleTabChange('profile');
+          openPremiumLP('monthly');
         });
       } else {
         showAlert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
