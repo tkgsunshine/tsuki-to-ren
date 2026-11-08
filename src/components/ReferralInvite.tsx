@@ -53,10 +53,10 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
         <Gift size={16} /> お友達に送ると、続きが見られる
       </span>
       <p style={text}>
-        お友達1人が招待URLから占うと、<strong>このお相手との結果</strong>で、次の3つがこれからずっと見られます。
+        お友達1人が招待URLから占うと、<strong>このお相手との結果</strong>で、次の3つが解放されます。
       </p>
       <ul style={{ ...text, paddingLeft: '1.2rem' }}>
-        <li>恋愛運MAX日の日付（すべて）</li>
+        <li>恋愛運MAX日の日付</li>
         <li>返信が遅いときの、おすすめの返し方</li>
         <li>生まれ持った星から見た二人の相性</li>
       </ul>
