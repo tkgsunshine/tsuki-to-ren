@@ -57,7 +57,7 @@ export function ReferralInvite({ status, loading, onOpen }: {
       </p>
       <ul style={{ ...text, paddingLeft: '1.2rem' }}>
         <li>恋愛運MAX日の日付</li>
-        <li>返信が遅いときの、おすすめの返し方</li>
+        <li>返信が遅いときの返し方（トリセツ）</li>
         <li>生まれ持った星から見た二人の相性</li>
       </ul>
       <p style={{ ...text, fontSize: '0.76rem' }}>お友達にも、恋愛運MAX日の直近の1日をプレゼント。</p>
