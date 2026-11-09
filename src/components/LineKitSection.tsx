@@ -73,7 +73,7 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
     const sub = m ? m[2] : '';
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-        <span style={{ flexShrink: 0, width: '1.25rem', height: '1.25rem', borderRadius: '50%', background: 'linear-gradient(135deg, #f2d98f, #c9a24e)', color: '#2a1f3d', fontSize: '0.68rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif' }}>{sceneNo(s.key)}</span>
+        <span style={{ flexShrink: 0, width: '1.25rem', height: '1.25rem', borderRadius: '50%', background: 'linear-gradient(135deg, #f2d98f, #c9a24e)', color: '#2a1f3d', fontSize: '0.68rem', fontWeight: 'bold', lineHeight: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif' }}>{sceneNo(s.key)}</span>
         <span style={{ fontWeight: 'bold', color: '#f2e2b3', fontSize: '0.82rem', letterSpacing: '0.02em' }}>{main}</span>
         {sub && <span style={{ fontSize: '0.66rem', color: '#a99bbd' }}>{sub}</span>}
       </div>
