@@ -29,6 +29,7 @@ export const routeFromPath = (path: string): PageFields => {
   if (p.startsWith('/column/')) return page('column', { slug: p.slice('/column/'.length) || null });
   if (p === '/column') return page('column');
   if (p === '/tools/nicchu') return page('tool', { slug: 'nicchu' });
+  if (p === '/guardians') return page('tool', { slug: 'guardians' });
   if (p === '/terms' || p === '/privacy') return page('home', { legal: true });
   if (p === '/tokushoho' || p === '/company' || p === '/contact' || p === '/about' || p === '/news') return page('profile', { subView: p.slice(1) as SettingsSubView });
   if (p === '/result' || p === '/fortune') return page('fortune');
@@ -42,7 +43,7 @@ export const pathForPage = (page: PageFields): string => {
   if (page.legal) return '/terms';
   switch (page.tab) {
     case 'column': return page.slug ? `/column/${page.slug}` : '/column';
-    case 'tool': return `/tools/${page.slug || 'nicchu'}`;
+    case 'tool': return page.slug === 'guardians' ? '/guardians' : `/tools/${page.slug || 'nicchu'}`;
     case 'fortune': return '/result';
     case 'chat': return '/chat';
     case 'profile':

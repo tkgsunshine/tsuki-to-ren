@@ -99,6 +99,10 @@
       "destination": "/tools/nicchu/index.html"
     },
     {
+      "source": "/guardians",
+      "destination": "/guardians/index.html"
+    },
+    {
       "source": "/contact",
       "destination": "/index.html"
     },
