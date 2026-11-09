@@ -7,7 +7,7 @@
 //   node scripts/x/hook-video.mjs --out hook.mp4
 //
 // 名前は「あなた」「好きな人」、生年月日は架空（自分 2004-02-03 ENFP、相手 2002-01-30 INTJ）。
-// トリセツなどプレミアムの項目は、録画用ブラウザの localStorage でだけプレミアム表示にする（本番のデータには触れない）。
+// トリセツなどプレミアムの項目は、開発サーバーの「会員ステータス（開発用テスト）」で表示する（本番のデータ・アカウントには触れない）。
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, existsSync, writeFileSync } from 'node:fs';
@@ -32,11 +32,12 @@ export const SCRIPT = {
     { find: 'あなたの守護獣', caption: 'あなたの守護獣', benefit: '二人の守護獣から相性の土台がわかる', pick: 'あなたの守護獣 ✦\\n([^\\n]+)' },
     { find: '本日のLINE吉時間', caption: '今日のLINEの送りどき', benefit: '好きな人にLINEを送るベストな時間がわかる', pick: '推奨送信タイミング\\n([^\\n]+)\\n([^\\n]+)', fmt: '$1\n$2' },
     { find: '地雷3選', caption: '二人の間で踏みやすい地雷', benefit: 'ケンカになりやすいポイントを先回りで避けられる', pick: '1\\. ([^\\n]+)' },
-    { find: 'おすすめのお誘いフレーズ', caption: '好きな人の誘い方', benefit: '誘うならどこへ、どう言えばいいかわかる', pick: '「[^」\\n]+」' },
+    { find: 'チャンスの日と誘い方', caption: '好きな人の誘い方', benefit: '誘うならどこへ、どう言えばいいかわかる', pick: '💌[^\\n]*[：:]\\s*([^\\n]+)' },
     { find: '絶対にやってはいけないこと', caption: '絶対にやってはいけないこと', benefit: '好きな人に冷められる行動を先に知れる', pick: '5選\\n([^\\n]+)' },
     { find: '返信が遅いときの本当の理由', caption: '返信が遅い“本当の理由”', benefit: '返信が遅くても、理由がわかるから不安にならない', pick: '【本当の理由】\\s*([^。\\n]+。)' },
     { find: '脈ありサイン 3段階', caption: '今どの段階？脈ありサイン', benefit: '好きな人の脈あり度を3段階で確かめられる', pick: 'Lv\\.3[^\\n]+' },
     { find: 'キラーテンプレート', caption: 'そのまま送れるLINE文', benefit: '送るLINEに迷ったら、そのまま送れるテンプレも', pick: '「[^」\\n]{8,60}」' },
+    { find: '惹かれるファッション', caption: '惹かれるファッション', benefit: '好きな人に刺さる服や色がわかる', pick: '【好みの系統】([^\\n]+)' },
     { find: '詳細相性レーダー', caption: '6つの軸で相性を点数に', benefit: '会話・将来・安心感など6つの相性を点数で見られる', pick: '運命の引き寄せ\\n(\\d+)\\n点[\\s\\S]*?信頼・安心感\\n(\\d+)\\n点', fmt: '運命の引き寄せ $1点\n信頼・安心感 $2点' },
     { find: '未来予測スケジュール', caption: '二人のこれからの運気', benefit: '運気がいい月がわかるから、動くタイミングを決められる', pick: '(\\d+月)：([^\\n]+)\\n+([^。\\n]+。)', fmt: '$1：$2\n$3' },
   ],
@@ -118,7 +119,7 @@ async function record({ base, dir, W, H, scale }) {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: scale, isMobile: true, hasTouch: true, locale: 'ja-JP' });
   await ctx.addInitScript(`
-    try { localStorage.removeItem('hasu_last_diagnosis_input'); localStorage.setItem('hasu_tsuki_user', JSON.stringify({ uid: 'video-demo' })); localStorage.setItem('hasu_tsuki_premium', 'video-demo'); } catch {}
+    try { localStorage.removeItem('hasu_last_diagnosis_input'); } catch {}
     setInterval(${HIDE_FLOATING}, 50);
   `);
   const page = await ctx.newPage();
@@ -130,7 +131,15 @@ async function record({ base, dir, W, H, scale }) {
     frames.push({ file, t: Date.now() / 1000 });
     cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {});
   });
-  await page.goto(base, { waitUntil: 'networkidle' });
+  // プレミアムの項目を見せるため、開発サーバーのマイページにある「会員ステータス（開発用テスト）」で有料会員の表示にしてから、
+  // 画面を移って（読み込み直さずに）トップの入力画面へ行く。本番のサイトにはこの切り替えは出ない（IS_PRODUCTION_SITE）。
+  await page.goto(`${base.replace(/\/$/, '')}/mypage`, { waitUntil: 'networkidle' });
+  await page.getByText('プロフィール編集').click();
+  await page.getByRole('button', { name: /有料会員: 未購読/ }).click();
+  await page.getByRole('button', { name: /有料会員: 購読中/ }).waitFor();
+  await page.locator('nav, [class*=nav]').getByText('恋愛診断').first().click();
+  await page.waitForTimeout(1200);
+  await page.evaluate(() => { const b = document.querySelector('.main-content'); if (b) b.scrollTop = 0; window.scrollTo(0, 0); });
   await page.waitForTimeout(800);
   await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 92, maxWidth: W * scale, maxHeight: H * scale });
   const t0 = Date.now() / 1000;
