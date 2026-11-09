@@ -10,7 +10,7 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 
 // 有料は2プラン: 買い切り（お相手1人の深層鑑定 ¥680: pairCheckouts → pairs）と月額プレミアム（¥980: checkouts → premiums）。
 // *Sessions = ブラウザのセッションで最初の1回だけ数えた「人数」（流れの表はこちらで割る）。salesYen = 本番の購入額（円）
-const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'lockViewSessions', 'premiumViewsPair',
+const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'lockViewSessions', 'premiumViewsPair', 'premiumViewsMail', 'premiumViewsMailPair',
   'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds',
   'regViews', 'regClicks', 'regSubmits', 'authOpens'] as const; // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
 type Metric = typeof METRIC_KEYS[number];
@@ -547,7 +547,7 @@ function Funnel({ t, since, ffSince, lockSince }: { t: FullCounts; since: string
 function DailyTable({ days }: { days: DayRow[] }) {
   const cols: [keyof DayRow, string][] = [
     ['visits', '訪問'], ['fortunes', '鑑定（回）'], ['fortuneSessions', '鑑定した人'], ['signups', '会員登録'], ['shares', '共有'],
-    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['lockViewSessions', 'ロックまで届いた'], ['premiumViewFortuneSessions', 'うち鑑定のあと'], ['premiumViewsPair', 'うち買い切りから'],
+    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['lockViewSessions', 'ロックまで届いた'], ['premiumViewFortuneSessions', 'うち鑑定のあと'], ['premiumViewsPair', 'うち買い切りから'], ['premiumViewsMail', 'うちメールから'], ['premiumViewsMailPair', 'メールから買い切り'],
     ['pairCheckouts', '支払い画面 買い切り'], ['checkouts', '支払い画面 月額'], ['pairs', '購入 買い切り'], ['premiums', '購入 月額'],
     ['salesYen', '売上'], ['aiCalls', 'AIチャット'],
     ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'], ['columnCtaMids', 'コラム途中→鑑定へ'], ['columnCtaEnds', 'コラム最後→鑑定へ'],

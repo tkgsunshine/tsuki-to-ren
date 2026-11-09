@@ -201,9 +201,10 @@ export const trackLockView = () => {
 /** The paid-plan page opened, with the plan it led with: 'pair' from a lock the one-time purchase opens, else 'monthly'. */
 // ff = '1' the first time in this session the page is opened after a fortune from the input form, so /admin can divide
 // "saw the page" by "ran a fortune" with people who did both (a restored result or the My Page banner does not count as a fortune)
-export const trackPremiumView = (plan: 'pair' | 'monthly') => {
+// fromMail = opened by a link in the morning mail (lp=), counted apart on /admin
+export const trackPremiumView = (plan: 'pair' | 'monthly', fromMail = false) => {
   const ff = fortunedInSession() ? firstInSession('premium_view_ff') : '0';
-  void send({ type: 'premium_view', plan, first: firstInSession('premium_view'), ff, ...current() });
+  void send({ type: 'premium_view', plan, first: firstInSession('premium_view'), ff, ...(fromMail ? { via: 'mail' } : {}), ...current() });
 };
 
 /** The button to Stripe's payment page pressed: monthly Premium (checkout) or the one-time pair purchase (checkout_pair). */

@@ -1178,6 +1178,17 @@ body.chat-keyboard-open .chat-partner-picker {
   transition: all 0.3s ease;
 }
 
+.premium-lock-tag .lock-rest {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: #c9bfa6;
+  padding-left: 0.4rem;
+  margin-left: 0.05rem;
+  border-left: 1px solid rgba(226, 192, 116, 0.3);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 .premium-lock-tag:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(226, 192, 116, 0.2);

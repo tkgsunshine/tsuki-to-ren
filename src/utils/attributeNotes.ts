@@ -2,22 +2,12 @@
 // 名前と色そのものは鑑定と同じ表（fortuneEngine.ts の branchPersonalities / stemThemes）から読むので、ここで二重に持たない。
 // ここにあるのは説明文と、色見本の色コードだけ（点数には一切関わらない）。
 import { branchPersonalities, stemThemes } from './fortuneEngine';
+import guardianData from '../data/guardian-types.json' with { type: 'json' };
 
-/** 性格分類（生まれた日の十二支＝日柱の2文字目）ごとの説明 */
-const PERSONALITY_TEXT: Record<string, { reading: string; animal: string; note: string; love: string }> = {
-  '子': { reading: 'ね', animal: 'ねずみ', note: '頭の回転が速く、先を読んで動ける人。少ない情報からでも、うまくいく道を見つけます。', love: '恋では、相手の気持ちを察して、さりげなく先回りします。' },
-  '丑': { reading: 'うし', animal: 'うし', note: 'こつこつ続けられる、がまん強い人。時間がかかっても、決めたことは最後までやり通します。', love: '恋では、すぐに燃え上がるより、ゆっくり信頼を積み上げるタイプ。' },
-  '寅': { reading: 'とら', animal: 'とら', note: '堂々として、自分から前に出られる人。困っている人を放っておけない、親分肌です。', love: '恋では、自分からリードして、相手を守りたくなります。' },
-  '卯': { reading: 'う', animal: 'うさぎ', note: 'やわらかい雰囲気で、周りを和ませる人。気配りが細かく、人当たりのよさが魅力です。', love: '恋では、ケンカを避けて、穏やかな空気を大切にします。' },
-  '辰': { reading: 'たつ', animal: 'りゅう', note: '大きな夢を持ち、スケールの大きいことに挑める人。ここ一番で力を出せます。', love: '恋では、理想が高め。一緒に高め合える相手を求めます。' },
-  '巳': { reading: 'み', animal: 'へび', note: 'じっくり考え、物事の奥まで知りたくなる人。落ち着いた知的な魅力があります。', love: '恋では、一度好きになると一途。気持ちを深く長く持ち続けます。' },
-  '午': { reading: 'うま', animal: 'うま', note: '明るく、思い立ったらすぐ動ける人。その場を盛り上げる元気があります。', love: '恋では、好きな気持ちをまっすぐ伝える、分かりやすいタイプ。' },
-  '未': { reading: 'ひつじ', animal: 'ひつじ', note: '穏やかで、人をほっとさせる人。身近な人を大切にし、面倒見がよいです。', love: '恋では、相手を支えて、安心できる居場所をつくります。' },
-  '申': { reading: 'さる', animal: 'さる', note: '器用で、その場に合わせた立ち回りがうまい人。アイデアと工夫で切り抜けます。', love: '恋では、楽しませ上手。会話やデートの段取りで相手の心をつかみます。' },
-  '酉': { reading: 'とり', animal: 'とり', note: '美しいものが好きで、細かいところまで丁寧な人。センスとこだわりがあります。', love: '恋では、見た目や振る舞いの品のよさを大切にします。' },
-  '戌': { reading: 'いぬ', animal: 'いぬ', note: '約束を守り、仲間を裏切らない誠実な人。信じた人のために頑張れます。', love: '恋では、浮気をしない一途なタイプ。相手にも誠実さを求めます。' },
-  '亥': { reading: 'い', animal: 'いのしし', note: 'こうと決めたら、まっすぐ突き進む人。迷いが少なく、行動で道を切り開きます。', love: '恋では、好きになったら一直線。駆け引きは苦手です。' },
-};
+/** 性格分類（生まれた日の十二支＝日柱の2文字目）ごとの説明。文面は src/data/guardian-types.json（守護獣図鑑と共通） */
+const PERSONALITY_TEXT: Record<string, { reading: string; animal: string; note: string; love: string }> = Object.fromEntries(
+  guardianData.types.map((t) => [t.branch, { reading: t.reading, animal: t.animal, note: t.note, love: t.love }])
+);
 
 /** 守護カラー（生まれた日の1文字目＝日柱の1文字目）ごとの説明 */
 const COLOR_TEXT: Record<string, { reading: string; note: string }> = {

@@ -154,7 +154,7 @@
     <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleauth/1/en_US/appleid.auth.js" defer></script>
     <!-- 起動スプラッシュ: JSの読み込み中、#root に入っているSEO用の事前レンダリング文字が見えないよう覆う。src/main.tsx がアプリ描画後に消す -->
     <style>
-      #boot-splash{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;background:radial-gradient(ellipse at 50% 38%,#1b2c44 0%,#0f1a2a 45%,#0a1019 80%);color:#e2c074;transition:opacity .35s ease,visibility .35s ease;animation:boot-splash-giveup 0s linear 10s forwards}
+      #boot-splash{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;background:radial-gradient(ellipse at 50% 38%,#1b2c44 0%,#0f1a2a 45%,#0a1019 80%);color:#e2c074;transition:opacity .35s ease,visibility .35s ease}
       #boot-splash.is-hidden{opacity:0;visibility:hidden}
       #boot-splash .boot-art{width:min(300px,78vw);height:auto;overflow:visible}
       #boot-splash .boot-moon{animation:boot-splash-in 1s ease-out both}
@@ -169,18 +169,50 @@
       @keyframes boot-splash-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
       @keyframes boot-splash-bloom{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
       @keyframes boot-splash-dot{0%,100%{opacity:.25}50%{opacity:1}}
-      /* JSが読み込めないまま10秒経ったら、事前レンダリングの内容を読めるように外す */
-      @keyframes boot-splash-giveup{to{opacity:0;visibility:hidden}}
+      #boot-splash .boot-retry{display:none;margin:0;text-align:center;font-size:.8rem;line-height:1.7;color:#cbd5e1}
+      #boot-splash .boot-retry button{margin-top:.75rem;padding:.6rem 1.6rem;border:0;border-radius:999px;background:linear-gradient(135deg,#fef08a 0%,#e2c074 100%);color:#000;font-weight:700;font-size:.9rem;cursor:pointer}
+      #boot-splash.is-stuck .boot-dots{display:none}
+      #boot-splash.is-stuck .boot-retry{display:block}
       @media (prefers-reduced-motion:reduce){#boot-splash .boot-dots span,#boot-splash .boot-star,#boot-splash .boot-moon,#boot-splash .boot-lotus,#boot-splash .boot-title,#boot-splash .boot-sub{animation:none;opacity:.9}}
     </style>
     <noscript><style>#boot-splash{display:none}</style></noscript>
+    <!--
+      起動の見張り: 開きっぱなし・放置したタブを読み込み直すと、古いHTMLが残っていて、前のデプロイのJS（/assets/…）を読みに行くことがある。
+      Vercelは前のデプロイのJSを消す（404）ので、アプリが起動せず、#root のSEO用の文字だけが見えてしまう。
+      JS/CSSの読み込み失敗を見つけたら、最新のHTMLを取り直すために1回だけ自動で読み込み直す。
+      それでも起動しない・15秒たっても起動しないときは、スプラッシュに「読み込み直す」ボタンを出す（SEO用の文字は見せない）。src/main.tsx がアプリ描画後に window.__tsrBooted を立てる。
+    -->
+    <script>
+      (function(){
+        var KEY='tsr-boot-reload-at';
+        function reloadOnce(){
+          if(window.__tsrBooted)return false;
+          try{var last=+sessionStorage.getItem(KEY)||0;if(Date.now()-last<60000)return false;sessionStorage.setItem(KEY,String(Date.now()));}catch(e){return false;}
+          location.reload();return true;
+        }
+        function stuck(){
+          if(window.__tsrBooted)return;
+          var s=document.getElementById('boot-splash');if(s)s.classList.add('is-stuck');
+        }
+        window.__tsrBootReload=reloadOnce;
+        window.addEventListener('error',function(e){
+          var t=e&&e.target;if(!t||window.__tsrBooted)return;
+          var url=(t.tagName==='SCRIPT'&&t.src)||(t.tagName==='LINK'&&t.href)||'';
+          if(url.indexOf('/assets/')===-1)return;
+          if(!reloadOnce())stuck();
+        },true);
+        // 通信が遅いだけのこともあるので、時間切れでは読み込み直さず、ボタンだけ出す（裏で読み込みは続き、起動したらスプラッシュは消える）
+        setTimeout(stuck,15000);
+      })();
+    </script>
   </head>
   <body class="bg-black text-white antialiased overflow-hidden">
-    <div id="boot-splash" aria-hidden="true">
+    <div id="boot-splash">
       <svg class="boot-art" viewBox="0 0 300 220" aria-hidden="true"><defs><radialGradient id="bm"><stop offset="0" stop-color="#fff7d1"/><stop offset="1" stop-color="#e2c074"/></radialGradient><radialGradient id="bh"><stop offset="0" stop-color="#e2c074" stop-opacity=".38"/><stop offset="1" stop-color="#e2c074" stop-opacity="0"/></radialGradient><linearGradient id="bl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2c074" stop-opacity=".6"/><stop offset="1" stop-color="#7c3aed" stop-opacity=".3"/></linearGradient><mask id="bc"><circle cx="150" cy="75" r="62" fill="#fff"/><circle cx="182" cy="52" r="57" fill="#000"/></mask></defs><circle class="boot-star" cx="61" cy="223" r="1.4" fill="#fff" opacity=".6" style="animation-delay:0.4s"/><circle class="boot-star" cx="129" cy="229" r="1.1" fill="#fff" opacity=".6" style="animation-delay:2.0s"/><circle class="boot-star" cx="237" cy="-47" r="1.4" fill="#fff" opacity=".6" style="animation-delay:0.0s"/><circle class="boot-star" cx="180" cy="52" r="1.4" fill="#fff" opacity=".6" style="animation-delay:0.7s"/><circle class="boot-star" cx="38" cy="160" r="1.4" fill="#fff" opacity=".6" style="animation-delay:2.6s"/><circle class="boot-star" cx="221" cy="163" r="1.1" fill="#fff" opacity=".6" style="animation-delay:2.0s"/><circle class="boot-star" cx="17" cy="38" r="1.4" fill="#fff" opacity=".6" style="animation-delay:0.4s"/><circle class="boot-star" cx="207" cy="119" r="1.4" fill="#fff" opacity=".6" style="animation-delay:0.0s"/><circle class="boot-star" cx="283" cy="-48" r="0.8" fill="#fff" opacity=".6" style="animation-delay:2.4s"/><circle class="boot-star" cx="242" cy="-59" r="1.1" fill="#fff" opacity=".6" style="animation-delay:2.4s"/><circle class="boot-star" cx="-45" cy="57" r="1.1" fill="#fff" opacity=".6" style="animation-delay:1.9s"/><circle class="boot-star" cx="308" cy="118" r="1.4" fill="#fff" opacity=".6" style="animation-delay:2.5s"/><circle class="boot-star" cx="158" cy="122" r="1.4" fill="#fff" opacity=".6" style="animation-delay:2.5s"/><circle class="boot-star" cx="235" cy="147" r="0.8" fill="#fff" opacity=".6" style="animation-delay:2.8s"/><circle class="boot-star" cx="127" cy="-31" r="0.8" fill="#fff" opacity=".6" style="animation-delay:0.4s"/><circle class="boot-star" cx="193" cy="31" r="1.1" fill="#fff" opacity=".6" style="animation-delay:3.0s"/><circle class="boot-star" cx="284" cy="143" r="1.4" fill="#fff" opacity=".6" style="animation-delay:2.7s"/><circle class="boot-star" cx="94" cy="135" r="1.4" fill="#fff" opacity=".6" style="animation-delay:2.6s"/><circle class="boot-star" cx="137" cy="213" r="1.1" fill="#fff" opacity=".6" style="animation-delay:1.7s"/><circle class="boot-star" cx="239" cy="128" r="1.4" fill="#fff" opacity=".6" style="animation-delay:0.7s"/><circle class="boot-star" cx="112" cy="-66" r="1.1" fill="#fff" opacity=".6" style="animation-delay:1.9s"/><circle class="boot-star" cx="283" cy="3" r="1.4" fill="#fff" opacity=".6" style="animation-delay:2.7s"/><g class="boot-moon"><circle cx="150" cy="95" r="130" fill="url(#bh)"/><circle cx="150" cy="75" r="62" fill="url(#bm)" mask="url(#bc)"/></g><g class="boot-lotus"><g transform="translate(150 175) rotate(-70) scale(0.8)"><path d="M0 0C35.1 -27.3 23.4 -66.3 0 -78C-23.4 -66.3 -35.1 -27.3 0 0Z" fill="url(#bl)" stroke="#e2c074" stroke-width="1.5" stroke-linejoin="round" opacity="0.7"/></g><g transform="translate(150 175) rotate(70) scale(0.8)"><path d="M0 0C35.1 -27.3 23.4 -66.3 0 -78C-23.4 -66.3 -35.1 -27.3 0 0Z" fill="url(#bl)" stroke="#e2c074" stroke-width="1.5" stroke-linejoin="round" opacity="0.7"/></g><g transform="translate(150 175) rotate(-40) scale(0.95)"><path d="M0 0C35.1 -27.3 23.4 -66.3 0 -78C-23.4 -66.3 -35.1 -27.3 0 0Z" fill="url(#bl)" stroke="#e2c074" stroke-width="1.5" stroke-linejoin="round" opacity="0.85"/></g><g transform="translate(150 175) rotate(40) scale(0.95)"><path d="M0 0C35.1 -27.3 23.4 -66.3 0 -78C-23.4 -66.3 -35.1 -27.3 0 0Z" fill="url(#bl)" stroke="#e2c074" stroke-width="1.5" stroke-linejoin="round" opacity="0.85"/></g><g transform="translate(150 175) rotate(0) scale(1.1)"><path d="M0 0C35.1 -27.3 23.4 -66.3 0 -78C-23.4 -66.3 -35.1 -27.3 0 0Z" fill="url(#bl)" stroke="#e2c074" stroke-width="1.5" stroke-linejoin="round" opacity="1"/></g></g><path d="M60 185Q150 200 240 185" stroke="#e2c074" stroke-opacity=".3" fill="none"/></svg>
       <p class="boot-title">月と蓮</p>
       <p class="boot-sub">TSUKI TO REN</p>
       <div class="boot-dots"><span></span><span></span><span></span></div>
+      <div class="boot-retry">うまく読み込めませんでした。<br>通信の良いところで、もう一度お試しください。<br><button type="button" onclick="location.reload()">読み込み直す</button></div>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

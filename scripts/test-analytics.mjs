@@ -306,12 +306,15 @@ test('track: the first fortune / first paid-plan page of a session also counts a
   await send({ type: 'premium_view', plan: 'pair', first: '1', ff: '1' });
   await send({ type: 'premium_view', plan: 'monthly', first: '0', ff: '0' });
   await send({ type: 'checkout_pair' });
-  assert.equal(db.writes.length, 5, 'still one write per event');
+  await send({ type: 'premium_view', plan: 'monthly', first: '0', ff: '0', via: 'mail' });
+  await send({ type: 'premium_view', plan: 'pair', first: '0', ff: '0', via: 'mail' });
+  assert.equal(db.writes.length, 7, 'still one write per event');
   const keys = db.writes.map((w) => Object.keys(w.data).filter((k) => !['date', 'bySource', 'byLanding', 'byDevice'].includes(k)).sort());
   assert.deepEqual(keys, [
     ['fortuneSessions', 'fortunes'], ['fortunes'],
     ['premiumViewFortuneSessions', 'premiumViewSessions', 'premiumViews', 'premiumViewsPair'], ['premiumViews'],
     ['pairCheckouts'],
+    ['premiumViews', 'premiumViewsMail'], ['premiumViews', 'premiumViewsMail', 'premiumViewsMailPair', 'premiumViewsPair'],
   ]);
   assert.deepEqual(Object.keys(db.writes[0].data.bySource.x).sort(), ['fortuneSessions', 'fortunes']);
   let res = mockRes();

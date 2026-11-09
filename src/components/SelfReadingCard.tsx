@@ -1,6 +1,7 @@
 import React from 'react';
 import { getSelfReading } from '../utils/selfReading';
 import { san } from '../utils/fortuneEngine';
+import { LockLabel, countChars } from './LockRest';
 
 // 鑑定結果の冒頭（点数のすぐ下）に出す「あなたってこんな人」。
 // 本人の性格・恋愛の傾向を先に見せて「当たってる」と感じてもらい、その先の相性・運勢を読む気持ちにつなげる。
@@ -109,7 +110,7 @@ const OpponentReadingCard: React.FC<{
           </div>
           <div className="premium-lock-overlay">
             <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); onUnlock?.(); }}>
-              続きを見る
+              <LockLabel word="続きを見る" chars={countChars(...reading.items.map((it) => it.text))} />
             </button>
           </div>
         </div>
