@@ -23,7 +23,7 @@ const arg = (name, def) => {
 // 台本。hook / end: 最初と最後の言葉の画面（行ごと。空なら入れない。2026-11-06 運営の判断で既定は入れない）。picks: 結果の中で大きく見せる項目（find=見出しの文字、caption=上の字幕）
 export const SCRIPT = {
   hook: [], // 例: ['好きな人の既読スルー、', '脈なしって', '決めつけてない？']
-  input: '好きな人の生年月日とMBTIを入れるだけ',
+  input: ['あなたのMBTIと誕生日', '好きな人のMBTIと誕生日'], // 入力の場面の字幕（自分 → 好きな人）
   score: '二人の相性が点数でわかる',
   // benefit: 上の帯に大きく出す「この機能で何ができるか」（2026-11-08 運営の指定。結果の文そのものは出さない）。
   // pick: カードの文字から抜き出す正規表現（( ) があれば、その部分をつなげる）。fmt: 抜き出した文の形（$1 など）。無ければ本文の最初の一文
@@ -144,12 +144,14 @@ async function record({ base, dir, W, H, scale }) {
   m.input = [now(), 0];
   const myBirth = page.getByPlaceholder('例：19950401 (数字8桁)');
   await myBirth.scrollIntoViewIfNeeded();
-  await page.evaluate(() => { const b = document.querySelector('.main-content'); if (b) b.scrollTop += 120; });
+  await page.evaluate(() => { const b = document.querySelector('.main-content'); if (b) b.scrollTop += 230; });
   await page.waitForTimeout(250);
   await myBirth.click();
   await myBirth.pressSequentially(ME.birth, { delay: 70 });
   const selects = page.locator('select');
   await selects.nth(0).selectOption(ME.mbti);
+  await page.waitForTimeout(900); // 入れた自分の情報を見せる
+  m.inputMid = now();
   await page.waitForTimeout(250);
   const oppName = page.getByPlaceholder('お相手 (最大8文字)');
   await oppName.scrollIntoViewIfNeeded();
@@ -161,6 +163,7 @@ async function record({ base, dir, W, H, scale }) {
   await oppBirth.click();
   await oppBirth.pressSequentially(OPP.birth, { delay: 70 });
   await selects.nth(1).selectOption(OPP.mbti);
+  await page.waitForTimeout(900); // 入れた好きな人の情報を見せる
   await page.waitForTimeout(250);
   const submit = page.getByRole('button', { name: /鑑定を開始する/ });
   await submit.scrollIntoViewIfNeeded();
@@ -199,7 +202,7 @@ async function record({ base, dir, W, H, scale }) {
   // 時刻は、使う最初のコマ（t0の直前）を0にそろえる
   const shift = t0 - use[0].t;
   const sh = ([a, b]) => [a + shift, b + shift];
-  return { list, m: { hook: sh(m.hook), input: sh(m.input), score: sh(m.score), picks: m.picks.map(p => ({ ...p, start: p.start + shift, end: p.end + shift })), end: m.end + shift } };
+  return { list, m: { hook: sh(m.hook), input: sh(m.input), inputMid: m.inputMid + shift, score: sh(m.score), picks: m.picks.map(p => ({ ...p, start: p.start + shift, end: p.end + shift })), end: m.end + shift } };
 }
 
 async function main() {
@@ -221,8 +224,10 @@ async function main() {
   // 1. つかみ: ホーム画面をぼかして暗くし、悩みの言葉を大きく
   if (SCRIPT.hook.length) seg.push(`[0:v]trim=${m.hook[0].toFixed(2)}:${(m.hook[0] + 2.6).toFixed(2)},setpts=PTS-STARTPTS,boxblur=18:2,drawbox=x=0:y=0:w=iw:h=ih:color=0x05060f@0.55:t=fill,`
     + SCRIPT.hook.map((l, i) => text(l, i === SCRIPT.hook.length - 1 ? 104 : 88, i === SCRIPT.hook.length - 1 ? '0xF2D27A' : 'white', 700 + i * 150)).join(',') + '[s0]');
-  // 2. 入力（1.6倍速）
-  seg.push(`[0:v]trim=${m.input[0].toFixed(2)}:${m.input[1].toFixed(2)},setpts=(PTS-STARTPTS)/1.6,${bar},${text(SCRIPT.input, 54, 'white', 90)}[s1]`);
+  // 2. 入力（2026-11-09 運営の指定で、最初は自分と好きな人のMBTIと誕生日を入れるところを、等倍で見せる）
+  const inBar = (cap) => `drawbox=x=0:y=0:w=iw:h=230:color=0x0b0d1f@0.92:t=fill,${text('まずは入れるだけ', 44, '0xF2D27A', 60)},${text(cap, 72, 'white', 120)}`;
+  seg.push(`[0:v]trim=${m.input[0].toFixed(2)}:${m.inputMid.toFixed(2)},setpts=PTS-STARTPTS,${inBar(SCRIPT.input[0])}[s1]`);
+  seg.push(`[0:v]trim=${m.inputMid.toFixed(2)}:${m.input[1].toFixed(2)},setpts=PTS-STARTPTS,${inBar(SCRIPT.input[1])}[s90]`);
   // 3. 点数
   seg.push(`[0:v]trim=${m.score[0].toFixed(2)}:${m.score[1].toFixed(2)},setpts=PTS-STARTPTS,${bar},${text(SCRIPT.score, 62, 'white', 86)}[s2]`);
   // 4. 機能: 上の帯に、小さく項目名、大きく「この機能で何ができるか」
