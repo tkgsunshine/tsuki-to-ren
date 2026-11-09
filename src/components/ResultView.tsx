@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { trackLockView, trackRegStep } from '../services/analytics';
-import { Lock, Calendar, Download, X, Heart, Smartphone, Share } from 'lucide-react';
+import { Calendar, Download, X, Heart, Smartphone, Share } from 'lucide-react';
 import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
@@ -1580,7 +1580,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   glow: 'rgba(156, 198, 216, 0.55)',
                   icon: <MoonPhaseMark size={18} tint="blue" />,
                   label: todayLabel,
-                  caption: dailyLocked ? 'プレミアム限定' : '毎日変わる',
+                  // 見られない日は丸の下に何も書かない（案内は下の箱に。2026-11-09 TAKASHI）
+                  caption: dailyHidden ? '' : '毎日変わる',
                   numColor: '#e8f3f8',
                   hidden: dailyHidden
                 })}
@@ -1641,11 +1642,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
                   <div style={{ fontSize: '0.8rem', color: '#e8e3d8', lineHeight: 1.65 }}>
                     {partnerLock.guest
-                      ? <>無料会員登録で{partnerCall}との今日の相性を解放</>
-                      : <>{partnerCall}との無料の期間が終わりました。<br />二人の毎日の点数と助言は、プレミアム（月額980円）でずっと見られます。</>}
+                      ? <>{partnerCall}との今日の相性は、<strong style={{ color: '#f2e2b3' }}>無料会員</strong>になるとすぐに見られます。<br />同じお相手なら<strong style={{ color: '#f2e2b3' }}>7日間</strong>、毎日の点数と助言をチェックできます。</>
+                      : <>{partnerCall}との今日の相性を無料で見られる<strong style={{ color: '#f2e2b3' }}>7日間</strong>が終わりました。<br />プレミアムなら、毎日の点数と助言に加えて、<strong style={{ color: '#f2e2b3' }}>10年先までの二人の流れ</strong>も見られます。</>}
                   </div>
                   <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); if (partnerLock.guest) handleScrollToRegister(); else handleLockTagClick(e); }}>
-                    <Lock size={11} /> {partnerLock.guest ? '無料会員登録' : 'プレミアムで今日の相性を見る'}
+                    {partnerLock.guest ? '無料登録して今日の相性を見る' : '今日の相性を見る（月額980円）'}
                   </button>
                   {!partnerLock.guest && canBuyPair && (
                     <button
