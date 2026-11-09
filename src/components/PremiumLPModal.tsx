@@ -154,6 +154,28 @@ interface PremiumLPModalProps {
   onPlansSeen?: () => void;
 }
 
+// 画面イメージの左上に重ねる「イメージ（サンプル）」の札。実際の結果ではないことを、拡大しなくても分かるようにする
+const SampleBadge: React.FC = () => (
+  <span style={{
+    position: 'absolute',
+    left: '0.4rem',
+    top: '0.4rem',
+    padding: '3px 9px',
+    borderRadius: '6px',
+    background: 'rgba(5, 7, 10, 0.86)',
+    border: '1px solid rgba(226, 192, 116, 0.85)',
+    color: '#f2e2b3',
+    fontSize: '0.66rem',
+    fontWeight: 'bold',
+    lineHeight: 1.3,
+    letterSpacing: '0.04em',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.5)',
+    pointerEvents: 'none'
+  }}>
+    イメージ（サンプル）
+  </span>
+);
+
 // 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見られる。
 // 枠より長い画像のときだけ、開いた直後に少し動かして見せ、下に「スクロール」の案内を出す（下まで見たら消える）
 const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({ src, alt, onClose }) => {
@@ -230,12 +252,15 @@ const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({
           justifyContent: 'space-between',
           gap: '0.5rem',
           padding: '0.55rem 0.6rem 0.55rem 0.9rem',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          background: 'rgba(17, 24, 35, 0.95)',
+          borderBottom: '1px solid rgba(226, 192, 116, 0.55)',
+          background: 'rgba(52, 42, 20, 0.97)',
           flexShrink: 0
         }}>
-          <span style={{ fontSize: '0.66rem', color: '#a9a49a', lineHeight: 1.4 }}>
-            ※ 画面はイメージです（名前や内容はサンプルです）
+          <span style={{ fontSize: '0.8rem', color: '#f2e2b3', fontWeight: 'bold', lineHeight: 1.45 }}>
+            ※ 画面はイメージです
+            <span style={{ display: 'block', fontSize: '0.68rem', fontWeight: 'normal', color: '#d8d2c6' }}>
+              名前や内容はサンプルで、実際の鑑定結果とは異なります
+            </span>
           </span>
           <button
             type="button"
@@ -682,8 +707,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                       style={{ position: 'relative', display: 'block', width: '100%', marginTop: '0.55rem', padding: 0, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', background: '#0a0e14', cursor: 'zoom-in' }}
                     >
                       <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: 'top' }} />
+                      <SampleBadge />
                       <span style={{ position: 'absolute', right: '0.4rem', bottom: '0.4rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(5, 7, 10, 0.75)', color: '#e8e3d8', fontSize: '0.6rem' }}>
-                        画面イメージ・タップで拡大
+                        タップで拡大
                       </span>
                     </button>
                   </CharBubble>
@@ -860,6 +886,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     decoding="async"
                     style={{ display: 'block', width: '100%', height: '170px', objectFit: 'cover', objectPosition: 'top' }}
                   />
+                  <SampleBadge />
                   <span style={{
                     position: 'absolute',
                     right: '0.45rem',
@@ -870,7 +897,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     color: '#e8e3d8',
                     fontSize: '0.62rem'
                   }}>
-                    画面イメージ・タップで拡大
+                    タップで拡大
                   </span>
                 </button>
               </div>
