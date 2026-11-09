@@ -1178,14 +1178,15 @@ function App() {
   const loadReferral = useCallback(async () => {
     if (!referralBirth) return;
     setReferralLoading(true);
-    const r = await fetchMyReferral(referralBirth);
+    const r = await fetchMyReferral(referralBirth, /^\d{4}-\d{2}-\d{2}$/.test(myBirth) ? myBirth : undefined);
     setReferralLoading(false);
     // 読み込み中にお相手が変わっていたら捨てる
     if (r && referralBirthRef.current === referralBirth) setReferralStatus(r);
-  }, [referralBirth]);
+  }, [referralBirth, myBirth]);
+  // 未登録でも読む（2026-11-09 TAKASHI「会員登録しなくても招待URL送れるように」）。登録・ログインしたら読み直す（端末の分が会員へ移る）
   useEffect(() => {
     setReferralStatus(null);
-    if (!currentUser?.uid || !referralBirth) return;
+    if (!referralBirth) return;
     void loadReferral();
     // お友達が占ったあとに戻ってきたら、開いたことが分かるように読み直す
     let last = Date.now();

@@ -10,8 +10,10 @@ import { partnerKey } from './partner-days.js';
 // 友達がそこから鑑定すると、そのお相手との結果の一部が開く（REFERRALS_TO_UNLOCK 人で、ずっと）:
 // 恋愛運MAX日の日付・返信が遅いときのおすすめの返し方・生まれ持った星から見た二人の相性。
 // 開くのは招待URLを作ったときのお相手だけ（2026-11-08 TAKASHI「紹介してみれるのは今占ってる相手だけ」）。
-// 友達は登録なしでよい。友達側の特典はなし。
-//   referralCodes/{code}  { uid, partner: <お相手の記号>, createdAt }      コード → 会員とお相手
+// 友達は登録なしでよい。送る側も登録なしでよい（2026-11-09 TAKASHI「会員登録しなくても招待URL送れるように」）:
+// 未登録の人は端末の記号（hasu_visitor_id のハッシュ）を持ち主として記録し、あとで登録したらその会員へ移す（ensureCode の guestOwner）。
+// 未登録の人の分は、端末のデータを消すと見られなくなる（お知らせも届かない）。
+//   referralCodes/{code}  { uid: <会員のuid か g_端末の記号>, partner: <お相手の記号>, ownerBirth?: <送った人の生年月日の記号>, createdAt }
 //   referrals/{uid}       { partners: { <お相手の記号>: { code, count, friends: { <端末の記号>: 日付 }, unlockedAt, createdAt } } }
 // お相手の記号は partnerDays・pairUnlocks と同じ（生年月日のハッシュ。生年月日そのものは保存しない）。
 // 書くのはサーバーだけ（firestore.rules で端末からは読み書き不可）。友達の生年月日やIPもそのまま保存しない。
@@ -37,6 +39,10 @@ export const cleanCode = (raw) => {
 };
 export const newCode = (rand = randomInt) => Array.from({ length: CODE_LENGTH }, () => ALPHABET[rand(ALPHABET.length)]).join('');
 const hash = (kind, v) => createHash('sha256').update(`referral:${kind}:${v}`).digest('hex').slice(0, 24);
+/** The owner id for a sender who is not signed in (from the browser's random id). */
+export const guestOwner = (visitor) => `g_${hash('owner', visitor)}`;
+const isGuestOwner = (owner) => String(owner).startsWith('g_');
+const birthKey = (birth) => hash('birth', birth);
 const jstDate = (ms) => new Date(ms + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
 export const referralNoticeId = (uid, pk) => `ref${hash('notice', `${uid}:${pk}`).slice(0, 32)}`;
@@ -60,10 +66,26 @@ const status = (entry) => {
 };
 
 /** This member's referral record for one partner, creating the code on first use. */
-export async function ensureCode(db, uid, pk, { now = Date.now(), rand } = {}) {
+export async function ensureCode(db, uid, pk, { now = Date.now(), rand, myBirth, fromGuest } = {}) {
   const ref = db.collection(REFERRALS).doc(uid);
   const cur = (await ref.get()).data()?.partners?.[pk];
   if (cur?.code) return status(cur);
+  // Signed up after inviting as a guest: the guest's code (and friends) move to the member
+  if (fromGuest && fromGuest !== uid) {
+    const guestRef = db.collection(REFERRALS).doc(fromGuest);
+    const moved = await db.runTransaction(async (tx) => {
+      const [g, mine] = await Promise.all([tx.get(guestRef), tx.get(ref)]);
+      const entry = mine.data()?.partners?.[pk];
+      if (entry?.code) return status(entry);
+      const ge = g.data()?.partners?.[pk];
+      if (!ge?.code) return null;
+      tx.set(ref, { partners: { [pk]: ge } }, { merge: true });
+      tx.set(db.collection(REFERRAL_CODES).doc(ge.code), { uid }, { merge: true });
+      tx.set(guestRef, { partners: { [pk]: { movedTo: uid } } }, { merge: true });
+      return status(ge);
+    });
+    if (moved) return moved;
+  }
   for (let i = 0; i < 5; i++) {
     const code = newCode(rand);
     const codeRef = db.collection(REFERRAL_CODES).doc(code);
@@ -73,7 +95,7 @@ export async function ensureCode(db, uid, pk, { now = Date.now(), rand } = {}) {
       if (entry?.code) return status(entry); // made at the same time by another request
       if (taken.exists) return null;
       const createdAt = new Date(now).toISOString();
-      tx.set(codeRef, { uid, partner: pk, createdAt });
+      tx.set(codeRef, { uid, partner: pk, ...(myBirth ? { ownerBirth: birthKey(myBirth) } : {}), createdAt });
       tx.set(ref, { partners: { [pk]: { code, count: 0, friends: {}, createdAt } } }, { merge: true });
       return status({ code, count: 0 });
     });
@@ -105,9 +127,13 @@ export async function completeReferral(db, { code, visitor, birth, uid, ipKey, n
   const pk = owned?.partner;
   if (!owner || !pk) return { ok: false, reason: 'unknown' };
   if (uid && uid === owner) return { ok: false, reason: 'self' };
+  if (visitor && guestOwner(visitor) === owner) return { ok: false, reason: 'self' }; // the guest's own browser
   if (birth) {
-    const profileBirth = (await db.collection(USER_DATA).doc(owner).get()).data()?.profile?.birth;
-    if (profileBirth && profileBirth === birth) return { ok: false, reason: 'self' };
+    if (owned.ownerBirth && owned.ownerBirth === birthKey(birth)) return { ok: false, reason: 'self' };
+    if (!isGuestOwner(owner)) {
+      const profileBirth = (await db.collection(USER_DATA).doc(owner).get()).data()?.profile?.birth;
+      if (profileBirth && profileBirth === birth) return { ok: false, reason: 'self' };
+    }
   }
   const ref = db.collection(REFERRALS).doc(owner);
   const friendKey = hash('visitor', visitor);
@@ -133,7 +159,7 @@ export async function completeReferral(db, { code, visitor, birth, uid, ipKey, n
     return { counted: true, unlockedNow };
   });
 
-  if (r.unlockedNow) {
+  if (r.unlockedNow && !isGuestOwner(owner)) { // a guest has no inbox
     // One thank-you notice per member and partner (a fixed id, so a retry does not send two)
     try {
       const noticeRef = db.collection(NOTICES).doc(referralNoticeId(owner, pk));
@@ -154,7 +180,7 @@ const optionalUid = async (req, auth) => {
 };
 
 // POST /api/stripe/referral
-//   { op: 'me', oppBirth }                     → { code, count, unlocked, need }（ログイン必須。そのお相手の分。初回にコードを作る）
+//   { op: 'me', oppBirth, myBirth?, visitor? } → { code, count, unlocked, need }（ログインなしは visitor で端末ごと。そのお相手の分。初回にコードを作る）
 //   { op: 'complete', code, visitor, birth? }  → { ok, reason? }（友達が鑑定し終えたとき。ログイン不要）
 export default async function handler(req, res, deps = {}) {
   res.setHeader('Cache-Control', 'no-store, private');
@@ -166,11 +192,23 @@ export default async function handler(req, res, deps = {}) {
     const now = deps.now ?? Date.now();
 
     if (body.op === 'me') {
-      const user = await verifyUser(req, auth);
-      if (user.error) return res.status(user.error.status).json({ status: 'error', message: user.error.message });
+      // Signed in → the member. Not signed in → this browser (visitor), so a guest can invite too
+      const visitor = VISITOR_RE.test(String(body.visitor || '')) ? String(body.visitor) : null;
+      let owner = null;
+      if (req.headers.authorization) {
+        const user = await verifyUser(req, auth);
+        if (user.error) return res.status(user.error.status).json({ status: 'error', message: user.error.message });
+        owner = user.uid;
+      } else if (visitor) {
+        owner = guestOwner(visitor);
+      } else {
+        return res.status(401).json({ status: 'error', message: 'Bad request' });
+      }
       const oppBirth = String(body.oppBirth || '');
       if (!BIRTH_RE.test(oppBirth)) return res.status(400).json({ status: 'error', message: 'Invalid oppBirth' });
-      return res.status(200).json({ status: 'ok', ...(await ensureCode(db, user.uid, partnerKey(oppBirth), { now, rand: deps.rand })) });
+      const myBirth = BIRTH_RE.test(String(body.myBirth || '')) ? String(body.myBirth) : undefined;
+      const fromGuest = visitor && !isGuestOwner(owner) ? guestOwner(visitor) : undefined;
+      return res.status(200).json({ status: 'ok', ...(await ensureCode(db, owner, partnerKey(oppBirth), { now, rand: deps.rand, myBirth, fromGuest })) });
     }
 
     if (body.op === 'complete') {

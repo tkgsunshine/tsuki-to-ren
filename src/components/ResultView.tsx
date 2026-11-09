@@ -2342,10 +2342,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           soloOpen={!sharedBy && referral?.unlocked === true}
           soloGift={!sharedBy && referralGift}
           referral={!sharedBy && referral ? {
-            isRegistered,
             status: referral.status,
             loading: referral.loading,
-            onRegister: () => handleScrollToRegister('lock'),
             onOpen: referral.onOpen,
             showCodeEntry: referral.showCodeEntry,
             onRedeem: referral.onRedeem

@@ -4,7 +4,7 @@ import { cleanCode, inviteText, inviteUrl } from '../services/referral';
 import type { ReferralStatus } from '../services/referral';
 
 // 友達紹介の欄（恋愛運MAX日のロックの下に出す）。src/services/referral.ts / api/_lib/referral.js
-// 送る側: 招待URLとコードを出し、LINE・コピーで送る。未登録の人には「無料登録して友達に送る」。
+// 送る側: 招待URLとコードを出し、LINE・コピーで送る。未登録でも送れる（2026-11-09 TAKASHI）。
 // 友達側: 「招待コードをお持ちの方」から手で入れる（URLのコードが別のブラウザに引き継げなかったとき用）。
 
 const box: React.CSSProperties = {
@@ -23,12 +23,10 @@ const linkBtn: React.CSSProperties = {
   textDecoration: 'underline', cursor: 'pointer', padding: '0.2rem'
 };
 
-export function ReferralInvite({ isRegistered, status, loading, onRegister, onOpen }: {
-  isRegistered: boolean;
+export function ReferralInvite({ status, loading, onOpen }: {
   /** null while loading or when it could not be read */
   status: ReferralStatus | null;
   loading?: boolean;
-  onRegister: () => void;
   /** The panel was opened (the code is made on the server the first time) */
   onOpen?: () => void;
 }) {
@@ -61,9 +59,7 @@ export function ReferralInvite({ isRegistered, status, loading, onRegister, onOp
         <li>生まれ持った星から見た二人の相性</li>
       </ul>
       <p style={{ ...text, fontSize: '0.76rem' }}>お友達にも、恋愛運MAX日の直近の1日をプレゼント。</p>
-      {!isRegistered ? (
-        <button type="button" style={goldBtn} onClick={onRegister}>無料登録して、お友達に送る</button>
-      ) : !open ? (
+      {!open ? (
         <button type="button" style={goldBtn} onClick={() => { setOpen(true); onOpen?.(); }}>お友達に送る</button>
       ) : !code ? (
         <p style={{ ...text, textAlign: 'center' }}>{loading ? '招待URLを用意しています…' : '招待URLを用意できませんでした。少し待ってから開き直してください'}</p>

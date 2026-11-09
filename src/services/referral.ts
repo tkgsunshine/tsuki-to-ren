@@ -82,15 +82,17 @@ export const completeRef = async (code: string, birth?: string): Promise<{ ok: b
   }
 };
 
-/** The signed-in member's code for this partner and how many friends have read with it (null when not signed in or on error). */
-export const fetchMyReferral = async (oppBirth: string): Promise<ReferralStatus | null> => {
+/**
+ * This person's code for this partner and how many friends have read with it (null on error).
+ * Not signed in: kept for this browser (2026-11-09 TAKASHI). After signing up, the server moves it to the member.
+ */
+export const fetchMyReferral = async (oppBirth: string, myBirth?: string): Promise<ReferralStatus | null> => {
   const t = await token();
-  if (!t) return null;
   try {
     const res = await fetch(ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
-      body: JSON.stringify({ op: 'me', oppBirth })
+      headers: { 'Content-Type': 'application/json', ...(t ? { Authorization: `Bearer ${t}` } : {}) },
+      body: JSON.stringify({ op: 'me', oppBirth, visitor: visitorId(), ...(myBirth ? { myBirth } : {}) })
     });
     if (!res.ok) return null;
     const d = await res.json();
