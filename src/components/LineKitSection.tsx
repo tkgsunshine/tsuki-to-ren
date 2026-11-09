@@ -111,8 +111,8 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
       <div style={{ fontSize: '0.68rem', color: '#a99bbd', marginBottom: '0.5rem' }}>{kit.basis}</div>
 
       <div className="font-serif" style={{ fontSize: '0.78rem', color: '#f0ebf5', lineHeight: '1.65', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-        {/* 1. 送り方の分析 */}
-        <div style={sectionTitle}>【{partnerLabel}に届くLINEの送り方】</div>
+        {/* 1. お相手のLINEのタイプ（返信のペース・書き方など） */}
+        <div style={sectionTitle}>【{partnerLabel}のLINEのタイプ】</div>
         {firstStyle && (
           <div><strong style={{ color: '#e9defa' }}>{firstStyle.label}：</strong>{firstStyle.text}</div>
         )}
