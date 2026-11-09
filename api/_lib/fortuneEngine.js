@@ -2198,7 +2198,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
     const oppStemTrait = oppPillarObj ? getStemTraits(oppPillarObj.stem, oppNickname) : null;
     let oneLiner = '';
     let summary = '';
-    // 状況（片思い中など）に合わせた月・蓮のひとこと。サマリーの末尾ではなく「月からあなたへ」のカードの先頭に出す（同じ月の言葉が続けて2つ並ばないように）
+    // 状況（片思い中など）に合わせた月・蓮のひとこと。サマリーの末尾ではなく「今日の恋の過ごし方」（旧「月からあなたへ」）のカードの先頭に出す（同じ月の言葉が続けて2つ並ばないように）
     let relAdviceText = '';
     if (hasOpponent) {
         const relKey = input.relationship || '片思い中';
@@ -2388,7 +2388,8 @@ export function generateFortuneResult(input, character, now = new Date()) {
     }
     const topics = [
         {
-            title: character === 'tsuki' ? `🌙 月から${san(myNickname, 'あなた')}へ` : `🔮 蓮から${san(myNickname, 'あなた')}へ`,
+            // 見出しは中身（状況に合わせたひとこと＋今日の向き合い方）が分かる名前に（TAKASHI判断 2026-11-10。旧「月/蓮から〇〇さんへ」）
+            title: character === 'tsuki' ? '🌙 今日の恋の過ごし方' : '🔮 今日の恋の過ごし方',
             text: relAdviceText ? `${relAdviceText}\n\n${firstCardText}` : firstCardText
         },
         {

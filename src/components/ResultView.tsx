@@ -140,6 +140,9 @@ export const formatAppraisalText = (text: string | undefined | null): string => 
   return formatted.replace(/\n{2,}/g, '\n').trim();
 };
 
+// 結果画面の「月の温室で相談する」などチャットへの誘導の箱。非表示にした（TAKASHI判断 2026-11-10）。戻すときは true に
+const SHOW_RESULT_CHAT_CTA: boolean = false;
+
 // 共有リンクから開いたときに上に出し続けるバーの高さ
 const SHARED_BAR_HEIGHT = '3rem';
 
@@ -1171,7 +1174,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     ...(hasOpponent && activeResult?.opponentPillar ? [`${partnerCall}ってこんな人（性格・恋愛の傾向）`] : []),
     // お相手ありの「性格・コミュニケーションの相性」「月/蓮からのメッセージ」「深層鑑定」は、無料会員でもぼかす（プレミアムで開く。TAKASHI判断 2026-11-07）ので、登録の箱には出さない
     ...(!hasOpponent && hasCommSection ? ['二人の性格・コミュニケーションの相性の全文'] : []),
-    ...(!hasOpponent ? ['月・蓮からのメッセージの全文', `深層鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`] : []),
+    ...(!hasOpponent ? ['今日の恋の過ごし方の全文', `深層鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`] : []),
     ...(hasOpponent ? [`${partnerCall}との今日の相性を7日間`] : []),
     '月・蓮へのチャット相談（1日2回）',
   ];
@@ -2109,7 +2112,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {activeResult.topics.slice(0, 1).map((topic) => (
             <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
               <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                {renderCharHeading(topic.title, 36)}
+                {/* 見出しは「今日の恋の過ごし方」（内容が分かる名前に。旧「月/蓮から〇〇さんへ」）。絵文字はキャラのアイコンに置き換える */}
+                <CharHeadingIcon char={topic.title.startsWith('🔮') ? '蓮' : '月'} size={36} />
+                {topic.title.replace(/^(🌙|🔮)\s*/u, '')}
               </h3>
               <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {/* 未登録・無料会員は1行だけ見せ、2行目以降をぼかす（TAKASHI判断 2026-11-07） */}
@@ -2329,102 +2334,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
             })()}
           </div>
         </div>
-
-        {/* 最高シンクロ日・恋愛運MAX日（LINEの吉時間・コツの欄のすぐ下。根拠・珍しさは全員に、日付は月額プレミアムか、そのお相手の買い切り） */}
-        <LuckyDaysSection
-          result={activeResult}
-          isSubscribed={isSubscribed}
-          pairOpen={pairOpen}
-          myName={myName}
-          oppName={oppNickname}
-          onLockClick={handleLockTagClick}
-          onPairLockClick={handleDeepLockClick}
-          lockWord={LOCK_WORD}
-          soloOpen={!sharedBy && referral?.unlocked === true}
-          soloGift={!sharedBy && referralGift}
-          referral={!sharedBy && referral ? {
-            status: referral.status,
-            loading: referral.loading,
-            onOpen: referral.onOpen,
-            showCodeEntry: referral.showCodeEntry,
-            onRedeem: referral.onRedeem
-          } : undefined}
-        />
       </div>
 
-        {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ */}
-        {onOpenChat && !sharedBy && (() => {
-          const isRen = selectedChar === 'ren';
-          const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
-          const oppLabel = hasOpponent ? san(oppNickname) : '';
-          const lead = hasOpponent
-            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考えるよ。` : `今日のこと、もう少しお話ししませんか？${oppLabel}に送る一言も、一緒に考えましょう。`)
-            : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
-          const questions = hasOpponent
-            ? [`${oppLabel}に今日なんて送ればいい？`, `${oppLabel}の本音や脈ありサインは？`]
-            : ['今日の恋愛運をもっと活かすには？', '出会いを増やすにはどう動けばいい？'];
-          return (
-            <div className="glass-panel" style={{
-              padding: '1rem',
-              border: `1.5px solid rgba(${charColor}, 0.35)`,
-              background: `linear-gradient(135deg, rgba(${charColor}, 0.1) 0%, rgba(12, 16, 23, 0.85) 100%)`
-            }}>
-              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
-                <img
-                  src={isRen ? '/assets/ren.webp' : '/assets/tsuki.webp'}
-                  alt={isRen ? '蓮' : '月'}
-                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid var(${isRen ? '--color-ren' : '--color-tsuki'})`, flexShrink: 0 }}
-                />
-                <div style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px 12px 12px 12px', padding: '0.5rem 0.65rem', fontSize: '0.76rem', color: '#e8e3d8', lineHeight: '1.6' }}>
-                  <div style={{ color: isRen ? '#9cc6d8' : '#cdbfe2', fontWeight: 'bold', fontSize: '0.7rem', marginBottom: '2px' }}>{isRen ? '蓮' : '月'}</div>
-                  {lead}
-                </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', margin: '0.65rem 0 0.6rem' }}>
-                {questions.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => onOpenChat(q)}
-                    style={{
-                      fontSize: '0.74rem',
-                      color: isRen ? '#cfe6f0' : '#e4d8f2',
-                      border: `1px solid rgba(${charColor}, 0.45)`,
-                      borderRadius: '999px',
-                      padding: '0.45rem 0.8rem',
-                      background: `rgba(${charColor}, 0.1)`,
-                      textAlign: 'left',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    💬 {q}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="font-serif"
-                onClick={() => onOpenChat()}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '0.7rem',
-                  borderRadius: '999px',
-                  border: 'none',
-                  fontWeight: 'bold',
-                  fontSize: '0.85rem',
-                  color: isRen ? '#0f1a22' : '#1b1626',
-                  background: isRen ? 'linear-gradient(90deg, #8cc3dc, #3a86ab)' : 'linear-gradient(90deg, #c9b3e6, #9f86c0)',
-                  cursor: 'pointer'
-                }}
-              >
-                {isRen ? '📖 蓮の書斎で相談する' : '🌙 月の温室で相談する'}
-              </button>
-            </div>
-          );
-        })()}
-
-        {/* 5 Detailed Appraisal Topics */}
+        {/* 5 Detailed Appraisal Topics（LINE吉時間の下・最高シンクロ日の上。TAKASHI判断 2026-11-10） */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={18} />
           {hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : `${san(myName, 'あなた')}の深層鑑定結果`}
@@ -2635,6 +2547,99 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </React.Fragment>
           );
         })}
+
+        {/* 最高シンクロ日・恋愛運MAX日（深層鑑定結果のすぐ下。LINEの吉時間の箱からは外した（TAKASHI判断 2026-11-10）。根拠・珍しさは全員に、日付は月額プレミアムか、そのお相手の買い切り） */}
+        <LuckyDaysSection
+          result={activeResult}
+          isSubscribed={isSubscribed}
+          pairOpen={pairOpen}
+          myName={myName}
+          oppName={oppNickname}
+          onLockClick={handleLockTagClick}
+          onPairLockClick={handleDeepLockClick}
+          lockWord={LOCK_WORD}
+          soloOpen={!sharedBy && referral?.unlocked === true}
+          soloGift={!sharedBy && referralGift}
+          referral={!sharedBy && referral ? {
+            status: referral.status,
+            loading: referral.loading,
+            onOpen: referral.onOpen,
+            showCodeEntry: referral.showCodeEntry,
+            onRedeem: referral.onRedeem
+          } : undefined}
+        />
+
+        {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ。結果画面では非表示（TAKASHI判断 2026-11-10。チャットタブは残す） */}
+        {SHOW_RESULT_CHAT_CTA && onOpenChat && !sharedBy && (() => {
+          const isRen = selectedChar === 'ren';
+          const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
+          const oppLabel = hasOpponent ? san(oppNickname) : '';
+          const lead = hasOpponent
+            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考えるよ。` : `今日のこと、もう少しお話ししませんか？${oppLabel}に送る一言も、一緒に考えましょう。`)
+            : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
+          const questions = hasOpponent
+            ? [`${oppLabel}に今日なんて送ればいい？`, `${oppLabel}の本音や脈ありサインは？`]
+            : ['今日の恋愛運をもっと活かすには？', '出会いを増やすにはどう動けばいい？'];
+          return (
+            <div className="glass-panel" style={{
+              padding: '1rem',
+              border: `1.5px solid rgba(${charColor}, 0.35)`,
+              background: `linear-gradient(135deg, rgba(${charColor}, 0.1) 0%, rgba(12, 16, 23, 0.85) 100%)`
+            }}>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                <img
+                  src={isRen ? '/assets/ren.webp' : '/assets/tsuki.webp'}
+                  alt={isRen ? '蓮' : '月'}
+                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid var(${isRen ? '--color-ren' : '--color-tsuki'})`, flexShrink: 0 }}
+                />
+                <div style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px 12px 12px 12px', padding: '0.5rem 0.65rem', fontSize: '0.76rem', color: '#e8e3d8', lineHeight: '1.6' }}>
+                  <div style={{ color: isRen ? '#9cc6d8' : '#cdbfe2', fontWeight: 'bold', fontSize: '0.7rem', marginBottom: '2px' }}>{isRen ? '蓮' : '月'}</div>
+                  {lead}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', margin: '0.65rem 0 0.6rem' }}>
+                {questions.map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => onOpenChat(q)}
+                    style={{
+                      fontSize: '0.74rem',
+                      color: isRen ? '#cfe6f0' : '#e4d8f2',
+                      border: `1px solid rgba(${charColor}, 0.45)`,
+                      borderRadius: '999px',
+                      padding: '0.45rem 0.8rem',
+                      background: `rgba(${charColor}, 0.1)`,
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    💬 {q}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="font-serif"
+                onClick={() => onOpenChat()}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '0.7rem',
+                  borderRadius: '999px',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem',
+                  color: isRen ? '#0f1a22' : '#1b1626',
+                  background: isRen ? 'linear-gradient(90deg, #8cc3dc, #3a86ab)' : 'linear-gradient(90deg, #c9b3e6, #9f86c0)',
+                  cursor: 'pointer'
+                }}
+              >
+                {isRen ? '📖 蓮の書斎で相談する' : '🌙 月の温室で相談する'}
+              </button>
+            </div>
+          );
+        })()}
 
         {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
       {activeResult.opponentTorisetsu && (
