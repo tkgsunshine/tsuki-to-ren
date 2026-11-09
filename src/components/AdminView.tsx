@@ -776,10 +776,11 @@ function ShareTable({ rows, total }: { rows: [string, number][]; total: number }
   );
 }
 
-// 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる）
+// 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる／一昨日 = 1日分、2日前で終わる）
 const PERIODS = [
   { label: '今日', days: 1, offset: 0 },
   { label: '昨日', days: 1, offset: 1 },
+  { label: '一昨日', days: 1, offset: 2 },
   { label: '7日', days: 7, offset: 0 },
   { label: '30日', days: 30, offset: 0 },
   { label: '90日', days: 90, offset: 0 },
