@@ -203,6 +203,14 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={partner ? (onPairLockClick || onLockClick) : onLockClick} lockWord={lockWord} commonLabels={soloCommon} openCount={soloGift ? 1 : 0} />
         {locked && referral && (
           <>
+            {/* 返信が遅いとき・生まれ持った星と同じ案内（2026-11-10 TAKASHI）。押すと下の紹介の欄へ */}
+            <button
+              type="button"
+              onClick={() => document.getElementById('referral-invite')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              style={{ display: 'block', margin: '0 auto', background: 'none', border: 'none', color: '#f5d77a', fontSize: '0.74rem', textDecoration: 'underline', cursor: 'pointer', padding: '0.2rem' }}
+            >
+              🎁 お友達を紹介して開く
+            </button>
             <ReferralInvite status={referral.status} loading={referral.loading} onOpen={referral.onOpen} />
             {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。恋愛運MAX日の直近の1日が見れます" />}
           </>

@@ -22,8 +22,11 @@ export const METRICS = {
   reg_view: 'regViews', reg_click: 'regClicks', reg_submit: 'regSubmits', auth_open: 'authOpens',
   lock_view: 'lockViewSessions', // 鑑定したあと、有料のロック（押すと購入LP）が画面に入った人。ブラウザが訪問ごとに1回だけ送る
   lp_leave: 'lpLeaves', // 購入LPを閉じた回数（有料会員以外）。どこまで読んだか・何秒いたか・閉じ方は byLpLeave
-  lp_exit: 'lpExits' // 購入LPを買わずに閉じた人が答えた「見送った理由」（訪問ごとに1回だけ聞く）。理由ごとの数は byLpExit
+  lp_exit: 'lpExits', // 購入LPを買わずに閉じた人が答えた「見送った理由」（訪問ごとに1回だけ聞く）。理由ごとの数は byLpExit
+  ref_send: 'refSends' // 友達紹介の招待URLを送った回数（LINEで送る・リンクをコピー）。ReferralInvite.tsx
 };
+// 友達紹介の招待URLから占ったお友達（数えた人だけ）。サーバー（_lib/referral.js）だけが書く
+export const REF_FRIEND_METRIC = 'refFriends';
 // 購入LPを閉じたときの1問アンケートの答え（決まった3つ＋スキップ）。byLpExit に `${reason}` と、料金のところまで読んでいたら `seen_${reason}` も数える
 export const LP_EXIT_REASONS = new Set(['price', 'content', 'free_enough', 'skip']); // skip = 答えずにスキップした
 // 購入LPを閉じたとき: 一番下まで届いたまとまり（並びは src/components/PremiumLPModal.tsx の data-lp-sec）、いた時間、閉じ方
@@ -58,7 +61,7 @@ export const MAIL_PAIR_VIEW_METRIC = 'premiumViewsMailPair';
 // 鑑定した人（入力画面から鑑定した人だけ）の一部になっていない（2026-11-05）
 export const FORTUNE_VIEW_METRIC = 'premiumViewFortuneSessions';
 export const SALES_METRIC = 'salesYen'; // 本番の購入額（円、Stripe の amount_total）。月額は初回分のみ（更新の請求は入らない）
-export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'auth_open', 'lock_view', 'lp_exit', 'lp_leave']);
+export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'auth_open', 'lock_view', 'lp_exit', 'lp_leave', 'ref_send']);
 
 // Fixed list so a forged request cannot add arbitrary keys (utm:* is the one open slot, kept short).
 export const SOURCES = new Set([
