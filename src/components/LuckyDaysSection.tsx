@@ -32,10 +32,8 @@ interface Props {
   soloGift?: boolean;
   /** 渡したときだけ、恋愛運MAX日のロックの下に紹介の欄と「招待コードをお持ちの方」を出す */
   referral?: {
-    isRegistered: boolean;
     status: ReferralStatus | null;
     loading?: boolean;
-    onRegister: () => void;
     onOpen?: () => void;
     /** 「招待コードをお持ちの方」を出すか（この端末から送り終えたら出さない） */
     showCodeEntry: boolean;
@@ -205,7 +203,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={partner ? (onPairLockClick || onLockClick) : onLockClick} lockWord={lockWord} commonLabels={soloCommon} openCount={soloGift ? 1 : 0} />
         {locked && referral && (
           <>
-            <ReferralInvite isRegistered={referral.isRegistered} status={referral.status} loading={referral.loading} onRegister={referral.onRegister} onOpen={referral.onOpen} />
+            <ReferralInvite status={referral.status} loading={referral.loading} onOpen={referral.onOpen} />
             {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。恋愛運MAX日の直近の1日が見られます" />}
           </>
         )}

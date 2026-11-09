@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import referral, { cleanCode, newCode, ensureCode, completeReferral, REFERRALS_TO_UNLOCK, PER_IP_DAILY, referralNoticeId } from '../api/_lib/referral.js';
+import referral, { cleanCode, newCode, ensureCode, completeReferral, REFERRALS_TO_UNLOCK, PER_IP_DAILY, referralNoticeId, guestOwner } from '../api/_lib/referral.js';
 import { partnerKey } from '../api/_lib/partner-days.js';
 
 const P1 = partnerKey('1997-09-28');
@@ -151,4 +151,36 @@ test('the handler: me needs sign-in, complete does not', async () => {
   res = mockRes();
   await referral(post({ op: 'me', oppBirth: '2000-01-01' }, 'owner'), res, { db, auth });
   assert.deepEqual([res.body.count, res.body.unlocked], [0, false]);
+});
+
+test('a guest can invite: kept per browser, its own browser and birth date do not count, no notice', async () => {
+  const db = mockDb();
+  let res = mockRes();
+  await referral(post({ op: 'me', oppBirth: '1997-09-28', myBirth: '1999-04-13', visitor: V1 }), res, { db, auth });
+  assert.equal(res.code, 200);
+  const code = res.body.code;
+  assert.equal(db.docs[`referralCodes/${code}`].uid, guestOwner(V1));
+  assert.equal((await completeReferral(db, { code, visitor: V1, ipKey: 'ip' })).reason, 'self');
+  assert.equal((await completeReferral(db, { code, visitor: V2, birth: '1999-04-13', ipKey: 'ip' })).reason, 'self');
+  assert.equal((await completeReferral(db, { code, visitor: V2, birth: '2001-01-01', ipKey: 'ip' })).ok, true);
+  res = mockRes();
+  await referral(post({ op: 'me', oppBirth: '1997-09-28', visitor: V1 }), res, { db, auth });
+  assert.deepEqual([res.body.code, res.body.unlocked], [code, true]);
+  assert.ok(!Object.keys(db.docs).some((k) => k.startsWith('notices/')));
+  assert.ok(!JSON.stringify(db.docs).includes('1999-04-13'));
+});
+
+test('after signing up, the guest\'s code and unlock move to the member', async () => {
+  const db = mockDb();
+  let res = mockRes();
+  await referral(post({ op: 'me', oppBirth: '1997-09-28', visitor: V1 }), res, { db, auth });
+  const code = res.body.code;
+  await completeReferral(db, { code, visitor: V2, ipKey: 'ip' });
+  res = mockRes();
+  await referral(post({ op: 'me', oppBirth: '1997-09-28', visitor: V1 }, 'owner'), res, { db, auth });
+  assert.deepEqual([res.body.code, res.body.unlocked], [code, true]);
+  assert.equal(db.docs[`referralCodes/${code}`].uid, 'u1');
+  // a friend reading later counts for the member
+  await completeReferral(db, { code, visitor: 'visitor-zzzzzzzzzzzz3', ipKey: 'ip' });
+  assert.equal(db.docs['referrals/u1'].partners[P1].count, 2);
 });
