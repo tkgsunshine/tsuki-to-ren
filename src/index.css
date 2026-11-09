@@ -285,6 +285,11 @@ h1, h2, h3, h4, button, label {
   box-sizing: border-box;
 }
 
+/* 下メニューを出さない画面（診断の入力画面）は、メニュー分の下余白を詰める */
+.main-content.no-navbar {
+  padding-bottom: max(1.5rem, calc(1rem + env(safe-area-inset-bottom, 0px)));
+}
+
 .main-content > * {
   flex-shrink: 0;
   width: 100%;
@@ -1117,7 +1122,8 @@ body.chat-keyboard-open .chat-partner-picker {
 .accordion-section.expanded {
   max-height: 1500px;
   opacity: 1;
-  margin-top: 1.25rem;
+  /* フォームの gap(1.25rem) だけで「あなたの情報」との間を空ける */
+  margin-top: 0;
 }
 
 /* Premium Mosaic & Blur Overlay Styles */
@@ -1170,6 +1176,17 @@ body.chat-keyboard-open .chat-partner-picker {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.premium-lock-tag .lock-rest {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: #c9bfa6;
+  padding-left: 0.4rem;
+  margin-left: 0.05rem;
+  border-left: 1px solid rgba(226, 192, 116, 0.3);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .premium-lock-tag:hover {
@@ -1399,8 +1416,8 @@ body.chat-keyboard-open .chat-partner-picker {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 10%, #000 62%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 10%, #000 62%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 4%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 4%, #000 62%, transparent 100%);
 }
 
 /* 称号の読みやすさのため、下側をうっすら暗くする */
@@ -1534,4 +1551,16 @@ body.chat-keyboard-open .chat-partner-picker {
   .opening-glow { display: none; }
   .app-header.is-opening .header-title,
   .app-header.is-opening > div:not(.opening-glow) { animation: none; }
+}
+
+/* プレミアム案内の画面イメージ拡大: 「スクロールで全部見られます」の矢印を上下にはねさせる */
+@keyframes shot-scroll-hint {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+.shot-scroll-hint {
+  animation: shot-scroll-hint 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shot-scroll-hint { animation: none; }
 }

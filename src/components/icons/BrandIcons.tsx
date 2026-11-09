@@ -186,6 +186,14 @@ export const GiftMark: React.FC<BrandIconProps> = (props) => (
   </LineIcon>
 );
 
+// ハンガー。お相手が惹かれるファッションと仕草。
+export const HangerMark: React.FC<BrandIconProps> = (props) => (
+  <LineIcon {...props}>
+    <path d="M10 6.5a2 2 0 1 1 2.6 1.9c-.4.1-.6.5-.6.9V11" />
+    <path d="M12 11 3.6 17.2c-.8.6-.4 1.8.6 1.8h15.6c1 0 1.4-1.2.6-1.8Z" />
+  </LineIcon>
+);
+
 // 点線の道の先に星。これからの進め方。
 export const RoadmapMark: React.FC<BrandIconProps> = (props) => (
   <LineIcon {...props}>

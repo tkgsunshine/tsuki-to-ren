@@ -126,6 +126,41 @@ test('track: steps toward a free account are counted, with where they happened',
   assert.deepEqual(Object.keys(odd.byReg), ['click_other'], 'an unknown place cannot add its own key');
 });
 
+test('track: the reason for leaving the paid-plan page is one of three, with whether the prices were seen', async () => {
+  const db = mockDb();
+  const send = async (body) => {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { source: 'x', landing: 'home', device: 'mobile_browser', type: 'lp_exit', ...body } }, res, { db });
+    return res.code;
+  };
+  assert.equal(await send({ reason: 'price', seen: '1' }), 204);
+  assert.equal(await send({ reason: 'free_enough', seen: '0' }), 204);
+  assert.equal(await send({ reason: 'skip', seen: '0' }), 204);
+  assert.equal(await send({ reason: 'other' }), 400, 'only the three answers and skip are accepted');
+  assert.equal(await send({}), 400);
+  assert.equal(db.writes.length, 3, 'one write per answer');
+  const [price, free, skip] = db.writes.map((w) => w.data);
+  assert.deepEqual(Object.keys(skip.byLpExit), ['skip']);
+  assert.ok(price.lpExits);
+  assert.deepEqual(Object.keys(price.byLpExit).sort(), ['price', 'seen_price']);
+  assert.deepEqual(Object.keys(free.byLpExit), ['free_enough']);
+});
+
+test('track: leaving the paid-plan page records how far it was read, for how long, and how it was closed', async () => {
+  const db = mockDb();
+  const send = async (body) => {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { source: 'x', landing: 'home', device: 'mobile_browser', type: 'lp_leave', ...body } }, res, { db });
+    return res.code;
+  };
+  assert.equal(await send({ layout: 'pair', reached: 'price', time: '30_60', close: 'x' }), 204);
+  assert.equal(await send({ layout: '<b>', reached: 'evil', time: '9999', close: 'swipe' }), 204);
+  const [a, b] = db.writes.map((w) => w.data);
+  assert.ok(a.lpLeaves);
+  assert.deepEqual(Object.keys(a.byLpLeave).sort(), ['close_x', 'pair_price', 'time_30_60']);
+  assert.deepEqual(Object.keys(b.byLpLeave).sort(), ['close_other', 'monthly_top', 'time_lt10'], 'unknown values cannot add their own keys');
+});
+
 test('countPremium: counted once per live subscription, under the member\'s first source', async () => {
   const db = mockDb(new Set(), { 'memberAttribution/u1': { source: 'x', landing: 'share_link', device: 'mobile_browser' } });
   assert.equal(await countPremium(db, { uid: 'u1', subscriptionId: 'sub_1', livemode: true }), true);
@@ -271,12 +306,15 @@ test('track: the first fortune / first paid-plan page of a session also counts a
   await send({ type: 'premium_view', plan: 'pair', first: '1', ff: '1' });
   await send({ type: 'premium_view', plan: 'monthly', first: '0', ff: '0' });
   await send({ type: 'checkout_pair' });
-  assert.equal(db.writes.length, 5, 'still one write per event');
+  await send({ type: 'premium_view', plan: 'monthly', first: '0', ff: '0', via: 'mail' });
+  await send({ type: 'premium_view', plan: 'pair', first: '0', ff: '0', via: 'mail' });
+  assert.equal(db.writes.length, 7, 'still one write per event');
   const keys = db.writes.map((w) => Object.keys(w.data).filter((k) => !['date', 'bySource', 'byLanding', 'byDevice'].includes(k)).sort());
   assert.deepEqual(keys, [
     ['fortuneSessions', 'fortunes'], ['fortunes'],
     ['premiumViewFortuneSessions', 'premiumViewSessions', 'premiumViews', 'premiumViewsPair'], ['premiumViews'],
     ['pairCheckouts'],
+    ['premiumViews', 'premiumViewsMail'], ['premiumViews', 'premiumViewsMail', 'premiumViewsMailPair', 'premiumViewsPair'],
   ]);
   assert.deepEqual(Object.keys(db.writes[0].data.bySource.x).sort(), ['fortuneSessions', 'fortunes']);
   let res = mockRes();
@@ -352,4 +390,11 @@ test('track: Preview deployments are not counted (same database as production, b
   await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'fortune', first: '1' } }, res, { db, vercelEnv: 'production' });
   assert.equal(res.code, 204);
   assert.equal(db.writes.length, 1);
+});
+
+test('track: a paid lock seen after a fortune is counted as one person (lockViewSessions)', async () => {
+  const db = mockDb();
+  await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'lock_view', source: 'x', landing: 'home', device: 'mobile_browser' } }, mockRes(), { db });
+  assert.equal(db.writes.length, 1);
+  assert.equal(Object.keys(db.writes[0].data).filter((k) => !['date', 'bySource', 'byLanding', 'byDevice'].includes(k)).join(), 'lockViewSessions');
 });

@@ -54,27 +54,27 @@ export const stars = [
 ];
 
 // 16タイプの相性（0〜100点の表。性別を入れ替えても同じ点数＝対称）。
-// 心の使い方（認知機能の並び）の一致・補い合いと、従来の「理想の組み合わせ」から定義した表（docs/design/mbti-compat-table.md）。
+// 心の使い方（認知機能の並び）の一致・補い合いと、従来の「理想の組み合わせ」、夫婦の調査で報告された傾向（S/Nが同じ・似た者どうし）から定義した表（docs/design/mbti-compat-table.md）。最低20点。
 // 点数への換算の重みは、アプリが決めた値（オリジナル）。ペア鑑定の基本点（最大40点）には、×0.4 して四捨五入して使う。
 // 元データ: src/data/mbti-compat.json（scripts/build-mbti-compat.mjs で生成）。このファイルは import を持てないため、同じ値をここに置く（test:engine で一致を確認）。
 export const MBTI_COMPAT_TYPES = ['INFP', 'ENFP', 'INFJ', 'ENFJ', 'INTJ', 'ENTJ', 'INTP', 'ENTP', 'ISFP', 'ESFP', 'ISTP', 'ESTP', 'ISFJ', 'ESFJ', 'ISTJ', 'ESTJ'];
 export const MBTI_COMPAT_100: number[][] = [
-  [38, 41, 0, 77, 42, 55, 46, 54, 25, 31, 32, 44, 19, 32, 61, 70], // INFP
-  [41, 38, 77, 0, 94, 42, 54, 48, 31, 22, 44, 32, 32, 19, 70, 61], // ENFP
-  [0, 77, 38, 41, 48, 54, 42, 94, 19, 32, 61, 70, 22, 31, 32, 44], // INFJ
-  [77, 0, 41, 38, 54, 46, 55, 42, 32, 19, 70, 61, 31, 25, 44, 32], // ENFJ
-  [42, 94, 48, 54, 38, 41, 0, 17, 61, 70, 19, 32, 32, 44, 22, 31], // INTJ
-  [55, 42, 54, 46, 41, 38, 77, 0, 70, 61, 32, 19, 44, 32, 31, 25], // ENTJ
-  [46, 54, 42, 55, 0, 77, 38, 41, 32, 44, 25, 31, 61, 70, 19, 32], // INTP
-  [54, 48, 94, 42, 17, 0, 41, 38, 44, 32, 31, 22, 70, 61, 32, 19], // ENTP
-  [25, 31, 19, 32, 61, 70, 32, 44, 38, 41, 46, 54, 0, 77, 42, 55], // ISFP
-  [31, 22, 32, 19, 70, 61, 44, 32, 41, 38, 54, 48, 77, 0, 94, 42], // ESFP
-  [32, 44, 61, 70, 19, 32, 25, 31, 46, 54, 38, 41, 42, 55, 0, 77], // ISTP
-  [44, 32, 70, 61, 32, 19, 31, 22, 54, 48, 41, 38, 55, 42, 17, 0], // ESTP
-  [19, 32, 22, 31, 32, 44, 61, 70, 0, 77, 42, 55, 38, 41, 48, 54], // ISFJ
-  [32, 19, 31, 25, 44, 32, 70, 61, 77, 0, 55, 42, 41, 38, 54, 46], // ESFJ
-  [61, 70, 32, 44, 22, 31, 19, 32, 42, 94, 0, 17, 48, 54, 38, 41], // ISTJ
-  [70, 61, 44, 32, 31, 25, 32, 19, 55, 42, 77, 0, 54, 46, 41, 38], // ESTJ
+  [66, 63, 26, 80, 59, 66, 68, 70, 31, 31, 32, 37, 20, 26, 53, 56], // INFP
+  [63, 66, 80, 26, 97, 59, 70, 70, 31, 29, 37, 32, 26, 20, 56, 53], // ENFP
+  [26, 80, 66, 63, 70, 70, 59, 97, 20, 26, 53, 56, 29, 31, 32, 37], // INFJ
+  [80, 26, 63, 66, 70, 68, 66, 59, 26, 20, 56, 53, 31, 31, 37, 32], // ENFJ
+  [59, 97, 70, 70, 66, 63, 26, 36, 53, 56, 20, 26, 32, 37, 29, 31], // INTJ
+  [66, 59, 70, 68, 63, 66, 80, 26, 56, 53, 26, 20, 37, 32, 31, 31], // ENTJ
+  [68, 70, 59, 66, 26, 80, 66, 63, 32, 37, 31, 31, 53, 56, 20, 26], // INTP
+  [70, 70, 97, 59, 36, 26, 63, 66, 37, 32, 31, 29, 56, 53, 26, 20], // ENTP
+  [31, 31, 20, 26, 53, 56, 32, 37, 66, 63, 68, 70, 26, 80, 59, 66], // ISFP
+  [31, 29, 26, 20, 56, 53, 37, 32, 63, 66, 70, 70, 80, 26, 97, 59], // ESFP
+  [32, 37, 53, 56, 20, 26, 31, 31, 68, 70, 66, 63, 59, 66, 26, 80], // ISTP
+  [37, 32, 56, 53, 26, 20, 31, 29, 70, 70, 63, 66, 66, 59, 36, 26], // ESTP
+  [20, 26, 29, 31, 32, 37, 53, 56, 26, 80, 59, 66, 66, 63, 70, 70], // ISFJ
+  [26, 20, 31, 31, 37, 32, 56, 53, 80, 26, 66, 59, 63, 66, 70, 68], // ESFJ
+  [53, 56, 32, 37, 29, 31, 20, 26, 59, 97, 26, 36, 70, 70, 66, 63], // ISTJ
+  [56, 53, 37, 32, 31, 31, 26, 20, 66, 59, 80, 26, 70, 68, 63, 66], // ESTJ
 ];
 
 /** 16タイプ相性（0〜100点）。タイプが不明なら null */
@@ -83,6 +83,9 @@ export function getMBTICompatibility100(mbtiA: string, mbtiB: string): number | 
   const j = MBTI_COMPAT_TYPES.indexOf((mbtiB || '').toUpperCase());
   return i < 0 || j < 0 ? null : MBTI_COMPAT_100[i][j];
 }
+
+/** 16タイプ不明のとき、生年月日の相性（60点満点）を100点満点へ広げる倍率。平均を旧版（タイプ不明=20点固定）とほぼ同じに保つ値 */
+export const MBTI_UNKNOWN_STRETCH = 2.5;
 
 export function getMBTICompatibilityScore(mbtiA: string, mbtiB: string): number {
   const v = getMBTICompatibility100(mbtiA, mbtiB);
@@ -152,8 +155,9 @@ export const SOLO_BASE_CONSTANT = 70;
 
 // 今日の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
 // 今日の点数に足す4つの項目（天干・十二支・十二運・日の九星）は、どれも平均がプラスなので、
-// そのままだと「基本の相性より今日の方が高い」日が7割になっていた。平均（約+4.8点）を引いて、＋と−がおおよそ半々になるようにする。
-export const DAILY_CENTER_OFFSET = -5;
+// そのままだと「基本の相性より今日の方が高い」日が7割になっていた。平均を引いて、＋と−がおおよそ半々になるようにする。
+// 2026-11 に恋の星・天乙貴人・空亡・2人の最高シンクロ日を足したので、-5 から -6 に合わせ直した。
+export const DAILY_CENTER_OFFSET = -6;
 
 // 月次・年次の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
 // 月次・年次は天干と十二支の2項目だけを足す（十二運・九星は入れていない）。2項目の平均は1人あたり約+4.1点（天干+2.3、十二支+1.8）なので、-4 で戻す。
@@ -238,6 +242,183 @@ export const getDailyStemImpact = (dayStem: string, personStem: string): number 
   return TEN_GOD_POINTS[getTenGod(personStem, dayStem)];
 };
 
+// ───────── 一人ずつの「良い日」の印（「2人の最高シンクロ日・あなたの恋愛運MAX日」と今日の点数で共通） ─────────
+// 印そのものは、四柱推命・九星気学の伝統的な決まり:
+//  ・天地徳合: その日の十干が自分の日干と干合し、十二支も自分の日支と支合（60日に1度）
+//  ・干合: その日の十干が自分の日干と干合
+//  ・支合: その日の十二支が自分の日支と支合
+//  ・十二運の帝旺・建禄: 自分の日干が、その日の十二支で帝旺・建禄
+//  ・天乙貴人: 自分の日干ごとに決まる2つの十二支の日（甲戊庚=丑未、乙己=子申、丙丁=亥酉、辛=寅午、壬癸=巳卯）
+//  ・恋の星: その日の十干が、女性には正官、男性には正財（恋愛・異性を表す星）
+//  ・生気: その日の日盤の九星が、自分の本命星を生む（九星気学）
+// 注意の日（どちらかに当たれば外す）:
+//  ・空亡: 自分の日柱の旬で欠ける2つの十二支の日
+//  ・六沖: その日の十二支が自分の日支と真逆
+// 印をどう重ねると「最高の日」とするか（isPersonalBest / isPairSyncDay）は伝統に決まりがないので、アプリのオリジナル。
+const LUCK_STEMS = '甲乙丙丁戊己庚辛壬癸';
+const LUCK_BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
+const LUCK_SHIGO: Record<string, string> = { 子: '丑', 丑: '子', 寅: '亥', 亥: '寅', 卯: '戌', 戌: '卯', 辰: '酉', 酉: '辰', 巳: '申', 申: '巳', 午: '未', 未: '午' };
+const LUCK_ROKUCHU: Record<string, string> = { 子: '午', 午: '子', 丑: '未', 未: '丑', 寅: '申', 申: '寅', 卯: '酉', 酉: '卯', 辰: '戌', 戌: '辰', 巳: '亥', 亥: '巳' };
+const LUCK_SANGO = ['申子辰', '巳酉丑', '寅午戌', '亥卯未'];
+const LUCK_TENOTSU: Record<string, string> = { 甲: '丑未', 戊: '丑未', 庚: '丑未', 乙: '子申', 己: '子申', 丙: '亥酉', 丁: '亥酉', 辛: '寅午', 壬: '巳卯', 癸: '巳卯' };
+const LUCK_STAR_ELEMENT = ['', '水', '土', '木', '木', '土', '金', '金', '土', '火']; // 一白〜九紫
+const LUCK_ELEMENT_ORDER = '木火土金水';
+
+export type LuckMark = 'tentoku' | 'kango' | 'shigo' | 'teio' | 'kenroku' | 'tenotsu' | 'love' | 'seiki';
+const LUCK_MARK_ORDER: LuckMark[] = ['tentoku', 'love', 'kango', 'shigo', 'tenotsu', 'teio', 'kenroku', 'seiki'];
+
+export interface LuckPerson {
+  stem: string;
+  branch: string;
+  /** 本命星の五行（木・火・土・金・水） */
+  starElement: string;
+  gender: 'male' | 'female';
+}
+
+export interface DayInfo {
+  y: number;
+  m: number;
+  d: number;
+  weekday: number;
+  stem: string;
+  branch: string;
+  star: number;
+}
+
+export interface PersonDay {
+  marks: LuckMark[];
+  caution: boolean;
+  /** 空亡の日（caution の一部。今日の点数で使う） */
+  kuubou: boolean;
+}
+
+/** 自分の日柱の旬で欠ける2つの十二支（空亡） */
+export function getKuubou(stem: string, branch: string): string[] {
+  const s = LUCK_STEMS.indexOf(stem);
+  const b = LUCK_BRANCHES.indexOf(branch);
+  // 60干支の番号 i は i%10=s, i%12=b。旬の始まり（甲の日）から見た十二支のずれで、欠ける2支が決まる
+  const start = (b - s + 12) % 12; // 旬の始まり（甲）の十二支
+  return [LUCK_BRANCHES[(start + 10) % 12], LUCK_BRANCHES[(start + 11) % 12]];
+}
+
+export function getDayInfo(date: Date): DayInfo {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  const p = calculateDayPillar(new Date(y, m - 1, d));
+  return { y, m, d, weekday: new Date(y, m - 1, d).getDay(), stem: p.stem, branch: p.branch, star: getDayStarNumber(y, m, d) };
+}
+
+export function getPersonDay(person: LuckPerson, day: DayInfo): PersonDay {
+  const marks: LuckMark[] = [];
+  const kango = STEM_COMBINATIONS[day.stem] === person.stem;
+  const shigo = LUCK_SHIGO[day.branch] === person.branch;
+  if (kango && shigo) marks.push('tentoku');
+  if (kango) marks.push('kango');
+  if (shigo) marks.push('shigo');
+  const juni = getJuniUn(person.stem, day.branch);
+  if (juni === '帝旺') marks.push('teio');
+  if (juni === '建禄') marks.push('kenroku');
+  if ((LUCK_TENOTSU[person.stem] || '').includes(day.branch)) marks.push('tenotsu');
+  const tenGod = getTenGod(person.stem, day.stem);
+  if (person.gender === 'female' ? tenGod === '正官' : tenGod === '正財') marks.push('love');
+  const dayEl = LUCK_STAR_ELEMENT[day.star];
+  if (person.starElement && dayEl && (LUCK_ELEMENT_ORDER.indexOf(person.starElement) - LUCK_ELEMENT_ORDER.indexOf(dayEl) + 5) % 5 === 1) marks.push('seiki');
+  const kuubou = getKuubou(person.stem, person.branch).includes(day.branch);
+  const caution = kuubou || LUCK_ROKUCHU[day.branch] === person.branch;
+  marks.sort((a, b) => LUCK_MARK_ORDER.indexOf(a) - LUCK_MARK_ORDER.indexOf(b));
+  return { marks, caution, kuubou };
+}
+
+const hasMark = (pd: PersonDay, k: LuckMark) => pd.marks.includes(k);
+
+/** 良い日: 注意の日でなく、主な印（九星の生気以外）が1つ以上 */
+export const isPersonalGood = (pd: PersonDay): boolean =>
+  !pd.caution && pd.marks.some((k) => k !== 'seiki');
+
+/** 勝負の日: 天地徳合、または印が強く重なる日（注意の日は除く） */
+export const isPersonalBest = (pd: PersonDay): boolean =>
+  !pd.caution &&
+  (hasMark(pd, 'tentoku') ||
+    (hasMark(pd, 'kango') && (hasMark(pd, 'tenotsu') || hasMark(pd, 'teio') || hasMark(pd, 'kenroku') || hasMark(pd, 'seiki'))) ||
+    (hasMark(pd, 'love') && (hasMark(pd, 'tenotsu') || hasMark(pd, 'shigo'))));
+
+/** 二人の十二支とその日の十二支で、三合がそろう日か（二人の十二支が同じ三合の、違う2支のときだけ起こる） */
+export function getSangoBranch(a: LuckPerson, b: LuckPerson): string | null {
+  if (a.branch === b.branch) return null;
+  const g = LUCK_SANGO.find((x) => x.includes(a.branch) && x.includes(b.branch));
+  return g ? g.replace(a.branch, '').replace(b.branch, '') : null;
+}
+
+/**
+ * 2人の最高シンクロ日か。どちらも注意の日でなく、
+ *  ・片方が勝負の日で、もう片方も良い日、または
+ *  ・三合がそろう日で、二人とも良い日
+ */
+export function isPairSyncDay(a: PersonDay, b: PersonDay, sango: boolean): boolean {
+  return (isPersonalBest(a) && isPersonalGood(b)) || (isPersonalBest(b) && isPersonalGood(a)) || (sango && isPersonalGood(a) && isPersonalGood(b));
+}
+
+// 2人の最高シンクロ日は、上の isPairSyncDay を満たす日（候補）のうち、暦の1年ごとに強い順で最大4日だけ（2026-11-07 TAKASHI
+// 「1人の恋愛運MAX日（年6〜7日）より少なく」）。強さ＝二人の印の数（九星の生気は0.5）＋三合がそろう日・上下とも結びつく日の上乗せ。
+// 同じ強さなら早い日。並べ方は伝統に決まりがないのでアプリのオリジナル。
+export const PAIR_SYNC_DAYS_PER_YEAR = 4;
+export const pairSyncStrength = (a: PersonDay, b: PersonDay, sango: boolean): number => {
+  const main = (pd: PersonDay) => pd.marks.filter((k) => k !== 'seiki').length;
+  const seiki = (pd: PersonDay) => (pd.marks.includes('seiki') ? 0.5 : 0);
+  const tentoku = a.marks.includes('tentoku') || b.marks.includes('tentoku');
+  return main(a) + main(b) + seiki(a) + seiki(b) + (sango ? 2 : 0) + (tentoku ? 2 : 0);
+};
+const pairSyncYearCache = new Map<string, Set<string>>();
+const dayKey = (y: number, m: number, d: number) => `${y}-${m}-${d}`;
+/** その暦年の2人の最高シンクロ日（"y-m-d" の集合）。二人の順番は関係ない */
+export function getPairSyncDaysOfYear(me: LuckPerson, partner: LuckPerson, year: number): Set<string> {
+  const pk = (p: LuckPerson) => `${p.stem}${p.branch}${p.starElement}${p.gender}`;
+  const key = [pk(me), pk(partner)].sort().join('|') + `|${year}`;
+  const hit = pairSyncYearCache.get(key);
+  if (hit) return hit;
+  const sangoBranch = getSangoBranch(me, partner);
+  const cands: { k: string; t: number; st: number }[] = [];
+  for (let dt = new Date(year, 0, 1); dt.getFullYear() === year; dt = new Date(year, dt.getMonth(), dt.getDate() + 1)) {
+    const day = getDayInfo(dt);
+    const a = getPersonDay(me, day);
+    const b = getPersonDay(partner, day);
+    const sango = sangoBranch === day.branch;
+    if (isPairSyncDay(a, b, sango)) cands.push({ k: dayKey(day.y, day.m, day.d), t: dt.getTime(), st: pairSyncStrength(a, b, sango) });
+  }
+  cands.sort((x, y) => y.st - x.st || x.t - y.t);
+  const set = new Set(cands.slice(0, PAIR_SYNC_DAYS_PER_YEAR).map((c) => c.k));
+  if (pairSyncYearCache.size > 500) pairSyncYearCache.clear();
+  pairSyncYearCache.set(key, set);
+  return set;
+}
+/** その日が2人の最高シンクロ日か（暦年ごとに強い順で最大4日） */
+export const isPairSyncDate = (me: LuckPerson, partner: LuckPerson, day: DayInfo): boolean =>
+  getPairSyncDaysOfYear(me, partner, day.y).has(dayKey(day.y, day.m, day.d));
+
+// ───────── 今日の点数に足す、印の点数（2026-11 見直し） ─────────
+// 「2人の最高シンクロ日」「恋の星が輝く」と出る日の点数が、ふつうの日より低く出ることがあったため、印を今日の点数にも入れる。
+//  ・恋の星（女性の正官・男性の正財）: 伝統では正官・正財はどちらも吉の星（四吉神）で、恋愛では異性・恋人を表す星。
+//    TEN_GOD_POINTS（基本の相性にも使う）は男女を区別しないため、正官をマイナスにしていた。今日の点数では、恋の星の日だけ下の値に置き換える。
+//  ・天乙貴人: 伝統では最も強い吉の星の一つ。今日の点数には入っていなかった。
+//  ・空亡: 伝統では運の空白の日（凶）。今日の点数には入っていなかった。六沖は getBranchImpact で既にマイナス。
+//  ・2人の最高シンクロ日: 印の重なり方の判定（isPairSyncDay）はアプリのオリジナルなので、ボーナスもアプリが決めた値。
+// 点数への換算の重みは、すべてアプリが決めた値。
+export const LOVE_STAR_DAILY_POINTS = 10;
+export const TENOTSU_DAILY_POINTS = 6;
+export const KUUBOU_DAILY_POINTS = -6;
+export const SYNC_DAY_BONUS = 10;
+
+/** その日の天干（＋印）が一人に与える点数。恋の星の日は通変星の点数を置き換え、天乙貴人・空亡を足す */
+export function getDailyMarkedStemImpact(person: LuckPerson | null, pd: PersonDay | null, dayStem: string, personStem: string): number {
+  let points = getDailyStemImpact(dayStem, personStem);
+  if (!person || !pd) return points;
+  if (hasMark(pd, 'love') && !hasMark(pd, 'kango')) points = LOVE_STAR_DAILY_POINTS;
+  if (hasMark(pd, 'tenotsu')) points += TENOTSU_DAILY_POINTS;
+  if (pd.kuubou) points += KUUBOU_DAILY_POINTS;
+  return points;
+}
+
 // 深層鑑定「二人の間で踏みやすい地雷3選」。
 // トリセツの「やってはいけないこと5選」は、お相手本人が嫌がること（お相手の日干・16タイプ）。
 // こちらは、二人の組み合わせで「あなた」がやりがちなこと。
@@ -247,25 +428,25 @@ export const getDailyStemImpact = (dayStem: string, personStem: string): number 
 // 足りないぶんは通変星の2文目、それでも足りなければ共通の文で埋める。
 const PAIR_PITFALL_BY_TEN_GOD: Record<TenGod, [string, string]> = {
   '比肩': ['張り合って、どちらが正しいかで譲らないこと', '相手も自分と同じ考えだと思いこんで、気持ちを確かめないこと'],
-  '劫財': ['相手の時間やお金を、当たり前のように自分のことに使うこと', '相手のまわりの人に張り合ったり、やきもちを強く見せたりすること'],
-  '食神': ['相手のやさしさに甘えすぎて、してもらうのを当たり前にすること', '楽しいことだけ一緒にして、大事な話を後回しにすること'],
+  '劫財': ['相手の時間やお金を、当たり前のように自分のことに使うこと', '相手の周りの人に張り合ったり、やきもちを強く見せたりすること'],
+  '食神': ['相手の優しさに甘えすぎて、してもらうのを当たり前にすること', '楽しいことだけ一緒にして、大事な話を後回しにすること'],
   '傷官': ['相手の鋭いひと言にむきになって、言い返して言い合いにすること', '相手のこだわりやセンスに、興味のないそぶりを見せること'],
   '偏財': ['その場の気分で約束を変えて、相手を振り回すこと', '楽しさばかり求めて、相手の地道ながんばりに気づかないこと'],
   '正財': ['相手がそばにいることに慣れて、二人の時間を後回しにすること', 'お金や時間の使い方を、相手に相談せずに決めること'],
   '偏官': ['自分の意見を通そうとして、相手が話し終わる前に結論を決めてしまうこと', '相手の弱いところを、からかいや冗談でつつくこと'],
   '正官': ['相手のやり方を、細かいところまで「ちゃんとして」と直させること', '相手の失敗を、あとから何度も持ち出すこと'],
-  '偏印': ['自分のやり方を教えこもうとして、相手のやり方を変えさせること', '気が向いたときだけかまって、そっけないときとの差を大きくすること'],
+  '偏印': ['自分のやり方を教えこもうとして、相手のやり方を変えさせること', '気が向いたときだけ構って、そっけないときとの差を大きくすること'],
   '正印': ['先回りして世話を焼きすぎて、相手の「自分でやりたい」気持ちをつぶすこと', '心配のあまり、相手の予定や行動を細かく聞きすぎること']
 };
 const PAIR_PITFALL_KANGO = '惹かれ合うぶん相手に合わせすぎて、本当の気持ちを言わずにためこむこと';
 // [自分がこの軸の1文字目, 自分が2文字目] のときの文
 const PAIR_PITFALL_BY_AXIS: { idx: number; letters: [string, string]; lines: [string, string] }[] = [
-  { idx: 2, letters: ['T', 'F'], lines: ['相手のうれしかった話やつらかった話に、短いそっけない返事ですませること', '察してほしくて、はっきり言わずに不機嫌な空気で伝えること'] },
+  { idx: 2, letters: ['T', 'F'], lines: ['相手のうれしかった話やつらかった話に、短いそっけない返事で済ませること', '察してほしくて、はっきり言わずに不機嫌な空気で伝えること'] },
   { idx: 3, letters: ['J', 'P'], lines: ['予定や返信のペースを自分で決めて、守れないと責めること', '「また今度ね」と、会う日や約束をなかなか決めないこと'] },
   { idx: 0, letters: ['E', 'I'], lines: ['会う回数や連絡の多さで気持ちを測って、相手の一人の時間まで埋めようとすること', '反応や返事が少なすぎて、「興味ないのかな」と不安にさせること'] },
   { idx: 1, letters: ['S', 'N'], lines: ['相手の思いつきや夢の話を、「現実的じゃない」と切り捨てること', '日時や中身を決めないまま、思いつきの話ばかりすること'] }
 ];
-const PAIR_PITFALL_COMMON = ['似ているところが多いぶん、「言わなくてもわかるはず」と確かめずに決めつけること', 'どちらも引けないときに意地を張り合って、先に謝らないこと'];
+const PAIR_PITFALL_COMMON = ['似ているところが多いぶん、「言わなくても分かるはず」と確かめずに決めつけること', 'どちらも引けないときに意地を張り合って、先に謝らないこと'];
 
 export function getPairPitfalls(myStem: string, oppStem: string, myMbti?: string, oppMbti?: string): string[] {
   const out: string[] = [];
@@ -621,6 +802,8 @@ export interface TorisetsuData {
   lineTemplateTopic: string;
   idealDateSpot: string;
   approachTip: string;
+  // お相手が惹かれるファッションと仕草（お相手のトリセツのみ。古い保存データには無い）
+  attraction?: AttractionStyle;
 }
 
 // 🌟 動的 取扱説明書 (トリセツ) ＆ 命式・MBTI深層分析エンジン
@@ -658,7 +841,7 @@ export function getStemTraits(oppStem: string, _name: string) {
       delayAdvice: '焦らせずに気長に待つ。「今日もお疲れ様！」と労いの言葉を送る。'
     },
     '己': {
-      praise: [`「さりげなく気をつかってくれるの、ちゃんと気づいてるよ」`, `「ほんと優しいよね。いつもありがとう」`],
+      praise: [`「さりげなく気を遣ってくれるの、ちゃんと気づいてるよ」`, `「ほんと優しいよね。いつもありがとう」`],
       ng: ['雑でがさつな言葉遣いや態度', '感謝の気持ちを言葉で伝えないこと'],
       delayReason: '「どのくらいの距離感で返すのがいいかな」と、あなたとの関係を考えながら様子を見ています。',
       delayAdvice: '日頃の感謝を素直に伝え、「いつもありがとう」と優しく声をかける。'
@@ -673,7 +856,7 @@ export function getStemTraits(oppStem: string, _name: string) {
       praise: [`「センスいいよね。選ぶものいつもおしゃれ」`, `「こだわってるとこ、素敵だと思う」`],
       ng: ['安っぽいノリで雑に扱うこと', 'プライドや繊細なこだわりを笑うこと'],
       delayReason: '雑な返事をしたくなくて、きれいな文面を考えているところです。',
-      delayAdvice: 'センスやこだわりをほめるひと言を送ると、気持ちがほぐれて返しやすくなる。'
+      delayAdvice: 'センスやこだわりを褒めるひと言を送ると、気持ちがほぐれて返しやすくなる。'
     },
     '壬': {
       praise: [`「一緒にいるといつも楽しい！」`, `「何でも楽しめるの、ほんとすごい」`],
@@ -682,7 +865,7 @@ export function getStemTraits(oppStem: string, _name: string) {
       delayAdvice: '重い話題は避け、面白そうなイベントや新しいスポットの情報を送る。'
     },
     '癸': {
-      praise: [`「ちゃんと気持ちわかってくれるの、すごく嬉しい」`, `「話聞いてくれてありがとう。ほっとした」`],
+      praise: [`「ちゃんと気持ち分かってくれるの、すごく嬉しい」`, `「話聞いてくれてありがとう。ほっとした」`],
       ng: ['強引に自分の意見を押し付けること', '冷たい態度で突き放すこと'],
       delayReason: '「どう思われるかな」と少し不安で、返すタイミングを迷っているところです。',
       delayAdvice: '「何かあったらいつでも言ってね」と安心できる一言を送る。'
@@ -709,7 +892,7 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
     'INTJ': {
       killingExtra: `「考え方がいつも筋通ってて尊敬する」`,
       ngExtra: '感情論だけで押し切ろうとすること',
-      greenL2: '将来の計画や、ふだん言わない本音の考えを話してくれる',
+      greenL2: '将来の計画や、普段言わない本音の考えを話してくれる',
       greenL3: '二人でゆっくり話せる時間を、優先して作ってくれる',
       lineInvite: `「好きそうな展示見つけたんだけど、今度一緒に行かない？」`,
       lineTopic: `「最近ハマって調べてることある？」`,
@@ -717,7 +900,7 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
       lineHabit: '用件のみの短文が基本。目的のないダラダラした雑談LINEは未読で後回しにしがち。',
       delayDeepReason: '考えごとや大事な用事に集中していて、急いで返す理由が見当たらないため。',
       ngList: ['筋の通らない感情論で詰め寄ること', '相談なしの急な予定変更', '一人の時間や大事にしている場所に、勝手に踏み込むこと'],
-      fallInLove: '自分の考えや将来の夢をちゃんとわかってくれて、相手も自分の足でしっかり立っているとわかった瞬間。'
+      fallInLove: '自分の考えや将来の夢をちゃんと分かってくれて、相手も自分の足でしっかり立っていると分かった瞬間。'
     },
     'INTP': {
       killingExtra: `「話してると発想が面白くて、毎回刺激もらってる」`,
@@ -734,16 +917,16 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
     },
     'ENTJ': {
       killingExtra: `「決めるの早いし、引っぱってくれるの頼もしい」`,
-      ngExtra: '優柔不断でいつまでも結論を出さない態度をとること',
+      ngExtra: '優柔不断でいつまでも結論を出さない態度を取ること',
       greenL2: 'あなたの仕事や目標を本気で応援して、アドバイスしてくれる',
       greenL3: '忙しい中でも予定を空けて、あなたとの時間をしっかり作ってくれる',
       lineInvite: `「気になってたお店あるんだけど、今週末行かない？」`,
-      lineTopic: `「今年いちばんやりたいことって何？」`,
+      lineTopic: `「今年一番やりたいことって何？」`,
       dateSpot: '眺望の良いルーフトップバー、洗練された高級レストラン',
       lineHabit: '即断即決の超効率型。無駄なやり取りを嫌い、結論と日程調整を最短で済ませたい。',
       delayDeepReason: '重要な仕事やプロジェクトに全集中しており、優先度の低い雑談を保留しているため。',
       ngList: ['優柔不断でいつまでも決めないこと', '言い訳が多く責任転嫁する態度', '向上心がなく愚痴ばかり話すこと'],
-      fallInLove: '自分の大きな目標をわかって応援してくれて、「この人は頼れる」と感じた瞬間。'
+      fallInLove: '自分の大きな目標を分かって応援してくれて、「この人は頼れる」と感じた瞬間。'
     },
     'ENTP': {
       killingExtra: `「話してるとネタが尽きなくて、ほんと楽しい！」`,
@@ -762,7 +945,7 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
       killingExtra: `「いつも気持ち汲んでくれてありがとう。ほんと優しいよね」`,
       ngExtra: '損か得かだけで人付き合いを決めること',
       greenL2: '普段は誰にも言わない悩みや人生の価値観を素直に打ち明けてくれる',
-      greenL3: '二人の心のつながりを何より大切にし、特別な秘密を共有してくれる',
+      greenL3: '二人の心の繋がりを何より大切にし、特別な秘密を共有してくれる',
       lineInvite: `「静かで落ち着くカフェ見つけたの。今度ゆっくり話さない？」`,
       lineTopic: `「最近考えてることとか、よかったら聞かせて」`,
       dateSpot: '静かなブックカフェ、落ち着いた日本庭園、プライベート感のある茶室',
@@ -786,14 +969,14 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
     },
     'ENFJ': {
       killingExtra: `「いつも周りのこと考えてて、ほんとすごいと思う」`,
-      ngExtra: '相手の気遣いを無視して自分勝手な行動をとること',
+      ngExtra: '相手の気遣いを無視して自分勝手な行動を取ること',
       greenL2: 'あなたの体調や状況を常に気遣い、親身になって手伝ってくれる',
       greenL3: '大切な友人や家族にあなたを自慢のパートナーとして紹介してくれる',
       lineInvite: `「好きそうなお店見つけたよ！今度一緒に行こう」`,
       lineTopic: `「最近嬉しかったことある？」`,
       dateSpot: 'テラス席のあるカフェ、明るい雰囲気のイタリアン、公演イベント',
       lineHabit: '相手を気遣う温かい長文や丁寧なスタンプ。相手が寂しがらないよう常に配慮する。',
-      delayDeepReason: 'まわりの人の世話や仕事に追われていて、あなたにゆっくり返せないことを申し訳なく思っているため。',
+      delayDeepReason: '周りの人の世話や仕事に追われていて、あなたにゆっくり返せないことを申し訳なく思っているため。',
       ngList: ['自分の善意や気遣いを無視して雑に扱うこと', '他者への冷淡さや不誠実な嘘', '感謝の気持ちを言葉で示さないこと'],
       fallInLove: '普段他人のために尽くしている自分に気づき、「いつも頑張ってくれてありがとう」と心から労ってくれた瞬間。'
     },
@@ -803,7 +986,7 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
       greenL2: '「これ好きそうだなと思って送っちゃった！」と日常の発見を共有してくれる',
       greenL3: 'あなたとの未来のワクワクする旅行やプランを一緒に夢中で計画してくれる',
       lineInvite: `「行ってみたいとこ見つけた！今度一緒に行こうよ」`,
-      lineTopic: `「今いちばん行ってみたい場所どこ？」`,
+      lineTopic: `「今一番行ってみたい場所どこ？」`,
       dateSpot: 'テーマパーク、話題のニューオープンカフェ、野外フェス',
       lineHabit: '感嘆符やスタンプが多くテンション高め。面白いことを見つけると突発的に共有したがる。',
       delayDeepReason: '同時に複数のことに意識が散っており、返信しようとしてスマホを置いたまま忘れているため。',
@@ -814,7 +997,7 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
       killingExtra: `「ちゃんとしてて、ほんと信頼してる」`,
       ngExtra: '約束の時間やルールを破って悪びれないこと',
       greenL2: '約束したことや雑談で言った好みを正確に覚えて行動してくれる',
-      greenL3: 'まじめなお付き合いを考えて、はっきりした告白や言葉をくれる',
+      greenL3: '真面目なお付き合いを考えて、はっきりした告白や言葉をくれる',
       lineInvite: `「評判いい落ち着いたお店あるんだけど、週末どうかな？」`,
       lineTopic: `「最近ずっと続けてることってある？」`,
       dateSpot: '老舗の和食店、伝統ある美術館、静かなホテルのラウンジ',
@@ -825,7 +1008,7 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
     },
     'ISFJ': {
       killingExtra: `「いつも気づかってくれてありがとう。ほっとする」`,
-      ngExtra: '横柄な態度をとったり感謝を言葉にしないこと',
+      ngExtra: '横柄な態度を取ったり感謝を言葉にしないこと',
       greenL2: 'あなたが小さく言った一言を覚えていて、先回りして手助けしてくれる',
       greenL3: '手料理を作ってくれたり、身の回りの世話を焼いてくれたりする',
       lineInvite: `「おいしいものでも食べに行って、のんびりしない？」`,
@@ -847,18 +1030,18 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
       lineHabit: '即断即決。用件が明確で、次に何をすべきかがハッキリしている実務的メッセージ。',
       delayDeepReason: 'やるべきことを順番に片付けている最中。急ぎでない連絡は、仕事が終わってから返すため。',
       ngList: ['感情的で要領を得ない愚痴の連発', '約束を破って言い訳すること', 'ルーズで不真面目な生活態度'],
-      fallInLove: '自分の努力をちゃんと認めてくれて、相手も自分のことは自分でできる、しっかりした人だとわかった瞬間。'
+      fallInLove: '自分の努力をちゃんと認めてくれて、相手も自分のことは自分でできる、しっかりした人だと分かった瞬間。'
     },
     'ESFJ': {
       killingExtra: `「いつも気配りしてくれてありがとう。笑顔に癒される」`,
-      ngExtra: '周囲への配慮を欠いた礼儀のない態度をとること',
+      ngExtra: '周囲への配慮を欠いた礼儀のない態度を取ること',
       greenL2: 'あなたの好きな食べ物や好みを覚えていて、サプライズでプレゼントしてくれる',
       greenL3: '大切な友人やイベントにあなたを連れて行き、自慢の相手として紹介する',
       lineInvite: `「おいしいって評判のスイーツのお店あるの！一緒に行こう！」`,
       lineTopic: `「最近嬉しかったことあった？」`,
       dateSpot: 'サービスが行き届いた人気のビストロ、賑やかなイルミネーション',
-      lineHabit: 'こまめな連絡と温かいリアクション。相手とのつながりを常に維持したいタイプ。',
-      delayDeepReason: 'まわりへの気づかいで、心がくたくたに疲れているため。',
+      lineHabit: 'こまめな連絡と温かいリアクション。相手との繋がりを常に維持したいタイプ。',
+      delayDeepReason: '周りへの気づかいで、心がくたくたに疲れているため。',
       ngList: ['冷たい態度で無視すること', '礼儀やマナーを欠いた振る舞い', 'みんなの空気を乱す自分勝手な行動'],
       fallInLove: '自分の気配りをしっかり言葉で褒めてくれ、二人きりの時に特別扱いしてくれた瞬間。'
     },
@@ -884,7 +1067,7 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
       lineTopic: `「最近買ってテンション上がったものある？」`,
       dateSpot: '景色の良い海辺のカフェ、アートギャラリー、おしゃれなアパレル街',
       lineHabit: 'マイペースで気分屋。写真やスタンプを好むが、文字を打つ気分でない時は既読のまま静かに放置。',
-      delayDeepReason: '自分の気持ちを整理している最中で、急かされるとよけいに閉じこもってしまうため。',
+      delayDeepReason: '自分の気持ちを整理している最中で、急かされると余計に閉じこもってしまうため。',
       ngList: ['上から目線での説教や価値観の押し付け', '大声やトゲのある言葉で威圧すること', '返信を急かして追い詰めること'],
       fallInLove: '自分の美意識や好みを褒めてくれ、無理に言葉を交わさずとも居心地の良い空気を作ってくれた瞬間。'
     },
@@ -907,7 +1090,7 @@ export function getMbtiTraits(oppMbti: string, _name: string) {
       greenL2: 'あなたを全力で楽しませようと面白いネタや動画を次々見せてくれる',
       greenL3: '自分の大好きなイベントやパーティーに連れて行き盛り上げてくれる',
       lineInvite: `「楽しそうなお店見つけた！一緒に行こうよ」`,
-      lineTopic: `「最近いちばん笑った話聞かせて！」`,
+      lineTopic: `「最近一番笑った話聞かせて！」`,
       dateSpot: 'ライブハウス、話題のダイニング、ナイトプール、遊園地',
       lineHabit: '賑やかでスタンプや写真が多い。楽しい出来事をリアルタイムで共有したがる。',
       delayDeepReason: '目の前にいる友達やイベントで盛り上がっており、スマホを放置しているため。',
@@ -948,7 +1131,7 @@ const mbtiFlagMap: Record<string, { greenL1: string; redSign: string; redRecover
   'INFP': {
     greenL1: '自分の好きな音楽や美しいと感じた日常の写真を、「これ綺麗だったから」と送ってくれる。',
     redSign: '未読や既読スルーが続き、こちらとのやり取りを避けるようになる。',
-    redRecovery: '責めたり理由を聞いたりせず、相手の好きな本やカフェの話題で、やさしい短い文を送る。'
+    redRecovery: '責めたり理由を聞いたりせず、相手の好きな本やカフェの話題で、優しい短い文を送る。'
   },
   'ENFJ': {
     greenL1: '「今日寒かったけど大丈夫？」「無理してない？」と、あなたの体調や状況を常に最優先で気遣う。',
@@ -1005,9 +1188,9 @@ const mbtiFlagMap: Record<string, { greenL1: string; redSign: string; redRecover
 // 1-2. 16タイプ別 LINE吉時間サブタイトル ＆ アプローチ助言エンジン
 const mbtiTimingSubtitles: Record<string, { t85: string; t73: string; t60: string; t45: string; tLow: string }> = {
   'INTJ': {
-    t85: '頭が落ち着く夜に、要点をしぼって誘う',
+    t85: '頭が落ち着く夜に、要点を絞って誘う',
     t73: '夕食後、二人だけでゆっくり話す',
-    t60: 'お昼に、用件ひとつだけの短い連絡',
+    t60: 'お昼に、用件一つだけの短い連絡',
     t45: '返信不要を添えた朝の3行以内メッセージ',
     tLow: '一人の時間を邪魔せず、今日は連絡しない'
   },
@@ -1103,7 +1286,7 @@ const mbtiTimingSubtitles: Record<string, { t85: string; t73: string; t60: strin
     tLow: '一人の時間を大切にして、そっとしておく'
   },
   'ESTP': {
-    t85: 'ノリがいちばん合う夜に、勝負のお誘い',
+    t85: 'ノリが一番合う夜に、勝負のお誘い',
     t73: '次の楽しい予定をサクッと決める夕暮れ後',
     t60: 'クスッと笑える話題で楽しませる昼休み',
     t45: '元気にテンポよく送る朝の短文ファイト一言',
@@ -1121,7 +1304,7 @@ const mbtiTimingSubtitles: Record<string, { t85: string; t73: string; t60: strin
 const singleTimingSubtitles: Record<string, { t85: string; t73: string; t60: string; t45: string; tLow: string }> = {
   'INTJ': {
     t85: '夜に、これからの目標をじっくり考える',
-    t73: '夕方は、勉強や自分みがきにぴったり',
+    t73: '夕方は、勉強や自分磨きにぴったり',
     t60: '思考を整理し優先順位を決める昼休み',
     t45: '今日一日のタスクを冷静に組み立てる朝',
     tLow: 'スマホを置いて、一人で静かに過ごす'
@@ -1138,7 +1321,7 @@ const singleTimingSubtitles: Record<string, { t85: string; t73: string; t60: str
     t73: '一日の成果を確認し次へ繋げる夕食後',
     t60: 'お昼休みに、午後の予定を整える',
     t45: 'やる気をぐっと高める朝のスタート',
-    tLow: '予定をへらして、しっかり休む'
+    tLow: '予定を減らして、しっかり休む'
   },
   'ENTP': {
     t85: 'ひらめきと発想が次々湧き出る深夜タイム',
@@ -1152,7 +1335,7 @@ const singleTimingSubtitles: Record<string, { t85: string; t73: string; t60: str
     t73: '心身のエネルギーを整える夕暮れのリラックス',
     t60: '静かな場所で心を癒やす昼休みの一息',
     t45: '一日を優しくスタートさせる朝の瞑想時間',
-    tLow: '自分の気持ちに耳をかたむけて、ゆっくり休む'
+    tLow: '自分の気持ちに耳を傾けて、ゆっくり休む'
   },
   'INFP': {
     t85: '自分の世界観と創造力に浸る夜のゴールデンタイム',
@@ -1163,7 +1346,7 @@ const singleTimingSubtitles: Record<string, { t85: string; t73: string; t60: str
   },
   'ENFJ': {
     t85: '大切な人々への感謝と愛情が満ちる夜の時間',
-    t73: '人とのつながりを温かく育む夕暮れ時',
+    t73: '人との繋がりを温かく育む夕暮れ時',
     t60: '笑顔で午後を迎える昼休みのポジティブ充電',
     t45: '周囲に元気を届ける爽やかな朝のスタート',
     tLow: '他者への配慮を休み自分自身を甘やかす時間'
@@ -1274,15 +1457,15 @@ export function getDailyContactAndAdvice(
       timeSlot = '21:00 〜 23:00';
       subtitle = subs.t85;
       parts = character === 'tsuki' ? [
-        `今日は${who}と心の波長がいちばん重なる日。迷っていた一歩を踏み出してみて。`,
-        `連絡はゆったりできる${timeSlot}がおすすめです。駆け引きはいりません。${killing}のように、${who}のすてきなところをそのまま言葉にして届けてみてください。素直なひと言ほど、まっすぐ心に届く日です。`,
-        `会話があたたまってきたら、${invite}と軽くお誘いしてみて。行き先に迷ったら、${spot}のような場所が${who}の好みに合いそうですよ。`,
+        `今日は${who}と心の波長が一番重なる日。迷っていた一歩を踏み出してみて。`,
+        `連絡はゆったりできる${timeSlot}がおすすめです。駆け引きはいりません。${killing}のように、${who}の素敵なところをそのまま言葉にして届けてみてください。素直なひと言ほど、まっすぐ心に届く日です。`,
+        `会話が温まってきたら、${invite}と軽くお誘いしてみて。行き先に迷ったら、${spot}のような場所が${who}の好みに合いそうですよ。`,
         `もし返信がゆっくりでも大丈夫。${who}の返信のくせは『${habit}』なので、返事の速さで気持ちを決めつけないでくださいね。今日のあなたの言葉は、ちゃんと心に残っています。`
       ] : [
         `星の巡りがあなたの背中を強く押す、勝負の日です。考えすぎず動きましょう。`,
         `連絡は${timeSlot}に。${whoType}を誘うなら、${invite}のように具体的なひと言で切り出してください。日にちや場所の候補まで添えると、相手はぐっと答えやすくなります。`,
         `返事をもらえたら、その場で日にちまで決めてしまうのがコツです。「また今度」で流すと、せっかくの流れが止まってしまいます。行き先は${spot}あたりが${who}に合いそうです。`,
-        `ひとつだけ気をつけたいのは『${ng}』。気持ちが高まる日ほど勢いで出やすいので、そこだけは落ち着いて。あとは自信を持って進んでください。`
+        `一つだけ気をつけたいのは『${ng}』。気持ちが高まる日ほど勢いで出やすいので、そこだけは落ち着いて。あとは自信を持って進んでください。`
       ];
     } else if (dailyScore >= 73) {
       timeSlot = '19:30 〜 21:00';
@@ -1296,19 +1479,19 @@ export function getDailyContactAndAdvice(
         `会話がかみ合い、やり取りがテンポよく続く好調日。話題選びが鍵です。`,
         `${timeSlot}に、${topic}と投げかけてみてください。${whoType}が答えやすく、話を広げやすい話題です。`,
         `返事が来たら、質問を重ねすぎず、自分の話も少し混ぜて「キャッチボール」にすること。質問ばかりだと、相手は面接を受けているような気分になってしまいます。`,
-        `会話がいちばん盛り上がったところで、「続きはまた今度聞かせて」と自分から切り上げるのが上手なやり方です。少しの物足りなさが、次の連絡のきっかけになります。`
+        `会話が一番盛り上がったところで、「続きはまた今度聞かせて」と自分から切り上げるのが上手なやり方です。少しの物足りなさが、次の連絡のきっかけになります。`
       ];
     } else if (dailyScore >= 60) {
       timeSlot = '12:30 〜 13:30';
       subtitle = subs.t60;
       parts = character === 'tsuki' ? [
-        `関係を急がず、小さな安心を積み重ねる日。いつも通りのやさしさが効きます。`,
-        `お昼休みの${timeSlot}ごろに、ランチの写真や「午後もがんばろうね」のような軽いひと言を送ってみてください。返事を求めない気楽な連絡が、居心地のよさとして心に残ります。`,
+        `関係を急がず、小さな安心を積み重ねる日。いつも通りの優しさが効きます。`,
+        `お昼休みの${timeSlot}ごろに、ランチの写真や「午後も頑張ろうね」のような軽いひと言を送ってみてください。返事を求めない気楽な連絡が、居心地のよさとして心に残ります。`,
         `${who}の返信のくせは『${habit}』。返事のペースは相手に合わせて、あなたからの連投は控えめにしましょう。`,
-        `もし会話が続いたら、${praise}のように、ふだん言えていない感謝をひとつ伝えてみて。穏やかな日にもらった言葉は、意外と長く覚えているものですよ。`
+        `もし会話が続いたら、${praise}のように、普段言えていない感謝を一つ伝えてみて。穏やかな日にもらった言葉は、意外と長く覚えているものですよ。`
       ] : [
         `二人の運気は穏やかに安定。大きく動くより、信頼を貯める日です。`,
-        `連絡は${timeSlot}のお昼休みに、要点をしぼった短い文で。${whoType}の返信のくせは『${habit}』なので、そのペースに合わせるのが近道です。`,
+        `連絡は${timeSlot}のお昼休みに、要点を絞った短い文で。${whoType}の返信のくせは『${habit}』なので、そのペースに合わせるのが近道です。`,
         `話題は、前に${who}が話していたことの「その後」を聞くのがおすすめです。「この前言ってたあれ、どうなった？」のひと言で、ちゃんと覚えていてくれたという信頼が生まれます。`,
         `今日は告白や大きなお誘いより、小さなやり取りを途切れさせないことを優先してください。こうした日の積み重ねが、勝負の日の追い風になります。`
       ];
@@ -1317,13 +1500,13 @@ export function getDailyContactAndAdvice(
       subtitle = subs.t45;
       parts = character === 'tsuki' ? [
         `運気の波がひと休みする調整の日。いつもより少し言葉を控えめに。`,
-        `連絡するなら朝の${timeSlot}に、「今日もお互い無理せずがんばろうね！」のような、返事のいらない爽やかなひと言だけにしておくのがいちばんです。`,
+        `連絡するなら朝の${timeSlot}に、「今日もお互い無理せず頑張ろうね！」のような、返事のいらない爽やかなひと言だけにしておくのが一番です。`,
         `${who}が苦手なのは『${ng}』。今日は気持ちがすれ違いやすいので、ここだけは避けてくださいね。返事がそっけなく感じても、あなたのせいではありません。`,
         `夜に不安になって追いLINEをしたくなったら、送る前にひと晩置いてみて。明日になれば流れは戻ってきます。今日は自分の時間を大切にしてね。`
       ] : [
         `すれ違いが起きやすい注意の日。攻めるより守りを固めましょう。`,
         `${whoType}の気持ちを遠ざけやすいのは『${ng}』と『${ng2}』。どちらも今日は特に誤解されやすいので、意識して避けてください。`,
-        `連絡を入れるなら朝の${timeSlot}に、用件だけの1行メッセージにしぼり、すぐに切り上げるのが賢い守り方です。長文や質問攻めは、今日は逆効果になりがちです。`,
+        `連絡を入れるなら朝の${timeSlot}に、用件だけの1行メッセージに絞り、すぐに切り上げるのが賢い守り方です。長文や質問攻めは、今日は逆効果になりがちです。`,
         `返事がそっけなくても、深追いせずにそのまま流してください。今日波風を立てないことが、次の好調日にしっかり距離を縮めるための準備になります。`
       ];
     } else {
@@ -1352,13 +1535,13 @@ export function getDailyContactAndAdvice(
       timeSlot = '20:00 〜 22:00';
       subtitle = subs.t85;
       parts = character === 'tsuki' ? [
-        `あなたの魅力がいちばん輝く日。いつもより少し外へ心を開いてみて。`,
-        `お気に入りの服を着て、${mySpot}のような心地よい場所へ出かけてみてください。${myType}あなたらしさが自然に出る場所ほど、すてきな出会いやご縁を引き寄せます。`,
+        `あなたの魅力が一番輝く日。いつもより少し外へ心を開いてみて。`,
+        `お気に入りの服を着て、${mySpot}のような心地よい場所へ出かけてみてください。${myType}あなたらしさが自然に出る場所ほど、素敵な出会いやご縁を引き寄せます。`,
         `夜の${timeSlot}は、気になる人や久しぶりの友だちに連絡するのにぴったりの時間。「元気？ふと思い出したよ」のひと言から、思いがけない話が広がるかもしれません。`,
         `誘いや紹介の話が来たら、迷ったら「行ってみる」を選んでね。今日のあなたは、自信を持っていい日ですよ。`
       ] : [
-        `行動力と判断力が冴える最高の開運日。先のばしにしていたことを動かそう。`,
-        `出会いの場への参加や、気になる人への連絡など、ふだん迷っていることほど今日が向いています。返事を待つより、自分から最初の一歩を出すのがコツです。`,
+        `行動力と判断力が冴える最高の開運日。先延ばしにしていたことを動かそう。`,
+        `出会いの場への参加や、気になる人への連絡など、普段迷っていることほど今日が向いています。返事を待つより、自分から最初の一歩を出すのがコツです。`,
         `夜の${timeSlot}は、これからの目標を書き出すのに向いた時間です。恋愛も仕事も「いつまでに、何をするか」を決めておくと、追い風をそのまま形にできます。`,
         `ただ、勢いのある日ほど予定を詰めこみすぎがちです。本当に大事なことを一つ選び、それに力を注いでください。`
       ];
@@ -1367,12 +1550,12 @@ export function getDailyContactAndAdvice(
       subtitle = subs.t73;
       parts = character === 'tsuki' ? [
         `心のエネルギーが満ちて、人とのご縁が広がりやすい日です。`,
-        `夕方の${timeSlot}に、会いたい人へ軽く連絡を入れてみてください。用件がなくても「最近どう？」で十分。今日蒔いた小さな種が、あとで嬉しいつながりになって返ってきます。`,
-        `興味のあることを調べたり、新しいお店をのぞいたりするのもおすすめ。${mySpot}のような場所は、あなたの心をやさしくほどいてくれますよ。`,
-        `誰かにほめられたら、照れずに「ありがとう」と受け取ってね。素直な笑顔が、いちばんの魅力になる日です。`
+        `夕方の${timeSlot}に、会いたい人へ軽く連絡を入れてみてください。用件がなくても「最近どう？」で十分。今日蒔いた小さな種が、あとで嬉しい繋がりになって返ってきます。`,
+        `興味のあることを調べたり、新しいお店をのぞいたりするのもおすすめ。${mySpot}のような場所は、あなたの心を優しくほどいてくれますよ。`,
+        `誰かに褒められたら、照れずに「ありがとう」と受け取ってね。素直な笑顔が、一番の魅力になる日です。`
       ] : [
         `よい刺激に恵まれ、物事が前に進みやすい好調日です。`,
-        `気になっていた集まりやイベントに参加したり、新しいことを学び始めたりするのに向いています。人の集まる場所に顔を出すほど、良いご縁につながります。`,
+        `気になっていた集まりやイベントに参加したり、新しいことを学び始めたりするのに向いています。人の集まる場所に顔を出すほど、良いご縁に繋がります。`,
         `夕方の${timeSlot}は、連絡やお誘いを送るのに向いた時間です。会話では、相手の話を一つ深く聞き返すと、印象に残る人になれます。`,
         `今日始めたことは、まず三日だけ続けてみてください。小さな習慣が、あなたの自信と魅力の土台になります。`
       ];
@@ -1382,7 +1565,7 @@ export function getDailyContactAndAdvice(
       parts = character === 'tsuki' ? [
         `心がとても安定している日。今日は自分のペースを大切にしましょう。`,
         `お昼の${timeSlot}は、美味しいものを食べたり、好きな音楽を聴いたりして、自分を満たす時間に。満たされている人の笑顔は、自然と人を惹きつけます。`,
-        `${myType}あなたのマイペースさは、大切な魅力のひとつ。無理に周りに合わせなくて大丈夫ですよ。`,
+        `${myType}あなたのマイペースさは、大切な魅力の一つ。無理に周りに合わせなくて大丈夫ですよ。`,
         `夜は、ゆっくり自分と向き合う時間に。「どんな人と、どんな恋がしたいか」を思い描いておくと、ご縁が来たときに迷わず手を伸ばせます。`
       ] : [
         `今の流れを保ち、足元を整えるのに向いた穏やかな日です。`,
@@ -1394,9 +1577,9 @@ export function getDailyContactAndAdvice(
       timeSlot = '21:30 〜 23:00';
       subtitle = subs.t45;
       parts = character === 'tsuki' ? [
-        `少し心と体に疲れが出やすい日。がんばりすぎず休ませてあげて。`,
+        `少し心と体に疲れが出やすい日。頑張りすぎず休ませてあげて。`,
         `『${myNg}』のような、あなたが苦手なことに出会うと、いつもより心がすり減りやすい日です。嫌だなと感じたら、無理せず距離を置いてくださいね。`,
-        `夜の${timeSlot}は、温かいお風呂にゆっくりつかって、早めにお布団へ。しっかり眠ることが、いちばんの開運になります。`,
+        `夜の${timeSlot}は、温かいお風呂にゆっくり使って、早めにお布団へ。しっかり眠ることが、一番の開運になります。`,
         `うまくいかないことがあっても、今日は運気の波がひと休みしているだけ。自分を責めなくて大丈夫ですよ。`
       ] : [
         `エネルギーを使いすぎないよう、慎重に過ごしたい日です。`,
@@ -1410,11 +1593,11 @@ export function getDailyContactAndAdvice(
       parts = character === 'tsuki' ? [
         `今日は自分を思いきり甘やかす、充電のための特別な日です。`,
         `SNSやニュースは少しお休みして、好きなスイーツを食べたり、お気に入りの動画を観たり。心がほっとすることを優先してください。`,
-        `寝る前に、今日の自分を「よくがんばったね」とほめてあげて。小さなことでも、自分をほめるほど心に余白が生まれます。`,
+        `寝る前に、今日の自分を「よく頑張ったね」と褒めてあげて。小さなことでも、自分を褒めるほど心に余白が生まれます。`,
         `その余白が、明日からの運気の波を迎え入れる準備になりますよ。焦らなくて大丈夫です。`
       ] : [
         `無理をせず、静かに過ごしたい日。休むことも立派な選択です。`,
-        `人とのやり取りは最小限にして、睡眠と食事をしっかりとってください。疲れているときの決めごとは、あとで後悔しやすいものです。`,
+        `人とのやり取りは最小限にして、睡眠と食事をしっかり取ってください。疲れているときの決めごとは、あとで後悔しやすいものです。`,
         `気になる人への連絡や大事な決めごとは、明日以降に回しましょう。今日は決めないことが、正しい判断になります。`,
         `心と体を休ませることが、次のチャンスをつかむ力になります。`
       ];
@@ -1427,6 +1610,36 @@ export function getDailyContactAndAdvice(
     dailyActionAdviceParts: parts
   };
 }
+
+// 鑑定文で「根拠」として示す十干・十二支・五行のたとえ（文のみ。判定・点数には使わない）
+const STEM_IMAGE: Record<string, string> = {
+  '甲': '甲（きのえ）＝天へまっすぐ伸びる大樹',
+  '乙': '乙（きのと）＝しなやかな草花',
+  '丙': '丙（ひのえ）＝天を照らす太陽',
+  '丁': '丁（ひのと）＝闇を照らす灯火',
+  '戊': '戊（つちのえ）＝どっしりとそびえる山',
+  '己': '己（つちのと）＝命を育む田畑',
+  '庚': '庚（かのえ）＝鍛えられた鋼',
+  '辛': '辛（かのと）＝磨かれた宝石',
+  '壬': '壬（みずのえ）＝すべてを包む大海',
+  '癸': '癸（みずのと）＝大地を潤す雨露'
+};
+const BRANCH_READING: Record<string, string> = {
+  '子': 'ね', '丑': 'うし', '寅': 'とら', '卯': 'う', '辰': 'たつ', '巳': 'み',
+  '午': 'うま', '未': 'ひつじ', '申': 'さる', '酉': 'とり', '戌': 'いぬ', '亥': 'い'
+};
+const branchLabel = (b: string) => (BRANCH_READING[b] ? `${b}（${BRANCH_READING[b]}）` : b);
+// 相生：生む側→生まれる側
+const GENERATE_IMAGE: Record<string, string> = {
+  '木火': '木が燃えて火を生む', '火土': '火が燃え尽きて灰が土に還る', '土金': '土の中から金属が生まれる',
+  '金水': '冷えた金属の表面に水が生まれる', '水木': '水が木を育てる'
+};
+// 相剋：剋す側→剋される側
+const CONQUER_IMAGE: Record<string, string> = {
+  '木土': '木が根を張って土を締めつける', '土水': '土が水をせき止める', '水火': '水が火を消す',
+  '火金': '火が金属を溶かす', '金木': '金の斧が木を断つ'
+};
+const conquerImage = (a: string, b: string) => CONQUER_IMAGE[`${a}${b}`] || CONQUER_IMAGE[`${b}${a}`] || `「${a}」と「${b}」の気がぶつかり合う`;
 
 // 2. 日干（生まれ持ったエネルギー）の宿命相性判定
 export function getStemCompatibility(myStem: string, oppStem: string, myNick: string, oppNick: string) {
@@ -1443,12 +1656,20 @@ export function getStemCompatibility(myStem: string, oppStem: string, myNick: st
     '癸戊': 'パズルのピースのようにぴったり重なる奇跡の相性'
   };
 
+  const me = san(myNick, 'あなた');
+  const opp = san(oppNick);
+  const myImg = STEM_IMAGE[myStem] || myStem;
+  const oppImg = STEM_IMAGE[oppStem] || oppStem;
+  const stemText = myStem === oppStem
+    ? `生まれた日の星（日干）は、${me}も${opp}も「${myImg}」。`
+    : `生まれた日の星（日干）は、${me}が「${myImg}」、${opp}が「${oppImg}」。`;
   const key = `${myStem}${oppStem}`;
   if (pairs[key]) {
     return {
       type: '運命の絆',
       title: `【運命の相性】${pairs[key]}`,
-      detail: `お二人は出会った瞬間から理屈や条件ではなく、心と心の深い部分で惹かれ合う特別な相性です。${san(myNick)}と${san(oppNick)}の間には言葉にしなくても伝わる安心感があり、どんな壁があっても自然と寄り添い合える強い絆で結ばれています。`
+      detail: `${stemText}陰と陽の星がぴたりと引き合う“干合（かんごう）”の組み合わせで、四柱推命では最も強い結びつきの一つ。古くは“夫婦の縁”とも呼ばれてきました。理屈より先に魂が反応し合うため、言葉にしなくても伝わる安心感があり、どんな壁があっても自然と寄り添い合える強い絆で結ばれています。`,
+      short: `${stemText}陰と陽が引き合う“干合（かんごう）”。四柱推命で最も強い結びつきの一つです。`
     };
   }
 
@@ -1456,36 +1677,46 @@ export function getStemCompatibility(myStem: string, oppStem: string, myNick: st
   const elB = stemElements[oppStem] || '火';
   const rel = elementRelations[elA]?.[elB] || 'same';
 
+  // 相生は両方向とも 'producing'。点数・typeは向きで分けず、文だけ向きで分ける
+  if (rel === 'producing' && GENERATE_IMAGE[`${elA}${elB}`]) {
+    return {
+      type: '支え合い',
+      title: '【自然と惹かれ合う相性】自然にパワーを与え合える関係',
+      detail: `${stemText}${GENERATE_IMAGE[`${elA}${elB}`]}ように、${me}の気が${opp}へ注がれる“相生（そうじょう）”の流れです。${me}の優しさや気配りが${opp}の魅力を自然と引き出し、${opp}にとって${me}は「一緒にいると一番ほっとして、元気になれる存在」になっています。`,
+      short: `${stemText}${me}の「${elA}」が${opp}の「${elB}」を生み育てる“相生（そうじょう）”。${me}が${opp}を元気にする関係です。`
+    };
+  }
   if (rel === 'producing') {
     return {
       type: '支え合い',
       title: '【自然と惹かれ合う相性】自然にパワーを与え合える関係',
-      detail: `お二人は自然とお互いを高め合える、とても心地よい関係です。${san(myNick)}の優しさや気配りが、${san(oppNick)}の魅力を自然と引き出し、お相手にとってあなたは「一緒にいると一番ホッとして元気になれる特別な存在」になっています。`
-    };
-  }
-  if (elementRelations[elB]?.[elA] === 'producing') {
-    return {
-      type: '愛され運',
-      title: '【安心感に包まれる相性】相手からの優しさがあなたを満たす関係',
-      detail: `お相手からたくさんのエネルギーと愛情をもらえる相性です。${san(oppNick)}と一緒にいると、${san(myNick)}は自然体でいられて前向きな気持ちになれます。相手の優しさを素直に受け取ることで、二人の仲はどんどん深まっていきます。`
+      detail: `${stemText}${GENERATE_IMAGE[`${elB}${elA}`] || '相手の気が自分を育てる'}ように、${opp}の気が${me}へ注がれる“相生（そうじょう）”の流れです。${opp}といると自然体で前向きになれ、その優しさを素直に受け取るほど、二人の縁は深まっていきます。`,
+      short: `${stemText}${opp}の「${elB}」が${me}の「${elA}」を生み育てる“相生（そうじょう）”。${opp}といると${me}が満たされる関係です。`
     };
   }
   if (rel === 'same') {
     return {
       type: '自然体',
       title: '【親友のように等身大でいられる相性】',
-      detail: `お互いのテンポや物事の感じ方がとてもよく似ている相性です。まるで昔からの大親友のように、飾らずに何でも本音で話せます。お互いに一人の時間も大切にしてあげることで、ずっと仲良しでいられる最高の関係になれます。`
+      detail: `${stemText}どちらも五行の「${elA}」の気を宿す、“比和（ひわ）”の組み合わせです。同じ気は共鳴し合うため、テンポや物事の感じ方が驚くほど似ていて、前世から知っていたかのように飾らない本音で語り合えます。ただ、同じ気は重なりすぎるとお互いの領域を取り合いやすいのが比和の課題。一人の時間という“余白”を尊重し合うことで、この縁はいつまでも澄んだまま育っていきます。`,
+      short: `${stemText}同じ「${elA}」の気どうしの“比和（ひわ）”。飾らない本音で語り合える関係です。`
     };
   }
   return {
     type: '刺激的',
     title: '【お互いを刺激し合うドラマティック相性】',
-    detail: `自分にはない新しい魅力や世界観を見せてくれる、ドキドキする相性です。正反対だからこそ強烈に惹かれ合いますが、お互いのやり方にこだわりすぎると小さなすれ違いが起きることも。「自分と違ってそこが素敵！」と面白がるゆとりを持つことが、ずっとラブラブでいるコツです。`
+    detail: `${stemText}${conquerImage(elA, elB)}ように気がぶつかり合う“相剋（そうこく）”の関係です。ただ相剋は、砥石が刃を研ぐようにお互いを磨き上げる力も持ちます。正反対だからこそ強く惹かれ合う一方、自分のやり方にこだわると小さなすれ違いも。「自分と違ってそこが素敵」と面白がる余裕が、この縁を長く結ぶ鍵です。`,
+    short: `${stemText}「${elA}」と「${elB}」がぶつかり合う“相剋（そうこく）”。違いがお互いを磨く、刺激的な関係です。`
   };
 }
 
 // 3. 生まれ月・十二支の波長判定
-export function getBranchCompatibility(myBranch: string, oppBranch: string) {
+export function getBranchCompatibility(myBranch: string, oppBranch: string, myNick = 'あなた', oppNick = 'お相手') {
+  const me = san(myNick, 'あなた');
+  const opp = san(oppNick);
+  const pairText = myBranch === oppBranch
+    ? `生まれ日の十二支（日支）は、${me}も${opp}も「${branchLabel(myBranch)}」。`
+    : `生まれ日の十二支（日支）は、${me}が「${branchLabel(myBranch)}」、${opp}が「${branchLabel(oppBranch)}」。`;
   const sixHarmonies: Record<string, string> = {
     '子': '丑', '丑': '子', '寅': '亥', '亥': '寅',
     '卯': '戌', '戌': '卯', '辰': '酉', '酉': '辰',
@@ -1495,18 +1726,29 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string) {
     return {
       type: '最高のフィーリング',
       title: '【以心伝心】言葉にしなくても伝わる空気感',
-      detail: 'お二人は言葉にしなくても空気感や生活リズムがぴったり一致する相性です。一緒にいるだけで不思議と緊張が解けて、深い安心感に包まれます。'
+      detail: `${pairText}十二支が陰陽でひと組になる“支合（しごう）”の関係で、見えない糸で結ばれた縁とされます。空気感や生活リズムが言葉なしでも重なり、一緒にいるだけで不思議と緊張がほどけて、深い安心感に包まれます。`,
+      short: `${pairText}陰陽でひと組になる“支合（しごう）”。言葉にしなくても空気感が重なる縁です。`
     };
   }
 
   const threeHarmonies = [
     ['申', '子', '辰'], ['巳', '酉', '丑'], ['寅', '午', '戌'], ['亥', '卯', '未']
   ];
-  if (threeHarmonies.some(group => group.includes(myBranch) && group.includes(oppBranch))) {
+  const harmonyGroup = threeHarmonies.find(group => group.includes(myBranch) && group.includes(oppBranch));
+  if (harmonyGroup) {
+    const HARMONY_NAME: Record<string, [string, string]> = {
+      '申': ['水局', '大きな水の流れ'], '巳': ['金局', '強い金の輝き'], '寅': ['火局', '大きな炎'], '亥': ['木局', '豊かな森']
+    };
+    const [kyoku, image] = HARMONY_NAME[harmonyGroup[0]];
+    const groupText = harmonyGroup.join('・');
+    const memberText = myBranch === oppBranch
+      ? `「${groupText}」の三つがそろうと${image}を生む“三合（さんごう）${kyoku}”の一角を、二人で分け合っています。`
+      : `この二つは「${groupText}」の三つがそろうと${image}を生む、“三合（さんごう）${kyoku}”の仲間です。`;
     return {
       type: 'ベストパートナー',
       title: '【相乗効果バツグン】一緒に未来へ進める相性',
-      detail: '二人が同じ目標や楽しい計画に向かって力を合わせた時に、何倍ものパワーを発揮できる相性です。お互いを助け合いながら、理想の未来を一緒に作っていけます。'
+      detail: `${pairText}${memberText}三合は、別々の場所から集まった気が一つの大きな流れになる縁。同じ目標や計画に向かって力を合わせたとき、二人の気は一つに束ねられ、何倍もの力となって理想の未来を切り開いていきます。`,
+      short: `${pairText}“三合（さんごう）${kyoku}”の仲間。力を合わせるほど何倍もの力になる縁です。`
     };
   }
 
@@ -1519,38 +1761,48 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string) {
     return {
       type: '磁石のような魅力',
       title: '【真逆だから惹かれ合う】刺激的な相性',
-      detail: '磁石のプラスとマイナスのように、お互いにない部分に強く惹かれ合う関係です。意見が違う時は「相手の世界を知るチャンス」と捉えることで、深いつながりに変わります。'
+      detail: `${pairText}十二支の円でちょうど真向かいに立つ“冲（ちゅう）”の関係です。冲は磁石の両極のように、互いにない部分へ強く惹かれ合う縁。意見が違うときは「相手の世界を知るチャンス」と受け止めることで、ぶつかり合う気は深い繋がりへと変わっていきます。`,
+      short: `${pairText}十二支の円で真向かいに立つ“冲（ちゅう）”。互いにない部分に強く惹かれ合う縁です。`
     };
   }
 
   return {
     type: '穏やかな調和',
     title: '【居心地バツグン】ほっと落ち着く相性',
-    detail: '無理をせず自然体でいられる関係です。焦らずマイペースに日々のやり取りを楽しむことで、じわじわと確かな信頼関係を育てていけます。'
+    detail: `${pairText}強く結びつける“合”も、ぶつかる“冲”もない、風のない湖のように穏やかな配置です。焦らずマイペースに日々のやり取りを重ねることで、じわじわと確かな信頼が育っていきます。`,
+    short: `${pairText}強い“合”も“冲”もない穏やかな配置。じわじわと信頼が育つ縁です。`
   };
 }
 
 // 4. 九星気学 本命星相性判定
-export function getStarCompatibility(myStar: string, oppStar: string) {
+export function getStarCompatibility(myStar: string, oppStar: string, myNick = 'あなた', oppNick = 'お相手') {
   const elA = starElements[myStar] || '水';
   const elB = starElements[oppStar] || '金';
   const rel = elementRelations[elA]?.[elB] || 'same';
+  const me = san(myNick, 'あなた');
+  const opp = san(oppNick);
+  const starText = myStar === oppStar
+    ? `九星気学の本命星は、${me}も${opp}も「${myStar}」。`
+    : `九星気学の本命星は、${me}が「${myStar}」、${opp}が「${oppStar}」。`;
 
   if (rel === 'producing' || elementRelations[elB]?.[elA] === 'producing') {
     return {
       type: '運気アップ',
-      detail: '一緒に過ごせば過ごすほど、自然とお互いの運気やモチベーションがアップしていくハッピーな組み合わせです。'
+      detail: `${starText}${GENERATE_IMAGE[`${elA}${elB}`] || GENERATE_IMAGE[`${elB}${elA}`]}ように、互いの気を生かし合う“相生”の組み合わせで、一緒に過ごすほど二人の運気とやる気が巡り、高め合っていきます。`,
+      short: `${starText}「${elA}」と「${elB}」の“相生”。一緒にいるほど運気が巡る組み合わせです。`
     };
   }
   if (rel === 'same') {
     return {
       type: '息ぴったり',
-      detail: '好きなことや休日の過ごし方の好みが似ていて、一緒にいて気疲れしないスムーズな関係です。'
+      detail: `${starText}同じ「${elA}」の星どうしの“比和”で、互いの運気を乱さず、穏やかに巡らせ合う相性とされます。好きなことや休日の過ごし方が自然と重なり、一緒にいても気疲れしない、風通しのよい関係です。`,
+      short: `${starText}同じ「${elA}」の星どうしの“比和”。気疲れしない、穏やかな組み合わせです。`
     };
   }
   return {
     type: '新しい刺激',
-    detail: 'お互いに新しい発見やワクワクする体験を与え合える、前向きな刺激に満ちた組み合わせです。'
+    detail: `${starText}「${elA}」と「${elB}」の気が交わる“相剋”の組み合わせで、互いの気の流れが交差する分、新しい発見や心が動く体験を運び合う、刺激に満ちた縁です。`,
+    short: `${starText}「${elA}」と「${elB}」が交わる“相剋”。新しい発見を運び合う組み合わせです。`
   };
 }
 
@@ -1565,7 +1817,7 @@ export function getMbtiCognitiveDynamics(myMbti: string, oppMbti: string, myNick
   if (!myT && oppT) {
     tfText = `論理的に物事を考えるタイプの${san(oppNick)}に対し、気持ちや共感を大切にするタイプの${san(myNick)}。${san(oppNick)}は悪気なくアドバイスや解決策を言いがちですが、${san(myNick)}が本当に求めているのは「共感して話を聞いてくれること」です。この考え方の違いをあらかじめ知っておくだけで、些細なすれ違いやモヤモヤをスッキリ解消できます。`;
   } else if (myT && !oppT) {
-    tfText = `気持ちや共感を大切にするタイプの${san(oppNick)}に対し、冷静で論理的なタイプの${san(myNick)}。${san(oppNick)}は解決策よりも「気持ちを分かってほしい」と思っています。アドバイスする前にまず「それは大変だったね」「わかるよ」と共感してあげるだけで、相手の心は一気にあなたに開いていきます。`;
+    tfText = `気持ちや共感を大切にするタイプの${san(oppNick)}に対し、冷静で論理的なタイプの${san(myNick)}。${san(oppNick)}は解決策よりも「気持ちを分かってほしい」と思っています。アドバイスする前にまず「それは大変だったね」「分かるよ」と共感してあげるだけで、相手の心は一気にあなたに開いていきます。`;
   } else if (myT && oppT) {
     tfText = `お互いに冷静で論理的な考え方ができるスマートな二人。感情的にならずサバサバと話し合える相性ですが、お互いに素直な弱音を吐きづらい面もあります。照れずに「嬉しい」「寂しい」などの素直な気持ちを言葉で伝えることが、もっと仲良くなる秘密です。`;
   } else {
@@ -1622,21 +1874,21 @@ function generateTorisetsu(
   const myT = (myMbti || '').toUpperCase().includes('T');
   const oppT = normMbti.includes('T');
 
-  let chemistryPraise4 = `「話してると時間あっという間。いちばん素でいられる」`;
+  let chemistryPraise4 = `「話してると時間あっという間。一番素でいられる」`;
   let chemistryPraise5 = `「こんなに話が合う人、なかなかいないよ」`;
   if (isKango) {
     chemistryPraise4 = `「一緒にいると、なんか不思議と安心するんだよね」`;
     chemistryPraise5 = `「苦手なとこ補い合えてる感じがして、すごく大事に思ってる」`;
   } else if (!myT && oppT) {
     chemistryPraise4 = `「いつも落ち着いてて頼りになる。ほんと安心する」`;
-    chemistryPraise5 = `「言わなくてもわかってくれるとこ、ほんと好き」`;
+    chemistryPraise5 = `「言わなくても分かってくれるとこ、ほんと好き」`;
   } else if (myT && !oppT) {
     chemistryPraise4 = `「話してると、張りつめてた気持ちがふっとゆるむ」`;
     chemistryPraise5 = `「いつも気づかってくれて、ほんとにありがとう」`;
   }
 
   let chemistryNg4 = mTrait.ngList[0] || '返信を急かして短時間に連投で催促すること';
-  let chemistryNg5 = mTrait.ngList[1] || '感謝の気持ちを伝えずに当たり前のような態度をとること';
+  let chemistryNg5 = mTrait.ngList[1] || '感謝の気持ちを伝えずに当たり前のような態度を取ること';
   if (oppT) {
     chemistryNg4 = `筋の通らない愚痴を長文でぶつけて、どう返せばいいか困らせること`;
   } else {
@@ -1668,9 +1920,220 @@ function generateTorisetsu(
     lineTemplateInvite: mTrait.lineInvite,
     lineTemplateTopic: mTrait.lineTopic,
     idealDateSpot: mTrait.dateSpot,
-    approachTip: `${isMbtiType(oppMbti) ? `${normMbti}タイプの` : ''}${san(name)}には、相手が一人でいたい時間や話したくないことには踏み込まず、${isKango ? '駆け引きをせずに、飾らない素直な気持ちを見せること' : '二人の気が合うところを見つけて、そこを具体的にほめること'}が、仲を深めるいちばんの近道です。`
+    approachTip: `${isMbtiType(oppMbti) ? `${normMbti}タイプの` : ''}${san(name)}には、相手が一人でいたい時間や話したくないことには踏み込まず、${isKango ? '駆け引きをせずに、飾らない素直な気持ちを見せること' : '二人の気が合うところを見つけて、そこを具体的に褒めること'}が、仲を深める一番の近道です。`
   };
 }
+// 💐 お相手が惹かれるファッション（系統・色・服）と仕草
+// 伝統の考え方: 四柱推命では、男性は「正財」、女性は「正官」がパートナーを表す星（配偶者の星）。
+//   正財 = 日主が剋す五行のうち、日主と陰陽が逆の十干（例: 甲の男性 → 己）
+//   正官 = 日主を剋す五行のうち、日主と陰陽が逆の十干（例: 甲の女性 → 辛）
+// その十干の象意（大樹・草花・太陽…）を、惹かれる雰囲気・色・服装に置き換える（置き換えはアプリ独自）。
+// 仕草の3つ目は、16タイプ（伝統の体系の外。アプリ独自）から足す。点数には一切関係しない。
+export interface AttractionStyle {
+  key?: string;        // 惹かれる相手の十干（絵・色見本の選択用）
+  imageName: string;   // 惹かれる相手のイメージ（例: 宝石）
+  imageNote: string;   // そのイメージの一言説明
+  styleName: string;   // 好みの系統
+  styleTag?: string;   // ひと言の系統（清楚系・ギャル系など。あなたの性別向け）
+  colors: string;      // 好みの色
+  outfit: string;      // あなた（の性別）向けの服装・髪・小物
+  gestures: string[];  // ドキッとさせる仕草
+  mbtiType?: string;   // お相手の16タイプ（入力があるときだけ）
+  mbtiTip?: string;    // お相手の16タイプに合わせた、服装の一工夫
+  ngStyle: string;     // 冷めやすい見た目・振る舞い
+}
+
+const attractionStyleMap: Record<string, {
+  tagFemale: string; tagMale: string; imageName: string; imageNote: string; styleName: string; colors: string;
+  outfitFemale: string; outfitMale: string; gestures: string[]; ngStyle: string;
+}> = {
+  '甲': {
+    tagFemale: '清楚系', tagMale: '爽やか系',
+    imageName: 'まっすぐ伸びる大樹',
+    imageNote: '飾りすぎず、凛としていて、まっすぐな人に惹かれます。',
+    styleName: 'ナチュラルで清潔感のある「きちんとシンプル」系',
+    colors: '深いグリーン・ネイビー・白',
+    outfitFemale: '白いシャツやコットンのブラウスに、ストレートのパンツかロングスカート。髪はまとめるか、まっすぐ下ろす。アクセは小さめ1つで十分です。',
+    outfitMale: '白シャツや無地のニットに、まっすぐなデニムかチノパン。髪は短めにすっきり。シワのない服を選ぶだけで印象が大きく変わります。',
+    gestures: ['背すじを伸ばして座る・歩く', '目を見て「ありがとう」をはっきり言う'],
+    ngStyle: 'ヨレた服やだらしない着くずし、姿勢の悪さ'
+  },
+  '乙': {
+    tagFemale: 'ゆるふわ系', tagMale: '韓国系',
+    imageName: '風に揺れる草花',
+    imageNote: 'やわらかくて、そばにいるとほっとできる人に惹かれます。',
+    styleName: 'ふんわり優しい「ナチュラル」系',
+    colors: '若草色・ミントグリーン・くすみピンク',
+    outfitFemale: '小花柄やふんわりしたブラウス、ひざ下のスカート。髪はゆるく巻くか、やわらかく下ろす。とがった印象の小物は控えめに。',
+    outfitMale: 'やわらかい素材のカーディガンや、淡い色のシャツ。髪は固めすぎず自然に。全身を黒でまとめるより、明るい色を1つ入れるのがおすすめです。',
+    gestures: ['話を聞くとき、少し首をかしげてうなずく', '小さなことに「かわいい」「きれいだね」と反応する'],
+    ngStyle: '威圧感のある全身黒や、強すぎる香水'
+  },
+  '丙': {
+    tagFemale: 'ギャル系', tagMale: 'スポーティ系',
+    imageName: '空に輝く太陽',
+    imageNote: '明るくて、一緒にいると元気になれる人に惹かれます。',
+    styleName: '明るく元気な「華やかカジュアル」系',
+    colors: '赤・オレンジ・明るいイエロー',
+    outfitFemale: '明るい色のトップスを1枚。ポニーテールなど顔周りがすっきりした髪型に、大きめのアクセを1つ。表情が明るく見えるリップを。',
+    outfitMale: '明るい色のTシャツやシャツに、きれいなスニーカー。髪は短めで爽やかに。暗い色だけでまとめず、どこかに明るい色を入れて。',
+    gestures: ['歯を見せて思いきり笑う', 'お相手の話に「えー！すごい！」と大きくリアクションする'],
+    ngStyle: '暗い色ばかりの服と、元気のない表情'
+  },
+  '丁': {
+    tagFemale: 'フェミニン系', tagMale: '大人っぽい系',
+    imageName: '温かく灯るろうそくの火',
+    imageNote: 'さりげなく上品で、近づくと温かさを感じる人に惹かれます。',
+    styleName: '上品でさりげない「大人きれいめ」系',
+    colors: 'ボルドー・ローズピンク・キャメル',
+    outfitFemale: 'とろみのある素材のブラウスや、体にほどよく沿うニット。華奢なネックレスや小さなピアスで、近くで見たときに気づく上品さを。',
+    outfitMale: '落ち着いた色のニットやシャツに、細めの時計や革の小物。派手さよりも、近くで見たときの質の良さを大事にして。',
+    gestures: ['二人のときだけ、少し声を落として話す', '髪型や持ち物など、小さな変化に気づいて伝える'],
+    ngStyle: '派手すぎてギラギラした服や、大声で騒ぐこと'
+  },
+  '戊': {
+    tagFemale: 'コンサバ系', tagMale: '大人カジュアル系',
+    imageName: 'どっしりそびえる山',
+    imageNote: '落ち着いていて、安心して頼れる人に惹かれます。',
+    styleName: '安定感のある「きれいめベーシック」系',
+    colors: 'ベージュ・キャメル・ブラウン',
+    outfitFemale: 'トレンチコートや上質なニット、きちんと感のあるロングスカート。髪はまとめ髪やきれいなストレートで、清潔感を一番に。',
+    outfitMale: 'ジャケットか上質な無地のニットに、チノパンと手入れした革靴。流行よりも、長く着られる定番を選ぶと好印象です。',
+    gestures: ['ゆっくり落ち着いたテンポで話す', 'お相手の話を最後まで聞いてから答える'],
+    ngStyle: '流行を追いすぎた奇抜な服や、そわそわ落ち着かない態度'
+  },
+  '己': {
+    tagFemale: 'ナチュラル系', tagMale: 'ナチュラル系',
+    imageName: '作物を育てる畑の土',
+    imageNote: '素朴で優しく、家庭的な温かさのある人に惹かれます。',
+    styleName: '優しく素朴な「ほっこりナチュラル」系',
+    colors: 'アイボリー・ベージュ・優しいイエロー',
+    outfitFemale: 'やわらかいニットやロングスカート、ナチュラルなメイク。作りこみすぎない、肩の力が抜けたかわいさが一番響きます。',
+    outfitMale: 'やわらかいスウェットやカーディガンなど、清潔感のあるカジュアル。ブランドロゴの目立つ服より、無地で優しい色を。',
+    gestures: ['ご飯のときに「おいしいね」と笑う', 'さりげなく料理を取り分けたり、飲み物を気づかったりする'],
+    ngStyle: 'ブランドロゴだらけの服や、作りこみすぎた見た目'
+  },
+  '庚': {
+    tagFemale: 'きれいめ系', tagMale: 'きれいめ系',
+    imageName: '鍛えられた鋼の刀',
+    imageNote: 'すっきりしていて、決めるときは決める、潔い人に惹かれます。',
+    styleName: 'シャープな「モノトーンきれいめ」系',
+    colors: '白・グレー・シルバー・黒',
+    outfitFemale: 'きれいめなシャツにセンタープレスのパンツ、シルバーのアクセ。色は2〜3色までに絞り、すっきりまとめるのがコツです。',
+    outfitMale: '白シャツに細身のパンツ、シルバーの時計。髪は短く整えて。色を絞ったシンプルなコーデが一番刺さります。',
+    gestures: ['お店やメニューを迷わずサッと決める', '姿勢よく、迷いのない足どりで歩く'],
+    ngStyle: '色や柄がごちゃごちゃした服と、いつまでも決められない態度'
+  },
+  '辛': {
+    tagFemale: 'お嬢様系', tagMale: '上品系',
+    imageName: 'きらめく宝石',
+    imageNote: '上品で、細かいところまで丁寧な人に惹かれます。',
+    styleName: '上質で洗練された「エレガント」系',
+    colors: 'パールホワイト・シャンパンゴールド・ラベンダー',
+    outfitFemale: '上質な素材のワンピースやブラウスに、パールなど小さく光るアクセ。指先（ネイル）や靴まで、丁寧に整えておくと必ず気づかれます。',
+    outfitMale: '上質なシャツやニットに、手入れした靴と時計。ほのかに香るくらいの香水も効果的です。高い服より、汚れやシワのなさが大事。',
+    gestures: ['物の受け渡しやグラスの持ち方など、指先まで丁寧にする', '目が合ったら、静かににこっと微笑む'],
+    ngStyle: '汚れた靴やほつれた服、ガサツな仕草'
+  },
+  '壬': {
+    tagFemale: 'カジュアル系', tagMale: 'アメカジ系',
+    imageName: '広がる大海',
+    imageNote: '自由でおおらかで、一緒にいると世界が広がる人に惹かれます。',
+    styleName: '抜け感のある「ゆったりカジュアル」系',
+    colors: 'ネイビー・マリンブルー・黒',
+    outfitFemale: 'ゆったりしたシャツやデニム、動きやすいスニーカー。きっちり固めるより、少し抜け感のあるラフなまとめ方が響きます。',
+    outfitMale: 'ゆったりしたシャツやデニム、少しアウトドア寄りのカジュアル。かしこまりすぎない、自然体の服が一番です。',
+    gestures: ['「いいね、行こう！」とノリよく誘いに乗る', '行ってみたい場所や旅の話を、目を輝かせて話す'],
+    ngStyle: 'きっちりしすぎて窮屈そうな服や、ノリの悪さ'
+  },
+  '癸': {
+    tagFemale: '韓国系', tagMale: '塩系',
+    imageName: '静かに降る雨と朝つゆ',
+    imageNote: 'しっとり落ち着いていて、少し謎めいた透明感のある人に惹かれます。',
+    styleName: '透明感のある「しっとりミステリアス」系',
+    colors: '黒・ネイビー・ラベンダーグレー',
+    outfitFemale: '透け感のある素材のブラウスや、とろみのあるスカート。髪はさらっと下ろして、つやを大切に。メイクは薄めで透明感を。',
+    outfitMale: '黒やネイビーの落ち着いたシンプルな服に、さらっとした髪。説明しすぎない、静かな雰囲気が一番の魅力になります。',
+    gestures: ['お相手の話に、静かにうなずいて共感する', '少し間をおいてから、目を合わせて話す'],
+    ngStyle: '大声や騒がしい振る舞い、ギラギラした服'
+  }
+};
+
+// 16タイプ（伝統の体系の外。アプリ独自）から、服装の一工夫を足す。
+// 好みはお相手1人の性質なので、二人の相性ではなく、お相手のタイプの4文字から決める。
+const mbtiFashionTip = (mbti: string): string | null => {
+  if (!isMbtiType(mbti)) return null;
+  const t = mbti.toUpperCase();
+  const sn = t[1] === 'S'
+    ? '流行を追うより、定番の服をサイズ感と清潔感で丁寧に着るほうが好印象です'
+    : 'どこか1点、あなたらしいこだわり（小物・色・柄）を入れると「センスいいね」と印象に残ります';
+  const tf = t[2] === 'T'
+    ? 'シルエットはすっきり、ごちゃごちゃさせないのが正解'
+    : 'やわらかい素材や色で、話しかけやすい雰囲気をつくって';
+  const ei = t[0] === 'E'
+    ? '明るい差し色を1つ入れると、会った瞬間の印象が上がります'
+    : '色は落ち着かせて、近くで見たときに気づく上質さで勝負して';
+  const jp = t[3] === 'J'
+    ? 'アイロンや靴の手入れなど「きちんと感」は必ずチェックされます。'
+    : 'きっちりしすぎず、袖をまくるなど少しの抜け感があると距離が縮まります。';
+  return `${sn}。${tf}。${ei}。${jp}`;
+};
+
+// 16タイプ（4つの気質）から、ドキッとさせる仕草を1つ足す
+const mbtiAttractionGesture = (mbti: string): string | null => {
+  if (!isMbtiType(mbti)) return null;
+  const t = mbti.toUpperCase();
+  const isI = t[0] === 'I';
+  if (t[1] === 'N' && t[2] === 'T') {
+    return isI
+      ? 'お相手の話に「それってどういうこと？」と興味を持って質問する（二人きりの静かな場所で）'
+      : 'お相手の考えに「それ面白いね」と乗っかり、自分の意見もはっきり返す';
+  }
+  if (t[1] === 'N' && t[2] === 'F') {
+    return isI
+      ? '気持ちを話してくれたとき、急かさずに目を見て最後まで聞く'
+      : 'うれしいことを「すごくうれしい！」と言葉と表情でまっすぐ伝える';
+  }
+  if (t[3] === 'J') { // SJ
+    return isI
+      ? '待ち合わせの時間を守り、前に話したことを覚えていて話題にする'
+      : '約束をきちんと守り、周りの人にも気配りをする';
+  }
+  // SP
+  return isI
+    ? '言葉よりも行動で示す（荷物をさりげなく持つ、自然に隣に座る）'
+    : 'その場の楽しいことに笑って全力で乗っかる';
+};
+
+export function getAttractionStyle(
+  oppStem: string,
+  oppGender: 'male' | 'female',
+  oppMbti: string,
+  myGender: 'male' | 'female'
+): AttractionStyle {
+  const idx = Math.max(0, stems.indexOf(oppStem));
+  const elemIdx = Math.floor(idx / 2);
+  const opposite = 1 - (idx % 2);
+  // 男性: 日主が剋す五行（五行の順で2つ先）＝正財。女性: 日主を剋す五行（3つ先）＝正官。どちらも陰陽が逆の十干
+  const targetElemIdx = (elemIdx + (oppGender === 'male' ? 2 : 3)) % 5;
+  const partnerStem = stems[targetElemIdx * 2 + opposite];
+  const s = attractionStyleMap[partnerStem] || attractionStyleMap['甲'];
+  const extra = mbtiAttractionGesture(oppMbti);
+  return {
+    key: attractionStyleMap[partnerStem] ? partnerStem : '甲',
+    imageName: s.imageName,
+    imageNote: s.imageNote,
+    styleName: s.styleName,
+    styleTag: myGender === 'male' ? s.tagMale : s.tagFemale,
+    colors: s.colors,
+    outfit: myGender === 'male' ? s.outfitMale : s.outfitFemale,
+    gestures: extra ? [...s.gestures, extra] : s.gestures,
+    mbtiType: isMbtiType(oppMbti) ? oppMbti.toUpperCase() : undefined,
+    mbtiTip: mbtiFashionTip(oppMbti) ?? undefined,
+    ngStyle: s.ngStyle
+  };
+}
+
 const getAstrologyAvatar = (branch: string, gender: string): string => {
   const isMale = gender === 'male';
   
@@ -1764,7 +2227,7 @@ export function getScoreMood(baseScore: number, dailyScore: number): ScoreMood {
   return { phase: 'thin', title: '今日は充電の日', diff, sign, trend: 'down' };
 }
 
-export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 'tsuki'): FortuneResult {
+export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 'tsuki', now: Date = new Date()): FortuneResult {
   const myNickname = input.myName || 'あなた';
   const oppNickname = input.opponentName || 'お相手';
   const myDate = new Date(input.myBirth);
@@ -1869,9 +2332,14 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     const starScore = relStar === 'producing' ? 30 : (relStar === 'same' ? 25 : 15);
     
     // 3. 16タイプ相性 - 配点 40点
-    const mbtiScore = getMBTICompatibilityScore(input.myMbti, input.opponentMbti || 'UNKNOWN');
-    
-    baseScore = fourPillarsScore + starScore + mbtiScore;
+    // どちらかのタイプが分からない場合は、16タイプ相性を使わず、四柱推命＋九星気学（60点満点）だけで100点満点にする（2026-11 見直し）。
+    // 旧版はタイプ不明を一律20点にしていたため、生年月日の相性が最高でも80点で止まっていた。
+    // 60点で100点、1点下がるごとに MBTI_UNKNOWN_STRETCH 点下げる（アプリが決めた値）。平均は旧版（約66点）とほぼ同じに保つ。
+    if (getMBTICompatibility100(input.myMbti, input.opponentMbti || 'UNKNOWN') === null) {
+      baseScore = Math.round(100 - (60 - (fourPillarsScore + starScore)) * MBTI_UNKNOWN_STRETCH);
+    } else {
+      baseScore = fourPillarsScore + starScore + getMBTICompatibilityScore(input.myMbti, input.opponentMbti || '');
+    }
   } else if (!hasOpponent) {
     // 自分だけの場合のベーススコア（自己恋愛指数）。
     //  ・日柱の十二運（日主が自分の日支でどの運の段階か＝本人のエネルギー）… 四柱推命
@@ -1887,23 +2355,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   if (baseScore < 30) baseScore = 30;
   
   // 日次スコア (その日の日干干支のエネルギーと自身の宿命日干の相互作用から論理的に算出)
-  const today = new Date();
-  
+  const today = now;
   const todayPillar = calculateDayPillar(today);
-  const myDailyImpact = getDailyStemImpact(todayPillar.stem, myPillarObj.stem);
 
-  const oppDailyImpact = hasOpponent ? getDailyStemImpact(todayPillar.stem, oppPillarObj.stem) : 0;
-  
-  // 今日の十二支が、自分（と相手）の日主にとってどの運の段階か（十二運）。日ごとの運気の波として足す。
-  // 旧版は、日付から作った疑似的な揺らぎ（sin関数）を足していた。相手がいる場合は、二人の平均。
-  const myJuniUnDaily = juniUnPoints(myPillarObj.stem, todayPillar.branch);
-  const juniUnDaily = hasOpponent ? (myJuniUnDaily + juniUnPoints(oppPillarObj.stem, todayPillar.branch)) / 2 : myJuniUnDaily;
-  
-  // 今日の十二支と、自分（と相手）の十二支の関係（支合・三合・六沖・五行の生剋）も足す。
-  // 週次スコア（weeklyScores の2日目以降）と同じ式・同じ強度に揃えている。0 にすると十二支の影響なし（旧仕様）。
-  const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
-  const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
-  // 相手がいる場合、天干と十二支も（十二運・日の九星と同じく）二人の平均にする。旧版は二人分を合計しており、振れ幅と＋への偏りが2倍になっていた。
+  // 一人ずつの「良い日」の印（恋の星・天乙貴人・空亡）と、2人の最高シンクロ日を、今日の点数にも入れる（2026-11 見直し）。
+  // 「2人の最高シンクロ日」欄（LuckyDaysSection）と同じく、性別が分からない人は印を使わない。
+  const myLuck: LuckPerson | null = input.myGender ? { stem: myPillarObj.stem, branch: myPillarObj.branch, starElement: myStarObj.element, gender: input.myGender } : null;
+  const oppLuck: LuckPerson | null = hasOpponent && oppPillarObj && opponentStarObj && input.opponentGender
+    ? { stem: oppPillarObj.stem, branch: oppPillarObj.branch, starElement: opponentStarObj.element, gender: input.opponentGender }
+    : null;
+  // 相手がいる場合、天干・十二支・十二運・日の九星はどれも二人の平均にする。旧版は天干と十二支を二人分合計しており、振れ幅と＋への偏りが2倍になっていた。
   const pairAvg = (mine: number, opp: number) => (hasOpponent ? (mine + opp) / 2 : mine);
 
   // 今日の日盤の中宮の星（日の九星）と、本命星の関係（九星気学）。相手がいる場合は、二人の平均。
@@ -1913,11 +2374,38 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       ? (mine + getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), opponentStarObj.element)) / 2
       : mine;
   };
-  const dayStarDaily = dayStarOf(today);
 
-  let dailyScore = Math.floor(baseScore + pairAvg(myDailyImpact, oppDailyImpact) + pairAvg(myBranchDaily, oppBranchDaily) + juniUnDaily + dayStarDaily + DAILY_CENTER_OFFSET);
+  /** その日の点数（今日の点数と、7日間のグラフで共通）。上限・下限で止める前の値 */
+  const rawDayScore = (d: Date): number => {
+    const dayInfo = getDayInfo(d);
+    const dp = { stem: dayInfo.stem, branch: dayInfo.branch };
+    const myDay = myLuck ? getPersonDay(myLuck, dayInfo) : null;
+    const oppDay = oppLuck ? getPersonDay(oppLuck, dayInfo) : null;
+    // 天干: 通変星・干合（＋恋の星・天乙貴人・空亡）
+    const myStem = getDailyMarkedStemImpact(myLuck, myDay, dp.stem, myPillarObj.stem);
+    const oppStem = hasOpponent ? getDailyMarkedStemImpact(oppLuck, oppDay, dp.stem, oppPillarObj.stem) : 0;
+    // 十二支: その日の十二支と、自分（と相手）の十二支の関係（支合・三合・六沖・五行の生剋）
+    const myBranch = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(dp.branch, myPillarObj.branch));
+    const oppBranch = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(dp.branch, oppPillarObj.branch)) : 0;
+    // 十二運: その日の十二支が、自分（と相手）の日主にとってどの運の段階か
+    const myJuni = juniUnPoints(myPillarObj.stem, dp.branch);
+    const juni = hasOpponent ? (myJuni + juniUnPoints(oppPillarObj.stem, dp.branch)) / 2 : myJuni;
+    // 2人の最高シンクロ日（LuckyDaysSection と同じ判定）
+    const sync = myLuck && oppLuck ? isPairSyncDate(myLuck, oppLuck, dayInfo) : false;
+    return baseScore + pairAvg(myStem, oppStem) + pairAvg(myBranch, oppBranch) + juni + dayStarOf(d) + DAILY_CENTER_OFFSET + (sync ? SYNC_DAY_BONUS : 0);
+  };
+
+  let dailyScore = Math.floor(rawDayScore(today));
   if (dailyScore > 100) dailyScore = 100;
   if (dailyScore < 0) dailyScore = 0;
+
+  // 相性レーダーの「日々の運気の波」用（印は入れない。従来どおり）
+  const myDailyImpact = getDailyStemImpact(todayPillar.stem, myPillarObj.stem);
+  const oppDailyImpact = hasOpponent ? getDailyStemImpact(todayPillar.stem, oppPillarObj.stem) : 0;
+  const myBranchDaily = Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, myPillarObj.branch));
+  const oppBranchDaily = hasOpponent ? Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(todayPillar.branch, oppPillarObj.branch)) : 0;
+  const myJuniUnDaily = juniUnPoints(myPillarObj.stem, todayPillar.branch);
+  const juniUnDaily = hasOpponent ? (myJuniUnDaily + juniUnPoints(oppPillarObj.stem, todayPillar.branch)) / 2 : myJuniUnDaily;
   
   // 16タイプ和名マッピング
   const mbtiNames: Record<string, string> = {
@@ -1956,8 +2444,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
 
   // 🌟 四柱推命・九星気学・16タイプ統合ダイナミクスの算出
   const stemComp = oppPillarObj ? getStemCompatibility(myPillarObj.stem, oppPillarObj.stem, myNickname, oppNickname) : null;
-  const branchComp = oppPillarObj ? getBranchCompatibility(myPillarObj.branch, oppPillarObj.branch) : null;
-  const starComp = opponentStarObj ? getStarCompatibility(myStarObj.name, opponentStarObj.name) : null;
+  const branchComp = oppPillarObj ? getBranchCompatibility(myPillarObj.branch, oppPillarObj.branch, myNickname, oppNickname) : null;
+  const starComp = opponentStarObj ? getStarCompatibility(myStarObj.name, opponentStarObj.name, myNickname, oppNickname) : null;
   // 未選択（空文字）でも文が欠けないよう、'UNKNOWN' として扱う
   const mbtiDyn = hasOpponent ? getMbtiCognitiveDynamics(input.myMbti || 'UNKNOWN', input.opponentMbti || 'UNKNOWN', myNickname, oppNickname) : null;
   const myStemTrait = getStemTraits(myPillarObj.stem, myNickname);
@@ -1975,22 +2463,22 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     const relAdviceMap: Record<string, { tsuki: string; ren: string }> = {
       '片思い中': {
         tsuki: `${san(myNickname)}の自然な優しさや気配りを、そのまま届けてみてください。少しずつ心を開いてもらえて、${san(oppNickname)}にとって「かけがえのない大切な存在」へ一歩ずつ近づけます。`,
-        ren: `お相手の性格タイプに合わせて、「返事がしやすく、負担にならない具体的なお誘い」を送るのが、いちばんうまくいくやり方です。`
+        ren: `お相手の性格タイプに合わせて、「返事がしやすく、負担にならない具体的なお誘い」を送るのが、一番うまくいくやり方です。`
       },
       '両思い・交際中': {
         tsuki: `二人の信頼関係は非常に良好です。日頃の「ありがとう」や素直な感謝の言葉を日常的に伝えることで、愛の絆はより一層深まります。`,
-        ren: `マンネリを防ぐには、二人で新しいことを体験したり、これからのことを具体的に話し合ったりするのがいちばんです。関係がぐっと深まります。`
+        ren: `マンネリを防ぐには、二人で新しいことを体験したり、これからのことを具体的に話し合ったりするのが一番です。関係がぐっと深まります。`
       },
       '復縁したい': {
-        tsuki: `昔のもめごとには触れず、相手の負担にならない「温かい見守り」と軽い気づかいを続けてください。それが、もう一度心を開いてもらういちばんの鍵です。`,
-        ren: `感情的に何度も連絡したり、返事を急かしたりするのは逆効果です。相手が気持ちを整理する時間を大切にして、LINE吉時間に、短くて答えやすいメッセージを送るのがいちばんです。`
+        tsuki: `昔のもめごとには触れず、相手の負担にならない「温かい見守り」と軽い気づかいを続けてください。それが、もう一度心を開いてもらう一番の鍵です。`,
+        ren: `感情的に何度も連絡したり、返事を急かしたりするのは逆効果です。相手が気持ちを整理する時間を大切にして、LINE吉時間に、短くて答えやすいメッセージを送るのが一番です。`
       },
       '結婚・夫婦': {
         tsuki: `日常の小さな思いやりの積み重ねが二人の幸運の土台です。お互いがほっとできる、温かい家庭を育てていきましょう。`,
-        ren: `生活のリズムを合わせることと、家事などの分担でお互いに「ありがとう」を伝え合うことが、二人の運気をいちばん高めます。`
+        ren: `生活のリズムを合わせることと、家事などの分担でお互いに「ありがとう」を伝え合うことが、二人の運気を一番高めます。`
       },
       '複雑愛・秘密の恋': {
-        tsuki: `まわりの声に心を乱されず、二人でいるときの安心できる時間を、やさしく大切にしてください。`,
+        tsuki: `周りの声に心を乱されず、二人でいるときの安心できる時間を、優しく大切にしてください。`,
         ren: `気持ちに流されず、冷静でいることが大切です。連絡する時間帯や会う場面はとても慎重に選び、無理のない形で関わりましょう。`
       }
     };
@@ -2004,30 +2492,30 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     if (character === 'tsuki') {
       if (baseScore >= 85) {
         oneLiner = `${sTitle}。心と心が深く通じ合い、自然と愛が深まる最高の幸運期です。`;
-        summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。お互いを思いやることで絆がぐんと深まる好調期。素直な気持ちを届けましょう。`;
-        summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 55) {
         oneLiner = `【ゆっくり育てる相性】二人の土台を静かに整える平穏期。焦らずお互いのペースを認め合いましょう。`;
-        summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else {
         oneLiner = `【${sType}】焦らず穏やかに見守る時。お互いの違いをポジティブに楽しむ姿勢が大切です。`;
-        summary = `${san(myNickname)}と${san(oppNickname)}は、${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       }
     } else { // ren
       if (baseScore >= 85) {
         oneLiner = `${sTitle}。星が示す抜群の相性。具体的なお誘いに進むベストタイミングです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 70) {
         oneLiner = `${sTitle}。関係性は着実に上昇中。相手の好む会話のペースに合わせるのが効果的です。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else if (baseScore >= 55) {
         oneLiner = `【ゆっくり育てる相性】相性は安定しています。無理にペースを変えず、今の心地よい関係を続けるのが正解です。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       } else {
-        oneLiner = `【${sType}】少しすれ違いやすい時期。気持ちのままに何度も連絡せず、落ち着いて見守るのがいちばんです。`;
-        summary = `お二人の相性バランスと分析結果：\n${stemComp?.detail}\n\n${branchComp?.detail}\n\n${starComp?.detail}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
+        oneLiner = `【${sType}】少しすれ違いやすい時期。気持ちのままに何度も連絡せず、落ち着いて見守るのが一番です。`;
+        summary = `お二人の相性バランスと分析結果：\n${stemComp?.short}\n${branchComp?.short}\n${starComp?.short}\n\n【二人の性格・コミュニケーションの相性】\n${mbtiDyn?.summary}`;
       }
     }
   } else {
@@ -2039,7 +2527,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     if (character === 'tsuki') {
       if (baseScore >= 85) {
         oneLiner = `【${myPillarObj.stem}の輝き】あなたの内なる魅力が満開となり、理想の良縁を引き寄せる絶頂期です。`;
-        summary = `${san(myNickname)}の生まれ持った星は「${myElTrait}」の性質を持ち、まわりを温かく惹きつける力があります。九星気学の本命星（${myStarObj.name}）との組み合わせもよく、あなたの自然体な笑顔がいちばんの開運アイテムです。人への遠慮は少し手放して、自分が本当に心地よいと感じるほうを選んでください。`;
+        summary = `${san(myNickname)}の生まれ持った星は「${myElTrait}」の性質を持ち、周りを温かく惹きつける力があります。九星気学の本命星（${myStarObj.name}）との組み合わせもよく、あなたの自然体な笑顔が一番の開運アイテムです。人への遠慮は少し手放して、自分が本当に心地よいと感じるほうを選んでください。`;
       } else if (baseScore >= 70) {
         oneLiner = `【${myPillarObj.stem}の循環】運気は順調に上向き。自分を満たす時間が、良いご縁を呼ぶ土台になります。`;
         summary = `あなたの生まれ持った星のエネルギーが安定して巡っています。${isMbtiType(input.myMbti) ? `あなたの16タイプ性格（${input.myMbti.toUpperCase()}）` : 'あなた'}が持つ長所を素直に表現できる環境に身を置くことで、波長の合う特別な存在との距離が自然と縮まります。小さなワクワクを大切にしてください。`;
@@ -2047,22 +2535,22 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         oneLiner = `【${myPillarObj.stem}の休息】心を静かに整える平穏期。焦らず、自分のペースを大切にしましょう。`;
         summary = `今は、心と体を休めて、自分の気持ちを見つめ直すのに向いた穏やかな時期です。無理に外へ動くより、部屋をきれいにしたり、好きな香りに包まれたりして、自分をいたわることで魅力の土台が整います。`;
       } else {
-        oneLiner = `【${myPillarObj.stem}の内省】無理をせず、力をためておく時期。自分にやさしくしてあげましょう。`;
+        oneLiner = `【${myPillarObj.stem}の内省】無理をせず、力をためておく時期。自分に優しくしてあげましょう。`;
         summary = `今は運気が少しお休みしている時期です。人の評価は気にせず、まずは自分を思いきり甘やかしてあげてください。ここでしっかり休むことが、次に運気が上がったときの力になります。`;
       }
     } else { // ren
       if (baseScore >= 85) {
         oneLiner = `【${myPillarObj.stem}の冴え】考える力と決める力が冴える好調期。思い描いていたことを実行に移しましょう。`;
-        summary = `生年月日と性格タイプを合わせて見ると、あなたの生まれ持った力が最高の状態で発揮されています。${isMbtiType(input.myMbti) ? `あなたの16タイプ（${input.myMbti.toUpperCase()}）の強み` : 'あなたの強み'}である考える力と行動力を活かして、恋愛や仕事の具体的な目標を決めてみてください。動いた分だけ結果につながりやすい時期です。`;
+        summary = `生年月日と性格タイプを合わせて見ると、あなたの生まれ持った力が最高の状態で発揮されています。${isMbtiType(input.myMbti) ? `あなたの16タイプ（${input.myMbti.toUpperCase()}）の強み` : 'あなたの強み'}である考える力と行動力を活かして、恋愛や仕事の具体的な目標を決めてみてください。動いた分だけ結果に繋がりやすい時期です。`;
       } else if (baseScore >= 70) {
         oneLiner = `【${myPillarObj.stem}の安定】落ち着いて選ぶほど、いい流れが続く好調期。気になることは調べてから動きましょう。`;
         summary = `頭がよく働き、冷静に判断できる時期です。価値観や目標が近い人が集まる場所を調べて、自分から足を運んでみてください。気の合う相手と出会うきっかけを、自分でつくれます。`;
       } else if (baseScore >= 55) {
         oneLiner = `【${myPillarObj.stem}の現状維持】運気は穏やかな横ばい。これまでの行動を振り返り、整えるのに向いた時期です。`;
-        summary = `運気は良くも悪くもない、ふつうの状態です。無理に新しいことを始めるより、身の回りややることの整理に力を使うのが、次のチャンスに向けたいちばんの準備になります。`;
+        summary = `運気は良くも悪くもない、普通の状態です。無理に新しいことを始めるより、身の回りややることの整理に力を使うのが、次のチャンスに向けた一番の準備になります。`;
       } else {
         oneLiner = `【${myPillarObj.stem}の守り】迷いが出て判断がぶれやすい時期。無理に動かず、様子を見ましょう。`;
-        summary = `気持ちに引っぱられて、判断がかたよりやすい時期です。大事な決めごとや勢いでの連絡は避けて、自分の状態を落ち着いて見つめ、心と体を休めることを優先してください。それが失敗を防ぐいちばんの方法です。`;
+        summary = `気持ちに引っぱられて、判断が偏りやすい時期です。大事な決めごとや勢いでの連絡は避けて、自分の状態を落ち着いて見つめ、心と体を休めることを優先してください。それが失敗を防ぐ一番の方法です。`;
       }
     }
   }
@@ -2086,9 +2574,9 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
 
   if (character === 'tsuki') {
     if (adviceCategory === '比劫') {
-      firstCardText = `${meta}今日のあなたに贈る言葉は「自分らしさの誇り」です。人の期待に応えようとして、自分の本音を閉じ込めていませんか？あなたの心が「心地よい」と感じるほうを選ぶことが、結果的に人との関係をいちばんいい形にしてくれます。`;
+      firstCardText = `${meta}今日のあなたに贈る言葉は「自分らしさの誇り」です。人の期待に応えようとして、自分の本音を閉じ込めていませんか？あなたの心が「心地よい」と感じるほうを選ぶことが、結果的に人との関係を一番いい形にしてくれます。`;
       secondCardText = hasOpponent && oppMbtiTrait
-        ? `関係を動かす一番の鍵は、${san(oppNickname)}の弱さを見た時に、それを優しく包み込んであげることです。${oppMbtiTrait.killingExtra}と伝えてみてください。素直な笑顔が、相手の緊張をやさしくほどいてくれます。`
+        ? `関係を動かす一番の鍵は、${san(oppNickname)}の弱さを見た時に、それを優しく包み込んであげることです。${oppMbtiTrait.killingExtra}と伝えてみてください。素直な笑顔が、相手の緊張を優しくほどいてくれます。`
         : `今日は自分を最優先に、お気に入りの服や心地よい音楽で自分を満たしてあげてください。満たされた気持ちは表情に出て、いいご縁を引き寄せます。`;
     } else if (adviceCategory === '食傷') {
       firstCardText = `${meta}あなたの言葉と笑顔が、いつも以上に人を惹きつける日です。難しい話より、「美味しいね」「楽しいね」と気持ちを分け合うことが、相手の心をやわらかくほどいてくれます。`;
@@ -2099,7 +2587,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       firstCardText = `${meta}焦らず、毎日の小さな積み重ねを信じて進みましょう。関係を一気に進めようとするより、目の前のことを落ち着いて見て、一緒にいて安心できる時間を少しずつ増やしていくのが鍵です。`;
       secondCardText = hasOpponent && oppMbtiTrait
         ? `お互いのリアルな日常を支え合う姿勢が信頼を深めます。${oppStemTrait?.delayAdvice || '相手のペースを温かく尊重し、焦らず信頼を育みましょう。'}`
-        : `身の回りの整理や、自分への小さなごほうびが吉です。毎日をていねいに過ごすことが、いい出会いを呼び込む土台になります。`;
+        : `身の回りの整理や、自分への小さなごほうびが吉です。毎日を丁寧に過ごすことが、いい出会いを呼び込む土台になります。`;
     } else if (adviceCategory === '官殺') {
       firstCardText = `${meta}相手との波長にズレを感じても心配はいりません。相手の感情の波を無理に引き受けず、今は「相手には相手のペースがある」と受け入れることで、結果的に心地よい信頼が芽生えます。`;
       secondCardText = hasOpponent && oppMbtiTrait
@@ -2116,7 +2604,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       firstCardText = `${meta}今日は、相手に頼りすぎず、世話を焼きすぎもしない「対等な会話」を意識する日です。相手の顔色をうかがうより、自分の考えや状況をそのまま伝えるほうが信頼されます。`;
       secondCardText = hasOpponent && oppMbtiTrait
         ? `結論：${isMbtiType(input.opponentMbti) ? `相手の性格タイプ（${input.opponentMbti.toUpperCase()}）` : '相手の考え方のくせ'}に合わせて、はっきり誘ってみるのにいい日です。${oppMbtiTrait.lineInvite}のように、日にちと場所まで具体的に書いて提案してください。`
-        : `自分の得意なことや、これからの目標を書き出して整理してみてください。自分の足で立っている大人の魅力が、いい相手を引き寄せるいちばんの力になります。`;
+        : `自分の得意なことや、これからの目標を書き出して整理してみてください。自分の足で立っている大人の魅力が、いい相手を引き寄せる一番の力になります。`;
     } else if (adviceCategory === '食傷') {
       firstCardText = `${meta}今日は「一緒に楽しめること」を提案するのがおすすめです。思ったままに話すより、相手が興味を持っていそうな話題を選んで振ってみてください。`;
       secondCardText = hasOpponent && oppMbtiTrait
@@ -2126,16 +2614,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       firstCardText = `${meta}二人のこれからを落ち着いて見直す日です。気持ちだけで判断せず、お互いが望んでいることや、かけられる時間が合っているかを確かめて、無理のない進め方を選んでください。`;
       secondCardText = hasOpponent && oppMbtiTrait
         ? `「いつ・どこで」を具体的にして提案すると、話が決まりやすい日です。行き先は『${oppMbtiTrait.dateSpot}』のような場所にすると、ぐっとまとまりやすくなります。`
-        : `お金の使い方や、これからの計画を見直すのにぴったりの日です。むだを減らして暮らしを整えると心に余裕が生まれ、それが魅力になります。`;
+        : `お金の使い方や、これからの計画を見直すのにぴったりの日です。無駄を減らして暮らしを整えると心に余裕が生まれ、それが魅力になります。`;
     } else if (adviceCategory === '官殺') {
-      firstCardText = `${meta}相手が今どんな状況で、何に追われているかを考えて、あえて「一歩引いて支える」のがいちばんです。返事を急かさず、落ち着いていてください。`;
+      firstCardText = `${meta}相手が今どんな状況で、何に追われているかを考えて、あえて「一歩引いて支える」のが一番です。返事を急かさず、落ち着いていてください。`;
       secondCardText = hasOpponent && oppMbtiTrait
-        ? `注意点：お相手が嫌がる『${oppMbtiTrait.ngList[0]}』は、今日は特に避けてください。連絡するなら、「おつかれさま」のようなねぎらいのひと言を入れた短い文だけにしましょう。`
+        ? `注意点：お相手が嫌がる『${oppMbtiTrait.ngList[0]}』は、今日は特に避けてください。連絡するなら、「お疲れさま」のようなねぎらいのひと言を入れた短い文だけにしましょう。`
         : `急なトラブルや予定変更があっても困らないよう、予定には余裕を持たせてください。落ち着いて対応できる人は、それだけで信頼されます。`;
     } else { // 印星
       firstCardText = `${meta}これまでのやり取りや相手の反応を振り返って、「うまくいったこと」と「直したいこと」を整理する日です。焦ると、物事を正しく見られなくなります。`;
       secondCardText = hasOpponent && oppMbtiTrait
-        ? `次のチャンスに向けて、相手のことをもっと知り、どう誘うかをじっくり考え直しましょう。相手に響くほめ言葉として『${oppMbtiTrait.killingExtra}』を用意しておくと、次に話すときの切り札になります。`
+        ? `次のチャンスに向けて、相手のことをもっと知り、どう誘うかをじっくり考え直しましょう。相手に響く褒め言葉として『${oppMbtiTrait.killingExtra}』を用意しておくと、次に話すときの切り札になります。`
         : `得意なことを伸ばしたり、本を読んだりする時間にあててください。ためた知識と落ち着いた見方が、これからの人付き合いで大きな強みになります。`;
     }
   }
@@ -2146,7 +2634,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       text: relAdviceText ? `${relAdviceText}\n\n${firstCardText}` : firstCardText
     },
     {
-      title: character === 'tsuki' ? `💖 ${san(myNickname, 'あなた')}の恋愛運をひらく鍵` : '🎯 うまくいくためのアドバイス',
+      title: character === 'tsuki' ? `💖 ${san(myNickname, 'あなた')}の恋愛運を開く鍵` : '🎯 うまくいくためのアドバイス',
       text: secondCardText
     }
   ];
@@ -2154,24 +2642,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   // 週次スコア (7日間 - 日柱干支の生剋・支合・三合・六沖から論理的に算出)
   const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
   const weeklyScores = Array.from({ length: 7 }).map((_, idx) => {
-    const d = new Date();
+    const d = new Date(today.getTime());
     d.setDate(today.getDate() + idx);
     const dayLabel = weekdays[d.getDay()];
     const dateStr = `${d.getMonth() + 1}/${d.getDate()}`;
-    
-    const dayPillar = calculateDayPillar(d);
-    const myStemImpact = getDailyStemImpact(dayPillar.stem, myPillarObj.stem);
-    const oppStemImpact = hasOpponent ? getDailyStemImpact(dayPillar.stem, oppPillarObj.stem) : 0;
-    const myBranchImpact = getBranchImpact(dayPillar.branch, myPillarObj.branch);
-    const oppBranchImpact = hasOpponent ? getBranchImpact(dayPillar.branch, oppPillarObj.branch) : 0;
 
     let score: number;
     if (idx === 0) {
       score = dailyScore;
     } else {
-      const myJuniUn = juniUnPoints(myPillarObj.stem, dayPillar.branch);
-      const dayJuniUn = hasOpponent ? (myJuniUn + juniUnPoints(oppPillarObj.stem, dayPillar.branch)) / 2 : myJuniUn;
-      score = Math.floor(baseScore + pairAvg(myStemImpact, oppStemImpact) + pairAvg(myBranchImpact, oppBranchImpact) + dayJuniUn + dayStarOf(d) + DAILY_CENTER_OFFSET);
+      score = Math.floor(rawDayScore(d));
       if (score > 100) score = 100;
       if (score < 30) score = 30;
     }
@@ -2192,16 +2672,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     if (stemImp >= 16 || branchImp >= 10) {
       astroNote = `（この月は星どうしが強く引き合い、大きな追い風が吹きます）`;
     } else if (branchImp <= -14 || stemImp <= -14) {
-      astroNote = `（この月は星どうしがぶつかりやすいので、ていねいで柔らかい言葉選びが運気を守る鍵です）`;
+      astroNote = `（この月は星どうしがぶつかりやすいので、丁寧で柔らかい言葉選びが運気を守る鍵です）`;
     }
 
     if (hasOpponent) {
       if (character === 'tsuki') {
         if (score >= 85) {
           const pool = [
-            `今月は${san(myNickname)}と${san(oppNick)}の気持ちと星のめぐりが、いちばんよく噛み合う絶好調の月です。言葉にしなくても心が通じ合う場面があり、素直な想いを伝えることで二人の距離が一気に縮まります。${astroNote}`,
+            `今月は${san(myNickname)}と${san(oppNick)}の気持ちと星の巡りが、一番よく噛み合う絶好調の月です。言葉にしなくても心が通じ合う場面があり、素直な想いを伝えることで二人の距離が一気に縮まります。${astroNote}`,
             `来月にかけて、二人の心がぐっと深く通じ合う、最高の幸運期を迎えます。${san(oppNick)}との間にあった壁がなくなり、これからのことを前向きに考えられる充実した時間になります。${astroNote}`,
-            `再来月にかけて、二人の運気の波がいちばん高くなります。毎日のふとした瞬間に、お互いが「なくてはならない存在」だと感じられる、幸せな時間が待っています。${astroNote}`
+            `再来月にかけて、二人の運気の波が一番高くなります。毎日のふとした瞬間に、お互いが「なくてはならない存在」だと感じられる、幸せな時間が待っています。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
         } else if (score >= 70) {
@@ -2220,7 +2700,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           return pool[monthIdx] || pool[0];
         } else {
           const pool = [
-            `今月は運気の波が一時的に引いている、注意の時期です。感情的になるとすれ違いが生まれやすいので、一歩引いて、${san(oppNick)}の状況や気持ちを静かに見守るのがいちばんです。${astroNote}`,
+            `今月は運気の波が一時的に引いている、注意の時期です。感情的になるとすれ違いが生まれやすいので、一歩引いて、${san(oppNick)}の状況や気持ちを静かに見守るのが一番です。${astroNote}`,
             `来月は、言葉の行き違いに少し注意したい時期です。焦って答えを求めず、相手を温かく受け止める余裕を持つことで、余計なぶつかり合いを防げます。${astroNote}`,
             `再来月は、自分の気持ちと向き合い、無理に関係を進めないほうがいい月です。ひと息ついて自分を整えておくと、そのあと流れが良くなる準備ができます。${astroNote}`
           ];
@@ -2230,21 +2710,21 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         if (score >= 85) {
           const pool = [
             `今月は、二人のこれからや「どういう関係か」がはっきり前に進む勝負の月です。${san(myNickname)}からの具体的な提案が、${san(oppNick)}の迷いを晴らし、関係をはっきり進められる絶好のチャンスです。${astroNote}`,
-            `来月は、よく考えた誘い方と、はっきりした計画がいちばん効く開運月です。${san(oppNick)}との間のあいまいだったことがはっきりして、次のステップに進む話がまとまりやすくなります。${astroNote}`,
-            `再来月は、二人の協力関係がいちばん良くなる時期です。仕事とプライベートのバランスを取りながら、お互いの目標を一緒にかなえていけます。${astroNote}`
+            `来月は、よく考えた誘い方と、はっきりした計画が一番効く開運月です。${san(oppNick)}との間のあいまいだったことがはっきりして、次のステップに進む話がまとまりやすくなります。${astroNote}`,
+            `再来月は、二人の協力関係が一番良くなる時期です。仕事とプライベートのバランスを取りながら、お互いの目標を一緒に叶えていけます。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
         } else if (score >= 70) {
           const pool = [
             `今月は、落ち着いた話し合いや価値観のすり合わせがスムーズに進む好調月です。お互いの生活を大切にしながら、ちょうどいい距離感で話をまとめられます。${astroNote}`,
-            `来月は、計画的に動くほどうまくいく時期です。${san(oppNick)}にとって${san(myNickname)}が「いちばん頼れる相手」として意識され、いい関係が続きます。${astroNote}`,
+            `来月は、計画的に動くほどうまくいく時期です。${san(oppNick)}にとって${san(myNickname)}が「一番頼れる相手」として意識され、いい関係が続きます。${astroNote}`,
             `再来月は、お互いの目標や仕事を支え合える運気が高まります。落ち着いた判断が、二人の信頼をさらに強くします。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
         } else if (score >= 55) {
           const pool = [
             `今月は、二人の関係を落ち着いて見直し、無理のないペースに整える安定期です。気持ちに振り回されず、次のステップへの準備ができます。${astroNote}`,
-            `来月は、やり取りのむだを減らして、関係を整える月です。落ち着いた振る舞いを続けることで、しっかりした土台ができます。${astroNote}`,
+            `来月は、やり取りの無駄を減らして、関係を整える月です。落ち着いた振る舞いを続けることで、しっかりした土台ができます。${astroNote}`,
             `再来月は、気持ちを落ち着けていられるかが大事な穏やかな月です。慌てず今の関係を保つことで、次に動くときに有利になります。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
@@ -2261,21 +2741,21 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       if (character === 'tsuki') {
         if (score >= 85) {
           const pool = [
-            `今月は${san(myNickname)}の魅力が、いちばん輝く月です。がんばりすぎなくても、あなたの優しさに惹かれた人からのアプローチや、いいご縁が自然と集まってきます。${astroNote}`,
-            `来月は、直感が冴えて、いいご縁を引き寄せやすい幸運期です。自分を大切にする時間が、そのまま理想の相手との出会いにつながります。${astroNote}`,
+            `今月は${san(myNickname)}の魅力が、一番輝く月です。頑張りすぎなくても、あなたの優しさに惹かれた人からのアプローチや、いいご縁が自然と集まってきます。${astroNote}`,
+            `来月は、直感が冴えて、いいご縁を引き寄せやすい幸運期です。自分を大切にする時間が、そのまま理想の相手との出会いに繋がります。${astroNote}`,
             `再来月は、あなたの心の豊かさが、最高のご縁を結ぶ大開運月です。気持ちを素直に表すほど、うれしい展開が待っています。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
         } else if (score >= 70) {
           const pool = [
             `今月は新しい出会いや人間関係の芽が順調に育つ好調期です。自分の感覚を信じ、心地よいと感じる場所や趣味に時間を使うことで、価値観の合う人との距離が縮まります。${astroNote}`,
-            `来月は、あなたの思いやりや穏やかな魅力が、まわりに伝わっていく月です。自然体で過ごすことが、いいご縁を育てる秘訣です。${astroNote}`,
-            `再来月は、穏やかで前向きな人とのつながりが広がる時期です。無理のない自分らしいペースが、開運につながります。${astroNote}`
+            `来月は、あなたの思いやりや穏やかな魅力が、周りに伝わっていく月です。自然体で過ごすことが、いいご縁を育てる秘訣です。${astroNote}`,
+            `再来月は、穏やかで前向きな人との繋がりが広がる時期です。無理のない自分らしいペースが、開運に繋がります。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
         } else if (score >= 55) {
           const pool = [
-            `今月は、心と体をいたわり、自分みがきに時間を使いたい穏やかな月です。昔の傷やこだわりを手放して、新しい恋を迎える準備をしましょう。${astroNote}`,
+            `今月は、心と体をいたわり、自分磨きに時間を使いたい穏やかな月です。昔の傷やこだわりを手放して、新しい恋を迎える準備をしましょう。${astroNote}`,
             `来月は、心に栄養をあげるリフレッシュの月です。自分を大切にするほど、心が静かに満たされていきます。${astroNote}`,
             `再来月は、この先の開運に向けて力をためる月です。焦らず自分らしさを大切にすることで、魅力の土台ができあがります。${astroNote}`
           ];
@@ -2291,16 +2771,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       } else {
         if (score >= 85) {
           const pool = [
-            `今月は、あなたの賢さや存在感がまわりから高く評価され、理想の相手を引き寄せやすい開運月です。どんな相手と、どんな関係になりたいかをはっきりさせて、行動する範囲を広げましょう。${astroNote}`,
-            `来月は、はっきりした目標と落ち着いたアプローチが、いちばんの結果につながる勝負の月です。価値観が合う、すてきな相手との出会いが期待できます。${astroNote}`,
+            `今月は、あなたの賢さや存在感が周りから高く評価され、理想の相手を引き寄せやすい開運月です。どんな相手と、どんな関係になりたいかをはっきりさせて、行動する範囲を広げましょう。${astroNote}`,
+            `来月は、はっきりした目標と落ち着いたアプローチが、一番の結果に繋がる勝負の月です。価値観が合う、素敵な相手との出会いが期待できます。${astroNote}`,
             `再来月は、考えて動いてきたことが実を結び、仕事でも恋愛でも大きく前進できる月です。自信を持って進んでください。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
         } else if (score >= 70) {
           const pool = [
             `今月は、いい刺激に恵まれ、行動力と考える力が冴える好調月です。自分の価値観や目標をはっきり伝えることで、尊敬し合える相手との関係が進みやすくなります。${astroNote}`,
-            `来月は、しっかりした大人の魅力が目立つ好調な月です。落ち着いた振る舞いがまわりから一目置かれ、いい人間関係が広がります。${astroNote}`,
-            `再来月は、冷静に考えて選ぶことが運気を押し上げる月です。むだのない動き方が、開運につながります。${astroNote}`
+            `来月は、しっかりした大人の魅力が目立つ好調な月です。落ち着いた振る舞いが周りから一目置かれ、いい人間関係が広がります。${astroNote}`,
+            `再来月は、冷静に考えて選ぶことが運気を押し上げる月です。無駄のない動き方が、開運に繋がります。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
         } else if (score >= 55) {
@@ -2313,8 +2793,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         } else {
           const pool = [
             `今月は、自分の状況を落ち着いて整理する、様子見の月です。無理なアプローチや強い自己主張は避けて、身の回りを整えましょう。${astroNote}`,
-            `来月は、力を使いすぎないよう、やることをしぼる守りの月です。静かに準備をしておくことが、失敗を防ぎます。${astroNote}`,
-            `再来月は、まわりの様子を見ながら、自分の中身をみがくことに集中したい月です。焦らず、危ないことを避けるのがいちばんの選択です。${astroNote}`
+            `来月は、力を使いすぎないよう、やることを絞る守りの月です。静かに準備をしておくことが、失敗を防ぎます。${astroNote}`,
+            `再来月は、周りの様子を見ながら、自分の中身を磨くことに集中したい月です。焦らず、危ないことを避けるのが一番の選択です。${astroNote}`
           ];
           return pool[monthIdx] || pool[0];
         }
@@ -2336,30 +2816,30 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       if (character === 'tsuki') {
         if (score >= 85) {
           if (yearsLater === 1) return `${displayYear}は、${san(myNickname)}と${san(oppNick)}の関係が、一時的なものから「本物の結びつき」へと深まる、大きく動く開運の年です。弱音を見せ合うことで、家族のような安心感が生まれます。${astroNote}`;
-          if (yearsLater === 2) return `${displayYear}は、関係が一気に具体的になり、同棲や結婚、将来の約束などが自然と進む「実りの年」です。まわりからも祝福され、しっかりした土台ができます。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、関係が一気に具体的になり、同棲や結婚、将来の約束などが自然と進む「実りの年」です。周りからも祝福され、しっかりした土台ができます。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、これからずっと続く二人の形を、お互いに納得しながら決めていける、大人の関係になる年です。相手を大切に思う気持ちと毎日の感謝が、一生続く絆をつくります。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、日常の落ち着きの中で、お互いが空気のように欠かせない存在になる安定の年です。特別なイベントがなくても心が満たされ、二人のリズムがぴったり合っていきます。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、二人の関係に新しい風が吹き、一緒に新しいことを始めたり、暮らしをステップアップさせたりする「新展開の年」です。出会った頃のときめきがよみがえります。${astroNote}`;
-          return `${displayYear}は、十年かけて育ててきた「最高のパートナー」としての関係が完成する年です。言葉にしなくても気持ちがわかり、どんな困難も二人で乗り越えられる強い絆があります。${astroNote}`;
+          return `${displayYear}は、十年かけて育ててきた「最高のパートナー」としての関係が完成する年です。言葉にしなくても気持ちが分かり、どんな困難も二人で乗り越えられる強い絆があります。${astroNote}`;
         } else if (score >= 70) {
           if (yearsLater === 1) return `${displayYear}は、二人の間にあった壁を乗り越えて、距離が一気に縮まる好調の年です。${san(myNickname)}の温かさが、お相手の「この人と進みたい」という気持ちを後押しします。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、二人の将来に向けた具体的な約束やステップアップが順調に実現する発展期です。互いの存在が日々の大きな励みとなり、前向きな将来像が描けます。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、愛が深まりながら、お互いの自分らしさも大切にできる、大人の関係になる年です。穏やかで揺るぎない信頼が、毎日を明るくしてくれます。${astroNote}`;
-          if (yearsLater === 4) return `${displayYear}は、これまで一緒に歩んできたことが自信になり、二人で新しい目標に挑戦できる年です。まわりからの信頼も高まります。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、これまで一緒に歩んできたことが自信になり、二人で新しい目標に挑戦できる年です。周りからの信頼も高まります。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、関係がさらに深まって広がり、二人で長く続く豊かさを楽しめる好調の年です。${astroNote}`;
           return `${displayYear}は、長年積み重ねた信頼が実り、穏やかで幸せな二人の関係が続く年です。${astroNote}`;
         } else if (score >= 55) {
           if (yearsLater === 1) return `${displayYear}は、焦らず、二人の信頼の土台をこつこつ築く「準備の年」です。派手な変化より、毎日の小さな「ありがとう」と、相手をそのまま受け止めることを積み重ねると、しっかりした土台ができます。${astroNote}`;
-          if (yearsLater === 2) return `${displayYear}は、お互いの価値観や生活習慣を少しずつすり合わせて、無理のないペースをつくる年です。ていねいな話し合いが、これからの支えになります。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、お互いの価値観や生活習慣を少しずつすり合わせて、無理のないペースをつくる年です。丁寧な話し合いが、これからの支えになります。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、二人の関係が静かに落ち着き、これからに向けて力をためる穏やかな年です。慌てず自分らしさを保つことが、愛を長持ちさせます。${astroNote}`;
-          if (yearsLater === 4) return `${displayYear}は、お互いのプライベートや成長を温かく見守り合う年です。相手をよくわかっていることが、心の支えになります。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、お互いのプライベートや成長を温かく見守り合う年です。相手をよく分かっていることが、心の支えになります。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、これまでの二人をふり返り、次に大きく進む時期に向けて準備を整える、静かな開運の年です。${astroNote}`;
           return `${displayYear}は、長い時間をかけて育てた信頼が揺るぎないものになり、変わらない安心感に包まれる年です。${astroNote}`;
         } else {
           if (yearsLater === 1) return `${displayYear}は、「こうあるべき」という思い込みや焦りを手放して、自分の気持ちを整える「見守りの年」です。${san(oppNick)}には自分の主張を強く出しすぎず、相手のペースを思いやることで、余計なぶつかり合いを防げます。それが次の年への力になります。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、目に見える成果を焦るより、自分の心を育て、プライベートを充実させることを優先したい「充電の年」です。慌てず自分の力と心の強さを育てておくと、この先つらいことがあっても乗り越えられます。${astroNote}`;
-          if (yearsLater === 3) return `${displayYear}は、今の安定と心の落ち着きを守り、無理に関係を広げない「守りの年」です。まわりを落ち着いて見直し、トラブルを前もって避けることがいちばんです。${astroNote}`;
-          if (yearsLater === 4) return `${displayYear}は、仕事とプライベートに使う時間や力を慎重に配分して、無理をしない年です。静かに様子を見て整えることが、長く続く安定につながります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、今の安定と心の落ち着きを守り、無理に関係を広げない「守りの年」です。周りを落ち着いて見直し、トラブルを前もって避けることが一番です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、仕事とプライベートに使う時間や力を慎重に配分して、無理をしない年です。静かに様子を見て整えることが、長く続く安定に繋がります。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、これまでをふり返って、余計な考えごとを整理し、やり方を立て直す年です。焦らず静かに準備しておくことで、次の幸運期にしっかり備えられます。${astroNote}`;
           return `${displayYear}は、十年かけて自分と向き合い、慎重に歩んできたことが実を結び、どんなことにも動じない心の強さと、安定した暮らしが手に入る年です。${astroNote}`;
         }
@@ -2367,7 +2847,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         if (score >= 85) {
           if (yearsLater === 1) return `${displayYear}は、二人の間の課題をはっきりさせて、具体的に改善していく「立て直しと大開運の年」です。これからのことをはっきり話し合うことで、二人の距離をしっかり縮められます。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、強い運気に後押しされて、婚約や同棲など、将来に向けた具体的なステップが進む最高の年です。${san(myNickname)}がリードすることで、スムーズに進みます。${astroNote}`;
-          if (yearsLater === 3) return `${displayYear}は、二人の関係が「揺るがないパートナー」として落ち着く年です。一緒に暮らす準備や、お金のことを一緒に考えるのに、いちばん向いています。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、二人の関係が「揺るがないパートナー」として落ち着く年です。一緒に暮らす準備や、お金のことを一緒に考えるのに、一番向いています。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、強い信頼に支えられて、お互いの仕事や活動が活発になる「支え合いと発展の年」です。心の支えがしっかりして、次のステージへ進めます。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、これまでを見直して、次の十年を考える「計画の練り直しの年」です。築いてきた土台を、さらに豊かなものにできます。${astroNote}`;
           return `${displayYear}は、十年かけて積み重ねた信頼が実を結び、「何があっても一緒に乗り越える二人」になる年です。最高の安定が続きます。${astroNote}`;
@@ -2386,11 +2866,11 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           if (yearsLater === 5) return `${displayYear}は、これまでをふり返り、次に進むための作戦を見直す、土台づくりの年です。${astroNote}`;
           return `${displayYear}は、長年、慎重に落ち着いて歩んできたことが実を結び、どんな変化にも負けないしっかりした暮らしができる年です。${astroNote}`;
         } else {
-          if (yearsLater === 1) return `${displayYear}は、二人の間の課題を慎重に見極め、急に関係を進めようとしない「守りと見守りの年」です。感情的なぶつかり合いを避け、落ち着いて今の関係を守ることが、この先の別れを防ぐいちばんの選択です。${astroNote}`;
-          if (yearsLater === 2) return `${displayYear}は、これからの計画を見直し、むだな出費や気持ちのぶつかり合いを減らして力をためる「見直しの年」です。お互いのプライベートや仕事のリズムを大切にすることが、関係を守るいちばんの方法です。${astroNote}`;
+          if (yearsLater === 1) return `${displayYear}は、二人の間の課題を慎重に見極め、急に関係を進めようとしない「守りと見守りの年」です。感情的なぶつかり合いを避け、落ち着いて今の関係を守ることが、この先の別れを防ぐ一番の選択です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、これからの計画を見直し、無駄な出費や気持ちのぶつかり合いを減らして力をためる「見直しの年」です。お互いのプライベートや仕事のリズムを大切にすることが、関係を守る一番の方法です。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、無理に成果を求めず、足元を見直して、これからの作戦を練り直す年です。慎重に動けば、思わぬトラブルも上手に避けられます。${astroNote}`;
-          if (yearsLater === 4) return `${displayYear}は、時間や力の使い方を慎重に決めて、余計なぶつかり合いを起こさない様子見の年です。気持ちを落ち着けていられることが、いちばんの武器になります。${astroNote}`;
-          if (yearsLater === 5) return `${displayYear}は、余計な考えごとを手放して、やり方を立て直す年です。焦らず様子を見ることが、うまくいくいちばんの近道です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、時間や力の使い方を慎重に決めて、余計なぶつかり合いを起こさない様子見の年です。気持ちを落ち着けていられることが、一番の武器になります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、余計な考えごとを手放して、やり方を立て直す年です。焦らず様子を見ることが、うまくいく一番の近道です。${astroNote}`;
           return `${displayYear}は、自分を整え、落ち着いて考えてきたことが実を結び、どんな変化にも動じない強い自分になれる年です。${astroNote}`;
         }
       }
@@ -2398,29 +2878,29 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       if (character === 'tsuki') {
         if (score >= 85) {
           if (yearsLater === 1) return `${displayYear}は、${san(myNickname)}の恋愛への考え方が根本から深まり、運命の相手との出会いを引き寄せる「大開運・変化の年」です。${astroNote}`;
-          if (yearsLater === 2) return `${displayYear}は、恋愛運がいちばん高まり、あなたを心から大切にしてくれる相手が現れる「実りの年」です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、恋愛運が一番高まり、あなたを心から大切にしてくれる相手が現れる「実りの年」です。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、手に入れた恋や新しいご縁を、毎日の中にしっかり根づかせる「定着の年」です。自分を大切にすることも忘れずに。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、心の豊かさがあふれて、特別なアピールをしなくても、いいご縁が次々と集まる「安定の年」です。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、恋愛も暮らしもさらに広がり、あなたを大きく成長させてくれる最高のご縁に恵まれる「新展開の年」です。${astroNote}`;
-          return `${displayYear}は、自分を大切にする力と、人の気持ちに寄り添う力がいちばん高まり、あなたらしい愛の形ができあがる年です。${astroNote}`;
+          return `${displayYear}は、自分を大切にする力と、人の気持ちに寄り添う力が一番高まり、あなたらしい愛の形ができあがる年です。${astroNote}`;
         } else if (score >= 70) {
           if (yearsLater === 1) return `${displayYear}は、理想の恋に向けて、最初の一歩を順調に踏み出せる「飛躍の年」です。${astroNote}`;
-          if (yearsLater === 2) return `${displayYear}は、あなたの魅力がまわりに伝わり、心地よいご縁との距離が一気に縮まる年です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、あなたの魅力が周りに伝わり、心地よいご縁との距離が一気に縮まる年です。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、自分らしさを大切にしながら豊かな人間関係を育める成熟の年です。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、自然体のまま愛されて、心が満たされる関係が続く好調の年です。${astroNote}`;
-          if (yearsLater === 5) return `${displayYear}は、新しい仲間や場所で、すてきなご縁が広がる年です。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、新しい仲間や場所で、素敵なご縁が広がる年です。${astroNote}`;
           return `${displayYear}は、長く前向きに過ごしてきたことが実を結び、穏やかで満ち足りた人生のパートナーに恵まれる年です。${astroNote}`;
         } else if (score >= 55) {
-          if (yearsLater === 1) return `${displayYear}は、心と体をいたわり、自分みがきに時間を使いたい「土台づくりの年」です。${astroNote}`;
+          if (yearsLater === 1) return `${displayYear}は、心と体をいたわり、自分磨きに時間を使いたい「土台づくりの年」です。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、自分を大切にすることで、新しい恋を迎える心の余裕をつくる年です。${astroNote}`;
-          if (yearsLater === 3) return `${displayYear}は、静かに力をため、自分をみがくことが、この先の幸運を呼び込む準備の年です。${astroNote}`;
-          if (yearsLater === 4) return `${displayYear}は、自分らしさをしっかり持って、まわりに流されない強さを育てる年です。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、静かに力をため、自分を磨くことが、この先の幸運を呼び込む準備の年です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、自分らしさをしっかり持って、周りに流されない強さを育てる年です。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、これまでの成長を力にして、次の幸運期に向けた準備を整える年です。${astroNote}`;
           return `${displayYear}は、自分を大切にする気持ちと心の落ち着きがしっかり育ち、自分らしい幸せがずっと続く年です。${astroNote}`;
         } else {
           if (yearsLater === 1) return `${displayYear}は、引きずっている気持ちやこだわりを手放して、心をゆっくり癒す「手放しの年」です。焦って答えを求めず自分を大切にすることで、次の大開運期を迎える心の余裕ができます。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、無理な行動や焦ったアプローチは控えて、自分のケアと充電に集中する「守りの年」です。静かに力をためることで、この先の大変なことも乗り越えられる心の強さが育ちます。${astroNote}`;
-          if (yearsLater === 3) return `${displayYear}は、まわりのにぎやかさから一歩引いて、自分が本当に望んでいることを見つめ直す年です。無理をしないことが、結果的にいちばんの選択になります。${astroNote}`;
+          if (yearsLater === 3) return `${displayYear}は、周りのにぎやかさから一歩引いて、自分が本当に望んでいることを見つめ直す年です。無理をしないことが、結果的に一番の選択になります。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、心と体のリフレッシュと、生活習慣の見直しを優先したい年です。ぶれない自分ができあがります。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、これまでの経験を活かして考えを整理し、次の飛躍に備える静かな充電の年です。${astroNote}`;
           return `${displayYear}は、じっくり自分と向き合ってきたことが実を結び、どんな環境でもぶれない強い心が手に入る年です。${astroNote}`;
@@ -2428,31 +2908,31 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       } else {
         if (score >= 85) {
           if (yearsLater === 1) return `${displayYear}は、理想の恋をよく考えて、実際に行動に移す「大開運の年」です。合わない出会いに時間を使わないことで、本当にいいご縁に出会えます。${astroNote}`;
-          if (yearsLater === 2) return `${displayYear}は、あなたの魅力とまわりからの評価が上がり、尊敬されながらアプローチを受ける、大きく飛躍する年です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、あなたの魅力と周りからの評価が上がり、尊敬されながらアプローチを受ける、大きく飛躍する年です。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、理想の関係を、現実的な形で毎日の暮らしに根づかせていく年です。${astroNote}`;
-          if (yearsLater === 4) return `${displayYear}は、お互いを高め合う力がいちばん強まり、仕事や夢を応援し合える最高のパートナー関係が築けます。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、お互いを高め合う力が一番強まり、仕事や夢を応援し合える最高のパートナー関係が築けます。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、大きな目標を一緒に立てて実行し、二人の関係を次のステージへ進める年です。${astroNote}`;
-          return `${displayYear}は、十年かけて考えて動き、自分をみがいてきたことが実を結び、理想の暮らしが手に入る年です。${astroNote}`;
+          return `${displayYear}は、十年かけて考えて動き、自分を磨いてきたことが実を結び、理想の暮らしが手に入る年です。${astroNote}`;
         } else if (score >= 70) {
-          if (yearsLater === 1) return `${displayYear}は、自分の価値観や目標をはっきり伝えることで、尊敬し合えるすてきな相手との関係が進む「好調の年」です。${astroNote}`;
+          if (yearsLater === 1) return `${displayYear}は、自分の価値観や目標をはっきり伝えることで、尊敬し合える素敵な相手との関係が進む「好調の年」です。${astroNote}`;
           if (yearsLater === 2) return `${displayYear}は、しっかりした大人の魅力が目立ち、お互いを高め合える関係が築ける年です。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、仕事とプライベートがお互いをいい方向に押し上げ、現実的な将来の計画が着実に形になる年です。${astroNote}`;
           if (yearsLater === 4) return `${displayYear}は、お互いの得意なことや知恵を分け合い、一緒に信頼される立場を築ける好調の年です。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、これまでの成果をもとに、さらに大きく飛躍を目指す年です。${astroNote}`;
-          return `${displayYear}は、長年よく考えて動き、自分をみがいてきたことが実を結び、安定した満足のいく暮らしが手に入る年です。${astroNote}`;
+          return `${displayYear}は、長年よく考えて動き、自分を磨いてきたことが実を結び、安定した満足のいく暮らしが手に入る年です。${astroNote}`;
         } else if (score >= 55) {
           if (yearsLater === 1) return `${displayYear}は、自分の理想を落ち着いて整理し、何を大事にするかをはっきりさせる年です。${astroNote}`;
-          if (yearsLater === 2) return `${displayYear}は、力のむだづかいを減らし、身の回りや自分の得意なことを整える準備の年です。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、力の無駄遣いを減らし、身の回りや自分の得意なことを整える準備の年です。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、現実的に考えて、これからの計画を見直し、しっかりした土台を固める安定の年です。${astroNote}`;
-          if (yearsLater === 4) return `${displayYear}は、自分の役割を落ち着いて見つめ直し、むだのない動き方を身につける年です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、自分の役割を落ち着いて見つめ直し、無駄のない動き方を身につける年です。${astroNote}`;
           if (yearsLater === 5) return `${displayYear}は、これまでの成果をふり返り、次の目標への準備をしっかり整える年です。${astroNote}`;
           return `${displayYear}は、慎重に歩んできたことが実を結び、気持ちも暮らしも安定して過ごせる年です。${astroNote}`;
         } else {
-          if (yearsLater === 1) return `${displayYear}は、自分のことや今の状況を落ち着いて整理する「守りと見守りの年」です。無理なアプローチや強い自己主張は避けて、身の回りを整えることが、失敗を防ぎ、いちばん早い開運につながります。${astroNote}`;
-          if (yearsLater === 2) return `${displayYear}は、力のむだづかいを避けて、自分の知識や得意なことをみがく「充電の年」です。無理なアプローチは控え、落ち着いて物事を見ることが、トラブルを防ぐいちばんの方法です。${astroNote}`;
+          if (yearsLater === 1) return `${displayYear}は、自分のことや今の状況を落ち着いて整理する「守りと見守りの年」です。無理なアプローチや強い自己主張は避けて、身の回りを整えることが、失敗を防ぎ、一番早い開運に繋がります。${astroNote}`;
+          if (yearsLater === 2) return `${displayYear}は、力の無駄遣いを避けて、自分の知識や得意なことを磨く「充電の年」です。無理なアプローチは控え、落ち着いて物事を見ることが、トラブルを防ぐ一番の方法です。${astroNote}`;
           if (yearsLater === 3) return `${displayYear}は、無理に手を広げず、足元を見直して、これからの作戦を練り直す年です。慎重に動けば、思わぬトラブルも上手に避けられます。${astroNote}`;
-          if (yearsLater === 4) return `${displayYear}は、時間や力の使い方を慎重に決めて、余計なぶつかり合いを起こさない様子見の年です。気持ちを落ち着けていられることが、いちばんの武器になります。${astroNote}`;
-          if (yearsLater === 5) return `${displayYear}は、余計な考えごとを手放して、やり方を立て直す年です。焦らず様子を見ることが、うまくいくいちばんの近道です。${astroNote}`;
+          if (yearsLater === 4) return `${displayYear}は、時間や力の使い方を慎重に決めて、余計なぶつかり合いを起こさない様子見の年です。気持ちを落ち着けていられることが、一番の武器になります。${astroNote}`;
+          if (yearsLater === 5) return `${displayYear}は、余計な考えごとを手放して、やり方を立て直す年です。焦らず様子を見ることが、うまくいく一番の近道です。${astroNote}`;
           return `${displayYear}は、自分を整え、落ち着いて考えてきたことが実を結び、どんな変化にも動じない強い自分になれる年です。${astroNote}`;
         }
       }
@@ -2479,30 +2959,30 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       if (character === 'tsuki') {
         if (score >= 85) {
           topic1Intro = `二人の生まれ持った星を重ねると、${sTitle}。${san(myNickname)}と${san(oppNick)}の間には、言葉がなくても惹かれ合う力と、深い信頼があります。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} さらに${starDetail}\n\n🌙 月からの導き：${san(oppNick)}にとって、${san(myNickname)}は「他では決して得られない深い安らぎ」を感じる存在です。お互いの弱さや本音を素直に打ち明け合うことで、二人の絆は一生ものになっていきます。`;
+          topic1Detail = `${sDetail}\n\n${bDetail}\n\nさらに${starDetail}\n\n🌙 月からの導き：${san(oppNick)}にとって、${san(myNickname)}は「他では決して得られない深い安らぎ」を感じる存在です。お互いの弱さや本音を素直に打ち明け合うことで、二人の絆は一生ものになっていきます。`;
         } else if (score >= 70) {
           topic1Intro = `お互いの生まれ持った性質がちょうどよく補い合い、一緒にいる時間が長いほど信頼が深まる「大器晩成」の好相性です。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：${san(oppNick)}は${san(myNickname)}の持つ柔らかな包容力に安心感を覚えています。「私たちってどういう関係？」と急いで決めようとせず、二人の心地よいペースを大切にすることが、恋を実らせる近道です。`;
+          topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🌙 月からの導き：${san(oppNick)}は${san(myNickname)}の持つ柔らかな包容力に安心感を覚えています。「私たちってどういう関係？」と急いで決めようとせず、二人の心地よいペースを大切にすることが、恋を実らせる近道です。`;
         } else if (score >= 55) {
           topic1Intro = `今の二人は、お互いが踏み込まれたくないところを大切にしながら、関係の土台をつくっている段階です。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：一時的にお相手が自分の世界に入り込んでいるように見えても、それはあなたを避けているのではなく、一人で元気を取り戻している最中です。焦らず温かく見守ることが、信頼につながります。`;
+          topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🌙 月からの導き：一時的にお相手が自分の世界に入り込んでいるように見えても、それはあなたを避けているのではなく、一人で元気を取り戻している最中です。焦らず温かく見守ることが、信頼に繋がります。`;
         } else {
-          topic1Intro = `今は二人の星のめぐりが一時的に「慎重に」の時期で、小さなすれ違いが起きやすくなっています。気持ちのままに動かず、様子を見ましょう。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🌙 月からの導き：今は無理に白黒をつけようとせず、相手に一人の時間をあげることがいちばんです。まずはあなた自身の心を満たしてあげると、余計なぶつかり合いを防げて、運気も上向いていきます。`;
+          topic1Intro = `今は二人の星の巡りが一時的に「慎重に」の時期で、小さなすれ違いが起きやすくなっています。気持ちのままに動かず、様子を見ましょう。`;
+          topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🌙 月からの導き：今は無理に白黒をつけようとせず、相手に一人の時間をあげることが一番です。まずはあなた自身の心を満たしてあげると、余計なぶつかり合いを防げて、運気も上向いていきます。`;
         }
       } else { // ren
         if (score >= 85) {
           topic1Intro = `二人の命式と性格タイプを重ね合わせると、互いの足りない部分を補い合う、とても相性の良い組み合わせだと読み取れます。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の分析：生まれ持った星の相性と九星気学のめぐりから見て、二人が大きくぶつかる心配はほとんどありません。この追い風のうちに、これからのことや次の約束を、具体的に話し合っておきましょう。`;
+          topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🔮 蓮の分析：生まれ持った星の相性と九星気学の巡りから見て、二人が大きくぶつかる心配はほとんどありません。この追い風のうちに、これからのことや次の約束を、具体的に話し合っておきましょう。`;
         } else if (score >= 70) {
           topic1Intro = `二人の関係は着実に上向いています。相手の考え方や行動のくせをよく見ておけば、無理なく仲を深められます。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の分析：気持ちをぶつけるより、共通の目標や趣味、実際にあった出来事を話題にして会話を重ねると、自然と距離が縮まります。`;
+          topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🔮 蓮の分析：気持ちをぶつけるより、共通の目標や趣味、実際にあった出来事を話題にして会話を重ねると、自然と距離が縮まります。`;
         } else if (score >= 55) {
           topic1Intro = `今の二人の運気は、大きな波のない穏やかな流れです。強引に動くより、今の関係を大切に育てるのが賢い選択です。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の分析：今のお相手は、心の余裕が少し落ちている時期です。返事の催促など押しすぎは禁物。3〜5日に1回くらい、近況などの気軽な連絡にとどめるのがいちばんです。`;
+          topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🔮 蓮の分析：今のお相手は、心の余裕が少し落ちている時期です。返事の催促など押しすぎは禁物。3〜5日に1回くらい、近況などの気軽な連絡にとどめるのが一番です。`;
         } else {
-          topic1Intro = `今の二人の星には、一時的にすれ違いやすいめぐりが出ています。相手が踏み込まれたくないところには、近づかないようにしてください。`;
-          topic1Detail = `${sDetail}\n\n${bDetail} ${starDetail}\n\n🔮 蓮の分析：お相手${oppTypeParen}は今、心を守ろうとしている時期で、感情的な長文には強く反発しやすくなっています。連絡はいつもよりぐっと減らして、少し様子を見るのがいちばん安全です。`;
+          topic1Intro = `今の二人の星には、一時的にすれ違いやすい巡りが出ています。相手が踏み込まれたくないところには、近づかないようにしてください。`;
+          topic1Detail = `${sDetail}\n\n${bDetail}\n\n${starDetail}\n\n🔮 蓮の分析：お相手${oppTypeParen}は今、心を守ろうとしている時期で、感情的な長文には強く反発しやすくなっています。連絡はいつもよりぐっと減らして、少し様子を見るのが一番安全です。`;
         }
       }
 
@@ -2519,7 +2999,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           `言葉の裏にある優しさまで、すっと伝わり合う最高の会話運です。`,
           `会話の波長がよく、お互いの考えを穏やかに分かち合える時期です。`,
           `言葉の受け取り方に少しズレが出やすい時期。相手のペースを大切にすると、安心感が深まります。`,
-          `気持ちが先走って、誤解が生まれやすい時期。いつもよりていねいな言葉選びを心がけましょう。`
+          `気持ちが先走って、誤解が生まれやすい時期。いつもより丁寧な言葉選びを心がけましょう。`
         ],
         ren: [
           `あなたの言葉がまっすぐ届きやすい時期です。${san(myNickname)}の素直な気持ちは、そのまま相手に響きます。`,
@@ -2531,15 +3011,15 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       const advices: Record<'tsuki' | 'ren', string[]> = {
         tsuki: [
           `${oppLineTopic}と軽く話を振ってみると、${san(oppNick)}は嬉しそうに心を開いてくれますよ。`,
-          `相手が悩みや本音をこぼしたときは、急いでアドバイスせず「そうだったんだね」とやさしく受け止めてあげて。それだけで二人の絆はぐっと深まります。`,
+          `相手が悩みや本音をこぼしたときは、急いでアドバイスせず「そうだったんだね」と優しく受け止めてあげて。それだけで二人の絆はぐっと深まります。`,
           `長文や返信を急かすメッセージは控えて、「返信は時間があるときで大丈夫だよ」とひと言添えてみて。その余裕が、相手に大きな安心感を届けます。`,
-          `今は大事な話し合いや、白黒をつけるやり取りは避けてね。短いあいさつくらいにとどめて、相手の気持ちが落ち着くのを待つのが、仲直りへのいちばんの近道です。`
+          `今は大事な話し合いや、白黒をつけるやり取りは避けてね。短いあいさつくらいにとどめて、相手の気持ちが落ち着くのを待つのが、仲直りへの一番の近道です。`
         ],
         ren: [
           `誘うときは「いつ・どこで・何をするか」をはっきりさせて、3行以内で伝えると返事をもらいやすくなります。話題には${oppLineTopic}がおすすめです。`,
-          `言いたいことは最初に書き、質問は1通につき1つにしぼってください。相手が返しやすくなり、やり取りが自然と続きます。`,
+          `言いたいことは最初に書き、質問は1通につき1つに絞ってください。相手が返しやすくなり、やり取りが自然と続きます。`,
           `今の${san(oppNick)}は、仕事など自分のことで手いっぱいになりがちです。メッセージはねぎらいの短い文にして、返事を急かさないことが大切です。`,
-          `問い詰めるような文や、言い合いになりそうな話題は今はやめておいてください。連絡は必要なことだけにして、少し距離を置くのがいちばんです。`
+          `問い詰めるような文や、言い合いになりそうな話題は今はやめておいてください。連絡は必要なことだけにして、少し距離を置くのが一番です。`
         ]
       };
       const band = score >= 85 ? 0 : score >= 70 ? 1 : score >= 55 ? 2 : 3;
@@ -2567,7 +3047,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       if (character === 'tsuki') {
         if (score >= 85) {
           topic3Intro = `二人の生まれ持った性質と気持ちが、ちょうどよく惹かれ合っています。`;
-          topic3Detail = `💘 ${san(oppNick)}が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 相手の心に響くほめ言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：駆け引きより、相手のいいところを素直に言葉にして、地雷行動を避けること。それが長く続く絆を育てます。`;
+          topic3Detail = `💘 ${san(oppNick)}が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 相手の心に響く褒め言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：駆け引きより、相手のいいところを素直に言葉にして、地雷行動を避けること。それが長く続く絆を育てます。`;
         } else if (score >= 70) {
           topic3Intro = `異なる魅力が互いを引き寄せ合い、知るほどに愛おしさが増す相性です。`;
           topic3Detail = `💘 お相手が惹かれる本質：\n${oppFallInLove}\n\n✨ 相手を喜ばせる褒め言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🌙 月からのアドバイス：相手の一人の時間や距離感を大切にしながら、たまに素直に甘えたり感謝を伝えたりすると、相手の「大切にしたい」という気持ちが強くなります。`;
@@ -2581,16 +3061,16 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       } else { // ren
         if (score >= 85) {
           topic3Intro = `双方の弱点を補い合うとても良い組み合わせが、星の配置に表れています。`;
-          topic3Detail = `💘 お相手${oppTypeParen}が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 響くほめ言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：対等な相手として敬意を持ち、上の地雷を必ず避けること。それだけで、関係がこじれる心配はぐっと減ります。`;
+          topic3Detail = `💘 お相手${oppTypeParen}が恋に落ちる瞬間：\n${oppFallInLove}\n\n✨ 響く褒め言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：対等な相手として敬意を持ち、上の地雷を必ず避けること。それだけで、関係がこじれる心配はぐっと減ります。`;
         } else if (score >= 70) {
           topic3Intro = `お互いのいいところを引き出し合える、いい関係ができています。`;
-          topic3Detail = `💘 お相手が惹かれるポイント：\n${oppFallInLove}\n\n✨ おすすめのほめ言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手に頼りきらず、一緒に目標に向かって高め合える「いいパートナー」でいることが、うまくいく秘訣です。`;
+          topic3Detail = `💘 お相手が惹かれるポイント：\n${oppFallInLove}\n\n✨ おすすめの褒め言葉：\n${oppKilling}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手に頼りきらず、一緒に目標に向かって高め合える「いいパートナー」でいることが、うまくいく秘訣です。`;
         } else if (score >= 55) {
           topic3Intro = `価値観の違いが目立ちますが、ちょうどいい距離感を保てば、ぶつかり合いは防げます。`;
           topic3Detail = `💘 お相手の心が動くポイント：\n${oppFallInLove}\n\n⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：相手の行動は「自分とは違う文化」だと思って受け止め、あっさりと礼儀正しく接してください。`;
         } else {
           topic3Intro = `性格タイプと命式の組み合わせに、少し噛み合いにくい部分が表れています。`;
-          topic3Detail = `⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：今は、押すほど相手が離れていきやすい時期です。上の地雷をしっかり避けて、しばらくはアプローチをお休みするのがいちばんです。`;
+          topic3Detail = `⚠️ 【二人の間で踏みやすい地雷3選】：\n1. ${ng1}\n2. ${ng2}\n3. ${ng3}\n${stemNgNote}\n\n🔮 蓮の分析：今は、押すほど相手が離れていきやすい時期です。上の地雷をしっかり避けて、しばらくはアプローチをお休みするのが一番です。`;
         }
       }
 
@@ -2603,7 +3083,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       if (character === 'tsuki') {
         if (score >= 85) {
           topic4Intro = `二人の距離がぐっと縮まりやすい時期です。「今後7日間の相性」で点数が高い日を狙いましょう。`;
-          topic4Detail = `📍 ${san(oppNick)}が最も喜ぶデートスポット：\n${oppDateSpot}\n\n💌 心を動かすお誘いテンプレート：\n${oppLineInvite}\n\n🌙 月からのアドバイス：「今後7日間の相性」で「絶好調」の日は、二人の星がいちばん響き合う日です。その日は迷わず、このスポットとお誘いの言葉を使って、素直な気持ちを伝えてみましょう。一気に関係が進みやすくなります。`;
+          topic4Detail = `📍 ${san(oppNick)}が最も喜ぶデートスポット：\n${oppDateSpot}\n\n💌 心を動かすお誘いテンプレート：\n${oppLineInvite}\n\n🌙 月からのアドバイス：「今後7日間の相性」で「絶好調」の日は、二人の星が一番響き合う日です。その日は迷わず、このスポットとお誘いの言葉を使って、素直な気持ちを伝えてみましょう。一気に関係が進みやすくなります。`;
         } else if (score >= 70) {
           topic4Intro = `運気が追い風になる日が、この先いくつかあります。自然なお誘いがうまくいきやすい時期です。`;
           topic4Detail = `📍 お相手がリラックスできるスポット：\n${oppDateSpot}\n\n💌 おすすめのお誘いフレーズ：\n${oppLineInvite}\n\n🌙 月からのアドバイス：焦って勝負をかける必要はありません。「今後7日間の相性」で点数が高い日に軽くお誘いするだけで、相手の気持ちがあなたへ傾くきっかけになります。`;
@@ -2616,11 +3096,11 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         }
       } else { // ren
         if (score >= 85) {
-          topic4Intro = `星の巡りを読み解き、二人の距離がいちばん縮まりやすい「勝負の日」を見つけました。`;
-          topic4Detail = `📍 誘いに乗ってもらいやすいスポット：\n${oppDateSpot}\n\n💌 おすすめのお誘い文：\n${oppLineInvite}\n\n🔮 蓮の作戦：「今後7日間の相性」で85点を超える日を選び、上のお誘い文に日にちと場所を具体的に入れて送ってください。迷わず動くことが、成功へのいちばんの近道です。`;
+          topic4Intro = `星の巡りを読み解き、二人の距離が一番縮まりやすい「勝負の日」を見つけました。`;
+          topic4Detail = `📍 誘いに乗ってもらいやすいスポット：\n${oppDateSpot}\n\n💌 おすすめのお誘い文：\n${oppLineInvite}\n\n🔮 蓮の作戦：「今後7日間の相性」で85点を超える日を選び、上のお誘い文に日にちと場所を具体的に入れて送ってください。迷わず動くことが、成功への一番の近道です。`;
         } else if (score >= 70) {
           topic4Intro = `運気が好調なうちに、会う予定を立てておくのがおすすめです。`;
-          topic4Detail = `📍 おすすめの場所：\n${oppDateSpot}\n\n💌 お誘い文の例：\n${oppLineInvite}\n\n🔮 蓮の作戦：「今後7日間の相性」で点数が高い日に、短いランチやお茶など、相手が気軽にOKしやすいお誘いをするのが、いちばん確実です。`;
+          topic4Detail = `📍 おすすめの場所：\n${oppDateSpot}\n\n💌 お誘い文の例：\n${oppLineInvite}\n\n🔮 蓮の作戦：「今後7日間の相性」で点数が高い日に、短いランチやお茶など、相手が気軽にOKしやすいお誘いをするのが、一番確実です。`;
         } else if (score >= 55) {
           topic4Intro = `今は、無理をしなければ安定している時期です。`;
           topic4Detail = `📍 この先に誘いたいスポット：\n${oppDateSpot}\n\n🔮 蓮の作戦：大きな提案は避け、相手の予定や関心事をさりげなく知る期間と考えて動いてください。`;
@@ -2653,14 +3133,14 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           topic5Intro = `四柱推命・九星気学・16タイプのすべてを重ね合わせた、最後のメッセージをお伝えします。`;
           topic5Detail = `四柱推命【${myPillarObj.stem}×${oppPillarObj?.stem}】の${stemComp?.type || '宿命'}、九星気学【${myStarObj.name}×${opponentStarObj?.name || '相手星'}】の${starComp?.type || '調和'}${myMbtiLabel && mbtiLabel ? `、そして16タイプ【${myMbtiLabel}×${mbtiLabel}】の${pairType}` : ''}。\n\nどの占術から見ても、二人の未来には力強い追い風が吹いています。ここでお伝えした行動を一つずつ実行していけば、望む関係（想いの成就・将来の約束）にきっと手が届きます。`;
         } else if (score >= 70) {
-          topic5Intro = `計画的に、あきらめずにアプローチを続ければ、想いがかなう可能性は十分あります。`;
-          topic5Detail = `気持ちの浮き沈みに流されず、落ち着いて考えたやり方で連絡を続けてください。確かな信頼の積み重ねが、ずっと続く関係につながります。`;
+          topic5Intro = `計画的に、あきらめずにアプローチを続ければ、想いが叶う可能性は十分あります。`;
+          topic5Detail = `気持ちの浮き沈みに流されず、落ち着いて考えたやり方で連絡を続けてください。確かな信頼の積み重ねが、ずっと続く関係に繋がります。`;
         } else if (score >= 55) {
           topic5Intro = `今うまくいっていないところを見直して、やり方を少し変えれば、着実に前に進めます。`;
-          topic5Detail = `どこがうまくいっていないかを見つけて、相手の考え方のくせに合わせて、誘い方や話し方を変えてみてください。小さな修正が、次の結果につながります。`;
+          topic5Detail = `どこがうまくいっていないかを見つけて、相手の考え方のくせに合わせて、誘い方や話し方を変えてみてください。小さな修正が、次の結果に繋がります。`;
         } else {
           topic5Intro = `今の二人の状況と、気をつけたいことについての最後のアドバイスです。`;
-          topic5Detail = `無理に押すのは避けて、今の状況を落ち着いて見直してください。少し距離を置いて、やり方を考え直す時間をとることが、望む未来へのいちばんの近道です。`;
+          topic5Detail = `無理に押すのは避けて、今の状況を落ち着いて見直してください。少し距離を置いて、やり方を考え直す時間を取ることが、望む未来への一番の近道です。`;
         }
       }
 
@@ -2684,7 +3164,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '1. 今のあなたの運気の流れ',
               intro: `あなたの生まれ持った星と本命星（${myStarObj.name}）が、ぴったり響き合う絶好調の時期です。`,
-              detail: `まわりから${myStemPraise}と言われるような、あなたらしい魅力がいちばん輝いています。無理にまわりに合わせる必要はありません。自分の心地よさを大切にすることで、すてきなご縁が自然と集まってきます。`
+              detail: `周りから${myStemPraise}と言われるような、あなたらしい魅力が一番輝いています。無理に周りに合わせる必要はありません。自分の心地よさを大切にすることで、素敵なご縁が自然と集まってきます。`
             },
             {
               title: '2. 自己表現と周囲への伝わり方',
@@ -2693,8 +3173,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             },
             {
               title: '3. あなたの内に秘められた魅力＆落とし穴',
-              intro: `人の気持ちに寄り添える力と、受け止める広い心が、今のあなたのいちばんの魅力です。`,
-              detail: `✨ あなたが言われやすいほめ言葉：${myStemPraise}\n⚠️ 気をつけたいこと：あなたは『${myNgItem}』や『${myStemNg}』をされると、心がすり減りやすいタイプ。そういう相手とは無理に付き合わず、自分を大切にしてください。`
+              intro: `人の気持ちに寄り添える力と、受け止める広い心が、今のあなたの一番の魅力です。`,
+              detail: `✨ あなたが言われやすい褒め言葉：${myStemPraise}\n⚠️ 気をつけたいこと：あなたは『${myNgItem}』や『${myStemNg}』をされると、心がすり減りやすいタイプ。そういう相手とは無理に付き合わず、自分を大切にしてください。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
@@ -2722,7 +3202,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `親しみやすさと上品な優しさが同居する魅力的なオーラが光っています。`,
-              detail: `✨ あなたが言われやすいほめ言葉：${myStemPraise}\n⚠️ 気をつけたい点：『${myNgItem}』をされると疲れやすいタイプです。そういう場面からは距離を置いて、自分のペースを守りましょう。`
+              detail: `✨ あなたが言われやすい褒め言葉：${myStemPraise}\n⚠️ 気をつけたい点：『${myNgItem}』をされると疲れやすいタイプです。そういう場面からは距離を置いて、自分のペースを守りましょう。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
@@ -2750,7 +3230,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `芯の強さと温かい配慮があなたの隠れた魅力です。`,
-              detail: `目立たなくても、あなたの確かな思いやりは、まわりに安心感を与えています。『${myStemNg}』をされると疲れやすいので、そんなときは自分へのごほうびを忘れずに。`
+              detail: `目立たなくても、あなたの確かな思いやりは、周りに安心感を与えています。『${myStemNg}』をされると疲れやすいので、そんなときは自分へのごほうびを忘れずに。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
@@ -2778,7 +3258,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `あなたには、じっと耐える力と、自分を冷静に見つめる力があります。`,
-              detail: `まわりの騒がしさに流されず、静かに自分の心と向き合えることが、長い目で見るとあなたの大きな強みになります。`
+              detail: `周りの騒がしさに流されず、静かに自分の心と向き合えることが、長い目で見るとあなたの大きな強みになります。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
@@ -2797,28 +3277,28 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
           return [
             {
               title: '1. 今のあなたの運気の流れ',
-              intro: `行動力と考える力が冴える、最高の開運期です。目標をはっきり決めて計画どおりに動くと、大きな成果につながります。`,
-              detail: `四柱推命と九星気学の星から見ても、あなたの力がよく発揮される時期です。まわりから${myStemPraise}と言われるような強みを、存分に活かしてください。`
+              intro: `行動力と考える力が冴える、最高の開運期です。目標をはっきり決めて計画どおりに動くと、大きな成果に繋がります。`,
+              detail: `四柱推命と九星気学の星から見ても、あなたの力がよく発揮される時期です。周りから${myStemPraise}と言われるような強みを、存分に活かしてください。`
             },
             {
               title: '2. 自己表現と周囲への伝わり方',
-              intro: `落ち着いて、わかりやすく話すあなたが、まわりを惹きつけます。`,
+              intro: `落ち着いて、分かりやすく話すあなたが、周りを惹きつけます。`,
               detail: `${myMbtiLabel ? `16タイプ（${myMbtiLabel}）らしい賢さ` : 'あなたの賢さ'}を活かして、自分の考えや目標を短くはっきり伝えてみてください。いい相手との関係が育つきっかけになります。`
             },
             {
               title: '3. あなたの内に秘められた魅力＆落とし穴',
-              intro: `自分で考えて問題を解決できる力が、あなたのいちばんの武器です。`,
-              detail: `✨ あなたが言われやすいほめ言葉：${myStemPraise}\n⚠️ 気をつけたいこと：『${myNgItem}』をされる場面や、完璧を求めすぎることで疲れやすいタイプです。こまめに休みをとってください。`
+              intro: `自分で考えて問題を解決できる力が、あなたの一番の武器です。`,
+              detail: `✨ あなたが言われやすい褒め言葉：${myStemPraise}\n⚠️ 気をつけたいこと：『${myNgItem}』をされる場面や、完璧を求めすぎることで疲れやすいタイプです。こまめに休みを取ってください。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
-              intro: `自分みがきや、学びの集まりへの参加が、この先のいいご縁を引き寄せます。`,
+              intro: `自分磨きや、学びの集まりへの参加が、この先のいいご縁を引き寄せます。`,
               detail: `おすすめの場所は『${myDateSpot}』。興味のあることを学んだり、目標を言葉にして書き出したりすると、いいご縁を引き寄せる力が強まります。`
             },
             {
               title: '5. 今後の可能性と総合アドバイス',
               intro: `よく考えて動き、自分をうまく整えれば、理想の毎日を自分の手でつくれる時期です。`,
-              detail: `これまで積み重ねてきたことに自信を持ち、ぶれずに進んでください。望む結果に、いちばん早くたどり着けます。`
+              detail: `これまで積み重ねてきたことに自信を持ち、ぶれずに進んでください。望む結果に、一番早くたどり着けます。`
             }
           ];
         } else if (score >= 70) {
@@ -2826,11 +3306,11 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '1. 今のあなたの運気の流れ',
               intro: `頭がよく働き、安定した好調な時期です。しっかり準備して情報を集めるほど、うまくいきます。`,
-              detail: `考えがすっきりまとまり、むだのない選択ができます。自分にとって本当に大切な人間関係や、自分みがきに時間を使ってください。`
+              detail: `考えがすっきりまとまり、無駄のない選択ができます。自分にとって本当に大切な人間関係や、自分磨きに時間を使ってください。`
             },
             {
               title: '2. 自己表現と周囲への伝わり方',
-              intro: `シンプルではっきりした伝え方が、相手の信頼につながります。`,
+              intro: `シンプルではっきりした伝え方が、相手の信頼に繋がります。`,
               detail: `長い説明は避けて要点を短く伝えると、あなたの賢い印象がより伝わります。`
             },
             {
@@ -2841,11 +3321,11 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '4. 好機を引き寄せる開運アクション',
               intro: `生活習慣を整えて予定をきちんと管理すると、運気がさらに上がります。`,
-              detail: `計画どおりにやることを片付けて、空いた時間を自分みがきにあてると、思いがけないチャンスをつかめます。`
+              detail: `計画どおりにやることを片付けて、空いた時間を自分磨きにあてると、思いがけないチャンスをつかめます。`
             },
             {
               title: '5. 今後の可能性と総合アドバイス',
-              intro: `確実な行動の積み重ねが、この先の大きな成功につながります。`,
+              intro: `確実な行動の積み重ねが、この先の大きな成功に繋がります。`,
               detail: `気持ちに流されず、自分で決めた計画どおりに行動を続けてください。`
             }
           ];
@@ -2858,17 +3338,17 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             },
             {
               title: '2. 自己表現と周囲への伝わり方',
-              intro: `強く主張するより、まわりを落ち着いて見る役に回るのがかしこい時期です。`,
-              detail: `まわりの意見や状況をよく見て、次に動くときのための情報を集めましょう。`
+              intro: `強く主張するより、周りを落ち着いて見る役に回るのが賢い時期です。`,
+              detail: `周りの意見や状況をよく見て、次に動くときのための情報を集めましょう。`
             },
             {
               title: '3. あなたの内に秘められた魅力＆落とし穴',
               intro: `気持ちに振り回されない冷静さと、危ないことを避ける力が、あなたの魅力です。`,
-              detail: `むだなトラブルを上手に避けられることが、あなたの毎日を快適にしています。`
+              detail: `無駄なトラブルを上手に避けられることが、あなたの毎日を快適にしています。`
             },
             {
               title: '4. 好機を引き寄せる開運アクション',
-              intro: `スマホやパソコンの中、机のまわりを整理するのがおすすめです。`,
+              intro: `スマホやパソコンの中、机の周りを整理するのがおすすめです。`,
               detail: `身の回りを片付けると頭もすっきりして、次に何をするか考えやすくなります。`
             },
             {
@@ -2882,7 +3362,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '1. 今のあなたの運気の流れ',
               intro: `うまくいかない要素がいくつか見えるので、無理に動かず守りを優先したい時期です。`,
-              detail: `力をむだに使わないようにして、無理な行動や勢いでの連絡はやめておくのが安全です。`
+              detail: `力を無駄に使わないようにして、無理な行動や勢いでの連絡はやめておくのが安全です。`
             },
             {
               title: '2. 自己表現と周囲への伝わり方',
@@ -2897,7 +3377,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
             {
               title: '4. 好機を引き寄せる開運アクション',
               intro: `人とのやり取りから少し離れ、静かなプライベート空間で休養を取ることです。`,
-              detail: `スマホから少し離れて、よく寝てしっかり食べることが、いちばん早い回復法です。`
+              detail: `スマホから少し離れて、よく寝てしっかり食べることが、一番早い回復法です。`
             },
             {
               title: '5. 今後の可能性と総合アドバイス',
@@ -2944,7 +3424,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   });
 
   // 年次プレビュー (歳運・流年柱干支の生剋・支合沖害から動的に算出)
-  const currentYear = new Date().getFullYear();
+  const currentYear = now.getFullYear();
   const yearlyPreviews = [1, 2, 3, 4, 5, 10].map((yearsLater) => {
     const calendarYear = currentYear + yearsLater;
     const displayYear = `${calendarYear}年`;
@@ -3053,7 +3533,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
         return `【最高の相性】${pairType}・愛と信頼で結ばれる二人`;
       }
       if (baseScore >= 70) {
-        return `【惹かれ合う相性】${pairType}・わかり合うほど仲が深まる二人`;
+        return `【惹かれ合う相性】${pairType}・分かり合うほど仲が深まる二人`;
       }
       if (baseScore >= 60) {
         return `【大器晩成】${pairType}・じわじわ絆が育つ安定相性`;
@@ -3192,13 +3672,21 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       input.opponentMbti || 'ENFP',
       input.myName || 'あなた'
     ),
-    opponentTorisetsu: oppPillarObj ? generateTorisetsu(
-      oppPillarObj.stem,
-      oppPillarObj.branch,
-      input.opponentMbti || 'ENFP',
-      myPillarObj.stem,
-      input.myMbti || 'ENFP',
-      input.opponentName || 'お相手'
-    ) : undefined
+    opponentTorisetsu: oppPillarObj ? {
+      ...generateTorisetsu(
+        oppPillarObj.stem,
+        oppPillarObj.branch,
+        input.opponentMbti || 'ENFP',
+        myPillarObj.stem,
+        input.myMbti || 'ENFP',
+        input.opponentName || 'お相手'
+      ),
+      attraction: getAttractionStyle(
+        oppPillarObj.stem,
+        input.opponentGender || (input.myGender === 'male' ? 'female' : 'male'),
+        input.opponentMbti || '',
+        input.myGender || 'female'
+      )
+    } : undefined
   };
 }

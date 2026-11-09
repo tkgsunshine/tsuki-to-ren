@@ -98,7 +98,7 @@ const SoloHero: React.FC<{ name: string; avatar?: string; mbti?: string }> = ({ 
 
 const ScorePod: React.FC<{ label: string; score?: number; color: string; big?: boolean }> = ({ label, score, color, big }) => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', padding: '0 1rem' }}>
-    <span style={{ fontSize: '0.72rem', color: '#e8e3d8', fontWeight: 600 }}>{label}</span>
+    <span style={{ fontSize: big ? '1rem' : '0.86rem', color, fontWeight: 800, letterSpacing: '0.06em' }}>{label}</span>
     <div className="font-serif" style={{ fontSize: big ? '2.6rem' : '2rem', fontWeight: 800, color, lineHeight: 1.05, display: 'flex', alignItems: 'baseline', gap: '1px' }}>
       {score ?? '??'}<span style={{ fontSize: big ? '0.9rem' : '0.75rem', fontWeight: 700 }}>点</span>
     </div>
@@ -194,7 +194,7 @@ export const SharedResultView: React.FC<Props> = ({ shared, onStart }) => {
           あなたも、気になる人との相性を<br />無料で鑑定してみませんか？
         </p>
         <p style={{ margin: 0, fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.6 }}>
-          生年月日を入れるだけで、二人の相性の点数、相手の本音、LINEを送るのにいい時間がわかります。
+          生年月日を入れるだけで、二人の相性の点数、相手の本音、LINEを送るのにいい時間が分かります。
         </p>
         {cta}
       </div>

@@ -17,9 +17,25 @@ if (!isAdminPage) initAttribution()
 if (!isAdminPage) injectVercelAnalytics({ framework: 'vite', beforeSend: (event) => (isTrackingOptedOut() ? null : event) })
 if (!isAdminPage) installPageScrollReset()
 
+// 開きっぱなしのタブで、デプロイ後に古い分割JS（lazy import）を読もうとして失敗したら、1回だけ読み込み直して最新にする
+// （Vercelは前のデプロイのJSを残さない）。連続で失敗したときは読み込み直さず、通常のエラーとして扱う
+window.addEventListener('vite:preloadError', (event) => {
+  const KEY = 'tsr-chunk-reload-at'
+  try {
+    const last = Number(sessionStorage.getItem(KEY)) || 0
+    if (Date.now() - last < 60_000) return
+    sessionStorage.setItem(KEY, String(Date.now()))
+  } catch {
+    return
+  }
+  event.preventDefault()
+  window.location.reload()
+})
+
 // index.html の起動スプラッシュを、アプリが描画されたあとにフェードアウトして外す
 function BootSplashRemover() {
   useEffect(() => {
+    ;(window as Window & { __tsrBooted?: boolean }).__tsrBooted = true
     const splash = document.getElementById('boot-splash')
     if (!splash || splash.classList.contains('is-hidden')) return
     splash.classList.add('is-hidden')

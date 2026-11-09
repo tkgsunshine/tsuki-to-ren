@@ -31,12 +31,15 @@ interface UnifiedInputViewProps {
   isSubscribed?: boolean;
   /** コラムの案内で入れてもらった生年月日（YYYY-MM-DD）。入っていれば最初からその値を入れておく */
   prefill?: { myBirth?: string; oppBirth?: string } | null;
+  /** 「鑑定を開始する」のすぐ下に出すもの（友達紹介の一言・招待コード欄） */
+  afterSubmit?: React.ReactNode;
 }
 
 export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   selectedCharacter,
   setSelectedCharacter,
   onSubmit,
+  afterSubmit,
   savedPartners = [],
   loadedPartner = null,
   onSelectPartner = () => {},
@@ -111,7 +114,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     return 'female';
   });
 
-  const [mode, setMode] = useState<'single' | 'match'>('match');
+  // 「自分だけ占う」はなくした（2026-11-06）。鑑定はいつもお相手との相性
+  const mode = 'match' as const;
 
   // Opponent Info states
   const [oppName, setOppName] = useState('お相手');
@@ -418,45 +422,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </div>
         </div>
 
-        {/* Mode Selector */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-          <div
-            className={`glass-panel`}
-            onClick={() => setMode('match')}
-            style={{
-              padding: '0.85rem',
-              borderRadius: '14px',
-              cursor: 'pointer',
-              border: mode === 'match' ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.08)',
-              boxShadow: mode === 'match' ? 'var(--shadow-gold)' : 'none',
-              textAlign: 'center',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: mode === 'match' ? 'var(--color-gold)' : 'white' }}>お相手との相性を占う</div>
-            <div style={{ fontSize: '0.6rem', color: '#a9a49a', marginTop: '0.15rem' }}>お相手の情報を追加</div>
-          </div>
-          
-          <div
-            className={`glass-panel`}
-            onClick={() => setMode('single')}
-            style={{
-              padding: '0.85rem',
-              borderRadius: '14px',
-              cursor: 'pointer',
-              border: mode === 'single' ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.08)',
-              boxShadow: mode === 'single' ? 'var(--shadow-gold)' : 'none',
-              textAlign: 'center',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: mode === 'single' ? 'var(--color-gold)' : 'white' }}>自分だけ占う</div>
-            <div style={{ fontSize: '0.6rem', color: '#a9a49a', marginTop: '0.15rem' }}>今日の恋愛運勢を表示</div>
-          </div>
-        </div>
-
         {/* Opponent Info Section (Smooth Accordion Slide-Down) */}
-        <div className={`accordion-section ${mode === 'match' ? 'expanded' : ''}`}>
+        <div className="accordion-section expanded">
           <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.5rem', marginBottom: '0.25rem', fontWeight: 'bold' }}>
               お相手の情報
@@ -686,6 +653,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           <MoonMark size={16} style={{ marginLeft: '0.5rem' }} />
         </button>
       </form>
+      {afterSubmit && <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '0.6rem' }}>{afterSubmit}</div>}
 
       {/* Differentiators & Rare Showcase */}
       <div className="lp-features" style={{ width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.1rem' }}>
@@ -721,8 +689,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             <MessageCircle size={18} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3efe6' }}>③ 心理統計学「16タイプ診断」で具体的アプローチを提示</span>
-            <span style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: '1.45' }}>西洋の心理統計学である16タイプ性格理論と相性論を融合し、日常の会話で生じる意思疎通のすれ違いや認知の癖を解剖。お相手のタイプに最も響くコミュニケーションの取り方を分析し、今日すぐにそのままコピー＆ペーストして送信できる具体的なLINEのメッセージ文案やアプローチ法を提示します。</span>
+            <span className="font-serif" style={{ fontSize: '0.85rem', fontWeight: '600', color: '#f3efe6' }}>③ 「16タイプ診断」で具体的アプローチを提示</span>
+            <span style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: '1.45' }}>16タイプ性格理論と相性論を組み合わせ、日常の会話で生じる意思疎通のすれ違いや認知の癖を解剖。お相手のタイプに最も響くコミュニケーションの取り方を分析し、今日すぐにそのままコピー＆ペーストして送信できる具体的なLINEのメッセージ文案やアプローチ法を提示します。</span>
           </div>
         </div>
       </div>

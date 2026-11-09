@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X, Lock } from 'lucide-react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
+import { trackLpLeave, type LpSection } from '../services/analytics';
 
 const worries = [
   '既読のまま返事がこなくて、なかなか眠れない夜',
@@ -21,12 +22,21 @@ const benefits = [
     body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。返信が遅いときの理由や気持ちが伝わるコツも、二人に合わせてお伝えしますね。'
   },
   {
+    Icon: Star,
+    color: '#e2c074',
+    title: '2人の最高シンクロ日と、あなたの恋愛運MAX日',
+    shot: '/assets/premium/lucky-days.webp',
+    shotAlt: '2人の最高シンクロ日とあなたの恋愛運MAX日の画面',
+    pairNote: 'pairLucky',
+    body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付が分かります。告白やデートのお誘いは、この日に。'
+  },
+  {
     Icon: Calendar,
     color: '#5d9fc0',
     title: '7日間の波から、10年先の二人の未来まで',
     shot: '/assets/premium/timeline-line.webp',
     shotAlt: '7日間・月ごと・年ごとの相性の折れ線グラフの画面',
-    body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目でわかるので、先を見すえて動けますよ。'
+    body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かるので、先を見すえて動けますよ。'
   },
   {
     Icon: BookOpen,
@@ -35,7 +45,16 @@ const benefits = [
     shot: '/assets/premium/torisetsu.webp',
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
     pairNote: 'pairAll',
-    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、ぜんぶ見られます。'
+    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、全部見られます。'
+  },
+  {
+    Icon: Shirt,
+    color: '#e28baa',
+    title: 'あの人が惹かれるファッションと、ドキッとさせる仕草',
+    shot: '/assets/premium/attraction.webp',
+    shotAlt: 'お相手が惹かれるファッションとドキッとさせる仕草の画面',
+    pairNote: 'pairAll',
+    body: 'あの人の生まれ持った星と性格のタイプから、惹かれやすい色・服装・コーデの一工夫と、避けたい服装が絵つきで分かります。会ったときにドキッとさせる仕草も全部見られるので、次のデートの準備に使ってくださいね。'
   },
   {
     Icon: Bell,
@@ -43,7 +62,7 @@ const benefits = [
     title: '毎朝の運勢メールが、全文で届く',
     shot: '/assets/premium/mail.webp',
     shotAlt: '毎朝届く運勢メールの画面',
-    body: 'その日の運勢と相性の点数、あの人にLINEを送るのにいちばんいい時間に加えて、今日のアプローチのコツを最後まで毎朝お届けします。同じ人との相性も、日数を気にせず毎日届きます（無料会員はコツが冒頭だけ、同じ人は7日分まで）。'
+    body: 'その日の運勢と相性の点数、あの人にLINEを送るのに一番いい時間に加えて、今日のアプローチのコツを最後まで毎朝お届けします。同じ人との相性も、日数を気にせず毎日届きます（無料会員はコツが冒頭だけ、同じ人は7日分まで）。'
   },
   {
     Icon: Heart,
@@ -140,7 +159,189 @@ interface PremiumLPModalProps {
   onCancelSubscription?: (reasons: string[], note: string) => void | Promise<void>;
   /** 解約済み（更新日で終了）のとき、その終了日（ISO）。この場合は解約アンケートを出さず、お支払い画面へ直接進む */
   premiumEndsOn?: string | null;
+  /** 料金・プランのところまで読んだ（閉じたときのアンケートの集計で、料金を見てから閉じたかを分ける） */
+  onPlansSeen?: () => void;
 }
+
+// 画面イメージの左上に重ねる「イメージ（サンプル）」の札。実際の結果ではないことを、拡大しなくても分かるようにする
+const SampleBadge: React.FC = () => (
+  <span style={{
+    position: 'absolute',
+    left: '0.4rem',
+    top: '0.4rem',
+    padding: '3px 9px',
+    borderRadius: '6px',
+    background: 'rgba(5, 7, 10, 0.86)',
+    border: '1px solid rgba(226, 192, 116, 0.85)',
+    color: '#f2e2b3',
+    fontSize: '0.66rem',
+    fontWeight: 'bold',
+    lineHeight: 1.3,
+    letterSpacing: '0.04em',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.5)',
+    pointerEvents: 'none'
+  }}>
+    イメージ（サンプル）
+  </span>
+);
+
+// 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見られる。
+// 枠より長い画像のときだけ、開いた直後に少し動かして見せ、下に「スクロール」の案内を出す（下まで見たら消える）
+const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({ src, alt, onClose }) => {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [canScroll, setCanScroll] = useState(false);
+  const [atBottom, setAtBottom] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const nudgedRef = useRef(false);
+
+  const measure = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const over = el.scrollHeight - el.clientHeight > 8;
+    setCanScroll(over);
+    setAtBottom(!over || el.scrollTop + el.clientHeight >= el.scrollHeight - 8);
+    // 長い画像だけ、開いた直後に一度だけ少し下へ動かして戻す（中がスクロールできると伝える）
+    if (over && !nudgedRef.current) {
+      nudgedRef.current = true;
+      const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) {
+        window.setTimeout(() => {
+          if (!scrollerRef.current || scrollerRef.current.scrollTop > 0) return;
+          scrollerRef.current.scrollTo({ top: 90, behavior: 'smooth' });
+          window.setTimeout(() => {
+            if (scrollerRef.current && scrollerRef.current.scrollTop <= 92) scrollerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 550);
+        }, 450);
+      }
+    }
+  };
+  useEffect(() => {
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  return (
+    <div
+      role="dialog"
+      aria-label={alt}
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 200001,
+        background: 'rgba(5, 7, 10, 0.94)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 'calc(0.75rem + env(safe-area-inset-top, 0px)) 0.75rem calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+        boxSizing: 'border-box'
+      }}
+    >
+      {/* スマホの画面の枠（実機と同じ 390×844 を上限に、画面に収まる大きさ） */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '390px',
+          height: '100%',
+          maxHeight: '844px',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#080c11',
+          border: '1px solid rgba(255, 255, 255, 0.14)',
+          borderRadius: '22px',
+          overflow: 'hidden',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7)'
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.5rem',
+          padding: '0.55rem 0.6rem 0.55rem 0.9rem',
+          borderBottom: '1px solid rgba(226, 192, 116, 0.55)',
+          background: 'rgba(52, 42, 20, 0.97)',
+          flexShrink: 0
+        }}>
+          <span style={{ fontSize: '0.8rem', color: '#f2e2b3', fontWeight: 'bold', lineHeight: 1.45 }}>
+            ※ 画面はイメージです
+            <span style={{ display: 'block', fontSize: '0.68rem', fontWeight: 'normal', color: '#d8d2c6' }}>
+              名前や内容はサンプルで、実際の鑑定結果とは異なります
+            </span>
+          </span>
+          <button
+            type="button"
+            aria-label="閉じる"
+            onClick={onClose}
+            style={{
+              flexShrink: 0,
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#e8e3d8',
+              cursor: 'pointer'
+            }}
+          >
+            <X size={19} />
+          </button>
+        </div>
+
+        <div
+          ref={scrollerRef}
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            if (el.scrollTop > 100) setScrolled(true);
+            setAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 8);
+          }}
+          style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
+        >
+          <img src={src} alt={alt} onLoad={measure} style={{ display: 'block', width: '100%', height: 'auto' }} />
+        </div>
+
+        {/* 続きがあることの案内: 下のぼかし＋はねる矢印。下まで見たら消す */}
+        {canScroll && !atBottom && (
+          <div aria-hidden="true" style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: '88px',
+            background: 'linear-gradient(180deg, rgba(8, 12, 17, 0) 0%, rgba(8, 12, 17, 0.92) 100%)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            paddingBottom: '0.7rem',
+            pointerEvents: 'none'
+          }}>
+            <span className="shot-scroll-hint" style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              padding: '4px 12px 4px 10px',
+              borderRadius: '9999px',
+              background: 'rgba(226, 192, 116, 0.92)',
+              color: '#1a1408',
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.45)',
+              opacity: scrolled ? 0.75 : 1
+            }}>
+              <ChevronDown size={15} />
+              {scrolled ? '続きがあります' : 'スクロールで全部見られます'}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   isOpen,
@@ -151,7 +352,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   onCancelSubscription,
   premiumEndsOn,
   pair = null,
-  focus = 'monthly'
+  focus = 'monthly',
+  onPlansSeen
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -180,6 +382,34 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     root.addEventListener('scroll', check, { passive: true });
     return () => root.removeEventListener('scroll', check);
   }, [isOpen, Boolean(pair)]);
+  // 閉じたときに、一番下まで届いたまとまり（data-lp-sec の並び）・いた時間・閉じ方を1回送る（有料会員は送らない）
+  const leaveRef = useRef({ reached: 'top' as LpSection, idx: -1, openedAt: 0, byX: false, layout: 'monthly' as 'pair' | 'monthly', subscribed: false });
+  leaveRef.current.layout = Boolean(pair) && !isSubscribed ? 'pair' : 'monthly';
+  leaveRef.current.subscribed = isSubscribed;
+  useEffect(() => {
+    if (!isOpen) return;
+    const st = leaveRef.current;
+    Object.assign(st, { reached: 'top', idx: -1, openedAt: Date.now(), byX: false });
+    const root = scrollRef.current;
+    const update = () => {
+      if (!root) return;
+      const bottom = root.getBoundingClientRect().bottom;
+      root.querySelectorAll<HTMLElement>('[data-lp-sec]').forEach((el, i) => {
+        if (i > st.idx && el.getBoundingClientRect().top < bottom) { st.idx = i; st.reached = el.dataset.lpSec as LpSection; }
+      });
+    };
+    update();
+    root?.addEventListener('scroll', update, { passive: true });
+    return () => {
+      root?.removeEventListener('scroll', update);
+      if (!st.subscribed) trackLpLeave(st.layout, st.reached, Date.now() - st.openedAt, st.byX ? 'x' : 'other');
+    };
+  }, [isOpen]);
+  const closeByX = () => { leaveRef.current.byX = true; onClose(); };
+  useEffect(() => {
+    if (isOpen && ctaReady) onPlansSeen?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, ctaReady]);
 
   if (!isOpen) return null;
 
@@ -202,6 +432,72 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
 
+  // 上（2プランの比べ方）と下（画面下に固定）で同じボタンを出す。下では「解放済み」は出さない
+  const renderPlanButtons = (showUnlocked: boolean) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+      {(pair ? (['monthly', 'pair'] as const) : (['monthly'] as const)).map((kind) =>
+        kind === 'monthly' ? (
+          <button
+            key="monthly"
+            type="button"
+            disabled={isProcessing}
+            onClick={handleSubscribeAction}
+            style={{
+              width: '100%',
+              padding: '0.8rem 1rem',
+              background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
+              color: '#000',
+              border: 'none',
+              borderRadius: '9999px',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              letterSpacing: '0.03em',
+              boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+              cursor: 'pointer'
+            }}
+          >
+            {isProcessing ? '決済画面へ移動しています...' : '誰でも無制限に鑑定を見る（980円/月）'}
+          </button>
+        ) : pair!.unlocked ? (
+          !showUnlocked ? null : <div key="pair" style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            padding: '0.75rem 1rem',
+            borderRadius: '9999px',
+            border: '1px solid rgba(111, 176, 143, 0.5)',
+            background: 'rgba(111, 176, 143, 0.08)',
+            color: '#8ecaa5',
+            fontSize: '0.82rem',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            ✓ {pair!.name}の鑑定は解放済みです
+          </div>
+        ) : (
+          <button
+            key="pair"
+            type="button"
+            disabled={isProcessing}
+            onClick={handlePairAction}
+            style={{
+              width: '100%',
+              padding: '0.8rem 1rem',
+              borderRadius: '9999px',
+              border: '1.5px solid rgba(226, 192, 116, 0.6)',
+              background: 'rgba(226, 192, 116, 0.07)',
+              color: '#f2e2b3',
+              fontSize: '0.88rem',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（680円/買い切り）`}
+          </button>
+        )
+      )}
+    </div>
+  );
+
   // 購読中・解約済みの人は新しく申し込めない（サーバーが409を返す）ので、Stripeのお支払い画面を開く
   const priceCardLabel = !isSubscribed
     ? 'すべての続きを見る'
@@ -215,7 +511,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const faqs = [
     ...(pair ? [{
       q: '買い切り（680円）と月額の違いは？',
-      a: `買い切りは、${pair.name}ひとりの「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      a: `買い切りは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
@@ -285,7 +581,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             type="button"
             className="tap-target"
             aria-label="閉じる"
-            onClick={onClose}
+            onClick={closeByX}
             style={{
               background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
@@ -391,7 +687,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
-          {/* 教育: 無料で見えているのは入り口だけで、この先に何がわかるのかを、お相手の名前で具体的に見せる */}
+          {showPlans && pair && !pair.unlocked && <div data-lp-sec="intro" />}
+          {/* 教育: 無料で見えているのは入り口だけで、この先に何が分かるのかを、お相手の名前で具体的に見せる */}
           {showPlans && pair && !pair.unlocked && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -401,8 +698,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {([
                   { who: 'tsuki', t: 'やってはいけないこと 5選 ＆ 返信が遅いときの心理・脈ありサイン', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}に言うと一気に冷めてしまう一言、既読のまま止まったときの本当の気持ち、今どの段階にいるのか、少し離れかけたときの戻し方まで。一緒に見ていきましょうね。` },
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
+                  { who: 'tsuki', t: '惹かれるファッション ＆ ドキッとさせる仕草', shot: '/assets/premium/attraction.webp', d: `${pair.name}が思わず目で追ってしまう色や服装、会ったときにドキッとさせる仕草。次に会う日の準備に使ってくださいね。` },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
+                  { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかが分かります。` },
                   { who: 'tsuki', t: '7日間の波から、10年先の二人の未来まで', shot: '/assets/premium/edu-future.webp', d: '明日からの7日間・月ごとの相性の波と、この先10年の年ごとの流れ。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' }
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
@@ -418,8 +717,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                       style={{ position: 'relative', display: 'block', width: '100%', marginTop: '0.55rem', padding: 0, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', background: '#0a0e14', cursor: 'zoom-in' }}
                     >
                       <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: 'top' }} />
+                      <SampleBadge />
                       <span style={{ position: 'absolute', right: '0.4rem', bottom: '0.4rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(5, 7, 10, 0.75)', color: '#e8e3d8', fontSize: '0.6rem' }}>
-                        画面イメージ・タップで拡大
+                        タップで拡大
                       </span>
                     </button>
                   </CharBubble>
@@ -430,6 +730,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
           {showPlans && pair && <div ref={ctaMarkerRef} />}
 
+          {showPlans && pair && <div data-lp-sec="plans" />}
           {/* プランを選ぶ（買い切り ¥680 と 月額 ¥980 を1枚で見比べる） */}
           {showPlans && pair && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
@@ -455,6 +756,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
+                  { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
+                  { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
+                  { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
                   { label: '7日間・月ごと・10年先までの流れ（結婚・転機の年）', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
@@ -481,74 +785,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   どちらも会員登録なしで購入できます。
                 </CharBubble>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-                {(['monthly', 'pair'] as const).map((kind) =>
-                  kind === 'monthly' ? (
-                    <button
-                      key="monthly"
-                      type="button"
-                      disabled={isProcessing}
-                      onClick={handleSubscribeAction}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
-                        color: '#000',
-                        border: 'none',
-                        borderRadius: '9999px',
-                        fontSize: '0.9rem',
-                        fontWeight: 800,
-                        letterSpacing: '0.03em',
-                        boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {isProcessing ? '決済画面へ移動しています...' : '誰でも無制限に鑑定を見る（980円/月）'}
-                    </button>
-                  ) : pair.unlocked ? (
-                    <div key="pair" style={{
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '9999px',
-                      border: '1px solid rgba(111, 176, 143, 0.5)',
-                      background: 'rgba(111, 176, 143, 0.08)',
-                      color: '#8ecaa5',
-                      fontSize: '0.82rem',
-                      fontWeight: 'bold',
-                      textAlign: 'center'
-                    }}>
-                      ✓ {pair.name}の鑑定は解放済みです
-                    </div>
-                  ) : (
-                    <button
-                      key="pair"
-                      type="button"
-                      disabled={isProcessing}
-                      onClick={handlePairAction}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        borderRadius: '9999px',
-                        border: '1.5px solid rgba(226, 192, 116, 0.6)',
-                        background: 'rgba(226, 192, 116, 0.07)',
-                        color: '#f2e2b3',
-                        fontSize: '0.88rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {isProcessing ? '決済画面へ移動しています...' : `${pairWho}の鑑定だけ見る（680円/買い切り）`}
-                    </button>
-                  )
-                )}
-              </div>
+              {renderPlanButtons(true)}
               <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
                 ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります。
               </p>
             </div>
           )}
 
+          <div data-lp-sec="worries" />
           {/* こんなときに */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -581,6 +825,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           </div>
 
+          <div data-lp-sec="benefits" />
           {/* できること */}
           <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
@@ -618,7 +863,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
                       {pairNote === 'pairAll'
                         ? `¥680の買い切りでも見られます（${pair ? pairWho : "お相手1人"}だけ）`
-                        : '¥680の買い切りは購入日だけ'}
+                        : pairNote === 'pairLucky'
+                          ? `¥680の買い切りでも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見られます`
+                          : '¥680の買い切りは購入日だけ'}
                     </span>
                   )}
                   <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
@@ -650,6 +897,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     decoding="async"
                     style={{ display: 'block', width: '100%', height: '170px', objectFit: 'cover', objectPosition: 'top' }}
                   />
+                  <SampleBadge />
                   <span style={{
                     position: 'absolute',
                     right: '0.45rem',
@@ -660,7 +908,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     color: '#e8e3d8',
                     fontSize: '0.62rem'
                   }}>
-                    画面イメージ・タップで拡大
+                    タップで拡大
                   </span>
                 </button>
               </div>
@@ -668,6 +916,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           </div>
 
           {!(showPlans && pair) && <div ref={ctaMarkerRef} />}
+          <div data-lp-sec="price" />
           {/* 料金 */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き）。
@@ -732,12 +981,13 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             )}
             <div style={{ marginTop: (showPlans && pair) ? 0 : '0.8rem' }}>
               <CharBubble who="ren" small>
-                毎朝のおまもりとして、気軽に使ってみてください。<br />
+                毎朝のお守りとして、気軽に使ってみてください。<br />
                 合わないと感じたら、マイページからいつでも解約できますよ。
               </CharBubble>
             </div>
           </div>
 
+          <div data-lp-sec="faq" />
           {/* FAQ Accordion Section */}
           <div style={{ padding: '0 1.15rem 1rem' }}>
             <h3 className="font-serif gold-text" style={{ fontSize: '0.9rem', fontWeight: 'bold', textAlign: 'center', margin: '0 0 0.75rem 0' }}>
@@ -823,6 +1073,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <span>•</span>
             <span>カード / Apple Pay / Google Pay</span>
           </div>
+          <div data-lp-sec="end" />
         </div>
 
         {/* PINNED FIXED BOTTOM CTA FOOTER（未購読の人には、説明を読み終えてから出す） */}
@@ -877,116 +1128,13 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              className="consult-btn"
-              disabled={isProcessing}
-              onClick={handleSubscribeAction}
-              style={{
-                width: '100%',
-                padding: '0.85rem 1.25rem',
-                fontSize: '0.98rem',
-                fontWeight: '800',
-                letterSpacing: '0.03em',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.45rem',
-                background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
-                color: '#000000',
-                border: 'none',
-                borderRadius: '9999px',
-                boxShadow: '0 6px 20px rgba(217, 164, 65, 0.55)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              {isProcessing ? (
-                <span>決済画面へ移動しています...</span>
-              ) : (
-                <>
-                  <Moon size={18} style={{ fill: 'currentColor' }} />
-                  <span>月額980円ではじめる</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          )}
-          {!isSubscribed && pair && !pair.unlocked && (
-            <button
-              type="button"
-              disabled={isProcessing}
-              onClick={handlePairAction}
-              style={{
-                width: '100%',
-                marginTop: '0.5rem',
-                background: 'none',
-                border: 'none',
-                color: '#d8d2c6',
-                fontSize: '0.74rem',
-                textDecoration: 'underline',
-                cursor: 'pointer',
-                padding: '0.1rem'
-              }}
-            >
-              {pairWho}だけ 買い切り680円で続きを見る
-            </button>
+            renderPlanButtons(false)
           )}
         </div>
         )}
       </div>
 
-      {zoomShot && (
-        <div
-          role="dialog"
-          aria-label={zoomShot.alt}
-          onClick={() => setZoomShot(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 200001,
-            background: 'rgba(5, 7, 10, 0.94)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: 'calc(1rem + env(safe-area-inset-top, 0px)) 0.75rem calc(1rem + env(safe-area-inset-bottom, 0px))',
-            boxSizing: 'border-box',
-            overflowY: 'auto',
-            cursor: 'zoom-out'
-          }}
-        >
-          <button
-            type="button"
-            aria-label="閉じる"
-            onClick={() => setZoomShot(null)}
-            style={{
-              alignSelf: 'flex-end',
-              flexShrink: 0,
-              background: 'rgba(255, 255, 255, 0.12)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '36px',
-              height: '36px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#e8e3d8',
-              cursor: 'pointer',
-              marginBottom: '0.6rem'
-            }}
-          >
-            <X size={20} />
-          </button>
-          <p style={{ fontSize: '0.7rem', color: '#a9a49a', margin: '0 0 0.6rem', flexShrink: 0 }}>
-            ※ 画面はイメージです（表示している名前や内容はサンプルです）
-          </p>
-          <img
-            src={zoomShot.src}
-            alt={zoomShot.alt}
-            style={{ display: 'block', width: '100%', maxWidth: '440px', height: 'auto', borderRadius: '14px', flexShrink: 0 }}
-          />
-        </div>
-      )}
+      {zoomShot && <ShotZoom src={zoomShot.src} alt={zoomShot.alt} onClose={() => setZoomShot(null)} />}
 
       <SubscriptionCancelModal
         isOpen={showCancelModal}

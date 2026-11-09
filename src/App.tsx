@@ -17,6 +17,7 @@ import { UnifiedInputView } from './components/UnifiedInputView';
 import { mbtiOptions } from './constants/mbti';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ResultView } from './components/ResultView';
+import { PartnerReplaceModal } from './components/PartnerReplaceModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult, san } from './utils/fortuneEngine';
 import type { FortuneResult } from './utils/fortuneEngine';
@@ -31,10 +32,16 @@ import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
 import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
+import { GuardianZukan } from './components/GuardianZukan';
+import { ToolGuardiansView } from './components/ToolGuardiansView';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
-import { trackCheckout, trackFortune, trackPremiumView, trackRegStep } from './services/analytics';
+import { ToolCompatView } from './components/ToolCompatView';
+import { lpExitAnswered, trackCheckout, trackFortune, trackLpExit, trackPremiumView, trackRegStep } from './services/analytics';
+import { LpExitSurvey } from './components/LpExitSurvey';
+import { ReferralCodeEntry } from './components/ReferralInvite';
+import { captureRefFromUrl, completeRef, fetchMyReferral, getPendingRef, hasSentRef, setPendingRef as savePendingRef, type ReferralStatus } from './services/referral';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
@@ -93,6 +100,12 @@ const getInitialRoute = (): InitialRoute => {
   }
   if (path === '/tools/nicchu' || path === '/tools/nicchu/') {
     return { tab: 'tool', slug: 'nicchu', legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/guardians' || path === '/guardians/') {
+    return { tab: 'tool', slug: 'guardians', legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/compatibility' || path === '/compatibility/') {
+    return { tab: 'tool', slug: 'compat', legal: false, settingsSubView: 'main', compatibilityPair: null };
   }
   if (path === '/terms' || path === '/terms/' || path === '/privacy' || path === '/privacy/') {
     return { tab: 'home', slug: null, legal: true, settingsSubView: 'main', compatibilityPair: null };
@@ -418,6 +431,10 @@ function App() {
     setPremiumLPFocus(focus);
     setShowPremiumLP(true);
   };
+  // 毎朝メールのリンク（?lp=m 月額 / ?lp=p 買い切り）: 鑑定結果を出したあとに、そのプランを先に見せる案内を開く
+  const pendingLPRef = useRef<'pair' | 'monthly' | null>(null);
+  // 次に開く案内がメールのリンクからか（管理画面で「メールから」を分けて数える）
+  const lpFromMailRef = useRef(false);
   const [chatCount, setChatCount] = useState(0);
   const [showShareCard, setShowShareCard] = useState(false);
   const [settingsSubView, setSettingsSubView] = useState<'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news'>(initialRoute.settingsSubView);
@@ -635,6 +652,14 @@ function App() {
     }
 
     if (mName && mBirth && mMbti && mGender) {
+      const lp = params.get('lp');
+      if (lp === 'm' || lp === 'p') {
+        pendingLPRef.current = lp === 'p' ? 'pair' : 'monthly';
+        // 読み込み直しや「戻る」で何度も開かないよう、URLから外す
+        params.delete('lp');
+        const qs = params.toString();
+        window.history.replaceState(window.history.state, '', window.location.pathname + (qs ? `?${qs}` : ''));
+      }
       setMyName(mName);
       setMyBirth(mBirth);
       setMyMbti(mMbti);
@@ -836,11 +861,6 @@ function App() {
   const isSubPartner = (p: SavedPartner) => subHasPartner && p.name === notifySub?.oppName && p.birth.replace(/\//g, '-') === notifySub?.oppBirth;
   const showKeepTarget = subHasPartner && !savedPartners.some(isSubPartner);
   const notifyTargetLabel = !notifySub ? '' : (subHasPartner ? `${san(notifySub.oppName)}との相性` : 'あなたの運勢');
-  // Whether the reading on screen (the partner now, or the solo reading) is the one the daily mail is about
-  const notifyIsCurrentReading = !!notifySub && (mode === 'match'
-    ? subHasPartner && notifySub.oppName === oppName && notifySub.oppBirth === oppBirth.replace(/\//g, '-')
-    : !subHasPartner);
-
   const openNotifyModal = (target?: string) => {
     setNotifyEmailInput(notifyEmail || currentUser?.email || '');
     if (target) {
@@ -913,34 +933,6 @@ function App() {
     if (!ok) return;
     setShowNotifyEmailModal(false);
     setShowAuthModal(true);
-  };
-
-  // From the result screen: makes the daily mail about the reading on screen, keeping the address
-  const switchNotifyToCurrentReading = async () => {
-    const email = (notifySub?.email || currentUser?.email || '').toLowerCase();
-    if (!email || accountNeedsEmail()) {
-      await askToAddEmail();
-      return;
-    }
-    if (!isValidBirthDate(myBirth)) {
-      showAlert('毎朝の運勢は生年月日から計算します。先にプロフィール編集で生年月日を登録してください。');
-      return;
-    }
-    const target = mode === 'match' ? `${san(oppName)}との相性` : 'あなたの運勢';
-    const ok = await showConfirm(`毎朝8時の通知を「${target}」に切り替えますか？`, { okLabel: '切り替える', cancelLabel: 'やめる' });
-    if (!ok) return;
-    const partner: SavedPartner | null = mode === 'match'
-      ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)
-        || { id: 'current', name: oppName || 'お相手', birth: oppBirth, mbti: oppMbti, gender: oppGender, relationship }
-      : null;
-    const saved = await saveNotifySubscription(email, partner);
-    if (!saved) {
-      showAlert('通知の切り替えに失敗しました。ログインし直してから、もう一度お試しください。');
-      return;
-    }
-    setNotifyEmail(email);
-    setNotifyDailyLuck(true);
-    showAlert(`🔔 明日の朝から「${target}」をお届けします。`);
   };
 
   useEffect(() => {
@@ -1050,12 +1042,12 @@ function App() {
       if (!isRegistered) {
         showConfirm(`非会員の保存上限（1人）に達しています。\n無料会員登録を行うと最大2人まで保存できます。無料登録しますか？`, { okLabel: '無料登録する', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
-          openSubView('profile');
+          setShowAuthModal(true);
         });
       } else if (!isSubscribed) {
         showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
-          handleTabChange('profile');
+          openPremiumLP('monthly');
         });
       } else {
         showAlert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
@@ -1065,19 +1057,67 @@ function App() {
     return true;
   };
 
-  // Returns the saved partner, or undefined when nothing was saved
+  const partnerLimit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+  // 保存済みかどうか。名前が空のお相手は「お相手」で保存されるのでそれとも比べる。
+  // 買い切りで解放したお相手は生年月日で決まるので、生年月日が同じなら保存済み扱い
+  const isSamePartner = (p: SavedPartner, name: string, birth: string) =>
+    p.birth === birth && (p.name === name || p.name === (name || 'お相手') || Boolean(p.unlocked));
+  const currentPartnerSaved = savedPartners.some(p => isSamePartner(p, oppName, oppBirth));
+
+  // 上限に達しているときの「入れ替えて保存しますか？」。manual: 保存ボタンから開いたとき
+  const [replaceCandidate, setReplaceCandidate] = useState<{ partner: SavedPartner; manual: boolean } | null>(null);
+  // 「今回は保存しない」を選んだお相手には、自動では聞き直さない（保存ボタンからはいつでも保存できる）
+  const declinedAutoSaveRef = useRef<Set<string>>(new Set());
+
+  // 鑑定したお相手を自動で保存する。上限に達していたら入れ替えるかを聞く（聞くのは結果画面が出てから）
+  const autoSavePartner = (fields: Omit<SavedPartner, 'id'>) => {
+    const list = savedPartnersRef.current;
+    if (list.some(p => isSamePartner(p, fields.name, fields.birth))) return;
+    const newPartner: SavedPartner = { id: `${fields.name}_${fields.birth}_${Date.now()}`, ...fields };
+    if (list.filter((x) => !x.unlocked).length < partnerLimit) {
+      setSavedPartners([...list, newPartner]);
+      return;
+    }
+    if (declinedAutoSaveRef.current.has(`${fields.name}_${fields.birth}`)) return;
+    setReplaceCandidate({ partner: newPartner, manual: false });
+  };
+
+  // 会員登録などで保存の枠が増えたら、入れ替えを待っていたお相手をそのまま保存する
+  useEffect(() => {
+    if (!replaceCandidate) return;
+    const { partner } = replaceCandidate;
+    if (savedPartners.some(p => isSamePartner(p, partner.name, partner.birth))) { setReplaceCandidate(null); return; }
+    if (savedPartners.filter((x) => !x.unlocked).length < partnerLimit) {
+      setSavedPartners([...savedPartners, partner]);
+      setReplaceCandidate(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [replaceCandidate, savedPartners, partnerLimit]);
+
+  const replaceSavedPartner = (removeId: string) => {
+    if (!replaceCandidate) return;
+    const { partner } = replaceCandidate;
+    setSavedPartners([...savedPartners.filter(p => p.id !== removeId), partner]);
+    if (loadedPartner && loadedPartner.id === removeId) setLoadedPartner(null);
+    setReplaceCandidate(null);
+    if (replaceCandidate.manual && isChatOpen && chatTarget === 'pick') setChatTarget(partner);
+  };
+
+  const skipReplacePartner = () => {
+    if (replaceCandidate) declinedAutoSaveRef.current.add(`${replaceCandidate.partner.name}_${replaceCandidate.partner.birth}`);
+    setReplaceCandidate(null);
+  };
+
+  // Returns the saved partner, or undefined when nothing was saved (or the replace prompt was opened)
   const handleSavePartner = (): SavedPartner | undefined => {
     if (!oppBirth) {
       showAlert('保存するお相手の情報がありません。');
       return;
     }
-    const exists = savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
-    if (exists) {
+    if (currentPartnerSaved) {
       showAlert('このお相手は既に保存されています。');
       return;
     }
-    if (!canAddPartner()) return;
-
     const newPartner: SavedPartner = {
       id: `${oppName}_${oppBirth}_${Date.now()}`,
       name: oppName || 'お相手',
@@ -1086,6 +1126,11 @@ function App() {
       gender: oppGender,
       relationship: relationship
     };
+    // 上限なら、どのお相手と入れ替えるかを選んでもらう
+    if (savedPartners.filter((x) => !x.unlocked).length >= partnerLimit) {
+      setReplaceCandidate({ partner: newPartner, manual: true });
+      return;
+    }
 
     setSavedPartners([...savedPartners, newPartner]);
     showAlert(`${san(newPartner.name)}の情報を保存しました。`);
@@ -1124,6 +1169,46 @@ function App() {
   const [partnerLock, setPartnerLock] = useState<PartnerLock>(null);
   // 買い切り（お相手1人 ¥680）の状態。同じ /api/stripe/partner の答えに入っている
   const [pairUnlock, setPairUnlock] = useState<PairUnlock>(null);
+
+  // 友達紹介（2026-11-08 TAKASHI、src/services/referral.ts）。招待URL（?ref=）で来た人は、鑑定し終えたらサーバーへ送る。
+  // 送った会員は、友達が1人占うと、招待URLを作ったお相手との結果の一部が開く（お相手ごと）。
+  // 招待で占った友達には、恋愛運MAX日の直近の1日を見せる（この端末に覚える。2026-11-08 TAKASHI）
+  const [pendingRef, setPendingRef] = useState<string | null>(() => captureRefFromUrl() || getPendingRef());
+  const [refSent, setRefSent] = useState(() => hasSentRef());
+  const [referralStatus, setReferralStatus] = useState<ReferralStatus | null>(null);
+  const [referralLoading, setReferralLoading] = useState(false);
+  const referralBirth = mode === 'match' && /^\d{4}-\d{2}-\d{2}$/.test(oppBirth) ? oppBirth : '';
+  const referralBirthRef = useRef(referralBirth);
+  referralBirthRef.current = referralBirth;
+  const loadReferral = useCallback(async () => {
+    if (!referralBirth) return;
+    setReferralLoading(true);
+    const r = await fetchMyReferral(referralBirth, /^\d{4}-\d{2}-\d{2}$/.test(myBirth) ? myBirth : undefined);
+    setReferralLoading(false);
+    // 読み込み中にお相手が変わっていたら捨てる
+    if (r && referralBirthRef.current === referralBirth) setReferralStatus(r);
+  }, [referralBirth, myBirth]);
+  // 未登録でも読む（2026-11-09 TAKASHI「会員登録しなくても招待URL送れるように」）。登録・ログインしたら読み直す（端末の分が会員へ移る）
+  useEffect(() => {
+    setReferralStatus(null);
+    if (!referralBirth) return;
+    void loadReferral();
+    // お友達が占ったあとに戻ってきたら、開いたことが分かるように読み直す
+    let last = Date.now();
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - last < 30_000) return;
+      last = Date.now();
+      void loadReferral();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [currentUser?.uid, referralBirth, loadReferral]);
+  const sendRef = async (code: string, birth: string): Promise<string | null> => {
+    const r = await completeRef(code, birth);
+    setPendingRef(getPendingRef());
+    if (r.ok) { setRefSent(true); return null; }
+    return r.message || '招待コードを確認できませんでした';
+  };
   // Stripe の決済から戻ったとき（?pair=success|cancel）。Webhook が数秒遅れることがあるので、解放されるまで何度か読み直す
   const [pairReturn, setPairReturn] = useState<string | null>(() => {
     const v = new URLSearchParams(window.location.search).get('pair');
@@ -1271,6 +1356,17 @@ function App() {
     setMode(data.mode);
     pushProfile(); // the input form has just saved the profile on this device
     trackFortune();
+    if (data.mode === 'match' && data.oppBirth) {
+      autoSavePartner({
+        name: data.oppName || 'お相手',
+        birth: data.oppBirth,
+        mbti: data.oppMbti,
+        gender: data.oppGender,
+        relationship: data.relationship
+      });
+    }
+    // 招待URL（またはコード）で来た人が占い終えた: 招待した会員に数える
+    if (pendingRef) void sendRef(pendingRef, data.myBirth);
 
     startDiagnosis(
       data.myName,
@@ -1367,6 +1463,11 @@ function App() {
         pushNav({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' }, '/result' + window.location.search);
       }
       scrollMainTo(0);
+      if (pendingLPRef.current) {
+        lpFromMailRef.current = true;
+        openPremiumLP(pendingLPRef.current);
+        pendingLPRef.current = null;
+      }
     };
 
     if (skipLoading) {
@@ -1420,7 +1521,29 @@ function App() {
 
   // 有料プランの案内を開いた回数（管理画面の集計用）。買い切りで解放できるロックから開いたか（pair）、月額側か（monthly）も送る
   useEffect(() => {
-    if (showPremiumLP) trackPremiumView(premiumLPFocus);
+    if (showPremiumLP) {
+      trackPremiumView(premiumLPFocus, lpFromMailRef.current);
+      lpFromMailRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPremiumLP]);
+
+  // 購入LPを買わずに閉じたら（×・戻る・下メニュー、どの閉じ方でも）、見送った理由を1問だけ聞く（3択＋スキップ）。
+  // 訪問ごとに1回だけ。有料会員と、LPの「お相手との鑑定へ」で移動したときは聞かない
+  const [showLpExitSurvey, setShowLpExitSurvey] = useState(false);
+  const lpWasOpenRef = useRef(false);
+  const lpPlansSeenRef = useRef(false);
+  const lpSkipSurveyRef = useRef(false);
+  useEffect(() => {
+    if (showPremiumLP) {
+      lpWasOpenRef.current = true;
+      lpPlansSeenRef.current = false;
+      lpSkipSurveyRef.current = false;
+      return;
+    }
+    if (!lpWasOpenRef.current) return;
+    lpWasOpenRef.current = false;
+    if (!isSubscribed && !lpSkipSurveyRef.current && !lpExitAnswered()) setShowLpExitSurvey(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPremiumLP]);
 
@@ -1525,8 +1648,19 @@ function App() {
     : chatTarget === 'self' ? 'self'
     : chatTarget !== null ? `p:${chatTarget.birth}:${chatTarget.name}`
     : (mode === 'match' && oppBirth ? `p:${oppBirth}:${oppName}` : 'self');
-  const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth
-    && !savedPartners.some(p => p.name === oppName && p.birth === oppBirth);
+  const currentUnsaved = mode === 'match' && flowStep === 'result' && !!oppBirth && !currentPartnerSaved;
+
+  // 初めて鑑定する人（未登録で、まだ鑑定結果が無い人）の診断（入力）画面では、下メニューを雑音として出さない（TAKASHI判断 2026-11-08）。
+  // 無料会員・プレミアム会員と、一度鑑定した人は従来どおり出す。共有リンクの結果表示・読み込み中・鑑定結果でも出す
+  const referralProp = {
+    status: referralStatus,
+    loading: referralLoading,
+    unlocked: referralStatus?.unlocked === true,
+    showCodeEntry: !refSent,
+    onOpen: () => { if (!referralStatus) void loadReferral(); },
+    onRedeem: (code: string) => sendRef(code, myBirth)
+  };
+  const hideNavbar = !isRegistered && !isSubscribed && !renResult && activeTab === 'home' && !sharedView && !sharedTeaser && flowStep === 'input';
 
   return (
     <div className={`app-container${activeTab === 'home' && flowStep !== 'result' ? ' bg-cosmos' : ''}`} style={{
@@ -1552,7 +1686,7 @@ function App() {
         transition: 'all 1.0s cubic-bezier(0.25, 0.8, 0.25, 1)'
       }} />
       {/* Scrollable Main Area */}
-      <main className="main-content no-scrollbar">
+      <main className={`main-content no-scrollbar${hideNavbar ? ' no-navbar' : ''}`}>
         
         {/* 共有リンクから開いた、ほかの人の鑑定結果（見るだけ）。「あなたも無料で鑑定する」で自分の入力画面へ */}
         {activeTab === 'home' && sharedView?.status === 'loading' && <LoadingScreen />}
@@ -1608,9 +1742,21 @@ function App() {
                   isRegistered={isRegistered}
                   isSubscribed={isSubscribed}
                   prefill={inputPrefill}
+                  afterSubmit={pendingRef ? (
+                    // 友達紹介: 招待URLで来た人には一言、そうでなければ目立たない「招待コードをお持ちの方」
+                    <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#f5d77a', lineHeight: 1.7, margin: 0 }}>
+                      🎁 お友達からの招待です。占い終わると、恋愛運MAX日の直近の1日が見られます
+                    </p>
+                  ) : !refSent ? (
+                    <ReferralCodeEntry
+                      onSubmit={async (code) => { savePendingRef(code); setPendingRef(code); return null; }}
+                      doneText="招待コードを預かりました。このまま占うとお友達に届きます"
+                    />
+                  ) : null}
                 />
                 </>
                 )}
+                {!sharedTeaser && <GuardianZukan />}
                 <SeoFooterSection />
               </div>
             )}
@@ -1638,13 +1784,9 @@ function App() {
                 hasOpponent={mode === 'match'}
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
-                isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
-                notifyStatus={{ on: notifyDailyLuck && !!notifySub?.enabled, targetLabel: notifyTargetLabel, isCurrentReading: notifyIsCurrentReading }}
-                onOpenNotifySettings={() => {
-                  if (!currentUser) { setShowAuthModal(true); return; }
-                  openNotifyModal(mode === 'match' ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)?.id : 'self');
-                }}
-                onSwitchNotifyToCurrent={switchNotifyToCurrentReading}
+                isPartnerSaved={currentPartnerSaved}
+                referral={mode === 'match' ? referralProp : undefined}
+                referralGift={refSent}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -1683,13 +1825,9 @@ function App() {
                 hasOpponent={mode === 'match'}
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
-                isPartnerSaved={savedPartners.some(p => p.name === oppName && p.birth === oppBirth)}
-                notifyStatus={{ on: notifyDailyLuck && !!notifySub?.enabled, targetLabel: notifyTargetLabel, isCurrentReading: notifyIsCurrentReading }}
-                onOpenNotifySettings={() => {
-                  if (!currentUser) { setShowAuthModal(true); return; }
-                  openNotifyModal(mode === 'match' ? savedPartners.find(p => p.name === oppName && p.birth === oppBirth)?.id : 'self');
-                }}
-                onSwitchNotifyToCurrent={switchNotifyToCurrentReading}
+                isPartnerSaved={currentPartnerSaved}
+                referral={mode === 'match' ? referralProp : undefined}
+                referralGift={refSent}
                 onOpenChat={(question) => {
                   setChatInitialQuestion(question);
                   setChatTarget(null);
@@ -1709,7 +1847,7 @@ function App() {
                   まだ鑑定結果がありません
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: '#d5cfc3', lineHeight: '1.6', maxWidth: '340px', margin: 0 }}>
-                  「恋愛診断」から生年月日を入力すると、約7,465万通りの条件の掛け合わせから二人の本音・相性スコア・LINE吉時間がここに表示されます。
+                  「恋愛診断」から生年月日を入力すると、二人の本音・相性スコア・LINE吉時間がここに表示されます。
                 </p>
                 <button 
                   className="consult-btn font-serif" 
@@ -1739,7 +1877,7 @@ function App() {
                 display: 'flex',
                 padding: '1.25rem 1rem',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: '0.9rem',
                 cursor: 'pointer',
                 border: '1px solid rgba(159, 134, 192,0.15)',
                 transition: 'all 0.3s ease',
@@ -1754,7 +1892,7 @@ function App() {
                 }
               }}>
                 <div style={{ position: 'relative' }}>
-                  <img src="/assets/tsuki.jpg" alt="月" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-tsuki)', boxShadow: 'var(--shadow-tsuki)', filter: isRegistered ? 'none' : 'grayscale(25%) blur(0.3px)' }} />
+                  <img src="/assets/tsuki.jpg" alt="月" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-tsuki)', boxShadow: 'var(--shadow-tsuki)' }} />
                   {!isRegistered && (
                     <div style={{
                       position: 'absolute',
@@ -1770,22 +1908,24 @@ function App() {
                     </div>
                   )}
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#cdbfe2', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     月の温室 (🌙)
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「不安な気持ち、そのまま話してくださいね。ちゃんと受けとめますよ。」</div>
+                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem', lineHeight: 1.6, textIndent: '-0.5em' }}>「不安な気持ち、そのまま話してくださいね。ちゃんと受けとめますよ。」</div>
+                  <div style={{ marginTop: '0.55rem', display: 'flex' }}>
+                  {isRegistered ? (
+                    <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
+                      待機中
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
+                      無料登録して開放
+                    </span>
+                  )}
+                  </div>
                 </div>
-                {isRegistered ? (
-                  <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
-                    待機中
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
-                    無料登録して開放
-                  </span>
-                )}
               </div>
 
               {/* Ren Lobby Card */}
@@ -1793,7 +1933,7 @@ function App() {
                 display: 'flex',
                 padding: '1.25rem 1rem',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: '0.9rem',
                 cursor: 'pointer',
                 border: '1px solid rgba(58, 134, 171,0.15)',
                 transition: 'all 0.3s ease',
@@ -1808,7 +1948,7 @@ function App() {
                 }
               }}>
                 <div style={{ position: 'relative' }}>
-                  <img src="/assets/ren.jpg" alt="蓮" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-ren)', boxShadow: 'var(--shadow-ren)', filter: isRegistered ? 'none' : 'grayscale(25%) blur(0.3px)' }} />
+                  <img src="/assets/ren.jpg" alt="蓮" style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-ren)', boxShadow: 'var(--shadow-ren)' }} />
                   {!isRegistered && (
                     <div style={{
                       position: 'absolute',
@@ -1824,22 +1964,24 @@ function App() {
                     </div>
                   )}
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: '600', color: '#9cc6d8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     蓮の書斎
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
+                  <div style={{ fontSize: '0.75rem', color: '#a9a49a', marginTop: '0.2rem', lineHeight: 1.6, textIndent: '-0.5em' }}>「あの人の心の動きを、筋道立てて一緒に整理しましょう。」</div>
+                  <div style={{ marginTop: '0.55rem', display: 'flex' }}>
+                  {isRegistered ? (
+                    <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
+                      待機中
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
+                      無料登録して開放
+                    </span>
+                  )}
+                  </div>
                 </div>
-                {isRegistered ? (
-                  <span style={{ fontSize: '0.7rem', color: '#6fb08f', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ width: '6px', height: '6px', background: '#6fb08f', borderRadius: '50%', boxShadow: '0 0 8px #6fb08f' }} />
-                    待機中
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '0.65rem', color: 'var(--color-gold)', display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'rgba(226,192,116,0.1)', padding: '2px 8px', borderRadius: '8px', border: '1px solid rgba(226,192,116,0.2)', fontWeight: 'bold' }}>
-                    無料登録して開放
-                  </span>
-                )}
               </div>
             </div>
             
@@ -1890,10 +2032,10 @@ function App() {
           </div>
         )}
 
-        {/* ツールページ（/tools/nicchu 日柱の調べ方） */}
+        {/* ツールページ（/tools/nicchu 日柱の調べ方、/compatibility 16タイプ恋愛相性表、/guardians 守護獣図鑑） */}
         {activeTab === 'tool' && (
           <div style={{ animation: 'fadeIn 0.4s ease', width: '100%' }}>
-            <ToolNicchuView />
+            {initialRoute.slug === 'compat' ? <ToolCompatView /> : initialRoute.slug === 'guardians' ? <ToolGuardiansView /> : <ToolNicchuView />}
           </div>
         )}
 
@@ -2940,20 +3082,20 @@ function App() {
                     </h3>
                   </div>
                   <p style={{ fontSize: '0.8rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
-                    『月と蓮』は、東洋最古にして最高峰の伝承占術「四柱推命」「九星気学」と、西洋の多角性格分類学「16タイプ心理診断」を独自アルゴリズムで統合した超精密相性鑑定エンジンです。感情の引き寄せから行動パターンの一致度、日々の運勢の波まで、約7,465万通りのマトリクスで多層的かつ論理的に解析します。
+                    『月と蓮』は、生年月日から見る「四柱推命」「九星気学」と、「16タイプ性格診断」を組み合わせた恋愛相性鑑定です。二人の生まれ持った星の関係と、16タイプから見たコミュニケーションの相性に、日々の運勢の波を重ねて鑑定します。
                   </p>
                 </div>
 
-                {/* 7,465万通り Calculation Matrix Card */}
+                {/* 相性の点数の出し方 */}
                 <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.08) 0%, rgba(159, 134, 192, 0.1) 100%)', borderRadius: '20px', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
                     <MoonMark size={18} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
                     <h4 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0 }}>
-                      約7,465万通りの条件の掛け合わせ
+                      相性の点数の出し方
                     </h4>
                   </div>
                   <p style={{ fontSize: '0.76rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
-                    『月と蓮』の鑑定結果は単なる属性の当てはめではありません。お二人それぞれの「四柱推命」「九星気学」「16タイプ性格」を掛け合わせた約7,465万通りの完全オーダーメイド判定プログラムです。
+                    二人の「基本の相性」は、四柱推命・九星気学・16タイプの3つの相性を組み合わせて、100点満点で出します。「今日の相性」は、その日の干支・九星と二人の星の関係を足して出すので、毎日変わります。
                   </p>
                 </div>
 
@@ -3289,6 +3431,26 @@ function App() {
         />
       )}
 
+      {/* 鑑定したお相手の自動保存で上限に達したとき: 入れ替えて保存するか（自動のときは、結果画面で解放の確認が済んでから） */}
+      {replaceCandidate && !showAuthModal && !savedPartners.some(p => isSamePartner(p, replaceCandidate.partner.name, replaceCandidate.partner.birth))
+        && (replaceCandidate.manual || (flowStep === 'result' && partnerLock?.status !== 'checking' && !pairUnlock?.unlocked)) && (
+        <PartnerReplaceModal
+          candidate={replaceCandidate.partner}
+          partners={savedPartners.filter((x) => !x.unlocked)}
+          limit={partnerLimit}
+          isRegistered={isRegistered}
+          isSubscribed={isSubscribed}
+          onReplace={replaceSavedPartner}
+          onSkip={skipReplacePartner}
+          onUpgrade={() => {
+            // 未登録: 会員登録の画面を出す。お相手は持ったままにして、登録で枠が増えたら保存する（下の useEffect）
+            if (!isRegistered) { setShowAuthModal(true); return; }
+            setReplaceCandidate(null);
+            openPremiumLP('monthly');
+          }}
+        />
+      )}
+
       {/* Share Card Modal Overlay */}
       {showShareCard && activeResult && (
         <ShareCardModal
@@ -3311,7 +3473,8 @@ function App() {
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={(user) => {
             setCurrentUser(user);
-            setIsRegistered(true);
+            // ログアウトのときは user が null。true のままだと、ログアウト後も無料会員向けの部分が見えたままになる
+            setIsRegistered(Boolean(user));
             setShowAuthModal(false);
           }}
         />
@@ -3459,7 +3622,7 @@ function App() {
               <span style={{ fontSize: '0.75rem', color: '#a9a49a' }}>誰との運勢を届ける？</span>
               {[
                 { id: 'self', label: '🌙 自分だけの運勢' },
-                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${san(notifySub?.oppName)}との相性（いまの設定）` }] : []),
+                ...(showKeepTarget ? [{ id: 'keep', label: `💞 ${san(notifySub?.oppName)}との相性（今の設定）` }] : []),
                 ...savedPartners.map(p => ({ id: p.id, label: `💞 ${san(p.name)}との相性` }))
               ].map(opt => (
                 <button
@@ -3558,6 +3721,14 @@ function App() {
         </div>
       )}
 
+      <LpExitSurvey
+        isOpen={showLpExitSurvey}
+        onAnswer={(reason) => {
+          trackLpExit(reason, lpPlansSeenRef.current);
+          setShowLpExitSurvey(false);
+        }}
+      />
+
       <PremiumWelcomeModal isOpen={showPremiumWelcome} pairPartner={welcomePairPartner} onClose={() => setShowPremiumWelcome(false)} />
 
       {/* Premium LP Modal / Landing Page */}
@@ -3566,7 +3737,9 @@ function App() {
         onClose={() => setShowPremiumLP(false)}
         focus={premiumLPFocus}
         pair={mode === 'match' && oppBirth && renResult ? { name: san(oppName), unlocked: pairUnlock?.unlocked === true, onBuy: handleBuyPair } : null}
+        onPlansSeen={() => { lpPlansSeenRef.current = true; }}
         onStartPairReading={() => {
+          lpSkipSurveyRef.current = true;
           setMode('match');
           handleTabChange('home');
           window.scrollTo({ top: 0 });
@@ -3629,8 +3802,8 @@ function App() {
         onClose={() => setShowInstallGuideModal(false)}
       />
 
-      {/* Global Bottom Navbar (Always visible on top of all pages) */}
-      <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />
+      {/* Global Bottom Navbar（初めて鑑定する人の診断の入力画面だけは出さない） */}
+      {!hideNavbar && <Navbar activeTab={activeTab} setActiveTab={handleTabChange} profileBadge={notices.unread} />}
     </div>
   );
 }

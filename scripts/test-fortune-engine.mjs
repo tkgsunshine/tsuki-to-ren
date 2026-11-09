@@ -277,3 +277,15 @@ test('月次・年次の点数も、基本の点より＋と−がおおよそ�
     }
   }
 });
+
+// 16タイプが分からない場合は、四柱推命＋九星気学（60点満点）を100点満点に換算する（旧版は最大80点で止まっていた）
+test('16タイプ不明でも、基本の相性は100点まで届く', () => {
+  const base = (b) => generateFortuneResult({ myBirth: '2000-01-01', opponentBirth: b, myMbti: '', opponentMbti: '', myGender: 'female', opponentGender: 'male' }, 'tsuki').baseScore;
+  let max = 0;
+  const d0 = Date.UTC(1995, 0, 1);
+  for (let i = 0; i < 2000; i++) {
+    const d = new Date(d0 + i * 86400000).toISOString().slice(0, 10);
+    max = Math.max(max, base(d));
+  }
+  assert.equal(max, 100);
+});

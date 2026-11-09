@@ -19,15 +19,15 @@ export const FORMAT_TEASER = {};
 /** ランキングの返信（リプ欄）の最後（署名の直前）に入れる、サイトへの案内（2026-10-31〜。運営の指示。ランキングの返信だけ）。URL は1つだけ、utm_source=x で、管理画面で「Xからの訪問」として数える */
 export const RANK_LINK_URL = `${SITE_URL}/?utm_source=x&utm_medium=ranking`;
 /** 本文に入れる、プロフィールへ誘う一言（2026-10-31〜。運営の指示。ランキングの本文と返信の両方）。URL は返信にだけ入れる */
-export const GAP_CTA = 'MBTIと生年月日だけで、好きな人との相性まで鑑定できます↓\n詳しくはプロフィールへ🌙';
-export const BEAST_CTA = '生年月日だけで、あなたの守護獣と好きな人との相性を鑑定できます↓\n詳しくはプロフィールへ🌙';
+export const GAP_CTA = 'MBTIと生年月日で二人の相性を鑑定↓\n詳しくはプロフィールへ🌙';
+export const BEAST_CTA = '生年月日で守護獣と二人の相性を鑑定↓\n詳しくはプロフィールへ🌙';
 /** 返信に入れる、一言とURL */
-export const GAP_LINK = `MBTIと生年月日だけで、好きな人との相性まで鑑定できます↓\n${RANK_LINK_URL}`;
-export const BEAST_LINK = `生年月日だけで、あなたの守護獣と好きな人との相性を鑑定できます↓\n${RANK_LINK_URL}`;
+export const GAP_LINK = `MBTIと生年月日で二人の相性を鑑定↓\n${RANK_LINK_URL}`;
+export const BEAST_LINK = `生年月日で守護獣と二人の相性を鑑定↓\n${RANK_LINK_URL}`;
 /** MBTI×守護獣ランキングの返信に入れる、一言とURL（2026-10-31 運営の指示: 「あなたの守護獣を鑑定」のように） */
-export const MB_BEAST_LINK = `あなたの守護獣を、生年月日で鑑定できます↓\n${RANK_LINK_URL}`;
+export const MB_BEAST_LINK = `生年月日であなたの守護獣を鑑定↓\n${RANK_LINK_URL}`;
 /** 相性占いの紹介（pair_teaser）の返信に入れる、一言とURL（2026-10-31〜。URLはリプ欄にだけ） */
-export const PAIR_LINK = `MBTIと生年月日だけで、あなたと好きな人の相性を鑑定できます↓\n${SITE_URL}/?utm_source=x&utm_medium=pair`;
+export const PAIR_LINK = `MBTIと生年月日で二人の相性を鑑定↓\n${SITE_URL}/?utm_source=x&utm_medium=pair`;
 /** 署名の行の直前に、リンクの行を入れる。すでに入っていれば、そのまま */
 export function withLink(text, link) {
   if (text.includes(link.split('\n').pop())) return text;

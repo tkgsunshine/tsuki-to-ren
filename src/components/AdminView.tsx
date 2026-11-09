@@ -10,9 +10,10 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 
 // 有料は2プラン: 買い切り（お相手1人の深層鑑定 ¥680: pairCheckouts → pairs）と月額プレミアム（¥980: checkouts → premiums）。
 // *Sessions = ブラウザのセッションで最初の1回だけ数えた「人数」（流れの表はこちらで割る）。salesYen = 本番の購入額（円）
-const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'premiumViewsPair',
+const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'lockViewSessions', 'premiumViewsPair', 'premiumViewsMail', 'premiumViewsMailPair',
   'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds',
-  'regViews', 'regClicks', 'regSubmits', 'authOpens'] as const; // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
+  'regViews', 'regClicks', 'regSubmits', 'authOpens',
+  'refSends', 'refFriends'] as const; // 友達紹介: 招待URLを送った回数（LINE・コピー）／招待URLから占ったお友達（数えた人） // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
 type FullCounts = Record<Metric, number>;
@@ -24,6 +25,8 @@ interface DailyDoc extends Counts {
   byDevice?: Record<string, Counts>;
   byShare?: Record<string, number>;
   byReg?: Record<string, number>;
+  byLpExit?: Record<string, number>;
+  byLpLeave?: Record<string, number>;
 }
 interface DayRow extends FullCounts {
   date: string;
@@ -154,6 +157,29 @@ const sumReg = (docs: DailyDoc[]) => {
   for (const d of docs) for (const [k, v] of Object.entries(d.byReg || {})) out[k] = (out[k] || 0) + (v || 0);
   return out;
 };
+const sumLpExit = (docs: DailyDoc[]) => {
+  const out: Record<string, number> = {};
+  for (const d of docs) for (const [k, v] of Object.entries(d.byLpExit || {})) out[k] = (out[k] || 0) + (v || 0);
+  return out;
+};
+const sumLpLeave = (docs: DailyDoc[]) => {
+  const out: Record<string, number> = {};
+  for (const d of docs) for (const [k, v] of Object.entries(d.byLpLeave || {})) out[k] = (out[k] || 0) + (v || 0);
+  return out;
+};
+// 購入LPのまとまり（上から順）。買い切りと月額を見比べる形（pair）と、月額だけの形（monthly）で並びが違う
+const LP_SECTION_LABELS: Record<string, string> = {
+  top: '最初の画面（月の語りかけ）', intro: '無料で見えているのは入り口', plans: 'プランを選ぶ（¥680 / ¥980 の比較）',
+  worries: 'こんな夜はありませんか？', benefits: 'プレミアムでできること', price: '料金（¥980）', faq: 'よくある質問', end: '一番下'
+};
+const LP_LAYOUTS: [string, string, string[]][] = [
+  ['pair', '買い切りと月額を見比べる形（お相手の鑑定から開いたとき）', ['top', 'intro', 'plans', 'worries', 'benefits', 'price', 'faq', 'end']],
+  ['monthly', '月額だけの形（お相手なし・マイページなどから開いたとき）', ['top', 'worries', 'benefits', 'price', 'faq', 'end']]
+];
+const LP_TIME_LABELS: [string, string][] = [['lt10', '10秒未満'], ['10_30', '10〜30秒'], ['30_60', '30秒〜1分'], ['60_180', '1〜3分'], ['gt180', '3分以上']];
+
+const LP_EXIT_LABELS: [string, string][] = [['price', '金額が高い'], ['content', '内容がピンとこない'], ['free_enough', '無料の結果で十分']];
+
 const REG_LABELS: Record<string, string> = {
   click_top: '点数の下', click_bar: '画面下のバー', click_lock: '鍵のかかった所', click_other: 'その他',
   submit_card_email: '結果画面・メール', submit_card_google: '結果画面・Google', submit_card_x: '結果画面・X',
@@ -456,12 +482,13 @@ function DailyChart({ days }: { days: DayRow[] }) {
 // 「鑑定した → 案内を見た」は、同じ訪問で鑑定したあとに案内を開いた人（premiumViewFortuneSessions、2026-11-05〜）で割る。
 // 案内を見た人の全体（premiumViewSessions）には、前回の結果が自動で出た人・共有リンクで結果を見た人・マイページのバナーから
 // 開いた人も入り、鑑定した人の一部ではないので、参考として別の行に出す（支払い画面はこちらで割る）。
-function Funnel({ t, since, ffSince }: { t: FullCounts; since: string | null; ffSince: string | null }) {
+function Funnel({ t, since, ffSince, lockSince }: { t: FullCounts; since: string | null; ffSince: string | null; lockSince: string | null }) {
   type Row = { label: string; n: number; prev?: number; indent?: boolean };
   const rows: Row[] = [
     { label: '訪問', n: t.visits },
     { label: '鑑定した', n: t.fortuneSessions, prev: t.visits },
-    { label: '鑑定したあと、有料プランの案内を見た', n: t.premiumViewFortuneSessions, prev: t.fortuneSessions },
+    { label: '鑑定したあと、有料のロックまで届いた', n: t.lockViewSessions, prev: t.fortuneSessions },
+    { label: '鑑定したあと、有料プランの案内を見た', n: t.premiumViewFortuneSessions, prev: t.lockViewSessions || t.fortuneSessions },
     { label: '有料プランの案内を見た（全体）', n: t.premiumViewSessions },
     { label: '支払い画面へ：買い切り ¥680', n: t.pairCheckouts, prev: t.premiumViewSessions, indent: true },
     { label: '支払い画面へ：月額 ¥980', n: t.checkouts, prev: t.premiumViewSessions, indent: true },
@@ -508,6 +535,7 @@ function Funnel({ t, since, ffSince }: { t: FullCounts; since: string | null; ff
       <div style={{ ...c.muted, marginTop: 8, lineHeight: 1.7 }}>
         「鑑定した」「有料プランの案内を見た」は、1回の訪問（ブラウザのセッション）で何度しても1人と数えます{since ? `（${since === '2026-11-04' ? '2026-11-04 の12時50分ごろ' : since} から計測。その前の分は「鑑定（回）」「有料案内（回）」にだけ入っています）` : '（まだ計測前です）'}。
         「鑑定したあと、案内を見た」は、同じ訪問で入力画面から鑑定したあとに案内を開いた人です{ffSince ? `（${ffSince} から計測）` : '（まだ計測前です）'}。
+        「ロックまで届いた」は、同じ訪問で鑑定したあと、押すと有料プランの案内が開く「続きを見る」が画面に入った人です{lockSince ? `（${lockSince} から計測）` : '（まだ計測前です）'}。マイページのバナーなどから直接開いた人もいるので、次の段が100%を超えることがあります。
         「案内を見た（全体）」には、前回の結果が自動で出た人・共有リンクから結果を見た人・マイページのバナーから開いた人も入ります（鑑定した人の一部ではないので、割合は出しません）。
         案内を開いた回数は「日ごとの数字」にあります。支払い画面は、案内を通らずに鑑定結果の「¥680で解放」から直接進んだ分も含みます。
         購入はStripeの本番決済だけで、月額は新しく始めた分（毎月の更新は入りません）。売上は購入時の金額の合計です。
@@ -520,10 +548,11 @@ function Funnel({ t, since, ffSince }: { t: FullCounts; since: string | null; ff
 function DailyTable({ days }: { days: DayRow[] }) {
   const cols: [keyof DayRow, string][] = [
     ['visits', '訪問'], ['fortunes', '鑑定（回）'], ['fortuneSessions', '鑑定した人'], ['signups', '会員登録'], ['shares', '共有'],
-    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['premiumViewFortuneSessions', 'うち鑑定のあと'], ['premiumViewsPair', 'うち買い切りから'],
+    ['premiumViews', '有料案内（回）'], ['premiumViewSessions', '案内を見た人'], ['lockViewSessions', 'ロックまで届いた'], ['premiumViewFortuneSessions', 'うち鑑定のあと'], ['premiumViewsPair', 'うち買い切りから'], ['premiumViewsMail', 'うちメールから'], ['premiumViewsMailPair', 'メールから買い切り'],
     ['pairCheckouts', '支払い画面 買い切り'], ['checkouts', '支払い画面 月額'], ['pairs', '購入 買い切り'], ['premiums', '購入 月額'],
     ['salesYen', '売上'], ['aiCalls', 'AIチャット'],
     ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'], ['columnCtaMids', 'コラム途中→鑑定へ'], ['columnCtaEnds', 'コラム最後→鑑定へ'],
+    ['refSends', '紹介を送った'], ['refFriends', '紹介で占った友達'],
   ];
   return (
     <div style={c.card}>
@@ -593,6 +622,139 @@ function SignupFunnel({ t, reg }: { t: FullCounts; reg: Record<string, number> }
   );
 }
 
+// 購入LPを買わずに閉じた人の「見送った理由」（閉じたときの1問アンケート、2026-11 から）
+function LpExitTable({ ex }: { ex: Record<string, number> }) {
+  const total = LP_EXIT_LABELS.reduce((n, [k]) => n + (ex[k] || 0), 0);
+  const seenTotal = LP_EXIT_LABELS.reduce((n, [k]) => n + (ex[`seen_${k}`] || 0), 0);
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>購入案内を閉じた理由（答えた {total} 人・スキップ {ex.skip || 0} 人）</h2>
+      {total === 0 && !ex.skip ? (
+        <div style={c.muted}>まだデータがありません</div>
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={c.table}>
+            <thead>
+              <tr>
+                <th style={c.th}></th>
+                <th style={{ ...c.th, ...c.num }}>人</th>
+                <th style={{ ...c.th, ...c.num }}>割合</th>
+                <th style={{ ...c.th, ...c.num }}>うち料金まで読んだ</th>
+                <th style={{ ...c.th, ...c.num }}>料金の前で閉じた</th>
+              </tr>
+            </thead>
+            <tbody>
+              {LP_EXIT_LABELS.map(([k, label]) => {
+                const n = ex[k] || 0;
+                const seen = ex[`seen_${k}`] || 0;
+                return (
+                  <tr key={k}>
+                    <td style={c.td}>{label}</td>
+                    <td style={{ ...c.td, ...c.num }}>{n}</td>
+                    <td style={{ ...c.td, ...c.num }}>{pct(n, total)}</td>
+                    <td style={{ ...c.td, ...c.num }}>{seen}</td>
+                    <td style={{ ...c.td, ...c.num }}>{n - seen}</td>
+                  </tr>
+                );
+              })}
+              <tr>
+                <td style={c.td}>合計</td>
+                <td style={{ ...c.td, ...c.num }}>{total}</td>
+                <td style={c.td}></td>
+                <td style={{ ...c.td, ...c.num }}>{seenTotal}</td>
+                <td style={{ ...c.td, ...c.num }}>{total - seenTotal}</td>
+              </tr>
+              <tr>
+                <td style={{ ...c.td, ...c.muted }}>スキップ（割合の計算に入れない）</td>
+                <td style={{ ...c.td, ...c.num }}>{ex.skip || 0}</td>
+                <td style={c.td}></td>
+                <td style={{ ...c.td, ...c.num }}>{ex.seen_skip || 0}</td>
+                <td style={{ ...c.td, ...c.num }}>{(ex.skip || 0) - (ex.seen_skip || 0)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        有料プランの案内を買わずに閉じたとき、3つから1つ選んでもらった答えです（スキップもできます。1回の訪問で1度だけ聞きます。有料会員には聞きません）。「料金まで読んだ」は、料金・プランの所まで画面を進めてから閉じた人です。
+      </div>
+    </div>
+  );
+}
+
+// 購入LPを閉じたとき、どこまで読んだか・何秒いたか・どう閉じたか（2026-11 から。有料会員は数えない）
+function LpLeaveTable({ lv }: { lv: Record<string, number> }) {
+  const total = (lv.close_x || 0) + (lv.close_other || 0);
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>購入案内をどこまで読んで閉じたか（閉じた回数 {total}）</h2>
+      {total === 0 ? (
+        <div style={c.muted}>まだデータがありません</div>
+      ) : (
+        <>
+          {LP_LAYOUTS.map(([layout, title, secs]) => {
+            const counts = secs.map((k) => lv[`${layout}_${k}`] || 0);
+            const n = counts.reduce((a, b) => a + b, 0);
+            if (!n) return null;
+            return (
+              <div key={layout} style={{ overflowX: 'auto', marginBottom: 12 }}>
+                <div style={{ fontWeight: 'bold', margin: '4px 0' }}>{title}（{n} 回）</div>
+                <table style={c.table}>
+                  <thead>
+                    <tr>
+                      <th style={c.th}>まとまり（上から順）</th>
+                      <th style={{ ...c.th, ...c.num }}>ここまで届いた</th>
+                      <th style={{ ...c.th, ...c.num }}>割合</th>
+                      <th style={{ ...c.th, ...c.num }}>ここで閉じた</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {secs.map((k, i) => {
+                      const reached = counts.slice(i).reduce((a, b) => a + b, 0);
+                      return (
+                        <tr key={k}>
+                          <td style={c.td}>{LP_SECTION_LABELS[k]}</td>
+                          <td style={{ ...c.td, ...c.num }}>{reached}</td>
+                          <td style={{ ...c.td, ...c.num }}>{pct(reached, n)}</td>
+                          <td style={{ ...c.td, ...c.num }}>{counts[i]}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+          <table style={c.table}>
+            <tbody>
+              {LP_TIME_LABELS.map(([k, label]) => (
+                <tr key={k}>
+                  <td style={c.td}>開いていた時間: {label}</td>
+                  <td style={{ ...c.td, ...c.num }}>{lv[`time_${k}`] || 0}</td>
+                  <td style={{ ...c.td, ...c.num }}>{pct(lv[`time_${k}`] || 0, total)}</td>
+                </tr>
+              ))}
+              <tr>
+                <td style={c.td}>閉じ方: ×ボタン</td>
+                <td style={{ ...c.td, ...c.num }}>{lv.close_x || 0}</td>
+                <td style={{ ...c.td, ...c.num }}>{pct(lv.close_x || 0, total)}</td>
+              </tr>
+              <tr>
+                <td style={c.td}>閉じ方: 戻る・下メニューなど</td>
+                <td style={{ ...c.td, ...c.num }}>{lv.close_other || 0}</td>
+                <td style={{ ...c.td, ...c.num }}>{pct(lv.close_other || 0, total)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </>
+      )}
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        閉じるたびに1回数えます（同じ人が何度も開いて閉じたら、その回数）。「ここまで届いた」は、そのまとまりの頭が画面に入ったところまで進めた回数です。支払い画面へ進んで戻ってから閉じた場合も入ります。
+      </div>
+    </div>
+  );
+}
+
 function ShareTable({ rows, total }: { rows: [string, number][]; total: number }) {
   return (
     <div style={c.card}>
@@ -616,10 +778,11 @@ function ShareTable({ rows, total }: { rows: [string, number][]; total: number }
   );
 }
 
-// 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる）
+// 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる／一昨日 = 1日分、2日前で終わる）
 const PERIODS = [
   { label: '今日', days: 1, offset: 0 },
   { label: '昨日', days: 1, offset: 1 },
+  { label: '一昨日', days: 1, offset: 2 },
   { label: '7日', days: 7, offset: 0 },
   { label: '30日', days: 30, offset: 0 },
   { label: '90日', days: 90, offset: 0 },
@@ -694,6 +857,7 @@ export default function AdminView() {
   // The first day the per-session counters (鑑定した人・案内を見た人) have data
   const sessionSince = useMemo(() => daily.find((d) => d.fortuneSessions || d.premiumViewSessions)?.date || null, [daily]);
   const ffSince = useMemo(() => daily.find((d) => d.premiumViewFortuneSessions)?.date || null, [daily]);
+  const lockSince = useMemo(() => daily.find((d) => d.lockViewSessions)?.date || null, [daily]);
 
   const setOwnerMark = async (uid: string, owner: boolean) => {
     if (!user) return;
@@ -842,6 +1006,7 @@ export default function AdminView() {
               <Tile label="鑑定" value={totals.fortunes} sub={`鑑定した人 ${totals.fortuneSessions}（訪問の ${pct(totals.fortuneSessions, totals.visits)}）`} />
               <Tile label="会員登録（期間内）" value={newMembers} sub={`計測分 ${totals.signups} 件`} />
               <Tile label="共有" value={totals.shares} sub="X・LINE・リンク・画像" />
+              <Tile label="友達紹介" value={totals.refSends} sub={`送った回数（LINE・コピー）／紹介で占ったお友達 ${totals.refFriends} 人`} />
               <Tile label="ツール使用" value={totals.toolUses} sub={`鑑定へ進んだ ${totals.toolCtas} 回`} />
               <Tile label="コラム→鑑定へ" value={totals.columnCtaMids + totals.columnCtaEnds} sub={`途中 ${totals.columnCtaMids} 回・最後 ${totals.columnCtaEnds} 回`} />
               <Tile label="買い切り購入（期間内）" value={totals.pairs} sub={`支払い画面へ ${totals.pairCheckouts} 回`} />
@@ -860,7 +1025,11 @@ export default function AdminView() {
 
             <DailyTable days={daily} />
 
-            <Funnel t={totals} since={sessionSince} ffSince={ffSince} />
+            <Funnel t={totals} since={sessionSince} ffSince={ffSince} lockSince={lockSince} />
+
+            <LpLeaveTable lv={sumLpLeave(data.daily)} />
+
+            <LpExitTable ex={sumLpExit(data.daily)} />
 
             <SignupFunnel t={totals} reg={sumReg(data.daily)} />
 

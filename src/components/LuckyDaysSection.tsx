@@ -1,0 +1,224 @@
+import React, { useMemo } from 'react';
+import { Star } from 'lucide-react';
+import { san } from '../utils/fortuneEngine';
+import type { FortuneResult } from '../utils/fortuneEngine';
+import {
+  toLuckPerson, findSoloBestDays, findPairBestDays, getSangoBranch, formatLuckyDate, LUCK_MARK_LABELS, WEEKDAYS
+} from '../utils/luckyDays';
+import type { LuckyDay, LuckMark } from '../utils/luckyDays';
+import { ReferralInvite, ReferralCodeEntry } from './ReferralInvite';
+import type { ReferralStatus } from '../services/referral';
+
+// 「2人の最高シンクロ日・あなたの恋愛運MAX日」の欄。根拠と、どれだけ珍しい日かは誰にでも見せ、日付そのものは有料（2026-11-05 TAKASHI）。
+// 2人の最高シンクロ日は、月額プレミアムか、そのお相手の買い切り（¥680）で開く。あなたの恋愛運MAX日も同じ（買い切りでも開く。2026-11-07 TAKASHI）。
+// 日付はロック中は年月だけ出し、日は DOM に出さない（ダミーの「●●日」を出す。曜日は見せる 2026-11-07 TAKASHI）。シンクロ日の判定は今日の点数でも使う（fortuneEngine.ts の isPairSyncDate。暦年ごとに強い順で最大4日）。
+const PAIR_WINDOW_DAYS = 365; // 90日の表示はやめ、1年ぶんだけ出す（2026-11-07 TAKASHI）
+const SOLO_WINDOW_DAYS = 365;
+
+interface Props {
+  result: FortuneResult;
+  isSubscribed: boolean;
+  /** そのお相手を買い切りで解放済み（2人の最高シンクロ日だけ開く） */
+  pairOpen?: boolean;
+  myName?: string;
+  oppName?: string;
+  onLockClick: (e?: React.MouseEvent) => void;
+  /** 2人の最高シンクロ日のロックを押したとき（買い切りも選べる購入画面へ） */
+  onPairLockClick?: (e?: React.MouseEvent) => void;
+  lockWord: string;
+  /** 友達紹介（2026-11-08 TAKASHI）。soloOpen = 友達が招待URLから占ったので、あなたの恋愛運MAX日がすべて開く */
+  soloOpen?: boolean;
+  /** 招待URL（またはコード）から占った友達: 恋愛運MAX日の直近の1日だけ開く（2026-11-08 TAKASHI） */
+  soloGift?: boolean;
+  /** 渡したときだけ、恋愛運MAX日のロックの下に紹介の欄と「招待コードをお持ちの方」を出す */
+  referral?: {
+    status: ReferralStatus | null;
+    loading?: boolean;
+    onOpen?: () => void;
+    /** 「招待コードをお持ちの方」を出すか（この端末から送り終えたら出さない） */
+    showCodeEntry: boolean;
+    /** 招待コードを手で入れたとき。エラーの文か null（受け付けた） */
+    onRedeem: (code: string) => Promise<string | null>;
+  };
+}
+
+// 「上下とも結びつく日」は「惹きつける力」「心が通じやすい」を含むので、重ねて書かない
+const labelsOf = (marks: LuckMark[] | undefined): string[] => {
+  const list = marks || [];
+  // 「助けが入る」は長いので出さない（2026-11-06 TAKASHI）。日の選び方には使う
+  const shown = (list.includes('tentoku') ? list.filter((k) => k !== 'kango' && k !== 'shigo') : list).filter((k) => k !== 'tenotsu');
+  return shown.length > 0 ? shown.map((k) => LUCK_MARK_LABELS[k]) : [FALLBACK_LABEL];
+};
+
+const FALLBACK_LABEL = '運気が追い風';
+const pairLabels = (x: LuckyDay): string[] => {
+  const all = [...new Set([...labelsOf(x.me), ...labelsOf(x.partner)])];
+  return all.length > 1 ? all.filter((t) => t !== FALLBACK_LABEL) : all;
+};
+
+const chipStyle: React.CSSProperties = {
+  fontSize: '0.72rem', fontWeight: 'bold', color: '#f5d77a', lineHeight: 1.4,
+  border: '1px solid rgba(245, 215, 122, 0.55)', background: 'rgba(212, 175, 55, 0.12)',
+  borderRadius: '999px', padding: '0.12rem 0.55rem', whiteSpace: 'nowrap'
+};
+
+function Chips({ who, marks, labels }: { who?: string; marks?: LuckMark[]; labels?: string[] }) {
+  const list = labels ?? labelsOf(marks);
+  if (list.length === 0) return null;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.3rem' }}>
+      {who && <span style={{ fontSize: '0.74rem', color: '#f3efe6', fontWeight: 'bold', marginRight: '0.15rem' }}>{who}</span>}
+      {list.map((t) => <span key={t} style={chipStyle}>✦ {t}</span>)}
+    </div>
+  );
+}
+
+const rowStyle: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', gap: '0.35rem',
+  padding: '0.6rem 0.75rem', borderRadius: '8px',
+  background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.25)'
+};
+const badgeStyle: React.CSSProperties = {
+  alignSelf: 'flex-start', fontSize: '0.72rem', fontWeight: 'bold', color: '#1a1408',
+  background: 'linear-gradient(135deg, #f5d77a, #d4af37)', borderRadius: '999px', padding: '0.15rem 0.6rem'
+};
+const bodyText: React.CSSProperties = { fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4', margin: 0 };
+const blurDummy: React.CSSProperties = { filter: 'blur(5px)', userSelect: 'none' };
+// 日数は金色に（2026-11-07 TAKASHI）
+const goldCount: React.CSSProperties = { color: '#f5d77a' };
+const subHead: React.CSSProperties = { fontSize: '0.85rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' };
+
+function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels = [], openCount = 0 }: {
+  days: LuckyDay[]; locked: boolean; showPair: boolean; myLabel: string; oppLabel: string;
+  /** ロック中でも、上から何行の日付を見せるか（招待で占った友達へのプレゼント＝1） */
+  openCount?: number;
+  onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
+  /** 一覧の上にまとめて出したタグ。各行からは外し、日によって違うタグだけ残す */
+  commonLabels?: string[];
+}) {
+  if (days.length === 0) return null;
+  // ロック中も理由は見せ、日付だけぼかす（2026-11-06 TAKASHI）。年と月は見せ、日の数字と曜日だけダミーの「●●」「(●)」をぼかし、「日」の字は見せる（2026-11-07 TAKASHI）。本当の日は DOM に出さない
+  const shown = days.slice(0, locked ? 3 : 8); // ロック中は3行だけ
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+      {shown.map((x, i) => { const rowLocked = locked && i >= openCount; return (
+        <div
+          key={rowLocked ? i : `${x.day.y}-${x.day.m}-${x.day.d}`}
+          style={{ ...rowStyle, cursor: rowLocked ? 'pointer' : 'auto' }}
+          {...(rowLocked ? { 'data-paid-lock': true, onClick: onLockClick } : {})}
+        >
+          <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f5d77a', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+            {rowLocked
+              ? <span>{x.day.y}年{x.day.m}月<span style={blurDummy} aria-hidden="true">●●</span>日({WEEKDAYS[x.day.weekday]})</span>
+              : formatLuckyDate(x.day)}
+            {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
+          </span>
+          {showPair ? (
+            // あなた・お相手で分けず、二人ぶんのタグをまとめて出す（2026-11-07 TAKASHI）
+            <Chips labels={pairLabels(x)} />
+          ) : (
+            <Chips labels={labelsOf(x.me).filter((t) => !commonLabels.includes(t))} />
+          )}
+          {locked && !rowLocked && <span style={{ fontSize: '0.7rem', color: '#bfb8a8' }}>🎁 お友達の招待のプレゼント</span>}
+        </div>
+      ); })}
+      {locked && (
+        <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick} style={{ alignSelf: 'center', marginTop: '0.2rem' }}>
+          {lockWord}
+        </button>
+      )}
+    </div>
+  );
+}
+
+export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myName, oppName, onLockClick, onPairLockClick, lockWord, soloOpen = false, soloGift = false, referral }: Props) {
+  const me = useMemo(() => toLuckPerson(result.myPillar, result.myStar, result.myGender), [result.myPillar, result.myStar, result.myGender]);
+  const partner = useMemo(() => toLuckPerson(result.opponentPillar, result.opponentStar, result.opponentGender), [result.opponentPillar, result.opponentStar, result.opponentGender]);
+  const today = useMemo(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }, []);
+  const soloDays = useMemo(() => (me ? findSoloBestDays(me, today, SOLO_WINDOW_DAYS) : []), [me, today]);
+  const pairDays = useMemo(() => (me && partner ? findPairBestDays(me, partner, today, PAIR_WINDOW_DAYS) : []), [me, partner, today]);
+  // あなたの恋愛運MAX日は毎回同じ干支の日なので、タグもほぼ同じ。共通のタグは一覧の上に1回だけ出す（2026-11-07 TAKASHI）
+  const soloCommon = soloDays.length > 0
+    ? labelsOf(soloDays[0].me).filter((t) => soloDays.every((x) => labelsOf(x.me).includes(t)))
+    : [];
+  if (!me) return null;
+
+  // あなたの恋愛運MAX日も、買い切りで開く（2026-11-07 TAKASHI）。友達紹介でも開く（2026-11-08 TAKASHI）
+  const locked = !(isSubscribed || pairOpen || soloOpen);
+  const pairLocked = !(isSubscribed || pairOpen);
+  const myLabel = san(myName, 'あなた');
+  const oppLabel = san(oppName);
+  // 「二人の絆が完成する日」の一言は、一覧にその日が入っているときだけ（年4日に絞ったため、入らない組もある）
+  const hasSango = Boolean(me && partner && getSangoBranch(me, partner)) && pairDays.some((x) => x.sango);
+
+  return (
+    <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+      <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
+        <Star size={16} />
+        {partner ? `${oppLabel}との最高シンクロ日` : `${myLabel}の恋愛運MAX日`}
+      </h2>
+
+      {partner && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <span style={subHead}>● 2人の最高シンクロ日</span>
+          <span style={badgeStyle}>1年に数日だけ</span>
+          <p style={bodyText}>
+            {myLabel}と{oppLabel}の恋愛運の波が、<strong>同じ日にぴったり重なる日</strong>です。二人だけの特別な日。デートのお誘いや気持ちを伝えるなら、この日に。
+          </p>
+          {hasSango && (
+            <p style={{ ...bodyText, color: '#f5d77a' }}>
+              さらに二人は、16%の組にしかない「二人の絆が完成する日」がある組み合わせです。
+            </p>
+          )}
+          <p style={{ ...bodyText, fontWeight: 'bold' }}>
+            {pairDays.length > 0
+              ? <>これから1年のうち、2人の最高シンクロ日は<span style={goldCount}>{pairDays.length}日</span>あります。</>
+              : 'これから1年のうちには、2人の最高シンクロ日はありません。'}
+          </p>
+          <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
+        </div>
+      )}
+
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: '0.55rem',
+        ...(partner ? { borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.9rem' } : {})
+      }}>
+        <span style={subHead}>● {myLabel}の恋愛運MAX日</span>
+        <span style={badgeStyle}>年に6〜7日だけ</span>
+        <p style={bodyText}>
+          {myLabel}が生まれた日の星と、その日の星が<strong>がっちり手をつなぐ日</strong>です。四柱推命で一番強い結びつきの一つ。告白やお誘いなど、大事な一歩はこの日に。
+        </p>
+        <p style={{ ...bodyText, fontWeight: 'bold' }}>
+          これから1年のうち、{myLabel}の恋愛運MAX日は<span style={goldCount}>{soloDays.length}日</span>あります。
+        </p>
+        {soloCommon.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+            <span style={{ fontSize: '0.74rem', color: '#f3efe6', fontWeight: 'bold' }}>どの日も</span>
+            <Chips labels={soloCommon} />
+          </div>
+        )}
+        <DayList days={soloDays} locked={locked} showPair={false} myLabel={myLabel} oppLabel={oppLabel} onLockClick={partner ? (onPairLockClick || onLockClick) : onLockClick} lockWord={lockWord} commonLabels={soloCommon} openCount={soloGift ? 1 : 0} />
+        {locked && referral && (
+          <>
+            {/* 返信が遅いとき・生まれ持った星と同じ案内（2026-11-10 TAKASHI）。押すと下の紹介の欄へ */}
+            <button
+              type="button"
+              onClick={() => document.getElementById('referral-invite')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              style={{ display: 'block', margin: '0 auto', background: 'none', border: 'none', color: '#f5d77a', fontSize: '0.74rem', textDecoration: 'underline', cursor: 'pointer', padding: '0.2rem' }}
+            >
+              🎁 お友達を紹介して開く
+            </button>
+            <ReferralInvite status={referral.status} loading={referral.loading} onOpen={referral.onOpen} />
+            {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。恋愛運MAX日の直近の1日が見られます" />}
+          </>
+        )}
+        {!locked && soloOpen && !isSubscribed && !pairOpen && (
+          <p style={{ ...bodyText, fontSize: '0.74rem', color: '#bfb8a8' }}>🎁 お友達の招待で開きました</p>
+        )}
+      </div>
+    </div>
+  );
+}

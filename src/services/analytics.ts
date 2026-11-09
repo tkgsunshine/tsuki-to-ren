@@ -182,6 +182,11 @@ export const trackRegStep = (type: 'reg_view' | 'reg_click' | 'reg_submit' | 'au
 
 export type ShareChannel = 'x' | 'line' | 'link' | 'image';
 
+/** A friend-referral invite sent (LINE button or link copied). /admin 「紹介を送った」 */
+export const trackRefSend = () => {
+  void send({ type: 'ref_send', ...current() });
+};
+
 /** A result shared: posted to X / LINE, link copied, or card image saved. */
 export const trackShare = (channel: ShareChannel) => {
   void send({ type: 'share', channel, ...current() });
@@ -192,12 +197,19 @@ const fortunedInSession = () => {
   try { return Boolean(session()?.getItem('hasu_first_fortune')); } catch { return false; }
 };
 
+/** A paid lock (its button opens the paid-plan page) came into view on the result, after a fortune in this session. Once per session. */
+export const trackLockView = () => {
+  if (!fortunedInSession() || firstInSession('lock_view') !== '1') return;
+  void send({ type: 'lock_view', ...current() });
+};
+
 /** The paid-plan page opened, with the plan it led with: 'pair' from a lock the one-time purchase opens, else 'monthly'. */
 // ff = '1' the first time in this session the page is opened after a fortune from the input form, so /admin can divide
 // "saw the page" by "ran a fortune" with people who did both (a restored result or the My Page banner does not count as a fortune)
-export const trackPremiumView = (plan: 'pair' | 'monthly') => {
+// fromMail = opened by a link in the morning mail (lp=), counted apart on /admin
+export const trackPremiumView = (plan: 'pair' | 'monthly', fromMail = false) => {
   const ff = fortunedInSession() ? firstInSession('premium_view_ff') : '0';
-  void send({ type: 'premium_view', plan, first: firstInSession('premium_view'), ff, ...current() });
+  void send({ type: 'premium_view', plan, first: firstInSession('premium_view'), ff, ...(fromMail ? { via: 'mail' } : {}), ...current() });
 };
 
 /** The button to Stripe's payment page pressed: monthly Premium (checkout) or the one-time pair purchase (checkout_pair). */
@@ -229,4 +241,23 @@ export const trackSignupIfNew = async (user: User) => {
     await send({ type: 'signup', ...current(), ...read(local(), FIRST_KEY) }, token);
     write(local(), `${SIGNUP_KEY}_${user.uid}`, '1');
   } catch {}
+};
+
+// 購入LPを買わずに閉じたときの1問アンケート（訪問ごとに1回だけ聞く）。seen = 料金・プランのところまで読んでいた
+export type LpExitReason = 'price' | 'content' | 'free_enough' | 'skip';
+const LP_EXIT_KEY = 'hasu_lp_exit_answered';
+export const lpExitAnswered = () => {
+  try { return Boolean(session()?.getItem(LP_EXIT_KEY)); } catch { return false; }
+};
+export const trackLpExit = (reason: LpExitReason, seen: boolean) => {
+  write(session(), LP_EXIT_KEY, '1');
+  void send({ type: 'lp_exit', reason, seen: seen ? '1' : '0', ...current() });
+};
+
+// 購入LPを閉じたとき（有料会員以外、閉じるたびに1回）: 一番下まで届いたまとまり・いた時間・閉じ方（×か、それ以外＝戻る・下メニュー）
+export type LpSection = 'top' | 'intro' | 'plans' | 'worries' | 'benefits' | 'price' | 'faq' | 'end';
+export const trackLpLeave = (layout: 'pair' | 'monthly', reached: LpSection, ms: number, close: 'x' | 'other') => {
+  const s = ms / 1000;
+  const time = s < 10 ? 'lt10' : s < 30 ? '10_30' : s < 60 ? '30_60' : s < 180 ? '60_180' : 'gt180';
+  void send({ type: 'lp_leave', layout, reached, time, close, ...current() });
 };

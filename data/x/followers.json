@@ -143,5 +143,25 @@
     "date": "2026-11-05",
     "followers": 67,
     "tweets": 358
+  },
+  {
+    "date": "2026-11-06",
+    "followers": 73,
+    "tweets": 366
+  },
+  {
+    "date": "2026-11-07",
+    "followers": 76,
+    "tweets": 374
+  },
+  {
+    "date": "2026-11-08",
+    "followers": 99,
+    "tweets": 380
+  },
+  {
+    "date": "2026-11-09",
+    "followers": 121,
+    "tweets": 391
   }
 ]

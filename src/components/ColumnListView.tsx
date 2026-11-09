@@ -358,7 +358,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
           あなたとお相手の本格相性を今すぐ占ってみませんか？
         </h3>
         <p style={{ fontSize: '0.75rem', color: '#d8d2c6', margin: 0 }}>
-          約7,465万通りの条件の掛け合わせで、二人の運命スコア・トリセツ・LINE吉時間を完全鑑定できます。
+          生年月日と16タイプから、二人の相性スコア・トリセツ・LINE吉時間を鑑定できます。
         </p>
         <button
           type="button"

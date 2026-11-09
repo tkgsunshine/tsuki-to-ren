@@ -161,7 +161,7 @@ export const PremiumWelcomeModal: React.FC<PremiumWelcomeModalProps> = ({ isOpen
             boxShadow: '0 8px 24px rgba(217, 164, 65, 0.35)'
           }}
         >
-          {pair ? '解放された鑑定を見る' : 'さっそく見てみる'}
+          {pair ? '解放された鑑定を見る' : '早速見てみる'}
         </button>
       </div>
     </div>
