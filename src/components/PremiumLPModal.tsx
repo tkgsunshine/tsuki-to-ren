@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, ChevronDown, Moon, ArrowRight, X, Lock, Star } from 'lucide-react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
@@ -46,6 +46,15 @@ const benefits = [
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
     pairNote: 'pairAll',
     body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、全部見られます。'
+  },
+  {
+    Icon: Shirt,
+    color: '#e28baa',
+    title: 'あの人が惹かれるファッションと、ドキッとさせる仕草',
+    shot: '/assets/premium/attraction.webp',
+    shotAlt: 'お相手が惹かれるファッションとドキッとさせる仕草の画面',
+    pairNote: 'pairAll',
+    body: 'あの人の生まれ持った星と性格のタイプから、惹かれやすい色・服装・コーデの一工夫と、避けたい服装が絵つきで分かります。会ったときにドキッとさせる仕草も全部見られるので、次のデートの準備に使ってくださいね。'
   },
   {
     Icon: Bell,
@@ -154,6 +163,28 @@ interface PremiumLPModalProps {
   onPlansSeen?: () => void;
 }
 
+// 画面イメージの左上に重ねる「イメージ（サンプル）」の札。実際の結果ではないことを、拡大しなくても分かるようにする
+const SampleBadge: React.FC = () => (
+  <span style={{
+    position: 'absolute',
+    left: '0.4rem',
+    top: '0.4rem',
+    padding: '3px 9px',
+    borderRadius: '6px',
+    background: 'rgba(5, 7, 10, 0.86)',
+    border: '1px solid rgba(226, 192, 116, 0.85)',
+    color: '#f2e2b3',
+    fontSize: '0.66rem',
+    fontWeight: 'bold',
+    lineHeight: 1.3,
+    letterSpacing: '0.04em',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.5)',
+    pointerEvents: 'none'
+  }}>
+    イメージ（サンプル）
+  </span>
+);
+
 // 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見られる。
 // 枠より長い画像のときだけ、開いた直後に少し動かして見せ、下に「スクロール」の案内を出す（下まで見たら消える）
 const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({ src, alt, onClose }) => {
@@ -230,12 +261,15 @@ const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({
           justifyContent: 'space-between',
           gap: '0.5rem',
           padding: '0.55rem 0.6rem 0.55rem 0.9rem',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          background: 'rgba(17, 24, 35, 0.95)',
+          borderBottom: '1px solid rgba(226, 192, 116, 0.55)',
+          background: 'rgba(52, 42, 20, 0.97)',
           flexShrink: 0
         }}>
-          <span style={{ fontSize: '0.66rem', color: '#a9a49a', lineHeight: 1.4 }}>
-            ※ 画面はイメージです（名前や内容はサンプルです）
+          <span style={{ fontSize: '0.8rem', color: '#f2e2b3', fontWeight: 'bold', lineHeight: 1.45 }}>
+            ※ 画面はイメージです
+            <span style={{ display: 'block', fontSize: '0.68rem', fontWeight: 'normal', color: '#d8d2c6' }}>
+              名前や内容はサンプルで、実際の鑑定結果とは異なります
+            </span>
           </span>
           <button
             type="button"
@@ -664,6 +698,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {([
                   { who: 'tsuki', t: 'やってはいけないこと 5選 ＆ 返信が遅いときの心理・脈ありサイン', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}に言うと一気に冷めてしまう一言、既読のまま止まったときの本当の気持ち、今どの段階にいるのか、少し離れかけたときの戻し方まで。一緒に見ていきましょうね。` },
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
+                  { who: 'tsuki', t: '惹かれるファッション ＆ ドキッとさせる仕草', shot: '/assets/premium/attraction.webp', d: `${pair.name}が思わず目で追ってしまう色や服装、会ったときにドキッとさせる仕草。次に会う日の準備に使ってくださいね。` },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
                   { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかが分かります。` },
@@ -682,8 +717,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                       style={{ position: 'relative', display: 'block', width: '100%', marginTop: '0.55rem', padding: 0, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', background: '#0a0e14', cursor: 'zoom-in' }}
                     >
                       <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: 'top' }} />
+                      <SampleBadge />
                       <span style={{ position: 'absolute', right: '0.4rem', bottom: '0.4rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(5, 7, 10, 0.75)', color: '#e8e3d8', fontSize: '0.6rem' }}>
-                        画面イメージ・タップで拡大
+                        タップで拡大
                       </span>
                     </button>
                   </CharBubble>
@@ -720,6 +756,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
+                  { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
                   { label: '7日間・月ごと・10年先までの流れ（結婚・転機の年）', pair: null, monthly: '◯' },
@@ -860,6 +897,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     decoding="async"
                     style={{ display: 'block', width: '100%', height: '170px', objectFit: 'cover', objectPosition: 'top' }}
                   />
+                  <SampleBadge />
                   <span style={{
                     position: 'absolute',
                     right: '0.45rem',
@@ -870,7 +908,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     color: '#e8e3d8',
                     fontSize: '0.62rem'
                   }}>
-                    画面イメージ・タップで拡大
+                    タップで拡大
                   </span>
                 </button>
               </div>

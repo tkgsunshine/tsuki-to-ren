@@ -2805,10 +2805,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
-            {/* 4.5 ドキッとさせる仕草（1つ目は誰でも見られ、2つ目以降はプレミアム限定。中身は fortuneEngine の getAttractionStyle） */}
+            {/* 4.5 ドキッとさせる仕草（1つ目は誰でも見られ、2つ目以降は月額か、そのお相手の買い切りで開く。中身は fortuneEngine の getAttractionStyle） */}
             {activeResult.opponentTorisetsu.attraction && activeResult.opponentTorisetsu.attraction.gestures.length > 0 && (() => {
               const gs = activeResult.opponentTorisetsu.attraction.gestures;
-              const locked = !isSubscribed;
+              const locked = !deepOpen;
               return (
                 <div style={{ background: 'rgba(226, 139, 170, 0.06)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(226, 139, 170, 0.22)', position: 'relative' }}>
                   <div className="font-serif" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f6c6d8', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -2825,8 +2825,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       </ul>
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
-                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <LockLabel word={LOCK_WORD} chars={countChars(...gs.slice(1))} />
+                          <button type="button" className="premium-lock-tag" data-paid-lock onClick={handleDeepLockClick}>
+                            <LockLabel word={deepLockWord} chars={countChars(...gs.slice(1))} />
                           </button>
                         </div>
                       )}
@@ -2928,10 +2928,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
-            {/* 7.5 お相手が惹かれるファッション（イメージと系統は誰でも見られ、色・服装・一工夫・NGはプレミアム限定） */}
+            {/* 7.5 お相手が惹かれるファッション（イメージと系統は誰でも見られ、色・服装・一工夫・NGは月額か、そのお相手の買い切りで開く） */}
             {activeResult.opponentTorisetsu.attraction && (() => {
               const at = activeResult.opponentTorisetsu.attraction;
-              const locked = !isSubscribed;
+              const locked = !deepOpen;
               const lockStyle: React.CSSProperties = { filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 };
               const label: React.CSSProperties = { color: '#f6c6d8', fontWeight: 'bold' };
               // 絵と色見本（古い保存データには key が無いので、そのときは文字だけ）。見られない人には絵も出さない（ぼかしの下で中身がわからないように）
@@ -2969,8 +2969,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       <div style={lockStyle}><span style={label}>【冷めやすいポイント】</span>{lockedText(at.ngStyle, locked)}</div>
                       {locked && (
                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, width: '90%', display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
-                          <button type="button" className="premium-lock-tag" onClick={handleLockTagClick}>
-                            <LockLabel word={LOCK_WORD} chars={countChars(at.colors, at.outfit, at.mbtiTip, at.ngStyle)} />
+                          <button type="button" className="premium-lock-tag" data-paid-lock onClick={handleDeepLockClick}>
+                            <LockLabel word={deepLockWord} chars={countChars(at.colors, at.outfit, at.mbtiTip, at.ngStyle)} />
                           </button>
                         </div>
                       )}
