@@ -32,6 +32,8 @@ import { LegalPage } from './components/LegalPage';
 import { PremiumLPModal } from './components/PremiumLPModal';
 import { InstallGuideModal } from './components/InstallGuideModal';
 import { SeoFooterSection } from './components/SeoFooterSection';
+import { GuardianZukan } from './components/GuardianZukan';
+import { ToolGuardiansView } from './components/ToolGuardiansView';
 import { ColumnListView } from './components/ColumnListView';
 import { ColumnDetailView } from './components/ColumnDetailView';
 import { ToolNicchuView } from './components/ToolNicchuView';
@@ -98,6 +100,9 @@ const getInitialRoute = (): InitialRoute => {
   }
   if (path === '/tools/nicchu' || path === '/tools/nicchu/') {
     return { tab: 'tool', slug: 'nicchu', legal: false, settingsSubView: 'main', compatibilityPair: null };
+  }
+  if (path === '/guardians' || path === '/guardians/') {
+    return { tab: 'tool', slug: 'guardians', legal: false, settingsSubView: 'main', compatibilityPair: null };
   }
   if (path === '/compatibility' || path === '/compatibility/') {
     return { tab: 'tool', slug: 'compat', legal: false, settingsSubView: 'main', compatibilityPair: null };
@@ -1751,6 +1756,7 @@ function App() {
                 />
                 </>
                 )}
+                {!sharedTeaser && <GuardianZukan />}
                 <SeoFooterSection />
               </div>
             )}
@@ -2026,10 +2032,10 @@ function App() {
           </div>
         )}
 
-        {/* ツールページ（/tools/nicchu 日柱の調べ方、/compatibility 16タイプ恋愛相性表） */}
+        {/* ツールページ（/tools/nicchu 日柱の調べ方、/compatibility 16タイプ恋愛相性表、/guardians 守護獣図鑑） */}
         {activeTab === 'tool' && (
           <div style={{ animation: 'fadeIn 0.4s ease', width: '100%' }}>
-            {initialRoute.slug === 'compat' ? <ToolCompatView /> : <ToolNicchuView />}
+            {initialRoute.slug === 'compat' ? <ToolCompatView /> : initialRoute.slug === 'guardians' ? <ToolGuardiansView /> : <ToolNicchuView />}
           </div>
         )}
 

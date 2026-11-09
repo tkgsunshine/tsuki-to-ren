@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { calculateDayPillar, MBTI_COMPAT_TYPES, MBTI_COMPAT_100 } from '../api/_lib/fortuneEngine.js';
+import { calculateDayPillar, MBTI_COMPAT_TYPES, MBTI_COMPAT_100, branchPersonalities } from '../api/_lib/fortuneEngine.js';
 import { SERVICE, ABOUT_FAQS, loadColumns } from './site-facts.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -595,6 +595,51 @@ console.log('🚀 Pre-rendering /compatibility (16タイプ恋愛相性表)...')
   ]);
 }
 
+// 5b. /guardians 守護獣図鑑（画面 ToolGuardiansView・トップの GuardianZukan と同じ文面。src/data/guardian-types.json）
+console.log('🚀 Pre-rendering /guardians (守護獣図鑑)...');
+const guardianPage = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../src/data/guardian-types.json'), 'utf-8'));
+const guardianImg = (slug, male) => `/assets/astrology_${slug === 'rabbit' ? '' : `${slug}_`}sample${male ? '_male' : ''}.webp`;
+{
+  const page = guardianPage;
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const url = `${BASE_URL}/guardians`;
+  const html = `
+    <div style="max-width: 680px; margin: 0 auto; padding: 2rem 1rem; font-family: sans-serif; color: #f3f4f6; background-color: #020205; line-height: 1.8;">
+      <nav aria-label="パンくずリスト" style="font-size: 0.8rem; margin-bottom: 1.5rem; color: #9ca3af;">
+        <a href="/" style="color: #e2c074;">ホーム</a> &gt; <span>${esc(page.h1)}</span>
+      </nav>
+      <article>
+        <h1 style="font-size: 1.6rem; color: #fef08a;">${esc(page.h1)}</h1>
+        <p>${esc(page.lead)}</p>
+        <p>自分の守護獣は、<a href="/" style="color: #e2c074;">無料の鑑定</a>か、<a href="/tools/nicchu" style="color: #e2c074;">日柱の調べ方</a>（日柱の2文字目の十二支）で分かります。</p>
+        ${page.types.map((t) => `
+        <section id="guardian-${t.slug}" style="margin-top: 1.5rem;">
+          <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.25rem;">${esc(t.animal)}（${t.branch}・${esc(branchPersonalities[t.branch])}）</h2>
+          <p style="margin: 0 0 0.5rem;">
+            <img src="${guardianImg(t.slug, false)}" alt="${esc(t.animal)}の守護獣（女性）" width="120" height="120" loading="lazy" style="border-radius: 12px;" />
+            <img src="${guardianImg(t.slug, true)}" alt="${esc(t.animal)}の守護獣（男性）" width="120" height="120" loading="lazy" style="border-radius: 12px;" />
+          </p>
+          <p style="margin: 0;">${esc(t.note)}</p>
+          <p style="margin: 0;">${esc(t.love)}</p>
+        </section>`).join('')}
+        <p style="margin-top: 2rem;">生年月日を入れるだけで、二人の守護獣と相性を無料で鑑定できます。</p>
+        <p><a href="/" style="display: inline-block; background: linear-gradient(135deg, #fef08a 0%, #e2c074 100%); color: #000; padding: 0.8rem 2rem; border-radius: 30px; text-decoration: none; font-weight: bold;">無料で相性を占う</a></p>
+      </article>
+    </div>
+  `;
+  writePage('guardians', page.title, page.description, page.keywords, url, html, [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'ホーム', 'item': `${BASE_URL}/` },
+        { '@type': 'ListItem', 'position': 2, 'name': page.h1, 'item': url }
+      ]
+    }
+  ]);
+  console.log('✅ Pre-rendered /guardians');
+}
+
 // The 256 /compatibility/[type1]-[type2] pages are no longer pre-rendered (thin, near-duplicate content).
 // vercel.json rewrites them to the SPA, which reads the pair from the URL, and sends X-Robots-Tag: noindex.
 
@@ -633,6 +678,17 @@ const homeSemanticHtml = `
       <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0;">鑑定は無料・会員登録なしで使えます。${SERVICE.plans.map((pl) => `${escHome(pl.name)}は${escHome(pl.price)}`).join('、')}です。</p>
     </section>
 
+    <section style="margin-bottom: 2rem;">
+      <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.5rem; text-align: center;">守護獣図鑑</h2>
+      <p style="text-align: center; font-size: 0.85rem; color: #cbd5e1; margin: 0 0 0.5rem;">生まれた日で決まる12の守護獣。あなたはどれ？</p>
+      <ul style="padding-left: 1.2rem; font-size: 0.82rem; color: #cbd5e1; line-height: 1.8; margin: 0;">
+        ${guardianPage.types.map((t) => `<li><a href="/guardians#${t.slug}" style="color: #e2c074;">${escHome(t.animal)}（${t.branch}・${escHome(branchPersonalities[t.branch])}）</a>：${escHome(t.note)}</li>`).join('')}
+      </ul>
+      <p style="text-align: center; margin-top: 0.5rem;">
+        <a href="/guardians" style="font-size: 0.8rem; color: #e2c074; font-weight: bold; text-decoration: underline;">全12タイプを見る（女性・男性） →</a>
+      </p>
+    </section>
+
     <!-- Column Quick Links -->
     <section style="margin-bottom: 2rem;">
       <h2 style="font-size: 1.15rem; color: #e2c074; margin-bottom: 0.75rem; text-align: center;">恋愛コラム</h2>
@@ -650,6 +706,7 @@ const homeSemanticHtml = `
         <a href="/about" style="color: #cbd5e1; text-decoration: none;">月と蓮とは</a>
         <a href="/tools/nicchu" style="color: #cbd5e1; text-decoration: none;">日柱の調べ方</a>
         <a href="/compatibility" style="color: #cbd5e1; text-decoration: none;">16タイプ恋愛相性表</a>
+        <a href="/guardians" style="color: #cbd5e1; text-decoration: none;">守護獣図鑑</a>
         <a href="/terms" style="color: #9ca3af; text-decoration: none;">利用規約</a>
         <a href="/privacy" style="color: #9ca3af; text-decoration: none;">プライバシーポリシー</a>
         <a href="/tokushoho" style="color: #9ca3af; text-decoration: none;">特定商取引法に基づく表記</a>
