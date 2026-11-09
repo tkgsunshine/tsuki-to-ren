@@ -13,6 +13,16 @@ const worries = [
 
 const benefits = [
   {
+    Icon: Calendar,
+    color: '#5d9fc0',
+    title: '10年先までの、二人の未来の流れ',
+    shot: '/assets/premium/timeline-line.webp',
+    shotAlt: '7日間・月ごと・年ごとの相性の折れ線グラフの画面',
+    // 画面イメージは縦長なので、10年先（年次）のグラフのところを見せる
+    shotPos: '50% 54%',
+    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの7日間と月ごとの波も見られるので、近い予定から先の人生まで、見すえて動けますよ。'
+  },
+  {
     Icon: Send,
     color: '#06c755',
     title: '今日のLINEの送り方と、二人のLINEのコツ',
@@ -29,14 +39,6 @@ const benefits = [
     shotAlt: '2人の最高シンクロ日とあなたの恋愛運MAX日の画面',
     pairNote: 'pairLucky',
     body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付が分かります。告白やデートのお誘いは、この日に。'
-  },
-  {
-    Icon: Calendar,
-    color: '#5d9fc0',
-    title: '7日間の波から、10年先の二人の未来まで',
-    shot: '/assets/premium/timeline-line.webp',
-    shotAlt: '7日間・月ごと・年ごとの相性の折れ線グラフの画面',
-    body: '明日から7日間・月ごとの相性の波に加えて、この先10年の年ごとの流れも読めます。「大開運の年」「整える年」など二人の運気の大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かるので、先を見すえて動けますよ。'
   },
   {
     Icon: BookOpen,
@@ -431,6 +433,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   // 買い切りで「今日」の内容が見られるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
+  const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 54%', d: 'この先10年の年ごとの流れと、明日からの7日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
 
   // 上（2プランの比べ方）と下（画面下に固定）で同じボタンを出す。下では「解放済み」は出さない
   const renderPlanButtons = (showUnlocked: boolean) => (
@@ -696,13 +699,15 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '0.7rem' }}>
                 {([
+                  // 月額だけの「10年先」は、月額を先に見せるときは一番上に（2026-11-09 TAKASHI「10年先をもっと前に」）。買い切りを先に見せるときは最後
+                  ...(pairFirst ? [] : [eduFuture]),
                   { who: 'tsuki', t: 'やってはいけないこと 5選 ＆ 返信が遅いときの心理・脈ありサイン', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}に言うと一気に冷めてしまう一言、既読のまま止まったときの本当の気持ち、今どの段階にいるのか、少し離れかけたときの戻し方まで。一緒に見ていきましょうね。` },
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
                   { who: 'tsuki', t: '惹かれるファッション ＆ ドキッとさせる仕草', shot: '/assets/premium/attraction.webp', d: `${pair.name}が思わず目で追ってしまう色や服装、会ったときにドキッとさせる仕草。次に会う日の準備に使ってくださいね。` },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
                   { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかが分かります。` },
-                  { who: 'tsuki', t: '7日間の波から、10年先の二人の未来まで', shot: '/assets/premium/edu-future.webp', d: '明日からの7日間・月ごとの相性の波と、この先10年の年ごとの流れ。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' }
+                  ...(pairFirst ? [eduFuture] : [])
                 ] as const).map((it) => (
                   <CharBubble key={it.t} who={it.who} small>
                     <span style={{ display: 'block', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.2rem' }}>
@@ -716,7 +721,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                       onClick={() => setZoomShot({ src: it.shot, alt: `${it.t}の画面イメージ` })}
                       style={{ position: 'relative', display: 'block', width: '100%', marginTop: '0.55rem', padding: 0, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden', background: '#0a0e14', cursor: 'zoom-in' }}
                     >
-                      <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: 'top' }} />
+                      <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: ('pos' in it && it.pos) || 'top' }} />
                       <SampleBadge />
                       <span style={{ position: 'absolute', right: '0.4rem', bottom: '0.4rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(5, 7, 10, 0.75)', color: '#e8e3d8', fontSize: '0.6rem' }}>
                         タップで拡大
@@ -754,12 +759,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   ))}
                 </div>
                 {[
+                  { label: '10年先までの二人の流れ（結婚・転機の年）、7日間・月ごとの波', pair: null, monthly: '◯' },
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
                   { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
-                  { label: '7日間・月ごと・10年先までの流れ（結婚・転機の年）', pair: null, monthly: '◯' },
                   { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
                   { label: 'お相手の保存', pair: '2人', monthly: '10人' }
@@ -831,7 +836,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
               プレミアムプラン（月額980円）でできること
             </h2>
-            {benefits.map(({ Icon, color, title, body, shot, shotAlt, pairNote }) => (
+            {benefits.map(({ Icon, color, title, body, shot, shotAlt, pairNote, shotPos }) => (
               <div key={title} className="glass-panel" style={{
                 padding: '0.9rem 1rem',
                 display: 'flex',
@@ -895,7 +900,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     alt={shotAlt}
                     loading="lazy"
                     decoding="async"
-                    style={{ display: 'block', width: '100%', height: '170px', objectFit: 'cover', objectPosition: 'top' }}
+                    style={{ display: 'block', width: '100%', height: '170px', objectFit: 'cover', objectPosition: shotPos || 'top' }}
                   />
                   <SampleBadge />
                   <span style={{
