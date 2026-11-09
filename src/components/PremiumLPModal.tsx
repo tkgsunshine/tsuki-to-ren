@@ -53,6 +53,7 @@ const benefits = [
     title: 'あの人が惹かれるファッションと、ドキッとさせる仕草',
     shot: '/assets/premium/attraction.webp',
     shotAlt: 'お相手が惹かれるファッションとドキッとさせる仕草の画面',
+    pairNote: 'pairAll',
     body: 'あの人の生まれ持った星と性格のタイプから、惹かれやすい色・服装・コーデの一工夫と、避けたい服装が絵つきで分かります。会ったときにドキッとさせる仕草も全部見られるので、次のデートの準備に使ってくださいね。'
   },
   {
@@ -697,7 +698,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {([
                   { who: 'tsuki', t: 'やってはいけないこと 5選 ＆ 返信が遅いときの心理・脈ありサイン', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}に言うと一気に冷めてしまう一言、既読のまま止まったときの本当の気持ち、今どの段階にいるのか、少し離れかけたときの戻し方まで。一緒に見ていきましょうね。` },
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
-                  { who: 'tsuki', t: '惹かれるファッション ＆ ドキッとさせる仕草', shot: '/assets/premium/attraction.webp', d: `${pair.name}が思わず目で追ってしまう色や服装、会ったときにドキッとさせる仕草。次に会う日の準備に使ってくださいね。（プレミアムプランで読めます）` },
+                  { who: 'tsuki', t: '惹かれるファッション ＆ ドキッとさせる仕草', shot: '/assets/premium/attraction.webp', d: `${pair.name}が思わず目で追ってしまう色や服装、会ったときにドキッとさせる仕草。次に会う日の準備に使ってくださいね。` },
                   { who: 'tsuki', t: '6つの相性グラフ ＆ 二人のこれから', shot: '/assets/premium/edu-radar.webp', d: '恋愛・会話・結婚・信頼などの相性と、関係が進みやすい時期。動くタイミングを、一緒に読んでいきましょうね。' },
                   { who: 'ren', t: 'そのまま送れるLINEキラーテンプレート', shot: '/assets/premium/edu-template.webp', d: `${pair.name}の性格に合わせた文例を用意しました。言葉に迷う夜は、そのまま使ってください。` },
                   { who: 'ren', t: '2人の最高シンクロ日', shot: '/assets/premium/lucky-days.webp', d: `二人の恋愛運がぴったり重なる、1年に数日だけの日。${pair.name}への告白やお誘いを、いつにすればいいかが分かります。` },
@@ -755,7 +756,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
-                  { label: '惹かれるファッション・ドキッとさせる仕草', pair: null, monthly: '◯' },
+                  { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
                   { label: '7日間・月ごと・10年先までの流れ（結婚・転機の年）', pair: null, monthly: '◯' },
