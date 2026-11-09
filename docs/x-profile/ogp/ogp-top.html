@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><!-- トップのOGP（2026-11-02 Xヘッダーと同じ文字の組み方：コピー→方式3行を頭と幅をそろえて縦積み。元は2026-11-01 A案）。app-screen.png はアプリの鑑定結果画面（390幅×3倍）を切り抜いたもの。Playwrightで1200×630を撮って public/ogp-image.jpg に -->
+<!doctype html><meta charset="utf-8"><!-- トップのOGP（2026-11-09 コピーを「好きな人との相性と恋愛の本性が分かる」に変更、方式名を小さく。2026-11-02 Xヘッダーと同じ文字の組み方：コピー→方式3行を頭と幅をそろえて縦積み。元は2026-11-01 A案）。app-screen.png はアプリの鑑定結果画面（390幅×3倍）を切り抜いたもの。Playwrightで1200×630を撮って public/ogp-top-YYYYMMDD.jpg に（index.html の og:image / twitter:image も差し替え） -->
 <style>
 @font-face{font-family:'SM';font-weight:700;src:url('../../../scripts/x/assets/ShipporiMincho-Bold.ttf')}
 html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#0a0714}
@@ -24,13 +24,13 @@ svg.st{position:absolute;inset:0}
 .tsuki{left:-70px;top:40px;width:420px;height:562px}
 .ren{left:900px;top:40px;width:420px;height:562px;opacity:.95}
 .t{position:absolute;left:250px;top:48px;width:480px;text-align:center}
-.cp{margin-top:16px;font-size:50px;line-height:1.24;letter-spacing:.02em;white-space:nowrap;text-shadow:0 0 26px rgba(226,192,116,.4)}
+.cp{margin-top:18px;font-size:52px;line-height:1.3;letter-spacing:.02em;white-space:nowrap;text-shadow:0 0 26px rgba(226,192,116,.4)}
 .cp .p{color:#fe8fb6}.cp .g{color:#e2c074}
-.mt{margin-top:22px;text-shadow:0 0 24px rgba(160,140,255,.45)}
+.mt{margin-top:30px;text-shadow:0 0 24px rgba(160,140,255,.45)}
 /* 方式名を3行、×はその間の行（5行）。MBTIは字間で4文字幅に */
-.mn{display:block;font-size:52px;line-height:1.1;white-space:nowrap}
-.mn.b{color:#9cc6ff;font-size:60px;letter-spacing:10.1px;text-indent:10.1px}
-.mx{display:block;color:#e2c074;font-size:30px;line-height:1.05}
+.mn{display:block;font-size:40px;line-height:1.1;white-space:nowrap}
+.mn.b{color:#9cc6ff;font-size:46px;letter-spacing:7.8px;text-indent:7.8px}
+.mx{display:block;color:#e2c074;font-size:24px;line-height:1.1}
 .phone{left:740px;top:34px;width:258px;transform:rotate(4deg)}
 .phone img{width:258px}
 </style>
@@ -39,7 +39,7 @@ svg.st{position:absolute;inset:0}
 <div class="c ren"><img src="ren.jpg"></div>
 <div class="t">
  <div class="badge">月と蓮</div>
- <div class="cp">好きな人との<br><span class="p">今日</span>の相性が<span class="g">わかる</span></div>
+ <div class="cp">好きな人との<span class="p">相性</span>と<br>恋愛の<span class="p">本性</span>が<span class="g">分かる</span></div>
  <div class="mt">
   <span class="mn">四柱推命</span>
   <span class="mx">×</span>
