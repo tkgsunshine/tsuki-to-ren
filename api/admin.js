@@ -1,6 +1,6 @@
 import { FieldPath, FieldValue } from 'firebase-admin/firestore';
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, DAILY, jstDate } from './_lib/analytics.js';
+import { ATTRIBUTION, DAILY, ageBandFromBirth, jstDate, normalizeGender, normalizeMbti } from './_lib/analytics.js';
 import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
 import { AUDIENCES, NOTICES, validateNotice } from './_lib/notices.js';
@@ -103,7 +103,7 @@ export default async function handler(req, res, deps = {}) {
     const from = jstDate(new Date(Date.now() - (offset + days - 1) * 86400 * 1000));
     const inPeriod = (d) => d.id <= to; // the query already starts at `from`; days after `to` are dropped here
 
-    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap, pairSnap] = await Promise.all([
+    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap, pairSnap, userDataSnap] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection('subscriptions').get(),
       db.collection(ATTRIBUTION).get(),
@@ -112,12 +112,14 @@ export default async function handler(req, res, deps = {}) {
       db.collection('premium').get(), // _lib/stripe.js PREMIUM (not imported, to keep the Stripe library out of this function)
       db.collection(OWNERS).doc('owners').get(),
       db.collection(NOTICES).orderBy('createdAt', 'desc').limit(MAX_NOTICES).get(),
-      db.collection('pairUnlocks').get() // _lib/pair-unlock.js PAIR_UNLOCKS（買い切りの購入）
+      db.collection('pairUnlocks').get(), // _lib/pair-unlock.js PAIR_UNLOCKS（買い切りの購入）
+      db.collection('userData').get() // _lib/user-data.js USER_DATA（会員のプロフィール。性別・年代・MBTIの集計に使う。生年月日は返さない）
     ]);
 
     const subs = new Map(subsSnap.docs.map((d) => [d.id, d.data()]));
     const attrib = new Map(attribSnap.docs.map((d) => [d.id, d.data()]));
     const premium = new Map(premiumSnap.docs.map((d) => [d.id, d.data()]));
+    const profiles = new Map((userDataSnap.docs || []).map((d) => [d.id, d.data()?.profile]));
     // 買い切りの購入数（本番／テスト）。お相手ごとに1件
     const pairs = new Map((pairSnap.docs || []).map((d) => {
       const list = Object.values(d.data()?.partners || {});
@@ -134,6 +136,7 @@ export default async function handler(req, res, deps = {}) {
         const sub = subs.get(u.uid);
         const at = attrib.get(u.uid);
         const p = premium.get(u.uid);
+        const prof = profiles.get(u.uid);
         const email = u.email || (u.providerData || []).find((x) => x.email)?.email || null;
         users.push({
           uid: u.uid,
@@ -144,6 +147,10 @@ export default async function handler(req, res, deps = {}) {
           lastSignInAt: u.metadata?.lastSignInTime ? new Date(u.metadata.lastSignInTime).toISOString() : null,
           dailyMail: sub ? sub.enabled === true : false,
           mbti: sub?.myMbti && sub.myMbti !== 'UNKNOWN' ? sub.myMbti : null,
+          // 属性の集計用（今のプロフィール）。プロフィールを保存していない会員は unknown。生年月日そのものは返さない
+          gender: prof ? normalizeGender(prof.gender) : 'unknown',
+          age: prof ? ageBandFromBirth(prof.birth) : 'unknown',
+          type: normalizeMbti(prof?.mbti && prof.mbti !== 'UNKNOWN' ? prof.mbti : sub?.myMbti),
           source: at?.source || null,
           landing: at?.landing || null,
           device: at?.device || null,
