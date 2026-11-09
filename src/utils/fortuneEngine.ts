@@ -2329,9 +2329,13 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     const starScore = relStar === 'producing' ? 30 : (relStar === 'same' ? 25 : 15);
     
     // 3. 16タイプ相性 - 配点 40点
-    const mbtiScore = getMBTICompatibilityScore(input.myMbti, input.opponentMbti || 'UNKNOWN');
-    
-    baseScore = fourPillarsScore + starScore + mbtiScore;
+    // どちらかのタイプが分からない場合は、16タイプ相性を使わず、四柱推命＋九星気学（60点満点）を100点満点に換算する。
+    // 旧版はタイプ不明を一律20点にしていたため、生年月日の相性が最高でも80点で止まっていた（2026-11 見直し）。
+    if (getMBTICompatibility100(input.myMbti, input.opponentMbti || 'UNKNOWN') === null) {
+      baseScore = Math.round(((fourPillarsScore + starScore) * 100) / 60);
+    } else {
+      baseScore = fourPillarsScore + starScore + getMBTICompatibilityScore(input.myMbti, input.opponentMbti || '');
+    }
   } else if (!hasOpponent) {
     // 自分だけの場合のベーススコア（自己恋愛指数）。
     //  ・日柱の十二運（日主が自分の日支でどの運の段階か＝本人のエネルギー）… 四柱推命
