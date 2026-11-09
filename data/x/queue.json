@@ -9316,6 +9316,110 @@
     "createdAt": "2026-11-08T17:54:12.626Z"
   },
   {
+    "id": "2026-11-11-am",
+    "date": "2026-11-11",
+    "slot": "am",
+    "kind": "value",
+    "text": "付き合う前に、価値観の話ってしづらいよね。\n重いって思われそうで、つい流しちゃう。\n・確認は「疑うこと」じゃない\n・尋問にならない聞き方の例文\n・違いが見つかったときの考え方も\n-月-\n▼長続きするために話しておく5つのこと\nhttps://www.tsuki-to-ren.com/column/values-to-check-before-dating-seriously?utm_source=x",
+    "format": "column_intro",
+    "system": "column",
+    "purpose": "follow",
+    "column": "values-to-check-before-dating-seriously",
+    "status": "scheduled",
+    "createdAt": "2026-11-09T22:15:49.984Z"
+  },
+  {
+    "id": "2026-11-11-noon",
+    "date": "2026-11-11",
+    "slot": "noon",
+    "kind": "value",
+    "text": "【INFJ 提唱者の恋愛】\n好きになると：相手の小さな変化に、誰より先に気づいてしまう\n愛情表現：前に話したことを覚えていて、さりげなく形にする\n惹かれる人：言葉にしない本音まで、ちゃんと聞いてくれる人\nつまずき：相手の気持ちを先読みしすぎて、ひとりで疲れる\nLINEのクセ：送る前に何度も読み返して、絵文字ひとつで迷う\n\nでもINFJには、本気で好きな人にだけ見せるサインがある。\n答えはリプ欄に↓\n-月-",
+    "format": "mbti_love",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "maxWeight": 600,
+    "status": "scheduled",
+    "createdAt": "2026-11-09T22:15:49.984Z"
+  },
+  {
+    "id": "2026-11-11-noon-reply",
+    "date": "2026-11-11",
+    "slot": "noon",
+    "kind": "value",
+    "text": "【INFJ 提唱者が本気のときだけ見せるサイン】\nふだんは聞き役なのに、本気の相手にだけ昔話をする。\n知ってほしい人ができたから。\n本気の好きは、相づちじゃなくて打ち明け話。\n-月-",
+    "replyTo": "2026-11-11-noon",
+    "format": "mbti_love_reply",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-11-09T22:15:49.984Z"
+  },
+  {
+    "id": "2026-11-11-pm",
+    "date": "2026-11-11",
+    "slot": "pm",
+    "kind": "value",
+    "text": "見えない月も、ちゃんとそこで満ちはじめている。\n今日は新月。空に何もない夜なのに、月はもう次の形に向かってる。\n返事が来ない日も、何も言えなかった日も、あなたの気持ちが止まったわけじゃないよ。\n今夜は、ひとつだけ願いを決めて眠ってね。\n-月-",
+    "format": "maxim_spirit",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-11-09T22:15:49.984Z"
+  },
+  {
+    "id": "2026-11-11-evening",
+    "date": "2026-11-11",
+    "slot": "evening",
+    "kind": "value",
+    "text": "【MBTI（16タイプ）別】見た目はクール、恋愛はいちばん甘えんぼなタイプ\n\n3位 INTP 論理学者\n4位 ISTJ 管理者\n5位 ENTJ 指揮官\n6位 INFJ 提唱者\n7位 ESTJ 幹部\n8位 ISFP 冒険家\n9位 INFP 仲介者\n10位 ENTP 討論者\n11位 ISFJ 擁護者\n12位 ESTP 起業家\n13位 ENFJ 主人公\n14位 ESFJ 領事官\n\n1位・2位と15位・16位は、リプ欄に。ふたりきりだと別人になるあなたは何位？\n\nMBTIと生年月日で二人の相性を鑑定↓\n詳しくはプロフィールへ🌙\n-月-",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "maxWeight": 700,
+    "status": "scheduled",
+    "createdAt": "2026-11-09T22:15:49.984Z",
+    "image": "data/x/cards/2026-11-11-evening.png"
+  },
+  {
+    "id": "2026-11-11-evening-reply",
+    "date": "2026-11-11",
+    "slot": "evening",
+    "kind": "value",
+    "text": "1位 INTJ 建築家\n2位 ISTP 巨匠\n\n15位 ENFP 運動家\n16位 ESFP エンターテイナー\n\n甘えんぼ度、あなたは何位だった？\n\nMBTIと生年月日で二人の相性を鑑定↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=ranking\n-月-",
+    "replyTo": "2026-11-11-evening",
+    "format": "gap_rank_reply",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "scheduled",
+    "createdAt": "2026-11-09T22:15:49.984Z",
+    "image": "data/x/cards/2026-11-11-evening-reply.png"
+  },
+  {
+    "id": "2026-11-11-night",
+    "date": "2026-11-11",
+    "slot": "night",
+    "kind": "value",
+    "text": "ISFJ 擁護者は、好きな人からの「ありがとう」を、なかなか受け取れない。\n遠慮じゃなくて、その日を最後まで守れたか、まだ確かめているからだよ。\n会う約束をした日から、順番に書くね。\n\n\n約束の前の夜。\n自分の服はすぐ決まるのに、\n相手が寒くないかで、カイロをかばんに入れたり出したりする。\n前に「あそこ混んでたよね」と言っていたお店を、こっそり候補から外しておく。\n\n\n当日。\n相手の話には何でも笑えるのに、\n自分のことを聞かれると「わたしは何でもいいよ」で返してしまう。\n相手のグラスが空く少し前に、もう店員さんを目で探している。\n\n\n帰り道。\n「今日ありがとうね」と言われて、うれしいはずなのに、\n頭の中では、変なことを言わなかったか一つずつ見直している。\n駅で手を振ったあと、相手が角を曲がるまでその場から動かない。\n\n\n夜の布団の中。\n体はくたくたなのに、なかなか眠れない。\n「今日、楽しかった？」と打っては消して、結局「おやすみ」だけ送る。\n既読がついたのを見て、やっと目を閉じる。\n\n\nISFJが「ありがとう」を受け取りきれないのは、自信がないからじゃなくて、\n相手の一日を、家に着くまで丸ごと大事にしていたから。\n受け取るのが遅いぶん、その人のことを長く想っているんだよ。\n\n\n今夜は、もらった「ありがとう」を、そのまま信じていいからね。\n気づかいは、見返りじゃなくて、好きのかたちそのもの。\nひとりで抱えこまずに、少しは甘えてね。\n\n\nISFJの友達がいたら、そっと見せてあげてね。ほかのタイプの恋の話は、プロフィールにまとめてあるよ。\n-月-",
+    "format": "long_deep",
+    "system": "mbti_love",
+    "purpose": "follow",
+    "maxWeight": 2000,
+    "status": "scheduled",
+    "createdAt": "2026-11-09T22:15:49.984Z"
+  },
+  {
+    "id": "2026-11-11-late",
+    "date": "2026-11-11",
+    "slot": "late",
+    "kind": "value",
+    "text": "「おやすみの延長戦」って、あると思う。\nもう日付が変わるのに、どっちも最後の一通を送れない。\n眠いのに、スタンプで終わるのがもったいなくて、また質問を足す。\nつらいのは、先に切ると気持ちが小さく見える気がするから。\n先に「おやすみ」を言えた夜は、明日の一通目が楽になるよ。\n-月-",
+    "format": "coined_feeling",
+    "system": "psychology",
+    "purpose": "follow",
+    "status": "scheduled",
+    "createdAt": "2026-11-09T22:15:49.984Z"
+  },
+  {
     "id": "article-20261105-1",
     "date": "2026-11-05",
     "slot": "manual",
@@ -9326,6 +9430,31 @@
     "status": "manual",
     "createdAt": "2026-11-05T13:10:38.936676Z",
     "text": "なぜMBTIだけでは、恋愛の相性がわからないのか。\n\n相性表では「最悪」の二人が、なぜか一番長く続いている。\n「理想の組み合わせ」のはずの二人が、3か月で終わってしまう。\nそんなカップルに、心当たりはない？\n\nMBTIが間違っているのではない。\nMBTIは、あなたが自分で選んだ答えでできている。だからわかるのは、表に出る考え方や話し方まで。\n理屈抜きで惹かれてしまう理由や、好きな人の前でだけ出てしまう素顔は、その外にある。\n\n恋愛で二人を本当に左右するのは、相性表の「合う・合わない」ではない。\n好きになったとき、その人がどうなるか。つまり、恋愛の本性だ。\n\nそして本性は、選んだ答えには出ない。\n生年月日のように、あなたが選べなかったものに出る。\n\nだから『月と蓮』は、MBTIに、生年月日から人を読み解く四柱推命と九星気学を加えている。\n月と蓮の相性鑑定は、この3つを重ねて出している。\n\n・MBTI：二人がどう話し、どう考えるか\n・四柱推命：二人がなぜ惹かれ合うのか\n・九星気学：二人がどう支え合い、どんな流れの中にいるのか\n\n「最悪」の二人が長続きするのは、型が真逆でも、本性が深いところで噛み合っているから。\n「理想」の二人が終わるのは、型がぴったりでも、本性がすれ違っているから。\n\n月と蓮は、あなたが選んだ答えだけでなく、選べなかったものまで見る。\n知ってほしいのは、二人の相性の、その先にある恋愛の本性だから。\n\n---\n\nあなたと好きな人の恋愛の本性は、生年月日とMBTIから無料で鑑定できる。\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=article&utm_campaign=why-not-mbti\n\nあなたと好きな人の恋愛の本性は、生年月日とMBTIから鑑定できる。アプリはプロフィールのリンクから。"
+  },
+  {
+    "id": "rank-20261106-g16",
+    "date": "2026-11-06",
+    "slot": "manual",
+    "kind": "value",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "manual",
+    "createdAt": "2026-11-06T09:09:41.867Z",
+    "text": "【MBTI（16タイプ）別】第一印象は近寄りがたい、付き合うといちばん優しいタイプ\n\n3位 ISTP 巨匠\n4位 ENTJ 指揮官\n5位 INFJ 提唱者\n6位 INTP 論理学者\n7位 ESTJ 幹部\n8位 ISFP 冒険家\n9位 ISFJ 擁護者\n10位 INFP 仲介者\n11位 ESTP 起業家\n12位 ENTP 討論者\n13位 ENFJ 主人公\n14位 ESFP エンターテイナー\n\n1位・2位と15位・16位は、リプ欄に。あなたは何位？\n\nMBTIと生年月日で二人の相性を鑑定↓\n詳しくはプロフィールへ🌙\n-月-"
+  },
+  {
+    "id": "rank-20261106-g16-r",
+    "date": "2026-11-06",
+    "slot": "manual",
+    "kind": "promo",
+    "format": "gap_rank",
+    "system": "mbti_love",
+    "purpose": "buzz",
+    "status": "manual",
+    "createdAt": "2026-11-06T09:09:41.867Z",
+    "text": "1位 INTJ 建築家\n2位 ISTJ 管理者\n\n15位 ENFP 運動家\n16位 ESFJ 領事官\n\nあなたは何位だった？\n\nあなたと好きな人の相性↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=ranking&utm_content=rank-20261106-g16\n\n16タイプ別の恋愛の話は、プロフィールにまとめてあるよ。\n\n-月-",
+    "replyTo": "rank-20261106-g16"
   },
   {
     "id": "tree-20261104-10",
@@ -9551,30 +9680,5 @@
     "createdAt": "2026-11-04T07:16:56.482Z",
     "text": "1位：INFP（仲介者）\n\nINFPが「恋をすると愛が重くなりがち」と言われる理由は、\n\n「心のまんなかに、『好きな人のためだけの特等席』を作ってしまうから」。\n\n一度好きになると、その人が心のほとんどを占めてしまう。\n\n相手の言葉ひとつで一日の気分が変わるくらい、まっすぐに想ってしまうんです。\n\nそれは決して、相手を縛りたいわけではありません。\n\nただ、ひとりの人を、心のすべてで愛そうとしているんです。\n\n重く見えるのは、それだけ本気で人を愛せる証拠なんですよね。\n\nあなたと好きな人の相性はここで↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=trend&utm_content=trend-20261104-r8\n\n16タイプ別の恋愛の話は、プロフィールにまとめてあるよ。",
     "replyTo": "trend-20261104-r8"
-  },
-  {
-    "id": "rank-20261106-g16",
-    "date": "2026-11-06",
-    "slot": "manual",
-    "kind": "value",
-    "format": "gap_rank",
-    "system": "mbti_love",
-    "purpose": "buzz",
-    "status": "manual",
-    "createdAt": "2026-11-06T09:09:41.867Z",
-    "text": "【MBTI（16タイプ）別】第一印象は近寄りがたい、付き合うといちばん優しいタイプ\n\n3位 ISTP 巨匠\n4位 ENTJ 指揮官\n5位 INFJ 提唱者\n6位 INTP 論理学者\n7位 ESTJ 幹部\n8位 ISFP 冒険家\n9位 ISFJ 擁護者\n10位 INFP 仲介者\n11位 ESTP 起業家\n12位 ENTP 討論者\n13位 ENFJ 主人公\n14位 ESFP エンターテイナー\n\n1位・2位と15位・16位は、リプ欄に。あなたは何位？\n\nMBTIと生年月日で二人の相性を鑑定↓\n詳しくはプロフィールへ🌙\n-月-"
-  },
-  {
-    "id": "rank-20261106-g16-r",
-    "date": "2026-11-06",
-    "slot": "manual",
-    "kind": "promo",
-    "format": "gap_rank",
-    "system": "mbti_love",
-    "purpose": "buzz",
-    "status": "manual",
-    "createdAt": "2026-11-06T09:09:41.867Z",
-    "text": "1位 INTJ 建築家\n2位 ISTJ 管理者\n\n15位 ENFP 運動家\n16位 ESFJ 領事官\n\nあなたは何位だった？\n\nあなたと好きな人の相性↓\nhttps://www.tsuki-to-ren.com/?utm_source=x&utm_medium=ranking&utm_content=rank-20261106-g16\n\n16タイプ別の恋愛の話は、プロフィールにまとめてあるよ。\n\n-月-",
-    "replyTo": "rank-20261106-g16"
   }
 ]

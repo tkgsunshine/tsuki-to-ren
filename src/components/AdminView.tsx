@@ -12,7 +12,8 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 // *Sessions = ブラウザのセッションで最初の1回だけ数えた「人数」（流れの表はこちらで割る）。salesYen = 本番の購入額（円）
 const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'lockViewSessions', 'premiumViewsPair', 'premiumViewsMail', 'premiumViewsMailPair',
   'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds',
-  'regViews', 'regClicks', 'regSubmits', 'authOpens'] as const; // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
+  'regViews', 'regClicks', 'regSubmits', 'authOpens',
+  'refSends', 'refFriends'] as const; // 友達紹介: 招待URLを送った回数（LINE・コピー）／招待URLから占ったお友達（数えた人） // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
 type FullCounts = Record<Metric, number>;
@@ -551,11 +552,12 @@ function DailyTable({ days }: { days: DayRow[] }) {
     ['pairCheckouts', '支払い画面 買い切り'], ['checkouts', '支払い画面 月額'], ['pairs', '購入 買い切り'], ['premiums', '購入 月額'],
     ['salesYen', '売上'], ['aiCalls', 'AIチャット'],
     ['toolUses', 'ツール使用'], ['toolCtas', 'ツール→鑑定へ'], ['columnCtaMids', 'コラム途中→鑑定へ'], ['columnCtaEnds', 'コラム最後→鑑定へ'],
+    ['refSends', '紹介を送った'], ['refFriends', '紹介で占った友達'],
   ];
   return (
     <div style={c.card}>
       <h2 style={c.h2}>日ごとの数字</h2>
-      <div style={{ ...c.muted, marginBottom: 8 }}>「有料案内（回）」は開いた回数、「案内を見た人」は1回の訪問で1人。「うち買い切りから」は、買い切りで見られる項目のロックから案内を開いた回数です。</div>
+      <div style={{ ...c.muted, marginBottom: 8 }}>「有料案内（回）」は開いた回数、「案内を見た人」は1回の訪問で1人。「うち買い切りから」は、買い切りで見れる項目のロックから案内を開いた回数です。</div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ ...c.table, minWidth: 640 }}>
           <thead>
@@ -776,10 +778,11 @@ function ShareTable({ rows, total }: { rows: [string, number][]; total: number }
   );
 }
 
-// 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる）
+// 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる／一昨日 = 1日分、2日前で終わる）
 const PERIODS = [
   { label: '今日', days: 1, offset: 0 },
   { label: '昨日', days: 1, offset: 1 },
+  { label: '一昨日', days: 1, offset: 2 },
   { label: '7日', days: 7, offset: 0 },
   { label: '30日', days: 30, offset: 0 },
   { label: '90日', days: 90, offset: 0 },
@@ -1003,6 +1006,7 @@ export default function AdminView() {
               <Tile label="鑑定" value={totals.fortunes} sub={`鑑定した人 ${totals.fortuneSessions}（訪問の ${pct(totals.fortuneSessions, totals.visits)}）`} />
               <Tile label="会員登録（期間内）" value={newMembers} sub={`計測分 ${totals.signups} 件`} />
               <Tile label="共有" value={totals.shares} sub="X・LINE・リンク・画像" />
+              <Tile label="友達紹介" value={totals.refSends} sub={`送った回数（LINE・コピー）／紹介で占ったお友達 ${totals.refFriends} 人`} />
               <Tile label="ツール使用" value={totals.toolUses} sub={`鑑定へ進んだ ${totals.toolCtas} 回`} />
               <Tile label="コラム→鑑定へ" value={totals.columnCtaMids + totals.columnCtaEnds} sub={`途中 ${totals.columnCtaMids} 回・最後 ${totals.columnCtaEnds} 回`} />
               <Tile label="買い切り購入（期間内）" value={totals.pairs} sub={`支払い画面へ ${totals.pairCheckouts} 回`} />

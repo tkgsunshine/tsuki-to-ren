@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Gift } from 'lucide-react';
 import { cleanCode, inviteText, inviteUrl } from '../services/referral';
 import type { ReferralStatus } from '../services/referral';
+import { trackRefSend } from '../services/analytics';
 
 // 友達紹介の欄（恋愛運MAX日のロックの下に出す）。src/services/referral.ts / api/_lib/referral.js
 // 送る側: 招待URLとコードを出し、LINE・コピーで送る。未登録でも送れる（2026-11-09 TAKASHI）。
@@ -36,6 +37,7 @@ export function ReferralInvite({ status, loading, onOpen }: {
 
   const copy = async () => {
     if (!code) return;
+    trackRefSend();
     try {
       await navigator.clipboard.writeText(inviteText(code));
       setCopied(true);
@@ -55,7 +57,7 @@ export function ReferralInvite({ status, loading, onOpen }: {
       </p>
       <ul style={{ ...text, paddingLeft: '1.2rem' }}>
         <li>恋愛運MAX日の日付</li>
-        <li>返信が遅いときの、おすすめの返し方</li>
+        <li>返信が遅いときの返し方（トリセツ）</li>
         <li>生まれ持った星から見た二人の相性</li>
       </ul>
       <p style={{ ...text, fontSize: '0.76rem' }}>お友達にも、恋愛運MAX日の直近の1日をプレゼント。</p>
@@ -70,7 +72,7 @@ export function ReferralInvite({ status, loading, onOpen }: {
             <div style={{ fontSize: '1.3rem', letterSpacing: '0.25em', color: '#f5d77a', fontWeight: 'bold', fontFamily: 'monospace' }}>{code}</div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button type="button" style={lineBtn} onClick={() => window.open(`https://line.me/R/msg/text/?${encodeURIComponent(inviteText(code))}`)}>LINEで送る</button>
+            <button type="button" style={lineBtn} onClick={() => { trackRefSend(); window.open(`https://line.me/R/msg/text/?${encodeURIComponent(inviteText(code))}`); }}>LINEで送る</button>
             <button type="button" style={ghostBtn} onClick={copy}>{copied ? 'コピーしました' : 'リンクをコピー'}</button>
           </div>
           <p style={{ ...text, fontSize: '0.72rem', color: '#bfb8a8', wordBreak: 'break-all' }}>{inviteUrl(code)}</p>

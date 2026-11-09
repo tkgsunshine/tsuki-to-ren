@@ -679,7 +679,7 @@ function App() {
       }
     } else if (!mBirth && (initialRoute.tab === 'home' || initialRoute.tab === 'fortune') && !initialRoute.legal && !initialRoute.compatibilityPair) {
       // 共有リンク（?shared= / ?from=share）を開いたときは、自分の結果を裏で用意するだけで画面は移さない
-      // （移すと共有された結果が見えなくなる）。自分の結果は「鑑定結果」タブで見られる
+      // （移すと共有された結果が見えなくなる）。自分の結果は「鑑定結果」タブで見れる
       const restoreInBackground = !!(sharedTeaser || sharedView);
       // 前回の結果を戻すのは、トップ（/）と鑑定結果（/result）を開いたときだけ。コラム・日柱ページ・/about などを開いたときは、そのページを見せる。
       // 生年月日だけのリンク（日柱ページからの ?mb=）でも戻さず、入力画面のままにする（生年月日は UnifiedInputView が入れる）
@@ -774,8 +774,8 @@ function App() {
       params.set('x-vercel-protection-bypass', 'fosYc2r3CdMOALx4Jk0mD0fAz0tzUMs2');
     }
 
-    // 共有リンクは誰でも見られるので、名前（ニックネーム）と点数だけを入れ、生年月日などは入れない（開いた人には api/share.js が要約を見せる）
-    // 保存した鑑定結果のID。開いた人は普段の結果画面で見られる
+    // 共有リンクは誰でも見れるので、名前（ニックネーム）と点数だけを入れ、生年月日などは入れない（開いた人には api/share.js が要約を見せる）
+    // 保存した鑑定結果のID。開いた人は普段の結果画面で見れる
     if (savedShare && savedShare.result === tsukiResult) params.set('r', savedShare.id);
     if (myName && myName !== 'あなた') params.set('mn', myName.slice(0, 8));
     if (mode === 'match') {
@@ -1017,7 +1017,7 @@ function App() {
         showAlert(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
         return;
       }
-      showConfirm(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n\n解放は生年月日で決まるため、生年月日を変えると、変更後のお相手は解放されていない状態になります（もう一度購入が必要です）。\n元の生年月日（${before?.birth.replace(/-/g, '/')}）の購入はなくならず、元に戻せばまた見られます。\n\n名前・16タイプ・性別だけの変更なら、解放はそのままです。\n\n本当に生年月日を変えますか？`, { okLabel: 'それでも変更する', danger: true }).then(ok => {
+      showConfirm(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n\n解放は生年月日で決まるため、生年月日を変えると、変更後のお相手は解放されていない状態になります（もう一度購入が必要です）。\n元の生年月日（${before?.birth.replace(/-/g, '/')}）の購入はなくならず、元に戻せばまた見れます。\n\n名前・16タイプ・性別だけの変更なら、解放はそのままです。\n\n本当に生年月日を変えますか？`, { okLabel: 'それでも変更する', danger: true }).then(ok => {
         if (!ok) return;
         confirmedUnlockEditRef.current = true;
         try { saveEditPartner(); } finally { confirmedUnlockEditRef.current = false; }
@@ -1637,7 +1637,7 @@ function App() {
   const chatOpponentName = chatTarget === null
     ? (mode === 'match' ? oppName : undefined)
     : (chatTarget !== 'pick' && chatTarget !== 'self' ? chatTarget.name : undefined);
-  // 今日の相性は、無料だとお相手ごとに見られる日数が決まっている。今の鑑定結果と同じお相手ならその判定を使い、
+  // 今日の相性は、無料だとお相手ごとに見れる日数が決まっている。今の鑑定結果と同じお相手ならその判定を使い、
   // 別のお相手はチャットのために「見た日」を数えないよう、プレミアム以外では点数をAIに渡さない
   const chatHideDailyScore = chatTarget === null
     ? dailyScoreHidden
@@ -1745,7 +1745,7 @@ function App() {
                   afterSubmit={pendingRef ? (
                     // 友達紹介: 招待URLで来た人には一言、そうでなければ目立たない「招待コードをお持ちの方」
                     <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#f5d77a', lineHeight: 1.7, margin: 0 }}>
-                      🎁 お友達からの招待です。占い終わると、恋愛運MAX日の直近の1日が見られます
+                      🎁 お友達からの招待です。占い終わると、恋愛運MAX日の直近の1日が見れます
                     </p>
                   ) : !refSent ? (
                     <ReferralCodeEntry
@@ -3038,9 +3038,9 @@ function App() {
                             <button
                               type="button"
                               onClick={() => {
-                                // 買い切りで解放したお相手は、消す前にはっきり知らせる（購入は消えない＝同じ生年月日で占えばまた見られる）
+                                // 買い切りで解放したお相手は、消す前にはっきり知らせる（購入は消えない＝同じ生年月日で占えばまた見れる）
                                 const confirmText = partner.unlocked
-                                  ? `⚠️ ${san(partner.name)}は、買い切りプランで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見られます。\n\n本当に削除しますか？`
+                                  ? `⚠️ ${san(partner.name)}は、買い切りプランで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見れます。\n\n本当に削除しますか？`
                                   : `${san(partner.name)}の保存データを削除しますか？`;
                                 showConfirm(confirmText, { okLabel: partner.unlocked ? 'それでも削除する' : '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
