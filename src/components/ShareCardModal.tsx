@@ -12,7 +12,7 @@ interface ShareCardModalProps {
   result: FortuneResult;
   /** お相手ありの鑑定で「自分の運勢」タブに出す、自分だけの鑑定結果（一人で占ったときと同じもの） */
   soloResult?: FortuneResult | null;
-  /** 「自分の運勢」タブのリンクに付ける、保存した自分だけの結果のID（開いた人は普段の結果画面で見られる） */
+  /** 「自分の運勢」タブのリンクに付ける、保存した自分だけの結果のID（開いた人は普段の結果画面で見れる） */
   soloShareId?: string;
   myName: string;
   opponentName?: string;

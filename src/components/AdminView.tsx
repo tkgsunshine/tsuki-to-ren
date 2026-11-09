@@ -555,7 +555,7 @@ function DailyTable({ days }: { days: DayRow[] }) {
   return (
     <div style={c.card}>
       <h2 style={c.h2}>日ごとの数字</h2>
-      <div style={{ ...c.muted, marginBottom: 8 }}>「有料案内（回）」は開いた回数、「案内を見た人」は1回の訪問で1人。「うち買い切りから」は、買い切りで見られる項目のロックから案内を開いた回数です。</div>
+      <div style={{ ...c.muted, marginBottom: 8 }}>「有料案内（回）」は開いた回数、「案内を見た人」は1回の訪問で1人。「うち買い切りから」は、買い切りで見れる項目のロックから案内を開いた回数です。</div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ ...c.table, minWidth: 640 }}>
           <thead>

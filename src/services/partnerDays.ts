@@ -1,6 +1,6 @@
 import { getFirebaseAuth } from './firebase';
 
-// 同じお相手（同じ誕生日）との「今日の相性」を無料で見られる日数（api/_lib/partner-days.js がサーバーで数える）。
+// 同じお相手（同じ誕生日）との「今日の相性」を無料で見れる日数（api/_lib/partner-days.js がサーバーで数える）。
 // ログインしていない人はこの端末だけで数え、1日分まで。続きは無料会員登録で（登録後はサーバーで7日分）。
 
 export interface PartnerAccess {

@@ -20,7 +20,7 @@ const benefits = [
     shotAlt: '7日間・月ごと・年ごとの相性の折れ線グラフの画面',
     // 画面イメージは縦長なので、10年先（年次）のグラフのところを見せる
     shotPos: '50% 54%',
-    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの7日間と月ごとの波も見られるので、近い予定から先の人生まで、見すえて動けますよ。'
+    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの7日間と月ごとの波も見れるので、近い予定から先の人生まで、見すえて動けますよ。'
   },
   {
     Icon: Send,
@@ -47,7 +47,7 @@ const benefits = [
     shot: '/assets/premium/torisetsu.webp',
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
     pairNote: 'pairAll',
-    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、全部見られます。'
+    body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、全部見れます。'
   },
   {
     Icon: Shirt,
@@ -56,7 +56,7 @@ const benefits = [
     shot: '/assets/premium/attraction.webp',
     shotAlt: 'お相手が惹かれるファッションとドキッとさせる仕草の画面',
     pairNote: 'pairAll',
-    body: 'あの人の生まれ持った星と性格のタイプから、惹かれやすい色・服装・コーデの一工夫と、避けたい服装が絵つきで分かります。会ったときにドキッとさせる仕草も全部見られるので、次のデートの準備に使ってくださいね。'
+    body: 'あの人の生まれ持った星と性格のタイプから、惹かれやすい色・服装・コーデの一工夫と、避けたい服装が絵つきで分かります。会ったときにドキッとさせる仕草も全部見れるので、次のデートの準備に使ってくださいね。'
   },
   {
     Icon: Bell,
@@ -187,7 +187,7 @@ const SampleBadge: React.FC = () => (
   </span>
 );
 
-// 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見られる。
+// 画面イメージの拡大表示。スマホの画面と同じ幅・高さの枠の中を、アプリと同じようにスクロールして全部見れる。
 // 枠より長い画像のときだけ、開いた直後に少し動かして見せ、下に「スクロール」の案内を出す（下まで見たら消える）
 const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({ src, alt, onClose }) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -336,7 +336,7 @@ const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({
               opacity: scrolled ? 0.75 : 1
             }}>
               <ChevronDown size={15} />
-              {scrolled ? '続きがあります' : 'スクロールで全部見られます'}
+              {scrolled ? '続きがあります' : 'スクロールで全部見れます'}
             </span>
           </div>
         )}
@@ -430,7 +430,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const showPlans = Boolean(pair) && !isSubscribed;
   // 買い切りボタンの「〇〇さんだけ」。名前が空のとき（san() が「お相手」を返す）は「このお相手だけ」
   const pairWho = !pair || pair.name === 'お相手' ? 'このお相手' : pair.name;
-  // 買い切りで「今日」の内容が見られるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
+  // 買い切りで「今日」の内容が見れるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
   const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 54%', d: 'この先10年の年ごとの流れと、明日からの7日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
@@ -514,7 +514,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const faqs = [
     ...(pair ? [{
       q: '買い切り（680円）と月額の違いは？',
-      a: `買い切りは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見られます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      a: `買い切りは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見れます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
@@ -667,7 +667,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   お相手1人だけなら ¥680/買い切りも
                 </p>
                 <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
-                  気になる人1人のトリセツ・深層鑑定・相性グラフを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見られます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
+                  気になる人1人のトリセツ・深層鑑定・相性グラフを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見れます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
                 </p>
                 <button
                   type="button"
@@ -867,9 +867,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   {pairNote && (
                     <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
                       {pairNote === 'pairAll'
-                        ? `¥680の買い切りでも見られます（${pair ? pairWho : "お相手1人"}だけ）`
+                        ? `¥680の買い切りでも見れます（${pair ? pairWho : "お相手1人"}だけ）`
                         : pairNote === 'pairLucky'
-                          ? `¥680の買い切りでも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見られます`
+                          ? `¥680の買い切りでも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見れます`
                           : '¥680の買い切りは購入日だけ'}
                     </span>
                   )}

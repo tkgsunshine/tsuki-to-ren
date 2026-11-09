@@ -1553,7 +1553,7 @@ body.chat-keyboard-open .chat-partner-picker {
   .app-header.is-opening > div:not(.opening-glow) { animation: none; }
 }
 
-/* プレミアム案内の画面イメージ拡大: 「スクロールで全部見られます」の矢印を上下にはねさせる */
+/* プレミアム案内の画面イメージ拡大: 「スクロールで全部見れます」の矢印を上下にはねさせる */
 @keyframes shot-scroll-hint {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(5px); }
