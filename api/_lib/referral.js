@@ -5,6 +5,8 @@ import { clientIp } from './inquiry.js';
 import { NOTICES } from './notices.js';
 import { USER_DATA } from './user-data.js';
 import { partnerKey } from './partner-days.js';
+import { DAILY, REF_FRIEND_METRIC } from './analytics.js';
+import { FieldValue } from 'firebase-admin/firestore';
 
 // 友達紹介（2026-11-08 TAKASHI）。会員が、いま見ているお相手との結果から招待URL（/?ref=コード）を友達に送り、
 // 友達がそこから鑑定すると、そのお相手との結果の一部が開く（REFERRALS_TO_UNLOCK 人で、ずっと）:
@@ -219,6 +221,12 @@ export default async function handler(req, res, deps = {}) {
       const birth = BIRTH_RE.test(String(body.birth || '')) ? String(body.birth) : null;
       const uid = await optionalUid(req, auth);
       const r = await completeReferral(db, { code, visitor, birth, uid, ipKey: hash('ip', clientIp(req) || 'unknown'), now });
+      // /admin の「紹介で占ったお友達」。Preview（PRごとの確認用URL）の操作は本番の数字に入れない（api/track.js と同じ）
+      const env = deps.vercelEnv ?? process.env.VERCEL_ENV;
+      if (r.counted && (!env || env === 'production') && !deps.skipMetrics) {
+        const day = jstDate(now);
+        try { await db.collection(DAILY).doc(day).set({ date: day, [REF_FRIEND_METRIC]: FieldValue.increment(1) }, { merge: true }); } catch (e) { console.error('⚠️ Referral metric failed:', e?.message); }
+      }
       if (!r.ok) {
         const message = r.reason === 'unknown' ? 'この招待コードは見つかりませんでした'
           : r.reason === 'self' ? 'ご自身の招待コードは使えません'

@@ -184,3 +184,16 @@ test('after signing up, the guest\'s code and unlock move to the member', async 
   await completeReferral(db, { code, visitor: 'visitor-zzzzzzzzzzzz3', ipKey: 'ip' });
   assert.equal(db.docs['referrals/u1'].partners[P1].count, 2);
 });
+
+test('a counted friend is added to the day\'s numbers on /admin (production only)', async () => {
+  const db = mockDb();
+  const { code } = await ensureCode(db, 'u1', P1);
+  let res = mockRes();
+  await referral(post({ op: 'complete', code, visitor: V1 }), res, { db, auth, vercelEnv: 'production' });
+  const day = Object.keys(db.docs).find((k) => k.startsWith('analyticsDaily/'));
+  assert.ok(day && db.docs[day].refFriends);
+  const before = JSON.stringify(db.docs[day]);
+  res = mockRes();
+  await referral(post({ op: 'complete', code, visitor: V2 }), res, { db, auth, vercelEnv: 'preview' });
+  assert.equal(JSON.stringify(db.docs[day]), before);
+});
