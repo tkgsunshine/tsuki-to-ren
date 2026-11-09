@@ -21,6 +21,8 @@ import { FieldValue } from 'firebase-admin/firestore';
 // 書くのはサーバーだけ（firestore.rules で端末からは読み書き不可）。友達の生年月日やIPもそのまま保存しない。
 // 自分で別のブラウザから鑑定して開けることは防ぎきれない（開く中身を小さくして許容。2026-11-08 TAKASHI了承）。
 // 防ぐのは、同じ会員のログインのまま・プロフィールと同じ生年月日・同じ端末の数え直し。
+// 2026-11-10 TAKASHI「小さい対策だけ足す」: お相手と同じ生年月日・送った人と同じ回線（IP）からの分も数えない。
+// 回線は、送った人が結果を開いたときのIPの記号（referralCodes.ownerIp）と比べる。同じWi-Fiで一緒に占った友達も数えなくなる。
 export const REFERRAL_CODES = 'referralCodes';
 export const REFERRALS = 'referrals';
 export const REFERRAL_LIMITS = 'referralLimits';
@@ -130,6 +132,8 @@ export async function completeReferral(db, { code, visitor, birth, uid, ipKey, n
   if (!owner || !pk) return { ok: false, reason: 'unknown' };
   if (uid && uid === owner) return { ok: false, reason: 'self' };
   if (visitor && guestOwner(visitor) === owner) return { ok: false, reason: 'self' }; // the guest's own browser
+  if (owned.ownerIp && ipKey && owned.ownerIp === ipKey) return { ok: false, reason: 'self' }; // the sender's own connection
+  if (birth && partnerKey(birth) === pk) return { ok: false, reason: 'self' }; // read as the partner (the sender typing the partner's birth date)
   if (birth) {
     if (owned.ownerBirth && owned.ownerBirth === birthKey(birth)) return { ok: false, reason: 'self' };
     if (!isGuestOwner(owner)) {
@@ -210,7 +214,16 @@ export default async function handler(req, res, deps = {}) {
       if (!BIRTH_RE.test(oppBirth)) return res.status(400).json({ status: 'error', message: 'Invalid oppBirth' });
       const myBirth = BIRTH_RE.test(String(body.myBirth || '')) ? String(body.myBirth) : undefined;
       const fromGuest = visitor && !isGuestOwner(owner) ? guestOwner(visitor) : undefined;
-      return res.status(200).json({ status: 'ok', ...(await ensureCode(db, owner, partnerKey(oppBirth), { now, rand: deps.rand, myBirth, fromGuest })) });
+      const st = await ensureCode(db, owner, partnerKey(oppBirth), { now, rand: deps.rand, myBirth, fromGuest });
+      // The sender's connection, so a reading from the same connection is not counted (written only when it changed)
+      if (st.code) {
+        try {
+          const ownerIp = hash('ip', clientIp(req) || 'unknown');
+          const codeRef = db.collection(REFERRAL_CODES).doc(st.code);
+          if ((await codeRef.get()).data()?.ownerIp !== ownerIp) await codeRef.set({ ownerIp }, { merge: true });
+        } catch (e) { console.error('⚠️ Referral owner IP failed:', e?.message); }
+      }
+      return res.status(200).json({ status: 'ok', ...st });
     }
 
     if (body.op === 'complete') {
