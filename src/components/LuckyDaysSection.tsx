@@ -212,7 +212,7 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
               🎁 お友達を紹介して開く
             </button>
             <ReferralInvite status={referral.status} loading={referral.loading} onOpen={referral.onOpen} />
-            {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。恋愛運MAX日の直近の1日が見られます" />}
+            {referral.showCodeEntry && <ReferralCodeEntry onSubmit={referral.onRedeem} doneText="招待コードを受け付けました。恋愛運MAX日の直近の1日が見れます" />}
           </>
         )}
         {!locked && soloOpen && !isSubscribed && !pairOpen && (

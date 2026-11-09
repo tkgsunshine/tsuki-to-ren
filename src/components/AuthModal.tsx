@@ -291,7 +291,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                 ) : (
                   <form onSubmit={handleEmailSignIn} style={{ marginTop: '0.5rem' }}>
                     <p style={{ fontSize: '0.75rem', color: '#a9a49a', lineHeight: 1.7, margin: '0 0 0.6rem' }}>
-                      今は、購入のときに自動で作られたアカウントで見ています。購入したときのメールアドレスでログインすると、購入した鑑定がそのアカウントに引き継がれ、ほかの端末でも見られて、毎朝の運勢メールも受け取れます。
+                      今は、購入のときに自動で作られたアカウントで見ています。購入したときのメールアドレスでログインすると、購入した鑑定がそのアカウントに引き継がれ、ほかの端末でも見れて、毎朝の運勢メールも受け取れます。
                     </p>
                     <input
                       type="email"

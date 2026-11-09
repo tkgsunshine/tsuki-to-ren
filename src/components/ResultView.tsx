@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { trackLockView, trackRegStep } from '../services/analytics';
-import { Lock, Calendar, Download, X, Heart, Smartphone, Share } from 'lucide-react';
+import { Calendar, Download, X, Heart, Smartphone, Share } from 'lucide-react';
 import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
@@ -254,7 +254,7 @@ const renderDeepTopicText = (raw: string): React.ReactNode => {
   return blocks;
 };
 
-// 見られない人には、ぼかす文章として本物の代わりにダミー文を渡す。
+// 見れない人には、ぼかす文章として本物の代わりにダミー文を渡す。
 // ぼかしは見た目だけで、ブラウザの「検証」を開くと下の文字が読めてしまうため。
 const LOCKED_FILLER = 'ここはプレミアム会員の方だけが読める鑑定文です。登録すると、二人に合わせた本文が表示されます。';
 const lockedText = (text: string | undefined, locked: boolean): string => {
@@ -321,7 +321,7 @@ const splitAdvicePreview = (text: string | undefined): { head: string; restLengt
   const cut = ADVICE_PREVIEW_CHARS;
   return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
 };
-// 7日間・月次・年次の点数も、見られない人にはダミーの値で描く（本物の点数を画面に置かない）
+// 7日間・月次・年次の点数も、見れない人にはダミーの値で描く（本物の点数を画面に置かない）
 const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
 
@@ -458,7 +458,7 @@ const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
   );
 };
 
-// 同じお相手との「今日の相性」を無料で見られる日数の状態（App.tsx が api/stripe/partner で数える）。null = 制限なし。
+// 同じお相手との「今日の相性」を無料で見れる日数の状態（App.tsx が api/stripe/partner で数える）。null = 制限なし。
 export type PartnerLock = { status: 'checking' | 'free' | 'locked'; daysLeft: number; guest: boolean } | null;
 export type PairUnlock = { unlocked: boolean; today: boolean } | null;
 export const LOCK_WORD = '続きを見る';
@@ -1160,7 +1160,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     return () => io.disconnect();
   }, [isRegistered, activeResult]);
 
-  // 無料会員登録で見られるもの（登録の箱に出す）
+  // 無料会員登録で見れるもの（登録の箱に出す）
   // 深層鑑定のうち、プレミアム限定（惹かれ合うポイント・二人のこれから）は登録しても開かないので出さない
   const lockedTopicNames = detailedTopics
     .filter((t) => !(hasOpponent && (t.title.includes('惹かれ合うポイント') || t.title.includes('二人のこれから'))))
@@ -1532,7 +1532,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </linearGradient>
                   </defs>
                   <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="rgba(10,12,28,0.55)" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
-                  {/* 見られない日はゲージを描かない（メールの today-locked.png と同じ。ゲージの長さで点数が読めないように） */}
+                  {/* 見れない日はゲージを描かない（メールの today-locked.png と同じ。ゲージの長さで点数が読めないように） */}
                   {!opts.hidden && <circle cx={opts.size / 2} cy={opts.size / 2} r={r} fill="none" stroke={`url(#${opts.gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * clamp(opts.score) * ringProgress) / 100} ${c}`} style={{ opacity: ringProgress > 0 ? 1 : 0 }} />}
                 </svg>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -1580,7 +1580,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   glow: 'rgba(156, 198, 216, 0.55)',
                   icon: <MoonPhaseMark size={18} tint="blue" />,
                   label: todayLabel,
-                  caption: dailyLocked ? 'プレミアム限定' : '毎日変わる',
+                  // 見れない日は丸の下に何も書かない（案内は下の箱に。2026-11-09 TAKASHI）
+                  caption: dailyHidden ? '' : '毎日変わる',
                   numColor: '#e8f3f8',
                   hidden: dailyHidden
                 })}
@@ -1603,7 +1604,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>}
 
               {/* 今日の流れ: 枠で囲まず、光る天気アイコン＋グラデーション文字で見せる。
-                  見られない日は出さない（本当の点数から決まるので、良し悪しがわかってしまう。2026-11-09 TAKASHI） */}
+                  見れない日は出さない（本当の点数から決まるので、良し悪しがわかってしまう。2026-11-09 TAKASHI） */}
               {!dailyHidden && <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem', marginTop: '0.1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', width: '100%' }}>
                   <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226,192,116,0.5))' }} />
@@ -1633,19 +1634,19 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {partnerLock.guest
                     ? <>明日からも見るなら、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください</>
                     : partnerLock.daysLeft > 0
-                      ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見られます</>
-                      : <>{partnerCall}との今日の相性を無料で見られるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見られます</>}
+                      ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見れます</>
+                      : <>{partnerCall}との今日の相性を無料で見れるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見れます</>}
                 </div>
               )}
               {dailyLocked && partnerLock && (
                 <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(226, 192, 116, 0.08)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
                   <div style={{ fontSize: '0.8rem', color: '#e8e3d8', lineHeight: 1.65 }}>
                     {partnerLock.guest
-                      ? <>無料会員登録で{partnerCall}との今日の相性を解放</>
-                      : <>{partnerCall}との無料の期間が終わりました。<br />二人の毎日の点数と助言は、プレミアム（月額980円）でずっと見られます。</>}
+                      ? <>{partnerCall}との今日の相性は、<strong style={{ color: '#f2e2b3' }}>無料会員</strong>になるとすぐに見れます。<br />同じお相手なら<strong style={{ color: '#f2e2b3' }}>7日間</strong>、毎日の点数と助言をチェックできます。</>
+                      : <>{partnerCall}との今日の相性を無料で見れる<strong style={{ color: '#f2e2b3' }}>7日間</strong>が終わりました。<br />プレミアムなら、毎日の点数と助言に加えて、<strong style={{ color: '#f2e2b3' }}>10年先までの二人の流れ</strong>も見れます。</>}
                   </div>
                   <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); if (partnerLock.guest) handleScrollToRegister(); else handleLockTagClick(e); }}>
-                    <Lock size={11} /> {partnerLock.guest ? '無料会員登録' : 'プレミアムで今日の相性を見る'}
+                    {partnerLock.guest ? '無料登録して今日の相性を見る' : '今日の相性を見る（月額980円）'}
                   </button>
                   {!partnerLock.guest && canBuyPair && (
                     <button
@@ -2805,7 +2806,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
-            {/* 4.5 ドキッとさせる仕草（1つ目は誰でも見られ、2つ目以降は月額か、そのお相手の買い切りで開く。中身は fortuneEngine の getAttractionStyle） */}
+            {/* 4.5 ドキッとさせる仕草（1つ目は誰でも見れ、2つ目以降は月額か、そのお相手の買い切りで開く。中身は fortuneEngine の getAttractionStyle） */}
             {activeResult.opponentTorisetsu.attraction && activeResult.opponentTorisetsu.attraction.gestures.length > 0 && (() => {
               const gs = activeResult.opponentTorisetsu.attraction.gestures;
               const locked = !deepOpen;
@@ -2928,13 +2929,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
             </div>
 
-            {/* 7.5 お相手が惹かれるファッション（イメージと系統は誰でも見られ、色・服装・一工夫・NGは月額か、そのお相手の買い切りで開く） */}
+            {/* 7.5 お相手が惹かれるファッション（イメージと系統は誰でも見れ、色・服装・一工夫・NGは月額か、そのお相手の買い切りで開く） */}
             {activeResult.opponentTorisetsu.attraction && (() => {
               const at = activeResult.opponentTorisetsu.attraction;
               const locked = !deepOpen;
               const lockStyle: React.CSSProperties = { filter: locked ? 'blur(4.5px)' : 'none', userSelect: locked ? 'none' : 'auto', opacity: locked ? 0.65 : 1 };
               const label: React.CSSProperties = { color: '#f6c6d8', fontWeight: 'bold' };
-              // 絵と色見本（古い保存データには key が無いので、そのときは文字だけ）。見られない人には絵も出さない（ぼかしの下で中身がわからないように）
+              // 絵と色見本（古い保存データには key が無いので、そのときは文字だけ）。見れない人には絵も出さない（ぼかしの下で中身がわからないように）
               const vis = at.key ? ATTRACTION_VISUALS[at.key] : undefined;
               const myIsMale = activeResult.myGender === 'male';
               return (
@@ -3160,7 +3161,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ fontSize: '0.74rem', color: '#e8e3d8', lineHeight: 1.6 }}>
                       <strong style={{ color: '#f2e2b3' }}>{partnerCall}のことだけ知りたい方は</strong><br />
-                      トリセツ・深層鑑定・6つの相性グラフを、{PAIR_PRICE_LABEL}の1回払いでずっと読めます。買った日は、今日の相性とLINEの助言も全部見られます。
+                      トリセツ・深層鑑定・6つの相性グラフを、{PAIR_PRICE_LABEL}の1回払いでずっと読めます。買った日は、今日の相性とLINEの助言も全部見れます。
                     </div>
                     <button
                       type="button"
