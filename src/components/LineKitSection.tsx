@@ -65,9 +65,24 @@ export const LineKitSection: React.FC<Props> = ({ kit, isSubscribed, onLockClick
   const sectionTitle: React.CSSProperties = { fontWeight: 'bold', color: '#d9c8ef', fontSize: '0.78rem', marginTop: '0.2rem' };
   const bubble: React.CSSProperties = { background: 'rgba(0,0,0,0.3)', padding: '0.45rem 0.6rem', borderRadius: '8px', color: '#f7f2fb' };
 
+  // 場面の見出しは本文と見分けやすいように、番号つきのゴールドの見出しにする（「（話しかけるきっかけ）」のような補足は小さく）
+  const sceneNo = (key: string) => kit.scenes.findIndex(sc => sc.key === key) + 1;
+  const renderSceneLabel = (s: LineKit['scenes'][number]) => {
+    const m = s.label.match(/^(.*?)（(.*)）$/);
+    const main = m ? m[1] : s.label;
+    const sub = m ? m[2] : '';
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+        <span style={{ flexShrink: 0, width: '1.25rem', height: '1.25rem', borderRadius: '50%', background: 'linear-gradient(135deg, #f2d98f, #c9a24e)', color: '#2a1f3d', fontSize: '0.68rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif' }}>{sceneNo(s.key)}</span>
+        <span style={{ fontWeight: 'bold', color: '#f2e2b3', fontSize: '0.82rem', letterSpacing: '0.02em' }}>{main}</span>
+        {sub && <span style={{ fontSize: '0.66rem', color: '#a99bbd' }}>{sub}</span>}
+      </div>
+    );
+  };
+
   const renderScene = (s: LineKit['scenes'][number], hide: boolean) => (
-    <div key={s.key} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-      <div style={{ fontWeight: 'bold', color: '#b9a3d6', fontSize: '0.74rem' }}>{s.label}</div>
+    <div key={s.key} style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', ...(sceneNo(s.key) > 1 ? { borderTop: '1px dashed rgba(226,192,116,0.25)', paddingTop: '0.6rem' } : {}) }}>
+      {renderSceneLabel(s)}
       <div style={{ ...bubble, display: 'flex', alignItems: 'flex-start', gap: '0.4rem' }}>
         <span style={{ flex: 1, minWidth: 0 }}>{show(s.message, hide)}</span>
         {!hide && (
