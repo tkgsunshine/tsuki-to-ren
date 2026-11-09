@@ -182,6 +182,11 @@ export const trackRegStep = (type: 'reg_view' | 'reg_click' | 'reg_submit' | 'au
 
 export type ShareChannel = 'x' | 'line' | 'link' | 'image';
 
+/** A friend-referral invite sent (LINE button or link copied). /admin 「紹介を送った」 */
+export const trackRefSend = () => {
+  void send({ type: 'ref_send', ...current() });
+};
+
 /** A result shared: posted to X / LINE, link copied, or card image saved. */
 export const trackShare = (channel: ShareChannel) => {
   void send({ type: 'share', channel, ...current() });
