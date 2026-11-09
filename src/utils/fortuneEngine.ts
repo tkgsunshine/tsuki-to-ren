@@ -84,6 +84,9 @@ export function getMBTICompatibility100(mbtiA: string, mbtiB: string): number | 
   return i < 0 || j < 0 ? null : MBTI_COMPAT_100[i][j];
 }
 
+/** 16タイプ不明のとき、生年月日の相性（60点満点）を100点満点へ広げる倍率。平均を旧版（タイプ不明=20点固定）とほぼ同じに保つ値 */
+export const MBTI_UNKNOWN_STRETCH = 2.5;
+
 export function getMBTICompatibilityScore(mbtiA: string, mbtiB: string): number {
   const v = getMBTICompatibility100(mbtiA, mbtiB);
   if (v === null) return 20; // 相手情報がない場合は基準値20点
@@ -2329,10 +2332,11 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     const starScore = relStar === 'producing' ? 30 : (relStar === 'same' ? 25 : 15);
     
     // 3. 16タイプ相性 - 配点 40点
-    // どちらかのタイプが分からない場合は、16タイプ相性を使わず、四柱推命＋九星気学（60点満点）を100点満点に換算する。
-    // 旧版はタイプ不明を一律20点にしていたため、生年月日の相性が最高でも80点で止まっていた（2026-11 見直し）。
+    // どちらかのタイプが分からない場合は、16タイプ相性を使わず、四柱推命＋九星気学（60点満点）だけで100点満点にする（2026-11 見直し）。
+    // 旧版はタイプ不明を一律20点にしていたため、生年月日の相性が最高でも80点で止まっていた。
+    // 60点で100点、1点下がるごとに MBTI_UNKNOWN_STRETCH 点下げる（アプリが決めた値）。平均は旧版（約66点）とほぼ同じに保つ。
     if (getMBTICompatibility100(input.myMbti, input.opponentMbti || 'UNKNOWN') === null) {
-      baseScore = Math.round(((fourPillarsScore + starScore) * 100) / 60);
+      baseScore = Math.round(100 - (60 - (fourPillarsScore + starScore)) * MBTI_UNKNOWN_STRETCH);
     } else {
       baseScore = fourPillarsScore + starScore + getMBTICompatibilityScore(input.myMbti, input.opponentMbti || '');
     }
