@@ -8,7 +8,7 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
-import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, PAIR_LINK, GAP_CTA, withLink, withProfileCta } from './lib/teasers.mjs';
+import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, PAIR_LINK, withLink } from './lib/teasers.mjs';
 import { addMbtiNicks, addMbtiNicksInline } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
@@ -129,7 +129,7 @@ function validate(posts) {
     }
     const f = planned[slot];
     const candidate = { ...p, slot, kind: f.kind || 'value' };
-    if (f.id === 'gap_rank') candidate.text = withProfileCta(String(p.text || '').trim(), GAP_CTA); // 本文にも、プロフィールへ誘う一言が自動で入る（2026-10-31〜）
+    // ランキング（gap_rank）の本文は「1〜3位、14〜16位はリプ欄..↓」で締める。本文のプロフィールへの一言（2026-10-31〜）は、2026-11-10 運営の指定で外した（案内とURLはリプ欄に）
     for (const pr of lintPost(candidate, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}: ${pr}`);
     if (!/-月-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」の署名を付ける（話し手は月だけ）`);
     if (f.card) {
@@ -149,11 +149,12 @@ function validate(posts) {
     } else if (f.all16) {
       for (const c of MBTI_TYPES.map((x) => x.code)) if ((String(p.text).match(new RegExp(`(^|[^A-Z])${c}(?![A-Z])`, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、1回だけ書かれていない（16タイプ全員を、1行ずつ、抜け・重複なし）`);
     } else if (f.rank16) {
-      if (!p.replyText) problems.push(`${slot}: 続き（1位・2位・15位・16位）の replyText も書く`);
+      if (!p.replyText) problems.push(`${slot}: 続き（1〜3位・14〜16位）の replyText も書く`);
       else {
         for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks, maxWeight: f.maxWeight, siteUrl: true })) problems.push(`${slot}の返信: ${pr}`);
-        if (/^\s*(1|2|15|16)位\s+[EI][NS][FT][JP]/m.test(p.text)) problems.push(`${slot}: 1位・2位・15位・16位は、投稿ではなくリプ欄（replyText）に書く`);
-        for (const n of [1, 2, 15, 16]) if (!new RegExp(`^\\s*${n}位`, 'm').test(p.replyText)) problems.push(`${slot}: replyText に「${n}位」の行がない`);
+        if (/^\s*(1|2|3|14|15|16)位\s+[EI][NS][FT][JP]/m.test(p.text)) problems.push(`${slot}: 1〜3位・14〜16位は、投稿ではなくリプ欄（replyText）に書く`);
+        if (!/1〜3位、14〜16位はリプ欄\.\.↓/.test(String(p.text))) problems.push(`${slot}: 本文の最後の行は「1〜3位、14〜16位はリプ欄..↓」にする`);
+        for (const n of [1, 2, 3, 14, 15, 16]) if (!new RegExp(`^\\s*${n}位`, 'm').test(p.replyText)) problems.push(`${slot}: replyText に「${n}位」の行がない`);
         const joined = `${p.text}\n${p.replyText}`;
         for (const c of MBTI_TYPES.map((t) => t.code)) if ((joined.match(new RegExp(c, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、投稿と返信で1回ずつになっていない（16タイプ全員を重複なく）`);
       }
@@ -326,7 +327,7 @@ const buzzItem = (slot, time) => {
   const f = planned[slot];
   const p = posts.find((x) => x.slot === slot);
   const item = {
-    id: `${date}-${slot}`, date, slot, kind: f.kind || 'value', text: f.id === 'gap_rank' ? withProfileCta(p.text.trim(), GAP_CTA) : p.text.trim(),
+    id: `${date}-${slot}`, date, slot, kind: f.kind || 'value', text: p.text.trim(),
     format: f.id, system: f.system, purpose: f.purpose, ...(f.maxWeight ? { maxWeight: f.maxWeight } : {}), // 反応の比較用（どの型が取れたか）
     status: 'scheduled', createdAt: new Date().toISOString(),
   };
