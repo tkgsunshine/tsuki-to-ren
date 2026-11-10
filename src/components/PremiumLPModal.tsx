@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PurchaseTerms } from './PurchaseTerms';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star, ZoomIn } from 'lucide-react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star, ZoomIn, Users } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
@@ -21,7 +21,8 @@ const benefits = [
     shotAlt: '14日間・月ごと・年ごとの相性の折れ線グラフの画面',
     // 画面イメージは縦長なので、10年先（年次）のグラフのところを見せる
     shotPos: '50% 58%',
-    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの14日間と月ごとの波も見れるので、近い予定から先の人生まで、見すえて動けますよ。'
+    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの14日間と月ごとの波も見れるので、近い予定から先の人生まで、見すえて動けますよ。',
+    diffBody: 'シングルプランにはない、プレミアムだけの機能です。この先10年の年ごとの波（「大開運の年」や、結婚・同棲のような大きな決断に向いた時期）と、明日からの14日間・月ごとの相性の波が分かるので、近い予定から先の人生まで見すえて動けます。'
   },
   {
     Icon: Send,
@@ -30,7 +31,8 @@ const benefits = [
     shot: '/assets/premium/line.webp',
     shotAlt: '本日のLINE吉時間とアプローチ助言、二人のLINEのコツの画面',
     pairNote: 'pairToday',
-    body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。返信が遅いときの理由や気持ちが伝わるコツも、二人に合わせてお伝えしますね。'
+    body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。返信が遅いときの理由や気持ちが伝わるコツも、二人に合わせてお伝えしますね。',
+    diffBody: 'シングルプランで見れるのは買った日の分だけ。プレミアムなら、今日の相性の点数と、LINEを送るのにいい時間・アプローチ助言・気持ちが伝わるコツを、毎日最後まで読めます。'
   },
   {
     Icon: Star,
@@ -39,6 +41,7 @@ const benefits = [
     shot: '/assets/premium/lucky-days.webp',
     shotAlt: '2人の最高シンクロ日とあなたの恋愛運MAX日の画面',
     pairNote: 'pairLucky',
+    hideInDiff: true,
     body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付が分かります。告白やデートのお誘いは、この日に。'
   },
   {
@@ -48,6 +51,7 @@ const benefits = [
     shot: '/assets/premium/torisetsu.webp',
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
     pairNote: 'pairAll',
+    hideInDiff: true,
     body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、全部見れます。'
   },
   {
@@ -57,6 +61,7 @@ const benefits = [
     shot: '/assets/premium/attraction.webp',
     shotAlt: 'お相手が惹かれるファッションとドキッとさせる仕草の画面',
     pairNote: 'pairAll',
+    hideInDiff: true,
     body: 'あの人の生まれ持った星と性格のタイプから、惹かれやすい色・服装・コーデの一工夫と、避けたい服装が絵つきで分かります。会ったときにドキッとさせる仕草も全部見れるので、次のデートの準備に使ってくださいね。'
   },
   {
@@ -73,7 +78,8 @@ const benefits = [
     title: '気になる人を5人まで保存',
     shot: '/assets/premium/partners.webp',
     shotAlt: '保存したお相手の一覧画面',
-    body: '本命の人も、まだ気になっているだけの人も、5人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。'
+    body: '本命の人も、まだ気になっているだけの人も、5人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。',
+    diffBody: 'シングルプランの保存は無料会員と同じ2人まで（買ったお相手は枠に数えません）。プレミアムなら5人まで保存して、ワンタップで相性を見比べられます。'
   },
   {
     Icon: MessageCircle,
@@ -81,9 +87,35 @@ const benefits = [
     title: '私と蓮に、いつでも相談',
     shot: '/assets/premium/chat.webp',
     shotAlt: '月とのチャット画面',
-    body: '返信の文面を一緒に考えたり、あの人の本音を一緒に読み解いたり。24時間、回数を気にせず話しかけてくださいね。寄り添う私と、冷静に整理してくれる蓮がいます。'
+    body: '返信の文面を一緒に考えたり、あの人の本音を一緒に読み解いたり。24時間、回数を気にせず話しかけてくださいね。寄り添う私と、冷静に整理してくれる蓮がいます。',
+    diffBody: 'シングルプランのチャットは1日2回まで。プレミアムなら、返信の文面を一緒に考えたり、あの人の本音を読み解いたり、24時間回数を気にせず話しかけられます。'
   }
-];
+] as BenefitItem[];
+
+type BenefitItem = {
+  Icon: typeof Calendar;
+  color: string;
+  title: string;
+  shot: string;
+  shotAlt: string;
+  shotPos?: string;
+  pairNote?: 'pairToday' | 'pairLucky' | 'pairAll';
+  body: string;
+  /** シングルプランと見比べているとき（お相手あり）に、シングルプランとの違いとして出す文。無いときは body */
+  diffBody?: string;
+  /** シングルプランと見比べているときは出さない（シングルプランでも同じお相手なら見れるもの。先頭の「誰でも全部」にまとめる） */
+  hideInDiff?: boolean;
+};
+
+/** シングルプランと見比べているときに先頭に出す、「誰でも何人でも全部見れる」という前提の項目 */
+const unlimitedBenefit = (pairWho: string): BenefitItem => ({
+  Icon: Users,
+  color: '#d4af37',
+  title: '気になる人なら誰でも、何人でも、全部見れる',
+  shot: '/assets/premium/torisetsu.webp',
+  shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
+  body: `シングルプランで見れるのは${pairWho}1人だけ。プレミアムなら、トリセツ・深層鑑定・6つの相性グラフ、惹かれるファッションとドキッとさせる仕草、2人の最高シンクロ日を、気になる人なら誰とでも、何人でも全部見れます。`
+});
 
 const sectionTitleStyle: React.CSSProperties = {
   fontSize: '1rem',
@@ -849,7 +881,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <div style={{ marginTop: '0.8rem' }}>
               <CharBubble who="ren" small>
                 そういうときこそ、気持ちだけで動かずに、相手の流れを知っておくのが近道です。<br />
-                プレミアムプランでできることを、順番に整理してお伝えしますね。
+                {showPlans && pair ? 'シングルプランとの違いを、順番に整理してお伝えしますね。' : 'プレミアムプランでできることを、順番に整理してお伝えしますね。'}
               </CharBubble>
             </div>
           </div>
@@ -858,9 +890,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {/* できること */}
           <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-              プレミアムプラン（月額980円）でできること
+              {showPlans && pair ? <>シングルプランに加えて<br />プレミアム（月額980円）でできること</> : 'プレミアムプラン（月額980円）でできること'}
             </h2>
-            {benefits.map(({ Icon, color, title, body, shot, shotAlt, pairNote, shotPos }) => (
+            {/* シングルプランと見比べているとき（お相手あり）は、シングルプランとの違いだけを並べる。
+                先頭に「誰でも何人でも全部見れる」を置き、シングルプランでも同じお相手なら見れる項目（トリセツ・仕草・シンクロ日）はそこにまとめる */}
+            {(showPlans && pair
+              ? [unlimitedBenefit(pairWho), ...benefits.filter((b) => !b.hideInDiff).map((b) => ({ ...b, body: b.diffBody || b.body, pairNote: undefined }))]
+              : benefits
+            ).map(({ Icon, color, title, body, shot, shotAlt, pairNote, shotPos }) => (
               <div key={title} className="glass-panel" style={{
                 padding: '0.9rem 1rem',
                 display: 'flex',
