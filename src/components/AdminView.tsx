@@ -53,6 +53,7 @@ interface Member {
   // 属性の集計用（今のプロフィールから。プロフィール未保存は unknown）。生年月日そのものは受け取らない
   gender?: string;
   age?: string;
+  ageYears?: number | null; // 今日時点の満年齢（生年月日なしは null）
   type?: string;
 }
 interface ChatDay {
@@ -196,11 +197,11 @@ const regDetail = (reg: Record<string, number>, prefix: string) =>
     .map(([k, n]) => `${REG_LABELS[k] || k} ${n}`).join('・');
 
 const toCsv = (rows: Member[]) => {
-  const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', 'プレミアム', '買い切り(人)', '流入元', '入口ページ', '端末'];
+  const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', '年齢', 'プレミアム', '買い切り(人)', '流入元', '入口ページ', '端末'];
   const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
   const lines = rows.map((m) => [
     jst(m.createdAt), m.email || '', m.name || '', m.guest ? '購入用（自動）' : PROVIDER_LABELS[m.provider] || m.provider, jst(m.lastSignInAt),
-    m.dailyMail ? 'ON' : 'OFF', m.mbti || '', premiumLabel(m.premium), String(m.pairs?.live || 0), m.source ? sourceLabel(m.source) : '', m.landing ? landingLabel(m.landing) : '',
+    m.dailyMail ? 'ON' : 'OFF', m.mbti || '', m.ageYears != null ? String(m.ageYears) : '', premiumLabel(m.premium), String(m.pairs?.live || 0), m.source ? sourceLabel(m.source) : '', m.landing ? landingLabel(m.landing) : '',
     m.device ? deviceLabel(m.device) : '',
   ].map(esc).join(','));
   return '﻿' + [head.map(esc).join(','), ...lines].join('\n');
@@ -1161,6 +1162,7 @@ export default function AdminView() {
                       <th style={c.th}>最終ログイン</th>
                       <th style={c.th}>毎朝メール</th>
                       <th style={c.th}>タイプ</th>
+                      <th style={c.th}>年齢</th>
                       <th style={c.th}>プレミアム</th>
                       <th style={c.th}>買い切り</th>
                       <th style={c.th}>流入元 / 入口 / 端末</th>
@@ -1177,6 +1179,7 @@ export default function AdminView() {
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{jst(m.lastSignInAt)}</td>
                         <td style={c.td}>{m.dailyMail ? 'ON' : '—'}</td>
                         <td style={c.td}>{m.mbti || '—'}</td>
+                        <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{m.ageYears != null ? `${m.ageYears}歳` : '—'}</td>
                         <td style={{ ...c.td, ...(m.premium === 'live' ? { color: '#e2c074', fontWeight: 700 } : c.muted) }}>{premiumLabel(m.premium) || '—'}</td>
                         <td style={{ ...c.td, ...((m.pairs?.live || 0) > 0 ? { color: '#e2c074', fontWeight: 700 } : c.muted) }}>
                           {m.pairs?.live ? `${m.pairs.live}人` : m.pairs?.test ? `テスト${m.pairs.test}` : '—'}
