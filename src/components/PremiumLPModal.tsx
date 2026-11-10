@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { PurchaseTerms } from './PurchaseTerms';
 import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
@@ -790,9 +791,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   どちらも会員登録なしで購入できます。
                 </CharBubble>
               </div>
+              <PurchaseTerms plans={pair.unlocked ? ['monthly'] : ['monthly', 'pair']} style={{ marginBottom: '0.6rem' }} />
               {renderPlanButtons(true)}
               <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります。
+                ¥680のお相手は生年月日で決まります。
               </p>
             </div>
           )}
@@ -926,6 +928,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き）。
                 上でプランを見比べているとき（お相手あり）は、同じ月額ボタンが2つにならないよう出さない */}
+            {!(showPlans && pair) && !isSubscribed && (
+              <PurchaseTerms plans={['monthly']} style={{ marginBottom: '0.6rem' }} />
+            )}
             {!(showPlans && pair) && (
             <button
               type="button"
@@ -1133,7 +1138,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </button>
             </div>
           ) : (
-            renderPlanButtons(false)
+            <>
+              {renderPlanButtons(false)}
+              <PurchaseTerms compact plans={pair && !pair.unlocked ? ['monthly', 'pair'] : ['monthly']} />
+            </>
           )}
         </div>
         )}

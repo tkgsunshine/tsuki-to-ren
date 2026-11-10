@@ -3314,7 +3314,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
+                  <span style={{ color: 'white' }}>〒162-0054 東京都新宿区河田町3-52-2</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
@@ -3388,7 +3388,7 @@ function App() {
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>5. 苦情・相談対応体制</h4>
                   <p>個人情報の取扱いに関するご質問、苦情、相談等は下記窓口までお申し出ください。<br/>
                   【苦情・相談窓口】Ill株式会社（担当：須藤 涼弥）<br/>
-                  所在地：東京都渋谷区代々木２丁目２４−８<br/>
+                  所在地：〒162-0054 東京都新宿区河田町3-52-2<br/>
                   連絡先：support@tsuki-to-ren.com</p>
                 </div>
               </div>
@@ -3411,7 +3411,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
+                  <span style={{ color: 'white' }}>〒162-0054 東京都新宿区河田町3-52-2</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
