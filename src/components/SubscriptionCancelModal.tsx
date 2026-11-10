@@ -141,7 +141,7 @@ export const SubscriptionCancelModal: React.FC<SubscriptionCancelModalProps> = (
               color: '#d8d2c6',
               lineHeight: '1.6'
             }}>
-              <li>7日間の相性バイオリズム ＆ 月次・10年運命年表の閲覧</li>
+              <li>14日間の相性バイオリズム ＆ 月次・10年運命年表の閲覧</li>
               <li>お相手の「取扱説明書（トリセツ）」＆ 6軸相性詳細分析（Lv.2/Lv.3サイン・逆転策等）</li>
               <li>毎朝の運勢メールの全文（解約後もメールは届きますが、アプローチのコツは冒頭だけ、同じお相手との相性は7日分までになります）</li>
               <li>お相手の保存枠（最大10人 → 無料枠2人 / ゲスト1人へ縮小）</li>

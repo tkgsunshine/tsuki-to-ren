@@ -4,7 +4,7 @@ import { Crown, LineChart, BookHeart, Mail, Users, MessageCircleHeart, Unlock, R
 // プレミアムのお支払い／買い切り（お相手1人）が反映されたときのお祝い画面（Stripe から戻ってきたとき App が出す）
 
 const UNLOCKED = [
-  { icon: LineChart, text: '7日間の相性バイオリズムと、月ごと・10年の運勢の流れ' },
+  { icon: LineChart, text: '14日間の相性バイオリズムと、月ごと・10年の運勢の流れ' },
   { icon: BookHeart, text: 'お相手の「取扱説明書」と6軸の詳しい相性' },
   { icon: Mail, text: '毎朝の運勢メールが全文に（アプローチのコツを最後まで・同じ人との相性も毎日）' },
   { icon: Users, text: 'お相手を最大10人まで保存' },

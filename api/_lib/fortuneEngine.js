@@ -2122,7 +2122,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
             ? (mine + getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), opponentStarObj.element)) / 2
             : mine;
     };
-    /** その日の点数（今日の点数と、7日間のグラフで共通）。上限・下限で止める前の値 */
+    /** その日の点数（今日の点数と、14日間のグラフで共通）。上限・下限で止める前の値 */
     const rawDayScore = (d) => {
         const dayInfo = getDayInfo(d);
         const dp = { stem: dayInfo.stem, branch: dayInfo.branch };
@@ -2397,9 +2397,9 @@ export function generateFortuneResult(input, character, now = new Date()) {
             text: secondCardText
         }
     ];
-    // 週次スコア (7日間 - 日柱干支の生剋・支合・三合・六沖から論理的に算出)
+    // 14日間スコア (14日間 - 日柱干支の生剋・支合・三合・六沖から論理的に算出)
     const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-    const weeklyScores = Array.from({ length: 7 }).map((_, idx) => {
+    const weeklyScores = Array.from({ length: 14 }).map((_, idx) => {
         const d = new Date(today.getTime());
         d.setDate(today.getDate() + idx);
         const dayLabel = weekdays[d.getDay()];
@@ -2956,12 +2956,12 @@ export function generateFortuneResult(input, character, now = new Date()) {
             let topic4Detail = '';
             if (character === 'tsuki') {
                 if (score >= 85) {
-                    topic4Intro = `二人の距離がぐっと縮まりやすい時期です。「今後7日間の相性」で点数が高い日を狙いましょう。`;
-                    topic4Detail = `📍 ${san(oppNick)}が最も喜ぶデートスポット：\n${oppDateSpot}\n\n💌 心を動かすお誘いテンプレート：\n${oppLineInvite}\n\n🌙 月からのアドバイス：「今後7日間の相性」で「絶好調」の日は、二人の星が一番響き合う日です。その日は迷わず、このスポットとお誘いの言葉を使って、素直な気持ちを伝えてみましょう。一気に関係が進みやすくなります。`;
+                    topic4Intro = `二人の距離がぐっと縮まりやすい時期です。「今後14日間の相性」で点数が高い日を狙いましょう。`;
+                    topic4Detail = `📍 ${san(oppNick)}が最も喜ぶデートスポット：\n${oppDateSpot}\n\n💌 心を動かすお誘いテンプレート：\n${oppLineInvite}\n\n🌙 月からのアドバイス：「今後14日間の相性」で「絶好調」の日は、二人の星が一番響き合う日です。その日は迷わず、このスポットとお誘いの言葉を使って、素直な気持ちを伝えてみましょう。一気に関係が進みやすくなります。`;
                 }
                 else if (score >= 70) {
                     topic4Intro = `運気が追い風になる日が、この先いくつかあります。自然なお誘いがうまくいきやすい時期です。`;
-                    topic4Detail = `📍 お相手がリラックスできるスポット：\n${oppDateSpot}\n\n💌 おすすめのお誘いフレーズ：\n${oppLineInvite}\n\n🌙 月からのアドバイス：焦って勝負をかける必要はありません。「今後7日間の相性」で点数が高い日に軽くお誘いするだけで、相手の気持ちがあなたへ傾くきっかけになります。`;
+                    topic4Detail = `📍 お相手がリラックスできるスポット：\n${oppDateSpot}\n\n💌 おすすめのお誘いフレーズ：\n${oppLineInvite}\n\n🌙 月からのアドバイス：焦って勝負をかける必要はありません。「今後14日間の相性」で点数が高い日に軽くお誘いするだけで、相手の気持ちがあなたへ傾くきっかけになります。`;
                 }
                 else if (score >= 55) {
                     topic4Intro = `運気は静かな調整期ですが、小さなチャンスの種が蒔かれています。`;
@@ -2975,11 +2975,11 @@ export function generateFortuneResult(input, character, now = new Date()) {
             else { // ren
                 if (score >= 85) {
                     topic4Intro = `星の巡りを読み解き、二人の距離が一番縮まりやすい「勝負の日」を見つけました。`;
-                    topic4Detail = `📍 誘いに乗ってもらいやすいスポット：\n${oppDateSpot}\n\n💌 おすすめのお誘い文：\n${oppLineInvite}\n\n🔮 蓮の作戦：「今後7日間の相性」で85点を超える日を選び、上のお誘い文に日にちと場所を具体的に入れて送ってください。迷わず動くことが、成功への一番の近道です。`;
+                    topic4Detail = `📍 誘いに乗ってもらいやすいスポット：\n${oppDateSpot}\n\n💌 おすすめのお誘い文：\n${oppLineInvite}\n\n🔮 蓮の作戦：「今後14日間の相性」で85点を超える日を選び、上のお誘い文に日にちと場所を具体的に入れて送ってください。迷わず動くことが、成功への一番の近道です。`;
                 }
                 else if (score >= 70) {
                     topic4Intro = `運気が好調なうちに、会う予定を立てておくのがおすすめです。`;
-                    topic4Detail = `📍 おすすめの場所：\n${oppDateSpot}\n\n💌 お誘い文の例：\n${oppLineInvite}\n\n🔮 蓮の作戦：「今後7日間の相性」で点数が高い日に、短いランチやお茶など、相手が気軽にOKしやすいお誘いをするのが、一番確実です。`;
+                    topic4Detail = `📍 おすすめの場所：\n${oppDateSpot}\n\n💌 お誘い文の例：\n${oppLineInvite}\n\n🔮 蓮の作戦：「今後14日間の相性」で点数が高い日に、短いランチやお茶など、相手が気軽にOKしやすいお誘いをするのが、一番確実です。`;
                 }
                 else if (score >= 55) {
                     topic4Intro = `今は、無理をしなければ安定している時期です。`;
@@ -3295,7 +3295,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
         const oppStemImpact = hasOpponent ? getDailyStemImpact(mPillar.stem, oppPillarObj.stem) : 0;
         const myBranchImpact = getBranchImpact(mPillar.branch, myPillarObj.branch);
         const oppBranchImpact = hasOpponent ? getBranchImpact(mPillar.branch, oppPillarObj.branch) : 0;
-        // 今日・7日間と同じく、相手がいる場合は二人の平均にし、＋への偏りを PERIOD_CENTER_OFFSET で戻す。
+        // 今日・14日間と同じく、相手がいる場合は二人の平均にし、＋への偏りを PERIOD_CENTER_OFFSET で戻す。
         let score = Math.floor(baseScore + pairAvg(myStemImpact, oppStemImpact) + pairAvg(myBranchImpact, oppBranchImpact) + PERIOD_CENTER_OFFSET);
         if (score > 100)
             score = 100;
