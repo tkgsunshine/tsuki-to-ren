@@ -86,7 +86,7 @@ test('checkout creates a subscription session tied to the account', async () => 
   assert.equal(params.custom_text.submit.message, SUBSCRIPTION_TERMS);
   for (const t of [SUBSCRIPTION_TERMS, PAIR_TERMS]) {
     assert.ok(t.length <= 1200);
-    assert.ok(t.includes('https://www.tsuki-to-ren.com/terms') && t.includes('https://www.tsuki-to-ren.com/tokushoho'));
+    assert.ok(t.includes('https://www.tsuki-to-ren.com/terms') && t.includes('https://www.tsuki-to-ren.com/privacy'));
   }
   assert.match(SUBSCRIPTION_TERMS, /自動で更新/);
   assert.match(SUBSCRIPTION_TERMS, /いつでも解約/);
