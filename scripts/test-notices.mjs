@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import notices, { cleanLink, validateNotice, listNotices, sendPurchaseThanks, thanksNoticeId, PURCHASE_THANKS, MAX_TITLE, MAX_BODY } from '../api/_lib/notices.js';
+import notices, { cleanLink, validateNotice, listNotices, sendPurchaseThanks, sendWelcomeIfNew, thanksNoticeId, welcomeNoticeId, validateAutoNotice, autoNoticeText, AUTO_NOTICES, PURCHASE_THANKS, WELCOME_NOTICE, MAX_TITLE, MAX_BODY } from '../api/_lib/notices.js';
 
 const mockRes = () => {
   const r = { code: 0, body: null, headers: {} };
@@ -128,4 +128,89 @@ test('a guest purchase adds how to see it on another device; unknown kinds send 
   assert.ok(validateNotice({ to: 'g1', ...n }).value);
   assert.equal(await sendPurchaseThanks(db, { uid: 'g1', kind: 'other', sessionId: 'cs_x' }), false);
   assert.equal(await sendPurchaseThanks(db, { uid: 'g1', kind: 'pair', sessionId: '' }), false);
+});
+
+// 自動で送るお知らせの文（/admin で書き換え、空欄は元の文）
+const SETTINGS = 'adminSettings/autoNotices';
+
+test('saved texts replace the defaults field by field; empty fields keep the default', async () => {
+  assert.deepEqual(autoNoticeText({}, 'thanks-premium').title, PURCHASE_THANKS.premium.title);
+  const t = autoNoticeText({ 'thanks-premium': { title: '新しいタイトル', body: '', link: '' } }, 'thanks-premium');
+  assert.equal(t.title, '新しいタイトル');
+  assert.equal(t.body, PURCHASE_THANKS.premium.body);
+  assert.equal(t.link, PURCHASE_THANKS.premium.link);
+  assert.equal(autoNoticeText({}, 'nope'), null);
+  // every default fits what /admin allows
+  for (const m of Object.values(AUTO_NOTICES)) assert.ok(validateNotice({ to: 'u1', ...m.defaults }).value);
+});
+
+test('a purchase uses the text saved in /admin, and the guest note is still added', async () => {
+  const db = mockDb([], { [SETTINGS]: { 'thanks-pair': { title: '', body: 'ありがとう（書き換え）', link: '/result' } } });
+  await sendPurchaseThanks(db, { uid: 'g1', kind: 'pair', sessionId: 'cs_edit', guest: true });
+  const n = db.docs[`notices/${thanksNoticeId('cs_edit')}`];
+  assert.equal(n.title, PURCHASE_THANKS.pair.title);
+  assert.ok(n.body.startsWith('ありがとう（書き換え）'));
+  assert.ok(n.body.includes('メールアドレスでログイン'));
+  assert.equal(n.link, '/result');
+});
+
+test('the auto text check: known kinds only, limits, links; enabled only for the welcome', () => {
+  assert.ok(validateAutoNotice({ kind: 'other' }).error);
+  assert.ok(validateAutoNotice({ kind: '__proto__' }).error);
+  assert.ok(validateAutoNotice({ kind: 'referral', title: 'x'.repeat(MAX_TITLE + 1) }).error);
+  assert.ok(validateAutoNotice({ kind: 'referral', body: 'x'.repeat(MAX_BODY + 1) }).error);
+  assert.ok(validateAutoNotice({ kind: 'referral', link: 'javascript:alert(1)' }).error);
+  assert.deepEqual(validateAutoNotice({ kind: 'thanks-premium', title: '', body: '', link: '', enabled: true }).value,
+    { kind: 'thanks-premium', title: '', body: '', link: '' });
+  assert.equal(validateAutoNotice({ kind: 'welcome', enabled: true }).value.enabled, true);
+});
+
+const newUserAuth = (created) => ({
+  verifyIdToken: async (t) => { if (t === 'guest') return { uid: 'g9', guest: true }; if (t !== 'good') throw new Error('bad'); return { uid: 'u1' }; },
+  getUser: async () => ({ metadata: { creationTime: new Date(created).toUTCString() } })
+});
+const NOW = Date.parse('2026-11-10T12:00:00Z');
+
+test('the welcome is not sent while it is switched off (the default)', async () => {
+  const db = mockDb();
+  const res = mockRes();
+  await notices({ method: 'GET', headers: signedIn }, res, { auth: newUserAuth(NOW - 60_000), db, now: NOW });
+  assert.equal(res.code, 200);
+  assert.ok(!db.docs[`notices/${welcomeNoticeId('u1')}`]);
+});
+
+test('switched on, a new member gets one welcome, shown as unread in the same list', async () => {
+  const on = { welcome: { enabled: true, enabledAt: '2026-11-01T00:00:00.000Z', title: 'ようこそ（書き換え）' } };
+  const db = mockDb([], { [SETTINGS]: on });
+  db.collection = ((orig) => (name) => {
+    const col = orig(name);
+    // listNotices reads by `to`; include docs written to notices/
+    if (name === 'notices') col.where = (f, op, v) => ({ get: async () => ({ docs: Object.entries(db.docs).filter(([k, d]) => k.startsWith('notices/') && d[f] === v).map(([k, d]) => ({ id: k.slice(8), data: () => d })) }) });
+    return col;
+  })(db.collection);
+  const res = mockRes();
+  await notices({ method: 'GET', headers: signedIn }, res, { auth: newUserAuth(NOW - 60_000), db, now: NOW });
+  const n = db.docs[`notices/${welcomeNoticeId('u1')}`];
+  assert.equal(n.to, 'u1');
+  assert.equal(n.title, 'ようこそ（書き換え）');
+  assert.equal(n.body, WELCOME_NOTICE.body);
+  assert.equal(n.auto, 'welcome');
+  assert.ok(db.docs['userData/u1'].welcomeNoticeAt);
+  assert.equal(res.body.items[0].id, welcomeNoticeId('u1'));
+  assert.ok(String(res.body.items[0].createdAt) > String(res.body.readAt)); // unread
+  // once only (even if taken back in /admin)
+  delete db.docs[`notices/${welcomeNoticeId('u1')}`];
+  await notices({ method: 'GET', headers: signedIn }, mockRes(), { auth: newUserAuth(NOW - 60_000), db, now: NOW + 1000 });
+  assert.ok(!db.docs[`notices/${welcomeNoticeId('u1')}`]);
+});
+
+test('no welcome for members who signed up before it was switched on, long ago, or purchase-made guest accounts', async () => {
+  const on = { [SETTINGS]: { welcome: { enabled: true, enabledAt: '2026-11-10T11:00:00.000Z' } } };
+  const before = mockDb([], { ...on });
+  assert.equal(await sendWelcomeIfNew(before, newUserAuth(Date.parse('2026-11-10T10:00:00Z')), { uid: 'u1', now: NOW }), false);
+  const old = mockDb([], { [SETTINGS]: { welcome: { enabled: true } } });
+  assert.equal(await sendWelcomeIfNew(old, newUserAuth(NOW - 3 * 86400 * 1000), { uid: 'u1', now: NOW }), false);
+  const guest = mockDb([], { [SETTINGS]: { welcome: { enabled: true } } });
+  assert.equal(await sendWelcomeIfNew(guest, newUserAuth(NOW - 60_000), { uid: 'g9', guest: true, now: NOW }), false);
+  assert.equal(await sendWelcomeIfNew(guest, newUserAuth(NOW - 60_000), { uid: 'u1', now: NOW }), true);
 });
