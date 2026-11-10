@@ -3062,7 +3062,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold' }}>プレミアムなら、買い切りの分に加えて</div>
+                  <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold' }}>プレミアムなら、シングルプランの分に加えて</div>
                   {[
                     `今日の相性とLINEの送り方が、今日だけでなく毎日読める`,
                     `送るタイミングを逃さない、これからの14日間・月ごとの流れ`,
@@ -3478,7 +3478,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   ? [
                       <><strong>これからの14日間・月ごとの流れ</strong></>,
                       <><strong>10年先までの年ごとの流れ</strong>（結婚・大きな転機の年）</>,
-                      <><strong>今日の相性とLINEの送り方を毎日</strong>（買い切りは購入日だけ）</>,
+                      <><strong>今日の相性とLINEの送り方を毎日</strong>（シングルプランは購入日だけ）</>,
                       <><strong>月 ＆ 蓮へのチャット相談が無制限</strong></>,
                       <><strong>お相手の保存が10人まで</strong>（ほかのお相手のトリセツも全部読める）</>
                     ]

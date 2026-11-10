@@ -49,7 +49,7 @@ export const PurchaseTerms: React.FC<{ plans: Plan[]; compact?: boolean; style?:
         )}
         {pair && (
           <li>
-            <strong style={{ color: '#d8d2c6' }}>お相手1人の深層鑑定 680円（税込）</strong>：1回払いで、自動更新はありません。お支払い後すぐに見られます。
+            <strong style={{ color: '#d8d2c6' }}>シングルプラン（お相手1人・買い切り）680円（税込）</strong>：1回払いで、自動更新はありません。お支払い後すぐに見られます。
           </li>
         )}
         <li>お支払いはカード / Apple Pay / Google Pay。お客様都合による返金はできません。</li>

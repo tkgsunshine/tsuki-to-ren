@@ -77,9 +77,9 @@ export const PURCHASE_THANKS = {
     link: '/chat'
   },
   pair: {
-    title: '深層鑑定のご購入ありがとうございます',
+    title: 'シングルプランのご購入ありがとうございます',
     body: [
-      'お相手の深層鑑定を選んでくれて、ありがとう。月（ツキ）です。',
+      'シングルプランを選んでくれて、ありがとう。月（ツキ）です。',
       '',
       'このお相手のトリセツ、LINEのテンプレート、惹かれ合うポイントと地雷、二人のこれから、相性グラフは、これからずっと見れます。',
       '今日の相性や、本日のアプローチ助言・LINEのコツは、買ってくれた今日だけ特別に見れるので、ぜひ今日のうちにのぞいてみてね。',
@@ -134,7 +134,7 @@ export const AUTO_SETTINGS_DOC = 'autoNotices';
 export const AUTO_NOTICES = {
   welcome: { label: '会員登録のお礼', when: '会員登録した直後（アプリを開いたとき）。登録なしで購入した人の自動アカウントには送らない', defaults: WELCOME_NOTICE, optional: true },
   'thanks-premium': { label: '月額プレミアムのお礼', when: '月額プレミアムを申し込んだ直後', defaults: PURCHASE_THANKS.premium },
-  'thanks-pair': { label: '買い切り（お相手1人の深層鑑定）のお礼', when: '買い切りを購入した直後', defaults: PURCHASE_THANKS.pair },
+  'thanks-pair': { label: 'シングルプラン（買い切り）のお礼', when: '買い切りを購入した直後', defaults: PURCHASE_THANKS.pair },
   referral: { label: '友達紹介で結果が開いたとき', when: '送った招待URLから友達が鑑定して、結果が開いたとき', defaults: REFERRAL_NOTICE }
 };
 
