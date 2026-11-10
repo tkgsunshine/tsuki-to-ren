@@ -1,22 +1,20 @@
 import React from 'react';
 
 // 購入ボタンの近くに出す、申し込み前の確認（特商法の最終確認画面のルール・規約への同意）。
-// 料金・支払いの時期・自動更新・解約方法・返金・規約へのリンクを、押す前に見える場所へ出す。
+// 料金・支払いの時期・自動更新・解約方法・返金・規約へのリンクを（特商法表記へのリンクはアプリ内では出さない: TAKASHI判断 2026-11-10）、押す前に見える場所へ出す。
 // Stripe の決済画面にも同じ内容を出している（api/_lib/stripe-checkout.js の SUBSCRIPTION_TERMS / PAIR_TERMS）。文を変えるときは両方そろえる。
 // compact: 画面下に固定したボタンの下など、場所が狭いところ用の1〜2行版
 type Plan = 'monthly' | 'pair';
 
 const linkStyle: React.CSSProperties = { color: '#d8c08a', textDecoration: 'underline' };
 
-const LegalLinks: React.FC<{ short?: boolean }> = ({ short }) => (
+const LegalLinks: React.FC = () => (
   <>
     購入すると
     <a href="/terms" target="_blank" rel="noopener" style={linkStyle}>利用規約</a>
     ・
     <a href="/privacy" target="_blank" rel="noopener" style={linkStyle}>プライバシーポリシー</a>
-    に同意したものとみなします{short ? '（' : '。'}
-    <a href="/tokushoho" target="_blank" rel="noopener" style={linkStyle}>{short ? '特商法表記' : '特定商取引法に基づく表記'}</a>
-    {short ? '）' : ''}
+    に同意したものとみなします。
   </>
 );
 
@@ -27,7 +25,7 @@ export const PurchaseTerms: React.FC<{ plans: Plan[]; compact?: boolean; style?:
     return (
       <p style={{ fontSize: '0.6rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.5rem 0 0', textAlign: 'center', ...style }}>
         {monthly && pair ? '月額は毎月自動更新（いつでも解約可）、¥680は1回払い。' : monthly ? '月額は毎月自動更新・いつでも解約できます。' : '¥680は1回払いです。'}
-        <LegalLinks short />
+        <LegalLinks />
       </p>
     );
   }
