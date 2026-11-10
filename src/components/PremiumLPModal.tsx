@@ -422,7 +422,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   useBackForwardReset(() => setIsProcessing(false));
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [zoomShot, setZoomShot] = useState<{ src: string; alt: string } | null>(null);
-  // 下の固定の購入ボタンは、いきなり出さない。説明（教育）を読み終えてプラン・料金の所まで来たら出す（一度出たら出たまま）
+  // 下の固定の購入ボタンは、いきなり出さない。お相手ありは「こんな夜はありませんか？」、それ以外は料金の所まで来たら出す（一度出たら出たまま）
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const ctaMarkerRef = useRef<HTMLDivElement | null>(null);
   const [ctaReady, setCtaReady] = useState(false);
@@ -790,8 +790,6 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
-          {showPlans && pair && <div ref={ctaMarkerRef} />}
-
           {showPlans && pair && <div data-lp-sec="plans" />}
           {/* プランを選ぶ（買い切り ¥680 と 月額 ¥980 を1枚で見比べる） */}
           {showPlans && pair && (
@@ -853,6 +851,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
+          {/* お相手ありのとき、下の固定の購入ボタンは「こんな夜はありませんか？」まで来たら出す（2026-11-11 TAKASHI「表示が早すぎる」） */}
+          {showPlans && pair && <div ref={ctaMarkerRef} />}
           <div data-lp-sec="worries" />
           {/* こんなときに */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
