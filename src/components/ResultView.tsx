@@ -325,21 +325,22 @@ const splitAdvicePreview = (text: string | undefined): { head: string; restLengt
   const cut = ADVICE_PREVIEW_CHARS;
   return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
 };
-// 7日間・月次・年次の点数も、見れない人にはダミーの値で描く（本物の点数を画面に置かない）
-const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
+// 14日間・月次・年次の点数も、見れない人にはダミーの値で描く（本物の点数を画面に置かない）
+const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82, 75, 61, 88, 70, 93, 66, 80];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
 
-// 未来予測スケジュール（7日間・月次・年次）の点数の折れ線グラフ。
+// 未来予測スケジュール（14日間・月次・年次）の点数の折れ線グラフ。
 // 縦軸は、そのグラフに出る点数の最低〜最高に合わせる（旧版は40〜100点固定で、6点差が約6pxにしかならず平らに見えた）。
 // 差が小さいときに大げさに見えないよう、縦軸の幅は最低 SCORE_LINE_MIN_SPAN 点ぶん取る。各点の上に点数を出しているので、数字で差は読める。
 const SCORE_LINE_HEIGHT_PX = 84;
 const SCORE_LINE_MIN_SPAN = 20;
 const SCORE_LINE_PAD = 0.12; // 上下の端に点が張り付かないよう、高さの12%ずつ空ける
-const ScoreLineChart = ({ items, locked }: { items: { key: string; label: string; score: number }[]; locked: boolean }) => {
+// range を渡すと縦軸をそれに合わせる（14日間を7日ずつ2段に分けて描くとき、2段の縦軸をそろえるため）。
+const ScoreLineChart = ({ items, locked, range }: { items: { key: string; label: string; score: number }[]; locked: boolean; range?: { lo: number; hi: number } }) => {
   const n = items.length;
   const scores = items.map((item) => item.score);
-  const lo = Math.min(...scores);
-  const hi = Math.max(...scores);
+  const lo = range ? range.lo : Math.min(...scores);
+  const hi = range ? range.hi : Math.max(...scores);
   const span = Math.max(hi - lo, SCORE_LINE_MIN_SPAN);
   const axisMin = (lo + hi) / 2 - span / 2;
   const pos = items.map((item, i) => {
@@ -1011,7 +1012,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   };
 
   // 買い切り（お相手1人 ¥680）。変わらない鑑定（トリセツ・深層鑑定・6つの相性グラフ・年次の流れ）は deepOpen、
-  // 毎日変わる内容（本日のアプローチ助言・二人のLINEのコツ）は todayOpen で開く。7日間・月次・朝メール・チャットは月額だけ。
+  // 毎日変わる内容（本日のアプローチ助言・二人のLINEのコツ）は todayOpen で開く。14日間・月次・朝メール・チャットは月額だけ。
   const pairOpen = hasOpponent && !sharedBy && pairUnlock?.unlocked === true;
   const deepOpen = isSubscribed || pairOpen;
   // 友達紹介で開く項目（2026-11-08 TAKASHI）: 返信が遅いときのおすすめの返し方・生まれ持った星から見た二人の相性（恋愛運MAX日は LuckyDaysSection）
@@ -3064,7 +3065,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold' }}>プレミアムなら、買い切りの分に加えて</div>
                   {[
                     `今日の相性とLINEの送り方が、今日だけでなく毎日読める`,
-                    `送るタイミングを逃さない、これからの7日間・月ごとの流れ`,
+                    `送るタイミングを逃さない、これからの14日間・月ごとの流れ`,
                     `結婚や大きな転機の年が分かる、10年先までの流れ`,
                     `毎朝の運勢メールが全文で届く`,
                     `${partnerCall}のことを、月と蓮にいつでも相談`,
@@ -3133,7 +3134,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>これからの7日間・月ごと・年ごとの流れ</strong></span>
+                    <span><strong>これからの14日間・月ごと・年ごとの流れ</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
@@ -3228,16 +3229,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? `今後7日間の${san(oppNickname)}との相性` : `今後7日間の${san(myName, 'あなた')}の運気`} {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? `今後14日間の${san(oppNickname)}との相性` : `今後14日間の${san(myName, 'あなた')}の運気`} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
-              <ScoreLineChart
-                locked={!isSubscribed}
-                items={activeResult.weeklyScores.map((day, index) => ({
+              {(() => {
+                // 14日分を1段に並べるとスマホ幅で日付・点数が重なるので、7日ずつ2段に分ける（縦軸は2段で共通）
+                const items = activeResult.weeklyScores.map((day, index) => ({
                   key: day.day,
                   label: index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day,
                   score: lockedScore(day.score, index, !isSubscribed)
-                }))}
-              />
+                }));
+                const scores = items.map((item) => item.score);
+                const range = { lo: Math.min(...scores), hi: Math.max(...scores) };
+                const rows = [items.slice(0, 7), items.slice(7)].filter((row) => row.length > 0);
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {rows.map((row, i) => (
+                      <ScoreLineChart key={i} locked={!isSubscribed} items={row} range={range} />
+                    ))}
+                  </div>
+                );
+              })()}
               {!isSubscribed && (
                 <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} data-paid-lock onClick={handleLockTagClick}>
                   <button 
@@ -3456,7 +3467,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
                   {pairOpen
-                    ? `月額980円で、明日からの7日間・月ごとの波から、結婚や大きな転機が分かる10年先の流れまで、${san(oppNickname)}との未来をいつでも確かめられます。`
+                    ? `月額980円で、明日からの14日間・月ごとの波から、結婚や大きな転機が分かる10年先の流れまで、${san(oppNickname)}との未来をいつでも確かめられます。`
                     : '月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。'}
                 </p>
               </div>
@@ -3465,7 +3476,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 {(pairOpen
                   ? [
-                      <><strong>これからの7日間・月ごとの流れ</strong></>,
+                      <><strong>これからの14日間・月ごとの流れ</strong></>,
                       <><strong>10年先までの年ごとの流れ</strong>（結婚・大きな転機の年）</>,
                       <><strong>今日の相性とLINEの送り方を毎日</strong>（買い切りは購入日だけ）</>,
                       <><strong>月 ＆ 蓮へのチャット相談が無制限</strong></>,
