@@ -1042,7 +1042,7 @@ function App() {
     // 買い切りで解放したお相手は生年月日で決まる。生年月日を変えると、この行は解放の対象ではなくなる
     const leavesUnlock = Boolean(before?.unlocked && before.birth !== fields.birth);
     if (leavesUnlock && !confirmedUnlockEditRef.current) {
-      const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+      const limit = isSubscribed ? 5 : (isRegistered ? 2 : 1);
       // 解放済みは保存の上限に数えていないので、外れると上限を超えることがある
       if (savedPartners.filter((x) => !x.unlocked).length + 1 > limit) {
         showAlert(`⚠️ ${san(before?.name || 'お相手')}は、シングルプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
@@ -1067,7 +1067,7 @@ function App() {
 
   // Checks the saved-partner limit for the member level; shows the upgrade prompt and returns false when full
   const canAddPartner = () => {
-    const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+    const limit = isSubscribed ? 5 : (isRegistered ? 2 : 1);
     // 買い切りで解放したお相手は上限に数えない
     if (savedPartners.filter((x) => !x.unlocked).length >= limit) {
       if (!isRegistered) {
@@ -1076,19 +1076,19 @@ function App() {
           setShowAuthModal(true);
         });
       } else if (!isSubscribed) {
-        showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+        showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大5人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
           openPremiumLP('monthly');
         });
       } else {
-        showAlert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
+        showAlert('有料会員の保存上限（5人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
       }
       return false;
     }
     return true;
   };
 
-  const partnerLimit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+  const partnerLimit = isSubscribed ? 5 : (isRegistered ? 2 : 1);
   // 保存済みかどうか。名前が空のお相手は「お相手」で保存されるのでそれとも比べる。
   // 買い切りで解放したお相手は生年月日で決まるので、生年月日が同じなら保存済み扱い
   const isSamePartner = (p: SavedPartner, name: string, birth: string) =>
@@ -2745,7 +2745,7 @@ function App() {
                   {/* シングルプランのお相手は上限に数えない（canAddPartner と同じ数え方） */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                     <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
-                      保存件数: {savedPartners.filter((x) => !x.unlocked).length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
+                      保存件数: {savedPartners.filter((x) => !x.unlocked).length} / {isSubscribed ? 5 : (isRegistered ? 2 : 1)}人
                     </span>
                     {savedPartners.some((x) => x.unlocked) && (
                       <span style={{ fontSize: '0.68rem', color: '#e2c074', lineHeight: 1.5 }}>
@@ -2754,7 +2754,7 @@ function App() {
                     )}
                   </div>
                   <span style={{ fontSize: '0.65rem', color: '#a9a49a' }}>
-                    {isSubscribed ? '有料会員 (最大10人)' : (isRegistered ? '無料会員 (最大2人)' : '非会員 (最大1人)')}
+                    {isSubscribed ? '有料会員 (最大5人)' : (isRegistered ? '無料会員 (最大2人)' : '非会員 (最大1人)')}
                   </span>
                 </div>
 

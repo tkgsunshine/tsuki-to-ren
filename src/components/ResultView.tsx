@@ -3069,7 +3069,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     `結婚や大きな転機の年が分かる、10年先までの流れ`,
                     `毎朝の運勢メールが全文で届く`,
                     `${partnerCall}のことを、月と蓮にいつでも相談`,
-                    `気になる人を10人まで保存。ほかのお相手も全部読める`
+                    `気になる人を5人まで保存。ほかのお相手も全部読める`
                   ].map((t) => (
                     <div key={t} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
                       <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
@@ -3142,7 +3142,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>お相手の保存が10人まで（無料会員は2人）</strong></span>
+                    <span><strong>お相手の保存が5人まで（無料会員は2人）</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
@@ -3480,12 +3480,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       <><strong>10年先までの年ごとの流れ</strong>（結婚・大きな転機の年）</>,
                       <><strong>今日の相性とLINEの送り方を毎日</strong>（シングルプランは購入日だけ）</>,
                       <><strong>月 ＆ 蓮へのチャット相談が無制限</strong></>,
-                      <><strong>お相手の保存が10人まで</strong>（ほかのお相手のトリセツも全部読める）</>
+                      <><strong>お相手の保存が5人まで</strong>（ほかのお相手のトリセツも全部読める）</>
                     ]
                   : [
                       <><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></>,
                       <><strong>月次・年次運勢スケジュールの完全閲覧</strong></>,
-                      <><strong>お相手の保存上限が10人に拡大</strong>（無料会員2人 → 10人）</>,
+                      <><strong>お相手の保存上限が5人に拡大</strong>（無料会員2人 → 5人）</>,
                       <><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></>,
                       <><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></>
                     ]

@@ -433,7 +433,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             {savedPartners && savedPartners.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.85rem' }}>
                 <span style={{ fontSize: '0.72rem', color: '#6fb08f', fontWeight: 'bold' }}>
-                  ● 保存したお相手から選ぶ ({savedPartners.length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人)
+                  ● 保存したお相手から選ぶ ({savedPartners.length} / {isSubscribed ? 5 : (isRegistered ? 2 : 1)}人)
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   {savedPartners.map((partner) => {
