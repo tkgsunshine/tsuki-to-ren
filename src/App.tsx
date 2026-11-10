@@ -68,6 +68,12 @@ const NEW_PARTNER_ID = '__new__';
 // 決済の直前に控える鑑定の入力（このタブだけ）と、読み込んだ時点のURL（?pair= などはすぐ消すため）
 const CHECKOUT_READING_KEY = 'hasu_checkout_reading';
 const INITIAL_SEARCH = typeof window === 'undefined' ? '' : window.location.search;
+// 決済へ移ったとき購入LPを開いていたら、そのLPで先に見せていたプラン（このタブだけ）。Stripeから戻ったら同じLPを開き直す
+const CHECKOUT_LP_KEY = 'hasu_checkout_lp';
+// 読み込んだ時点の履歴（下の最初の effect で重ね表示を消す前）。ブラウザの「戻る」で読み込み直したとき、購入LPを開いていたかを見る
+const INITIAL_HISTORY_STATE: unknown = typeof window === 'undefined' ? null : window.history.state;
+const isNavStateWithOverlay = (v: unknown, name: string): boolean =>
+  !!v && typeof v === 'object' && Array.isArray((v as { overlays?: unknown }).overlays) && ((v as { overlays: unknown[] }).overlays).includes(name);
 const isValidBirthDate = (val: string): boolean => {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(val || '');
   if (!m) return false;
@@ -402,6 +408,11 @@ function App() {
   // Stripe から戻ったとき、端末の記録（hasu_last_diagnosis_input）がログイン状態の変化で消えていても、同じ鑑定を出し直せるように
   const lastReadingRef = useRef<Record<string, unknown> | null>(null);
   const rememberReadingForCheckout = () => {
+    // 購入LPから決済へ移るときは、戻ったときに同じLPを開き直せるよう、先に見せていたプランも控える
+    try {
+      if (showPremiumLPRef.current) sessionStorage.setItem(CHECKOUT_LP_KEY, premiumLPFocusRef.current);
+      else sessionStorage.removeItem(CHECKOUT_LP_KEY);
+    } catch { /* blocked storage */ }
     if (!lastReadingRef.current) return;
     try { sessionStorage.setItem(CHECKOUT_READING_KEY, JSON.stringify(lastReadingRef.current)); } catch { /* blocked storage */ }
   };
@@ -427,6 +438,12 @@ function App() {
   const [showPremiumLP, setShowPremiumLP] = useState(false);
   // LPで先に見せるプラン。買い切りで解放できる項目のロックからは 'pair'、毎日の内容のロックからは 'monthly'
   const [premiumLPFocus, setPremiumLPFocus] = useState<'pair' | 'monthly'>('monthly');
+  const showPremiumLPRef = useRef(false);
+  showPremiumLPRef.current = showPremiumLP;
+  const premiumLPFocusRef = useRef(premiumLPFocus);
+  premiumLPFocusRef.current = premiumLPFocus;
+  // Stripe から戻って購入LPを開き直すとき（開いた回数には数えない）
+  const lpReopenRef = useRef(false);
   const openPremiumLP = (focus: 'pair' | 'monthly' = 'monthly') => {
     setPremiumLPFocus(focus);
     setShowPremiumLP(true);
@@ -619,6 +636,20 @@ function App() {
       return 'female';
     };
 
+    // 購入LPから決済へ移っていたら、Stripe の「戻る」（?pair=cancel / ?premium=cancel）か、
+    // ブラウザの「戻る」で読み込み直したとき（履歴に購入LPが開いた状態が残っている）に、同じLPを開き直す
+    let checkoutLp: string | null = null;
+    try {
+      checkoutLp = sessionStorage.getItem(CHECKOUT_LP_KEY);
+      sessionStorage.removeItem(CHECKOUT_LP_KEY);
+    } catch { /* blocked storage */ }
+    const cancelledCheckout = /[?&](pair|premium)=cancel(&|$)/.test(INITIAL_SEARCH);
+    const backFromCheckout = !/[?&](pair|premium)=/.test(INITIAL_SEARCH)
+      && isNavStateWithOverlay(INITIAL_HISTORY_STATE, 'premiumLP');
+    if ((checkoutLp === 'pair' || checkoutLp === 'monthly') && (cancelledCheckout || backFromCheckout)) {
+      pendingLPRef.current = checkoutLp;
+      lpReopenRef.current = true;
+    }
     // Parse URL params (supports both compact short keys: mn, mb, mm, mg, on, ob, om, og, r & legacy long keys)
     const params = new URLSearchParams(window.location.search);
     const mName = params.get('mn') || params.get('mName') || 'あなた';
@@ -686,7 +717,7 @@ function App() {
       // Restore last diagnosis result when returning from 2-step email verification link
       try {
         // Stripe から戻ったとき（?pair= / ?premium=。URLからはすぐ消すので、読み込んだ時点のURLで見る）は、決済の直前に控えた鑑定も使う
-        const fromCheckout = /[?&](pair|premium)=/.test(INITIAL_SEARCH);
+        const fromCheckout = /[?&](pair|premium)=/.test(INITIAL_SEARCH) || lpReopenRef.current;
         let checkoutRaw: string | null = null;
         try {
           checkoutRaw = fromCheckout ? sessionStorage.getItem(CHECKOUT_READING_KEY) : null;
@@ -1014,10 +1045,10 @@ function App() {
       const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
       // 解放済みは保存の上限に数えていないので、外れると上限を超えることがある
       if (savedPartners.filter((x) => !x.unlocked).length + 1 > limit) {
-        showAlert(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
+        showAlert(`⚠️ ${san(before?.name || 'お相手')}は、シングルプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
         return;
       }
-      showConfirm(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n\n解放は生年月日で決まるため、生年月日を変えると、変更後のお相手は解放されていない状態になります（もう一度購入が必要です）。\n元の生年月日（${before?.birth.replace(/-/g, '/')}）の購入はなくならず、元に戻せばまた見れます。\n\n名前・16タイプ・性別だけの変更なら、解放はそのままです。\n\n本当に生年月日を変えますか？`, { okLabel: 'それでも変更する', danger: true }).then(ok => {
+      showConfirm(`⚠️ ${san(before?.name || 'お相手')}は、シングルプランで鑑定を解放したお相手です。\n\n解放は生年月日で決まるため、生年月日を変えると、変更後のお相手は解放されていない状態になります（もう一度購入が必要です）。\n元の生年月日（${before?.birth.replace(/-/g, '/')}）の購入はなくならず、元に戻せばまた見れます。\n\n名前・16タイプ・性別だけの変更なら、解放はそのままです。\n\n本当に生年月日を変えますか？`, { okLabel: 'それでも変更する', danger: true }).then(ok => {
         if (!ok) return;
         confirmedUnlockEditRef.current = true;
         try { saveEditPartner(); } finally { confirmedUnlockEditRef.current = false; }
@@ -1355,7 +1386,7 @@ function App() {
     setRelationship(data.relationship);
     setMode(data.mode);
     pushProfile(); // the input form has just saved the profile on this device
-    trackFortune();
+    trackFortune({ birth: data.myBirth, gender: data.myGender, mbti: data.myMbti });
     if (data.mode === 'match' && data.oppBirth) {
       autoSavePartner({
         name: data.oppName || 'お相手',
@@ -1464,7 +1495,7 @@ function App() {
       }
       scrollMainTo(0);
       if (pendingLPRef.current) {
-        lpFromMailRef.current = true;
+        if (!lpReopenRef.current) lpFromMailRef.current = true;
         openPremiumLP(pendingLPRef.current);
         pendingLPRef.current = null;
       }
@@ -1522,7 +1553,8 @@ function App() {
   // 有料プランの案内を開いた回数（管理画面の集計用）。買い切りで解放できるロックから開いたか（pair）、月額側か（monthly）も送る
   useEffect(() => {
     if (showPremiumLP) {
-      trackPremiumView(premiumLPFocus, lpFromMailRef.current);
+      if (lpReopenRef.current) lpReopenRef.current = false; // 決済から戻って開き直しただけ。同じ訪問なので数えない
+      else trackPremiumView(premiumLPFocus, lpFromMailRef.current);
       lpFromMailRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2710,14 +2742,14 @@ function App() {
             {settingsSubView === 'partners' && (
               <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.65rem' }}>
-                  {/* 買い切りプランのお相手は上限に数えない（canAddPartner と同じ数え方） */}
+                  {/* シングルプランのお相手は上限に数えない（canAddPartner と同じ数え方） */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                     <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
                       保存件数: {savedPartners.filter((x) => !x.unlocked).length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
                     </span>
                     {savedPartners.some((x) => x.unlocked) && (
                       <span style={{ fontSize: '0.68rem', color: '#e2c074', lineHeight: 1.5 }}>
-                        ＋ 買い切りプランのお相手 {savedPartners.filter((x) => x.unlocked).length}人（保存件数とは別）
+                        ＋ シングルプランのお相手 {savedPartners.filter((x) => x.unlocked).length}人（保存件数とは別）
                       </span>
                     )}
                   </div>
@@ -2799,7 +2831,7 @@ function App() {
                               <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
                               {partner.unlocked && (
                                 <div style={{ fontSize: '0.7rem', color: '#f2c27a', lineHeight: 1.6 }}>
-                                  ⚠️ 買い切りプランを購入したお相手です。生年月日を変えると、解放の対象から外れます（名前・16タイプ・性別の変更は大丈夫です）。
+                                  ⚠️ シングルプランを購入したお相手です。生年月日を変えると、解放の対象から外れます（名前・16タイプ・性別の変更は大丈夫です）。
                                 </div>
                               )}
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -3005,7 +3037,7 @@ function App() {
                                   border: '1px solid rgba(111, 176, 143, 0.35)',
                                   fontWeight: '600'
                                 }}>
-                                  ✦ 買い切りプラン購入済み
+                                  ✦ シングルプラン購入済み
                                 </span>
                               )}
                             </div>
@@ -3040,7 +3072,7 @@ function App() {
                               onClick={() => {
                                 // 買い切りで解放したお相手は、消す前にはっきり知らせる（購入は消えない＝同じ生年月日で占えばまた見れる）
                                 const confirmText = partner.unlocked
-                                  ? `⚠️ ${san(partner.name)}は、買い切りプランで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見れます。\n\n本当に削除しますか？`
+                                  ? `⚠️ ${san(partner.name)}は、シングルプランで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見れます。\n\n本当に削除しますか？`
                                   : `${san(partner.name)}の保存データを削除しますか？`;
                                 showConfirm(confirmText, { okLabel: partner.unlocked ? 'それでも削除する' : '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
@@ -3282,7 +3314,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
+                  <span style={{ color: 'white' }}>〒162-0054 東京都新宿区河田町3-52-2</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
@@ -3294,7 +3326,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
                   <span style={{ color: '#a9a49a', flexShrink: 0 }}>販売価格</span>
-                  <span style={{ color: 'white', fontWeight: 'bold', textAlign: 'right' }}>プレミアムプラン: 月額980円 (税込)<br />お相手1人の深層鑑定（買い切り）: 680円 (税込)</span>
+                  <span style={{ color: 'white', fontWeight: 'bold', textAlign: 'right' }}>プレミアムプラン: 月額980円 (税込)<br />シングルプラン（お相手1人・買い切り）: 680円 (税込)</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>契約期間・自動更新</span>
@@ -3356,7 +3388,7 @@ function App() {
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>5. 苦情・相談対応体制</h4>
                   <p>個人情報の取扱いに関するご質問、苦情、相談等は下記窓口までお申し出ください。<br/>
                   【苦情・相談窓口】Ill株式会社（担当：須藤 涼弥）<br/>
-                  所在地：東京都渋谷区代々木２丁目２４−８<br/>
+                  所在地：〒162-0054 東京都新宿区河田町3-52-2<br/>
                   連絡先：support@tsuki-to-ren.com</p>
                 </div>
               </div>
@@ -3379,7 +3411,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
+                  <span style={{ color: 'white' }}>〒162-0054 東京都新宿区河田町3-52-2</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>

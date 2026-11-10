@@ -309,7 +309,7 @@ test('track: the first fortune / first paid-plan page of a session also counts a
   await send({ type: 'premium_view', plan: 'monthly', first: '0', ff: '0', via: 'mail' });
   await send({ type: 'premium_view', plan: 'pair', first: '0', ff: '0', via: 'mail' });
   assert.equal(db.writes.length, 7, 'still one write per event');
-  const keys = db.writes.map((w) => Object.keys(w.data).filter((k) => !['date', 'bySource', 'byLanding', 'byDevice'].includes(k)).sort());
+  const keys = db.writes.map((w) => Object.keys(w.data).filter((k) => !['date', 'bySource', 'byLanding', 'byDevice', 'byFortuneAttr'].includes(k)).sort());
   assert.deepEqual(keys, [
     ['fortuneSessions', 'fortunes'], ['fortunes'],
     ['premiumViewFortuneSessions', 'premiumViewSessions', 'premiumViews', 'premiumViewsPair'], ['premiumViews'],
@@ -397,4 +397,62 @@ test('track: a paid lock seen after a fortune is counted as one person (lockView
   await track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'lock_view', source: 'x', landing: 'home', device: 'mobile_browser' } }, mockRes(), { db });
   assert.equal(db.writes.length, 1);
   assert.equal(Object.keys(db.writes[0].data).filter((k) => !['date', 'bySource', 'byLanding', 'byDevice'].includes(k)).join(), 'lockViewSessions');
+});
+
+test('track: the first fortune of a visit counts the person\'s gender / age band / MBTI; later ones and odd values do not add keys', async () => {
+  const db = mockDb();
+  const send = (body) => track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'fortune', source: 'x', landing: 'home', device: 'mobile_browser', ...body } }, mockRes(), { db });
+  await send({ first: '1', g: 'male', a: '20_24', m: 'infp' });
+  await send({ first: '0', g: 'male', a: '20_24', m: 'INFP' });
+  await send({ first: '1', g: 'x', a: '1999-01-01', m: 'UNKNOWN' });
+  await send({ first: '1' });
+  assert.equal(db.writes.length, 4, 'still one write per event');
+  assert.deepEqual(Object.keys(db.writes[0].data.byFortuneAttr).sort(), ['a_20_24', 'g_male', 'm_INFP']);
+  assert.equal(db.writes[1].data.byFortuneAttr, undefined);
+  assert.deepEqual(Object.keys(db.writes[2].data.byFortuneAttr).sort(), ['a_unknown', 'g_unknown', 'm_unknown']);
+  assert.deepEqual(Object.keys(db.writes[3].data.byFortuneAttr).sort(), ['a_unknown', 'g_unknown', 'm_unknown']);
+});
+
+test('age band: the same cut on the server and in the browser (JST, birthday not yet reached)', async () => {
+  const { ageBandFromBirth } = await import('../api/_lib/analytics.js');
+  const { ageBand } = await import('../src/services/analytics.ts');
+  const now = new Date('2026-11-09T16:00:00Z'); // 2026-11-10 01:00 JST
+  const cases = [['2006-11-10', '20_24'], ['2006-11-11', 'u20'], ['2006-11-09', '20_24'], ['2002-01-01', '20_24'], ['2001-11-10', '25_29'], ['2001-11-11', '20_24'], ['1996-05-05', '30_34'], ['1990-01-01', '35_39'], ['1980-01-01', '40s'], ['1960-01-01', '50p'], ['', 'unknown'], ['2030-01-01', 'unknown'], ['1999/04/13', '25_29']];
+  for (const [birth, band] of cases) {
+    assert.equal(ageBandFromBirth(birth, now), band, birth);
+    assert.equal(ageBand(birth, now), band, birth);
+  }
+});
+
+test('admin: members carry gender / age band / MBTI from their saved profile, never the birth date', async () => {
+  const auth = {
+    verifyIdToken: async () => ({ email: 'owner@example.com', email_verified: true }),
+    listUsers: async () => ({ users: [
+      { uid: 'a', email: 'a@example.com', providerData: [], metadata: {} },
+      { uid: 'b', email: 'b@example.com', providerData: [], metadata: {} },
+      { uid: 'c', email: 'c@example.com', providerData: [], metadata: {} },
+    ] }),
+  };
+  const empty = { docs: [] };
+  const docs = {
+    userData: { docs: [
+      { id: 'a', data: () => ({ profile: { birth: '1999-04-13', gender: 'female', mbti: 'INFP' } }) },
+      { id: 'b', data: () => ({ profile: { birth: '1985-01-01', gender: 'male', mbti: 'UNKNOWN' } }) },
+    ] },
+    subscriptions: { docs: [{ id: 'b', data: () => ({ myMbti: 'ENTJ' }) }] },
+  };
+  const query = { get: async () => empty, orderBy: () => ({ limit: () => ({ get: async () => empty }) }) };
+  const db = { collection: (name) => ({
+    where: () => query, get: async () => docs[name] || empty, orderBy: query.orderBy,
+    doc: () => ({ get: async () => ({ data: () => undefined }) }),
+  }) };
+  const res = mockRes();
+  await admin({ method: 'GET', headers: { authorization: 'Bearer x' }, query: {} }, res, { auth, db, adminEmails: 'owner@example.com' });
+  assert.equal(res.code, 200);
+  const by = Object.fromEntries(res.body.users.map((u) => [u.uid, [u.gender, u.age, u.type]]));
+  assert.equal(by.a[0], 'female');
+  assert.equal(by.a[2], 'INFP');
+  assert.deepEqual([by.b[0], by.b[1], by.b[2]], ['male', '40s', 'ENTJ']);
+  assert.deepEqual(by.c, ['unknown', 'unknown', 'unknown']);
+  assert.ok(!JSON.stringify(res.body).includes('1999-04-13'), 'no birth date in the answer');
 });

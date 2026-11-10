@@ -108,7 +108,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
               本サービスでは、月額利用プラン等の有料サブスクリプション機能（以下「有料プラン」）を提供しています。
               <ul style={{ margin: '0.4rem 0 0 1rem', padding: 0, listStyle: 'disc' }}>
                 <li style={{ marginBottom: '0.35rem' }}><strong>契約期間と更新</strong>：有料プランは月額980円（税込）、お申し込み日を起算日とする1か月ごとの自動継続型サブスクリプションサービスです（無料お試し期間はありません）。更新日までに解約手続きが行われない場合、自動的に1か月延長更新され、更新日に決済が行われます。</li>
-                <li style={{ marginBottom: '0.35rem' }}><strong>買い切り商品</strong>：「お相手1人の深層鑑定」は680円（税込）の1回払いで、自動更新はありません。購入したお相手（生年月日で判定）について、トリセツ・深層鑑定・6つの相性グラフを期間の定めなくご利用いただけます。今日の相性など毎日変わる内容は購入日（日本時間）のみご利用いただけます。サービスを終了する場合は、あらかじめサービス内にて通知します。</li>
+                <li style={{ marginBottom: '0.35rem' }}><strong>買い切り商品</strong>：「シングルプラン」（お相手1人の深層鑑定）は680円（税込）の1回払いで、自動更新はありません。購入したお相手（生年月日で判定）について、トリセツ・深層鑑定・6つの相性グラフを期間の定めなくご利用いただけます。今日の相性など毎日変わる内容は購入日（日本時間）のみご利用いただけます。サービスを終了する場合は、あらかじめサービス内にて通知します。</li>
                 <li style={{ marginBottom: '0.35rem' }}><strong>返金・キャンセルポリシー</strong>：デジタルコンテンツの特性上、決済完了後のお客様都合によるキャンセル・返金・日割り計算による払戻しには応じかねます。ただし、当社システムに明らかな瑕疵（サービスが利用できない重大な不具合等）が認められた場合、または当社に帰責性がある過剰課金が発生した場合は、事実確認のうえ速やかに返金または決済取消対応を行います。</li>
                 <li style={{ marginBottom: '0.35rem' }}><strong>解約手続き</strong>：ユーザーはアプリ内の設定画面等からいつでも自動更新の停止（解約）手続きが可能です。解約手続き完了後も、現在の有効期間満了日までは有料機能を引き続きご利用いただけます。</li>
                 <li style={{ marginBottom: '0.35rem' }}><strong>料金の変更</strong>：運営者は有料プランの価格を変更することがあります。価格変更を行う場合は、あらかじめサービス内にてユーザーに通知します。</li>
@@ -212,7 +212,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
               <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <strong>【個人情報苦情・相談窓口】</strong><br />
                 ・運営事業者：Ill株式会社<br />
-                ・所在地：東京都渋谷区代々木２丁目２４−８<br />
+                ・所在地：〒162-0054 東京都新宿区河田町3-52-2<br />
                 ・代表責任者：須藤 涼弥<br />
                 ・メールアドレス：support@tsuki-to-ren.com
               </div>
@@ -257,7 +257,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>所在地</td>
-                  <td style={{ color: '#e7e1d5' }}>東京都渋谷区代々木２丁目２４−８</td>
+                  <td style={{ color: '#e7e1d5' }}>〒162-0054 東京都新宿区河田町3-52-2</td>
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>お問合せ</td>
@@ -265,7 +265,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
-                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年10月27日）</td>
+                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年11月10日）</td>
                 </tr>
               </tbody>
             </table>

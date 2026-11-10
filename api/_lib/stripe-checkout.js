@@ -6,6 +6,21 @@ import { guestPurchaseEmail } from './checkout-claim.js';
 import { attributionMetadata } from './analytics.js';
 
 const BIRTH_RE = /^\d{4}-\d{2}-\d{2}$/;
+const SITE = 'https://www.tsuki-to-ren.com';
+
+// 特商法の「最終確認画面」用: Stripe の決済画面（申し込みボタンを押す画面）の支払いボタンの下に、
+// 料金・支払い時期・自動更新・解約方法・返金・規約への同意を出す（custom_text.submit、1200字まで・Markdownのリンク可）。
+// アプリ側の購入ボタン付近の説明（src/components/PurchaseTerms.tsx）と同じ内容にそろえる。
+const LEGAL_LINKS = `お支払いにより、[利用規約](${SITE}/terms)・[プライバシーポリシー](${SITE}/privacy)に同意したものとみなします。`;
+// 特商法表記へのリンクは Stripe が画面の一番下に出す（Stripe管理画面の公開情報に登録済み）ので、ここには書かない
+export const SUBSCRIPTION_TERMS =
+  '月額980円（税込）。本日1回目をお支払いいただき、以後は毎月同じ日に自動で更新・決済されます（無料お試し期間はありません）。' +
+  'マイページからいつでも解約でき、解約後も期間の終わりまでご利用いただけます。お客様都合による返金・日割りの払い戻しはできません。' +
+  LEGAL_LINKS;
+export const PAIR_TERMS =
+  'シングルプラン（お相手1人の深層鑑定）：680円（税込）の1回払いです。自動更新・継続課金はありません。お支払い後すぐにご覧いただけます。' +
+  'お客様都合による返金はできません。' +
+  LEGAL_LINKS;
 
 // Starts a Premium sign-up: creates a Stripe Checkout session and returns its URL.
 // Signed in: the account's uid goes on the session (and subscription), so the webhook knows whose it is.
@@ -58,6 +73,7 @@ export default async function handler(req, res, deps = {}) {
         payment_intent_data: { metadata },
         metadata,
         locale: 'ja',
+        custom_text: { submit: { message: PAIR_TERMS } },
         success_url: done('pair'),
         cancel_url: withParam(back, 'pair', 'cancel')
       });
@@ -74,6 +90,7 @@ export default async function handler(req, res, deps = {}) {
       subscription_data: { metadata },
       metadata: { ...metadata, ...attrib },
       locale: 'ja',
+      custom_text: { submit: { message: SUBSCRIPTION_TERMS } },
       success_url: done('premium'),
       cancel_url: withParam(back, 'premium', 'cancel')
     });

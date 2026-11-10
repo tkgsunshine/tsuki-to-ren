@@ -174,7 +174,7 @@ export function renderPairPromo(sub) {
                   <td align="center" style="padding: 16px 18px 18px; text-align: center;">
                     <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 15px; font-weight: bold; color: #f2c98a; letter-spacing: 0.08em;">${who}のこと、もっと深く</div>
                     <div style="font-size: 12px; color: #cbd5e1; line-height: 1.8; margin-top: 8px;">
-                      ${who}のトリセツ（惹かれるファッション・ドキッとさせる仕草など）と深層鑑定を、<strong style="color: #fef08a;">買い切り680円</strong>でずっと見られます。
+                      ${who}のトリセツ（惹かれるファッション・ドキッとさせる仕草など）と深層鑑定を、<strong style="color: #fef08a;">シングルプラン（買い切り680円）</strong>でずっと見られます。
                     </div>
                     <div style="margin-top: 12px;">
                       <a href="${esc(premiumLpUrlFor(sub, 'pair'))}" style="display: inline-block; padding: 9px 20px; border: 1px solid ${GOLD}; color: ${GOLD}; font-size: 12px; font-weight: bold; text-decoration: none; border-radius: 20px; letter-spacing: 0.04em;">${who}の深層鑑定を見る &#10132;</a>
@@ -202,7 +202,7 @@ export function renderPartnerTeaser(sub, teaser) {
                       <a href="${esc(premiumLpUrlFor(sub))}" style="display: inline-block; padding: 9px 20px; border: 1px solid ${GOLD}; color: ${GOLD}; font-size: 12px; font-weight: bold; text-decoration: none; border-radius: 20px; letter-spacing: 0.04em;">プレミアムの詳細を見る &#10132;</a>
                     </div>${teaser.pairOffer ? `
                     <div style="font-size: 12px; line-height: 1.7; margin-top: 12px;">
-                      <a href="${esc(premiumLpUrlFor(sub, 'pair'))}" style="color: #cbd5e1; text-decoration: underline;">${who}のことだけ深く知るなら、買い切り680円も &#10132;</a>
+                      <a href="${esc(premiumLpUrlFor(sub, 'pair'))}" style="color: #cbd5e1; text-decoration: underline;">${who}のことだけ深く知るなら、シングルプラン（買い切り680円）も &#10132;</a>
                     </div>` : ''}
                   </td>
                 </tr>

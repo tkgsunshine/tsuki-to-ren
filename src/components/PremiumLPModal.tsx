@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { PurchaseTerms } from './PurchaseTerms';
 import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
@@ -17,10 +18,10 @@ const benefits = [
     color: '#5d9fc0',
     title: '10年先までの、二人の未来の流れ',
     shot: '/assets/premium/timeline-line.webp',
-    shotAlt: '7日間・月ごと・年ごとの相性の折れ線グラフの画面',
+    shotAlt: '14日間・月ごと・年ごとの相性の折れ線グラフの画面',
     // 画面イメージは縦長なので、10年先（年次）のグラフのところを見せる
-    shotPos: '50% 54%',
-    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの7日間と月ごとの波も見れるので、近い予定から先の人生まで、見すえて動けますよ。'
+    shotPos: '50% 58%',
+    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの14日間と月ごとの波も見れるので、近い予定から先の人生まで、見すえて動けますよ。'
   },
   {
     Icon: Send,
@@ -433,7 +434,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   // 買い切りで「今日」の内容が見れるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
-  const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 54%', d: 'この先10年の年ごとの流れと、明日からの7日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
+  const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 58%', d: 'この先10年の年ごとの流れと、明日からの14日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
 
   // 上（2プランの比べ方）と下（画面下に固定）で同じボタンを出す。下では「解放済み」は出さない
   const renderPlanButtons = (showUnlocked: boolean) => (
@@ -513,8 +514,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   const faqs = [
     ...(pair ? [{
-      q: '買い切り（680円）と月額の違いは？',
-      a: `買い切りは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見れます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      q: 'シングルプラン（680円・買い切り）と月額の違いは？',
+      a: `シングルプランは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見れます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
@@ -664,7 +665,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 gap: '0.6rem'
               }}>
                 <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>
-                  お相手1人だけなら ¥680/買い切りも
+                  お相手1人だけなら シングルプラン（¥680/買い切り）も
                 </p>
                 <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
                   気になる人1人のトリセツ・深層鑑定・相性グラフを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見れます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
@@ -752,20 +753,19 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textAlign: 'center' }}>
                   <div style={{ padding: '0.55rem 0.5rem', textAlign: 'left' }}>できること</div>
                   {(pairFirst
-                    ? ['買い切り\nプラン\n¥680', 'プレミアム\nプラン\n¥980/月']
-                    : ['プレミアム\nプラン\n¥980/月', '買い切り\nプラン\n¥680']
+                    ? ['シングル\nプラン\n¥680', 'プレミアム\nプラン\n¥980/月']
+                    : ['プレミアム\nプラン\n¥980/月', 'シングル\nプラン\n¥680']
                   ).map((h, i) => (
                     <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4, whiteSpace: 'pre-line', fontSize: '0.72rem' }}>{h}</div>
                   ))}
                 </div>
                 {[
-                  { label: '10年先までの二人の流れ（結婚・転機の年）、7日間・月ごとの波', pair: null, monthly: '◯' },
+                  { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', pair: null, monthly: '◯' },
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
                   { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
-                  { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
                   { label: 'お相手の保存', pair: '2人', monthly: '10人' }
                 ].map((row, idx) => {
@@ -781,18 +781,18 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 })}
               </div>
               <p style={{ fontSize: '0.68rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.5rem 0 0.8rem' }}>
-                ※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥680で買ったお相手は2人の枠に数えません）。
+                ※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。
               </p>
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
-                  {pair.name}のことを今日じっくり知りたいなら、¥680で十分ですよ。<br />
-                  毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。<br />
-                  どちらも会員登録なしで購入できます。
+                  {pair.name}のことを今日じっくり知りたいなら、シングルプランで十分ですよ。<br />
+                  毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。
                 </CharBubble>
               </div>
+              <PurchaseTerms plans={pair.unlocked ? ['monthly'] : ['monthly', 'pair']} style={{ marginBottom: '0.6rem' }} />
               {renderPlanButtons(true)}
               <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                ¥680は1回払いで、自動更新はありません。お相手は生年月日で決まります。
+                シングルプランのお相手は生年月日で決まります。
               </p>
             </div>
           )}
@@ -867,10 +867,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   {pairNote && (
                     <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
                       {pairNote === 'pairAll'
-                        ? `¥680の買い切りでも見れます（${pair ? pairWho : "お相手1人"}だけ）`
+                        ? `シングルプラン（¥680）でも見れます（${pair ? pairWho : "お相手1人"}だけ）`
                         : pairNote === 'pairLucky'
-                          ? `¥680の買い切りでも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見れます`
-                          : '¥680の買い切りは購入日だけ'}
+                          ? `シングルプラン（¥680）でも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見れます`
+                          : 'シングルプラン（¥680）は購入日だけ'}
                     </span>
                   )}
                   <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
@@ -926,6 +926,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
             {/* 料金の枠ごとゴールドのボタンにする。未購読は申し込み（Stripe決済）、購読中・解約済みはStripeのお支払い画面へ（下の固定ボタンと同じ動き）。
                 上でプランを見比べているとき（お相手あり）は、同じ月額ボタンが2つにならないよう出さない */}
+            {!(showPlans && pair) && !isSubscribed && (
+              <PurchaseTerms plans={['monthly']} style={{ marginBottom: '0.6rem' }} />
+            )}
             {!(showPlans && pair) && (
             <button
               type="button"
@@ -1133,7 +1136,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </button>
             </div>
           ) : (
-            renderPlanButtons(false)
+            <>
+              {renderPlanButtons(false)}
+              <PurchaseTerms compact plans={pair && !pair.unlocked ? ['monthly', 'pair'] : ['monthly']} />
+            </>
           )}
         </div>
         )}

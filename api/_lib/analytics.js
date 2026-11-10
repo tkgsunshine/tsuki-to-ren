@@ -63,6 +63,34 @@ export const FORTUNE_VIEW_METRIC = 'premiumViewFortuneSessions';
 export const SALES_METRIC = 'salesYen'; // 本番の購入額（円、Stripe の amount_total）。月額は初回分のみ（更新の請求は入らない）
 export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'auth_open', 'lock_view', 'lp_exit', 'lp_leave', 'ref_send']);
 
+// 鑑定した人の属性（入力画面の「あなた」の性別・年代・MBTI）。生年月日は送らず、ブラウザで年代にしてから送る。
+// 訪問ごとの最初の鑑定（first='1'、fortuneSessions と同じ人数）だけ、日の書き込みの byFortuneAttr に g_*・a_*・m_* で数える（2026-11-10〜）
+export const GENDERS = new Set(['female', 'male']);
+// 年代（src/services/analytics.ts の ageBand と合わせる）
+export const AGE_BANDS = ['u20', '20_24', '25_29', '30_34', '35_39', '40s', '50p'];
+export const MBTI_TYPES = new Set(['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP']);
+export const normalizeGender = (v) => (GENDERS.has(String(v ?? '')) ? String(v) : 'unknown');
+export const normalizeAgeBand = (v) => (AGE_BANDS.includes(String(v ?? '')) ? String(v) : 'unknown');
+// 'UNKNOWN'（わからない・未選択）も 'unknown' にまとめる
+export const normalizeMbti = (v) => { const s = String(v ?? '').toUpperCase(); return MBTI_TYPES.has(s) ? s : 'unknown'; };
+export const fortuneAttrKeys = (body = {}) => [`g_${normalizeGender(body.g)}`, `a_${normalizeAgeBand(body.a)}`, `m_${normalizeMbti(body.m)}`];
+/** 生年月日（YYYY-MM-DD）→ 今日（日本時間）の年齢の年代。読めない日付は 'unknown' */
+// 今日（日本時間）時点の満年齢。生年月日が無い・おかしいときは null
+export function ageFromBirth(birth, now = new Date()) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birth || '').replace(/\//g, '-'));
+  if (!m) return null;
+  const today = jstDate(now);
+  const [ty, tmd] = [Number(today.slice(0, 4)), today.slice(5)];
+  const age = ty - Number(m[1]) - (tmd < `${m[2]}-${m[3]}` ? 1 : 0);
+  return age >= 0 && age < 120 ? age : null;
+}
+
+export function ageBandFromBirth(birth, now = new Date()) {
+  const age = ageFromBirth(birth, now);
+  if (age === null) return 'unknown';
+  return age < 20 ? 'u20' : age < 25 ? '20_24' : age < 30 ? '25_29' : age < 35 ? '30_34' : age < 40 ? '35_39' : age < 50 ? '40s' : '50p';
+}
+
 // Fixed list so a forged request cannot add arbitrary keys (utm:* is the one open slot, kept short).
 export const SOURCES = new Set([
   'direct', 'google', 'yahoo', 'bing', 'x', 'instagram', 'line', 'facebook', 'threads', 'tiktok',
@@ -105,7 +133,7 @@ export function jstDate(d = new Date()) {
 
 // Still one write per event: every breakdown is a field of the same day document
 // also = more counters bumped by the same event (first-of-session, plan); yen = purchase amount added to salesYen
-export async function recordEvent(db, { type, source, landing, device, channel, regPlace, lpExit, lpLeave, date = jstDate(), also = [], yen = 0 }) {
+export async function recordEvent(db, { type, source, landing, device, channel, regPlace, lpExit, lpLeave, fortuneAttr, date = jstDate(), also = [], yen = 0 }) {
   const metric = METRICS[type];
   if (!metric) throw new Error(`Unknown event type: ${type}`);
   const inc = FieldValue.increment(1);
@@ -121,7 +149,8 @@ export async function recordEvent(db, { type, source, landing, device, channel, 
     ...(type === 'share' && channel ? { byShare: { [channel]: inc } } : {}),
     ...(regPlace ? { byReg: { [regPlace]: inc } } : {}),
     ...(lpExit ? { byLpExit: Object.fromEntries(lpExit.map((k) => [k, inc])) } : {}),
-    ...(lpLeave ? { byLpLeave: Object.fromEntries(lpLeave.map((k) => [k, inc])) } : {})
+    ...(lpLeave ? { byLpLeave: Object.fromEntries(lpLeave.map((k) => [k, inc])) } : {}),
+    ...(fortuneAttr ? { byFortuneAttr: Object.fromEntries(fortuneAttr.map((k) => [k, inc])) } : {})
   }, { merge: true });
 }
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { PurchaseTerms } from './PurchaseTerms';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { trackLockView, trackRegStep } from '../services/analytics';
@@ -139,6 +140,9 @@ export const formatAppraisalText = (text: string | undefined | null): string => 
   // 5. Clean up multiple newlines to single newline \n
   return formatted.replace(/\n{2,}/g, '\n').trim();
 };
+
+// 結果画面の「月の温室で相談する」などチャットへの誘導の箱。非表示にした（TAKASHI判断 2026-11-10）。戻すときは true に
+const SHOW_RESULT_CHAT_CTA: boolean = false;
 
 // 共有リンクから開いたときに上に出し続けるバーの高さ
 const SHARED_BAR_HEIGHT = '3rem';
@@ -321,21 +325,22 @@ const splitAdvicePreview = (text: string | undefined): { head: string; restLengt
   const cut = ADVICE_PREVIEW_CHARS;
   return { head: t.slice(0, cut), restLength: Math.max(12, t.length - cut) };
 };
-// 7日間・月次・年次の点数も、見れない人にはダミーの値で描く（本物の点数を画面に置かない）
-const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82];
+// 14日間・月次・年次の点数も、見れない人にはダミーの値で描く（本物の点数を画面に置かない）
+const LOCKED_SCORES = [72, 85, 64, 90, 78, 68, 82, 75, 61, 88, 70, 93, 66, 80];
 const lockedScore = (score: number, index: number, locked: boolean): number => (locked ? LOCKED_SCORES[index % LOCKED_SCORES.length] : score);
 
-// 未来予測スケジュール（7日間・月次・年次）の点数の折れ線グラフ。
+// 未来予測スケジュール（14日間・月次・年次）の点数の折れ線グラフ。
 // 縦軸は、そのグラフに出る点数の最低〜最高に合わせる（旧版は40〜100点固定で、6点差が約6pxにしかならず平らに見えた）。
 // 差が小さいときに大げさに見えないよう、縦軸の幅は最低 SCORE_LINE_MIN_SPAN 点ぶん取る。各点の上に点数を出しているので、数字で差は読める。
 const SCORE_LINE_HEIGHT_PX = 84;
 const SCORE_LINE_MIN_SPAN = 20;
 const SCORE_LINE_PAD = 0.12; // 上下の端に点が張り付かないよう、高さの12%ずつ空ける
-const ScoreLineChart = ({ items, locked }: { items: { key: string; label: string; score: number }[]; locked: boolean }) => {
+// range を渡すと縦軸をそれに合わせる（14日間を7日ずつ2段に分けて描くとき、2段の縦軸をそろえるため）。
+const ScoreLineChart = ({ items, locked, range }: { items: { key: string; label: string; score: number }[]; locked: boolean; range?: { lo: number; hi: number } }) => {
   const n = items.length;
   const scores = items.map((item) => item.score);
-  const lo = Math.min(...scores);
-  const hi = Math.max(...scores);
+  const lo = range ? range.lo : Math.min(...scores);
+  const hi = range ? range.hi : Math.max(...scores);
   const span = Math.max(hi - lo, SCORE_LINE_MIN_SPAN);
   const axisMin = (lo + hi) / 2 - span / 2;
   const pos = items.map((item, i) => {
@@ -1007,7 +1012,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   };
 
   // 買い切り（お相手1人 ¥680）。変わらない鑑定（トリセツ・深層鑑定・6つの相性グラフ・年次の流れ）は deepOpen、
-  // 毎日変わる内容（本日のアプローチ助言・二人のLINEのコツ）は todayOpen で開く。7日間・月次・朝メール・チャットは月額だけ。
+  // 毎日変わる内容（本日のアプローチ助言・二人のLINEのコツ）は todayOpen で開く。14日間・月次・朝メール・チャットは月額だけ。
   const pairOpen = hasOpponent && !sharedBy && pairUnlock?.unlocked === true;
   const deepOpen = isSubscribed || pairOpen;
   // 友達紹介で開く項目（2026-11-08 TAKASHI）: 返信が遅いときのおすすめの返し方・生まれ持った星から見た二人の相性（恋愛運MAX日は LuckyDaysSection）
@@ -1171,7 +1176,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     ...(hasOpponent && activeResult?.opponentPillar ? [`${partnerCall}ってこんな人（性格・恋愛の傾向）`] : []),
     // お相手ありの「性格・コミュニケーションの相性」「月/蓮からのメッセージ」「深層鑑定」は、無料会員でもぼかす（プレミアムで開く。TAKASHI判断 2026-11-07）ので、登録の箱には出さない
     ...(!hasOpponent && hasCommSection ? ['二人の性格・コミュニケーションの相性の全文'] : []),
-    ...(!hasOpponent ? ['月・蓮からのメッセージの全文', `深層鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`] : []),
+    ...(!hasOpponent ? ['今日の恋の過ごし方の全文', `深層鑑定の続き（${lockedTopicNames.join('・') || '伏せている部分'}）`] : []),
     ...(hasOpponent ? [`${partnerCall}との今日の相性を7日間`] : []),
     '月・蓮へのチャット相談（1日2回）',
   ];
@@ -2109,7 +2114,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {activeResult.topics.slice(0, 1).map((topic) => (
             <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
               <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                {renderCharHeading(topic.title, 36)}
+                {/* 見出しは「今日の恋の過ごし方」（内容が分かる名前に。旧「月/蓮から〇〇さんへ」）。絵文字はキャラのアイコンに置き換える */}
+                <CharHeadingIcon char={topic.title.startsWith('🔮') ? '蓮' : '月'} size={36} />
+                {topic.title.replace(/^(🌙|🔮)\s*/u, '')}
               </h3>
               <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {/* 未登録・無料会員は1行だけ見せ、2行目以降をぼかす（TAKASHI判断 2026-11-07） */}
@@ -2329,102 +2336,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
             })()}
           </div>
         </div>
-
-        {/* 最高シンクロ日・恋愛運MAX日（LINEの吉時間・コツの欄のすぐ下。根拠・珍しさは全員に、日付は月額プレミアムか、そのお相手の買い切り） */}
-        <LuckyDaysSection
-          result={activeResult}
-          isSubscribed={isSubscribed}
-          pairOpen={pairOpen}
-          myName={myName}
-          oppName={oppNickname}
-          onLockClick={handleLockTagClick}
-          onPairLockClick={handleDeepLockClick}
-          lockWord={LOCK_WORD}
-          soloOpen={!sharedBy && referral?.unlocked === true}
-          soloGift={!sharedBy && referralGift}
-          referral={!sharedBy && referral ? {
-            status: referral.status,
-            loading: referral.loading,
-            onOpen: referral.onOpen,
-            showCodeEntry: referral.showCodeEntry,
-            onRedeem: referral.onRedeem
-          } : undefined}
-        />
       </div>
 
-        {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ */}
-        {onOpenChat && !sharedBy && (() => {
-          const isRen = selectedChar === 'ren';
-          const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
-          const oppLabel = hasOpponent ? san(oppNickname) : '';
-          const lead = hasOpponent
-            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考えるよ。` : `今日のこと、もう少しお話ししませんか？${oppLabel}に送る一言も、一緒に考えましょう。`)
-            : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
-          const questions = hasOpponent
-            ? [`${oppLabel}に今日なんて送ればいい？`, `${oppLabel}の本音や脈ありサインは？`]
-            : ['今日の恋愛運をもっと活かすには？', '出会いを増やすにはどう動けばいい？'];
-          return (
-            <div className="glass-panel" style={{
-              padding: '1rem',
-              border: `1.5px solid rgba(${charColor}, 0.35)`,
-              background: `linear-gradient(135deg, rgba(${charColor}, 0.1) 0%, rgba(12, 16, 23, 0.85) 100%)`
-            }}>
-              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
-                <img
-                  src={isRen ? '/assets/ren.webp' : '/assets/tsuki.webp'}
-                  alt={isRen ? '蓮' : '月'}
-                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid var(${isRen ? '--color-ren' : '--color-tsuki'})`, flexShrink: 0 }}
-                />
-                <div style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px 12px 12px 12px', padding: '0.5rem 0.65rem', fontSize: '0.76rem', color: '#e8e3d8', lineHeight: '1.6' }}>
-                  <div style={{ color: isRen ? '#9cc6d8' : '#cdbfe2', fontWeight: 'bold', fontSize: '0.7rem', marginBottom: '2px' }}>{isRen ? '蓮' : '月'}</div>
-                  {lead}
-                </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', margin: '0.65rem 0 0.6rem' }}>
-                {questions.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => onOpenChat(q)}
-                    style={{
-                      fontSize: '0.74rem',
-                      color: isRen ? '#cfe6f0' : '#e4d8f2',
-                      border: `1px solid rgba(${charColor}, 0.45)`,
-                      borderRadius: '999px',
-                      padding: '0.45rem 0.8rem',
-                      background: `rgba(${charColor}, 0.1)`,
-                      textAlign: 'left',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    💬 {q}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="font-serif"
-                onClick={() => onOpenChat()}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '0.7rem',
-                  borderRadius: '999px',
-                  border: 'none',
-                  fontWeight: 'bold',
-                  fontSize: '0.85rem',
-                  color: isRen ? '#0f1a22' : '#1b1626',
-                  background: isRen ? 'linear-gradient(90deg, #8cc3dc, #3a86ab)' : 'linear-gradient(90deg, #c9b3e6, #9f86c0)',
-                  cursor: 'pointer'
-                }}
-              >
-                {isRen ? '📖 蓮の書斎で相談する' : '🌙 月の温室で相談する'}
-              </button>
-            </div>
-          );
-        })()}
-
-        {/* 5 Detailed Appraisal Topics */}
+        {/* 5 Detailed Appraisal Topics（LINE吉時間の下・最高シンクロ日の上。TAKASHI判断 2026-11-10） */}
         <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
           <MoonMark size={18} />
           {hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : `${san(myName, 'あなた')}の深層鑑定結果`}
@@ -2635,6 +2549,99 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </React.Fragment>
           );
         })}
+
+        {/* 最高シンクロ日・恋愛運MAX日（深層鑑定結果のすぐ下。LINEの吉時間の箱からは外した（TAKASHI判断 2026-11-10）。根拠・珍しさは全員に、日付は月額プレミアムか、そのお相手の買い切り） */}
+        <LuckyDaysSection
+          result={activeResult}
+          isSubscribed={isSubscribed}
+          pairOpen={pairOpen}
+          myName={myName}
+          oppName={oppNickname}
+          onLockClick={handleLockTagClick}
+          onPairLockClick={handleDeepLockClick}
+          lockWord={LOCK_WORD}
+          soloOpen={!sharedBy && referral?.unlocked === true}
+          soloGift={!sharedBy && referralGift}
+          referral={!sharedBy && referral ? {
+            status: referral.status,
+            loading: referral.loading,
+            onOpen: referral.onOpen,
+            showCodeEntry: referral.showCodeEntry,
+            onRedeem: referral.onRedeem
+          } : undefined}
+        />
+
+        {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ。結果画面では非表示（TAKASHI判断 2026-11-10。チャットタブは残す） */}
+        {SHOW_RESULT_CHAT_CTA && onOpenChat && !sharedBy && (() => {
+          const isRen = selectedChar === 'ren';
+          const charColor = isRen ? '58, 134, 171' : '159, 134, 192';
+          const oppLabel = hasOpponent ? san(oppNickname) : '';
+          const lead = hasOpponent
+            ? (isRen ? `迷ったら、まず状況を整理しよう。${oppLabel}への次の一手、一緒に考えるよ。` : `今日のこと、もう少しお話ししませんか？${oppLabel}に送る一言も、一緒に考えましょう。`)
+            : (isRen ? '今日の流れをどう活かすか、一緒に整理しよう。' : '今日の恋のこと、もう少し一緒にお話ししませんか？');
+          const questions = hasOpponent
+            ? [`${oppLabel}に今日なんて送ればいい？`, `${oppLabel}の本音や脈ありサインは？`]
+            : ['今日の恋愛運をもっと活かすには？', '出会いを増やすにはどう動けばいい？'];
+          return (
+            <div className="glass-panel" style={{
+              padding: '1rem',
+              border: `1.5px solid rgba(${charColor}, 0.35)`,
+              background: `linear-gradient(135deg, rgba(${charColor}, 0.1) 0%, rgba(12, 16, 23, 0.85) 100%)`
+            }}>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                <img
+                  src={isRen ? '/assets/ren.webp' : '/assets/tsuki.webp'}
+                  alt={isRen ? '蓮' : '月'}
+                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid var(${isRen ? '--color-ren' : '--color-tsuki'})`, flexShrink: 0 }}
+                />
+                <div style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px 12px 12px 12px', padding: '0.5rem 0.65rem', fontSize: '0.76rem', color: '#e8e3d8', lineHeight: '1.6' }}>
+                  <div style={{ color: isRen ? '#9cc6d8' : '#cdbfe2', fontWeight: 'bold', fontSize: '0.7rem', marginBottom: '2px' }}>{isRen ? '蓮' : '月'}</div>
+                  {lead}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', margin: '0.65rem 0 0.6rem' }}>
+                {questions.map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => onOpenChat(q)}
+                    style={{
+                      fontSize: '0.74rem',
+                      color: isRen ? '#cfe6f0' : '#e4d8f2',
+                      border: `1px solid rgba(${charColor}, 0.45)`,
+                      borderRadius: '999px',
+                      padding: '0.45rem 0.8rem',
+                      background: `rgba(${charColor}, 0.1)`,
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    💬 {q}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="font-serif"
+                onClick={() => onOpenChat()}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '0.7rem',
+                  borderRadius: '999px',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '0.85rem',
+                  color: isRen ? '#0f1a22' : '#1b1626',
+                  background: isRen ? 'linear-gradient(90deg, #8cc3dc, #3a86ab)' : 'linear-gradient(90deg, #c9b3e6, #9f86c0)',
+                  cursor: 'pointer'
+                }}
+              >
+                {isRen ? '📖 蓮の書斎で相談する' : '🌙 月の温室で相談する'}
+              </button>
+            </div>
+          );
+        })()}
 
         {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
       {activeResult.opponentTorisetsu && (
@@ -3055,10 +3062,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold' }}>プレミアムなら、買い切りの分に加えて</div>
+                  <div style={{ fontSize: '0.74rem', color: '#f2e2b3', fontWeight: 'bold' }}>プレミアムなら、シングルプランの分に加えて</div>
                   {[
                     `今日の相性とLINEの送り方が、今日だけでなく毎日読める`,
-                    `送るタイミングを逃さない、これからの7日間・月ごとの流れ`,
+                    `送るタイミングを逃さない、これからの14日間・月ごとの流れ`,
                     `結婚や大きな転機の年が分かる、10年先までの流れ`,
                     `毎朝の運勢メールが全文で届く`,
                     `${partnerCall}のことを、月と蓮にいつでも相談`,
@@ -3127,7 +3134,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>これからの7日間・月ごと・年ごとの流れ</strong></span>
+                    <span><strong>これからの14日間・月ごと・年ごとの流れ</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
@@ -3183,8 +3190,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで続きを見る`}
                     </button>
                     <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      自動更新はありません。お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
+                      お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
                     </div>
+                    <PurchaseTerms plans={['pair']} />
                   </div>
                 )}
               </div>
@@ -3221,16 +3229,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
-            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? `今後7日間の${san(oppNickname)}との相性` : `今後7日間の${san(myName, 'あなた')}の運気`} {!isSubscribed && '(プレミアム限定)'}</span>
+            <span style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>● {hasOpponent ? `今後14日間の${san(oppNickname)}との相性` : `今後14日間の${san(myName, 'あなた')}の運気`} {!isSubscribed && '(プレミアム限定)'}</span>
             <div style={{ position: 'relative', marginTop: '0.5rem' }}>
-              <ScoreLineChart
-                locked={!isSubscribed}
-                items={activeResult.weeklyScores.map((day, index) => ({
+              {(() => {
+                // 14日分を1段に並べるとスマホ幅で日付・点数が重なるので、7日ずつ2段に分ける（縦軸は2段で共通）
+                const items = activeResult.weeklyScores.map((day, index) => ({
                   key: day.day,
                   label: index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day,
                   score: lockedScore(day.score, index, !isSubscribed)
-                }))}
-              />
+                }));
+                const scores = items.map((item) => item.score);
+                const range = { lo: Math.min(...scores), hi: Math.max(...scores) };
+                const rows = [items.slice(0, 7), items.slice(7)].filter((row) => row.length > 0);
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {rows.map((row, i) => (
+                      <ScoreLineChart key={i} locked={!isSubscribed} items={row} range={range} />
+                    ))}
+                  </div>
+                );
+              })()}
               {!isSubscribed && (
                 <div className="premium-lock-overlay" style={{ borderRadius: '8px' }} data-paid-lock onClick={handleLockTagClick}>
                   <button 
@@ -3449,7 +3467,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </h3>
                 <p style={{ fontSize: '0.72rem', color: '#d5cfc3', lineHeight: '1.5', margin: 0 }}>
                   {pairOpen
-                    ? `月額980円で、明日からの7日間・月ごとの波から、結婚や大きな転機が分かる10年先の流れまで、${san(oppNickname)}との未来をいつでも確かめられます。`
+                    ? `月額980円で、明日からの14日間・月ごとの波から、結婚や大きな転機が分かる10年先の流れまで、${san(oppNickname)}との未来をいつでも確かめられます。`
                     : '月額980円で、今後の運勢バイオリズムや恋愛成就へのロードマップをいつでも確認できます。'}
                 </p>
               </div>
@@ -3458,9 +3476,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 {(pairOpen
                   ? [
-                      <><strong>これからの7日間・月ごとの流れ</strong></>,
+                      <><strong>これからの14日間・月ごとの流れ</strong></>,
                       <><strong>10年先までの年ごとの流れ</strong>（結婚・大きな転機の年）</>,
-                      <><strong>今日の相性とLINEの送り方を毎日</strong>（買い切りは購入日だけ）</>,
+                      <><strong>今日の相性とLINEの送り方を毎日</strong>（シングルプランは購入日だけ）</>,
                       <><strong>月 ＆ 蓮へのチャット相談が無制限</strong></>,
                       <><strong>お相手の保存が10人まで</strong>（ほかのお相手のトリセツも全部読める）</>
                     ]
