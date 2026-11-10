@@ -766,7 +766,6 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
-                  { label: '毎朝の運勢メール', pair: '冒頭', monthly: '全文' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
                   { label: 'お相手の保存', pair: '2人', monthly: '10人' }
                 ].map((row, idx) => {
@@ -782,7 +781,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 })}
               </div>
               <p style={{ fontSize: '0.68rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.5rem 0 0.8rem' }}>
-                ※ メールの冒頭・チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。
+                ※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。
               </p>
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
