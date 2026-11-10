@@ -96,8 +96,9 @@ type BenefitItem = {
   Icon: typeof Calendar;
   color: string;
   title: string;
-  shot: string;
-  shotAlt: string;
+  /** 画面イメージ。無い項目は画像を出さない */
+  shot?: string;
+  shotAlt?: string;
   shotPos?: string;
   pairNote?: 'pairToday' | 'pairLucky' | 'pairAll';
   body: string;
@@ -111,10 +112,8 @@ type BenefitItem = {
 const unlimitedBenefit = (pairWho: string): BenefitItem => ({
   Icon: Users,
   color: '#d4af37',
-  title: '気になる人なら誰でも、何人でも、全部見れる',
-  shot: '/assets/premium/torisetsu.webp',
-  shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
-  body: `シングルプランで見れるのは${pairWho}1人だけ。プレミアムなら、トリセツ・深層鑑定・6つの相性グラフ、惹かれるファッションとドキッとさせる仕草、2人の最高シンクロ日を、気になる人なら誰とでも、何人でも全部見れます。`
+  title: '誰でも無制限に、全ての機能が見れる',
+  body: `シングルプランで見れるのは${pairWho}1人だけ。プレミアムなら、気になる人なら誰とでも、何人でも、全ての機能が見れます。`
 });
 
 const sectionTitleStyle: React.CSSProperties = {
@@ -937,11 +936,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   </p>
                 </div>
               </div>
-                {/* 実際の画面の参考スクショ（ダミーデータ）。タップで全体を拡大 */}
+                {/* 実際の画面の参考スクショ（ダミーデータ）。タップで全体を拡大（画像のない項目は出さない） */}
+                {shot && (
                 <button
                   type="button"
                   aria-label={`${shotAlt}を拡大して見る`}
-                  onClick={() => setZoomShot({ src: shot, alt: shotAlt })}
+                  onClick={() => setZoomShot({ src: shot, alt: shotAlt || '' })}
                   style={{
                     position: 'relative',
                     display: 'block',
@@ -964,6 +964,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   <SampleBadge />
                   <ZoomHint />
                 </button>
+                )}
               </div>
             ))}
           </div>
