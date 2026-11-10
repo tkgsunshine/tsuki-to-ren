@@ -839,7 +839,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </p>
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
-                  {pair.name === 'お相手' ? '1人のお相手' : `${pair.name}1人`}のことを今日じっくり知りたいなら、シングルプランで十分ですよ。<br />
+                  {pair.name === 'お相手' ? '1人のお相手' : `${pair.name}1人`}のことを今日じっくり知りたいなら、シングルプランですよ。<br />
                   毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。
                 </CharBubble>
               </div>
