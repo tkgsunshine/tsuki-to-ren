@@ -51,10 +51,9 @@ const labelsOf = (marks: LuckMark[] | undefined): string[] => {
 };
 
 const FALLBACK_LABEL = '運気が追い風';
-const pairLabels = (x: LuckyDay): string[] => {
-  const all = [...new Set([...labelsOf(x.me), ...labelsOf(x.partner)])];
-  return all.length > 1 ? all.filter((t) => t !== FALLBACK_LABEL) : all;
-};
+// 2人の最高シンクロ日のタグは日ごとに出さず、決め打ちの一式を一覧の上に1回だけ出す（2026-11-10 TAKASHI「ほぼ一緒だから全部1か所に」）。
+// 実際に重なる星は日によって違う（3000組の試算で1日平均3.1個）ので、「日によって重なり方は変わります」を添える。日の選び方・点数は変えない。
+const PAIR_FIXED_LABELS: string[] = (['love', 'tentoku', 'kango', 'shigo', 'teio', 'kenroku', 'seiki'] as LuckMark[]).map((k) => LUCK_MARK_LABELS[k]);
 
 const chipStyle: React.CSSProperties = {
   fontSize: '0.72rem', fontWeight: 'bold', color: '#f5d77a', lineHeight: 1.4,
@@ -113,12 +112,8 @@ function DayList({ days, locked, showPair, onLockClick, lockWord, commonLabels =
               : formatLuckyDate(x.day)}
             {x.sango && <span style={{ ...badgeStyle, marginLeft: '0.5rem', fontSize: '0.68rem' }}>{LUCK_MARK_LABELS.sango}</span>}
           </span>
-          {showPair ? (
-            // あなた・お相手で分けず、二人ぶんのタグをまとめて出す（2026-11-07 TAKASHI）
-            <Chips labels={pairLabels(x)} />
-          ) : (
-            <Chips labels={labelsOf(x.me).filter((t) => !commonLabels.includes(t))} />
-          )}
+          {/* 2人の最高シンクロ日は、行ごとのタグを出さない（一覧の上に一式をまとめて出す 2026-11-10 TAKASHI） */}
+          {!showPair && <Chips labels={labelsOf(x.me).filter((t) => !commonLabels.includes(t))} />}
           {locked && !rowLocked && <span style={{ fontSize: '0.7rem', color: '#bfb8a8' }}>🎁 お友達の招待のプレゼント</span>}
         </div>
       ); })}
@@ -178,6 +173,13 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
               ? <>これから1年のうち、2人の最高シンクロ日は<span style={goldCount}>{pairDays.length}日</span>あります。</>
               : 'これから1年のうちには、2人の最高シンクロ日はありません。'}
           </p>
+          {pairDays.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              <span style={{ fontSize: '0.74rem', color: '#f3efe6', fontWeight: 'bold' }}>シンクロ日に重なる星</span>
+              <Chips labels={PAIR_FIXED_LABELS} />
+              <span style={{ fontSize: '0.68rem', color: '#bfb8a8' }}>※日によって重なり方は変わります</span>
+            </div>
+          )}
           <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
         </div>
       )}
