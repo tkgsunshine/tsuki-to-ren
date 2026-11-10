@@ -20,7 +20,7 @@ const benefits = [
     shot: '/assets/premium/timeline-line.webp',
     shotAlt: '14日間・月ごと・年ごとの相性の折れ線グラフの画面',
     // 画面イメージは縦長なので、10年先（年次）のグラフのところを見せる
-    shotPos: '50% 54%',
+    shotPos: '50% 58%',
     body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの14日間と月ごとの波も見れるので、近い予定から先の人生まで、見すえて動けますよ。'
   },
   {
@@ -434,7 +434,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   // 買い切りで「今日」の内容が見れるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
-  const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 54%', d: 'この先10年の年ごとの流れと、明日からの14日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
+  const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 58%', d: 'この先10年の年ごとの流れと、明日からの14日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
 
   // 上（2プランの比べ方）と下（画面下に固定）で同じボタンを出す。下では「解放済み」は出さない
   const renderPlanButtons = (showUnlocked: boolean) => (
