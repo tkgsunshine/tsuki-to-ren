@@ -514,8 +514,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
 
   const faqs = [
     ...(pair ? [{
-      q: '買い切り（680円）と月額の違いは？',
-      a: `買い切りは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見れます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      q: 'シングルプラン（680円・買い切り）と月額の違いは？',
+      a: `シングルプランは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見れます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
@@ -665,7 +665,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 gap: '0.6rem'
               }}>
                 <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>
-                  お相手1人だけなら ¥680/買い切りも
+                  お相手1人だけなら シングルプラン（¥680/買い切り）も
                 </p>
                 <p style={{ margin: 0, fontSize: '0.72rem', color: '#d8d2c6', lineHeight: 1.7 }}>
                   気になる人1人のトリセツ・深層鑑定・相性グラフを、ずっと読めます。買った日は今日の相性とLINEの助言も全部見れます。お相手と鑑定すると、結果の画面からその場で購入できます（会員登録なしでもOK）。
@@ -753,8 +753,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textAlign: 'center' }}>
                   <div style={{ padding: '0.55rem 0.5rem', textAlign: 'left' }}>できること</div>
                   {(pairFirst
-                    ? ['買い切り\nプラン\n¥680', 'プレミアム\nプラン\n¥980/月']
-                    : ['プレミアム\nプラン\n¥980/月', '買い切り\nプラン\n¥680']
+                    ? ['シングル\nプラン\n¥680', 'プレミアム\nプラン\n¥980/月']
+                    : ['プレミアム\nプラン\n¥980/月', 'シングル\nプラン\n¥680']
                   ).map((h, i) => (
                     <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4, whiteSpace: 'pre-line', fontSize: '0.72rem' }}>{h}</div>
                   ))}
@@ -781,11 +781,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 })}
               </div>
               <p style={{ fontSize: '0.68rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.5rem 0 0.8rem' }}>
-                ※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（¥680で買ったお相手は2人の枠に数えません）。
+                ※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。
               </p>
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
-                  {pair.name}のことを今日じっくり知りたいなら、¥680で十分ですよ。<br />
+                  {pair.name}のことを今日じっくり知りたいなら、シングルプラン（¥680）で十分ですよ。<br />
                   毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。<br />
                   どちらも会員登録なしで購入できます。
                 </CharBubble>
@@ -793,7 +793,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               <PurchaseTerms plans={pair.unlocked ? ['monthly'] : ['monthly', 'pair']} style={{ marginBottom: '0.6rem' }} />
               {renderPlanButtons(true)}
               <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                ¥680のお相手は生年月日で決まります。
+                シングルプランのお相手は生年月日で決まります。
               </p>
             </div>
           )}
@@ -868,10 +868,10 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   {pairNote && (
                     <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
                       {pairNote === 'pairAll'
-                        ? `¥680の買い切りでも見れます（${pair ? pairWho : "お相手1人"}だけ）`
+                        ? `シングルプラン（¥680）でも見れます（${pair ? pairWho : "お相手1人"}だけ）`
                         : pairNote === 'pairLucky'
-                          ? `¥680の買い切りでも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見れます`
-                          : '¥680の買い切りは購入日だけ'}
+                          ? `シングルプラン（¥680）でも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見れます`
+                          : 'シングルプラン（¥680）は購入日だけ'}
                     </span>
                   )}
                   <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>

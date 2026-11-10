@@ -1045,10 +1045,10 @@ function App() {
       const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
       // 解放済みは保存の上限に数えていないので、外れると上限を超えることがある
       if (savedPartners.filter((x) => !x.unlocked).length + 1 > limit) {
-        showAlert(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
+        showAlert(`⚠️ ${san(before?.name || 'お相手')}は、シングルプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
         return;
       }
-      showConfirm(`⚠️ ${san(before?.name || 'お相手')}は、買い切りプランで鑑定を解放したお相手です。\n\n解放は生年月日で決まるため、生年月日を変えると、変更後のお相手は解放されていない状態になります（もう一度購入が必要です）。\n元の生年月日（${before?.birth.replace(/-/g, '/')}）の購入はなくならず、元に戻せばまた見れます。\n\n名前・16タイプ・性別だけの変更なら、解放はそのままです。\n\n本当に生年月日を変えますか？`, { okLabel: 'それでも変更する', danger: true }).then(ok => {
+      showConfirm(`⚠️ ${san(before?.name || 'お相手')}は、シングルプランで鑑定を解放したお相手です。\n\n解放は生年月日で決まるため、生年月日を変えると、変更後のお相手は解放されていない状態になります（もう一度購入が必要です）。\n元の生年月日（${before?.birth.replace(/-/g, '/')}）の購入はなくならず、元に戻せばまた見れます。\n\n名前・16タイプ・性別だけの変更なら、解放はそのままです。\n\n本当に生年月日を変えますか？`, { okLabel: 'それでも変更する', danger: true }).then(ok => {
         if (!ok) return;
         confirmedUnlockEditRef.current = true;
         try { saveEditPartner(); } finally { confirmedUnlockEditRef.current = false; }
@@ -2742,14 +2742,14 @@ function App() {
             {settingsSubView === 'partners' && (
               <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.65rem' }}>
-                  {/* 買い切りプランのお相手は上限に数えない（canAddPartner と同じ数え方） */}
+                  {/* シングルプランのお相手は上限に数えない（canAddPartner と同じ数え方） */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                     <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
                       保存件数: {savedPartners.filter((x) => !x.unlocked).length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
                     </span>
                     {savedPartners.some((x) => x.unlocked) && (
                       <span style={{ fontSize: '0.68rem', color: '#e2c074', lineHeight: 1.5 }}>
-                        ＋ 買い切りプランのお相手 {savedPartners.filter((x) => x.unlocked).length}人（保存件数とは別）
+                        ＋ シングルプランのお相手 {savedPartners.filter((x) => x.unlocked).length}人（保存件数とは別）
                       </span>
                     )}
                   </div>
@@ -2831,7 +2831,7 @@ function App() {
                               <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>生年月日 (数字8桁)</label>
                               {partner.unlocked && (
                                 <div style={{ fontSize: '0.7rem', color: '#f2c27a', lineHeight: 1.6 }}>
-                                  ⚠️ 買い切りプランを購入したお相手です。生年月日を変えると、解放の対象から外れます（名前・16タイプ・性別の変更は大丈夫です）。
+                                  ⚠️ シングルプランを購入したお相手です。生年月日を変えると、解放の対象から外れます（名前・16タイプ・性別の変更は大丈夫です）。
                                 </div>
                               )}
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -3037,7 +3037,7 @@ function App() {
                                   border: '1px solid rgba(111, 176, 143, 0.35)',
                                   fontWeight: '600'
                                 }}>
-                                  ✦ 買い切りプラン購入済み
+                                  ✦ シングルプラン購入済み
                                 </span>
                               )}
                             </div>
@@ -3072,7 +3072,7 @@ function App() {
                               onClick={() => {
                                 // 買い切りで解放したお相手は、消す前にはっきり知らせる（購入は消えない＝同じ生年月日で占えばまた見れる）
                                 const confirmText = partner.unlocked
-                                  ? `⚠️ ${san(partner.name)}は、買い切りプランで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見れます。\n\n本当に削除しますか？`
+                                  ? `⚠️ ${san(partner.name)}は、シングルプランで鑑定を解放したお相手です。\n\n削除すると「保存したお相手」の一覧から消えます。\n購入はなくならないので、同じ生年月日で占い直せば、解放された鑑定をまた見れます。\n\n本当に削除しますか？`
                                   : `${san(partner.name)}の保存データを削除しますか？`;
                                 showConfirm(confirmText, { okLabel: partner.unlocked ? 'それでも削除する' : '削除する', danger: true }).then(ok => {
                                   if (ok) handleDeletePartner(partner.id);
@@ -3326,7 +3326,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
                   <span style={{ color: '#a9a49a', flexShrink: 0 }}>販売価格</span>
-                  <span style={{ color: 'white', fontWeight: 'bold', textAlign: 'right' }}>プレミアムプラン: 月額980円 (税込)<br />お相手1人の深層鑑定（買い切り）: 680円 (税込)</span>
+                  <span style={{ color: 'white', fontWeight: 'bold', textAlign: 'right' }}>プレミアムプラン: 月額980円 (税込)<br />シングルプラン（お相手1人・買い切り）: 680円 (税込)</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>契約期間・自動更新</span>

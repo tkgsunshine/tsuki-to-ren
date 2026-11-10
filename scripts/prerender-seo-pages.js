@@ -352,7 +352,7 @@ writePage(
             <tr><th style="${td} text-align: left; color: #9ca3af;">運営</th><td style="${td}"><a href="/company" style="color: #e2c074;">${esc(SERVICE.operator)}</a></td></tr>
             <tr><th style="${td} text-align: left; color: #9ca3af;">URL</th><td style="${td}">${BASE_URL}/</td></tr>
             <tr><th style="${td} text-align: left; color: #9ca3af;">使い方</th><td style="${td}">ブラウザで開くだけ（スマホのホーム画面にも追加できます）</td></tr>
-            <tr><th style="${td} text-align: left; color: #9ca3af;">料金</th><td style="${td}">鑑定は無料。プレミアムプラン 月額980円／お相手1人の買い切り 680円</td></tr>
+            <tr><th style="${td} text-align: left; color: #9ca3af;">料金</th><td style="${td}">鑑定は無料。プレミアムプラン 月額980円／シングルプラン（お相手1人の買い切り）680円</td></tr>
           </tbody>
         </table>
 
@@ -415,7 +415,7 @@ writePage(
           'offers': [
             { '@type': 'Offer', 'name': '鑑定（無料）', 'price': '0', 'priceCurrency': 'JPY' },
             { '@type': 'Offer', 'name': 'プレミアムプラン（月額）', 'price': '980', 'priceCurrency': 'JPY' },
-            { '@type': 'Offer', 'name': 'お相手1人の買い切り', 'price': '680', 'priceCurrency': 'JPY' }
+            { '@type': 'Offer', 'name': 'シングルプラン（お相手1人の買い切り）', 'price': '680', 'priceCurrency': 'JPY' }
           ]
         }
       },
