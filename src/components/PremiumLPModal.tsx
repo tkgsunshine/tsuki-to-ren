@@ -422,7 +422,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   useBackForwardReset(() => setIsProcessing(false));
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [zoomShot, setZoomShot] = useState<{ src: string; alt: string } | null>(null);
-  // 下の固定の購入ボタンは、いきなり出さない。お相手ありは「こんな夜はありませんか？」、それ以外は料金の所まで来たら出す（一度出たら出たまま）
+  // 下の固定の購入ボタンは、いきなり出さない。お相手ありは「こんな夜はありませんか？」、それ以外は料金の所まで来たら出し、それより上に戻ったら消す
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const ctaMarkerRef = useRef<HTMLDivElement | null>(null);
   const [ctaReady, setCtaReady] = useState(false);
@@ -431,13 +431,11 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     const root = scrollRef.current;
     const marker = ctaMarkerRef.current;
     if (!root || !marker) { setCtaReady(true); return; }
-    // 目印（プラン・料金の手前）が画面の下から1/4より上に来たら出す。速くスクロールして通り過ぎた場合も出す
+    // 目印が画面の下から1/4より上に来たら出す。速くスクロールして通り過ぎた場合も出す。
+    // 目印より上に戻ったら消す（2026-11-11 TAKASHI「こんな夜はありませんか？より上に戻ったら非表示」）
     const check = () => {
       const r = root.getBoundingClientRect();
-      if (marker.getBoundingClientRect().top < r.bottom - r.height * 0.25) {
-        setCtaReady(true);
-        root.removeEventListener('scroll', check);
-      }
+      setCtaReady(marker.getBoundingClientRect().top < r.bottom - r.height * 0.25);
     };
     check();
     root.addEventListener('scroll', check, { passive: true });
