@@ -506,8 +506,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 58%', d: 'この先10年の年ごとの流れと、明日からの14日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
 
   // 上（2プランの比べ方）と下（画面下に固定）で同じボタンを出す。下では「解放済み」は出さない
-  const renderPlanButtons = (showUnlocked: boolean) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+  // compact: 画面下の固定ボタン用。ボタンの大きさは変えず、ボタンの間だけ詰める（2026-11-11 TAKASHI「ボタンのサイズはそのままで縦幅を狭く」）
+  const renderPlanButtons = (showUnlocked: boolean, compact = false) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? '0.4rem' : '0.55rem' }}>
       {(pair ? (['monthly', 'pair'] as const) : (['monthly'] as const)).map((kind) =>
         kind === 'monthly' ? (
           <button
@@ -1114,7 +1115,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
         {/* PINNED FIXED BOTTOM CTA FOOTER（未購読の人には、説明を読み終えてから出す） */}
         {(isSubscribed || ctaReady) && (
         <div className="lp-cta-footer" style={{
-          padding: '0.85rem 1.25rem max(1.75rem, calc(0.85rem + env(safe-area-inset-bottom, 24px))) 1.25rem',
+          padding: isSubscribed ? '0.85rem 1.25rem max(1.75rem, calc(0.85rem + env(safe-area-inset-bottom, 24px))) 1.25rem' : '0.55rem 1.25rem max(0.75rem, calc(0.4rem + env(safe-area-inset-bottom, 0px))) 1.25rem',
           background: 'rgba(12, 17, 24, 0.96)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
@@ -1164,8 +1165,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           ) : (
             <>
-              {renderPlanButtons(false)}
-              <PurchaseTerms compact plans={pair && !pair.unlocked ? ['monthly', 'pair'] : ['monthly']} />
+              {renderPlanButtons(false, true)}
+              <PurchaseTerms compact style={{ marginTop: '0.35rem', lineHeight: 1.4 }} plans={pair && !pair.unlocked ? ['monthly', 'pair'] : ['monthly']} />
             </>
           )}
         </div>
