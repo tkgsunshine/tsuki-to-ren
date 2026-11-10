@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PurchaseTerms } from './PurchaseTerms';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star } from 'lucide-react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star, ZoomIn } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
@@ -185,6 +185,32 @@ const SampleBadge: React.FC = () => (
     pointerEvents: 'none'
   }}>
     イメージ（サンプル）
+  </span>
+);
+
+// 画面イメージの右下に重ねる「タップで拡大」。小さく暗い札だと気づかれにくかったので、
+// ゴールドの塗り＋虫めがねのアイコンにして、ゆっくり光らせる（動きを減らす設定の人は光らせない）
+const ZoomHint: React.FC = () => (
+  <span className="shot-zoom-hint" style={{
+    position: 'absolute',
+    right: '0.45rem',
+    bottom: '0.45rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+    padding: '4px 11px 4px 9px',
+    borderRadius: '9999px',
+    background: 'linear-gradient(135deg, #f2d98c 0%, #d4af37 100%)',
+    color: '#1a1230',
+    fontSize: '0.72rem',
+    fontWeight: 'bold',
+    lineHeight: 1.3,
+    letterSpacing: '0.03em',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.6)',
+    pointerEvents: 'none'
+  }}>
+    <ZoomIn size={13} strokeWidth={2.6} aria-hidden="true" />
+    タップで拡大
   </span>
 );
 
@@ -724,9 +750,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     >
                       <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: ('pos' in it && it.pos) || 'top' }} />
                       <SampleBadge />
-                      <span style={{ position: 'absolute', right: '0.4rem', bottom: '0.4rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(5, 7, 10, 0.75)', color: '#e8e3d8', fontSize: '0.6rem' }}>
-                        タップで拡大
-                      </span>
+                      <ZoomHint />
                     </button>
                   </CharBubble>
                 ))}
@@ -760,12 +784,12 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   ))}
                 </div>
                 {[
-                  { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', pair: null, monthly: '◯' },
-                  { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
-                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
+                  { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
+                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
+                  { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', pair: null, monthly: '◯' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
                   { label: 'お相手の保存', pair: '2人', monthly: '5人' }
                 ].map((row, idx) => {
@@ -785,7 +809,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </p>
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
-                  {pair.name}のことを今日じっくり知りたいなら、シングルプランで十分ですよ。<br />
+                  {pair.name === 'お相手' ? '1人のお相手' : `${pair.name}1人`}のことを今日じっくり知りたいなら、シングルプランで十分ですよ。<br />
                   毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。
                 </CharBubble>
               </div>
@@ -903,18 +927,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     style={{ display: 'block', width: '100%', height: '170px', objectFit: 'cover', objectPosition: shotPos || 'top' }}
                   />
                   <SampleBadge />
-                  <span style={{
-                    position: 'absolute',
-                    right: '0.45rem',
-                    bottom: '0.45rem',
-                    padding: '2px 8px',
-                    borderRadius: '9999px',
-                    background: 'rgba(5, 7, 10, 0.75)',
-                    color: '#e8e3d8',
-                    fontSize: '0.62rem'
-                  }}>
-                    タップで拡大
-                  </span>
+                  <ZoomHint />
                 </button>
               </div>
             ))}
