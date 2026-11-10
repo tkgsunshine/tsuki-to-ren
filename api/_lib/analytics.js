@@ -75,13 +75,19 @@ export const normalizeAgeBand = (v) => (AGE_BANDS.includes(String(v ?? '')) ? St
 export const normalizeMbti = (v) => { const s = String(v ?? '').toUpperCase(); return MBTI_TYPES.has(s) ? s : 'unknown'; };
 export const fortuneAttrKeys = (body = {}) => [`g_${normalizeGender(body.g)}`, `a_${normalizeAgeBand(body.a)}`, `m_${normalizeMbti(body.m)}`];
 /** 生年月日（YYYY-MM-DD）→ 今日（日本時間）の年齢の年代。読めない日付は 'unknown' */
-export function ageBandFromBirth(birth, now = new Date()) {
+// 今日（日本時間）時点の満年齢。生年月日が無い・おかしいときは null
+export function ageFromBirth(birth, now = new Date()) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birth || '').replace(/\//g, '-'));
-  if (!m) return 'unknown';
+  if (!m) return null;
   const today = jstDate(now);
   const [ty, tmd] = [Number(today.slice(0, 4)), today.slice(5)];
   const age = ty - Number(m[1]) - (tmd < `${m[2]}-${m[3]}` ? 1 : 0);
-  if (!(age >= 0 && age < 120)) return 'unknown';
+  return age >= 0 && age < 120 ? age : null;
+}
+
+export function ageBandFromBirth(birth, now = new Date()) {
+  const age = ageFromBirth(birth, now);
+  if (age === null) return 'unknown';
   return age < 20 ? 'u20' : age < 25 ? '20_24' : age < 30 ? '25_29' : age < 35 ? '30_34' : age < 40 ? '35_39' : age < 50 ? '40s' : '50p';
 }
 

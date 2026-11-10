@@ -1,6 +1,6 @@
 import { FieldPath, FieldValue } from 'firebase-admin/firestore';
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, DAILY, ageBandFromBirth, jstDate, normalizeGender, normalizeMbti } from './_lib/analytics.js';
+import { ATTRIBUTION, DAILY, ageBandFromBirth, ageFromBirth, jstDate, normalizeGender, normalizeMbti } from './_lib/analytics.js';
 import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
 import { AUDIENCES, NOTICES, validateNotice } from './_lib/notices.js';
@@ -147,9 +147,10 @@ export default async function handler(req, res, deps = {}) {
           lastSignInAt: u.metadata?.lastSignInTime ? new Date(u.metadata.lastSignInTime).toISOString() : null,
           dailyMail: sub ? sub.enabled === true : false,
           mbti: sub?.myMbti && sub.myMbti !== 'UNKNOWN' ? sub.myMbti : null,
-          // 属性の集計用（今のプロフィール）。プロフィールを保存していない会員は unknown。生年月日そのものは返さない
+          // 属性の集計用（今のプロフィール）。プロフィールを保存していない会員は unknown。生年月日そのものは返さない（年齢の数だけ）
           gender: prof ? normalizeGender(prof.gender) : 'unknown',
           age: prof ? ageBandFromBirth(prof.birth) : 'unknown',
+          ageYears: prof ? ageFromBirth(prof.birth) : null, // 会員リストの「年齢」列（今日時点の満年齢）
           type: normalizeMbti(prof?.mbti && prof.mbti !== 'UNKNOWN' ? prof.mbti : sub?.myMbti),
           source: at?.source || null,
           landing: at?.landing || null,
