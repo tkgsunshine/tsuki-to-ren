@@ -1,9 +1,9 @@
 import { FieldPath, FieldValue } from 'firebase-admin/firestore';
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, DAILY, ageBandFromBirth, jstDate, normalizeGender, normalizeMbti } from './_lib/analytics.js';
+import { ATTRIBUTION, DAILY, ageBandFromBirth, ageFromBirth, jstDate, normalizeGender, normalizeMbti } from './_lib/analytics.js';
 import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
-import { AUDIENCES, NOTICES, validateNotice } from './_lib/notices.js';
+import { AUDIENCES, AUTO_NOTICES, AUTO_SETTINGS, AUTO_SETTINGS_DOC, NOTICES, readAutoSettings, validateAutoNotice, validateNotice } from './_lib/notices.js';
 
 // Data for the admin page (/admin): daily counters, and the member list (with each member's premium state).
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
@@ -12,6 +12,7 @@ import { AUDIENCES, NOTICES, validateNotice } from './_lib/notices.js';
 // POST { action: 'ownerMark', uid, owner } marks a member as the owner's own account, left out of the member counts.
 // POST { action: 'noticeSend', to: 'all' | 'members' | uid, title, body, link } sends an in-app お知らせ (to everyone, to signed-in members only, or to one member).
 // POST { action: 'noticeDelete', id } takes one back (it disappears from the app).
+// POST { action: 'autoNoticeSave', kind, title, body, link, enabled? } saves the text of an automatic お知らせ (sign-up / purchase / referral); empty = the default text.
 // Accounts whose email is in ADMIN_EMAILS (also with a +alias, e.g. name+1@) count as the owner's without a mark.
 const OWNERS = 'adminSettings'; // doc 'owners': { uids: [...] }
 const MAX_USER_PAGES = 20; // 20 x 1000 accounts
@@ -83,6 +84,20 @@ export default async function handler(req, res, deps = {}) {
         const ref = await db.collection(NOTICES).add(doc);
         return res.status(200).json({ status: 'success', notice: { id: ref.id, ...doc } });
       }
+      if (body.action === 'autoNoticeSave') {
+        const checked = validateAutoNotice(body);
+        if (checked.error) return res.status(400).json({ status: 'error', message: checked.error });
+        const { kind, ...fields } = checked.value;
+        const at = new Date(deps.now ?? Date.now()).toISOString();
+        const saved = { ...fields, updatedAt: at };
+        if (fields.enabled === true) {
+          // 「送る」にした時刻。これより前に登録した会員には送らない（いったん止めて戻しても、元の時刻のまま）
+          const prev = (await readAutoSettings(db))[kind];
+          saved.enabledAt = prev?.enabledAt || at;
+        }
+        await db.collection(AUTO_SETTINGS).doc(AUTO_SETTINGS_DOC).set({ [kind]: saved }, { merge: true });
+        return res.status(200).json({ status: 'success', kind, saved });
+      }
       if (body.action === 'noticeDelete') {
         const noticeId = String(body.id || '');
         if (!/^[A-Za-z0-9]{1,40}$/.test(noticeId)) return res.status(400).json({ status: 'error', message: '不正なリクエストです' });
@@ -103,7 +118,7 @@ export default async function handler(req, res, deps = {}) {
     const from = jstDate(new Date(Date.now() - (offset + days - 1) * 86400 * 1000));
     const inPeriod = (d) => d.id <= to; // the query already starts at `from`; days after `to` are dropped here
 
-    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap, pairSnap, userDataSnap] = await Promise.all([
+    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap, pairSnap, userDataSnap, autoSettings] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection('subscriptions').get(),
       db.collection(ATTRIBUTION).get(),
@@ -113,7 +128,8 @@ export default async function handler(req, res, deps = {}) {
       db.collection(OWNERS).doc('owners').get(),
       db.collection(NOTICES).orderBy('createdAt', 'desc').limit(MAX_NOTICES).get(),
       db.collection('pairUnlocks').get(), // _lib/pair-unlock.js PAIR_UNLOCKS（買い切りの購入）
-      db.collection('userData').get() // _lib/user-data.js USER_DATA（会員のプロフィール。性別・年代・MBTIの集計に使う。生年月日は返さない）
+      db.collection('userData').get(), // _lib/user-data.js USER_DATA（会員のプロフィール。性別・年代・MBTIの集計に使う。生年月日は返さない）
+      readAutoSettings(db) // 自動で送るお知らせの、書き換えた文
     ]);
 
     const subs = new Map(subsSnap.docs.map((d) => [d.id, d.data()]));
@@ -147,9 +163,10 @@ export default async function handler(req, res, deps = {}) {
           lastSignInAt: u.metadata?.lastSignInTime ? new Date(u.metadata.lastSignInTime).toISOString() : null,
           dailyMail: sub ? sub.enabled === true : false,
           mbti: sub?.myMbti && sub.myMbti !== 'UNKNOWN' ? sub.myMbti : null,
-          // 属性の集計用（今のプロフィール）。プロフィールを保存していない会員は unknown。生年月日そのものは返さない
+          // 属性の集計用（今のプロフィール）。プロフィールを保存していない会員は unknown。生年月日そのものは返さない（年齢の数だけ）
           gender: prof ? normalizeGender(prof.gender) : 'unknown',
           age: prof ? ageBandFromBirth(prof.birth) : 'unknown',
+          ageYears: prof ? ageFromBirth(prof.birth) : null, // 会員リストの「年齢」列（今日時点の満年齢）
           type: normalizeMbti(prof?.mbti && prof.mbti !== 'UNKNOWN' ? prof.mbti : sub?.myMbti),
           source: at?.source || null,
           landing: at?.landing || null,
@@ -189,8 +206,17 @@ export default async function handler(req, res, deps = {}) {
       // In-app お知らせ sent so far (to everyone and to single members)
       notices: noticeSnap.docs.map((d) => {
         const v = d.data();
-        return { id: d.id, to: v.to, title: v.title, body: v.body, link: v.link || '', createdAt: v.createdAt || null };
-      })
+        return { id: d.id, to: v.to, title: v.title, body: v.body, link: v.link || '', auto: v.auto || null, createdAt: v.createdAt || null };
+      }),
+      // 自動で送るお知らせ（会員登録・購入・友達紹介）: 元の文と、/admin で書き換えた文（空欄 = 元の文）
+      autoNotices: Object.entries(AUTO_NOTICES).map(([kind, m]) => ({
+        kind,
+        label: m.label,
+        when: m.when,
+        optional: m.optional === true,
+        defaults: { title: m.defaults.title, body: m.defaults.body, link: m.defaults.link || '' },
+        saved: autoSettings?.[kind] || null
+      }))
     });
   } catch (e) {
     console.error('❌ Admin data failed:', e?.message);

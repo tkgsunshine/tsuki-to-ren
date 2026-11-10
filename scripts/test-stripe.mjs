@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import Stripe from 'stripe';
-import checkout from '../api/_lib/stripe-checkout.js';
+import checkout, { SUBSCRIPTION_TERMS, PAIR_TERMS } from '../api/_lib/stripe-checkout.js';
 import portal from '../api/_lib/stripe-portal.js';
 import status from '../api/_lib/stripe-status.js';
 import webhook from '../api/_lib/stripe-webhook.js';
@@ -82,6 +82,14 @@ test('checkout creates a subscription session tied to the account', async () => 
   assert.equal(params.subscription_data.metadata.uid, 'u1');
   assert.equal(params.customer_email, 'a@example.com');
   assert.equal(params.success_url, 'https://www.tsuki-to-ren.com/result?mn=a&premium=success');
+  // 特商法の最終確認画面: 支払いボタンの下に自動更新・解約方法・規約への同意を出す（Stripe の上限は1200字）
+  assert.equal(params.custom_text.submit.message, SUBSCRIPTION_TERMS);
+  for (const t of [SUBSCRIPTION_TERMS, PAIR_TERMS]) {
+    assert.ok(t.length <= 1200);
+    assert.ok(t.includes('https://www.tsuki-to-ren.com/terms') && t.includes('https://www.tsuki-to-ren.com/privacy'));
+  }
+  assert.match(SUBSCRIPTION_TERMS, /自動で更新/);
+  assert.match(SUBSCRIPTION_TERMS, /いつでも解約/);
 });
 
 test('a preview build sends the member back to the preview', async () => {

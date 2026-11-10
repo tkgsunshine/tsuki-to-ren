@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, signInWithGoogle, logOutUser } from '../services/firebase';
 import { COLUMNS_DATA } from '../data/columnsData';
+import { mbtiOptions } from '../constants/mbti';
 import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../services/analytics';
 
 // Admin page (/admin): visits, fortunes, sign-ups, shares and premium (page → payment page → paid) per day,
@@ -52,6 +53,7 @@ interface Member {
   // 属性の集計用（今のプロフィールから。プロフィール未保存は unknown）。生年月日そのものは受け取らない
   gender?: string;
   age?: string;
+  ageYears?: number | null; // 今日時点の満年齢（生年月日なしは null）
   type?: string;
 }
 interface ChatDay {
@@ -80,6 +82,15 @@ interface SentNotice {
   link: string;
   createdAt: string | null;
 }
+interface AutoNoticeText { title: string; body: string; link: string }
+interface AutoNotice {
+  kind: string;
+  label: string;
+  when: string;
+  optional: boolean; // 「送る／送らない」を選べる（会員登録のお礼）
+  defaults: AutoNoticeText;
+  saved: (Partial<AutoNoticeText> & { enabled?: boolean; enabledAt?: string; updatedAt?: string }) | null;
+}
 interface AdminData {
   from: string;
   to: string;
@@ -89,6 +100,7 @@ interface AdminData {
   truncated: boolean;
   inquiries?: Inquiry[];
   notices?: SentNotice[];
+  autoNotices?: AutoNotice[];
 }
 
 const INQUIRY_CATEGORIES: Record<string, string> = {
@@ -195,11 +207,11 @@ const regDetail = (reg: Record<string, number>, prefix: string) =>
     .map(([k, n]) => `${REG_LABELS[k] || k} ${n}`).join('・');
 
 const toCsv = (rows: Member[]) => {
-  const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', 'プレミアム', '買い切り(人)', '流入元', '入口ページ', '端末'];
+  const head = ['登録日時(JST)', 'メール', '名前', 'ログイン方法', '最終ログイン(JST)', '毎朝メール', '16タイプ', '年齢', 'プレミアム', '買い切り(人)', '流入元', '入口ページ', '端末'];
   const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
   const lines = rows.map((m) => [
     jst(m.createdAt), m.email || '', m.name || '', m.guest ? '購入用（自動）' : PROVIDER_LABELS[m.provider] || m.provider, jst(m.lastSignInAt),
-    m.dailyMail ? 'ON' : 'OFF', m.mbti || '', premiumLabel(m.premium), String(m.pairs?.live || 0), m.source ? sourceLabel(m.source) : '', m.landing ? landingLabel(m.landing) : '',
+    m.dailyMail ? 'ON' : 'OFF', m.mbti || '', m.ageYears != null ? String(m.ageYears) : '', premiumLabel(m.premium), String(m.pairs?.live || 0), m.source ? sourceLabel(m.source) : '', m.landing ? landingLabel(m.landing) : '',
     m.device ? deviceLabel(m.device) : '',
   ].map(esc).join(','));
   return '﻿' + [head.map(esc).join(','), ...lines].join('\n');
@@ -398,6 +410,89 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
           {n.link && <div style={c.muted}>リンク: {n.link}</div>}
         </div>
       ))}
+    </div>
+  );
+}
+
+// 自動で送るお知らせ（会員登録・購入・友達紹介）の文。空欄の項目は元の文で送る。
+// 書き換えはこれから送る分だけに効く（もう届いたお知らせは変わらない）。
+function AutoNoticeEditor({ item, onSave }: {
+  item: AutoNotice;
+  onSave: (kind: string, v: AutoNoticeText & { enabled?: boolean }) => Promise<boolean>;
+}) {
+  const s = item.saved || {};
+  const d = item.defaults;
+  // 欄には今送っている文（書き換えていなければ元の文）を入れておく。元の文と同じ項目は空で保存する（＝元の文を使う）
+  const [title, setTitle] = useState(s.title || d.title);
+  const [body, setBody] = useState(s.body || d.body);
+  const [link, setLink] = useState(s.link || d.link);
+  const toSave = () => ({ title: title.trim() === d.title ? '' : title, body: body.trim() === d.body ? '' : body, link: link.trim() === d.link ? '' : link });
+  const [enabled, setEnabled] = useState(s.enabled === true);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState('');
+  const next = toSave();
+  const changed = next.title !== (s.title || '') || next.body !== (s.body || '') || next.link !== (s.link || '') || (item.optional && enabled !== (s.enabled === true));
+  const custom = Boolean(s.title || s.body || s.link);
+  const ok = title.length <= NOTICE_MAX_TITLE && body.length <= NOTICE_MAX_BODY;
+
+  const save = async (v: AutoNoticeText & { enabled?: boolean }) => {
+    setBusy(true);
+    setDone('');
+    const saved = await onSave(item.kind, v);
+    setBusy(false);
+    if (saved) setDone('保存しました。次に送る分からこの文になります');
+  };
+  const reset = () => {
+    if (!window.confirm(`「${item.label}」を元の文に戻します。よろしいですか？`)) return;
+    setTitle(d.title); setBody(d.body); setLink(d.link);
+    void save({ title: '', body: '', link: '', ...(item.optional ? { enabled } : {}) });
+  };
+
+  return (
+    <div style={{ borderTop: '1px solid #2a2545', padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontWeight: 700 }}>{item.label}</span>
+        <span style={{ ...c.muted, color: custom ? '#e2c074' : undefined }}>{custom ? '書き換え中' : '元の文'}</span>
+        {item.optional && (
+          <span style={{ ...c.muted, color: s.enabled ? '#7dbb8a' : '#e08a8a' }}>{s.enabled ? '送っている' : '送っていない'}</span>
+        )}
+      </div>
+      <div style={c.muted}>送るとき: {item.when}</div>
+      {item.optional && (
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+          <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+          <span>このお知らせを送る（「送る」で保存した後に登録した人にだけ届きます。今いる会員には届きません）</span>
+        </label>
+      )}
+      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="タイトル（空欄なら元の文）" style={inputStyle} />
+      <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={10} placeholder="本文（空欄なら元の文）" style={{ ...inputStyle, resize: 'vertical' }} />
+      <input value={link} onChange={(e) => setLink(e.target.value)} placeholder={`ボタンのリンク（空欄なら元の設定: ${item.defaults.link || 'なし'}）例: /chat`} style={inputStyle} />
+      <details>
+        <summary style={{ ...c.muted, cursor: 'pointer' }}>元の文を見る</summary>
+        <div style={{ ...c.muted, fontWeight: 700, marginTop: 6 }}>{item.defaults.title}</div>
+        <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', ...c.muted }}>{item.defaults.body}</div>
+      </details>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+        <span style={c.muted}>タイトル {title.length}/{NOTICE_MAX_TITLE}・本文 {body.length}/{NOTICE_MAX_BODY}</span>
+        {done && <span style={{ ...c.muted, color: '#7dbb8a' }}>{done}</span>}
+        {custom && <button style={{ ...c.btn, marginLeft: 'auto' }} disabled={busy} onClick={reset}>元の文に戻す</button>}
+        <button style={{ ...c.btn, ...c.btnOn, marginLeft: custom ? 0 : 'auto', padding: '8px 18px', opacity: changed && ok ? 1 : 0.5 }} disabled={!changed || !ok || busy}
+          onClick={() => { void save({ ...next, ...(item.optional ? { enabled } : {}) }); }}>
+          {busy ? '保存中…' : '保存'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AutoNotices({ items, onSave }: { items: AutoNotice[]; onSave: (kind: string, v: AutoNoticeText & { enabled?: boolean }) => Promise<boolean> }) {
+  return (
+    <div style={c.card} id="auto-notices">
+      <h2 style={c.h2}>自動で送るお知らせの文</h2>
+      <div style={{ ...c.muted, marginBottom: 4 }}>
+        会員登録や購入のときに、その人だけに自動で届くアプリ内のお知らせです。欄には今送っている文が入っています。直して「保存」を押すと、次に送る分からその文になります（もう届いたお知らせは変わりません）。空欄にした項目と「元の文に戻す」は、元の文で送ります。登録なしで購入した人には、本文の最後に「別の端末ではお支払いのメールでログイン」の案内が自動で付きます。
+      </div>
+      {items.map((item) => <AutoNoticeEditor key={`${item.kind}:${item.saved?.updatedAt || ''}`} item={item} onSave={onSave} />)}
     </div>
   );
 }
@@ -764,7 +859,9 @@ function LpLeaveTable({ lv }: { lv: Record<string, number> }) {
 const GENDER_ROWS: [string, string][] = [['female', '女性'], ['male', '男性'], ['unknown', '不明']];
 const AGE_ROWS: [string, string][] = [['u20', '19歳以下'], ['20_24', '20〜24歳'], ['25_29', '25〜29歳'], ['30_34', '30〜34歳'], ['35_39', '35〜39歳'], ['40s', '40代'], ['50p', '50歳以上'], ['unknown', '不明']];
 const MBTI_ORDER = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP'];
-const MBTI_ROWS: [string, string][] = [...MBTI_ORDER.map((t): [string, string] => [t, t]), ['unknown', 'わからない・未選択']];
+// 表示は「ESTP（起業家）」の形（入力画面の選択肢と同じ名前）
+const MBTI_LABEL = new Map(mbtiOptions.map((o) => [o.value, o.label]));
+const MBTI_ROWS: [string, string][] = [...MBTI_ORDER.map((t): [string, string] => [t, MBTI_LABEL.get(t) || t]), ['unknown', 'わからない・未選択']];
 const sumFortuneAttr = (docs: DailyDoc[]) => {
   const out: Record<string, number> = {};
   for (const d of docs) for (const [k, v] of Object.entries(d.byFortuneAttr || {})) out[k] = (out[k] || 0) + (v || 0);
@@ -778,7 +875,14 @@ const countMembers = (list: Member[]) => {
 
 function AttrTable({ title, prefix, rows, cols }: { title: string; prefix: string; rows: [string, string][]; cols: { label: string; counts: Record<string, number>; total: number }[] }) {
   const list = prefix === 'm_'
-    ? [...rows.slice(0, -1)].sort((a, b) => (cols[0].counts[`m_${b[0]}`] || 0) - (cols[0].counts[`m_${a[0]}`] || 0)).concat(rows.slice(-1))
+    // 鑑定した人の多い順。同数なら期間内の会員登録、会員の合計の多い順（「わからない・未選択」は最後のまま）
+    ? [...rows.slice(0, -1)].sort((a, b) => {
+      for (const col of cols) {
+        const d = (col.counts[`m_${b[0]}`] || 0) - (col.counts[`m_${a[0]}`] || 0);
+        if (d) return d;
+      }
+      return 0;
+    }).concat(rows.slice(-1))
     : rows;
   return (
     <>
@@ -822,7 +926,7 @@ function AttributeTables({ docs, newMembers, allMembers }: { docs: DailyDoc[]; n
       <h2 style={c.h2}>鑑定した人・会員の性別・年代・MBTI</h2>
       <AttrTable title="性別" prefix="g_" rows={GENDER_ROWS} cols={cols} />
       <AttrTable title="年代" prefix="a_" rows={AGE_ROWS} cols={cols} />
-      <AttrTable title="MBTI（鑑定した人の多い順）" prefix="m_" rows={MBTI_ROWS} cols={cols} />
+      <AttrTable title="MBTI（多い順）" prefix="m_" rows={MBTI_ROWS} cols={cols} />
       <div style={{ ...c.muted, marginTop: 8 }}>
         「鑑定した人」は入力画面の「あなた」の性別・年代・MBTIで、1回の訪問の最初の鑑定だけ数えます（2026-11-10 から計測。それより前の鑑定は数えられません{since ? `。この期間は ${since} から` : '。この期間はまだデータがありません'}）。
         会員は、その人が今保存しているプロフィールで数えます（期間内は登録日で絞り込み）。プロフィールを保存していない会員は「不明」です。年代は今日の年齢です。
@@ -1003,6 +1107,26 @@ export default function AdminView() {
     }
   };
 
+  const saveAutoNotice = async (kind: string, v: AutoNoticeText & { enabled?: boolean }) => {
+    try {
+      setError('');
+      const body = await postAdmin({ action: 'autoNoticeSave', kind, ...v });
+      setData((d) => (d ? { ...d, autoNotices: (d.autoNotices || []).map((a) => (a.kind === kind ? { ...a, saved: body.saved } : a)) } : d));
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '保存できませんでした');
+      return false;
+    }
+  };
+
+  // ホーム（AI社員ホーム）の「自動のお知らせの文を編集」から #auto-notices で開いたとき、その欄まで動かす
+  const hasData = Boolean(data);
+  useEffect(() => {
+    if (!hasData || window.location.hash !== '#auto-notices') return;
+    const t = window.setTimeout(() => document.getElementById('auto-notices')?.scrollIntoView({ block: 'start' }), 300);
+    return () => window.clearTimeout(t);
+  }, [hasData]);
+
   const messageMember = (uid: string) => {
     setNoticeTarget(uid);
     document.getElementById('admin-notices')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1117,6 +1241,8 @@ export default function AdminView() {
 
             <Notices items={data.notices || []} members={allMembers} target={noticeTarget} setTarget={setNoticeTarget} onSend={sendNotice} onDelete={deleteNotice} />
 
+            <AutoNotices items={data.autoNotices || []} onSave={saveAutoNotice} />
+
             <ChatCost days={data.chat || []} />
 
             <BreakdownTable title="流入元" rows={sumBy(data.daily, 'bySource')} label={sourceLabel}
@@ -1151,6 +1277,7 @@ export default function AdminView() {
                       <th style={c.th}>最終ログイン</th>
                       <th style={c.th}>毎朝メール</th>
                       <th style={c.th}>タイプ</th>
+                      <th style={c.th}>年齢</th>
                       <th style={c.th}>プレミアム</th>
                       <th style={c.th}>買い切り</th>
                       <th style={c.th}>流入元 / 入口 / 端末</th>
@@ -1167,6 +1294,7 @@ export default function AdminView() {
                         <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{jst(m.lastSignInAt)}</td>
                         <td style={c.td}>{m.dailyMail ? 'ON' : '—'}</td>
                         <td style={c.td}>{m.mbti || '—'}</td>
+                        <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{m.ageYears != null ? `${m.ageYears}歳` : '—'}</td>
                         <td style={{ ...c.td, ...(m.premium === 'live' ? { color: '#e2c074', fontWeight: 700 } : c.muted) }}>{premiumLabel(m.premium) || '—'}</td>
                         <td style={{ ...c.td, ...((m.pairs?.live || 0) > 0 ? { color: '#e2c074', fontWeight: 700 } : c.muted) }}>
                           {m.pairs?.live ? `${m.pairs.live}人` : m.pairs?.test ? `テスト${m.pairs.test}` : '—'}

@@ -2,7 +2,7 @@ import { createHash, randomInt } from 'node:crypto';
 import { getDb, getAdminAuth } from './firestore.js';
 import { parseBody, verifyUser } from './stripe.js';
 import { clientIp } from './inquiry.js';
-import { NOTICES } from './notices.js';
+import { NOTICES, REFERRAL_NOTICE, autoNoticeText, readAutoSettings } from './notices.js';
 import { USER_DATA } from './user-data.js';
 import { partnerKey } from './partner-days.js';
 import { DAILY, REF_FRIEND_METRIC } from './analytics.js';
@@ -50,19 +50,8 @@ const birthKey = (birth) => hash('birth', birth);
 const jstDate = (ms) => new Date(ms + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
 export const referralNoticeId = (uid, pk) => `ref${hash('notice', `${uid}:${pk}`).slice(0, 32)}`;
-export const REFERRAL_NOTICE = {
-  title: 'お友達が占ってくれました🌙',
-  body: [
-    'あなたが送った招待URLから、お友達が鑑定してくれました。月（ツキ）です。',
-    '',
-    'お礼に、招待URLを作ったときのお相手との鑑定結果で、「恋愛運MAX日」の日付、「返信が遅いときの返し方（トリセツ）」、「生まれ持った星から見た二人の相性」が、これからずっと見れるようになりました。そのお相手の結果からのぞいてみてね。',
-    '',
-    '蓮（レン）からもひとこと。「大事な一歩は、その日に。準備はもうできているはずだ」',
-    '',
-    '月と蓮'
-  ].join('\n'),
-  link: '/result'
-};
+// 文は notices.js（/admin で書き換えられる）。元の文は REFERRAL_NOTICE
+export { REFERRAL_NOTICE };
 
 const status = (entry) => {
   const count = Math.max(0, Number(entry?.count) || 0);
@@ -170,7 +159,8 @@ export async function completeReferral(db, { code, visitor, birth, uid, ipKey, n
     try {
       const noticeRef = db.collection(NOTICES).doc(referralNoticeId(owner, pk));
       if (!(await noticeRef.get()).data()) {
-        await noticeRef.set({ to: owner, ...REFERRAL_NOTICE, auto: 'referral', createdAt: new Date(now).toISOString() });
+        const t = autoNoticeText(await readAutoSettings(db), 'referral');
+        await noticeRef.set({ to: owner, title: t.title, body: t.body, link: t.link, auto: 'referral', createdAt: new Date(now).toISOString() });
       }
     } catch (e) {
       console.error('⚠️ Referral counted, but the notice failed:', e?.message);

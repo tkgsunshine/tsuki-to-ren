@@ -68,6 +68,12 @@ const NEW_PARTNER_ID = '__new__';
 // 決済の直前に控える鑑定の入力（このタブだけ）と、読み込んだ時点のURL（?pair= などはすぐ消すため）
 const CHECKOUT_READING_KEY = 'hasu_checkout_reading';
 const INITIAL_SEARCH = typeof window === 'undefined' ? '' : window.location.search;
+// 決済へ移ったとき購入LPを開いていたら、そのLPで先に見せていたプラン（このタブだけ）。Stripeから戻ったら同じLPを開き直す
+const CHECKOUT_LP_KEY = 'hasu_checkout_lp';
+// 読み込んだ時点の履歴（下の最初の effect で重ね表示を消す前）。ブラウザの「戻る」で読み込み直したとき、購入LPを開いていたかを見る
+const INITIAL_HISTORY_STATE: unknown = typeof window === 'undefined' ? null : window.history.state;
+const isNavStateWithOverlay = (v: unknown, name: string): boolean =>
+  !!v && typeof v === 'object' && Array.isArray((v as { overlays?: unknown }).overlays) && ((v as { overlays: unknown[] }).overlays).includes(name);
 const isValidBirthDate = (val: string): boolean => {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(val || '');
   if (!m) return false;
@@ -402,6 +408,11 @@ function App() {
   // Stripe から戻ったとき、端末の記録（hasu_last_diagnosis_input）がログイン状態の変化で消えていても、同じ鑑定を出し直せるように
   const lastReadingRef = useRef<Record<string, unknown> | null>(null);
   const rememberReadingForCheckout = () => {
+    // 購入LPから決済へ移るときは、戻ったときに同じLPを開き直せるよう、先に見せていたプランも控える
+    try {
+      if (showPremiumLPRef.current) sessionStorage.setItem(CHECKOUT_LP_KEY, premiumLPFocusRef.current);
+      else sessionStorage.removeItem(CHECKOUT_LP_KEY);
+    } catch { /* blocked storage */ }
     if (!lastReadingRef.current) return;
     try { sessionStorage.setItem(CHECKOUT_READING_KEY, JSON.stringify(lastReadingRef.current)); } catch { /* blocked storage */ }
   };
@@ -427,6 +438,12 @@ function App() {
   const [showPremiumLP, setShowPremiumLP] = useState(false);
   // LPで先に見せるプラン。買い切りで解放できる項目のロックからは 'pair'、毎日の内容のロックからは 'monthly'
   const [premiumLPFocus, setPremiumLPFocus] = useState<'pair' | 'monthly'>('monthly');
+  const showPremiumLPRef = useRef(false);
+  showPremiumLPRef.current = showPremiumLP;
+  const premiumLPFocusRef = useRef(premiumLPFocus);
+  premiumLPFocusRef.current = premiumLPFocus;
+  // Stripe から戻って購入LPを開き直すとき（開いた回数には数えない）
+  const lpReopenRef = useRef(false);
   const openPremiumLP = (focus: 'pair' | 'monthly' = 'monthly') => {
     setPremiumLPFocus(focus);
     setShowPremiumLP(true);
@@ -619,6 +636,20 @@ function App() {
       return 'female';
     };
 
+    // 購入LPから決済へ移っていたら、Stripe の「戻る」（?pair=cancel / ?premium=cancel）か、
+    // ブラウザの「戻る」で読み込み直したとき（履歴に購入LPが開いた状態が残っている）に、同じLPを開き直す
+    let checkoutLp: string | null = null;
+    try {
+      checkoutLp = sessionStorage.getItem(CHECKOUT_LP_KEY);
+      sessionStorage.removeItem(CHECKOUT_LP_KEY);
+    } catch { /* blocked storage */ }
+    const cancelledCheckout = /[?&](pair|premium)=cancel(&|$)/.test(INITIAL_SEARCH);
+    const backFromCheckout = !/[?&](pair|premium)=/.test(INITIAL_SEARCH)
+      && isNavStateWithOverlay(INITIAL_HISTORY_STATE, 'premiumLP');
+    if ((checkoutLp === 'pair' || checkoutLp === 'monthly') && (cancelledCheckout || backFromCheckout)) {
+      pendingLPRef.current = checkoutLp;
+      lpReopenRef.current = true;
+    }
     // Parse URL params (supports both compact short keys: mn, mb, mm, mg, on, ob, om, og, r & legacy long keys)
     const params = new URLSearchParams(window.location.search);
     const mName = params.get('mn') || params.get('mName') || 'あなた';
@@ -686,7 +717,7 @@ function App() {
       // Restore last diagnosis result when returning from 2-step email verification link
       try {
         // Stripe から戻ったとき（?pair= / ?premium=。URLからはすぐ消すので、読み込んだ時点のURLで見る）は、決済の直前に控えた鑑定も使う
-        const fromCheckout = /[?&](pair|premium)=/.test(INITIAL_SEARCH);
+        const fromCheckout = /[?&](pair|premium)=/.test(INITIAL_SEARCH) || lpReopenRef.current;
         let checkoutRaw: string | null = null;
         try {
           checkoutRaw = fromCheckout ? sessionStorage.getItem(CHECKOUT_READING_KEY) : null;
@@ -1464,7 +1495,7 @@ function App() {
       }
       scrollMainTo(0);
       if (pendingLPRef.current) {
-        lpFromMailRef.current = true;
+        if (!lpReopenRef.current) lpFromMailRef.current = true;
         openPremiumLP(pendingLPRef.current);
         pendingLPRef.current = null;
       }
@@ -1522,7 +1553,8 @@ function App() {
   // 有料プランの案内を開いた回数（管理画面の集計用）。買い切りで解放できるロックから開いたか（pair）、月額側か（monthly）も送る
   useEffect(() => {
     if (showPremiumLP) {
-      trackPremiumView(premiumLPFocus, lpFromMailRef.current);
+      if (lpReopenRef.current) lpReopenRef.current = false; // 決済から戻って開き直しただけ。同じ訪問なので数えない
+      else trackPremiumView(premiumLPFocus, lpFromMailRef.current);
       lpFromMailRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3282,7 +3314,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
+                  <span style={{ color: 'white' }}>〒162-0054 東京都新宿区河田町3-52-2</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
@@ -3356,7 +3388,7 @@ function App() {
                   <h4 style={{ color: 'white', fontWeight: 'bold', marginBottom: '0.25rem' }}>5. 苦情・相談対応体制</h4>
                   <p>個人情報の取扱いに関するご質問、苦情、相談等は下記窓口までお申し出ください。<br/>
                   【苦情・相談窓口】Ill株式会社（担当：須藤 涼弥）<br/>
-                  所在地：東京都渋谷区代々木２丁目２４−８<br/>
+                  所在地：〒162-0054 東京都新宿区河田町3-52-2<br/>
                   連絡先：support@tsuki-to-ren.com</p>
                 </div>
               </div>
@@ -3379,7 +3411,7 @@ function App() {
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                   <span style={{ color: '#a9a49a' }}>所在地</span>
-                  <span style={{ color: 'white' }}>東京都渋谷区代々木２丁目２４−８</span>
+                  <span style={{ color: 'white' }}>〒162-0054 東京都新宿区河田町3-52-2</span>
                 </div>
                 <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#a9a49a' }}>お問合せ</span>
