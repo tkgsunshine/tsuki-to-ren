@@ -1564,3 +1564,15 @@ body.chat-keyboard-open .chat-partner-picker {
 @media (prefers-reduced-motion: reduce) {
   .shot-scroll-hint { animation: none; }
 }
+
+/* プレミアム案内の画面イメージ右下の「タップで拡大」: 気づいてもらえるよう、ゆっくり光を広げる */
+@keyframes shot-zoom-hint {
+  0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 0 0 rgba(242, 217, 140, 0.55); }
+  50% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 0 6px rgba(242, 217, 140, 0); }
+}
+.shot-zoom-hint {
+  animation: shot-zoom-hint 2s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shot-zoom-hint { animation: none; }
+}
