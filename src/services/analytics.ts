@@ -2,7 +2,7 @@ import type { User } from 'firebase/auth';
 
 // The site's own counters for the admin page (/admin): where a visit came from, which page it landed on, on what device,
 // how many fortunes were run, accounts created, results shared, and how often the premium page and the payment page were opened.
-// Sends no names, birth dates or emails.
+// Sends no names, birth dates or emails (a fortune sends the age band, gender and MBTI type only).
 
 interface Attribution {
   source: string;
@@ -163,9 +163,21 @@ const firstInSession = (type: string): '1' | '0' => {
   return '1';
 };
 
-/** One fortune run from the input form. */
-export const trackFortune = () => {
-  void send({ type: 'fortune', first: firstInSession('fortune'), ...current() });
+/** 生年月日（YYYY-MM-DD）→ 今日（日本時間）の年齢の年代。api/_lib/analytics.js の ageBandFromBirth と同じ区切り */
+export const ageBand = (birth: string, now = new Date()): string => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birth || '').replace(/\//g, '-'));
+  if (!m) return 'unknown';
+  const today = new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+  const age = Number(today.slice(0, 4)) - Number(m[1]) - (today.slice(5) < `${m[2]}-${m[3]}` ? 1 : 0);
+  if (!(age >= 0 && age < 120)) return 'unknown';
+  return age < 20 ? 'u20' : age < 25 ? '20_24' : age < 30 ? '25_29' : age < 35 ? '30_34' : age < 40 ? '35_39' : age < 50 ? '40s' : '50p';
+};
+
+/** One fortune run from the input form. The visit's first one also sends the person's gender, age band and MBTI (not the birth date). */
+export const trackFortune = (me?: { birth: string; gender: string; mbti: string }) => {
+  const first = firstInSession('fortune');
+  const attr: Record<string, string> = first === '1' && me ? { g: me.gender, a: ageBand(me.birth), m: me.mbti } : {};
+  void send({ type: 'fortune', first, ...attr, ...current() });
 };
 
 /**

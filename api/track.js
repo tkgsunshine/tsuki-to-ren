@@ -1,11 +1,11 @@
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, BOT_RE, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, MAIL_PAIR_VIEW_METRIC, MAIL_VIEW_METRIC, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeLpExit, normalizeLpLeave, normalizeRegPlace, normalizeSource, recordEvent } from './_lib/analytics.js';
+import { ATTRIBUTION, BOT_RE, fortuneAttrKeys, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, MAIL_PAIR_VIEW_METRIC, MAIL_VIEW_METRIC, PAIR_VIEW_METRIC, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeLpExit, normalizeLpLeave, normalizeRegPlace, normalizeSource, recordEvent } from './_lib/analytics.js';
 import { handleInquiry } from './_lib/inquiry.js';
 
 // Receives the site's own counters: a visit (once per browser session), a fortune (each time the form is submitted),
 // a sign-up (once per new account), a share (X / LINE / link copy / image save), the paid-plan page opened and the payment page
 // opened (monthly 'checkout' / one-time pair 'checkout_pair').
-// Payments themselves are counted by the Stripe webhook, not here. Counts only; no names, birth dates or emails are sent here.
+// Payments themselves are counted by the Stripe webhook, not here. Counts only; no names, birth dates or emails are sent here (a fortune carries the age band, gender and MBTI type, not the birth date).
 // A sign-up must carry the new account's sign-in token, so sign-up counts cannot be forged from outside.
 // The contact form (type 'inquiry') is handled here too, so it needs no serverless function of its own: _lib/inquiry.js
 const SIGNUP_WINDOW_MS = 48 * 3600 * 1000;
@@ -72,7 +72,9 @@ export default async function handler(req, res, deps = {}) {
       also.push(MAIL_VIEW_METRIC);
       if (body.plan === 'pair') also.push(MAIL_PAIR_VIEW_METRIC);
     }
-    await recordEvent(db, { type, source, landing, device, channel, regPlace, lpExit, lpLeave, also });
+    // 訪問で最初の鑑定だけ、その人の性別・年代・MBTI も数える（「鑑定した人」と同じ人数になる）
+    const fortuneAttr = type === 'fortune' && body.first === '1' ? fortuneAttrKeys(body) : undefined;
+    await recordEvent(db, { type, source, landing, device, channel, regPlace, lpExit, lpLeave, fortuneAttr, also });
     return res.status(204).end();
   } catch (e) {
     console.error('⚠️ Could not record the event:', e?.message);

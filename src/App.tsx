@@ -1355,7 +1355,7 @@ function App() {
     setRelationship(data.relationship);
     setMode(data.mode);
     pushProfile(); // the input form has just saved the profile on this device
-    trackFortune();
+    trackFortune({ birth: data.myBirth, gender: data.myGender, mbti: data.myMbti });
     if (data.mode === 'match' && data.oppBirth) {
       autoSavePartner({
         name: data.oppName || 'お相手',

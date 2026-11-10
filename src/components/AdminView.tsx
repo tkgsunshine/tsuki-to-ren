@@ -27,6 +27,7 @@ interface DailyDoc extends Counts {
   byReg?: Record<string, number>;
   byLpExit?: Record<string, number>;
   byLpLeave?: Record<string, number>;
+  byFortuneAttr?: Record<string, number>; // 鑑定した人（訪問で最初の鑑定）の g_性別・a_年代・m_MBTI（2026-11-10〜）
 }
 interface DayRow extends FullCounts {
   date: string;
@@ -48,6 +49,10 @@ interface Member {
   pairs?: { live: number; test: number }; // 買い切りで解放したお相手の数
   guest?: boolean; // 登録なしの購入で自動作成されたアカウント（メールなし）。会員数に入れない
   owner: 'auto' | 'marked' | null; // the owner's own account, left out of the member counts
+  // 属性の集計用（今のプロフィールから。プロフィール未保存は unknown）。生年月日そのものは受け取らない
+  gender?: string;
+  age?: string;
+  type?: string;
 }
 interface ChatDay {
   date: string;
@@ -755,6 +760,78 @@ function LpLeaveTable({ lv }: { lv: Record<string, number> }) {
   );
 }
 
+// 鑑定した人・会員登録した人の性別・年代・MBTI（集計値だけ。一人ひとりの生年月日は出さない）
+const GENDER_ROWS: [string, string][] = [['female', '女性'], ['male', '男性'], ['unknown', '不明']];
+const AGE_ROWS: [string, string][] = [['u20', '19歳以下'], ['20_24', '20〜24歳'], ['25_29', '25〜29歳'], ['30_34', '30〜34歳'], ['35_39', '35〜39歳'], ['40s', '40代'], ['50p', '50歳以上'], ['unknown', '不明']];
+const MBTI_ORDER = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP'];
+const MBTI_ROWS: [string, string][] = [...MBTI_ORDER.map((t): [string, string] => [t, t]), ['unknown', 'わからない・未選択']];
+const sumFortuneAttr = (docs: DailyDoc[]) => {
+  const out: Record<string, number> = {};
+  for (const d of docs) for (const [k, v] of Object.entries(d.byFortuneAttr || {})) out[k] = (out[k] || 0) + (v || 0);
+  return out;
+};
+const countMembers = (list: Member[]) => {
+  const out: Record<string, number> = {};
+  for (const m of list) for (const k of [`g_${m.gender || 'unknown'}`, `a_${m.age || 'unknown'}`, `m_${m.type || 'unknown'}`]) out[k] = (out[k] || 0) + 1;
+  return out;
+};
+
+function AttrTable({ title, prefix, rows, cols }: { title: string; prefix: string; rows: [string, string][]; cols: { label: string; counts: Record<string, number>; total: number }[] }) {
+  const list = prefix === 'm_'
+    ? [...rows.slice(0, -1)].sort((a, b) => (cols[0].counts[`m_${b[0]}`] || 0) - (cols[0].counts[`m_${a[0]}`] || 0)).concat(rows.slice(-1))
+    : rows;
+  return (
+    <>
+      <h3 style={{ fontSize: 14, fontWeight: 700, margin: '12px 0 6px' }}>{title}</h3>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={c.table}>
+          <thead>
+            <tr>
+              <th style={c.th}></th>
+              {cols.map((col) => <th key={col.label} style={{ ...c.th, ...c.num }} colSpan={2}>{col.label}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {list.map(([k, label]) => (
+              <tr key={k}>
+                <td style={c.td}>{label}</td>
+                {cols.flatMap((col) => [
+                  <td key={`${col.label}-n`} style={{ ...c.td, ...c.num }}>{col.counts[`${prefix}${k}`] || 0}</td>,
+                  <td key={`${col.label}-p`} style={{ ...c.td, ...c.num, ...c.muted }}>{pct(col.counts[`${prefix}${k}`] || 0, col.total)}</td>,
+                ])}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function AttributeTables({ docs, newMembers, allMembers }: { docs: DailyDoc[]; newMembers: Member[]; allMembers: Member[] }) {
+  const fa = sumFortuneAttr(docs);
+  const fortuneTotal = GENDER_ROWS.reduce((n, [k]) => n + (fa[`g_${k}`] || 0), 0);
+  const since = docs.find((d) => d.byFortuneAttr && Object.keys(d.byFortuneAttr).length)?.date || null;
+  const cols = [
+    { label: `鑑定した人（${fortuneTotal}）`, counts: fa, total: fortuneTotal },
+    { label: `会員登録（期間内 ${newMembers.length}）`, counts: countMembers(newMembers), total: newMembers.length },
+    { label: `会員の合計（${allMembers.length}）`, counts: countMembers(allMembers), total: allMembers.length },
+  ];
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>鑑定した人・会員の性別・年代・MBTI</h2>
+      <AttrTable title="性別" prefix="g_" rows={GENDER_ROWS} cols={cols} />
+      <AttrTable title="年代" prefix="a_" rows={AGE_ROWS} cols={cols} />
+      <AttrTable title="MBTI（鑑定した人の多い順）" prefix="m_" rows={MBTI_ROWS} cols={cols} />
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        「鑑定した人」は入力画面の「あなた」の性別・年代・MBTIで、1回の訪問の最初の鑑定だけ数えます（2026-11-10 から計測。それより前の鑑定は数えられません{since ? `。この期間は ${since} から` : '。この期間はまだデータがありません'}）。
+        会員は、その人が今保存しているプロフィールで数えます（期間内は登録日で絞り込み）。プロフィールを保存していない会員は「不明」です。年代は今日の年齢です。
+        性別は入力画面で最初から「女性」が選ばれているため、変えずに占った男性は女性に入ります。自分のアカウント・購入用の自動アカウントは入れていません。
+      </div>
+    </div>
+  );
+}
+
 function ShareTable({ rows, total }: { rows: [string, number][]; total: number }) {
   return (
     <div style={c.card}>
@@ -930,7 +1007,8 @@ export default function AdminView() {
     setNoticeTarget(uid);
     document.getElementById('admin-notices')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
-  const newMembers = useMemo(() => (data ? members.filter((m) => (jstDay(m.createdAt) >= data.from && jstDay(m.createdAt) <= data.to)).length : 0), [data, members]);
+  const newMemberList = useMemo(() => (data ? members.filter((m) => (jstDay(m.createdAt) >= data.from && jstDay(m.createdAt) <= data.to)) : []), [data, members]);
+  const newMembers = newMemberList.length;
   const mailOn = members.filter((m) => m.dailyMail).length;
   // 有料会員には、登録なしで月額を始めた人（自動作成アカウント）も入れる
   const paying = [...members, ...guests].filter((m) => m.premium === 'live').length;
@@ -1032,6 +1110,8 @@ export default function AdminView() {
             <LpExitTable ex={sumLpExit(data.daily)} />
 
             <SignupFunnel t={totals} reg={sumReg(data.daily)} />
+
+            <AttributeTables docs={data.daily} newMembers={newMemberList} allMembers={members} />
 
             <Inquiries items={data.inquiries || []} members={allMembers} onStatus={setInquiryStatus} />
 
