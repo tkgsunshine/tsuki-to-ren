@@ -785,9 +785,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </p>
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
-                  {pair.name}のことを今日じっくり知りたいなら、シングルプラン（¥680）で十分ですよ。<br />
-                  毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。<br />
-                  どちらも会員登録なしで購入できます。
+                  {pair.name}のことを今日じっくり知りたいなら、シングルプランで十分ですよ。<br />
+                  毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。
                 </CharBubble>
               </div>
               <PurchaseTerms plans={pair.unlocked ? ['monthly'] : ['monthly', 'pair']} style={{ marginBottom: '0.6rem' }} />
