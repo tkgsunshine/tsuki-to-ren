@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, signInWithGoogle, logOutUser } from '../services/firebase';
 import { COLUMNS_DATA } from '../data/columnsData';
+import { mbtiOptions } from '../constants/mbti';
 import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../services/analytics';
 
 // Admin page (/admin): visits, fortunes, sign-ups, shares and premium (page → payment page → paid) per day,
@@ -764,7 +765,9 @@ function LpLeaveTable({ lv }: { lv: Record<string, number> }) {
 const GENDER_ROWS: [string, string][] = [['female', '女性'], ['male', '男性'], ['unknown', '不明']];
 const AGE_ROWS: [string, string][] = [['u20', '19歳以下'], ['20_24', '20〜24歳'], ['25_29', '25〜29歳'], ['30_34', '30〜34歳'], ['35_39', '35〜39歳'], ['40s', '40代'], ['50p', '50歳以上'], ['unknown', '不明']];
 const MBTI_ORDER = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP'];
-const MBTI_ROWS: [string, string][] = [...MBTI_ORDER.map((t): [string, string] => [t, t]), ['unknown', 'わからない・未選択']];
+// 表示は「ESTP（起業家）」の形（入力画面の選択肢と同じ名前）
+const MBTI_LABEL = new Map(mbtiOptions.map((o) => [o.value, o.label]));
+const MBTI_ROWS: [string, string][] = [...MBTI_ORDER.map((t): [string, string] => [t, MBTI_LABEL.get(t) || t]), ['unknown', 'わからない・未選択']];
 const sumFortuneAttr = (docs: DailyDoc[]) => {
   const out: Record<string, number> = {};
   for (const d of docs) for (const [k, v] of Object.entries(d.byFortuneAttr || {})) out[k] = (out[k] || 0) + (v || 0);
@@ -778,7 +781,14 @@ const countMembers = (list: Member[]) => {
 
 function AttrTable({ title, prefix, rows, cols }: { title: string; prefix: string; rows: [string, string][]; cols: { label: string; counts: Record<string, number>; total: number }[] }) {
   const list = prefix === 'm_'
-    ? [...rows.slice(0, -1)].sort((a, b) => (cols[0].counts[`m_${b[0]}`] || 0) - (cols[0].counts[`m_${a[0]}`] || 0)).concat(rows.slice(-1))
+    // 鑑定した人の多い順。同数なら期間内の会員登録、会員の合計の多い順（「わからない・未選択」は最後のまま）
+    ? [...rows.slice(0, -1)].sort((a, b) => {
+      for (const col of cols) {
+        const d = (col.counts[`m_${b[0]}`] || 0) - (col.counts[`m_${a[0]}`] || 0);
+        if (d) return d;
+      }
+      return 0;
+    }).concat(rows.slice(-1))
     : rows;
   return (
     <>
@@ -822,7 +832,7 @@ function AttributeTables({ docs, newMembers, allMembers }: { docs: DailyDoc[]; n
       <h2 style={c.h2}>鑑定した人・会員の性別・年代・MBTI</h2>
       <AttrTable title="性別" prefix="g_" rows={GENDER_ROWS} cols={cols} />
       <AttrTable title="年代" prefix="a_" rows={AGE_ROWS} cols={cols} />
-      <AttrTable title="MBTI（鑑定した人の多い順）" prefix="m_" rows={MBTI_ROWS} cols={cols} />
+      <AttrTable title="MBTI（多い順）" prefix="m_" rows={MBTI_ROWS} cols={cols} />
       <div style={{ ...c.muted, marginTop: 8 }}>
         「鑑定した人」は入力画面の「あなた」の性別・年代・MBTIで、1回の訪問の最初の鑑定だけ数えます（2026-11-10 から計測。それより前の鑑定は数えられません{since ? `。この期間は ${since} から` : '。この期間はまだデータがありません'}）。
         会員は、その人が今保存しているプロフィールで数えます（期間内は登録日で絞り込み）。プロフィールを保存していない会員は「不明」です。年代は今日の年齢です。
