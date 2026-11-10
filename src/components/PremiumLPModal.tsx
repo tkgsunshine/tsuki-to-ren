@@ -70,10 +70,10 @@ const benefits = [
   {
     Icon: Heart,
     color: '#6fb08f',
-    title: '気になる人を10人まで保存',
+    title: '気になる人を5人まで保存',
     shot: '/assets/premium/partners.webp',
     shotAlt: '保存したお相手の一覧画面',
-    body: '本命の人も、まだ気になっているだけの人も、10人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。'
+    body: '本命の人も、まだ気になっているだけの人も、5人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。'
   },
   {
     Icon: MessageCircle,
@@ -767,7 +767,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
-                  { label: 'お相手の保存', pair: '2人', monthly: '10人' }
+                  { label: 'お相手の保存', pair: '2人', monthly: '5人' }
                 ].map((row, idx) => {
                   const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
                   return (

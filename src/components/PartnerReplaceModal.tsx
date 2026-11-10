@@ -20,7 +20,7 @@ export function PartnerReplaceModal({ candidate, partners, limit, isRegistered, 
   const upgrade = !isRegistered
     ? { text: '無料会員登録すると、2人まで保存できます。', label: '無料登録する' }
     : !isSubscribed
-      ? { text: 'プレミアムなら、10人まで保存できます。', label: 'プレミアムを見る' }
+      ? { text: 'プレミアムなら、5人まで保存できます。', label: 'プレミアムを見る' }
       : null;
 
   return (
