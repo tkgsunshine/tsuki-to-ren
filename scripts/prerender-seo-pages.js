@@ -134,7 +134,7 @@ writePage(
           <h2 style="font-size: 1.1rem; color: #86efac;">6. 苦情・相談対応体制</h2>
           <p>個人情報の取扱いに関する苦情・相談は、下記窓口までお申し出ください。<br/>
           運営会社：Ill株式会社（個人情報管理責任者：須藤 涼弥）<br/>
-          所在地：東京都渋谷区代々木２丁目２４−８<br/>
+          所在地：〒162-0054 東京都新宿区河田町3-52-2<br/>
           連絡先：support@tsuki-to-ren.com</p>
         </section>
         <p style="margin-top: 2rem;"><a href="/" style="display: inline-block; background: #e2c074; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: bold;">← 恋愛診断トップへ戻る</a></p>
@@ -171,7 +171,7 @@ writePage(
           <tbody>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af; width: 140px;">販売事業者</th><td style="padding: 0.75rem 0;">Ill株式会社</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">運営責任者</th><td style="padding: 0.75rem 0;">須藤 涼弥</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">〒162-0054 東京都新宿区河田町3-52-2</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">電話番号</th><td style="padding: 0.75rem 0;">請求があった場合は遅滞なく開示します</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">販売価格</th><td style="padding: 0.75rem 0;">プレミアムプラン: 月額980円（税込）</td></tr>
@@ -218,7 +218,7 @@ writePage(
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af; width: 140px;">社名</th><td style="padding: 0.75rem 0; font-weight: bold;">Ill株式会社</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">代表取締役</th><td style="padding: 0.75rem 0;">須藤 涼弥</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">設立</th><td style="padding: 0.75rem 0;">2022年6月1日</td></tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">東京都渋谷区代々木２丁目２４−８</td></tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">所在地</th><td style="padding: 0.75rem 0;">〒162-0054 東京都新宿区河田町3-52-2</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">事業内容</th><td style="padding: 0.75rem 0;">AI占いコンテンツ開発、次世代マッチングプラットフォーム『月と蓮』の企画運営・システム提供。</td></tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);"><th style="text-align: left; padding: 0.75rem 0; color: #9ca3af;">お問い合わせ</th><td style="padding: 0.75rem 0;">support@tsuki-to-ren.com</td></tr>
           </tbody>

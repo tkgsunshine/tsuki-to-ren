@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import Stripe from 'stripe';
-import checkout from '../api/_lib/stripe-checkout.js';
+import checkout, { PAIR_TERMS } from '../api/_lib/stripe-checkout.js';
 import webhook from '../api/_lib/stripe-webhook.js';
 import partner, { FREE_PARTNER_DAYS, partnerKey } from '../api/_lib/partner-days.js';
 import { pairAccess, recordPairPurchase } from '../api/_lib/pair-unlock.js';
@@ -188,6 +188,9 @@ test('a guest checkout has no uid, carries guest metadata and comes back with th
   assert.equal(stripe.params.metadata.uid, undefined);
   assert.ok(stripe.params.success_url.endsWith('&sid={CHECKOUT_SESSION_ID}'));
   assert.ok(!stripe.params.cancel_url.includes('sid='));
+  // 特商法の最終確認画面: 支払いボタンの下に1回払い・返金・規約への同意を出す
+  assert.equal(stripe.params.custom_text.submit.message, PAIR_TERMS);
+  assert.match(PAIR_TERMS, /1回払い/);
 
   // the monthly plan can be bought as a guest too
   const stripe2 = stripeCapturing();

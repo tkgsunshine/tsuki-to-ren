@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { PurchaseTerms } from './PurchaseTerms';
 import { Send, X, RotateCcw } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/firebase';
@@ -614,6 +615,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               >
                 <span>🔒</span> プレミアム登録で全解放 (月額980円)
               </button>
+              <PurchaseTerms compact plans={['monthly']} />
 
               {/* Close Link */}
               <button 

@@ -212,7 +212,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
               <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <strong>【個人情報苦情・相談窓口】</strong><br />
                 ・運営事業者：Ill株式会社<br />
-                ・所在地：東京都渋谷区代々木２丁目２４−８<br />
+                ・所在地：〒162-0054 東京都新宿区河田町3-52-2<br />
                 ・代表責任者：須藤 涼弥<br />
                 ・メールアドレス：support@tsuki-to-ren.com
               </div>
@@ -257,7 +257,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>所在地</td>
-                  <td style={{ color: '#e7e1d5' }}>東京都渋谷区代々木２丁目２４−８</td>
+                  <td style={{ color: '#e7e1d5' }}>〒162-0054 東京都新宿区河田町3-52-2</td>
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>お問合せ</td>
@@ -265,7 +265,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
-                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年10月27日）</td>
+                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年11月10日）</td>
                 </tr>
               </tbody>
             </table>

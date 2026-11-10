@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { PurchaseTerms } from './PurchaseTerms';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { trackLockView, trackRegStep } from '../services/analytics';
@@ -3188,8 +3189,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで続きを見る`}
                     </button>
                     <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      自動更新はありません。お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
+                      お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
                     </div>
+                    <PurchaseTerms plans={['pair']} />
                   </div>
                 )}
               </div>
