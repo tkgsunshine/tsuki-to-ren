@@ -6,7 +6,7 @@ import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
 import type { PersonStars, NextDay } from '../utils/todayStars';
 import { WEEKDAYS } from '../utils/luckyDays';
 import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
-import { getPartnerToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, TEN_GOD_STATE, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
+import { getPartnerToday, getMyToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, TEN_GOD_STATE, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
 import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
 
@@ -133,6 +133,8 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
 
   // 〇〇さんの今日（お相手の星から見た今日の傾向）と、二人の道のり・今日の一歩
   const partnerToday = useMemo(() => (hasOpponent ? getPartnerToday(result, now) : null), [hasOpponent, result, now]);
+  const myToday = useMemo(() => getMyToday(result, now), [result, now]);
+  const myLabel = san(myName, 'あなた');
   const currentPartner = hasOpponent && input
     ? partners.find((p) => p.birth === input.opponentBirth && p.name === input.opponentName) || null
     : null;
@@ -206,7 +208,8 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
           {stars.pairNotes.map((n) => (
             <p key={n} style={{ ...body, color: GOLD, fontWeight: 'bold', fontSize: '0.84rem' }}>★ {n}</p>
           ))}
-          <StarsBlock p={stars.me} self />
+          {/* 自分の星は下の「あなたの今日」に出す */}
+          {!myToday && <StarsBlock p={stars.me} self />}
           {/* お相手の星は下の「〇〇さんの今日」に出す */}
           {stars.partner && !partnerToday && <StarsBlock p={stars.partner} self={false} />}
         </section>
@@ -278,6 +281,17 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         </section>
       )}
 
+      {/* あなたの今日（お相手の今日と同じ見方で、自分の分も。2026-11-12 TAKASHI） */}
+      {myToday && stars?.me && (
+        <PartnerTodayCard
+          oppLabel={myLabel}
+          pt={myToday}
+          p={stars.me}
+          self
+          guardian={result.myAvatarUrl ? { img: result.myAvatarUrl, name: result.myAstrologyName || '', theme: (result.myAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
+        />
+      )}
+
       {/* ② お相手の今日（と、それに合わせた今日の一歩） */}
       {/* 〇〇さんの今日（星から見たお相手の今日の傾向） */}
       {partnerToday && stars?.partner && (
@@ -341,19 +355,20 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
 const WAVE_COLOR: Record<PartnerToday['wave'], string> = { low: '#9cc6d8', mid: '#f2e2b3', high: '#7fe0a8' };
 
 /** 〇〇さんの今日: 心のモード（十神）・元気の量（十二運）・心の揺れ（空亡・六冲）と良いしるし */
-function PartnerTodayCard({ oppLabel, pt, p, guardian }: { oppLabel: string; pt: PartnerToday; p: PersonStars; guardian?: { img: string; name: string; theme: string } }) {
+function PartnerTodayCard({ oppLabel, pt, p, guardian, self = false }: { oppLabel: string; pt: PartnerToday; p: PersonStars; guardian?: { img: string; name: string; theme: string }; self?: boolean }) {
+  const accent = self ? '#e2c074' : '#9cc6d8';
   return (
-    <section style={{ ...card, border: '1px solid rgba(156, 198, 216, 0.45)', background: 'linear-gradient(160deg, rgba(77,140,168,0.14), rgba(255,255,255,0.03))' }}>
+    <section style={{ ...card, border: self ? '1px solid rgba(226, 192, 116, 0.4)' : '1px solid rgba(156, 198, 216, 0.45)', background: self ? 'linear-gradient(160deg, rgba(212,175,55,0.1), rgba(255,255,255,0.03))' : 'linear-gradient(160deg, rgba(77,140,168,0.14), rgba(255,255,255,0.03))' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <h3 className="font-serif" style={{ ...h3, color: '#9cc6d8' }}>{oppLabel}の今日</h3>
+        <h3 className="font-serif" style={{ ...h3, color: accent }}>{oppLabel}の今日</h3>
         <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#0b0f15', background: WAVE_COLOR[pt.wave], borderRadius: '9999px', padding: '0.15rem 0.6rem' }}>{WAVE_LABEL[pt.wave]}</span>
       </div>
       {/* お相手の守護獣（小さめ。2026-11-12 TAKASHI） */}
       {guardian ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
-          <img src={guardian.img} alt={guardian.name} style={{ width: 64, height: 64, flexShrink: 0, borderRadius: '14px', objectFit: 'cover', objectPosition: 'center 8%', border: '1px solid rgba(156, 198, 216, 0.45)' }} />
+          <img src={guardian.img} alt={guardian.name} style={{ width: 64, height: 64, flexShrink: 0, borderRadius: '14px', objectFit: 'cover', objectPosition: 'center 8%', border: `1px solid ${self ? 'rgba(226, 192, 116, 0.45)' : 'rgba(156, 198, 216, 0.45)'}` }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', minWidth: 0 }}>
-            <span style={{ ...sub, color: '#9cc6d8' }}>{oppLabel}の守護獣</span>
+            <span style={{ ...sub, color: accent }}>{oppLabel}の守護獣</span>
             {guardian.theme && <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.4 }}>{guardian.theme}</span>}
             {guardian.name && <span style={{ ...sub, color: '#d8d2c6' }}>{guardian.name}</span>}
           </div>
@@ -362,7 +377,7 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian }: { oppLabel: string; pt:
       <p style={sub}>{oppLabel}の生まれた日の星と、今日の星の関係から見た「今日の傾向」です。</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
-        <p style={{ ...sub, color: '#9cc6d8', fontWeight: 'bold' }}>心のモード</p>
+        <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>心のモード</p>
         <p className="font-serif" style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', lineHeight: 1.4 }}>{pt.mood}</p>
         <p style={{ ...body, fontSize: '0.84rem' }}>{TEN_GOD_STATE[pt.tenGod]}</p>
         <p style={sub}>今日は「{p.tenGodName}」の日</p>
@@ -370,7 +385,7 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian }: { oppLabel: string; pt:
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-          <p style={{ ...sub, color: '#9cc6d8', fontWeight: 'bold' }}>元気の量</p>
+          <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>元気の量</p>
           <span aria-label={`5段階中${pt.energy}`} style={{ display: 'flex', gap: '0.22rem' }}>
             {[1, 2, 3, 4, 5].map((n) => (
               <span key={n} style={{ width: 10, height: 10, borderRadius: '50%', background: n <= pt.energy ? GOLD : 'rgba(255,255,255,0.14)' }} />

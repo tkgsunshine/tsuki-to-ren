@@ -90,6 +90,14 @@ export function getPartnerToday(result: FortuneResult, date: Date): PartnerToday
   return computePartnerToday(me, partner, getDayInfo(date));
 }
 
+/** 自分の今日（お相手と同じ見方で、自分の生まれた日の星から。2026-11-12 TAKASHI「自分の分も出してOK」） */
+export function getMyToday(result: FortuneResult, date: Date): PartnerToday | null {
+  const me = toLuckPerson(result.myPillar, result.myStar, result.myGender);
+  if (!me) return null;
+  const opp = toLuckPerson(result.opponentPillar, result.opponentStar, result.opponentGender);
+  return computePartnerToday(opp, me, getDayInfo(date));
+}
+
 // ───────── 二人の道のり ─────────
 
 export type JourneyMode = 'crush' | 'couple';
