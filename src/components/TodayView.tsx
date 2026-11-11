@@ -491,7 +491,6 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
         <p style={{ ...body, fontSize: '0.9rem', color: '#ffffff', fontWeight: 'bold' }}>{step.text}</p>
         {delivery && <p style={{ ...sub, color: '#9cc6d8' }}>{step.wait ? '待っていい理由：' : '伝え方：'}{delivery}</p>}
         {step.ownChoice && <p style={{ ...sub, color: '#f2e2b3' }}>決めるのはあなたです。星は背中を押すだけ。今日でなくても、あなたが「今だ」と思う日がいちばんの日です。</p>}
-        <p style={sub}>{oppLabel}の今日の様子（{pt.mood}・元気{pt.energy}/5{pt.sway ? '・心が揺れやすい日' : ''}）から選んでいます。</p>
       </div>
 
       {/* 今日の接し方: 状態は四柱推命、接し方はお相手の16タイプから（2026-11-12 TAKASHI） */}
