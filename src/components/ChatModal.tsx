@@ -283,7 +283,10 @@ ${todayStarsForChat(getTodayStars(result, new Date(), 'あなた', hasOppNicknam
       }));
 
       // The server counts each account's chats (api/_lib/chat-limit.js), so it needs to know who is asking
-      const idToken = await getFirebaseAuth().currentUser?.getIdToken().catch(() => undefined);
+      // 開いた直後はログイン状態の読み込みが終わっていないことがあるので、待ってから鍵をもらう
+      const auth = getFirebaseAuth();
+      await auth.authStateReady().catch(() => undefined);
+      const idToken = await auth.currentUser?.getIdToken().catch(() => undefined);
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -300,6 +303,17 @@ ${todayStarsForChat(getTodayStars(result, new Date(), 'あなた', hasOppNicknam
       
       if (response.status === 401) {
         setIsTyping(false);
+        // アプリでは会員なのにサーバーでログインを確かめられないとき（ログイン切れ・開発用ボタンで会員にしただけ等）は、
+        // 「無料で登録」ではなく、ログインし直す案内を出す（2026-11-12 TAKASHI「有料なのにアラートでる」）
+        if (isRegistered) {
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            sender: 'bot',
+            text: 'ごめんなさい、ログインの確認ができませんでした。お手数ですが、マイページから一度ログインし直してから、もう一度送ってくださいね。'
+          }]);
+          setChatCount(prev => Math.max(0, prev - 1));
+          return;
+        }
         setShowRegisterOverlay(true);
         return;
       }
