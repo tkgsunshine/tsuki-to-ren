@@ -207,7 +207,14 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
       </section>
 
       {/* 〇〇さんの今日（星から見たお相手の今日の傾向） */}
-      {partnerToday && stars?.partner && <PartnerTodayCard oppLabel={oppLabel} pt={partnerToday} p={stars.partner} />}
+      {partnerToday && stars?.partner && (
+        <PartnerTodayCard
+          oppLabel={oppLabel}
+          pt={partnerToday}
+          p={stars.partner}
+          guardian={result.opponentAvatarUrl ? { img: result.opponentAvatarUrl, name: result.opponentAstrologyName || '', theme: (result.opponentAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
+        />
+      )}
 
       {/* 二人の道のりと、今日の一歩 */}
       {partnerToday && (
@@ -313,13 +320,24 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
 const WAVE_COLOR: Record<PartnerToday['wave'], string> = { low: '#9cc6d8', mid: '#f2e2b3', high: '#7fe0a8' };
 
 /** 〇〇さんの今日: 心のモード（十神）・元気の量（十二運）・心の揺れ（空亡・六冲）と良いしるし */
-function PartnerTodayCard({ oppLabel, pt, p }: { oppLabel: string; pt: PartnerToday; p: PersonStars }) {
+function PartnerTodayCard({ oppLabel, pt, p, guardian }: { oppLabel: string; pt: PartnerToday; p: PersonStars; guardian?: { img: string; name: string; theme: string } }) {
   return (
     <section style={{ ...card, border: '1px solid rgba(156, 198, 216, 0.45)', background: 'linear-gradient(160deg, rgba(77,140,168,0.14), rgba(255,255,255,0.03))' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
         <h3 className="font-serif" style={{ ...h3, color: '#9cc6d8' }}>{oppLabel}の今日</h3>
         <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#0b0f15', background: WAVE_COLOR[pt.wave], borderRadius: '9999px', padding: '0.15rem 0.6rem' }}>{WAVE_LABEL[pt.wave]}</span>
       </div>
+      {/* お相手の守護獣（小さめ。2026-11-12 TAKASHI） */}
+      {guardian ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+          <img src={guardian.img} alt={guardian.name} style={{ width: 64, height: 64, flexShrink: 0, borderRadius: '14px', objectFit: 'cover', objectPosition: 'center 8%', border: '1px solid rgba(156, 198, 216, 0.45)' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', minWidth: 0 }}>
+            <span style={{ ...sub, color: '#9cc6d8' }}>{oppLabel}の守護獣</span>
+            {guardian.theme && <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.4 }}>{guardian.theme}</span>}
+            {guardian.name && <span style={{ ...sub, color: '#d8d2c6' }}>{guardian.name}</span>}
+          </div>
+        </div>
+      ) : null}
       <p style={sub}>{oppLabel}の生まれた日の星と、今日の星の関係から見た「今日の傾向」です。</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
