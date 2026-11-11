@@ -71,7 +71,7 @@ export function ContactForm({ defaultEmail, onBack }: { defaultEmail?: string | 
   }
 
   return (
-    <form onSubmit={submit} className="glass-panel" style={{ position: 'relative', padding: '1.5rem 1.25rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '1.3rem', width: '100%', borderRadius: '20px', boxSizing: 'border-box' }}>
+    <form onSubmit={submit} data-clarity-mask="True" className="glass-panel" style={{ position: 'relative', padding: '1.5rem 1.25rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '1.3rem', width: '100%', borderRadius: '20px', boxSizing: 'border-box' }}>
       <p style={{ fontSize: '0.85rem', color: '#d8d2c6', lineHeight: 1.7, margin: 0 }}>
         不具合のご報告、使い方のご質問、「こうなったらうれしい」というご意見など、お気軽にお送りください。
       </p>
