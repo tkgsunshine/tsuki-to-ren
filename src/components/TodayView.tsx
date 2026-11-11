@@ -6,7 +6,7 @@ import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
 import type { PersonStars, NextDay } from '../utils/todayStars';
 import { WEEKDAYS } from '../utils/luckyDays';
 import { MoonMark } from './icons/BrandIcons';
-import { getPartnerToday, getTodayStep, getCourage, getMbtiAction, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
+import { getPartnerToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, TEN_GOD_STATE, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
 import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
 
@@ -377,7 +377,7 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian }: { oppLabel: string; pt:
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
         <p style={{ ...sub, color: '#9cc6d8', fontWeight: 'bold' }}>心のモード</p>
         <p className="font-serif" style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', lineHeight: 1.4 }}>{pt.mood}</p>
-        <p style={{ ...body, fontSize: '0.84rem' }}>{p.tenGodText}</p>
+        <p style={{ ...body, fontSize: '0.84rem' }}>{TEN_GOD_STATE[pt.tenGod]}</p>
         <p style={sub}>今日は「{p.tenGodName}」の日</p>
       </div>
 
@@ -427,6 +427,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
   const mbtiAction = getMbtiAction(pt.tenGod, oppMbti);
   const stages = JOURNEY_STAGES[journey.mode];
   const step = getTodayStep(journey, pt, now);
+  const delivery = getStepDelivery(step, oppMbti);
   const courage = getCourage(selectedChar, pt.wave, now);
   const charName = selectedChar === 'ren' ? '蓮' : '月';
   const setMode = (mode: JourneyMode) => { if (mode !== journey.mode) setJourney({ mode, stage: 0 }); };
@@ -486,6 +487,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(226,192,116,0.35)' }}>
         <span style={{ alignSelf: 'flex-start', fontSize: '0.68rem', fontWeight: 'bold', color: '#0b0f15', background: WAVE_COLOR[pt.wave], borderRadius: '9999px', padding: '0.1rem 0.55rem' }}>{step.size}</span>
         <p style={{ ...body, fontSize: '0.9rem', color: '#ffffff', fontWeight: 'bold' }}>{step.text}</p>
+        {delivery && <p style={{ ...sub, color: '#9cc6d8' }}>{step.wait ? `待っていい理由（${oppMbti}）：` : `伝え方（${oppMbti}）：`}{delivery}</p>}
         {step.ownChoice && <p style={{ ...sub, color: '#f2e2b3' }}>決めるのはあなたです。星は背中を押すだけ。今日でなくても、あなたが「今だ」と思う日がいちばんの日です。</p>}
         <p style={sub}>{oppLabel}の今日の様子（{pt.mood}・元気{pt.energy}/5{pt.sway ? '・心が揺れやすい日' : ''}）から選んでいます。</p>
       </div>
