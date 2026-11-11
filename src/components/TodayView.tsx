@@ -84,12 +84,14 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
     return generateFortuneResult(input, 'tsuki', y).dailyScore;
   }, [input, now]);
   const diff = yesterdayScore === null ? null : result.dailyScore - yesterdayScore;
-  // 直近7日の点数（日めくりの下の小さな棒。今日が右端）
-  const week = useMemo(() => {
-    if (!input) return [] as { d: Date; score: number }[];
-    return [6, 5, 4, 3, 2, 1, 0].map((k) => {
-      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - k, 12);
-      return { d, score: k === 0 ? result.dailyScore : generateFortuneResult(input, 'tsuki', d).dailyScore };
+  // 今月の毎日の点数（カレンダー用。今日は表示中の点数そのもの）
+  const month = useMemo(() => {
+    if (!input) return [] as { day: number; score: number }[];
+    const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return Array.from({ length: last }, (_, i) => {
+      const day = i + 1;
+      if (day === now.getDate()) return { day, score: result.dailyScore };
+      return { day, score: generateFortuneResult(input, 'tsuki', new Date(now.getFullYear(), now.getMonth(), day, 12)).dailyScore };
     });
   }, [input, now, result.dailyScore]);
 
@@ -208,7 +210,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         base={result.baseScore}
         daily={result.dailyScore}
         diff={diff}
-        week={week}
+        month={month}
         luckTitle={result.dailyLuckTitle}
       />
 
@@ -539,75 +541,77 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
   );
 }
 
-/** 恋の暦の日めくり: 左に日付の札、右に今日の点数、下に7日の小さな棒と今日の流れ */
-function KoyomiCard({ now, dayPillar, title, baseLabel, base, daily, diff, week, luckTitle }: {
+/** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
+function KoyomiCard({ now, title, baseLabel, base, daily, diff, month, luckTitle }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
-  week: { d: Date; score: number }[]; luckTitle?: string;
+  month: { day: number; score: number }[]; luckTitle?: string;
 }) {
   const sm = getScoreMood(base, daily);
-  const RED = '#c8463c';
   const diffText = diff === null ? null : diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0';
-  const max = Math.max(100, ...week.map((w) => w.score));
-  const min = Math.min(base, ...week.map((w) => w.score));
-  const floor = Math.max(0, Math.floor((min - 10) / 10) * 10);
+  const LEVEL = {
+    up: { label: '良い', bg: 'linear-gradient(160deg, rgba(226,192,116,0.55), rgba(212,175,55,0.25))', border: 'rgba(242,226,179,0.7)', color: '#fff6dc' },
+    flat: { label: 'ふつう', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', color: '#d8d2c6' },
+    down: { label: '控えめ', bg: 'rgba(77,110,140,0.28)', border: 'rgba(120,160,190,0.35)', color: '#a9c3d6' }
+  } as const;
+  const lead = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+  const cells: ({ day: number; score: number } | null)[] = [...Array(lead).fill(null), ...month];
+  while (cells.length % 7) cells.push(null);
+  const today = now.getDate();
   return (
-    <section style={{
-      display: 'flex', flexDirection: 'column', borderRadius: '6px', overflow: 'hidden',
-      background: '#f4ecdc', color: '#2a2233',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(120,90,40,0.25)'
-    }}>
-      {/* 暦の綴じ（上の帯） */}
-      <div style={{ height: 14, background: `repeating-linear-gradient(90deg, #3a2a4a 0 10px, #2c2038 10px 20px)`, borderBottom: '2px solid #b8923a' }} />
-      <div style={{ display: 'flex', alignItems: 'stretch' }}>
-        {/* 日付の札 */}
-        <div style={{ width: 104, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0.9rem 0.4rem', borderRight: '1px dashed rgba(120,90,40,0.45)', background: 'rgba(200,70,60,0.06)' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 'bold', color: RED, letterSpacing: '0.1em' }}>{now.getMonth() + 1}月</span>
-          <span className="font-serif" style={{ fontSize: '3.4rem', fontWeight: 900, lineHeight: 1, color: RED }}>{now.getDate()}</span>
-          <span style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#4a3d55', marginTop: '0.2rem' }}>{WEEKDAYS[now.getDay()]}曜日</span>
-          {dayPillar && <span className="font-serif" style={{ marginTop: '0.4rem', fontSize: '0.72rem', color: '#6b5a3a', border: '1px solid rgba(120,90,40,0.45)', borderRadius: '3px', padding: '0.05rem 0.4rem', writingMode: 'horizontal-tb' }}>{dayPillar.replace(/\s*[（(].*?[）)]/, '')}の日</span>}
+    <section style={{ ...card, gap: '0.8rem', border: '1px solid rgba(226,192,116,0.45)', background: 'linear-gradient(160deg, rgba(212,175,55,0.12), rgba(255,255,255,0.03))' }}>
+      <p style={sub}>{now.getMonth() + 1}月{now.getDate()}日({WEEKDAYS[now.getDay()]})　{title}</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.15rem' }}>
+          <span className="font-serif" style={{ fontSize: '3rem', fontWeight: 900, lineHeight: 1, color: GOLD, textShadow: '0 0 18px rgba(212,175,55,0.35)' }}>{daily}</span>
+          <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 'bold', color: GOLD }}>点</span>
         </div>
-        {/* 今日の点数 */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.85rem 0.9rem' }}>
-          <span style={{ fontSize: '0.72rem', color: '#6b5f73', fontWeight: 'bold', lineHeight: 1.4 }}>{title}</span>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.2rem' }}>
-            <span className="font-serif" style={{ fontSize: '3.2rem', fontWeight: 900, lineHeight: 1, color: '#2a2233' }}>{daily}</span>
-            <span className="font-serif" style={{ fontSize: '1rem', fontWeight: 'bold', color: '#2a2233' }}>点</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <MoonPhaseMark size={20} phase={sm.phase} />
+            <span className="font-serif" style={{ fontSize: '1rem', fontWeight: 900, color: '#f2e2b3', letterSpacing: '0.06em' }}>{sm.title}</span>
           </div>
-          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-            {diffText && <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#fff', background: diff! > 0 ? '#3f8f63' : diff! < 0 ? '#b0574c' : '#8a7f6a', borderRadius: '3px', padding: '0.1rem 0.45rem' }}>昨日より {diffText}</span>}
-            <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#4a3d55', border: '1px solid rgba(74,61,85,0.35)', borderRadius: '3px', padding: '0.1rem 0.45rem' }}>{baseLabel} {base}点</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.1rem' }}>
-            <span style={{ display: 'inline-flex', borderRadius: '50%', background: '#2a2233', padding: 2 }}><MoonPhaseMark size={18} phase={sm.phase} /></span>
-            <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 900, color: '#2a2233', letterSpacing: '0.06em' }}>{sm.title}</span>
+          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', fontSize: '0.72rem', color: '#a9a293' }}>
+            {diffText && <span>昨日より <b style={{ color: diff! > 0 ? '#8fd3ae' : diff! < 0 ? '#e0a9a0' : '#d8cfb8' }}>{diffText}</b></span>}
+            <span>{baseLabel} <b style={{ color: '#d8d2c6' }}>{base}点</b></span>
           </div>
         </div>
       </div>
-      {/* この7日 */}
-      {week.length > 1 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', padding: '0.6rem 0.9rem 0.7rem', borderTop: '1px solid rgba(120,90,40,0.25)' }}>
-          <span style={{ fontSize: '0.66rem', color: '#6b5f73', fontWeight: 'bold', letterSpacing: '0.08em' }}>この7日の流れ</span>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.35rem', height: 54 }}>
-            {week.map((w, i) => {
-              const today = i === week.length - 1;
-              const h = Math.max(6, ((w.score - floor) / (max - floor)) * 46);
+      {luckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.86rem', lineHeight: 1.6 }}>{luckTitle}</p>}
+
+      {month.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.7rem', borderTop: '1px solid rgba(226,192,116,0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+            <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{now.getMonth() + 1}月の恋の暦</span>
+            <span style={{ display: 'flex', gap: '0.5rem', fontSize: '0.64rem', color: '#a9a293' }}>
+              {(['up', 'flat', 'down'] as const).map((k) => (
+                <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+                  <span style={{ width: 9, height: 9, borderRadius: 3, background: LEVEL[k].bg, border: `1px solid ${LEVEL[k].border}` }} />{LEVEL[k].label}
+                </span>
+              ))}
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem' }}>
+            {WEEKDAYS.map((w, i) => (
+              <span key={w} style={{ textAlign: 'center', fontSize: '0.62rem', fontWeight: 'bold', color: i === 0 ? '#e0a9a0' : i === 6 ? '#9cc6d8' : '#8f887b' }}>{w}</span>
+            ))}
+            {cells.map((c, i) => {
+              if (!c) return <span key={i} />;
+              const lv = LEVEL[getScoreMood(base, c.score).trend];
+              const isToday = c.day === today;
+              const past = c.day < today;
               return (
-                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem' }}>
-                  <span style={{ fontSize: '0.58rem', color: today ? RED : '#7a6f80', fontWeight: 'bold' }}>{w.score}</span>
-                  <span style={{ width: '100%', maxWidth: 22, height: h, borderRadius: '2px 2px 0 0', background: today ? RED : 'rgba(74,61,85,0.35)' }} />
+                <div key={i} style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.05rem',
+                  aspectRatio: '1 / 1', borderRadius: '9px', background: lv.bg, border: isToday ? `2px solid ${GOLD}` : `1px solid ${lv.border}`,
+                  boxShadow: isToday ? '0 0 12px rgba(212,175,55,0.55)' : 'none', opacity: past ? 0.55 : 1
+                }}>
+                  <span style={{ fontSize: '0.74rem', fontWeight: 'bold', lineHeight: 1, color: isToday ? '#ffffff' : lv.color }}>{c.day}</span>
+                  <span style={{ fontSize: '0.56rem', lineHeight: 1, color: isToday ? '#f2e2b3' : lv.color, opacity: 0.85 }}>{isToday ? '今日' : c.score}</span>
                 </div>
               );
             })}
           </div>
-          <div style={{ display: 'flex', gap: '0.35rem' }}>
-            {week.map((w, i) => (
-              <span key={i} style={{ flex: 1, textAlign: 'center', fontSize: '0.58rem', color: i === week.length - 1 ? RED : '#7a6f80', fontWeight: i === week.length - 1 ? 'bold' : 'normal' }}>{i === week.length - 1 ? '今日' : `${w.d.getDate()}日`}</span>
-            ))}
-          </div>
         </div>
-      )}
-      {luckTitle && (
-        <p className="font-serif" style={{ margin: 0, padding: '0.7rem 0.9rem 0.85rem', background: '#2a2233', color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.86rem', lineHeight: 1.6 }}>{luckTitle}</p>
       )}
     </section>
   );
