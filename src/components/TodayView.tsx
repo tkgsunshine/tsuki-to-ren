@@ -38,6 +38,10 @@ interface Props {
 }
 
 const GOLD = '#f5d77a';
+// LINEの公式ロゴ（鑑定書の LineLogoIcon と同じ画像）
+const LineLogo = ({ size = 20 }: { size?: number }) => (
+  <img src="/line-logo.png" alt="LINE" width={size} height={size} draggable={false} style={{ flexShrink: 0, display: 'inline-block', width: `${size}px`, height: `${size}px` }} />
+);
 const card: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: '0.55rem',
   padding: '1rem 1rem 1.05rem', borderRadius: '18px',
@@ -222,11 +226,36 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
       )}
 
       {/* LINE吉時間と助言 */}
-      <section style={card}>
-        <h3 className="font-serif" style={h3}>📱 今日のLINE吉時間</h3>
-        <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', letterSpacing: '0.04em' }}>{hourMain}</div>
-        {hourSub && <p style={{ ...sub, color: '#a8d3b0' }}>{hourSub}</p>}
-        {advice.filter(Boolean).map((t, i) => <p key={i} style={body}>{t}</p>)}
+      {/* 鑑定書の「本日のLINE吉時間 ＆ 運勢」と同じ緑のデザイン（2026-11-12 TAKASHI） */}
+      <section style={{
+        ...card, gap: '0.75rem', padding: '1.15rem',
+        border: '1.5px solid rgba(6, 199, 85, 0.35)',
+        background: 'linear-gradient(135deg, rgba(14, 19, 27, 0.75) 0%, rgba(12, 16, 23, 0.85) 100%)',
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 199, 85, 0.1)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <LineLogo size={22} />
+            <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#ffffff', letterSpacing: '0.02em' }}>今日のLINE吉時間</span>
+          </div>
+          <span style={{ fontSize: '0.65rem', color: '#a8d3b0', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: 600, whiteSpace: 'nowrap' }}>毎日0時更新</span>
+        </div>
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.9rem 1rem', borderRadius: '14px',
+          background: 'linear-gradient(135deg, rgba(6, 199, 85, 0.16) 0%, rgba(0, 0, 0, 0.5) 100%)',
+          border: '1.5px solid rgba(6, 199, 85, 0.45)', boxShadow: '0 4px 20px rgba(6, 199, 85, 0.15)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#7dbb8a', fontWeight: 'bold' }}>
+            <LineLogo size={18} />
+            <span>推奨送信タイミング</span>
+          </div>
+          <div style={{ fontSize: '1.25rem', color: '#ffffff', fontWeight: 900, letterSpacing: '0.04em', textShadow: '0 0 12px rgba(6, 199, 85, 0.6)' }}>{hourMain}</div>
+          {hourSub && <div style={{ fontSize: '0.78rem', color: '#a8d3b0', fontWeight: 600, letterSpacing: '0.02em' }}>{hourSub}</div>}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', padding: '0.75rem 1rem', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.8rem' }}>💡 本日のアプローチ助言</div>
+          {advice.filter(Boolean).map((t, i) => <p key={i} style={{ ...body, fontSize: '0.84rem', lineHeight: 1.75 }}>{t}</p>)}
+        </div>
       </section>
 
       {/* 今日の恋の過ごし方 */}
