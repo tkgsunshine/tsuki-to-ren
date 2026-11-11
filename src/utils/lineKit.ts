@@ -313,7 +313,7 @@ export function buildLineKit(oppMbtiCode: string | undefined, oppPillar: string 
 
   return {
     basis: known
-      ? `${oppMbtiCode!.toUpperCase()}タイプから分析`
+      ? 'お相手のLINEのくせから分析'
       : '生まれ持った星から分析',
     style,
     scenes,
