@@ -57,3 +57,13 @@ test('道のり: 関係性からの初期値と、壊れた値の扱い', () => 
   assert.deepEqual(cleanJourney({ mode: 'couple', stage: 2, situation: 'noreply' }), { mode: 'couple', stage: 2 });
   assert.equal(JOURNEY_STAGES.couple[4], '結婚');
 });
+
+test('今日の接し方: 十神のまとまり×16タイプで文が決まり、タイプ不明なら出さない', async () => {
+  const { getMbtiAction } = await import('../src/utils/partnerToday.ts');
+  const a = getMbtiAction('偏官', 'ENFJ');
+  assert.match(a.action, /ねぎらい/);
+  assert.match(a.plan, /具体的/);
+  assert.notEqual(getMbtiAction('偏官', 'ISTP').action, a.action);
+  assert.equal(getMbtiAction('偏官', 'UNKNOWN'), null);
+  assert.equal(getMbtiAction('偏官', ''), null);
+});

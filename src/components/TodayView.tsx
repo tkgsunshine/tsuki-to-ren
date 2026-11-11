@@ -6,7 +6,7 @@ import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
 import type { PersonStars, NextDay } from '../utils/todayStars';
 import { WEEKDAYS } from '../utils/luckyDays';
 import { MoonMark } from './icons/BrandIcons';
-import { getPartnerToday, getTodayStep, getCourage, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
+import { getPartnerToday, getTodayStep, getCourage, getMbtiAction, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
 import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
 
@@ -312,6 +312,8 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
           oppLabel={oppLabel}
           selectedChar={selectedChar}
           saved={!!currentPartner}
+          oppMbti={result.opponentMbtiCode}
+          oppMbtiName={result.opponentMbtiName}
           onAsk={onOpenChat ? (q) => ask(q) : undefined}
         />
       )}
@@ -410,7 +412,7 @@ const segBtn = (on: boolean): React.CSSProperties => ({
 });
 
 /** 二人の道のり（片思い／付き合っている・5段階）と今の状況を選ぶと、今日の一歩と月・蓮の勇気の一言が出る */
-function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved, onAsk }: {
+function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved, oppMbti, oppMbtiName, onAsk }: {
   journey: Journey;
   setJourney: (j: Journey) => void;
   pt: PartnerToday;
@@ -418,8 +420,11 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
   oppLabel: string;
   selectedChar: 'ren' | 'tsuki';
   saved: boolean;
+  oppMbti?: string;
+  oppMbtiName?: string;
   onAsk?: (q: string) => void;
 }) {
+  const mbtiAction = getMbtiAction(pt.tenGod, oppMbti);
   const stages = JOURNEY_STAGES[journey.mode];
   const step = getTodayStep(journey, pt, now);
   const courage = getCourage(selectedChar, pt.wave, now);
@@ -484,6 +489,16 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
         {step.ownChoice && <p style={{ ...sub, color: '#f2e2b3' }}>決めるのはあなたです。星は背中を押すだけ。今日でなくても、あなたが「今だ」と思う日がいちばんの日です。</p>}
         <p style={sub}>{oppLabel}の今日の様子（{pt.mood}・元気{pt.energy}/5{pt.sway ? '・心が揺れやすい日' : ''}）から選んでいます。</p>
       </div>
+
+      {/* 今日の接し方: 状態は四柱推命、接し方はお相手の16タイプから（2026-11-12 TAKASHI） */}
+      {mbtiAction && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(77,140,168,0.12)', border: '1px solid rgba(156,198,216,0.4)' }}>
+          <p style={{ ...sub, color: '#9cc6d8', fontWeight: 'bold' }}>{oppLabel}（{oppMbti}{oppMbtiName ? `・${oppMbtiName}` : ''}）への今日の接し方</p>
+          <p style={sub}>星から見た今日の{oppLabel}：{mbtiAction.state}</p>
+          <p style={{ ...body, fontSize: '0.86rem', color: '#ffffff' }}>{mbtiAction.action}</p>
+          <p style={{ ...sub, color: '#d8d2c6' }}>{mbtiAction.plan}</p>
+        </div>
+      )}
 
       {/* 月・蓮の勇気の一言 */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.55rem' }}>
