@@ -20,7 +20,7 @@ import { ResultView } from './components/ResultView';
 import { PartnerReplaceModal } from './components/PartnerReplaceModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult, san } from './utils/fortuneEngine';
-import type { FortuneResult } from './utils/fortuneEngine';
+import type { FortuneResult, DiagnosisInput } from './utils/fortuneEngine';
 import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, MessageCircle, Calendar, Bell, Crown, Smartphone, Megaphone } from 'lucide-react';
 import { MoonMark } from './components/icons/BrandIcons';
 import { CustomDatePicker } from './components/CustomDatePicker';
@@ -1188,12 +1188,28 @@ function App() {
     setMode('match');
   };
 
+  // 月額会員の「今日」画面で、お相手（または自分だけ）を切り替える。読み込み画面は出さずに、その場で鑑定し直す
+  const handleTodaySwitch = (partner: SavedPartner | null) => {
+    const cur = readingInput;
+    if (!cur) return;
+    if (!partner) {
+      setMode('single');
+      startDiagnosis(cur.myName, cur.myBirth, cur.myMbti, cur.myGender, '', '', 'UNKNOWN', 'female', cur.relationship || '片思い中', 'single', true);
+      return;
+    }
+    handleSelectPartner(partner);
+    const g = partner.gender === cur.myGender ? (cur.myGender === 'female' ? 'male' : 'female') : partner.gender;
+    startDiagnosis(cur.myName, cur.myBirth, cur.myMbti, cur.myGender, partner.name, partner.birth, partner.mbti, g, partner.relationship, 'match', true);
+  };
+
   // Diagnostic Results Cache
   const [renResult, setRenResult] = useState<FortuneResult | null>(null);
   const [tsukiResult, setTsukiResult] = useState<FortuneResult | null>(null);
   // お相手ありの鑑定のときの、自分だけの鑑定結果（共有カードの「自分の運勢」タブ用。一人で占ったときと同じ計算）
   const [soloRenResult, setSoloRenResult] = useState<FortuneResult | null>(null);
   const [soloTsukiResult, setSoloTsukiResult] = useState<FortuneResult | null>(null);
+  // いま表示している鑑定の入力（月額会員の「今日」画面で、昨日の点数・お相手ごとの点数を出すのに使う）
+  const [readingInput, setReadingInput] = useState<DiagnosisInput | null>(null);
 
   // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
   // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
@@ -1467,6 +1483,7 @@ function App() {
         console.error(e);
       }
 
+      setReadingInput(input);
       // Generate results for both characters to allow instant tab toggling
       const resRen = generateFortuneResult(input, 'ren');
       const resTsuki = generateFortuneResult(input, 'tsuki');
@@ -1817,6 +1834,9 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={currentPartnerSaved}
+                todayInput={readingInput}
+                todayPartners={savedPartners}
+                onTodaySwitch={handleTodaySwitch}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
                 onOpenChat={(question) => {
@@ -1858,6 +1878,9 @@ function App() {
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
                 isPartnerSaved={currentPartnerSaved}
+                todayInput={readingInput}
+                todayPartners={savedPartners}
+                onTodaySwitch={handleTodaySwitch}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
                 onOpenChat={(question) => {

@@ -6,6 +6,7 @@ import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/fire
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { san } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
+import { getTodayStars, todayStarsForChat } from '../utils/todayStars';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { chatHistoryKey, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chatHistory';
 import type { SavedPartner } from '../App';
@@ -209,6 +210,14 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const getDiagnosedDataText = (): string => {
     if (!result) return '';
     const hasOpp = !!result.opponentPillar;
+    // 今日の見出し・LINE吉時間・今日の星の動き（「今日」画面と同じ根拠）。今日の相性を見られないお相手には渡さない
+    const todayText = hideDailyScore ? '' : `
+
+【今日の運勢（${new Date().getMonth() + 1}月${new Date().getDate()}日）】
+今日の見出し: ${(result.dailyLuckTitle || '').replace(/\n/g, ' ')}
+LINE吉時間: ${result.bestContactHour || ''}
+今日の星の動き:
+${todayStarsForChat(getTodayStars(result, new Date(), 'あなた', hasOppNickname ? oppNickname : undefined))}`;
     const basicInfo = `【あなたの属性】
 命式の日干（本質）: ${result.myPillar}
 本命星（九星）: ${result.myStar}
@@ -226,10 +235,10 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 【現在の二人の相性】
 基本相性値: ${result.baseScore}点
 今日のバイオリズム相性値: ${hideDailyScore ? '非公開（プレミアム限定。点数は答えないこと）' : `${result.dailyScore}点`}
-二人の相性一言要約: "${result.oneLiner}"`;
+二人の相性一言要約: "${result.oneLiner}"${todayText}`;
     }
     
-    return basicInfo;
+    return `${basicInfo}${todayText}`;
   };
 
   const handleSend = async (text: string) => {

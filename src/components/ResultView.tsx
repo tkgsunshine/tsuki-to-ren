@@ -7,7 +7,9 @@ import { Calendar, Download, X, Heart, Smartphone, Share } from 'lucide-react';
 import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
-import type { FortuneResult } from '../utils/fortuneEngine';
+import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
+import { TodayView } from './TodayView';
+import type { SavedPartner } from '../App';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
@@ -511,6 +513,10 @@ interface ResultViewProps {
     onOpen: () => void;
     onRedeem: (code: string) => Promise<string | null>;
   };
+  /** 月額プレミアム会員の「今日」画面（2026-11-12 TAKASHI）: いま表示している鑑定の入力・保存したお相手・お相手の切り替え */
+  todayInput?: DiagnosisInput | null;
+  todayPartners?: SavedPartner[];
+  onTodaySwitch?: (partner: SavedPartner | null) => void;
 }
 
 // 画面下のバー（無料で続きを見る／シェア）の位置: 下メニューのすぐ上（約6px空ける）。
@@ -541,7 +547,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onOpenChat,
   sharedBy,
   referral,
-  referralGift = false
+  referralGift = false,
+  todayInput = null,
+  todayPartners = [],
+  onTodaySwitch
 }) => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -553,8 +562,15 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const torisetsuRef = useRef<HTMLDivElement>(null);
   const wasSubscribedRef = useRef(isSubscribed);
   const [showWelcomePremium, setShowWelcomePremium] = useState(false);
+  // 月額プレミアム会員は、開いたときに「今日」（毎日変わる結果だけ）を見せ、タブで「鑑定書」（今までの結果画面）に切り替える（2026-11-12 TAKASHI）。
+  // 共有リンクで開いた、ほかの人の結果では出さない
+  const [resultTab, setResultTab] = useState<'today' | 'book'>('today');
+  const showTodayTabs = isSubscribed && !sharedBy;
+  const showToday = showTodayTabs && resultTab === 'today';
   useEffect(() => {
     if (isSubscribed && !wasSubscribedRef.current) {
+      // 購入した直後は、開いたトリセツへ案内する（鑑定書のほう）
+      setResultTab('book');
       setShowWelcomePremium(true);
       // モーダルが閉じてから戻す（閉じる前だと body のスクロールロック解除で位置がずれる）
       const timer = setTimeout(() => {
@@ -1348,6 +1364,65 @@ export const ResultView: React.FC<ResultViewProps> = ({
           )}
         </div>
       )}
+
+      {/* 月額プレミアム会員: 「今日」と「鑑定書」の切り替え */}
+      {showTodayTabs && (
+        <div role="tablist" aria-label="結果の表示" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem', width: '100%', maxWidth: '360px', margin: '0 auto', padding: '0.3rem', boxSizing: 'border-box', borderRadius: '9999px', background: 'rgba(11, 15, 21, 0.85)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+          {([['today', '今日'], ['book', hasOpponent ? '二人の鑑定書' : 'あなたの鑑定書']] as const).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={resultTab === key}
+              onClick={() => { setResultTab(key); resultTopRef.current?.scrollIntoView({ block: 'start' }); }}
+              className="font-serif"
+              style={{
+                padding: '0.5rem 0.4rem', borderRadius: '9999px', border: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 'bold',
+                background: resultTab === key ? 'linear-gradient(90deg, #ecc87a 0%, #d9a441 100%)' : 'transparent',
+                color: resultTab === key ? '#1a1230' : '#b9b2a4'
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {showToday && (
+        <TodayView
+          result={activeResult}
+          selectedChar={selectedChar}
+          setSelectedChar={setSelectedChar}
+          myName={myName}
+          oppName={opponentName}
+          hasOpponent={hasOpponent}
+          input={todayInput}
+          partners={todayPartners}
+          onSwitch={onTodaySwitch}
+          onOpenBook={() => { setResultTab('book'); resultTopRef.current?.scrollIntoView({ block: 'start' }); }}
+          onOpenChat={onOpenChat}
+          barBottom={RESULT_BAR_BOTTOM}
+          weeklyChart={(() => {
+            const items = activeResult.weeklyScores.map((day, index) => ({
+              key: day.day,
+              label: index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day,
+              score: day.score
+            }));
+            const scores = items.map((item) => item.score);
+            const range = { lo: Math.min(...scores), hi: Math.max(...scores) };
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {[items.slice(0, 7), items.slice(7)].filter((row) => row.length > 0).map((row, i) => (
+                  <ScoreLineChart key={i} locked={false} items={row} range={range} />
+                ))}
+              </div>
+            );
+          })()}
+        />
+      )}
+
+      {/* 「今日」を見ているあいだは、鑑定書（ここから下）を隠す。display: contents なので、表示中の並び・余白は今までと同じ */}
+      <div style={{ display: showToday ? 'none' : 'contents' }}>
 
       {/* 🌙 / 🔮 Character Switch Tabs (Sticky fixed to top of view) */}
       <div style={{
@@ -4005,6 +4080,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         isOpen={showA2hsModal}
         onClose={() => setShowA2hsModal(false)}
       />
+      </div>
     </div>
   );
 };
