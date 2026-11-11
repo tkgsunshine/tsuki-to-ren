@@ -197,6 +197,12 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
               昨日より {diff > 0 ? `＋${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0'}
             </span>
           )}
+          {/* 基本の相性（二人の生まれ持った相性。毎日は変わらない）を小さく添える（2026-11-12 TAKASHI） */}
+          {hasOpponent && typeof result.baseScore === 'number' && (
+            <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#b9b2a4', whiteSpace: 'nowrap' }}>
+              基本の相性 <span style={{ fontWeight: 'bold', color: '#f2e2b3', fontVariantNumeric: 'tabular-nums' }}>{result.baseScore}</span>点
+            </span>
+          )}
         </div>
         {result.dailyLuckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: 1.6 }}>{result.dailyLuckTitle}</p>}
       </section>
