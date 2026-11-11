@@ -228,6 +228,17 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         </section>
       )}
 
+      {/* あなたの今日（お相手の今日と同じ見方で、自分の分も。2026-11-12 TAKASHI、LINE吉時間の上へ） */}
+      {myToday && stars?.me && (
+        <PartnerTodayCard
+          oppLabel={myLabel}
+          pt={myToday}
+          p={stars.me}
+          self
+          guardian={result.myAvatarUrl ? { img: result.myAvatarUrl, name: result.myAstrologyName || '', theme: (result.myAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
+        />
+      )}
+
       {/* LINE吉時間と助言 */}
       {/* 鑑定書の「本日のLINE吉時間 ＆ 運勢」と同じ緑のデザイン（2026-11-12 TAKASHI） */}
       <section style={{
@@ -292,17 +303,6 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
             ))}
           </div>
         </section>
-      )}
-
-      {/* あなたの今日（お相手の今日と同じ見方で、自分の分も。2026-11-12 TAKASHI） */}
-      {myToday && stars?.me && (
-        <PartnerTodayCard
-          oppLabel={myLabel}
-          pt={myToday}
-          p={stars.me}
-          self
-          guardian={result.myAvatarUrl ? { img: result.myAvatarUrl, name: result.myAstrologyName || '', theme: (result.myAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
-        />
       )}
 
       {/* ② お相手の今日（と、それに合わせた今日の一歩） */}
