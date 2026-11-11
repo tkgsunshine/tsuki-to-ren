@@ -409,24 +409,40 @@ const PAIR_PITFALL_BY_AXIS = [
     { idx: 1, letters: ['S', 'N'], lines: ['相手の思いつきや夢の話を、「現実的じゃない」と切り捨てること', '日時や中身を決めないまま、思いつきの話ばかりすること'] }
 ];
 const PAIR_PITFALL_COMMON = ['似ているところが多いぶん、「言わなくても分かるはず」と確かめずに決めつけること', 'どちらも引けないときに意地を張り合って、先に謝らないこと'];
+// 同じ文字どうしのときの文（[1文字目どうし, 2文字目どうし]）
+const PAIR_PITFALL_SAME_AXIS = {
+    2: ['どちらも気持ちを言葉にしないまま、用件だけのやり取りで済ませてしまうこと', '相手の機嫌を気にしすぎて、言いたいことを飲みこみ合うこと'],
+    3: ['予定や段取りの決め方で、どちらも自分のやり方を譲らないこと', '「そのうち」が続いて、会う日や大事なことがいつまでも決まらないこと'],
+    0: ['盛り上がる話ばかりで、相手の本音や疲れに気づかないこと', 'どちらも連絡を待って、気づけば何日もやり取りが止まること'],
+    1: ['いつも同じお店・同じ過ごし方で、新しいことをしないまま慣れてしまうこと', '話が理想や「いつか」に流れて、今の気持ちを確かめないこと']
+};
+// 地雷3選（二人の組み合わせで、あなたがやりがちなこと）。行動なので、二人とも16タイプがわかるときはタイプの組み合わせだけで選ぶ。
+// どちらかがわからないときだけ、星（干合・お相手から見たあなたの十神）から選ぶ（2026-11-12 TAKASHI方針）。
 export function getPairPitfalls(myStem, oppStem, myMbti, oppMbti) {
     const out = [];
     const add = (t) => { if (out.length < 3 && !out.includes(t))
         out.push(t); };
+    if (isMbtiType(myMbti) && isMbtiType(oppMbti)) {
+        const me = myMbti.toUpperCase();
+        const opp = oppMbti.toUpperCase();
+        // 違う軸を先に（すれ違いが起きやすい順）、そのあと同じ軸
+        for (const a of PAIR_PITFALL_BY_AXIS) {
+            if (me[a.idx] !== opp[a.idx])
+                add(me[a.idx] === a.letters[0] ? a.lines[0] : a.lines[1]);
+        }
+        for (const a of PAIR_PITFALL_BY_AXIS) {
+            if (me[a.idx] === opp[a.idx])
+                add(PAIR_PITFALL_SAME_AXIS[a.idx][me[a.idx] === a.letters[0] ? 0 : 1]);
+        }
+        PAIR_PITFALL_COMMON.forEach(add);
+        return out;
+    }
     const hasStems = !!stemElements[myStem] && !!stemElements[oppStem];
     const tg = hasStems ? PAIR_PITFALL_BY_TEN_GOD[getTenGod(oppStem, myStem)] : null;
     if (hasStems && STEM_COMBINATIONS[myStem] === oppStem)
         add(PAIR_PITFALL_KANGO);
     if (tg)
         add(tg[0]);
-    if (isMbtiType(myMbti) && isMbtiType(oppMbti)) {
-        const me = myMbti.toUpperCase();
-        const opp = oppMbti.toUpperCase();
-        for (const a of PAIR_PITFALL_BY_AXIS) {
-            if (me[a.idx] !== opp[a.idx])
-                add(me[a.idx] === a.letters[0] ? a.lines[0] : a.lines[1]);
-        }
-    }
     if (tg)
         add(tg[1]);
     PAIR_PITFALL_COMMON.forEach(add);
@@ -1136,6 +1152,21 @@ const mbtiTimingSubtitles = {
         tLow: '連絡を控えて、相手からのLINEを待つ'
     }
 };
+// タイプがわからないときの小見出し（特定のタイプに寄せない言い方）
+const GENERIC_TIMING_SUBTITLES = {
+    t85: '気持ちが届きやすい夜に、素直なひと言を',
+    t73: 'くつろいだ夕方以降に、話しやすい話題を',
+    t60: 'お昼に、返事のいらない軽いひと言',
+    t45: '朝に、短くさわやかなひと言だけ',
+    tLow: '今日は連絡を休んで、相手の時間を大切に'
+};
+const GENERIC_SINGLE_TIMING_SUBTITLES = {
+    t85: '夜に、気になる人へ自分から連絡',
+    t73: '夕方は、人に会う予定や連絡にぴったり',
+    t60: 'お昼は、自分を満たす時間に',
+    t45: '夜は早めに休んで、心と体を回復',
+    tLow: 'スマホを置いて、一日ゆっくり休む'
+};
 const singleTimingSubtitles = {
     'INTJ': {
         t85: '夜に、これからの目標をじっくり考える',
@@ -1251,8 +1282,9 @@ const singleTimingSubtitles = {
     }
 };
 export function getDailyContactAndAdvice(dailyScore, hasOpponent, character, _myNick, oppNick, oppMbti, myMbti, oppMbtiTrait, myMbtiTrait, oppStemTrait) {
-    const oppNorm = (oppMbti || 'ENFP').toUpperCase();
-    const myNorm = (myMbti || 'ENFP').toUpperCase();
+    // タイプがわからないときは ENFP 扱いにせず、タイプに寄らない言い方にする（2026-11-12）
+    const oppNorm = (oppMbti || '').toUpperCase();
+    const myNorm = (myMbti || '').toUpperCase();
     const isType = (t) => /^[EI][NS][TF][JP]$/.test(t);
     // 『』に入れて文中に埋めるため、末尾の句点を外す
     const trimEnd = (s) => s.replace(/[。．]+$/, '');
@@ -1261,11 +1293,12 @@ export function getDailyContactAndAdvice(dailyScore, hasOpponent, character, _my
     let subtitle = '';
     let parts = [];
     if (hasOpponent) {
-        const subs = mbtiTimingSubtitles[oppNorm] || mbtiTimingSubtitles['ENFP'];
+        const subs = mbtiTimingSubtitles[oppNorm] || GENERIC_TIMING_SUBTITLES;
         const who = `${san(oppNick)}`;
         const whoType = isType(oppNorm) ? `${who}（${oppNorm}）` : who;
         const killing = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「いつも誠実でいてくれるとこ、ほんと尊敬してる」');
-        const praise = oppStemTrait?.praise[1] || oppMbtiTrait?.killingExtra || '「いつもありがとう。話してるとほっとする」';
+        // 褒め言葉（行動）は16タイプから。タイプがわからないときだけ星から
+        const praise = oppMbtiTrait?.killingExtra || oppStemTrait?.praise[1] || '「いつもありがとう。話してるとほっとする」';
         const invite = oppMbtiTrait?.lineInvite || '「よさそうなお店見つけたから、今度一緒に行かない？」';
         const topic = oppMbtiTrait?.lineTopic || '「最近ハマっていることある？」';
         const habit = trimEnd(oppMbtiTrait?.lineHabit || 'マイペースで丁寧なやり取りを好む傾向');
@@ -1351,7 +1384,7 @@ export function getDailyContactAndAdvice(dailyScore, hasOpponent, character, _my
     }
     else {
         // シングルモード
-        const subs = singleTimingSubtitles[myNorm] || singleTimingSubtitles['ENFP'];
+        const subs = singleTimingSubtitles[myNorm] || GENERIC_SINGLE_TIMING_SUBTITLES;
         const myType = isType(myNorm) ? `16タイプ（${myNorm}）の` : '';
         const myNg = myMbtiTrait?.ngList[0] || '無理な我慢を強いられること';
         const mySpot = myMbtiTrait?.dateSpot || '落ち着いたカフェ';
@@ -1666,68 +1699,106 @@ export function getMbtiCognitiveDynamics(myMbti, oppMbti, myNick, oppNick) {
         summary: `${tfText}\n\n${jpText}`
     };
 }
+// トリセツの「返信が遅いときの返し方」と「仲を深めるコツ」（行動なので16タイプの 外向/内向 × 思考/感情 から。2026-11-12）
+const SLOW_REPLY_ACTION_BY_AXIS = {
+    EF: '「忙しかったらスルーで大丈夫！」と軽く一言だけ送って、あとは待ちましょう。反応を大事にするタイプなので、返事が来たら明るく大きめのリアクションで返すと、すぐいつものテンポに戻ります。',
+    ET: '追いLINEはせず、次は相手が返しやすい用件か、面白い話題を一つだけ送りましょう。テンポを大事にするタイプなので、責める一言より、さらっと流すほうが早く返ってきます。',
+    IF: '催促はせず、「ゆっくりで大丈夫だよ」の一言だけにして待ちましょう。気持ちが整ってから返したいタイプなので、待ってくれる人を大切に思います。',
+    IT: '何も送らずに待つのが正解です。自分のタイミングで返したいタイプなので、2〜3日あいても気にせず、返事が来たら結論から短く返しましょう。'
+};
+const APPROACH_BY_AXIS = {
+    EF: '一緒に楽しめることを見つけて、うれしい・楽しいという気持ちを言葉にして伝えること',
+    ET: '話題や誘いをはっきり具体的にして、相手のテンポに合わせること',
+    IF: '一人の時間を大切にしてあげながら、気持ちのこもった短い言葉を届けること',
+    IT: '相手の考えやこだわりに興味を持って、押しつけずに質問すること'
+};
+// タイプがわからないときのサイン（特定のタイプに寄せない）
+const GENERIC_FLAG = {
+    greenL1: '用がなくても、ちょっとした出来事や写真を送ってくる。',
+    greenL2: '好みや前に話したことを覚えていて、会話に出してくれる',
+    greenL3: '二人で会う予定を、相手のほうから立ててくれる',
+    redSign: '返事が短くなり、質問が返ってこなくなる。',
+    redRecovery: '「どうしたの？」と問い詰めず、数日そっとしておく。そのあと、返事のいらない明るい話題を短く1つだけ送る。'
+};
 function generateTorisetsu(oppStem, _oppBranch, oppMbti, myStem, myMbti, oppNickName) {
     const name = oppNickName || 'お相手';
     const sTrait = getStemTraits(oppStem, name);
-    const mTrait = getMbtiTraits(oppMbti, name);
-    const normMbti = (oppMbti || 'ENFP').toUpperCase();
-    const flag = mbtiFlagMap[normMbti] || mbtiFlagMap['ENFP'];
-    // あなたとお相手の相性（干合・支合・三合・相生・認知機能）に基づく特別な褒め言葉とNG
+    // 行動（褒め言葉・やってはいけないこと・返し方・誘い方）は16タイプから。タイプがわからないときは星とタイプに寄らない文から（2026-11-12）
+    const known = isMbtiType(oppMbti);
+    const mTrait = known ? getMbtiTraits(oppMbti, name) : null;
+    const normMbti = known ? oppMbti.toUpperCase() : '';
+    const flag = known ? (mbtiFlagMap[normMbti] || GENERIC_FLAG) : GENERIC_FLAG;
+    const axis = known ? `${normMbti[0]}${normMbti[2]}` : null;
+    // あなたとお相手の相性（干合・思考/感情）に基づく特別な褒め言葉
     const isKango = ((myStem === '甲' && oppStem === '己') || (myStem === '己' && oppStem === '甲') ||
         (myStem === '乙' && oppStem === '庚') || (myStem === '庚' && oppStem === '乙') ||
         (myStem === '丙' && oppStem === '辛') || (myStem === '辛' && oppStem === '丙') ||
         (myStem === '丁' && oppStem === '壬') || (myStem === '壬' && oppStem === '丁') ||
         (myStem === '戊' && oppStem === '癸') || (myStem === '癸' && oppStem === '戊'));
-    const myT = (myMbti || '').toUpperCase().includes('T');
-    const oppT = normMbti.includes('T');
+    const myKnown = isMbtiType(myMbti);
+    const myT = myKnown && myMbti.toUpperCase()[2] === 'T';
+    const oppT = known && normMbti[2] === 'T';
     let chemistryPraise4 = `「話してると時間あっという間。一番素でいられる」`;
     let chemistryPraise5 = `「こんなに話が合う人、なかなかいないよ」`;
-    if (isKango) {
-        chemistryPraise4 = `「一緒にいると、なんか不思議と安心するんだよね」`;
-        chemistryPraise5 = `「苦手なとこ補い合えてる感じがして、すごく大事に思ってる」`;
-    }
-    else if (!myT && oppT) {
+    if (known && myKnown && !myT && oppT) {
         chemistryPraise4 = `「いつも落ち着いてて頼りになる。ほんと安心する」`;
         chemistryPraise5 = `「言わなくても分かってくれるとこ、ほんと好き」`;
     }
-    else if (myT && !oppT) {
+    else if (known && myKnown && myT && !oppT) {
         chemistryPraise4 = `「話してると、張りつめてた気持ちがふっとゆるむ」`;
         chemistryPraise5 = `「いつも気づかってくれて、ほんとにありがとう」`;
     }
-    let chemistryNg4 = mTrait.ngList[0] || '返信を急かして短時間に連投で催促すること';
-    let chemistryNg5 = mTrait.ngList[1] || '感謝の気持ちを伝えずに当たり前のような態度を取ること';
-    if (oppT) {
-        chemistryNg4 = `筋の通らない愚痴を長文でぶつけて、どう返せばいいか困らせること`;
+    else if (!known && isKango) {
+        chemistryPraise4 = `「一緒にいると、なんか不思議と安心するんだよね」`;
+        chemistryPraise5 = `「苦手なとこ補い合えてる感じがして、すごく大事に思ってる」`;
     }
-    else {
-        chemistryNg4 = `相手の気持ちを正論で言い負かして、つらさに寄り添わないこと`;
+    if (mTrait && axis) {
+        const tfNg = oppT
+            ? '筋の通らない愚痴を長文でぶつけて、どう返せばいいか困らせること'
+            : '相手の気持ちを正論で言い負かして、つらさに寄り添わないこと';
+        // ngExtra は ngList と似た文があるので、離して最後に置く
+        const ng = [mTrait.ngList[0], mTrait.ngList[1], tfNg, mTrait.ngList[2], mTrait.ngExtra]
+            .filter((t, i, arr) => !!t && arr.indexOf(t) === i);
+        if (ng.length < 5)
+            ng.push('返信を急かして、短い時間に何通も送ること');
+        return {
+            killingWords: [mTrait.killingExtra, chemistryPraise4, chemistryPraise5, sTrait.praise[0], sTrait.praise[1]],
+            ngBehaviors: ng.slice(0, 5),
+            // 返信が遅い「理由」は状態なので星から、「返し方」は行動なので16タイプから
+            slowReplyPsychology: sTrait.delayReason,
+            slowReplyAction: SLOW_REPLY_ACTION_BY_AXIS[axis],
+            greenFlagSign: flag.greenL1,
+            greenFlagLevel2: mTrait.greenL2,
+            greenFlagLevel3: mTrait.greenL3,
+            redFlagSign: flag.redSign,
+            redFlagRecovery: flag.redRecovery,
+            lineTemplateInvite: mTrait.lineInvite,
+            lineTemplateTopic: mTrait.lineTopic,
+            idealDateSpot: mTrait.dateSpot,
+            approachTip: `${normMbti}タイプ（${mbtiAxisLabel(normMbti)}）の${san(name)}には、${APPROACH_BY_AXIS[axis]}が、仲を深める一番の近道です。`
+        };
     }
+    // タイプがわからないとき: 星から出した文と、タイプに寄らない文
     return {
-        killingWords: [
-            sTrait.praise[0],
-            mTrait.killingExtra,
-            sTrait.praise[1],
-            chemistryPraise4,
-            chemistryPraise5
-        ],
+        killingWords: [sTrait.praise[0], chemistryPraise4, sTrait.praise[1], chemistryPraise5],
         ngBehaviors: [
             sTrait.ng[0],
-            mTrait.ngExtra,
             sTrait.ng[1],
-            chemistryNg4,
-            chemistryNg5
+            '返信を急かして、短い時間に何通も送ること',
+            '感謝を伝えずに、してもらうことを当たり前にすること',
+            '相手の話を途中でさえぎって、自分の話にすり替えること'
         ],
         slowReplyPsychology: sTrait.delayReason,
         slowReplyAction: sTrait.delayAdvice,
         greenFlagSign: flag.greenL1,
-        greenFlagLevel2: mTrait.greenL2,
-        greenFlagLevel3: mTrait.greenL3,
+        greenFlagLevel2: GENERIC_FLAG.greenL2,
+        greenFlagLevel3: GENERIC_FLAG.greenL3,
         redFlagSign: flag.redSign,
         redFlagRecovery: flag.redRecovery,
-        lineTemplateInvite: mTrait.lineInvite,
-        lineTemplateTopic: mTrait.lineTopic,
-        idealDateSpot: mTrait.dateSpot,
-        approachTip: `${isMbtiType(oppMbti) ? `${normMbti}タイプの` : ''}${san(name)}には、相手が一人でいたい時間や話したくないことには踏み込まず、${isKango ? '駆け引きをせずに、飾らない素直な気持ちを見せること' : '二人の気が合うところを見つけて、そこを具体的に褒めること'}が、仲を深める一番の近道です。`
+        lineTemplateInvite: '「よさそうなお店見つけたんだけど、今度一緒に行かない？」',
+        lineTemplateTopic: '「最近ハマっていることある？」',
+        idealDateSpot: '落ち着いて話せるカフェや、景色のよいお店',
+        approachTip: `${san(name)}には、相手が一人でいたい時間や話したくないことには踏み込まず、${isKango ? '駆け引きをせずに、飾らない素直な気持ちを見せること' : '二人の気が合うところを見つけて、そこを具体的に褒めること'}が、仲を深める一番の近道です。（${san(name)}の16タイプがわかると、タイプに合わせたコツをお伝えできます）`
     };
 }
 const attractionStyleMap = {
@@ -1971,6 +2042,107 @@ function getTenGodsCategory(myStem, todayStem) {
     };
     return categories[diff] || '比劫';
 }
+const TODAY_STATE = {
+    tsuki: {
+        '比劫': '今日のあなたは、自分らしさがいちばん強く出る星回り。人に合わせすぎず、自分の気持ちを大事にしてよい日です。',
+        '食傷': '今日のあなたは、言葉と笑顔に魅力が乗りやすい星回り。気持ちが自然と表に出る日です。',
+        '財星': '今日のあなたは、目の前の人や現実のことに心が向く星回り。人との約束や予定を、具体的な形にしやすい日です。',
+        '官殺': '今日のあなたは、周りの期待や予定に押されて、心の余裕が少なくなりやすい星回りです。',
+        '印星': '今日のあなたは、人の優しさを受け取りやすく、心が内側に向く星回りです。'
+    },
+    ren: {
+        '比劫': '今日は、あなたの星と同じ気が巡る日。自分の考えがはっきりして、人と対等に話せる力が強まっています。',
+        '食傷': '今日は、あなたの星から気持ちや発想が外へ流れ出る日。言葉が軽やかに出て、楽しい空気をつくりやすい日です。',
+        '財星': '今日は、あなたの星が人や物事を動かす側に回る日。予定や約束を具体的に決めやすい日です。',
+        '官殺': '今日は、外から圧がかかる星回り。余裕が少なく、言葉が固くなりやすい日です。',
+        '印星': '今日は、考えを深めたり振り返ったりするのに向いた星回り。勢いより、落ち着いた判断が冴える日です。'
+    }
+};
+// お相手の16タイプに合わせた、今日のお相手への接し方
+const TODAY_ACTION_PAIR = {
+    '比劫': {
+        EF: '今日は自分の「好き」や「楽しかった」を素直に話してみて。気持ちを表に出すタイプなので、あなたが本音を見せるほど、相手も本音で返してくれます。',
+        ET: '今日は自分の意見をはっきり伝えて大丈夫です。考えを言い合うのが好きなタイプなので、遠慮した返事より「私はこう思う」のほうが一目置かれます。',
+        IF: '今日は自分のペースを守りつつ、短い一言で気持ちを伝えて。じっくり受け取るタイプなので、長文より「これ見て思い出した」くらいの一言が心に残ります。',
+        IT: '今日は対等な距離感で、用件や話題をはっきり伝えましょう。一人の時間を大事にするタイプなので、べったりせず、要点の伝わる短い連絡が好印象です。'
+    },
+    '食傷': {
+        EF: '今日は楽しいことを一緒に盛り上がるのが一番。ノリと共感を大事にするタイプなので、スタンプや「それいいね！」で明るく返すと会話が弾みます。',
+        ET: '今日は面白い話題を一つ投げてみて。新しいことに食いつくタイプなので、「これ知ってる？」とネタを振ると、楽しそうに乗ってきます。',
+        IF: '今日はあなたが感じたことを、丁寧な言葉で届けてみて。感受性の強いタイプなので、相手の好きなものを具体的に褒めると深く響きます。',
+        IT: '今日は相手の得意なことについて質問してみて。こだわりを話すのが好きなタイプなので、聞き役に回るとたくさん話してくれます。'
+    },
+    '財星': {
+        EF: '今日は「今度二人で行こうよ」と軽く誘ってみて。人と過ごす時間が好きなタイプなので、気軽なお誘いほど乗ってくれやすいです。',
+        ET: '誘うなら、日にちと場所をセットで具体的に。てきぱき決めたいタイプなので、「土曜のお昼、〇〇どう？」くらい具体的だと話が早く進みます。',
+        IF: '今日は少人数で落ち着ける場所を提案してみて。にぎやかさより安心感を大事にするタイプなので、静かなお店や二人だけの時間が喜ばれます。',
+        IT: '今日は目的のはっきりした誘い方が通りやすい日。理由があると動きやすいタイプなので、「〇〇を見に行きたいんだけど、一緒にどう？」と中身から伝えて。'
+    },
+    '官殺': {
+        EF: '無理に盛り上げようとしなくて大丈夫。反応を大事にするタイプなので、短くても「ありがとう」「うれしい」を返すだけで、気持ちは十分伝わります。',
+        ET: '今日はやり取りを短く、用件中心に。テンポを大事にするタイプなので、疲れた長文より、さっと返せる一言のほうが好印象です。',
+        IF: '今日は返事を急がず、自分の余裕を優先して。相手も急かされるのが苦手なタイプなので、「ゆっくりでいいよ」とお互いのペースを守るのが正解です。',
+        IT: '今日は連絡は控えめで大丈夫。一人の時間を大事にするタイプなので、間があいても気にしません。送るなら夜に、短く。'
+    },
+    '印星': {
+        EF: '今日は素直に甘えたり、頼ったりしてみて。頼られるとうれしいタイプなので、「ちょっと聞いてほしいことがあって」の一言が距離を縮めます。',
+        ET: '今日は相談ごとを一つ持ちかけてみて。頼られて力を発揮するタイプなので、「〇〇さんならどうする？」と聞くと、頼もしく答えてくれます。',
+        IF: '今日は気持ちを込めた短いメッセージを一通だけ。言葉の温かさを大事にするタイプなので、「いつもありがとう」のような素直な言葉が長く心に残ります。',
+        IT: '今日は焦らず、次に話すことをじっくり考える日に。よく考えてから話したいタイプなので、思いつきの連投より、考えて送った一通のほうが響きます。'
+    }
+};
+// あなたの16タイプに合わせた、今日のあなたの過ごし方（自分だけの鑑定）
+const TODAY_ACTION_SELF = {
+    '比劫': {
+        EF: '今日は好きなことを人に話してみて。気持ちを外に出すと元気になるタイプなので、友だちとのおしゃべりが良いご縁の入口になります。',
+        ET: '今日はやりたいことを一つ決めて、自分から動いてみて。自分で決めて進むと力が出るタイプなので、誘いを待つより自分で予定を作るのが近道です。',
+        IF: '今日は自分の気持ちを大事にして、心地よいほうを選んで。自分の価値観を大切にするタイプなので、無理に人に合わせないほうが魅力が出ます。',
+        IT: '今日は一人で集中できる時間を作って。自分のペースで考えると冴えるタイプなので、やりたいことを整理しておくと、次の出会いで迷いません。'
+    },
+    '食傷': {
+        EF: '今日は人の集まる場所に顔を出してみて。楽しい空気をつくるのが得意なタイプなので、笑顔と一言で自然と人が寄ってきます。',
+        ET: '今日は気になっていたイベントや新しいお店に行ってみて。新しい刺激で元気になるタイプなので、出かけた先で話のネタも出会いも見つかります。',
+        IF: '今日は好きなものに触れる時間を作って。感性で動くタイプなので、音楽や映画、写真などで心を満たすと、表情がやわらかくなります。',
+        IT: '今日は興味のあることをとことん調べてみて。こだわりを深めると輝くタイプなので、その話ができる相手との会話が弾みます。'
+    },
+    '財星': {
+        EF: '今日は気になる人や友だちに「最近どう？」と連絡してみて。人とのつながりで運が開くタイプなので、軽い一言が次の約束に繋がります。',
+        ET: '今日は会いたい人との予定を、日にちまで決めてしまいましょう。段取りが得意なタイプなので、自分から決めると話がどんどん進みます。',
+        IF: '今日は仲のよい人と、少人数でゆっくり過ごして。安心できる場で本来の魅力が出るタイプなので、紹介や縁つなぎも生まれやすいです。',
+        IT: '今日は時間とお金の使い方を見直してみて。計画を立てると安心するタイプなので、出会いの場に使う時間を先に確保しておくのが効きます。'
+    },
+    '官殺': {
+        EF: '今日は頑張りすぎず、話を聞いてくれる人に頼って。人と話すと回復するタイプなので、一人で抱えずに少しこぼすだけで楽になります。',
+        ET: '今日はやることを3つに絞って、残りは明日へ。何でも自分で回そうとするタイプなので、手放すことを決めるのが一番の守りです。',
+        IF: '今日は断ることを自分に許して。人に合わせて疲れやすいタイプなので、気が進まない誘いは無理に受けなくて大丈夫です。',
+        IT: '今日は予定を詰めず、一人の時間を確保して。静かな時間で回復するタイプなので、連絡はあとでまとめて返せば十分です。'
+    },
+    '印星': {
+        EF: '今日は信頼できる人に素直に甘えてみて。人の温かさで満たされるタイプなので、受け取った優しさが明日の魅力になります。',
+        ET: '今日は尊敬する人に相談してみて。人の意見を取り入れて伸びるタイプなので、その一言が次の行動のヒントになります。',
+        IF: '今日は日記やメモに、今の気持ちを書き出してみて。心の中を整理すると落ち着くタイプなので、どんな恋がしたいかが見えてきます。',
+        IT: '今日は本を読んだり、考えを整理したりする時間に。じっくり考えて答えを出すタイプなので、焦らず次の一手を練るのが正解です。'
+    }
+};
+/** 16タイプの 外向/内向・思考/感情 を「外向・感情タイプ」のように言う */
+function mbtiAxisLabel(t) {
+    const u = t.toUpperCase();
+    return `${u[0] === 'E' ? '外向' : '内向'}・${u[2] === 'T' ? '思考' : '感情'}タイプ`;
+}
+/**
+ * 今日の恋の過ごし方。状態（星回り）は四柱推命、行動は16タイプから。タイプがわからないときは null（呼び出し側で星の文＋案内）。
+ * @param who お相手ありならお相手の呼び名（「ハルさん」）、自分だけなら null
+ */
+export function getTodayLoveAction(category, mbti, character, who) {
+    if (!isMbtiType(mbti))
+        return null;
+    const u = mbti.toUpperCase();
+    const axis = `${u[0]}${u[2]}`;
+    const table = who ? TODAY_ACTION_PAIR : TODAY_ACTION_SELF;
+    const basis = who ? `${who}は${u}（${mbtiAxisLabel(u)}）。` : `あなたは${u}（${mbtiAxisLabel(u)}）。`;
+    const action = who ? table[category][axis].replace(/〇〇さん/g, who) : table[category][axis];
+    return `${TODAY_STATE[character][category]}\n\n${basis}${action}`;
+}
 export function getScoreMood(baseScore, dailyScore) {
     const diff = dailyScore - baseScore;
     const sign = diff > 0 ? `+${diff}点` : diff < 0 ? `−${-diff}点` : '±0点';
@@ -2193,8 +2365,11 @@ export function generateFortuneResult(input, character, now = new Date()) {
     // 未選択（空文字）でも文が欠けないよう、'UNKNOWN' として扱う
     const mbtiDyn = hasOpponent ? getMbtiCognitiveDynamics(input.myMbti || 'UNKNOWN', input.opponentMbti || 'UNKNOWN', myNickname, oppNickname) : null;
     const myStemTrait = getStemTraits(myPillarObj.stem, myNickname);
-    const oppMbtiTrait = input.opponentMbti ? getMbtiTraits(input.opponentMbti, oppNickname) : null;
-    const myMbtiTrait = getMbtiTraits(input.myMbti, myNickname);
+    // 行動の案内に使う16タイプの特徴。タイプがわからないときは null（以前は黙って ENFP として扱っていた。2026-11-12 修正）
+    const oppMbtiTrait = isMbtiType(input.opponentMbti) ? getMbtiTraits(input.opponentMbti, oppNickname) : null;
+    // 「恋愛運の鍵」（topics[1]。今は画面に出していない）だけは従来どおり
+    const oppKeyTrait = input.opponentMbti ? getMbtiTraits(input.opponentMbti, oppNickname) : null;
+    const myMbtiTrait = isMbtiType(input.myMbti) ? getMbtiTraits(input.myMbti, myNickname) : null;
     const oppStemTrait = oppPillarObj ? getStemTraits(oppPillarObj.stem, oppNickname) : null;
     let oneLiner = '';
     let summary = '';
@@ -2325,31 +2500,31 @@ export function generateFortuneResult(input, character, now = new Date()) {
     if (character === 'tsuki') {
         if (adviceCategory === '比劫') {
             firstCardText = `${meta}今日のあなたに贈る言葉は「自分らしさの誇り」です。人の期待に応えようとして、自分の本音を閉じ込めていませんか？あなたの心が「心地よい」と感じるほうを選ぶことが、結果的に人との関係を一番いい形にしてくれます。`;
-            secondCardText = hasOpponent && oppMbtiTrait
-                ? `関係を動かす一番の鍵は、${san(oppNickname)}の弱さを見た時に、それを優しく包み込んであげることです。${oppMbtiTrait.killingExtra}と伝えてみてください。素直な笑顔が、相手の緊張を優しくほどいてくれます。`
+            secondCardText = hasOpponent && oppKeyTrait
+                ? `関係を動かす一番の鍵は、${san(oppNickname)}の弱さを見た時に、それを優しく包み込んであげることです。${oppKeyTrait.killingExtra}と伝えてみてください。素直な笑顔が、相手の緊張を優しくほどいてくれます。`
                 : `今日は自分を最優先に、お気に入りの服や心地よい音楽で自分を満たしてあげてください。満たされた気持ちは表情に出て、いいご縁を引き寄せます。`;
         }
         else if (adviceCategory === '食傷') {
             firstCardText = `${meta}あなたの言葉と笑顔が、いつも以上に人を惹きつける日です。難しい話より、「美味しいね」「楽しいね」と気持ちを分け合うことが、相手の心をやわらかくほどいてくれます。`;
-            secondCardText = hasOpponent && oppMbtiTrait
-                ? `${san(myNickname)}が感じたワクワクした気持ちをストレートに言葉に乗せてみましょう。LINEでは${oppMbtiTrait.lineTopic}について軽く振ってみると、相手は嬉しそうに乗ってきます。`
+            secondCardText = hasOpponent && oppKeyTrait
+                ? `${san(myNickname)}が感じたワクワクした気持ちをストレートに言葉に乗せてみましょう。LINEでは${oppKeyTrait.lineTopic}について軽く振ってみると、相手は嬉しそうに乗ってきます。`
                 : `直感に従って好きなカフェやアートに触れてみましょう。あなたの自由で豊かな表現力が、周囲を惹きつける磁石となります。`;
         }
         else if (adviceCategory === '財星') {
             firstCardText = `${meta}焦らず、毎日の小さな積み重ねを信じて進みましょう。関係を一気に進めようとするより、目の前のことを落ち着いて見て、一緒にいて安心できる時間を少しずつ増やしていくのが鍵です。`;
-            secondCardText = hasOpponent && oppMbtiTrait
+            secondCardText = hasOpponent && oppKeyTrait
                 ? `お互いのリアルな日常を支え合う姿勢が信頼を深めます。${oppStemTrait?.delayAdvice || '相手のペースを温かく尊重し、焦らず信頼を育みましょう。'}`
                 : `身の回りの整理や、自分への小さなごほうびが吉です。毎日を丁寧に過ごすことが、いい出会いを呼び込む土台になります。`;
         }
         else if (adviceCategory === '官殺') {
             firstCardText = `${meta}相手との波長にズレを感じても心配はいりません。相手の感情の波を無理に引き受けず、今は「相手には相手のペースがある」と受け入れることで、結果的に心地よい信頼が芽生えます。`;
-            secondCardText = hasOpponent && oppMbtiTrait
-                ? `今は押しすぎず、自分のペースを保ちましょう。お相手が嫌がる『${oppMbtiTrait.ngList[0]}』は避けて、一歩引いて見守ってあげてください。その落ち着いた優しさが、相手の心を引き寄せます。`
+            secondCardText = hasOpponent && oppKeyTrait
+                ? `今は押しすぎず、自分のペースを保ちましょう。お相手が嫌がる『${oppKeyTrait.ngList[0]}』は避けて、一歩引いて見守ってあげてください。その落ち着いた優しさが、相手の心を引き寄せます。`
                 : `プレッシャーを感じやすい日です。無理に誰かと関わろうとせず、暖かいお風呂でゆっくり深呼吸してエネルギーを充電してください。`;
         }
         else { // 印星
             firstCardText = `${meta}今日はずっと頑張ってきた自分をたっぷり甘やかして、優しさを素直に受け取る日です。「尽くさなければ愛されない」という思い込みを手放し、愛される心地よさを実感してください。`;
-            secondCardText = hasOpponent && oppMbtiTrait
+            secondCardText = hasOpponent && oppKeyTrait
                 ? `${san(myNickname)}が素直に「頼る」「甘える」姿勢を見せることで、${san(oppNickname)}の「この人の力になりたい」という気持ちが強くなります。感謝の言葉をひと言添えて、お願いしてみましょう。`
                 : `本を読んだり、新しいことを知ったりするのにぴったりの日です。自分の中身を育てる時間が、これからのあなたを輝かせます。`;
         }
@@ -2357,33 +2532,46 @@ export function generateFortuneResult(input, character, now = new Date()) {
     else { // ren
         if (adviceCategory === '比劫') {
             firstCardText = `${meta}今日は、相手に頼りすぎず、世話を焼きすぎもしない「対等な会話」を意識する日です。相手の顔色をうかがうより、自分の考えや状況をそのまま伝えるほうが信頼されます。`;
-            secondCardText = hasOpponent && oppMbtiTrait
-                ? `結論：${isMbtiType(input.opponentMbti) ? `相手の性格タイプ（${input.opponentMbti.toUpperCase()}）` : '相手の考え方のくせ'}に合わせて、はっきり誘ってみるのにいい日です。${oppMbtiTrait.lineInvite}のように、日にちと場所まで具体的に書いて提案してください。`
+            secondCardText = hasOpponent && oppKeyTrait
+                ? `結論：${isMbtiType(input.opponentMbti) ? `相手の性格タイプ（${input.opponentMbti.toUpperCase()}）` : '相手の考え方のくせ'}に合わせて、はっきり誘ってみるのにいい日です。${oppKeyTrait.lineInvite}のように、日にちと場所まで具体的に書いて提案してください。`
                 : `自分の得意なことや、これからの目標を書き出して整理してみてください。自分の足で立っている大人の魅力が、いい相手を引き寄せる一番の力になります。`;
         }
         else if (adviceCategory === '食傷') {
             firstCardText = `${meta}今日は「一緒に楽しめること」を提案するのがおすすめです。思ったままに話すより、相手が興味を持っていそうな話題を選んで振ってみてください。`;
-            secondCardText = hasOpponent && oppMbtiTrait
-                ? `お相手が乗ってきやすいのは、${oppMbtiTrait.lineTopic}のような質問です。短く聞くと、返事をもらいやすくなります。`
+            secondCardText = hasOpponent && oppKeyTrait
+                ? `お相手が乗ってきやすいのは、${oppKeyTrait.lineTopic}のような質問です。短く聞くと、返事をもらいやすくなります。`
                 : `新しい分野の情報収集や体験型イベントへの参加が吉です。知的好奇心を満たす行動が、思わぬ好機や人脈をもたらします。`;
         }
         else if (adviceCategory === '財星') {
             firstCardText = `${meta}二人のこれからを落ち着いて見直す日です。気持ちだけで判断せず、お互いが望んでいることや、かけられる時間が合っているかを確かめて、無理のない進め方を選んでください。`;
-            secondCardText = hasOpponent && oppMbtiTrait
-                ? `「いつ・どこで」を具体的にして提案すると、話が決まりやすい日です。行き先は『${oppMbtiTrait.dateSpot}』のような場所にすると、ぐっとまとまりやすくなります。`
+            secondCardText = hasOpponent && oppKeyTrait
+                ? `「いつ・どこで」を具体的にして提案すると、話が決まりやすい日です。行き先は『${oppKeyTrait.dateSpot}』のような場所にすると、ぐっとまとまりやすくなります。`
                 : `お金の使い方や、これからの計画を見直すのにぴったりの日です。無駄を減らして暮らしを整えると心に余裕が生まれ、それが魅力になります。`;
         }
         else if (adviceCategory === '官殺') {
             firstCardText = `${meta}相手が今どんな状況で、何に追われているかを考えて、あえて「一歩引いて支える」のが一番です。返事を急かさず、落ち着いていてください。`;
-            secondCardText = hasOpponent && oppMbtiTrait
-                ? `注意点：お相手が嫌がる『${oppMbtiTrait.ngList[0]}』は、今日は特に避けてください。連絡するなら、「お疲れさま」のようなねぎらいのひと言を入れた短い文だけにしましょう。`
+            secondCardText = hasOpponent && oppKeyTrait
+                ? `注意点：お相手が嫌がる『${oppKeyTrait.ngList[0]}』は、今日は特に避けてください。連絡するなら、「お疲れさま」のようなねぎらいのひと言を入れた短い文だけにしましょう。`
                 : `急なトラブルや予定変更があっても困らないよう、予定には余裕を持たせてください。落ち着いて対応できる人は、それだけで信頼されます。`;
         }
         else { // 印星
             firstCardText = `${meta}これまでのやり取りや相手の反応を振り返って、「うまくいったこと」と「直したいこと」を整理する日です。焦ると、物事を正しく見れなくなります。`;
-            secondCardText = hasOpponent && oppMbtiTrait
-                ? `次のチャンスに向けて、相手のことをもっと知り、どう誘うかをじっくり考え直しましょう。相手に響く褒め言葉として『${oppMbtiTrait.killingExtra}』を用意しておくと、次に話すときの切り札になります。`
+            secondCardText = hasOpponent && oppKeyTrait
+                ? `次のチャンスに向けて、相手のことをもっと知り、どう誘うかをじっくり考え直しましょう。相手に響く褒め言葉として『${oppKeyTrait.killingExtra}』を用意しておくと、次に話すときの切り札になります。`
                 : `得意なことを伸ばしたり、本を読んだりする時間にあててください。ためた知識と落ち着いた見方が、これからの人付き合いで大きな強みになります。`;
+        }
+    }
+    // 行動は16タイプから（2026-11-12 TAKASHI方針）。タイプがわからないときは星から出した文のまま、入力の案内を添える。
+    {
+        const actionMbti = hasOpponent ? input.opponentMbti : input.myMbti;
+        const byType = getTodayLoveAction(adviceCategory, actionMbti, character, hasOpponent ? san(oppNickname) : null);
+        if (byType) {
+            firstCardText = byType;
+        }
+        else {
+            firstCardText += hasOpponent
+                ? `\n\n（${san(oppNickname)}の16タイプがわかると、ここをタイプに合わせた接し方でお伝えできます）`
+                : `\n\n（あなたの16タイプを入れると、ここをタイプに合わせた過ごし方でお伝えできます）`;
         }
     }
     const topics = [
@@ -2862,8 +3050,10 @@ export function generateFortuneResult(input, character, now = new Date()) {
             const oppLineHabit = oppMbtiTrait?.lineHabit || 'マイペースで丁寧なやり取りを好む傾向があります。';
             const oppDelayReason = oppMbtiTrait?.delayDeepReason || oppStemTrait?.delayReason || '自分の作業やタスクに没頭し、一人の充電時間を必要としているため。';
             const oppLineTopic = oppMbtiTrait?.lineTopic || '「最近ハマっていることや好きなこと」';
-            const tfText = mbtiDyn?.tfText || '';
-            const jpText = mbtiDyn?.jpText || '';
+            // 「気持ちが伝わるコツ」は二人ともタイプがわかるときだけ（わからないタイプを感情・知覚タイプとして書いていたため。2026-11-12）
+            const bothTypes = isMbtiType(input.myMbti) && isMbtiType(input.opponentMbti);
+            const tfText = bothTypes ? (mbtiDyn?.tfText || '') : '';
+            const jpText = bothTypes ? (mbtiDyn?.jpText || '') : '';
             // 「会話と伝わり方・LINE心理学」は、結果画面の「本日のLINE吉時間」カードに統合して表示する（lineTips）。
             const intros = {
                 tsuki: [
@@ -2910,7 +3100,9 @@ export function generateFortuneResult(input, character, now = new Date()) {
             const oppFallInLove = oppMbtiTrait?.fallInLove || '飾らない素直な笑顔と、自分の世界観を認めてくれた瞬間。';
             const oppKilling = oppMbtiTrait?.killingExtra || (oppStemTrait ? oppStemTrait.praise[0] : '「いつも誠実でいてくれるとこ、ほんと尊敬してる」');
             const [ng1, ng2, ng3] = getPairPitfalls(myPillarObj.stem, oppPillarObj.stem, input.myMbti, input.opponentMbti);
-            const stemNgNote = `（${san(oppNick)}から見たあなたの星と、二人の性格タイプの違いから選んでいます。${san(oppNick)}本人が嫌がることは、トリセツの「やってはいけないこと5選」にあります）`;
+            const stemNgNote = isMbtiType(input.myMbti) && isMbtiType(input.opponentMbti)
+                ? `（二人の16タイプ（${input.myMbti.toUpperCase()}×${input.opponentMbti.toUpperCase()}）の組み合わせから選んでいます。${san(oppNick)}本人が嫌がることは、トリセツの「やってはいけないこと5選」にあります）`
+                : `（${san(oppNick)}から見たあなたの星から選んでいます。二人の16タイプがわかると、タイプの組み合わせから選び直せます。${san(oppNick)}本人が嫌がることは、トリセツの「やってはいけないこと5選」にあります）`;
             let topic3Intro = '';
             let topic3Detail = '';
             if (character === 'tsuki') {
@@ -3341,7 +3533,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
         const text = generateYearlyText(score, yearsLater, displayYear, yPillar);
         return { year: displayYear, label, text, score };
     });
-    const dailyContactAdvice = getDailyContactAndAdvice(dailyScore, hasOpponent, character, myNickname, oppNickname, input.opponentMbti || 'ENFP', input.myMbti || 'ENFP', oppMbtiTrait, myMbtiTrait, oppStemTrait);
+    const dailyContactAdvice = getDailyContactAndAdvice(dailyScore, hasOpponent, character, myNickname, oppNickname, input.opponentMbti || '', input.myMbti || '', oppMbtiTrait, myMbtiTrait, oppStemTrait);
     return {
         baseScore,
         dailyScore,
