@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Send, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { generateFortuneResult, san } from '../utils/fortuneEngine';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
 import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
@@ -33,8 +33,8 @@ interface Props {
   onUpdateJourney?: (partnerId: string, journey: Journey) => void;
   /** 14日間の折れ線グラフ（結果画面と同じ部品） */
   weeklyChart: React.ReactNode;
-  /** 画面下の入力欄の位置（結果画面の下のバーと同じ） */
-  barBottom: string;
+  /** 画面下の入力欄の位置（相談の入力欄は TAKASHI判断 2026-11-12 で削除。今は使わない） */
+  barBottom?: string;
 }
 
 const GOLD = '#f5d77a';
@@ -69,9 +69,8 @@ function StarsBlock({ p, self }: { p: PersonStars; self: boolean }) {
 
 const fmtDay = (n: NextDay) => `${n.date.m}月${n.date.d}日(${WEEKDAYS[n.date.weekday]})`;
 
-export function TodayView({ result, selectedChar, setSelectedChar, myName, oppName, hasOpponent, input, partners, onSwitch, onOpenBook, onOpenChat, onUpdateJourney, weeklyChart, barBottom }: Props) {
+export function TodayView({ result, selectedChar, setSelectedChar, myName, oppName, hasOpponent, input, partners, onSwitch, onOpenBook, onOpenChat, onUpdateJourney, weeklyChart }: Props) {
   const now = useMemo(() => new Date(), []);
-  const charName = selectedChar === 'ren' ? '蓮' : '月';
   const oppLabel = san(oppName);
 
   // 昨日の点数（同じ入力・同じ計算で日付だけ前日に）
@@ -307,32 +306,6 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         <ChevronRight size={20} style={{ flexShrink: 0, color: GOLD }} />
       </button>
 
-      {/* 画面下: 月・蓮への相談の入り口。入力欄の形にして、タップするとチャットが開き、そのまま書ける */}
-      {onOpenChat && (
-        <button
-          type="button"
-          className="result-floating-bar"
-          onClick={() => ask()}
-          aria-label={`${charName}に今日のことを相談する`}
-          style={{
-            position: 'fixed', bottom: barBottom, left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 2rem)', maxWidth: '360px',
-            zIndex: 9990, boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', textAlign: 'left',
-            padding: '0.35rem 0.4rem 0.35rem 0.45rem', borderRadius: '9999px',
-            background: 'rgba(11, 15, 21, 0.94)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(226, 192, 116, 0.5)', boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
-          }}
-        >
-          <img src={selectedChar === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp'} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-          <span style={{ flex: 1, minWidth: 0, color: '#9d978a', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{charName}に今日のことを相談する…</span>
-          <span aria-hidden="true" style={{
-            flexShrink: 0, width: 34, height: 34, borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg, #ecc87a, #b8692d)', color: '#000'
-          }}>
-            <Send size={16} />
-          </span>
-        </button>
-      )}
     </div>
   );
 }
