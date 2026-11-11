@@ -497,10 +497,16 @@ function AutoNotices({ items, onSave }: { items: AutoNotice[]; onSave: (kind: st
   );
 }
 
-function Tile({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+// total: 期間に関係ない「今の数」（累計）。期間内の数と見分けるため、金の枠・色つきの背景・「累計」の札で表示する
+function Tile({ label, value, sub, total }: { label: string; value: string | number; sub?: string; total?: boolean }) {
   return (
-    <div style={{ ...c.card, marginBottom: 0, flex: '1 1 140px' }}>
-      <div style={c.muted}>{label}</div>
+    <div style={{ ...c.card, marginBottom: 0, flex: '1 1 140px', ...(total ? { background: '#2a2238', border: '1px solid #e2c074' } : {}) }}>
+      {total && (
+        <div style={{ display: 'inline-block', background: '#e2c074', color: '#1a1530', fontSize: 11, fontWeight: 700, borderRadius: 4, padding: '1px 6px', marginBottom: 4 }}>
+          累計（今の数）
+        </div>
+      )}
+      <div style={total ? { ...c.muted, color: '#e2c074' } : c.muted}>{label}</div>
       <div style={{ fontSize: 26, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
       {sub && <div style={c.muted}>{sub}</div>}
     </div>
@@ -1214,8 +1220,8 @@ export default function AdminView() {
               <Tile label="買い切り購入（期間内）" value={totals.pairs} sub={`支払い画面へ ${totals.pairCheckouts} 回`} />
               <Tile label="月額の新規（期間内）" value={totals.premiums} sub={`支払い画面へ ${totals.checkouts} 回`} />
               <Tile label="売上（期間内）" value={salesYen(totals.salesYen)} sub="本番の購入額（月額の更新分は除く）" />
-              <Tile label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
-              <Tile label="月額プレミアム" value={paying} sub={`買い切りを買った人 ${pairBuyers} 人`} />
+              <Tile total label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
+              <Tile total label="月額プレミアム" value={paying} sub={`買い切りを買った人 ${pairBuyers} 人`} />
             </div>
 
             {days > 1 && (
