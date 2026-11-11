@@ -54,10 +54,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       const stored = localStorage.getItem('hasu_user_profile');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.name) return parsed.name;
+        // 「あなた」は空欄のときの呼び名なので、入力欄には入れない（プレースホルダーだけ見せる）
+        if (parsed.name && parsed.name !== 'あなた') return parsed.name;
       }
     } catch (e) {}
-    return 'あなた';
+    return '';
   });
 
   const [myBirth, setMyBirth] = useState(() => {
@@ -118,7 +119,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const mode = 'match' as const;
 
   // Opponent Info states
-  const [oppName, setOppName] = useState('お相手');
+  // 初期値は空欄（プレースホルダーだけ）。空欄で鑑定すると結果では「お相手」と呼ぶ
+  const [oppName, setOppName] = useState('');
   const [oppBirth, setOppBirth] = useState(() => prefill?.oppBirth || '');
   const [oppMbti, setOppMbti] = useState(() => {
     if (urlPair?.opp) return urlPair.opp;
@@ -140,7 +142,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
 
   React.useEffect(() => {
     if (loadedPartner) {
-      setOppName(loadedPartner.name);
+      setOppName(loadedPartner.name === 'お相手' ? '' : loadedPartner.name);
       setOppBirth(loadedPartner.birth);
       setOppMbti(loadedPartner.mbti);
       setRelationship(loadedPartner.relationship);
@@ -187,10 +189,6 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       return;
     }
     if (mode === 'match') {
-      if (!oppName || !oppName.trim()) {
-        showFieldError('お相手のニックネームを入力してください。', oppNameRef.current);
-        return;
-      }
       if (!oppBirth || oppBirth.length < 10) {
         showFieldError('お相手の生年月日は「19951221」のように数字8桁で入力してください。', oppBirthRef.current);
         return;
@@ -200,7 +198,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     // Auto-save user profile to localStorage for future default pre-fill
     try {
       localStorage.setItem('hasu_user_profile', JSON.stringify({
-        name: myName || 'あなた',
+        name: myName.trim() || 'あなた',
         birth: myBirth,
         mbti: myMbti,
         gender: myGender
@@ -208,11 +206,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     } catch (err) {}
     
     onSubmit({
-      myName: myName || 'あなた',
+      myName: myName.trim() || 'あなた',
       myBirth,
       myMbti,
       myGender,
-      oppName: oppName || 'お相手',
+      oppName: oppName.trim() || 'お相手',
       oppBirth,
       oppMbti,
       oppGender,
