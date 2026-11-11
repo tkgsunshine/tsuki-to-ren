@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
-import { generateFortuneResult, san } from '../utils/fortuneEngine';
+import { ChevronRight, Heart } from 'lucide-react';
+import { generateFortuneResult, san, getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
 import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
 import type { PersonStars, NextDay } from '../utils/todayStars';
 import { WEEKDAYS } from '../utils/luckyDays';
-import { MoonMark } from './icons/BrandIcons';
+import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
 import { getPartnerToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, TEN_GOD_STATE, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
 import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
@@ -101,6 +101,11 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
           selected: hasOpponent && p.birth === input.opponentBirth && p.name === input.opponentName
         };
       });
+    // 名前だけ違う（別の端末で名前を直した等）ときは、生年月日が同じお相手が1人だけならその人として扱う
+    if (hasOpponent && !list.some((c) => c.selected)) {
+      const same = list.filter((c) => c.partner?.birth === input.opponentBirth);
+      if (same.length === 1) same[0].selected = true;
+    }
     // いま見ているお相手が保存されていないときも、先頭に出す
     if (hasOpponent && !list.some((c) => c.selected)) {
       list.unshift({ key: '__current', label: oppLabel, score: result.dailyScore, partner: null, selected: true });
@@ -108,10 +113,6 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
     // 切り替えはお相手ごとだけ（自分だけの運勢は出さない。2026-11-12 TAKASHI「上のタブはあくまで相手ごと」）
     return list;
   }, [input, partners, hasOpponent, now, oppLabel, result.dailyScore]);
-  const topKey = useMemo(() => {
-    if (chips.length < 2) return null;
-    return chips.reduce((a, b) => (b.score > a.score ? b : a)).key;
-  }, [chips]);
 
   const stars = useMemo(() => getTodayStars(result, now, myName, oppName), [result, now, myName, oppName]);
   const next = useMemo(() => getNextSpecialDays(result, now), [result, now]);
@@ -168,7 +169,6 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
             >
               <span style={{ fontSize: '0.68rem', color: c.selected ? '#f2e2b3' : '#b9b2a4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{c.label}</span>
               <span style={{ fontSize: '1.05rem', fontWeight: 900, color: GOLD, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2 }}>{c.score}</span>
-              {c.key === topKey && <span style={{ fontSize: '0.58rem', color: '#7fe0a8', fontWeight: 'bold', whiteSpace: 'nowrap' }}>今日いちばん</span>}
             </button>
           ))}
         </div>
@@ -190,24 +190,11 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
       </div>
 
       {/* 今日の相性 */}
-      <section style={{ ...card, background: 'linear-gradient(160deg, rgba(212,175,55,0.14), rgba(255,255,255,0.03))', border: '1px solid rgba(226,192,116,0.45)' }}>
-        <p style={sub}>{dateLabel}{hasOpponent ? `　${oppLabel}との今日の相性` : `　${san(myName, 'あなた')}の今日の運勢`}</p>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', flexWrap: 'wrap' }}>
-          <span className="font-serif" style={{ fontSize: '2.8rem', fontWeight: 900, color: GOLD, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{result.dailyScore}</span>
-          <span style={{ fontSize: '0.8rem', color: '#b9b2a4' }}>点</span>
-          {diff !== null && (
-            <span style={{ fontSize: '0.82rem', fontWeight: 'bold', color: diff > 0 ? '#7fe0a8' : diff < 0 ? '#f0b4a6' : '#b9b2a4' }}>
-              昨日より {diff > 0 ? `＋${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0'}
-            </span>
-          )}
-          {/* 基本の相性（二人の生まれ持った相性。毎日は変わらない）を小さく添える（2026-11-12 TAKASHI） */}
-          {hasOpponent && typeof result.baseScore === 'number' && (
-            <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#b9b2a4', whiteSpace: 'nowrap' }}>
-              基本の相性 <span style={{ fontWeight: 'bold', color: '#f2e2b3', fontVariantNumeric: 'tabular-nums' }}>{result.baseScore}</span>点
-            </span>
-          )}
-        </div>
-        {result.dailyLuckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: 1.6 }}>{result.dailyLuckTitle}</p>}
+      {/* 鑑定書の「基本の相性・今日の相性」と同じ、2つの丸いメーター＋今日の流れ（2026-11-12 TAKASHI） */}
+      <section className="glass-panel" style={{ ...card, alignItems: 'center', gap: '0.7rem', padding: '1.1rem 0.9rem 1.2rem', border: '1px solid rgba(226,192,116,0.45)', background: 'linear-gradient(160deg, rgba(212,175,55,0.12), rgba(14,19,27,0.7))' }}>
+        <p style={{ ...sub, textAlign: 'center' }}>{dateLabel}{hasOpponent ? `　${oppLabel}との今日の相性` : `　${san(myName, 'あなた')}の今日の運勢`}</p>
+        <ScoreRings base={result.baseScore} daily={result.dailyScore} hasOpponent={hasOpponent} diff={diff} />
+        {result.dailyLuckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: 1.6, textAlign: 'center' }}>{result.dailyLuckTitle}</p>}
       </section>
 
       {/* ① 二人の今日の相性 */}
@@ -522,5 +509,64 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
 
       {!saved && <p style={sub}>{oppLabel}を保存すると、道のりと状況を次回も覚えておけます。</p>}
     </section>
+  );
+}
+
+
+/** 鑑定書と同じ丸いメーター（基本＝小・今日＝大）と、今日の流れ（月の満ち欠け＋ひとこと）・昨日との差 */
+function Ring({ size, score, gradId, from, to, glow, icon, label, numColor }: { size: number; score: number; gradId: string; from: string; to: string; glow: string; icon: React.ReactNode; label: string; numColor: string }) {
+  const stroke = size * 0.055;
+  const r = (size - stroke) / 2 - 2;
+  const c = 2 * Math.PI * r;
+  const v = Math.max(0, Math.min(100, score));
+  return (
+    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)', filter: `drop-shadow(0 0 6px ${glow})` }} aria-hidden="true">
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={from} />
+            <stop offset="100%" stopColor={to} />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="rgba(10,12,28,0.55)" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`url(#${gradId})`} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${(c * v) / 100} ${c}`} />
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        {icon}
+        <span style={{ fontSize: size > 130 ? '0.98rem' : '0.8rem', color: numColor, fontWeight: 800, letterSpacing: '0.06em', marginTop: '0.15rem', textShadow: `0 0 10px ${glow}, 0 1px 3px rgba(0,0,0,0.6)` }}>{label}</span>
+        <div className="font-serif" style={{ fontSize: `${size * 0.3}px`, fontWeight: 800, color: numColor, lineHeight: 1.05, textShadow: `0 0 14px ${glow}, 0 2px 4px rgba(0,0,0,0.5)`, display: 'flex', alignItems: 'baseline', gap: '1px' }}>
+          {score}<span style={{ fontSize: `${size * 0.1}px`, fontWeight: 'bold' }}>点</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScoreRings({ base, daily, hasOpponent, diff }: { base: number; daily: number; hasOpponent: boolean; diff: number | null }) {
+  const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
+  const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
+  const sm = getScoreMood(base, daily);
+  const moodColor = sm.trend === 'up' ? '#8fd3ae' : sm.trend === 'down' ? '#e0a9a0' : '#d8cfb8';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.55rem', width: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.7rem' }}>
+        <Ring size={104} score={base} gradId="todayRingBase" from="#9f86c0" to="#e2c074" glow="rgba(226, 192, 116, 0.45)" icon={<Heart size={12} style={{ fill: '#cdbfe2', color: '#cdbfe2' }} />} label={baseLabel} numColor="#f6e6c2" />
+        <Ring size={148} score={daily} gradId="todayRingDaily" from="#9cc6d8" to="#3a86ab" glow="rgba(156, 198, 216, 0.55)" icon={<MoonPhaseMark size={17} tint="blue" />} label={todayLabel} numColor="#e8f3f8" />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', width: '100%' }}>
+        <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226,192,116,0.5))' }} />
+        <MoonPhaseMark size={30} phase={sm.phase} />
+        <span aria-hidden="true" style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(58,134,171,0.6), transparent)' }} />
+      </div>
+      <div className="font-serif" style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '0.12em', background: 'linear-gradient(90deg, #f6e6c2 0%, #e2c074 45%, #9cc6d8 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }}>
+        {sm.title}
+      </div>
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
+        <span>{baseLabel}より <span className="font-serif" style={{ fontSize: '1.02rem', fontWeight: 800, color: moodColor }}>{sm.sign}</span></span>
+        {diff !== null && (
+          <span>昨日より <span className="font-serif" style={{ fontSize: '1.02rem', fontWeight: 800, color: diff > 0 ? '#8fd3ae' : diff < 0 ? '#e0a9a0' : '#d8cfb8' }}>{diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0'}</span></span>
+        )}
+      </div>
+    </div>
   );
 }

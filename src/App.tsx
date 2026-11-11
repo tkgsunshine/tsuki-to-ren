@@ -1022,7 +1022,7 @@ function App() {
       return;
     }
     const fields = {
-      name: editPartnerName || 'お相手',
+      name: editPartnerName.trim().slice(0, 8) || 'お相手',
       birth: editPartnerBirth,
       mbti: editPartnerMbti,
       gender: editPartnerGender,
@@ -1061,6 +1061,11 @@ function App() {
     const updated = savedPartners.map(p => (p.id === editingPartnerId ? { ...p, ...fields, ...(leavesUnlock ? { unlocked: false } : {}) } : p));
     setSavedPartners(updated);
     setEditingPartnerId(null);
+    // いま結果画面に出しているお相手を直したときは、結果もその場で新しい名前・生年月日で出し直す
+    // （出し直さないと、「恋の暦」の切り替えに古い名前のお相手と直したお相手の2人が並ぶ。2026-11-12 TAKASHI報告）
+    if (before && readingInput && readingInput.opponentName === before.name && readingInput.opponentBirth === before.birth) {
+      handleTodaySwitch({ ...before, ...fields });
+    }
     // If this partner is the one the daily mail is about, the mail follows the edit
     if (before && isSubPartner(before) && notifySub?.enabled && notifySub.email) {
       saveNotifySubscription(notifySub.email, { ...before, ...fields });
@@ -2846,8 +2851,9 @@ function App() {
                               <input
                                 type="text"
                                 value={editPartnerName}
-                                onChange={(e) => setEditPartnerName(e.target.value)}
-                                placeholder="お相手のニックネーム"
+                                maxLength={8}
+                                onChange={(e) => setEditPartnerName(e.target.value.slice(0, 8))}
+                                placeholder="お相手のニックネーム (最大8文字)"
                                 style={{
                                   background: 'rgba(0,0,0,0.3)',
                                   border: '1px solid rgba(255,255,255,0.1)',
