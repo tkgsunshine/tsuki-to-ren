@@ -9,6 +9,8 @@ export interface SavedPartner {
   relationship: string;
   /** 買い切り（お相手1人の深層鑑定 ¥680）で解放したお相手。保存上限に数えない */
   unlocked?: boolean;
+  /** 月額会員の「今日」画面の二人の道のり（片思い／付き合っている・段階・今の状況）。端末とアカウントで同期する */
+  journey?: Journey;
 }
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
@@ -21,6 +23,7 @@ import { PartnerReplaceModal } from './components/PartnerReplaceModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult, san } from './utils/fortuneEngine';
 import type { FortuneResult, DiagnosisInput } from './utils/fortuneEngine';
+import type { Journey } from './utils/partnerToday';
 import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, MessageCircle, Calendar, Bell, Crown, Smartphone, Megaphone } from 'lucide-react';
 import { MoonMark } from './components/icons/BrandIcons';
 import { CustomDatePicker } from './components/CustomDatePicker';
@@ -1202,6 +1205,11 @@ function App() {
     startDiagnosis(cur.myName, cur.myBirth, cur.myMbti, cur.myGender, partner.name, partner.birth, partner.mbti, g, partner.relationship, 'match', true);
   };
 
+  // 「今日」画面の二人の道のり・今の状況を、保存したお相手に書く（アカウントへは保存したお相手と一緒に送られる）
+  const handleUpdateJourney = (partnerId: string, journey: Journey) => {
+    setSavedPartners((prev) => prev.map((p) => (p.id === partnerId ? { ...p, journey } : p)));
+  };
+
   // Diagnostic Results Cache
   const [renResult, setRenResult] = useState<FortuneResult | null>(null);
   const [tsukiResult, setTsukiResult] = useState<FortuneResult | null>(null);
@@ -1837,6 +1845,7 @@ function App() {
                 todayInput={readingInput}
                 todayPartners={savedPartners}
                 onTodaySwitch={handleTodaySwitch}
+                onUpdateJourney={handleUpdateJourney}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
                 onOpenChat={(question) => {
@@ -1881,6 +1890,7 @@ function App() {
                 todayInput={readingInput}
                 todayPartners={savedPartners}
                 onTodaySwitch={handleTodaySwitch}
+                onUpdateJourney={handleUpdateJourney}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
                 onOpenChat={(question) => {

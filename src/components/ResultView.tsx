@@ -9,6 +9,7 @@ import { getScoreMood, san } from '../utils/fortuneEngine';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
 import { TodayView } from './TodayView';
+import type { Journey } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
@@ -517,6 +518,7 @@ interface ResultViewProps {
   todayInput?: DiagnosisInput | null;
   todayPartners?: SavedPartner[];
   onTodaySwitch?: (partner: SavedPartner | null) => void;
+  onUpdateJourney?: (partnerId: string, journey: Journey) => void;
 }
 
 // 画面下のバー（無料で続きを見る／シェア）の位置: 下メニューのすぐ上（約6px空ける）。
@@ -550,7 +552,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   referralGift = false,
   todayInput = null,
   todayPartners = [],
-  onTodaySwitch
+  onTodaySwitch,
+  onUpdateJourney
 }) => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -1399,6 +1402,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           input={todayInput}
           partners={todayPartners}
           onSwitch={onTodaySwitch}
+          onUpdateJourney={onUpdateJourney}
           onOpenBook={() => { setResultTab('book'); resultTopRef.current?.scrollIntoView({ block: 'start' }); }}
           onOpenChat={onOpenChat}
           barBottom={RESULT_BAR_BOTTOM}

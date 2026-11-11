@@ -16,6 +16,16 @@ export function cleanProfile(p) {
   return { name: str(p.name, 40) || 'あなた', birth: str(p.birth, 10), mbti: str(p.mbti, 10) || 'UNKNOWN', gender: gender(p.gender) };
 }
 
+const JOURNEY_SITUATIONS = { crush: ['good', 'flat', 'noreply', 'meet'], couple: ['good', 'rut', 'fight', 'meet'] };
+export function cleanJourney(j) {
+  if (!j || typeof j !== 'object') return null;
+  const mode = j.mode === 'couple' ? 'couple' : j.mode === 'crush' ? 'crush' : null;
+  if (!mode) return null;
+  const stage = Number.isInteger(j.stage) && j.stage >= 0 && j.stage <= 4 ? j.stage : 0;
+  const situation = JOURNEY_SITUATIONS[mode].includes(j.situation) ? j.situation : null;
+  return { mode, stage, ...(situation ? { situation } : {}) };
+}
+
 export function cleanPartners(list) {
   if (!Array.isArray(list)) return null;
   return list
@@ -29,7 +39,9 @@ export function cleanPartners(list) {
       gender: gender(p.gender),
       relationship: str(p.relationship, 20) || 'single',
       // 買い切り（お相手1人の深層鑑定）で解放したお相手の印。保存上限に数えない
-      ...(p.unlocked === true ? { unlocked: true } : {})
+      ...(p.unlocked === true ? { unlocked: true } : {}),
+      // 月額会員の「今日」画面の二人の道のり（src/utils/partnerToday.ts の Journey）
+      ...(cleanJourney(p.journey) ? { journey: cleanJourney(p.journey) } : {})
     }));
 }
 

@@ -98,3 +98,15 @@ test("another account's data on this device is not carried over", () => {
   assert.deepEqual(d.partners, []);
   assert.equal(d.push, null);
 });
+
+test('cleanPartners: 「今日」画面の二人の道のり（journey）は形をそろえて残し、壊れた値は外す', () => {
+  const base = { name: 'ハル', birth: '1997-09-28', mbti: 'ENFJ', gender: 'male', relationship: '片思い中' };
+  const [ok, bad, odd] = cleanPartners([
+    { ...base, journey: { mode: 'crush', stage: 2, situation: 'noreply' } },
+    { ...base, journey: { mode: 'x', stage: 9 } },
+    { ...base, journey: { mode: 'couple', stage: 7, situation: 'noreply', extra: 'drop' } }
+  ]);
+  assert.deepEqual(ok.journey, { mode: 'crush', stage: 2, situation: 'noreply' });
+  assert.equal(bad.journey, undefined);
+  assert.deepEqual(odd.journey, { mode: 'couple', stage: 0 });
+});

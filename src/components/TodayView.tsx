@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Send, ChevronRight } from 'lucide-react';
 import { generateFortuneResult, san } from '../utils/fortuneEngine';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
@@ -6,6 +6,8 @@ import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
 import type { PersonStars, NextDay } from '../utils/todayStars';
 import { WEEKDAYS } from '../utils/luckyDays';
 import { MoonMark } from './icons/BrandIcons';
+import { getPartnerToday, getTodayStep, getCourage, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
+import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
 
 // 月額プレミアム会員の「今日」画面（2026-11-12 TAKASHI）。結果画面の多くはお相手が同じなら毎日同じなので、
@@ -27,6 +29,8 @@ interface Props {
   onSwitch?: (partner: SavedPartner | null) => void;
   onOpenBook: () => void;
   onOpenChat?: (question?: string) => void;
+  /** 保存したお相手の「二人の道のり」（片思い／付き合っている・段階・今の状況）を書き換える */
+  onUpdateJourney?: (partnerId: string, journey: Journey) => void;
   /** 14日間の折れ線グラフ（結果画面と同じ部品） */
   weeklyChart: React.ReactNode;
   /** 画面下の入力欄の位置（結果画面の下のバーと同じ） */
@@ -65,7 +69,7 @@ function StarsBlock({ p, self }: { p: PersonStars; self: boolean }) {
 
 const fmtDay = (n: NextDay) => `${n.date.m}月${n.date.d}日(${WEEKDAYS[n.date.weekday]})`;
 
-export function TodayView({ result, selectedChar, setSelectedChar, myName, oppName, hasOpponent, input, partners, onSwitch, onOpenBook, onOpenChat, weeklyChart, barBottom }: Props) {
+export function TodayView({ result, selectedChar, setSelectedChar, myName, oppName, hasOpponent, input, partners, onSwitch, onOpenBook, onOpenChat, onUpdateJourney, weeklyChart, barBottom }: Props) {
   const now = useMemo(() => new Date(), []);
   const charName = selectedChar === 'ren' ? '蓮' : '月';
   const oppLabel = san(oppName);
@@ -123,6 +127,22 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
   const ask = (q?: string) => {
     if (!onOpenChat) return;
     onOpenChat(q);
+  };
+
+  // 〇〇さんの今日（お相手の星から見た今日の傾向）と、二人の道のり・今日の一歩
+  const partnerToday = useMemo(() => (hasOpponent ? getPartnerToday(result, now) : null), [hasOpponent, result, now]);
+  const currentPartner = hasOpponent && input
+    ? partners.find((p) => p.birth === input.opponentBirth && p.name === input.opponentName) || null
+    : null;
+  // 保存していないお相手は、この画面を開いているあいだだけ覚えておく
+  const [unsavedJourneys, setUnsavedJourneys] = useState<Record<string, Journey>>({});
+  const unsavedKey = `${input?.opponentName || ''}_${input?.opponentBirth || ''}`;
+  const journey: Journey = currentPartner
+    ? cleanJourney(currentPartner.journey, currentPartner.relationship)
+    : unsavedJourneys[unsavedKey] || defaultJourney(input?.relationship);
+  const setJourney = (j: Journey) => {
+    if (currentPartner && onUpdateJourney) onUpdateJourney(currentPartner.id, j);
+    else setUnsavedJourneys((prev) => ({ ...prev, [unsavedKey]: j }));
   };
 
   const dateLabel = `${now.getMonth() + 1}月${now.getDate()}日(${WEEKDAYS[now.getDay()]})`;
@@ -183,6 +203,23 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         {result.dailyLuckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: 1.6 }}>{result.dailyLuckTitle}</p>}
       </section>
 
+      {/* 〇〇さんの今日（星から見たお相手の今日の傾向） */}
+      {partnerToday && stars?.partner && <PartnerTodayCard oppLabel={oppLabel} pt={partnerToday} p={stars.partner} />}
+
+      {/* 二人の道のりと、今日の一歩 */}
+      {partnerToday && (
+        <StepCard
+          journey={journey}
+          setJourney={setJourney}
+          pt={partnerToday}
+          now={now}
+          oppLabel={oppLabel}
+          selectedChar={selectedChar}
+          saved={!!currentPartner}
+          onAsk={onOpenChat ? (q) => ask(q) : undefined}
+        />
+      )}
+
       {/* 今日の星の動き（今日の点数の根拠） */}
       {stars && (
         <section style={card}>
@@ -192,7 +229,8 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
             <p key={n} style={{ ...body, color: GOLD, fontWeight: 'bold', fontSize: '0.84rem' }}>★ {n}</p>
           ))}
           <StarsBlock p={stars.me} self />
-          {stars.partner && <StarsBlock p={stars.partner} self={false} />}
+          {/* お相手の星は上の「〇〇さんの今日」に出す */}
+          {stars.partner && !partnerToday && <StarsBlock p={stars.partner} self={false} />}
         </section>
       )}
 
@@ -292,5 +330,153 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         </button>
       )}
     </div>
+  );
+}
+
+const WAVE_COLOR: Record<PartnerToday['wave'], string> = { low: '#9cc6d8', mid: '#f2e2b3', high: '#7fe0a8' };
+
+/** 〇〇さんの今日: 心のモード（十神）・元気の量（十二運）・心の揺れ（空亡・六冲）と良いしるし */
+function PartnerTodayCard({ oppLabel, pt, p }: { oppLabel: string; pt: PartnerToday; p: PersonStars }) {
+  return (
+    <section style={{ ...card, border: '1px solid rgba(156, 198, 216, 0.45)', background: 'linear-gradient(160deg, rgba(77,140,168,0.14), rgba(255,255,255,0.03))' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <h3 className="font-serif" style={{ ...h3, color: '#9cc6d8' }}>{oppLabel}の今日</h3>
+        <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#0b0f15', background: WAVE_COLOR[pt.wave], borderRadius: '9999px', padding: '0.15rem 0.6rem' }}>{WAVE_LABEL[pt.wave]}</span>
+      </div>
+      <p style={sub}>{oppLabel}の生まれた日の星と、今日の星の関係から見た「今日の傾向」です。</p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
+        <p style={{ ...sub, color: '#9cc6d8', fontWeight: 'bold' }}>心のモード</p>
+        <p className="font-serif" style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', lineHeight: 1.4 }}>{pt.mood}</p>
+        <p style={{ ...body, fontSize: '0.84rem' }}>{p.tenGodText}</p>
+        <p style={sub}>今日は「{p.tenGodName}」の日</p>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+          <p style={{ ...sub, color: '#9cc6d8', fontWeight: 'bold' }}>元気の量</p>
+          <span aria-label={`5段階中${pt.energy}`} style={{ display: 'flex', gap: '0.22rem' }}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <span key={n} style={{ width: 10, height: 10, borderRadius: '50%', background: n <= pt.energy ? GOLD : 'rgba(255,255,255,0.14)' }} />
+            ))}
+          </span>
+        </div>
+        <p style={{ ...body, fontSize: '0.84rem' }}>{pt.energyText}</p>
+        <p style={sub}>十二運（じゅうにうん）＝星の元気の段階で、今日は「{pt.energyName}」</p>
+      </div>
+
+      {(p.cautions.length > 0 || p.goods.length > 0) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          {p.cautions.map((c) => <p key={c} style={{ ...sub, color: '#f0b4a6' }}>△ 心が揺れやすい日: {c}</p>)}
+          {p.goods.map((g) => <p key={g} style={{ ...sub, color: '#f2e2b3' }}>✦ {g}</p>)}
+        </div>
+      )}
+    </section>
+  );
+}
+
+const segBtn = (on: boolean): React.CSSProperties => ({
+  padding: '0.4rem 0.3rem', borderRadius: '10px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 'bold',
+  border: on ? `1.5px solid ${GOLD}` : '1px solid rgba(255,255,255,0.14)',
+  background: on ? 'rgba(212, 175, 55, 0.18)' : 'rgba(255,255,255,0.04)',
+  color: on ? '#f2e2b3' : '#b9b2a4'
+});
+
+/** 二人の道のり（片思い／付き合っている・5段階）と今の状況を選ぶと、今日の一歩と月・蓮の勇気の一言が出る */
+function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved, onAsk }: {
+  journey: Journey;
+  setJourney: (j: Journey) => void;
+  pt: PartnerToday;
+  now: Date;
+  oppLabel: string;
+  selectedChar: 'ren' | 'tsuki';
+  saved: boolean;
+  onAsk?: (q: string) => void;
+}) {
+  const stages = JOURNEY_STAGES[journey.mode];
+  const step = getTodayStep(journey, pt, now);
+  const courage = getCourage(selectedChar, pt.wave, now);
+  const charName = selectedChar === 'ren' ? '蓮' : '月';
+  const setMode = (mode: JourneyMode) => { if (mode !== journey.mode) setJourney({ mode, stage: 0 }); };
+  const reachedCouple = journey.mode === 'crush' && journey.stage === 4;
+
+  return (
+    <section style={{ ...card, border: '1px solid rgba(226,192,116,0.45)' }}>
+      <h3 className="font-serif" style={h3}>今日の一歩</h3>
+
+      {/* 片思い／付き合っている */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
+        {([['crush', '片思い中'], ['couple', '付き合っている']] as const).map(([m, label]) => (
+          <button key={m} type="button" aria-pressed={journey.mode === m} onClick={() => setMode(m)} style={segBtn(journey.mode === m)}>{label}</button>
+        ))}
+      </div>
+
+      {/* 道のり（タップで今の段階を選ぶ） */}
+      <div>
+        <p style={{ ...sub, marginBottom: '0.35rem' }}>二人の道のり（今いるところをタップ）{journey.mode === 'couple' ? '　ゴールは結婚' : ''}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '0.15rem', position: 'relative' }}>
+          <span aria-hidden="true" style={{ position: 'absolute', top: 9, left: '10%', right: '10%', height: 2, background: 'rgba(226,192,116,0.25)' }} />
+          {stages.map((label, i) => {
+            const done = i <= journey.stage;
+            const cur = i === journey.stage;
+            return (
+              <button key={label} type="button" aria-pressed={cur} onClick={() => setJourney({ ...journey, stage: i })} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', padding: 0, background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative', minWidth: 0
+              }}>
+                <span style={{ width: cur ? 20 : 14, height: cur ? 20 : 14, marginTop: cur ? 0 : 3, borderRadius: '50%', background: done ? GOLD : '#2a2638', border: cur ? '3px solid #fff3c9' : '1px solid rgba(226,192,116,0.5)', boxSizing: 'border-box' }} />
+                <span style={{ fontSize: '0.62rem', lineHeight: 1.3, color: cur ? '#f2e2b3' : done ? '#d9cfb6' : '#8f897d', fontWeight: cur ? 'bold' : 'normal', textAlign: 'center', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {reachedCouple && (
+        <button type="button" onClick={() => setJourney({ mode: 'couple', stage: 0 })} style={{ ...segBtn(true), padding: '0.55rem 0.7rem', textAlign: 'left', lineHeight: 1.5 }}>
+          おめでとうございます！ ここからは「付き合っている」の道のりへ進みましょう（ゴールは結婚）›
+        </button>
+      )}
+
+      {/* 今の状況（1タップ。もう一度押すと外れる） */}
+      <div>
+        <p style={{ ...sub, marginBottom: '0.35rem' }}>今の状況は？</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
+          {SITUATIONS[journey.mode].map((s) => {
+            const on = journey.situation === s.key;
+            return (
+              <button key={s.key} type="button" aria-pressed={on} onClick={() => setJourney({ mode: journey.mode, stage: journey.stage, ...(on ? {} : { situation: s.key }) })} style={segBtn(on)}>{s.label}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 今日の一歩 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(226,192,116,0.35)' }}>
+        <span style={{ alignSelf: 'flex-start', fontSize: '0.68rem', fontWeight: 'bold', color: '#0b0f15', background: WAVE_COLOR[pt.wave], borderRadius: '9999px', padding: '0.1rem 0.55rem' }}>{step.size}</span>
+        <p style={{ ...body, fontSize: '0.9rem', color: '#ffffff', fontWeight: 'bold' }}>{step.text}</p>
+        {step.ownChoice && <p style={{ ...sub, color: '#f2e2b3' }}>決めるのはあなたです。星は背中を押すだけ。今日でなくても、あなたが「今だ」と思う日がいちばんの日です。</p>}
+        <p style={sub}>{oppLabel}の今日の様子（{pt.mood}・元気{pt.energy}/5{pt.sway ? '・心が揺れやすい日' : ''}）から選んでいます。</p>
+      </div>
+
+      {/* 月・蓮の勇気の一言 */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.55rem' }}>
+        <img src={selectedChar === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp'} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+        <p style={{ ...body, fontSize: '0.84rem', color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2' }}>{charName}「{courage}」</p>
+      </div>
+
+      {onAsk && (
+        <button type="button" onClick={() => onAsk(step.wait
+          ? `今日の一歩は「${step.text}」。${oppLabel}のことが気になって落ち着かないとき、今日はどう過ごせばいい？`
+          : `今日の一歩は「${step.text}」。${oppLabel}に送るLINEの文を一緒に考えて`)} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', textAlign: 'left',
+          padding: '0.6rem 0.8rem', borderRadius: '12px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 'bold',
+          background: 'linear-gradient(90deg, rgba(236,200,122,0.22), rgba(217,164,65,0.12))', border: `1px solid ${GOLD}`, color: '#f3efe6'
+        }}>
+          <span>{step.wait ? `${charName}に、待つあいだの過ごし方を相談する` : `${charName}に、この一歩のLINEの文を相談する`}</span><ChevronRight size={16} style={{ flexShrink: 0, color: GOLD }} />
+        </button>
+      )}
+
+      {!saved && <p style={sub}>{oppLabel}を保存すると、道のりと状況を次回も覚えておけます。</p>}
+    </section>
   );
 }

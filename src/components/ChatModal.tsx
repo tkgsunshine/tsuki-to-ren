@@ -7,6 +7,12 @@ import type { FortuneResult } from '../utils/fortuneEngine';
 import { san } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
 import { getTodayStars, todayStarsForChat } from '../utils/todayStars';
+import { getPartnerToday, WAVE_LABEL } from '../utils/partnerToday';
+import type { PartnerToday } from '../utils/partnerToday';
+
+// 「今日」画面の「お相手の今日」（星から見た傾向）をチャットにも渡す
+const partnerTodayForChat = (pt: PartnerToday | null): string =>
+  pt ? `\nお相手の今日の様子（星から見た傾向）: ${pt.mood}・元気${pt.energy}/5（十二運 ${pt.energyName}：${pt.energyText}）${pt.sway ? '・心が揺れやすい日' : ''}・${WAVE_LABEL[pt.wave]}` : '';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { chatHistoryKey, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chatHistory';
 import type { SavedPartner } from '../App';
@@ -217,7 +223,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 今日の見出し: ${(result.dailyLuckTitle || '').replace(/\n/g, ' ')}
 LINE吉時間: ${result.bestContactHour || ''}
 今日の星の動き:
-${todayStarsForChat(getTodayStars(result, new Date(), 'あなた', hasOppNickname ? oppNickname : undefined))}`;
+${todayStarsForChat(getTodayStars(result, new Date(), 'あなた', hasOppNickname ? oppNickname : undefined))}${partnerTodayForChat(getPartnerToday(result, new Date()))}`;
     const basicInfo = `【あなたの属性】
 命式の日干（本質）: ${result.myPillar}
 本命星（九星）: ${result.myStar}
