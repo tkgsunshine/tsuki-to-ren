@@ -414,7 +414,7 @@ const segBtn = (on: boolean): React.CSSProperties => ({
 });
 
 /** 二人の道のり（片思い／付き合っている・5段階）と今の状況を選ぶと、今日の一歩と月・蓮の勇気の一言が出る */
-function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved, oppMbti, oppMbtiName, onAsk }: {
+function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved, oppMbti, onAsk }: {
   journey: Journey;
   setJourney: (j: Journey) => void;
   pt: PartnerToday;
@@ -489,7 +489,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(226,192,116,0.35)' }}>
         <span style={{ alignSelf: 'flex-start', fontSize: '0.68rem', fontWeight: 'bold', color: '#0b0f15', background: WAVE_COLOR[pt.wave], borderRadius: '9999px', padding: '0.1rem 0.55rem' }}>{step.size}</span>
         <p style={{ ...body, fontSize: '0.9rem', color: '#ffffff', fontWeight: 'bold' }}>{step.text}</p>
-        {delivery && <p style={{ ...sub, color: '#9cc6d8' }}>{step.wait ? `待っていい理由（${oppMbti}）：` : `伝え方（${oppMbti}）：`}{delivery}</p>}
+        {delivery && <p style={{ ...sub, color: '#9cc6d8' }}>{step.wait ? '待っていい理由：' : '伝え方：'}{delivery}</p>}
         {step.ownChoice && <p style={{ ...sub, color: '#f2e2b3' }}>決めるのはあなたです。星は背中を押すだけ。今日でなくても、あなたが「今だ」と思う日がいちばんの日です。</p>}
         <p style={sub}>{oppLabel}の今日の様子（{pt.mood}・元気{pt.energy}/5{pt.sway ? '・心が揺れやすい日' : ''}）から選んでいます。</p>
       </div>
@@ -497,7 +497,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
       {/* 今日の接し方: 状態は四柱推命、接し方はお相手の16タイプから（2026-11-12 TAKASHI） */}
       {mbtiAction && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(77,140,168,0.12)', border: '1px solid rgba(156,198,216,0.4)' }}>
-          <p style={{ ...sub, color: '#9cc6d8', fontWeight: 'bold' }}>{oppLabel}（{oppMbti}{oppMbtiName ? `・${oppMbtiName}` : ''}）への今日の接し方</p>
+          <p style={{ ...sub, color: '#9cc6d8', fontWeight: 'bold' }}>{oppLabel}への今日の接し方</p>
           <p style={sub}>星から見た今日の{oppLabel}：{mbtiAction.state}</p>
           <p style={{ ...body, fontSize: '0.86rem', color: '#ffffff' }}>{mbtiAction.action}</p>
           <p style={{ ...sub, color: '#d8d2c6' }}>{mbtiAction.plan}</p>

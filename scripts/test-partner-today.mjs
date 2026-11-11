@@ -71,7 +71,7 @@ test('今日の接し方: 十神のまとまり×16タイプで文が決まり�
 test('今日の一歩の伝え方: 16タイプから。待つ一歩は「待っていい理由」、タイプ不明なら出さない', async () => {
   const { getStepDelivery, TEN_GOD_STATE } = await import('../src/utils/partnerToday.ts');
   assert.match(getStepDelivery({ text: 'x', size: '', wait: false }, 'INFP'), /一対一/);
-  assert.match(getStepDelivery({ text: 'x', size: '', wait: true }, 'ESTJ'), /外向型/);
+  assert.match(getStepDelivery({ text: 'x', size: '', wait: true }, 'ESTJ'), /周りとの予定/);
   assert.equal(getStepDelivery({ text: 'x', size: '' }, 'UNKNOWN'), null);
   // 心のモードの説明は状態だけ（「〜しましょう」など行動の案内を含めない）
   for (const t of Object.values(TEN_GOD_STATE)) assert.doesNotMatch(t, /しましょう|しておく|避け|控え/);
