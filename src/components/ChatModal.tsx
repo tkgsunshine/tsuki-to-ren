@@ -334,7 +334,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   };
 
   return (
-    <div className="chat-overlay">
+    <div className="chat-overlay" data-clarity-mask="True">
       <div className="chat-window" style={{ position: 'relative', overflow: 'hidden' }}>
         
         {/* Guest Free Member Registration Form Overlay */}

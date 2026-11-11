@@ -134,7 +134,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
   };
 
   return (
-    <div style={{
+    <div data-clarity-mask="True" style={{
       position: 'fixed',
       inset: 0,
       background: 'rgba(2, 3, 4, 0.82)',

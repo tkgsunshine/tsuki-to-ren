@@ -6,6 +6,7 @@ import { AppDialogHost } from './components/AppDialog'
 import { installPageScrollReset, installStandaloneBottomGapFix } from './utils/pwaHelper'
 import { initAttribution, isTrackingOptedOut } from './services/analytics'
 import { inject as injectVercelAnalytics } from '@vercel/analytics'
+import { initClarity } from './services/clarity'
 
 const AdminView = lazy(() => import('./components/AdminView'))
 const isAdminPage = /^\/admin\/?$/.test(window.location.pathname)
@@ -16,6 +17,8 @@ if (!isAdminPage) initAttribution()
 // 管理画面と、集計から外したブラウザ（運営の端末）は送らない。Vercel側で Web Analytics を有効にすると集計が始まる
 if (!isAdminPage) injectVercelAnalytics({ framework: 'vite', beforeSend: (event) => (isTrackingOptedOut() ? null : event) })
 if (!isAdminPage) installPageScrollReset()
+// Microsoft Clarity（ヒートマップ・録画）。本番ドメインかつ VITE_CLARITY_PROJECT_ID があるときだけ。管理画面・運営の端末は送らない
+initClarity(isAdminPage)
 
 // 開きっぱなしのタブで、デプロイ後に古い分割JS（lazy import）を読もうとして失敗したら、1回だけ読み込み直して最新にする
 // （Vercelは前のデプロイのJSを残さない）。連続で失敗したときは読み込み直さず、通常のエラーとして扱う

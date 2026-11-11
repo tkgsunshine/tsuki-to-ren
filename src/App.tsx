@@ -2073,7 +2073,7 @@ function App() {
 
         {/* Tab 4: SETTINGS (MYPAGE) */}
         {activeTab === 'profile' && (
-          <div style={{ animation: 'fadeIn 0.4s ease', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2rem' }}>
+          <div data-clarity-mask="True" style={{ animation: 'fadeIn 0.4s ease', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2rem' }}>
             {/* Header / Back Navigation */}
             {settingsSubView !== 'main' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
