@@ -1368,7 +1368,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* 月額プレミアム会員: 「今日」と「鑑定書」の切り替え */}
       {showTodayTabs && (
         <div role="tablist" aria-label="結果の表示" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem', width: '100%', maxWidth: '360px', margin: '0 auto', padding: '0.3rem', boxSizing: 'border-box', borderRadius: '9999px', background: 'rgba(11, 15, 21, 0.85)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
-          {([['today', '今日'], ['book', hasOpponent ? '二人の鑑定書' : 'あなたの鑑定書']] as const).map(([key, label]) => (
+          {([['today', '恋の暦'], ['book', hasOpponent ? '二人の鑑定書' : 'あなたの鑑定書']] as const).map(([key, label]) => (
             <button
               key={key}
               type="button"
