@@ -1413,6 +1413,33 @@ function App() {
     );
   };
 
+  // 結果画面で、かんたん質問で決めた16タイプを入れて鑑定し直す（16タイプが未設定の以前の鑑定向け。TAKASHI 2026-11-12）
+  const handleSetMbti = (who: 'self' | 'partner', mbti: string) => {
+    const r = lastReadingRef.current as null | {
+      mName: string; mBirth: string; mMbti: string; mGender: 'male' | 'female';
+      oName: string; oBirth: string; oMbti: string; oGender: 'male' | 'female';
+      rel: string; runMode: 'single' | 'match'; selectedCharacter?: 'ren' | 'tsuki';
+    };
+    if (!r) return;
+    const next = { ...r, ...(who === 'self' ? { mMbti: mbti } : { oMbti: mbti }) };
+    if (who === 'self') {
+      setMyMbti(mbti);
+      try {
+        const prof = readLocalProfile();
+        if (prof) localStorage.setItem('hasu_user_profile', JSON.stringify({ ...prof, mbti }));
+      } catch { /* blocked storage */ }
+      pushProfile();
+    } else {
+      setOppMbti(mbti);
+      // 保存済みのお相手なら、タイプも入れておく
+      const list = savedPartnersRef.current;
+      if (list.some(p => isSamePartner(p, r.oName, r.oBirth) && (!p.mbti || p.mbti === 'UNKNOWN'))) {
+        setSavedPartners(list.map(p => (isSamePartner(p, r.oName, r.oBirth) && (!p.mbti || p.mbti === 'UNKNOWN') ? { ...p, mbti } : p)));
+      }
+    }
+    startDiagnosis(next.mName, next.mBirth, next.mMbti, next.mGender, next.oName, next.oBirth, next.oMbti, next.oGender, next.rel, next.runMode, true, next.selectedCharacter);
+  };
+
   const startDiagnosis = (
     mName: string,
     mBirth: string,
@@ -1816,6 +1843,7 @@ function App() {
                 hasOpponent={mode === 'match'}
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
+                onSetMbti={handleSetMbti}
                 isPartnerSaved={currentPartnerSaved}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
@@ -1857,6 +1885,7 @@ function App() {
                 hasOpponent={mode === 'match'}
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
+                onSetMbti={handleSetMbti}
                 isPartnerSaved={currentPartnerSaved}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}

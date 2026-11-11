@@ -6,7 +6,33 @@ import { CustomDatePicker } from './CustomDatePicker';
 import { mbtiOptions } from '../constants/mbti';
 import { showFieldError, showConfirm } from './AppDialog';
 import { san } from '../utils/fortuneEngine';
+import MbtiQuizModal from './MbtiQuizModal';
+import { isMbtiCode } from '../utils/mbtiQuiz';
 export { mbtiOptions };
+
+// 入力画面の16タイプの選択肢。必須なので「選んでください」から始め、「わからない」を選ぶとかんたん質問を開く
+const mbtiSelectOptions = [
+  { value: '', label: '選んでください' },
+  ...mbtiOptions.filter(o => o.value !== 'UNKNOWN'),
+  { value: 'UNKNOWN', label: 'わからない（4つの質問で決める）' }
+];
+const estimateNoteStyle: React.CSSProperties = {
+  fontSize: '0.72rem',
+  color: '#c9c2b4',
+  lineHeight: 1.6,
+  textShadow: '0 1px 3px rgba(0,0,0,0.95)'
+};
+const quizLinkStyle: React.CSSProperties = {
+  alignSelf: 'flex-start',
+  background: 'none',
+  border: 'none',
+  padding: '0.1rem 0',
+  color: '#e2c074',
+  fontSize: '0.74rem',
+  textDecoration: 'underline',
+  cursor: 'pointer',
+  textShadow: '0 1px 3px rgba(0,0,0,0.95)'
+};
 
 interface UnifiedInputViewProps {
   selectedCharacter: 'ren' | 'tsuki';
@@ -98,10 +124,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       const stored = localStorage.getItem('hasu_user_profile');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.mbti) return parsed.mbti;
+        if (isMbtiCode(parsed.mbti)) return parsed.mbti;
       }
     } catch (e) {}
-    return 'UNKNOWN';
+    // 16タイプは必須（TAKASHI 2026-11-12）。未設定は空欄にして、選ぶかかんたん質問に答えてもらう
+    return '';
   });
 
   const [myGender, setMyGender] = useState<'male' | 'female'>(() => {
@@ -123,9 +150,15 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const [oppName, setOppName] = useState('');
   const [oppBirth, setOppBirth] = useState(() => prefill?.oppBirth || '');
   const [oppMbti, setOppMbti] = useState(() => {
-    if (urlPair?.opp) return urlPair.opp;
-    return 'UNKNOWN';
+    if (urlPair?.opp && isMbtiCode(urlPair.opp)) return urlPair.opp;
+    return '';
   });
+  // かんたん質問（16タイプがわからないとき）を開いている相手
+  const [quizFor, setQuizFor] = useState<'self' | 'partner' | null>(null);
+  // かんたん質問で決めたタイプか（予想なので、正確なタイプで精度が上がることを案内する）
+  const [estimated, setEstimated] = useState<{ self: boolean; partner: boolean }>({ self: false, partner: false });
+  const myMbtiRef = React.useRef<HTMLSelectElement>(null);
+  const oppMbtiRef = React.useRef<HTMLSelectElement>(null);
   const [oppGender, setOppGender] = useState<'male' | 'female'>(() => (myGender === 'female' ? 'male' : 'female'));
   const [relationship, setRelationship] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -144,7 +177,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     if (loadedPartner) {
       setOppName(loadedPartner.name === 'お相手' ? '' : loadedPartner.name);
       setOppBirth(loadedPartner.birth);
-      setOppMbti(loadedPartner.mbti);
+      setOppMbti(isMbtiCode(loadedPartner.mbti) ? loadedPartner.mbti : '');
       setRelationship(loadedPartner.relationship);
 
       // Gender Validation: Ensure opposite gender combination (Male x Female) silently
@@ -188,9 +221,18 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       showFieldError('あなたの生年月日は「19950401」のように数字8桁で入力してください。', myBirthRef.current);
       return;
     }
+    // 16タイプは必須。わからないときは、かんたん質問に答えてもらう（TAKASHI 2026-11-12）
+    if (!isMbtiCode(myMbti)) {
+      showFieldError('あなたの16タイプを選んでください。わからないときは「わからない」を選ぶと、4つの質問で決められます。', myMbtiRef.current);
+      return;
+    }
     if (mode === 'match') {
       if (!oppBirth || oppBirth.length < 10) {
         showFieldError('お相手の生年月日は「19951221」のように数字8桁で入力してください。', oppBirthRef.current);
+        return;
+      }
+      if (!isMbtiCode(oppMbti)) {
+        showFieldError('お相手の16タイプを選んでください。わからないときは「わからない」を選ぶと、4つの質問で決められます。', oppMbtiRef.current);
         return;
       }
     }
@@ -367,16 +409,28 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>16タイプ診断 (任意)</label>
+            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>16タイプ診断 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
             <select
-              value={myMbti}
-              onChange={(e) => setMyMbti(e.target.value)}
-              style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+              ref={myMbtiRef}
+              value={isMbtiCode(myMbti) ? myMbti : ''}
+              onChange={(e) => {
+                if (e.target.value === 'UNKNOWN') { setQuizFor('self'); return; }
+                setMyMbti(e.target.value);
+                setEstimated(p => ({ ...p, self: false }));
+                e.target.classList.remove('field-invalid');
+              }}
+              style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: isMbtiCode(myMbti) ? 'white' : '#8a8478', outline: 'none', fontSize: '0.85rem' }}
             >
-              {mbtiOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              {mbtiSelectOptions.map(opt => (
+                <option key={opt.value} value={opt.value} disabled={opt.value === ''}>{opt.label}</option>
               ))}
             </select>
+            {!isMbtiCode(myMbti) && (
+              <button type="button" onClick={() => setQuizFor('self')} style={quizLinkStyle}>
+                わからないときは、4つの質問で決める →
+              </button>
+            )}
+            {isMbtiCode(myMbti) && estimated.self && <div style={estimateNoteStyle}>質問からの予想です。正確な16タイプがわかると、鑑定結果の精度がもっと上がります。</div>}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
@@ -554,16 +608,41 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の16タイプ診断 (任意)</label>
+              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の16タイプ診断 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
               <select
-                value={oppMbti}
-                onChange={(e) => setOppMbti(e.target.value)}
-                style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                ref={oppMbtiRef}
+                value={isMbtiCode(oppMbti) ? oppMbti : ''}
+                onChange={(e) => {
+                  if (e.target.value === 'UNKNOWN') { setQuizFor('partner'); return; }
+                  setOppMbti(e.target.value);
+                  setEstimated(p => ({ ...p, partner: false }));
+                  e.target.classList.remove('field-invalid');
+                }}
+                style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: isMbtiCode(oppMbti) ? 'white' : '#8a8478', outline: 'none', fontSize: '0.85rem' }}
               >
-                {mbtiOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {mbtiSelectOptions.map(opt => (
+                  <option key={opt.value} value={opt.value} disabled={opt.value === ''}>{opt.label}</option>
                 ))}
               </select>
+              {!isMbtiCode(oppMbti) && (
+                <button type="button" onClick={() => setQuizFor('partner')} style={quizLinkStyle}>
+                  わからないときは、お相手について4つの質問で決める →
+                </button>
+              )}
+              {isMbtiCode(oppMbti) && estimated.partner && <div style={estimateNoteStyle}>質問からの予想です。正確な16タイプがわかると、鑑定結果の精度がもっと上がります。</div>}
+              {quizFor && (
+                <MbtiQuizModal
+                  subject={quizFor}
+                  name={san(oppName.trim() || 'お相手')}
+                  onClose={() => setQuizFor(null)}
+                  onDone={(t) => {
+                    if (quizFor === 'self') setMyMbti(t); else setOppMbti(t);
+                    setEstimated(p => ({ ...p, [quizFor]: true }));
+                    (quizFor === 'self' ? myMbtiRef.current : oppMbtiRef.current)?.classList.remove('field-invalid');
+                    setQuizFor(null);
+                  }}
+                />
+              )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
