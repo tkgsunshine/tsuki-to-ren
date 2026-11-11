@@ -102,14 +102,12 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
     if (hasOpponent && !list.some((c) => c.selected)) {
       list.unshift({ key: '__current', label: oppLabel, score: result.dailyScore, partner: null, selected: true });
     }
-    const solo = generateFortuneResult({ ...base, relationship: input.relationship }, 'tsuki', now);
-    list.push({ key: '__self', label: '自分', score: solo.dailyScore, partner: null, selected: !hasOpponent });
+    // 切り替えはお相手ごとだけ（自分だけの運勢は出さない。2026-11-12 TAKASHI「上のタブはあくまで相手ごと」）
     return list;
   }, [input, partners, hasOpponent, now, oppLabel, result.dailyScore]);
   const topKey = useMemo(() => {
-    const pairs = chips.filter((c) => c.key !== '__self');
-    if (pairs.length < 2) return null;
-    return pairs.reduce((a, b) => (b.score > a.score ? b : a)).key;
+    if (chips.length < 2) return null;
+    return chips.reduce((a, b) => (b.score > a.score ? b : a)).key;
   }, [chips]);
 
   const stars = useMemo(() => getTodayStars(result, now, myName, oppName), [result, now, myName, oppName]);
@@ -150,14 +148,14 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
   return (
     <div key={dayKey(now)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* お相手の切り替え（それぞれの今日の点数つき） */}
-      {chips.length > 1 && (
+      {(chips.length > 1 || (!hasOpponent && chips.length > 0)) && (
         <div style={{ display: 'flex', gap: '0.45rem', overflowX: 'auto', padding: '0.1rem 0.1rem 0.3rem', scrollbarWidth: 'none' }}>
           {chips.map((c) => (
             <button
               key={c.key}
               type="button"
               aria-pressed={c.selected}
-              onClick={() => { if (!c.selected && onSwitch && (c.partner || c.key === '__self')) onSwitch(c.partner); }}
+              onClick={() => { if (!c.selected && onSwitch && c.partner) onSwitch(c.partner); }}
               style={{
                 flex: '0 0 auto', minWidth: '64px', maxWidth: '96px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.05rem',
                 padding: '0.4rem 0.55rem', borderRadius: '12px', cursor: c.selected ? 'default' : 'pointer',
