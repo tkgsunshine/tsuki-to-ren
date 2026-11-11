@@ -1,6 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { getDb } from './_lib/firestore.js';
 import { isValidUid, verifyUid } from './_lib/unsubscribe-token.js';
+import { MAIL_OPT_OUT } from './_lib/notice-mail.js';
 
 const SITE = 'https://www.tsuki-to-ren.com';
 
@@ -78,6 +79,38 @@ export default async function handler(req, res) {
       bubble: 'ごめんね、このリンクはうまく開けなかったみたい。',
       body: '<p>リンクが正しくないか、期限が切れています。<br>マイページの「通知設定」から停止できます。</p>',
       actions: `<a class="btn btn-gold" href="${SITE}/mypage" style="margin-top:20px">マイページを開く</a>`,
+    }));
+  }
+
+  // k=news: the link in an お知らせ mail. Stops only those mails (mailOptOut/{uid}); the daily fortune mail keeps coming.
+  if (pick(req, 'k') === 'news') {
+    if (req.method === 'GET') {
+      return res.status(200).send(page('お知らせメールの停止', {
+        bubble: 'お知らせのメール、ここで止められるよ。毎朝の運勢メールはそのまま届くから安心してね。',
+        heading: 'お知らせメールを停止しますか？',
+        body: '<p>新機能などのお知らせをメールで受け取らなくなります。<br>アプリ内の「お知らせ」には引き続き表示されます。</p>',
+        actions: `<form method="POST" action="/api/unsubscribe?k=news&uid=${encodeURIComponent(uid)}&t=${encodeURIComponent(token)}">
+<button type="submit" class="btn btn-gold">お知らせメールを停止する</button>
+</form>
+<a class="btn btn-ghost" href="${SITE}/">停止せずに戻る</a>`,
+      }));
+    }
+    if (req.method !== 'POST') {
+      res.setHeader('Allow', 'GET, POST');
+      return res.status(405).send(errorPage('この操作はできません。'));
+    }
+    try {
+      await getDb().collection(MAIL_OPT_OUT).doc(uid).set({ news: true, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    } catch (e) {
+      console.error('❌ News unsubscribe failed:', e?.message);
+      return res.status(500).send(errorPage('停止できませんでした。時間をおいてもう一度お試しください。'));
+    }
+    return res.status(200).send(page('停止しました', {
+      img: 'tsuki-prayer.webp',
+      bubble: 'わかったよ。大事なお知らせは、アプリの中でお伝えするね。',
+      heading: '停止しました',
+      body: '<p>お知らせメールを停止しました。<br>毎朝の運勢メールは、これまでどおり届きます。</p>',
+      actions: `<a class="btn btn-ghost" href="${SITE}/" style="margin-top:20px">月と蓮を開く</a>`,
     }));
   }
 

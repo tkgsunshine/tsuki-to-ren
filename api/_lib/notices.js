@@ -232,7 +232,7 @@ export async function listNotices(db, uid) {
     ...(uid ? [col.where('to', '==', 'members').get(), col.where('to', '==', uid).get()] : [])
   ]);
   return snaps
-    .flatMap((s) => s.docs.map((d) => view(d.id, d.data())))
+    .flatMap((s) => s.docs.filter((d) => d.data().channel !== 'mail').map((d) => view(d.id, d.data()))) // メールだけで送ったものはアプリに出さない
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
     .slice(0, MAX_SHOWN);
 }
