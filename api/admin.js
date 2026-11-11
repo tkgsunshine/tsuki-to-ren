@@ -4,6 +4,7 @@ import { ATTRIBUTION, DAILY, ageBandFromBirth, ageFromBirth, jstDate, normalizeG
 import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
 import { AUDIENCES, AUTO_NOTICES, AUTO_SETTINGS, AUTO_SETTINGS_DOC, NOTICES, readAutoSettings, validateAutoNotice, validateNotice } from './_lib/notices.js';
+import { CHANNELS, MAIL_OPT_OUT, broadcastRecipients, mailRecipients, sendNoticeMail, sendsApp, sendsMail } from './_lib/notice-mail.js';
 
 // Data for the admin page (/admin): daily counters, and the member list (with each member's premium state).
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
@@ -11,6 +12,8 @@ import { AUDIENCES, AUTO_NOTICES, AUTO_SETTINGS, AUTO_SETTINGS_DOC, NOTICES, rea
 // POST { action: 'inquiryStatus', id, status } marks a contact-form message as handled (or back to new).
 // POST { action: 'ownerMark', uid, owner } marks a member as the owner's own account, left out of the member counts.
 // POST { action: 'noticeSend', to: 'all' | 'members' | uid, title, body, link } sends an in-app お知らせ (to everyone, to signed-in members only, or to one member).
+//   channel: 'app'（既定）| 'mail' | 'both'。メールの送り先は _lib/notice-mail.js（一斉は毎朝メールを有効にしている会員だけ）。
+// POST { action: 'noticeMailTest', title, body, link } sends the mail version only to the signed-in admin's own address.
 // POST { action: 'noticeDelete', id } takes one back (it disappears from the app).
 // POST { action: 'autoNoticeSave', kind, title, body, link, enabled? } saves the text of an automatic お知らせ (sign-up / purchase / referral); empty = the default text.
 // Accounts whose email is in ADMIN_EMAILS (also with a +alias, e.g. name+1@) count as the owner's without a mark.
@@ -80,9 +83,29 @@ export default async function handler(req, res, deps = {}) {
         if (!AUDIENCES.includes(checked.value.to)) {
           try { await auth.getUser(checked.value.to); } catch { return res.status(400).json({ status: 'error', message: 'その会員が見つかりません' }); }
         }
-        const doc = { ...checked.value, createdAt: new Date(deps.now ?? Date.now()).toISOString() };
+        const channel = body.channel === undefined ? 'app' : String(body.channel);
+        if (!CHANNELS.includes(channel)) return res.status(400).json({ status: 'error', message: '送り方が正しくありません' });
+        const doc = { ...checked.value, channel, createdAt: new Date(deps.now ?? Date.now()).toISOString() };
+        if (sendsMail(channel)) {
+          const recipients = await mailRecipients(db, auth, doc.to);
+          doc.mail = await sendNoticeMail(doc, recipients, deps.mail);
+          // メールだけで、1通も届かなかったときは記録を残さない（送れていないものが「送った」に並ばないように）
+          if (!sendsApp(channel) && doc.mail.sent === 0) {
+            const message = recipients.length === 0 ? 'メールの送り先が0人でした（毎朝メールを有効にしている会員がいない、または送り先の会員がメール未確認です）' : `メールを送れませんでした（${doc.mail.error || '原因不明'}）`;
+            return res.status(502).json({ status: 'error', message });
+          }
+        }
         const ref = await db.collection(NOTICES).add(doc);
         return res.status(200).json({ status: 'success', notice: { id: ref.id, ...doc } });
+      }
+      if (body.action === 'noticeMailTest') {
+        const checked = validateNotice({ ...body, to: 'members' });
+        if (checked.error) return res.status(400).json({ status: 'error', message: checked.error });
+        const token = /^Bearer (.+)$/.exec(String(req.headers.authorization || ''))?.[1];
+        const me = await auth.verifyIdToken(token);
+        const result = await sendNoticeMail(checked.value, [{ uid: me.uid, email: me.email }], deps.mail);
+        if (result.sent === 0) return res.status(502).json({ status: 'error', message: `試し送りに失敗しました（${result.error || '原因不明'}）` });
+        return res.status(200).json({ status: 'success', email: me.email });
       }
       if (body.action === 'autoNoticeSave') {
         const checked = validateAutoNotice(body);
@@ -118,7 +141,7 @@ export default async function handler(req, res, deps = {}) {
     const from = jstDate(new Date(Date.now() - (offset + days - 1) * 86400 * 1000));
     const inPeriod = (d) => d.id <= to; // the query already starts at `from`; days after `to` are dropped here
 
-    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap, pairSnap, userDataSnap, autoSettings] = await Promise.all([
+    const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap, pairSnap, userDataSnap, autoSettings, mailOptOutSnap] = await Promise.all([
       db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get(),
       db.collection('subscriptions').get(),
       db.collection(ATTRIBUTION).get(),
@@ -129,7 +152,8 @@ export default async function handler(req, res, deps = {}) {
       db.collection(NOTICES).orderBy('createdAt', 'desc').limit(MAX_NOTICES).get(),
       db.collection('pairUnlocks').get(), // _lib/pair-unlock.js PAIR_UNLOCKS（買い切りの購入）
       db.collection('userData').get(), // _lib/user-data.js USER_DATA（会員のプロフィール。性別・年代・MBTIの集計に使う。生年月日は返さない）
-      readAutoSettings(db) // 自動で送るお知らせの、書き換えた文
+      readAutoSettings(db), // 自動で送るお知らせの、書き換えた文
+      db.collection(MAIL_OPT_OUT).get() // お知らせメールを止めた会員（news == true）
     ]);
 
     const subs = new Map(subsSnap.docs.map((d) => [d.id, d.data()]));
@@ -206,8 +230,10 @@ export default async function handler(req, res, deps = {}) {
       // In-app お知らせ sent so far (to everyone and to single members)
       notices: noticeSnap.docs.map((d) => {
         const v = d.data();
-        return { id: d.id, to: v.to, title: v.title, body: v.body, link: v.link || '', auto: v.auto || null, createdAt: v.createdAt || null };
+        return { id: d.id, to: v.to, title: v.title, body: v.body, link: v.link || '', auto: v.auto || null, channel: v.channel || 'app', mail: v.mail || null, createdAt: v.createdAt || null };
       }),
+      // お知らせをメールで一斉に送ったときに届く人数（毎朝メールを有効にしている会員から、お知らせメールを止めた人を除く）
+      noticeMailReach: broadcastRecipients(subsSnap.docs, new Set((mailOptOutSnap?.docs || []).filter((d) => d.data()?.news === true).map((d) => d.id))).length,
       // 自動で送るお知らせ（会員登録・購入・友達紹介）: 元の文と、/admin で書き換えた文（空欄 = 元の文）
       autoNotices: Object.entries(AUTO_NOTICES).map(([kind, m]) => ({
         kind,
