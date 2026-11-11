@@ -206,30 +206,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         {result.dailyLuckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: 1.6 }}>{result.dailyLuckTitle}</p>}
       </section>
 
-      {/* 〇〇さんの今日（星から見たお相手の今日の傾向） */}
-      {partnerToday && stars?.partner && (
-        <PartnerTodayCard
-          oppLabel={oppLabel}
-          pt={partnerToday}
-          p={stars.partner}
-          guardian={result.opponentAvatarUrl ? { img: result.opponentAvatarUrl, name: result.opponentAstrologyName || '', theme: (result.opponentAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
-        />
-      )}
-
-      {/* 二人の道のりと、今日の一歩 */}
-      {partnerToday && (
-        <StepCard
-          journey={journey}
-          setJourney={setJourney}
-          pt={partnerToday}
-          now={now}
-          oppLabel={oppLabel}
-          selectedChar={selectedChar}
-          saved={!!currentPartner}
-          onAsk={onOpenChat ? (q) => ask(q) : undefined}
-        />
-      )}
-
+      {/* ① 二人の今日の相性 */}
       {/* 今日の星の動き（今日の点数の根拠） */}
       {stars && (
         <section style={card}>
@@ -239,7 +216,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
             <p key={n} style={{ ...body, color: GOLD, fontWeight: 'bold', fontSize: '0.84rem' }}>★ {n}</p>
           ))}
           <StarsBlock p={stars.me} self />
-          {/* お相手の星は上の「〇〇さんの今日」に出す */}
+          {/* お相手の星は下の「〇〇さんの今日」に出す */}
           {stars.partner && !partnerToday && <StarsBlock p={stars.partner} self={false} />}
         </section>
       )}
@@ -251,6 +228,14 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         {hourSub && <p style={{ ...sub, color: '#a8d3b0' }}>{hourSub}</p>}
         {advice.filter(Boolean).map((t, i) => <p key={i} style={body}>{t}</p>)}
       </section>
+
+      {/* 今日の恋の過ごし方 */}
+      {topic && (
+        <section style={card}>
+          <h3 className="font-serif" style={h3}>{topic.title}</h3>
+          <p style={body}>{topic.text}</p>
+        </section>
+      )}
 
       {/* 月・蓮にそのまま相談（質問の候補） */}
       {onOpenChat && (
@@ -277,14 +262,32 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         </section>
       )}
 
-      {/* 今日の恋の過ごし方 */}
-      {topic && (
-        <section style={card}>
-          <h3 className="font-serif" style={h3}>{topic.title}</h3>
-          <p style={body}>{topic.text}</p>
-        </section>
+      {/* ② お相手の今日（と、それに合わせた今日の一歩） */}
+      {/* 〇〇さんの今日（星から見たお相手の今日の傾向） */}
+      {partnerToday && stars?.partner && (
+        <PartnerTodayCard
+          oppLabel={oppLabel}
+          pt={partnerToday}
+          p={stars.partner}
+          guardian={result.opponentAvatarUrl ? { img: result.opponentAvatarUrl, name: result.opponentAstrologyName || '', theme: (result.opponentAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
+        />
       )}
 
+      {/* 二人の道のりと、今日の一歩 */}
+      {partnerToday && (
+        <StepCard
+          journey={journey}
+          setJourney={setJourney}
+          pt={partnerToday}
+          now={now}
+          oppLabel={oppLabel}
+          selectedChar={selectedChar}
+          saved={!!currentPartner}
+          onAsk={onOpenChat ? (q) => ask(q) : undefined}
+        />
+      )}
+
+      {/* ③ これから14日間の流れ */}
       {/* これから14日間と、次の特別な日 */}
       <section style={card}>
         <h3 className="font-serif" style={h3}>これから14日間</h3>
