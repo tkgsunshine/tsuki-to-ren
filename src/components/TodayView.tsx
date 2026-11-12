@@ -566,7 +566,9 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
     const stops = SCALE_STOPS;
     const tt = Math.min(1, t);
     const i = tt >= SCALE_POS[1] ? 1 : 0;
-    const f = Math.min(1, (tt - SCALE_POS[i]) / (SCALE_POS[i + 1] - SCALE_POS[i]));
+    const f0 = Math.min(1, (tt - SCALE_POS[i]) / (SCALE_POS[i + 1] - SCALE_POS[i]));
+    // 紫→金の間は早めに金へ寄せる（中間がくすんだピンクにならないように。2026-11-12 TAKASHI「82・83をもう少しゴールド寄りに」）
+    const f = i === 1 ? Math.sqrt(f0) : f0;
     const mix = (k: number) => Math.round(stops[i][k] + (stops[i + 1][k] - stops[i][k]) * f);
     const rgb = `${mix(0)}, ${mix(1)}, ${mix(2)}`;
     return {
