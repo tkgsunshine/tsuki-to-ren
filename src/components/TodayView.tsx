@@ -659,7 +659,10 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
           {specials.map((n) => (
             <div key={n.label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0.65rem', borderRadius: '10px', background: 'rgba(0,0,0,0.22)' }}>
-              <span style={{ fontSize: '0.85rem', color: markOf(n) === '♥' ? '#ff9db5' : '#fff3c4', width: '1rem', textAlign: 'center' }}>{markOf(n)}</span>
+              {/* 暦のマスと同じ形・色（2026-11-12 TAKASHI「星のデザインの統一」） */}
+              <svg aria-hidden="true" viewBox="0 0 24 24" style={{ width: '1.05rem', height: '1.05rem', flexShrink: 0, filter: markOf(n) === '♥' ? 'drop-shadow(0 0 4px rgba(255,122,168,0.7))' : 'drop-shadow(0 0 4px rgba(255,214,102,0.7))' }}>
+                <path d={markOf(n) === '♥' ? 'M12 21.5C5.2 16.6 2 13.1 2 8.6 2 5.5 4.4 3 7.4 3c1.9 0 3.6 1 4.6 2.6C13 4 14.7 3 16.6 3 19.6 3 22 5.5 22 8.6c0 4.5-3.2 8-10 12.9z' : 'M12 1.5l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.6l-6.4 3.5L7 14l-5.3-5 7.2-.9z'} fill={markOf(n) === '♥' ? 'rgba(255,122,168,0.9)' : 'rgba(255,214,102,0.95)'} />
+              </svg>
               <span style={{ flex: 1, minWidth: 0, fontSize: '0.74rem', color: '#f2e2b3', lineHeight: 1.4 }}>次の{n.label}<br /><span style={{ color: '#b9b2a4', fontSize: '0.7rem' }}>{fmtDay(n)}</span></span>
               <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 900, color: GOLD, whiteSpace: 'nowrap' }}>{n.daysAway === 0 ? '今日！' : `あと${n.daysAway}日`}</span>
             </div>
