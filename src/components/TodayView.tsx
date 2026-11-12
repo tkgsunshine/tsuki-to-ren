@@ -622,17 +622,30 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
               const lv = shade(c.score);
               const isToday = mo.current && c.day === today;
               const past = mo.before || (mo.current && c.day < today);
+              const sp = specialAt(mo.year, mo.month, c.day);
+              const spIsHeart = !!sp && markOf(sp) === '♥';
+              const spStyle = sp ? (spIsHeart
+                ? { bg: 'linear-gradient(150deg, #5a2346, #2e1430)', shape: 'rgba(255,122,168,0.9)', ring: '#ff9db5', glow: 'rgba(255,122,168,0.7)', text: '#ffffff', shadow: '0 1px 4px rgba(60,10,30,0.8)', date: '#ffd1e0' }
+                : { bg: 'linear-gradient(150deg, #4a3a18, #2a2010)', shape: 'rgba(255,214,102,0.95)', ring: '#ffe08a', glow: 'rgba(255,214,102,0.7)', text: '#2a1d05', shadow: '0 0 3px rgba(255,244,210,0.9)', date: '#ffe08a' }) : null;
               return (
                 <div key={i} style={{
-                  position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  aspectRatio: '1 / 1', borderRadius: '9px', background: lv.bg, border: isToday ? '2px solid #ffffff' : `1px solid ${lv.border}`,
-                  boxShadow: isToday ? '0 0 12px rgba(255,255,255,0.55)' : 'none', opacity: past ? 0.6 : 1
+                  position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: sp ? 'visible' : undefined,
+                  aspectRatio: '1 / 1', borderRadius: '9px', background: sp ? spStyle!.bg : lv.bg,
+                  border: isToday ? '2px solid #ffffff' : sp ? `1.5px solid ${spStyle!.ring}` : `1px solid ${lv.border}`,
+                  boxShadow: isToday ? '0 0 12px rgba(255,255,255,0.55)' : sp ? `0 0 12px ${spStyle!.glow}` : 'none', opacity: past ? 0.6 : 1
                 }}>
+                  {/* 次のシンクロ日（♥）・恋愛運MAX日（★）は、マスいっぱいの形を点数の背景にして目立たせる（2026-11-12 TAKASHI「点数の背景にしてアピール」） */}
+                  {sp && (
+                    <svg aria-label={sp.label} viewBox="0 0 24 24" style={{ position: 'absolute', inset: '3%', width: '94%', height: '94%' }}>
+                      {spIsHeart
+                        ? <path d="M12 21.5C5.2 16.6 2 13.1 2 8.6 2 5.5 4.4 3 7.4 3c1.9 0 3.6 1 4.6 2.6C13 4 14.7 3 16.6 3 19.6 3 22 5.5 22 8.6c0 4.5-3.2 8-10 12.9z" fill={spStyle!.shape} />
+                        : <path d="M12 1.5l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.6l-6.4 3.5L7 14l-5.3-5 7.2-.9z" fill={spStyle!.shape} />}
+                    </svg>
+                  )}
                   {/* 日付は左上に小さく、点数は真ん中に大きく（2026-11-12 TAKASHI「日付と点数の差が分かりづらい」） */}
-                  <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: lv.color, opacity: 0.7 }}>{c.day}日</span>
+                  <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: sp ? spStyle!.date : lv.color, opacity: sp ? 1 : 0.7, zIndex: 1 }}>{c.day}日</span>
                   {isToday && <span style={{ position: 'absolute', top: -7, right: -3, fontSize: '0.5rem', fontWeight: 'bold', lineHeight: 1, color: '#0b0f15', background: '#ffffff', borderRadius: '6px', padding: '2px 4px' }}>今日</span>}
-                  {(() => { const sp = specialAt(mo.year, mo.month, c.day); return sp ? <span aria-label={sp.label} style={{ position: 'absolute', top: 2, right: 4, fontSize: '0.6rem', lineHeight: 1, color: sp && markOf(sp) === '♥' ? '#ff9db5' : '#fff3c4', textShadow: '0 0 4px rgba(0,0,0,0.6)' }}>{markOf(sp)}</span> : null; })()}
-                  <span className="font-serif" style={{ fontSize: '1.08rem', fontWeight: 900, lineHeight: 1, color: lv.color, marginTop: '0.35rem' }}>{c.score}</span>
+                  <span className="font-serif" style={{ position: 'relative', fontSize: '1.08rem', fontWeight: 900, lineHeight: 1, color: sp ? spStyle!.text : lv.color, marginTop: '0.35rem', textShadow: sp ? spStyle!.shadow : undefined }}>{c.score}</span>
                 </div>
               );
             })}
