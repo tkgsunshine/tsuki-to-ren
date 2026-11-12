@@ -635,7 +635,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
                   boxShadow: isToday ? '0 0 12px rgba(255,255,255,0.55)' : 'none', opacity: past ? 0.6 : 1
                 }}>
                   {/* 日付は左上に小さく、点数は真ん中に大きく（2026-11-12 TAKASHI「日付と点数の差が分かりづらい」） */}
-                  <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: lv.color, opacity: 0.7 }}>{c.day}</span>
+                  <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: lv.color, opacity: 0.7 }}>{c.day}日</span>
                   {isToday && <span style={{ position: 'absolute', top: -7, right: -3, fontSize: '0.5rem', fontWeight: 'bold', lineHeight: 1, color: '#0b0f15', background: '#ffffff', borderRadius: '6px', padding: '2px 4px' }}>今日</span>}
                   <span className="font-serif" style={{ fontSize: '1.08rem', fontWeight: 900, lineHeight: 1, color: lv.color, marginTop: '0.35rem' }}>{c.score}</span>
                 </div>
