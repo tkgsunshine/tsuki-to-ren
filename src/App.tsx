@@ -1333,7 +1333,7 @@ function App() {
       .then((r) => { if (!cancelled) { setCoupleDrops(r.drops); setCoupleDropsError(r.drops ? null : (r.reason || '不明')); } })
       .catch((e) => { if (!cancelled) setCoupleDropsError(`読み込みエラー ${String((e as Error)?.message || '').slice(0, 60)}`); });
     return () => { cancelled = true; };
-  // シングルプランを買った直後（購入の記録が届いた時）にも読み直して、50個を反映する
+  // シングルプランを買った直後（購入の記録が届いた時）にも読み直して、10個を反映する
   }, [flowStep, renResult, mode, oppBirth, signedInUid, isSubscribed, pairUnlock?.unlocked]);
   const handleOpenCoupleTopic = useCallback(async (kind: DropKind, no: number, gate?: Promise<unknown>) => {
     if (!oppBirth) return false;

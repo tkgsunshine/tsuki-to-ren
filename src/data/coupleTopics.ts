@@ -145,7 +145,7 @@ export const READING_TOPICS: CoupleTopic<ReadingCategory>[] = [
 
 /**
  * Xに出すランキングの候補25本: X投稿済みの★17本＋各カテゴリから8本（2026-11-12 設計書 2章の案）。
- * 2026-11-13 からシングルプランは「かけら50個」になり、この25本が自動で開くことはない（TAKASHI）。
+ * 2026-11-13 からシングルプランは「かけら10個（＋毎日2個）」になり、この25本が自動で開くことはない（TAKASHI）。
  */
 export const SINGLE_RANK_NOS: number[] = [
   ...RANK_TOPICS.filter((t) => t.posted).map((t) => t.no),

@@ -5,23 +5,23 @@ import { isPremiumRecord, jstToday, partnerKey } from './partner-days.js';
 import { findPairUnlock } from './pair-unlock.js';
 
 // 「月のかけら」（2026-11-12 TAKASHI決定）: 「二人の相性100」のお題を1つずつ開けるためのかけら。
-// ・月額プレミアム: 支払い日（新しい支払い期間に入った最初の表示）に50個、毎日10個。貯められるのは100個まで
+// ・月額プレミアム: 支払い日（新しい支払い期間に入った最初の表示）に50個、毎日5個。貯められるのは100個まで
 // ・無料会員: 毎日2個。使わなかった分は持ち越さない（2個まで）
 // ・かけら1つで1つのお題が開く。一度開けたお題は、そのお相手についてずっと見られる
 //   （月額の間に開けたお題は、解約すると見られなくなる。無料会員のかけらで開けたお題は解約に関係なく見られる）
-// ・シングルプラン（¥680、お相手1人）: 買ったお相手に使えるかけらを50個（1回の購入につき1回だけ。上限・期限なし、
-//   毎日のかけらとは別に持つ。毎日の分を先に使う。開けたお題はずっと見られる）（2026-11-13 TAKASHI「かけら50個付与でいい。ユーザー自身が選べば良い」）
+// ・シングルプラン（¥680、お相手1人）: 買ったお相手に使えるかけらを10個（1回の購入につき1回だけ。上限・期限なし、
+//   毎日のかけらとは別に持つ。毎日の分を先に使う。開けたお題はずっと見られる）（2026-11-13 TAKASHI、のち「シングル：支払い日に10個、毎日2個」で10個に。「かけら50個付与でいい。ユーザー自身が選べば良い」）
 // ・かけらは単体では売らない（お金で買えると資金決済法の対象になりうるため）
 // ・補充は定期実行を使わず、画面を開いたとき（このAPIを呼んだとき）に、前回からの日数ぶん計算する
 // 記録は coupleDrops/{uid} にサーバーだけが書く（firestore.rules で端末からは読み書き不可。今の課金記録と同じ守り方）。
 // お相手は誕生日から作る記号（partnerKey）で持ち、誕生日そのものは保存しない。
 export const COUPLE_DROPS = 'coupleDrops';
-export const PREMIUM_DAILY = 10;
+export const PREMIUM_DAILY = 5;
 export const PREMIUM_PAYDAY = 50;
 export const PREMIUM_CAP = 100;
 export const FREE_DAILY = 2;
 export const FREE_CAP = 2;
-export const PAIR_BONUS = 50;
+export const PAIR_BONUS = 10;
 const TOPIC_MAX = 50;
 const BIRTH_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -97,7 +97,7 @@ export default async function handler(req, res, deps = {}) {
       const rec = snap.exists ? snap.data() : {};
       const r = refill(rec, { premium, periodEnd }, today);
       const o = openedOf(rec, key);
-      // シングルプランのかけら（このお相手専用）。購入（sessionId）ごとに1回だけ50個
+      // シングルプランのかけら（このお相手専用）。購入（sessionId）ごとに1回だけ10個
       let bonus = Math.max(0, Number(rec?.bonus?.[key]) || 0);
       const grantedFor = rec?.bonusFor?.[key] || null;
       let bonusGranted = false;

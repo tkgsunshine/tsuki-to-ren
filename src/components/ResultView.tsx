@@ -1054,8 +1054,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   ) : null;
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
   // 二人の相性100（2026-11-12 TAKASHI）
-  // ・シングル（¥680）: そのお相手に使えるかけら50個（自分で選んで開ける。2026-11-13 TAKASHI）
-  // ・月のかけら: 月額は支払い日に50個＋毎日10個、無料会員は毎日2個。かけら1つで1つのお題が開き、開けたお題はずっと見られる
+  // ・シングル（¥680）: そのお相手に使えるかけら10個＋無料会員の毎日2個（自分で選んで開ける。2026-11-13 TAKASHI）
+  // ・月のかけら: 月額は支払い日に50個＋毎日5個、無料会員は毎日2個。かけら1つで1つのお題が開き、開けたお題はずっと見られる
   // ・未登録・無料会員: ランキングは代表2本＋X投稿から来たお題の順位だけ、本格鑑定は見本1本
   const dropsOn = hasOpponent && !sharedBy && Boolean(coupleDrops) && Boolean(onOpenCoupleTopic);
   // 無料の見本は、その二人でいちばん上位と、いちばん下位のランキング（MBTIが未定なら固定の2つ）。

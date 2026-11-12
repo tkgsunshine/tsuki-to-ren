@@ -32,13 +32,13 @@ const req = (body) => ({ method: 'POST', headers: { authorization: 'Bearer good'
 const PREMIUM = { 'premium/u1': { active: true, livemode: true, currentPeriodEnd: '2026-12-12T00:00:00.000Z' } };
 const call = async (db, today, body = {}) => { const res = mockRes(); await drops(req(body), res, { auth, db, live: true, today, premiumEmails: '' }); return res; };
 
-test('refill: 月額は支払い日に50＋毎日10（上限100）、無料は毎日2で持ち越さない', () => {
+test('refill: 月額は支払い日に50＋毎日5（上限100）、無料は毎日2で持ち越さない', () => {
   let r = refill({}, { premium: true, periodEnd: 'p1' }, '2026-11-12');
-  assert.equal(r.balance, 60); // 支払い日50＋今日10
+  assert.equal(r.balance, 55); // 支払い日50＋今日5
   r = refill(r, { premium: true, periodEnd: 'p1' }, '2026-11-12');
-  assert.equal(r.balance, 60); // 同じ日は増えない
+  assert.equal(r.balance, 55); // 同じ日は増えない
   r = refill(r, { premium: true, periodEnd: 'p1' }, '2026-11-15');
-  assert.equal(r.balance, 90); // 3日ぶん
+  assert.equal(r.balance, 70); // 3日ぶん
   r = refill(r, { premium: true, periodEnd: 'p2' }, '2026-12-12');
   assert.equal(r.balance, PREMIUM_CAP); // 次の支払い日＋日数ぶん、上限100
   let f = refill({}, { premium: false }, '2026-11-12');
@@ -53,12 +53,12 @@ test('開けるとかけらが1つ減り、同じお題は二度と減らない�
   const db = mockDb({ ...PREMIUM });
   let res = await call(db, '2026-11-12');
   assert.equal(res.code, 200);
-  assert.equal(res.body.balance, 60);
+  assert.equal(res.body.balance, 55);
   res = await call(db, '2026-11-12', { open: { kind: 'reading', no: 31 } });
-  assert.equal(res.body.balance, 59);
+  assert.equal(res.body.balance, 54);
   assert.deepEqual(res.body.opened.reading, [31]);
   res = await call(db, '2026-11-12', { open: { kind: 'reading', no: 31 } });
-  assert.equal(res.body.balance, 59);
+  assert.equal(res.body.balance, 54);
   assert.equal(res.body.openedNow, false);
   assert.ok(!JSON.stringify(db.docs['coupleDrops/u1']).includes(BIRTH));
   assert.ok(db.docs['coupleDrops/u1'].opened[partnerKey(BIRTH)]);
@@ -95,21 +95,21 @@ test('ログインなし・不正な入力は断る', async () => {
   assert.equal(res.code, 400);
 });
 
-test('シングルプラン: 買ったお相手に50個（購入ごとに1回）。毎日の分を先に使い、開けた分は月額をやめても見える', async () => {
+test('シングルプラン: 買ったお相手に10個（購入ごとに1回）。毎日の分を先に使い、開けた分は月額をやめても見える', async () => {
   const key = partnerKey(BIRTH);
   const db = mockDb({ 'pairUnlocks/u1': { partners: { [key]: { sessionId: 'cs_1', purchasedOn: '2026-11-12', livemode: true } } } });
   let res = await call(db, '2026-11-12');
-  assert.equal(res.body.balance, 52); // 無料の2＋50
-  assert.equal(res.body.bonus, 50);
+  assert.equal(res.body.balance, 12); // 無料の2＋10
+  assert.equal(res.body.bonus, 10);
   res = await call(db, '2026-11-12');
-  assert.equal(res.body.balance, 52); // 二度は増えない
+  assert.equal(res.body.balance, 12); // 二度は増えない
   await call(db, '2026-11-12', { open: { kind: 'rank', no: 1 } });
   await call(db, '2026-11-12', { open: { kind: 'rank', no: 2 } });
   res = await call(db, '2026-11-12', { open: { kind: 'reading', no: 40 } });
-  assert.equal(res.body.bonus, 49); // 毎日の2個を先に使い、3つ目から50個の分
-  assert.equal(res.body.balance, 49);
+  assert.equal(res.body.bonus, 9); // 毎日の2個を先に使い、3つ目から10個の分
+  assert.equal(res.body.balance, 9);
   res = await call(db, '2026-11-13');
-  assert.equal(res.body.balance, 51); // 翌日の2個＋残り49
+  assert.equal(res.body.balance, 11); // 翌日の2個＋残り9
   // 別のお相手には使えない
   const other = mockRes();
   await drops(req({ oppBirth: '1999-05-05' }), other, { auth, db, live: true, today: '2026-11-13', premiumEmails: '' });
@@ -121,4 +121,18 @@ test('シングルプラン: 買ったお相手に50個（購入ごとに1回）
   db.docs['premium/u1'] = { active: false, livemode: true };
   res = await call(db, '2026-11-15');
   assert.ok(res.body.opened.reading.includes(45));
+});
+
+test('月額: 支払い日の50個を持っているとき（50個そのまま→毎日5個ずつ、100で止まる）', async () => {
+  const db = mockDb({ ...PREMIUM, 'coupleDrops/u1': { balance: 0, lastDaily: '2026-11-11', periods: [], opened: {} } });
+  let res = await call(db, '2026-11-12');
+  assert.equal(res.body.balance, 55); // 支払い日50＋今日5
+  assert.equal(res.body.granted, 55);
+  for (let no = 1; no <= 5; no++) res = await call(db, '2026-11-12', { open: { kind: 'rank', no } });
+  assert.equal(res.body.balance, 50);
+  assert.equal(res.body.daily, 5);
+  res = await call(db, '2026-11-22');
+  assert.equal(res.body.balance, PREMIUM_CAP); // 10日で50増えて100
+  res = await call(db, '2026-11-25');
+  assert.equal(res.body.balance, PREMIUM_CAP); // 100で止まる
 });
