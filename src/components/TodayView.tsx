@@ -539,8 +539,10 @@ type CalMonth = { year: number; month: number; days: { day: number; score: numbe
 
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
 // 恋の暦の色の段階（低い→高い）
-// 2026-11-12 TAKASHI「カラフルすぎる」→ 紺→くすんだ紫→金の3色に絞る
-const SCALE_STOPS: [number, number, number][] = [[40, 44, 80], [94, 80, 130], [214, 180, 100]];
+// 2026-11-12 TAKASHI「カラフルすぎる」→ 紺→紫→金の3色に絞る
+const SCALE_STOPS: [number, number, number][] = [[34, 42, 104], [116, 74, 196], [248, 196, 72]];
+// 各色の位置（0＝最低点〜1＝最高点）。上位およそ2割がはっきり金になるよう、金を手前に置く（2026-11-12 TAKASHI「地味すぎる、90点でも薄い」）
+const SCALE_POS = [0, 0.5, 0.8];
 
 function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
@@ -562,15 +564,15 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
   const shade = (score: number) => {
     const t = hi > lo ? (score - lo) / (hi - lo) : 0.5;
     const stops = SCALE_STOPS;
-    const x = t * (stops.length - 1);
-    const i = Math.min(stops.length - 2, Math.floor(x));
-    const f = x - i;
+    const tt = Math.min(1, t);
+    const i = tt >= SCALE_POS[1] ? 1 : 0;
+    const f = Math.min(1, (tt - SCALE_POS[i]) / (SCALE_POS[i + 1] - SCALE_POS[i]));
     const mix = (k: number) => Math.round(stops[i][k] + (stops[i + 1][k] - stops[i][k]) * f);
     const rgb = `${mix(0)}, ${mix(1)}, ${mix(2)}`;
     return {
-      bg: `rgba(${rgb}, 0.92)`,
-      border: t > 0.85 ? 'rgba(255, 240, 200, 0.8)' : `rgba(${rgb}, 1)`,
-      color: t > 0.7 ? '#2a1d05' : '#ffffff'
+      bg: `rgba(${rgb}, 0.95)`,
+      border: t > 0.8 ? 'rgba(255, 240, 200, 0.8)' : `rgba(${rgb}, 1)`,
+      color: t > 0.68 ? '#2a1d05' : '#ffffff'
     };
   };
   const today = now.getDate();
@@ -610,7 +612,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.64rem', color: '#a9a293' }}>
               低い
-              <span style={{ width: 54, height: 9, borderRadius: 3, background: `linear-gradient(90deg, ${SCALE_STOPS.map((c) => `rgb(${c.join(',')})`).join(', ')})` }} />
+              <span style={{ width: 54, height: 9, borderRadius: 3, background: `linear-gradient(90deg, ${SCALE_STOPS.map((c, k) => `rgb(${c.join(',')}) ${SCALE_POS[k] * 100}%`).join(', ')})` }} />
               高い
             </span>
           </div>
@@ -633,11 +635,11 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
                   position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: sp ? 'visible' : undefined,
                   aspectRatio: '1 / 1', borderRadius: '9px', background: sp ? spStyle!.bg : lv.bg,
                   border: isToday ? '2px solid #ffffff' : sp ? `1.5px solid ${spStyle!.ring}` : `1px solid ${lv.border}`,
-                  boxShadow: isToday ? '0 0 12px rgba(255,255,255,0.55)' : sp ? `0 0 12px ${spStyle!.glow}` : 'none', opacity: past ? 0.6 : 1
+                  boxShadow: isToday ? '0 0 12px rgba(255,255,255,0.55)' : sp ? `0 0 12px ${spStyle!.glow}` : 'none', opacity: past ? 0.8 : 1
                 }}>
                   {/* 次のシンクロ日（♥）・恋愛運MAX日（★）は、マスいっぱいの形を点数の背景にして目立たせる（2026-11-12 TAKASHI「点数の背景にしてアピール」） */}
                   {sp && (
-                    <svg aria-label={sp.label} viewBox="0 0 24 24" style={{ position: 'absolute', inset: '3%', width: '94%', height: '94%' }}>
+                    <svg aria-label={sp.label} viewBox="0 0 24 24" style={{ position: 'absolute', top: '20%', left: '16%', width: '68%', height: '68%' }}>
                       {spIsHeart
                         ? <path d="M12 21.5C5.2 16.6 2 13.1 2 8.6 2 5.5 4.4 3 7.4 3c1.9 0 3.6 1 4.6 2.6C13 4 14.7 3 16.6 3 19.6 3 22 5.5 22 8.6c0 4.5-3.2 8-10 12.9z" fill={spStyle!.shape} />
                         : <path d="M12 1.5l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.6l-6.4 3.5L7 14l-5.3-5 7.2-.9z" fill={spStyle!.shape} />}
