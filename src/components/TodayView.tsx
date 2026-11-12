@@ -179,7 +179,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
               }}
             >
               <span style={{ fontSize: '0.68rem', color: c.selected ? '#f2e2b3' : '#b9b2a4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{c.label}</span>
-              <span style={{ fontSize: '1.05rem', fontWeight: 900, color: GOLD, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2 }}>{c.score}</span>
+              <span className="font-serif" style={{ fontSize: '1.2rem', fontWeight: 900, color: GOLD, lineHeight: 1.2 }}>{c.score}</span>
             </button>
           ))}
         </div>
