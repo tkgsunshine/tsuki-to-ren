@@ -16,6 +16,7 @@ import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showFieldError } from './AppDialog';
 import { saveImageBlob } from '../utils/saveImage';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
+import { getMbtiColor } from '../utils/mbtiColor';
 import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
 
 /** 守護カラーの値を、色名ごとにその色の文字で出す（黒・紺は白い光で縁取って読ませる） */
@@ -412,14 +413,6 @@ const ScoreLineChart = ({ items, locked, range }: { items: { key: string; label:
       </div>
     </div>
   );
-};
-
-const getMbtiColor = (mbtiCode: string) => {
-  const code = (mbtiCode || '').toUpperCase();
-  if (code.includes('N') && code.includes('F')) return '#6fb08f'; // Emerald Green
-  if (code.includes('N') && code.includes('T')) return '#b9a3d6'; // Purple
-  if (code.includes('S') && code.includes('J')) return '#5d9fc0'; // Blue
-  return '#e6b85c'; // Explorer Gold
 };
 
 const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
