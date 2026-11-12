@@ -539,7 +539,8 @@ type CalMonth = { year: number; month: number; days: { day: number; score: numbe
 
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
 // 恋の暦の色の段階（低い→高い）
-const SCALE_STOPS: [number, number, number][] = [[44, 58, 98], [96, 70, 138], [168, 88, 124], [216, 140, 78], [242, 206, 106]];
+// 2026-11-12 TAKASHI「カラフルすぎる」→ 紺→くすんだ紫→金の3色に絞る
+const SCALE_STOPS: [number, number, number][] = [[40, 44, 80], [94, 80, 130], [214, 180, 100]];
 
 function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
