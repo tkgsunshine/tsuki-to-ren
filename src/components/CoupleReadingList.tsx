@@ -120,7 +120,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
                     {locked ? (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                         <span style={{ fontSize: '0.75rem', color: '#bfb8a8', filter: 'blur(3px)' }} aria-hidden="true">★★★☆☆</span>
-                        <ChevronDown size={14} style={{ color: '#f5d77a' }} />
+                        <ChevronDown size={14} style={{ color: '#f5d77a', transform: dropOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                       </span>
                     ) : (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>

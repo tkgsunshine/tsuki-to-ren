@@ -259,7 +259,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
                           {/* 伏せた順位は、見えている順位と同じ大きさの数字を強くぼかす（2026-11-13 TAKASHI「モザイクが小さい」） */}
                           <span aria-hidden="true" style={{ filter: 'blur(3.5px)', display: 'inline-block', padding: '0 0.1em', color: '#e8e2d4' }}>888</span>位<span style={{ fontSize: '0.62rem', fontWeight: 'normal', marginLeft: '0.3em' }}>/<span style={{ marginLeft: '0.3em' }}>{COUPLE_PAIR_COUNT}組</span></span>
                         </span>
-                        <ChevronDown size={14} style={{ color: '#f5d77a' }} />
+                        <ChevronDown size={14} style={{ color: '#f5d77a', transform: dropOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                       </span>
                     ) : (
                       // 「6位/136組」の形で母数を添える（2026-11-12 TAKASHI）
