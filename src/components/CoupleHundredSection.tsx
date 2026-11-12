@@ -41,7 +41,7 @@ interface Props {
   /** 月のかけら（ログイン中だけ）。あるとき、ロック中のお題はかけら1つで開ける */
   drops?: CoupleDrops | null;
   dropsError?: string | null;
-  onDrop?: (kind: DropKind, no: number) => Promise<boolean>;
+  onDrop?: (kind: DropKind, no: number, gate?: Promise<unknown>) => Promise<boolean>;
 }
 
 const SITE = 'tsuki-to-ren.com';
@@ -214,7 +214,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
 
       {tab === 'reading' ? (
         mePerson && oppPerson ? (
-          <CoupleReadingList me={mePerson} opp={oppPerson} myName={myName} oppName={oppName} access={readingAccess} onLockClick={onLockClick} lockWord={lockWord} drops={drops} onDrop={onDrop ? (no) => onDrop('reading', no) : undefined} />
+          <CoupleReadingList me={mePerson} opp={oppPerson} myName={myName} oppName={oppName} access={readingAccess} onLockClick={onLockClick} lockWord={lockWord} drops={drops} onDrop={onDrop ? (no, gate) => onDrop('reading', no, gate) : undefined} />
         ) : (
           <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>二人のMBTIが分かると、本格鑑定が見られます。</p>
         )
@@ -239,7 +239,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
               const r = results.get(t.no);
               const isOpen = openNo === t.no && access !== 'locked' && r;
               const dropOpen = openNo === t.no && access === 'locked' && drops && onDrop;
-              const panel = drops && onDrop ? <DropPanel drops={drops} what={access === 'locked' ? '順位と理由' : '理由'} onDrop={() => onDrop('rank', t.no)} onLockClick={onLockClick} lockWord={lockWord} /> : undefined;
+              const panel = drops && onDrop ? <DropPanel drops={drops} what={access === 'locked' ? '順位と理由' : '理由'} onDrop={(gate) => onDrop('rank', t.no, gate)} onLockClick={onLockClick} lockWord={lockWord} /> : undefined;
               return (
                 <div key={t.no} ref={t.no === focusNo ? focusRef : undefined}>
                   <button

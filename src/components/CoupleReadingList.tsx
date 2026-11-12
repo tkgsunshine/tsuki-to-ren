@@ -69,7 +69,7 @@ interface Props {
   onLockClick: (e?: React.MouseEvent) => void;
   lockWord: string;
   drops?: CoupleDrops | null;
-  onDrop?: (no: number) => Promise<boolean>;
+  onDrop?: (no: number, gate?: Promise<unknown>) => Promise<boolean>;
 }
 
 export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, access, onLockClick, lockWord, drops = null, onDrop }) => {
@@ -131,7 +131,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
                   </button>
                   {isOpen && r && <ReadingCard title={t.title} r={r} pair={pair} />}
                   {dropOpen && drops && onDrop && (
-                    <DropPanel drops={drops} what="鑑定" onDrop={() => onDrop(t.no)} onLockClick={onLockClick} lockWord={lockWord} />
+                    <DropPanel drops={drops} what="鑑定" onDrop={(gate) => onDrop(t.no, gate)} onLockClick={onLockClick} lockWord={lockWord} />
                   )}
                 </div>
               );

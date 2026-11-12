@@ -61,7 +61,7 @@ export const DropBalance: React.FC<{ drops: CoupleDrops }> = ({ drops }) => {
 export const DropPanel: React.FC<{
   drops: CoupleDrops;
   what: string;
-  onDrop: () => Promise<boolean>;
+  onDrop: (gate?: Promise<unknown>) => Promise<boolean>;
   onLockClick: (e?: React.MouseEvent) => void;
   lockWord: string;
 }> = ({ drops, what, onDrop, onLockClick, lockWord }) => {
@@ -80,10 +80,10 @@ export const DropPanel: React.FC<{
           onClick={async () => {
             setBusy(true);
             try {
-              // かけらが光ってから開く（開くと、この箱は消えてカードに替わるため、演出を先に見せる）
-              if (!reduce) await new Promise((r) => setTimeout(r, 1200));
-              lastOpenedAt = Date.now();
-              const ok = await onDrop();
+              // かけらが光ってから開く。通信は演出と同時に始め、演出が終わったらすぐ開く（待ち時間を演出に重ねる）
+              const gate = reduce ? undefined : new Promise((r) => setTimeout(r, 1200));
+              lastOpenedAt = Date.now() + (reduce ? 0 : 1200);
+              const ok = await onDrop(gate);
               if (!ok) lastOpenedAt = 0;
             } finally { setBusy(false); }
           }}

@@ -1334,9 +1334,10 @@ function App() {
       .catch((e) => { if (!cancelled) setCoupleDropsError(`読み込みエラー ${String((e as Error)?.message || '').slice(0, 60)}`); });
     return () => { cancelled = true; };
   }, [flowStep, renResult, mode, oppBirth, signedInUid, isSubscribed]);
-  const handleOpenCoupleTopic = useCallback(async (kind: DropKind, no: number) => {
+  const handleOpenCoupleTopic = useCallback(async (kind: DropKind, no: number, gate?: Promise<unknown>) => {
     if (!oppBirth) return false;
-    const r = await openCoupleTopic(oppBirth, kind, no);
+    // 通信は押した瞬間に始め、演出（gate）が終わったらすぐ開く（2026-11-13 TAKASHI「アニメーションの後のためが長すぎる」）
+    const [r] = await Promise.all([openCoupleTopic(oppBirth, kind, no), gate]);
     if (r.drops) setCoupleDrops(r.drops);
     if (r.error === 'failed') showAlert('通信がうまくいきませんでした。少したってから、もう一度お試しください。');
     return !r.error;

@@ -516,7 +516,7 @@ interface ResultViewProps {
   /** 月のかけらを読めなかったときの理由（表示用） */
   coupleDropsError?: string | null;
   /** かけらを1つ使ってお題を開ける。開けたら true */
-  onOpenCoupleTopic?: (kind: DropKind, no: number) => Promise<boolean>;
+  onOpenCoupleTopic?: (kind: DropKind, no: number, gate?: Promise<unknown>) => Promise<boolean>;
   /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
   referral?: {
     status: ReferralStatus | null;
