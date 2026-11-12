@@ -396,10 +396,23 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian, self = false }: { oppLabe
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
           <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>元気の量</p>
-          <span aria-label={`5段階中${pt.energy}`} style={{ display: 'flex', gap: '0.22rem' }}>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <span key={n} style={{ width: 10, height: 10, borderRadius: '50%', background: n <= pt.energy ? GOLD : 'rgba(255,255,255,0.14)' }} />
-            ))}
+          {/* 元気の量のメーター（5段の目盛り＋数字。2026-11-12 TAKASHI「もう少しいい感じに」） */}
+          <span aria-label={`5段階中${pt.energy}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: '3px', height: 18 }}>
+              {[1, 2, 3, 4, 5].map((n) => {
+                const on = n <= pt.energy;
+                return (
+                  <span key={n} style={{
+                    width: 7, height: 6 + n * 2.4, borderRadius: '2px',
+                    background: on ? `linear-gradient(180deg, ${accent === '#e2c074' ? '#f6e6c2' : '#cfe7f2'}, ${accent})` : 'rgba(255,255,255,0.1)',
+                    boxShadow: on ? `0 0 6px ${accent}66` : 'none'
+                  }} />
+                );
+              })}
+            </span>
+            <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 900, color: accent, lineHeight: 1 }}>
+              {pt.energy}<span style={{ fontSize: '0.62rem', color: '#8f887b', fontWeight: 'bold' }}> / 5</span>
+            </span>
           </span>
         </div>
         <p style={{ ...body, fontSize: '0.84rem' }}>{pt.energyText}</p>
