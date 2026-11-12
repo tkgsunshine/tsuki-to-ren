@@ -136,3 +136,20 @@ test('今日の一歩（16タイプ別）: 12タイプ×14の段階・状況×3�
     for (const x of SITUATION16.fight.low[ty]) assert.match(x, /話し合わない|話し合わず/);
   }
 });
+
+test('今日の接し方・心のモード: 同じお相手で30日に30通り、心のモードの説明は3文', async () => {
+  const { getMbtiAction, getTenGodState } = await import('../src/utils/partnerToday.ts');
+  const gods = ['比肩', '劫財', '食神', '傷官', '偏財', '正財', '偏官', '正官', '偏印', '正印'];
+  for (const mb of ['ENFJ', 'ISTP', 'INFP', 'ESTJ']) {
+    const seen = new Set();
+    for (let d = 0; d < 30; d++) seen.add(getMbtiAction(gods[d % 10], mb, new Date(2026, 10, 1 + d)).action);
+    assert.equal(seen.size, 30, mb);
+    for (const t of seen) assert.doesNotMatch(t, /外向|内向|タイプ|MBTI|[EI][NS][TF][JP]/);
+  }
+  for (const g of gods) {
+    const s = new Set();
+    for (let d = 0; d < 30; d++) s.add(getTenGodState(g, new Date(2026, 10, 1 + d)));
+    assert.equal(s.size, 3, g);
+    for (const t of s) assert.doesNotMatch(t, /しましょう|しておく|避け|控え/);
+  }
+});

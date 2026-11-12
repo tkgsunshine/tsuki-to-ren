@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, MessageCircle } from 'lucide-react';
 import { generateFortuneResult, san, getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
 import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
 import type { PersonStars, NextDay } from '../utils/todayStars';
 import { WEEKDAYS } from '../utils/luckyDays';
 import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
-import { getPartnerToday, getMyToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, TEN_GOD_STATE, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
+import { getPartnerToday, getMyToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, getTenGodState, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
 import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
 
@@ -227,6 +227,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
       {/* あなたの今日（お相手の今日と同じ見方で、自分の分も。2026-11-12 TAKASHI、LINE吉時間の上へ） */}
       {myToday && stars?.me && (
         <PartnerTodayCard
+          now={now}
           oppLabel={myLabel}
           pt={myToday}
           p={stars.me}
@@ -238,6 +239,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
       {/* 〇〇さんの今日（あなたの今日のすぐ下。2026-11-12 TAKASHI） */}
       {partnerToday && stars?.partner && (
         <PartnerTodayCard
+          now={now}
           oppLabel={oppLabel}
           pt={partnerToday}
           p={stars.partner}
@@ -347,7 +349,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
 const WAVE_COLOR: Record<PartnerToday['wave'], string> = { low: '#9cc6d8', mid: '#f2e2b3', high: '#7fe0a8' };
 
 /** 〇〇さんの今日: 心のモード（十神）・元気の量（十二運）・心の揺れ（空亡・六冲）と良いしるし */
-function PartnerTodayCard({ oppLabel, pt, p, guardian, self = false }: { oppLabel: string; pt: PartnerToday; p: PersonStars; guardian?: { img: string; name: string; theme: string }; self?: boolean }) {
+function PartnerTodayCard({ oppLabel, pt, p, guardian, now, self = false }: { oppLabel: string; pt: PartnerToday; now: Date; p: PersonStars; guardian?: { img: string; name: string; theme: string }; self?: boolean }) {
   const accent = self ? '#e2c074' : '#9cc6d8';
   return (
     <section style={{ ...card, border: self ? '1px solid rgba(226, 192, 116, 0.4)' : '1px solid rgba(156, 198, 216, 0.45)', background: self ? 'linear-gradient(160deg, rgba(212,175,55,0.1), rgba(255,255,255,0.03))' : 'linear-gradient(160deg, rgba(77,140,168,0.14), rgba(255,255,255,0.03))' }}>
@@ -371,7 +373,7 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian, self = false }: { oppLabe
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
         <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>心のモード</p>
         <p className="font-serif" style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', lineHeight: 1.4 }}>{pt.mood}</p>
-        <p style={{ ...body, fontSize: '0.84rem' }}>{TEN_GOD_STATE[pt.tenGod]}</p>
+        <p style={{ ...body, fontSize: '0.84rem' }}>{getTenGodState(pt.tenGod, now)}</p>
         <p style={sub}>今日は「{p.tenGodName}」の日</p>
       </div>
 
@@ -429,7 +431,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
   oppMbtiName?: string;
   onAsk?: (q: string) => void;
 }) {
-  const mbtiAction = getMbtiAction(pt.tenGod, oppMbti);
+  const mbtiAction = getMbtiAction(pt.tenGod, oppMbti, now);
   const stages = JOURNEY_STAGES[journey.mode];
   const step = getTodayStep(journey, pt, now, oppMbti);
   const delivery = getStepDelivery(step, oppMbti);
@@ -514,14 +516,21 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
       </div>
 
       {onAsk && (
+        // 相談の入口（2026-11-12 TAKASHI「デザイン見直し」）: キャラの顔＋2行の文＋吹き出しアイコン、金のボタン
         <button type="button" onClick={() => onAsk(step.wait
           ? `今日の一歩は「${step.text}」。${oppLabel}のことが気になって落ち着かないとき、今日はどう過ごせばいい？`
           : `今日の一歩は「${step.text}」。${oppLabel}に送るLINEの文を一緒に考えて`)} style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', textAlign: 'left',
-          padding: '0.6rem 0.8rem', borderRadius: '12px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 'bold',
-          background: 'linear-gradient(90deg, rgba(236,200,122,0.22), rgba(217,164,65,0.12))', border: `1px solid ${GOLD}`, color: '#f3efe6'
+          display: 'flex', alignItems: 'center', gap: '0.65rem', textAlign: 'left', width: '100%',
+          padding: '0.6rem 0.75rem', borderRadius: '14px', cursor: 'pointer',
+          background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 100%)', border: 'none',
+          boxShadow: '0 4px 14px rgba(217, 164, 65, 0.28)', color: '#1a1230'
         }}>
-          <span>{step.wait ? `${charName}に、待つあいだの過ごし方を相談する` : `${charName}に、この一歩のLINEの文を相談する`}</span><ChevronRight size={16} style={{ flexShrink: 0, color: GOLD }} />
+          <img src={selectedChar === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp'} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid rgba(255,255,255,0.7)' }} />
+          <span style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 900, lineHeight: 1.35 }}>{step.wait ? `${charName}に、待つあいだの過ごし方を聞く` : `${charName}と、送るLINEを考える`}</span>
+            <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'rgba(26, 18, 48, 0.72)', lineHeight: 1.4 }}>{step.wait ? '気持ちが落ち着く過ごし方を一緒に考えます' : 'この一歩に合う文面を、一緒に作ります'}</span>
+          </span>
+          <MessageCircle size={20} style={{ flexShrink: 0 }} />
         </button>
       )}
 
