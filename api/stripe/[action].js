@@ -7,8 +7,10 @@ import userdata from '../_lib/user-data.js';
 import notices from '../_lib/notices.js';
 import claim from '../_lib/checkout-claim.js';
 import referral from '../_lib/referral.js';
+import drops from '../_lib/couple-drops.js';
 
-// /api/stripe/checkout | portal | status | webhook | partner | userdata | notices | claim | referral in one function
+// /api/stripe/checkout | portal | status | webhook | partner | userdata | notices | claim | referral | drops in one function
+// (drops = 月のしずく for the 二人の相性100)
 // (userdata = the member's profile and saved partners, notices = the in-app お知らせ;
 //  both are kept here only to stay within the function limit)
 // (the Hobby plan allows at most 12 functions per deployment).
@@ -16,7 +18,7 @@ import referral from '../_lib/referral.js';
 // the raw body is handed on as a Buffer, which the other handlers parse as JSON.
 export const config = { api: { bodyParser: false } };
 
-const HANDLERS = { checkout, portal, status, webhook, partner, userdata, notices, claim, referral };
+const HANDLERS = { checkout, portal, status, webhook, partner, userdata, notices, claim, referral, drops };
 
 const readRawBody = async (req) => {
   const chunks = [];

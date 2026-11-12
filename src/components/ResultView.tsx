@@ -38,6 +38,7 @@ import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
 import MbtiQuizModal from './MbtiQuizModal';
 import { CoupleHundredSection } from './CoupleHundredSection';
 import type { CoupleAccess } from './CoupleHundredSection';
+import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 import { SINGLE_RANK_NOS, FREE_RANK_NOS, SINGLE_READING_NOS, FREE_READING_NOS } from '../data/coupleTopics';
 import { isMbtiCode } from '../utils/mbtiQuiz';
 
@@ -509,6 +510,10 @@ interface ResultViewProps {
   referralGift?: boolean;
   /** 二人の相性100: X投稿（utm_content=couple-…）から来たお題の番号。開いた状態でスクロールし、順位は誰でも見られる */
   coupleFocusNo?: number | null;
+  /** 月のしずく（ログイン中・お相手ありのときだけ。App.tsx が api/stripe/drops で持つ） */
+  coupleDrops?: CoupleDrops | null;
+  /** しずくを1つ使ってお題を開ける。開けたら true */
+  onOpenCoupleTopic?: (kind: DropKind, no: number) => Promise<boolean>;
   /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
   referral?: {
     status: ReferralStatus | null;
@@ -552,7 +557,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onSetMbti,
   referral,
   referralGift = false,
-  coupleFocusNo = null
+  coupleFocusNo = null,
+  coupleDrops = null,
+  onOpenCoupleTopic
 }) => {
   const [mbtiQuizFor, setMbtiQuizFor] = useState<'self' | 'partner' | null>(null);
   const [email, setEmail] = useState('');
@@ -1042,18 +1049,22 @@ export const ResultView: React.FC<ResultViewProps> = ({
     </button>
   ) : null;
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
-  // 二人の相性100のランキング50（2026-11-12 TAKASHI）: シングル（¥680）はそのお相手の25本を理由つきで。
-  // 未登録・無料会員は代表2本＋X投稿から来たお題の順位だけ。月額プレミアムは「月のしずく」で開ける（別PR）までの間、50本すべて。
+  // 二人の相性100（2026-11-12 TAKASHI）
+  // ・シングル（¥680）: そのお相手のランキング25本＋本格鑑定25本を、ずっと
+  // ・月のしずく: 月額は支払い日に50個＋毎日10個、無料会員は毎日2個。しずく1つで1つのお題が開き、開けたお題はずっと見られる
+  // ・未登録・無料会員: ランキングは代表2本＋X投稿から来たお題の順位だけ、本格鑑定は見本1本
+  const dropsOn = hasOpponent && !sharedBy && Boolean(coupleDrops) && Boolean(onOpenCoupleTopic);
   const coupleRankAccess = (no: number): CoupleAccess => {
     if (sharedBy) return FREE_RANK_NOS.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
-    if (isSubscribed) return 'full';
     if (pairOpen && SINGLE_RANK_NOS.includes(no)) return 'full';
+    if (coupleDrops?.opened.rank.includes(no)) return 'full';
     return FREE_RANK_NOS.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
   };
-  // 本格鑑定50: シングルはそのお相手の25本（1〜25）。無料は見本1本。月額は月のしずくまでの間、50本すべて
   const coupleReadingAccess = (no: number): CoupleAccess => {
-    if (!sharedBy && (isSubscribed || (pairOpen && SINGLE_READING_NOS.includes(no)))) return 'full';
-    return FREE_READING_NOS.includes(no) ? 'full' : 'locked';
+    if (FREE_READING_NOS.includes(no)) return 'full';
+    if (sharedBy) return 'locked';
+    if (pairOpen && SINGLE_READING_NOS.includes(no)) return 'full';
+    return coupleDrops?.opened.reading.includes(no) ? 'full' : 'locked';
   };
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
@@ -2643,6 +2654,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
             onLockClick={handleDeepLockClick}
             lockWord={LOCK_WORD}
             onAskMbti={!sharedBy && onSetMbti ? (who) => setMbtiQuizFor(who) : undefined}
+            drops={dropsOn ? coupleDrops : null}
+            onDrop={dropsOn ? onOpenCoupleTopic : undefined}
           />
         )}
 

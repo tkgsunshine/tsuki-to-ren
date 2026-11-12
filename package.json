@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test:engine": "node --experimental-strip-types --test scripts/test-fortune-engine.mjs scripts/test-solar-terms.mjs scripts/test-self-reading.mjs scripts/test-lucky-days.mjs scripts/test-mbti-quiz.mjs scripts/test-couple-rank.mjs scripts/test-couple-reading.mjs",
     "test:analytics": "node --experimental-strip-types --test scripts/test-analytics.mjs",
-    "test:stripe": "node --test scripts/test-stripe.mjs scripts/test-partner-days.mjs scripts/test-pair-unlock.mjs scripts/test-daily-mail-pair.mjs scripts/test-referral.mjs",
+    "test:stripe": "node --test scripts/test-stripe.mjs scripts/test-partner-days.mjs scripts/test-pair-unlock.mjs scripts/test-daily-mail-pair.mjs scripts/test-referral.mjs scripts/test-couple-drops.mjs",
     "test:userdata": "node --experimental-strip-types --test scripts/test-user-data.mjs",
     "test:notices": "node --test scripts/test-notices.mjs scripts/test-notice-mail.mjs",
     "test:chat": "node --test scripts/test-chat-limit.mjs",

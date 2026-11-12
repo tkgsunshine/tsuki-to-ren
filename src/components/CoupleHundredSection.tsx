@@ -6,6 +6,8 @@ import { RANK_TOPICS, RANK_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { RankCategory } from '../data/coupleTopics';
 import { toPerson } from '../utils/coupleReading';
 import { CoupleReadingList } from './CoupleReadingList';
+import { DropBalance, DropPanel } from './CoupleDropPanel';
+import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 
 // 「二人の相性100」（2026-11-12 TAKASHI決定）。結果画面（お相手あり）の欄。
 // ランキング50: 二人の16タイプの組が、お題ごとに136組中何位か＋理由の文。1〜136位の一覧は出さない（どのプランでも）。
@@ -33,6 +35,9 @@ interface Props {
   lockWord: string;
   /** 16タイプが決まっていないとき、かんたん質問を開く */
   onAskMbti?: (who: 'self' | 'partner') => void;
+  /** 月のしずく（ログイン中だけ）。あるとき、ロック中のお題はしずく1つで開ける */
+  drops?: CoupleDrops | null;
+  onDrop?: (kind: DropKind, no: number) => Promise<boolean>;
 }
 
 const SITE = 'tsuki-to-ren.com';
@@ -49,9 +54,9 @@ const rankChip = (top: boolean): React.CSSProperties => ({
 });
 
 /** スクショ用の1枚（開いたお題） */
-function RankCard({ title, rank, reason, pair, reasonOpen, onLockClick, lockWord }: {
+function RankCard({ title, rank, reason, pair, reasonOpen, onLockClick, lockWord, dropSlot }: {
   title: string; rank: number; reason: string; pair: string; reasonOpen: boolean;
-  onLockClick: (e?: React.MouseEvent) => void; lockWord: string;
+  onLockClick: (e?: React.MouseEvent) => void; lockWord: string; dropSlot?: React.ReactNode;
 }) {
   const top = rank <= 10;
   return (
@@ -77,9 +82,11 @@ function RankCard({ title, rank, reason, pair, reasonOpen, onLockClick, lockWord
           <p aria-hidden="true" style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.75, color: '#e8e2d4', filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.6, maxHeight: '3.5em', overflow: 'hidden' }}>
             二人の文字の組み合わせのうち、このお題でいちばん効いているところと、順位がこの位置になった理由をお伝えします。
           </p>
-          <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick} style={{ display: 'block', margin: '0.4rem auto 0' }}>
-            {lockWord}（理由）
-          </button>
+          {dropSlot ?? (
+            <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick} style={{ display: 'block', margin: '0.4rem auto 0' }}>
+              {lockWord}（理由）
+            </button>
+          )}
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.64rem', color: '#8f8778', borderTop: '1px solid rgba(212, 175, 55, 0.18)', paddingTop: '0.4rem' }}>
@@ -91,7 +98,7 @@ function RankCard({ title, rank, reason, pair, reasonOpen, onLockClick, lockWord
 }
 
 export const CoupleHundredSection: React.FC<Props> = ({
-  myMbti, oppMbti, myName, oppName, myPillar, myStar, oppPillar, oppStar, rankAccess, readingAccess, focusNo = null, onLockClick, lockWord, onAskMbti
+  myMbti, oppMbti, myName, oppName, myPillar, myStar, oppPillar, oppStar, rankAccess, readingAccess, focusNo = null, onLockClick, lockWord, onAskMbti, drops = null, onDrop
 }) => {
   // 上に本格鑑定50、下にランキング50（タブ）。X投稿から来たときはランキングを先に開く
   const [tab, setTab] = useState<'reading' | 'rank'>(focusNo ? 'rank' : 'reading');
@@ -142,10 +149,11 @@ export const CoupleHundredSection: React.FC<Props> = ({
           ? <>16タイプ・四柱推命・九星気学の3つの占術で読み解く本格鑑定。{san(myName, 'あなた')}と{san(oppName, 'お相手')}の生年月日まで使った、二人だけの50のお題です。</>
           : <>{san(myName, 'あなた')}と{san(oppName, 'お相手')}の16タイプの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のお題で見ていきます。{ready && <span style={{ color: '#f5d77a' }}>（{pair}）</span>}</>}
       </p>
+      {drops && <DropBalance drops={drops} />}
 
       {tab === 'reading' ? (
         mePerson && oppPerson ? (
-          <CoupleReadingList me={mePerson} opp={oppPerson} myName={myName} oppName={oppName} access={readingAccess} onLockClick={onLockClick} lockWord={lockWord} />
+          <CoupleReadingList me={mePerson} opp={oppPerson} myName={myName} oppName={oppName} access={readingAccess} onLockClick={onLockClick} lockWord={lockWord} drops={drops} onDrop={onDrop ? (no) => onDrop('reading', no) : undefined} />
         ) : (
           <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>二人の16タイプが分かると、本格鑑定が見られます。</p>
         )
@@ -169,14 +177,19 @@ export const CoupleHundredSection: React.FC<Props> = ({
               const access = rankAccess(t.no);
               const r = results.get(t.no);
               const isOpen = openNo === t.no && access !== 'locked' && r;
+              const dropOpen = openNo === t.no && access === 'locked' && drops && onDrop;
+              const panel = drops && onDrop ? <DropPanel drops={drops} what={access === 'locked' ? '順位と理由' : '理由'} onDrop={() => onDrop('rank', t.no)} onLockClick={onLockClick} lockWord={lockWord} /> : undefined;
               return (
                 <div key={t.no} ref={t.no === focusNo ? focusRef : undefined}>
                   <button
                     type="button"
                     style={{ ...rowStyle, ...(access === 'locked' ? { opacity: 0.85 } : {}) }}
                     {...(access === 'locked' ? { 'data-paid-lock': true } : {})}
-                    onClick={(e) => { if (access === 'locked') { onLockClick(e); return; } setOpenNo(isOpen ? null : t.no); }}
-                    aria-expanded={access !== 'locked' ? Boolean(isOpen) : undefined}
+                    onClick={(e) => {
+                      if (access === 'locked' && !panel) { onLockClick(e); return; }
+                      setOpenNo(isOpen || dropOpen ? null : t.no);
+                    }}
+                    aria-expanded={access !== 'locked' || panel ? Boolean(isOpen || dropOpen) : undefined}
                   >
                     <span style={{ flex: 1, fontSize: '0.8rem', lineHeight: 1.5 }}>{t.title}</span>
                     {access === 'locked' || !r ? (
@@ -191,8 +204,9 @@ export const CoupleHundredSection: React.FC<Props> = ({
                     )}
                   </button>
                   {isOpen && r && (
-                    <RankCard title={t.title} rank={r.rank} reason={r.reason} pair={pair} reasonOpen={access === 'full'} onLockClick={onLockClick} lockWord={lockWord} />
+                    <RankCard title={t.title} rank={r.rank} reason={r.reason} pair={pair} reasonOpen={access === 'full'} onLockClick={onLockClick} lockWord={lockWord} dropSlot={panel} />
                   )}
+                  {dropOpen && panel}
                 </div>
               );
             })}
@@ -208,8 +222,8 @@ export const CoupleHundredSection: React.FC<Props> = ({
               ほかのお題も見る（あと{RANK_TOPICS.length - openCount}個）
             </button>
           )}
-          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {RANK_TOPICS.length} 個です</span>
-          <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>
+          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {RANK_TOPICS.length} 個です{drops ? '（お題を押すと、しずくで開けられます）' : ''}</span>
+          {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>
       )}
       {tab === 'rank' && <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>

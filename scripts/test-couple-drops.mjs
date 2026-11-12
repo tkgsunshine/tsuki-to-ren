@@ -1,0 +1,96 @@
+// node --test scripts/test-couple-drops.mjs  （npm run test:stripe）
+// 月のしずく（api/_lib/couple-drops.js）: 補充の計算、開ける、解約後の見え方、誕生日を保存しないこと
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import drops, { refill, PREMIUM_CAP, FREE_CAP } from '../api/_lib/couple-drops.js';
+import { partnerKey } from '../api/_lib/partner-days.js';
+
+const mockRes = () => {
+  const r = { code: 0, body: null, headers: {} };
+  r.setHeader = (k, v) => { r.headers[k] = v; };
+  r.status = (c) => { r.code = c; return r; };
+  r.json = (b) => { r.body = b; return r; };
+  return r;
+};
+// Firestore stand-in with a deep merge (as Firestore does with { merge: true })
+const deepMerge = (a, b) => {
+  const out = { ...(a || {}) };
+  for (const [k, v] of Object.entries(b)) out[k] = v && typeof v === 'object' && !Array.isArray(v) ? deepMerge(out[k], v) : v;
+  return out;
+};
+const mockDb = (docs = {}) => {
+  const ref = (name, id) => ({ key: `${name}/${id}`, get: async () => ({ exists: !!docs[`${name}/${id}`], data: () => docs[`${name}/${id}`] }) });
+  return {
+    docs,
+    collection: (name) => ({ doc: (id) => ref(name, id) }),
+    runTransaction: async (fn) => fn({ get: (r) => r.get(), set: (r, data, opts) => { docs[r.key] = opts?.merge ? deepMerge(docs[r.key], data) : data; } })
+  };
+};
+const auth = { verifyIdToken: async (t) => { if (t !== 'good') throw new Error('bad'); return { uid: 'u1', email: 'a@example.com', email_verified: true }; } };
+const BIRTH = '2000-01-01';
+const req = (body) => ({ method: 'POST', headers: { authorization: 'Bearer good' }, body: { oppBirth: BIRTH, ...body } });
+const PREMIUM = { 'premium/u1': { active: true, livemode: true, currentPeriodEnd: '2026-12-12T00:00:00.000Z' } };
+const call = async (db, today, body = {}) => { const res = mockRes(); await drops(req(body), res, { auth, db, live: true, today, premiumEmails: '' }); return res; };
+
+test('refill: 月額は支払い日に50＋毎日10（上限100）、無料は毎日2で持ち越さない', () => {
+  let r = refill({}, { premium: true, periodEnd: 'p1' }, '2026-11-12');
+  assert.equal(r.balance, 60); // 支払い日50＋今日10
+  r = refill(r, { premium: true, periodEnd: 'p1' }, '2026-11-12');
+  assert.equal(r.balance, 60); // 同じ日は増えない
+  r = refill(r, { premium: true, periodEnd: 'p1' }, '2026-11-15');
+  assert.equal(r.balance, 90); // 3日ぶん
+  r = refill(r, { premium: true, periodEnd: 'p2' }, '2026-12-12');
+  assert.equal(r.balance, PREMIUM_CAP); // 次の支払い日＋日数ぶん、上限100
+  let f = refill({}, { premium: false }, '2026-11-12');
+  assert.equal(f.balance, 2);
+  f = refill({ ...f, balance: 0 }, { premium: false }, '2026-11-20');
+  assert.equal(f.balance, FREE_CAP); // 8日空いても2個
+  f = refill({ ...f, balance: 40 }, { premium: false }, '2026-11-21');
+  assert.equal(f.balance, 2); // 解約して無料に戻ると、残りは2個まで
+});
+
+test('開けるとしずくが1つ減り、同じお題は二度と減らない。誕生日は保存しない', async () => {
+  const db = mockDb({ ...PREMIUM });
+  let res = await call(db, '2026-11-12');
+  assert.equal(res.code, 200);
+  assert.equal(res.body.balance, 60);
+  res = await call(db, '2026-11-12', { open: { kind: 'reading', no: 31 } });
+  assert.equal(res.body.balance, 59);
+  assert.deepEqual(res.body.opened.reading, [31]);
+  res = await call(db, '2026-11-12', { open: { kind: 'reading', no: 31 } });
+  assert.equal(res.body.balance, 59);
+  assert.equal(res.body.openedNow, false);
+  assert.ok(!JSON.stringify(db.docs['coupleDrops/u1']).includes(BIRTH));
+  assert.ok(db.docs['coupleDrops/u1'].opened[partnerKey(BIRTH)]);
+});
+
+test('しずくが無いと開けない（409）', async () => {
+  const db = mockDb({ 'coupleDrops/u1': { balance: 0, lastDaily: '2026-11-12', opened: {} } });
+  const res = await call(db, '2026-11-12', { open: { kind: 'rank', no: 3 } });
+  assert.equal(res.code, 409);
+  assert.equal(res.body.code, 'no_drops');
+});
+
+test('月額の間に開けたお題は解約後は見えない。無料のしずくで開けたお題は見える', async () => {
+  const db = mockDb({ ...PREMIUM });
+  await call(db, '2026-11-12', { open: { kind: 'rank', no: 40 } });
+  db.docs['premium/u1'] = { active: false, livemode: true };
+  const res = await call(db, '2026-11-13', { open: { kind: 'rank', no: 3 } });
+  assert.equal(res.body.premium, false);
+  assert.deepEqual(res.body.opened.rank, [3]);
+  // また月額になると、月額の間に開けた分も戻る
+  db.docs['premium/u1'] = { active: true, livemode: true, currentPeriodEnd: '2027-01-13T00:00:00.000Z' };
+  const back = await call(db, '2026-11-14');
+  assert.deepEqual(back.body.opened.rank, [3, 40]);
+});
+
+test('ログインなし・不正な入力は断る', async () => {
+  let res = mockRes();
+  await drops({ method: 'POST', headers: {}, body: { oppBirth: BIRTH } }, res, { auth, db: mockDb() });
+  assert.equal(res.code, 401);
+  res = await call(mockDb(), '2026-11-12', { open: { kind: 'rank', no: 99 } });
+  assert.equal(res.code, 400);
+  res = mockRes();
+  await drops(req({ oppBirth: '2000/1/1' }), res, { auth, db: mockDb() });
+  assert.equal(res.code, 400);
+});

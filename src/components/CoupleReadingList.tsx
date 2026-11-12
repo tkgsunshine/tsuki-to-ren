@@ -5,6 +5,8 @@ import type { Person, CoupleReading } from '../utils/coupleReading';
 import { READING_TOPICS, READING_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { ReadingCategory } from '../data/coupleTopics';
 import type { CoupleAccess } from './CoupleHundredSection';
+import { DropPanel } from './CoupleDropPanel';
+import type { CoupleDrops } from '../services/coupleDrops';
 
 // 「二人の相性100」の本格鑑定50（16タイプ × 四柱推命 × 九星気学）。★1〜5＋上位◯%＋鑑定文＋根拠（判定に使った星だけ）。
 // 見え方: full＝全部、それ以外＝お題名だけ（★や%も出さない。ロックを押すと購入画面へ）
@@ -65,9 +67,11 @@ interface Props {
   access: (no: number) => CoupleAccess;
   onLockClick: (e?: React.MouseEvent) => void;
   lockWord: string;
+  drops?: CoupleDrops | null;
+  onDrop?: (no: number) => Promise<boolean>;
 }
 
-export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, access, onLockClick, lockWord }) => {
+export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, access, onLockClick, lockWord, drops = null, onDrop }) => {
   const [openNo, setOpenNo] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(false);
   const pair = 'すべての組み合わせ';
@@ -92,14 +96,19 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
               const r = results.get(t.no);
               const locked = !r;
               const isOpen = openNo === t.no && r;
+              const canDrop = locked && drops && onDrop;
+              const dropOpen = openNo === t.no && canDrop;
               return (
                 <div key={t.no}>
                   <button
                     type="button"
                     style={{ ...rowStyle, ...(locked ? { opacity: 0.85 } : {}) }}
                     {...(locked ? { 'data-paid-lock': true } : {})}
-                    onClick={(e) => { if (locked) { onLockClick(e); return; } setOpenNo(isOpen ? null : t.no); }}
-                    aria-expanded={locked ? undefined : Boolean(isOpen)}
+                    onClick={(e) => {
+                      if (locked && !canDrop) { onLockClick(e); return; }
+                      setOpenNo(isOpen || dropOpen ? null : t.no);
+                    }}
+                    aria-expanded={locked && !canDrop ? undefined : Boolean(isOpen || dropOpen)}
                   >
                     <span style={{ flex: 1, fontSize: '0.8rem', lineHeight: 1.5 }}>{t.title}</span>
                     {locked ? (
@@ -112,6 +121,9 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
                     )}
                   </button>
                   {isOpen && r && <ReadingCard title={t.title} r={r} pair={pair} />}
+                  {dropOpen && drops && onDrop && (
+                    <DropPanel drops={drops} what="鑑定" onDrop={() => onDrop(t.no)} onLockClick={onLockClick} lockWord={lockWord} />
+                  )}
                 </div>
               );
             })}
@@ -125,8 +137,8 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
               ほかのお題も見る（あと{READING_TOPICS.length - openCount}個）
             </button>
           )}
-          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {READING_TOPICS.length} 個です</span>
-          <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>
+          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {READING_TOPICS.length} 個です{drops ? '（お題を押すと、しずくで開けられます）' : ''}</span>
+          {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>
       )}
       <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>

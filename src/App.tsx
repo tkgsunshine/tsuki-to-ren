@@ -49,6 +49,8 @@ import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
 import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/share-card-text.js';
 import { claimCheckout, fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPairCheckout, startPremiumCheckout } from './services/premium';
+import { fetchCoupleDrops, openCoupleTopic } from './services/coupleDrops';
+import type { CoupleDrops, DropKind } from './services/coupleDrops';
 import { fetchPartnerAccess, readCachedPartnerAccess, writeCachedPartnerAccess } from './services/partnerDays';
 import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFromPath, type NavState, type OverlayName, type PageFields, type SettingsSubView } from './utils/navHistory';
 import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
@@ -1321,6 +1323,21 @@ function App() {
     });
   }, []);
   const signedInUid = currentUser?.uid;
+  // 月のしずく（二人の相性100のお題を1つずつ開ける）。ログイン中・お相手ありの結果を開いたときに読む（補充もこのとき計算）
+  const [coupleDrops, setCoupleDrops] = useState<CoupleDrops | null>(null);
+  useEffect(() => {
+    if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || !signedInUid) { setCoupleDrops(null); return; }
+    let cancelled = false;
+    void fetchCoupleDrops(oppBirth).then((r) => { if (!cancelled) setCoupleDrops(r.drops); });
+    return () => { cancelled = true; };
+  }, [flowStep, renResult, mode, oppBirth, signedInUid, isSubscribed]);
+  const handleOpenCoupleTopic = useCallback(async (kind: DropKind, no: number) => {
+    if (!oppBirth) return false;
+    const r = await openCoupleTopic(oppBirth, kind, no);
+    if (r.drops) setCoupleDrops(r.drops);
+    if (r.error === 'failed') showAlert('通信がうまくいきませんでした。少したってから、もう一度お試しください。');
+    return !r.error;
+  }, [oppBirth]);
   useEffect(() => {
     if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || isSubscribed) {
       setPartnerLock(null);
@@ -1851,6 +1868,8 @@ function App() {
               <ResultView
                 result={activeResult}
                 coupleFocusNo={coupleFocusNo}
+                coupleDrops={coupleDrops}
+                onOpenCoupleTopic={handleOpenCoupleTopic}
                 renResult={renResult}
                 tsukiResult={tsukiResult}
                 selectedChar={selectedCharacter}
@@ -1894,6 +1913,8 @@ function App() {
               <ResultView
                 result={activeResult}
                 coupleFocusNo={coupleFocusNo}
+                coupleDrops={coupleDrops}
+                onOpenCoupleTopic={handleOpenCoupleTopic}
                 renResult={renResult}
                 tsukiResult={tsukiResult}
                 selectedChar={selectedCharacter}
