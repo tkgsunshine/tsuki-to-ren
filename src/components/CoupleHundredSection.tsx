@@ -35,7 +35,7 @@ interface Props {
   lockWord: string;
   /** 16タイプが決まっていないとき、かんたん質問を開く */
   onAskMbti?: (who: 'self' | 'partner') => void;
-  /** 月のしずく（ログイン中だけ）。あるとき、ロック中のお題はしずく1つで開ける */
+  /** 月のかけら（ログイン中だけ）。あるとき、ロック中のお題はかけら1つで開ける */
   drops?: CoupleDrops | null;
   onDrop?: (kind: DropKind, no: number) => Promise<boolean>;
 }
@@ -222,7 +222,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
               ほかのお題も見る（あと{RANK_TOPICS.length - openCount}個）
             </button>
           )}
-          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {RANK_TOPICS.length} 個です{drops ? '（お題を押すと、しずくで開けられます）' : ''}</span>
+          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {RANK_TOPICS.length} 個です{drops ? '（お題を押すと、かけらで開けられます）' : ''}</span>
           {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>
       )}

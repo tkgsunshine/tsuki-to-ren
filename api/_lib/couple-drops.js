@@ -3,12 +3,12 @@ import { PREMIUM, isLiveKey, parseBody, verifyUser } from './stripe.js';
 import { isOverrideEmail } from './premium-override.js';
 import { isPremiumRecord, jstToday, partnerKey } from './partner-days.js';
 
-// 「月のしずく」（2026-11-12 TAKASHI決定）: 「二人の相性100」のお題を1つずつ開けるためのしずく。
+// 「月のかけら」（2026-11-12 TAKASHI決定）: 「二人の相性100」のお題を1つずつ開けるためのかけら。
 // ・月額プレミアム: 支払い日（新しい支払い期間に入った最初の表示）に50個、毎日10個。貯められるのは100個まで
 // ・無料会員: 毎日2個。使わなかった分は持ち越さない（2個まで）
-// ・しずく1つで1つのお題が開く。一度開けたお題は、そのお相手についてずっと見られる
-//   （月額の間に開けたお題は、解約すると見られなくなる。無料会員のしずくで開けたお題は解約に関係なく見られる）
-// ・しずくは単体では売らない（お金で買えると資金決済法の対象になりうるため）
+// ・かけら1つで1つのお題が開く。一度開けたお題は、そのお相手についてずっと見られる
+//   （月額の間に開けたお題は、解約すると見られなくなる。無料会員のかけらで開けたお題は解約に関係なく見られる）
+// ・かけらは単体では売らない（お金で買えると資金決済法の対象になりうるため）
 // ・補充は定期実行を使わず、画面を開いたとき（このAPIを呼んだとき）に、前回からの日数ぶん計算する
 // 記録は coupleDrops/{uid} にサーバーだけが書く（firestore.rules で端末からは読み書き不可。今の課金記録と同じ守り方）。
 // お相手は誕生日から作る記号（partnerKey）で持ち、誕生日そのものは保存しない。
@@ -48,7 +48,7 @@ export function refill(rec, { premium, periodEnd }, today) {
 }
 
 const cleanList = (v) => (Array.isArray(v) ? v.filter((n) => Number.isInteger(n) && n >= 1 && n <= TOPIC_MAX) : []);
-/** そのお相手について開けたお題（r: ランキング、g: 本格鑑定。p: 月額の間に開けた、f: 無料のしずくで開けた） */
+/** そのお相手について開けたお題（r: ランキング、g: 本格鑑定。p: 月額の間に開けた、f: 無料のかけらで開けた） */
 export const openedOf = (rec, key) => {
   const o = rec?.opened?.[key] || {};
   return { rp: cleanList(o.rp), rf: cleanList(o.rf), gp: cleanList(o.gp), gf: cleanList(o.gf) };
@@ -62,7 +62,7 @@ export const visibleOpened = (o, premium) => ({
 /**
  * POST /api/stripe/drops { oppBirth, open?: { kind: 'rank' | 'reading', no } }
  * → { balance, cap, daily, premium, opened: { rank: [...], reading: [...] }, granted, opened_now? }
- * open を付けると、しずくを1つ使ってそのお題を開ける（もう開いていれば使わない）。
+ * open を付けると、かけらを1つ使ってそのお題を開ける（もう開いていれば使わない）。
  */
 export default async function handler(req, res, deps = {}) {
   res.setHeader('Cache-Control', 'no-store, private');
@@ -119,7 +119,7 @@ export default async function handler(req, res, deps = {}) {
 
     const payload = {
       status: out.error ? 'error' : 'ok',
-      ...(out.error ? { code: out.error, message: 'しずくが足りません' } : {}),
+      ...(out.error ? { code: out.error, message: 'かけらが足りません' } : {}),
       premium,
       balance: out.r.balance,
       cap: premium ? PREMIUM_CAP : FREE_CAP,

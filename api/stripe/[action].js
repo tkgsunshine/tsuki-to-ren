@@ -10,7 +10,7 @@ import referral from '../_lib/referral.js';
 import drops from '../_lib/couple-drops.js';
 
 // /api/stripe/checkout | portal | status | webhook | partner | userdata | notices | claim | referral | drops in one function
-// (drops = 月のしずく for the 二人の相性100)
+// (drops = 月のかけら for the 二人の相性100)
 // (userdata = the member's profile and saved partners, notices = the in-app お知らせ;
 //  both are kept here only to stay within the function limit)
 // (the Hobby plan allows at most 12 functions per deployment).

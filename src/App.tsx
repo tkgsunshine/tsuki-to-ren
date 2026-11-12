@@ -1323,7 +1323,7 @@ function App() {
     });
   }, []);
   const signedInUid = currentUser?.uid;
-  // 月のしずく（二人の相性100のお題を1つずつ開ける）。ログイン中・お相手ありの結果を開いたときに読む（補充もこのとき計算）
+  // 月のかけら（二人の相性100のお題を1つずつ開ける）。ログイン中・お相手ありの結果を開いたときに読む（補充もこのとき計算）
   const [coupleDrops, setCoupleDrops] = useState<CoupleDrops | null>(null);
   useEffect(() => {
     if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || !signedInUid) { setCoupleDrops(null); return; }

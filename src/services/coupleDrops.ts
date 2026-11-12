@@ -1,6 +1,6 @@
 import { getFirebaseAuth } from './firebase';
 
-// 月のしずく（api/_lib/couple-drops.js）。「二人の相性100」のお題を1つずつ開ける。
+// 月のかけら（api/_lib/couple-drops.js）。「二人の相性100」のお題を1つずつ開ける。
 // 残高・開けたお題はサーバー（Firestore）だけが記録する。この端末は表示するだけ。
 
 export interface CoupleDrops {
@@ -8,9 +8,9 @@ export interface CoupleDrops {
   balance: number;
   cap: number;
   daily: number;
-  /** 今回の表示で足されたしずく（支払い日・毎日の補充） */
+  /** 今回の表示で足されたかけら（支払い日・毎日の補充） */
   granted: number;
-  /** このお相手について、しずくで開けたお題 */
+  /** このお相手について、かけらで開けたお題 */
   opened: { rank: number[]; reading: number[] };
 }
 
@@ -48,5 +48,5 @@ const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops
 /** 画面を開いたときに呼ぶ。補充もここで計算される */
 export const fetchCoupleDrops = (oppBirth: string) => post({ oppBirth });
 
-/** しずくを1つ使ってお題を開ける（もう開いていれば使わない） */
+/** かけらを1つ使ってお題を開ける（もう開いていれば使わない） */
 export const openCoupleTopic = (oppBirth: string, kind: DropKind, no: number) => post({ oppBirth, open: { kind, no } });

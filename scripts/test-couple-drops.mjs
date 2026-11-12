@@ -1,5 +1,5 @@
 // node --test scripts/test-couple-drops.mjs  （npm run test:stripe）
-// 月のしずく（api/_lib/couple-drops.js）: 補充の計算、開ける、解約後の見え方、誕生日を保存しないこと
+// 月のかけら（api/_lib/couple-drops.js）: 補充の計算、開ける、解約後の見え方、誕生日を保存しないこと
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import drops, { refill, PREMIUM_CAP, FREE_CAP } from '../api/_lib/couple-drops.js';
@@ -49,7 +49,7 @@ test('refill: 月額は支払い日に50＋毎日10（上限100）、無料は�
   assert.equal(f.balance, 2); // 解約して無料に戻ると、残りは2個まで
 });
 
-test('開けるとしずくが1つ減り、同じお題は二度と減らない。誕生日は保存しない', async () => {
+test('開けるとかけらが1つ減り、同じお題は二度と減らない。誕生日は保存しない', async () => {
   const db = mockDb({ ...PREMIUM });
   let res = await call(db, '2026-11-12');
   assert.equal(res.code, 200);
@@ -64,14 +64,14 @@ test('開けるとしずくが1つ減り、同じお題は二度と減らない�
   assert.ok(db.docs['coupleDrops/u1'].opened[partnerKey(BIRTH)]);
 });
 
-test('しずくが無いと開けない（409）', async () => {
+test('かけらが無いと開けない（409）', async () => {
   const db = mockDb({ 'coupleDrops/u1': { balance: 0, lastDaily: '2026-11-12', opened: {} } });
   const res = await call(db, '2026-11-12', { open: { kind: 'rank', no: 3 } });
   assert.equal(res.code, 409);
   assert.equal(res.body.code, 'no_drops');
 });
 
-test('月額の間に開けたお題は解約後は見えない。無料のしずくで開けたお題は見える', async () => {
+test('月額の間に開けたお題は解約後は見えない。無料のかけらで開けたお題は見える', async () => {
   const db = mockDb({ ...PREMIUM });
   await call(db, '2026-11-12', { open: { kind: 'rank', no: 40 } });
   db.docs['premium/u1'] = { active: false, livemode: true };

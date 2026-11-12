@@ -510,9 +510,9 @@ interface ResultViewProps {
   referralGift?: boolean;
   /** 二人の相性100: X投稿（utm_content=couple-…）から来たお題の番号。開いた状態でスクロールし、順位は誰でも見られる */
   coupleFocusNo?: number | null;
-  /** 月のしずく（ログイン中・お相手ありのときだけ。App.tsx が api/stripe/drops で持つ） */
+  /** 月のかけら（ログイン中・お相手ありのときだけ。App.tsx が api/stripe/drops で持つ） */
   coupleDrops?: CoupleDrops | null;
-  /** しずくを1つ使ってお題を開ける。開けたら true */
+  /** かけらを1つ使ってお題を開ける。開けたら true */
   onOpenCoupleTopic?: (kind: DropKind, no: number) => Promise<boolean>;
   /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
   referral?: {
@@ -1051,7 +1051,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
   // 二人の相性100（2026-11-12 TAKASHI）
   // ・シングル（¥680）: そのお相手のランキング25本＋本格鑑定25本を、ずっと
-  // ・月のしずく: 月額は支払い日に50個＋毎日10個、無料会員は毎日2個。しずく1つで1つのお題が開き、開けたお題はずっと見られる
+  // ・月のかけら: 月額は支払い日に50個＋毎日10個、無料会員は毎日2個。かけら1つで1つのお題が開き、開けたお題はずっと見られる
   // ・未登録・無料会員: ランキングは代表2本＋X投稿から来たお題の順位だけ、本格鑑定は見本1本
   const dropsOn = hasOpponent && !sharedBy && Boolean(coupleDrops) && Boolean(onOpenCoupleTopic);
   const coupleRankAccess = (no: number): CoupleAccess => {

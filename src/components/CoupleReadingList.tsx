@@ -137,7 +137,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
               ほかのお題も見る（あと{READING_TOPICS.length - openCount}個）
             </button>
           )}
-          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {READING_TOPICS.length} 個です{drops ? '（お題を押すと、しずくで開けられます）' : ''}</span>
+          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {READING_TOPICS.length} 個です{drops ? '（お題を押すと、かけらで開けられます）' : ''}</span>
           {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>
       )}
