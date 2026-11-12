@@ -1,5 +1,5 @@
 import React from 'react';
-import { getSelfReading } from '../utils/selfReading';
+import { getSelfReading, maskedLead } from '../utils/selfReading';
 import { san } from '../utils/fortuneEngine';
 import { LockLabel, countChars } from './LockRest';
 
@@ -87,33 +87,66 @@ const OpponentReadingCard: React.FC<{
   );
 
   if (locked) {
-    // 未登録: 全文だと長いので、見出し2つ＋1行ずつだけを小さくぼかして見せる
+    // 未登録: 「ふだん」「恋愛」の2項目の1文目だけ見せ、その人らしさの核の言葉を「〇〇〇〇〇」で伏せる（2026-11-12 TAKASHI依頼）。
+    // 伏せた言葉は登録すると全文の中でそのまま読める。本物の言葉と2文目以降は画面に置かない。〇〇のタップ＝「続きを見る」と同じ。
     const preview = reading.items.slice(0, 2);
+    const leads = preview.map((item) => maskedLead(item.text, item.mask));
+    const shown = leads.reduce((n, l) => n + (l ? countChars(l.before, l.after) : 0), 0);
+    const rest = Math.max(0, countChars(...reading.items.map((it) => it.text)) - shown);
+    const unlock = () => onUnlock?.();
     return (
       <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
         {heading}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {preview.map((item, i) => {
+            const lead = leads[i];
+            return (
+              <div key={item.label} style={{ borderLeft: '2px solid rgba(226,192,116,0.55)', paddingLeft: '0.75rem' }}>
+                <div style={{ fontSize: '0.74rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>{label(item.label)}</div>
+                <p className="font-serif" style={{ fontSize: '0.88rem', lineHeight: 1.85, letterSpacing: '0.02em', color: '#e8e3d8', margin: 0 }}>
+                  {lead ? (
+                    <>
+                      {lead.before}
+                      <span
+                        className="masked-word"
+                        role="button"
+                        tabIndex={0}
+                        aria-label="伏せられた言葉。続きを見る"
+                        onClick={unlock}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); unlock(); } }}
+                      >
+                        〇〇〇〇〇
+                      </span>
+                      {lead.after}
+                    </>
+                  ) : (
+                    <span style={{ filter: 'blur(4px)', userSelect: 'none', opacity: 0.7 }} aria-hidden="true">{LOCKED_FILLER.slice(0, 28)}</span>
+                  )}
+                </p>
+              </div>
+            );
+          })}
+        </div>
         <div
           className="premium-blur-container"
           role="button"
           tabIndex={0}
-          onClick={onUnlock}
-          onKeyDown={(e) => { if (e.key === 'Enter') onUnlock?.(); }}
-          style={{ minHeight: 0, cursor: 'pointer', borderRadius: '8px' }}
+          onClick={unlock}
+          onKeyDown={(e) => { if (e.key === 'Enter') unlock(); }}
+          style={{ minHeight: 0, cursor: 'pointer', borderRadius: '8px', marginTop: '0.35rem' }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none', opacity: 0.7 }} aria-hidden="true">
-            {preview.map((item) => (
-              <div key={item.label} style={{ borderLeft: '2px solid rgba(226,192,116,0.55)', paddingLeft: '0.75rem' }}>
-                <div style={{ fontSize: '0.74rem', color: '#e2c074', fontWeight: 'bold', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>{label(item.label)}</div>
-                <p className="font-serif" style={{ fontSize: '0.84rem', lineHeight: 1.7, color: '#e8e3d8', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'clip' }}>{LOCKED_FILLER}</p>
-              </div>
-            ))}
-          </div>
+          <p className="font-serif" aria-hidden="true" style={{ fontSize: '0.84rem', lineHeight: 1.85, color: '#e8e3d8', margin: 0, filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none', opacity: 0.7, maxHeight: '3.7em', overflow: 'hidden' }}>
+            {LOCKED_FILLER}{LOCKED_FILLER}
+          </p>
           <div className="premium-lock-overlay">
-            <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); onUnlock?.(); }}>
-              <LockLabel word="続きを見る" chars={countChars(...reading.items.map((it) => it.text))} />
+            <button type="button" className="premium-lock-tag" onClick={(e) => { e.stopPropagation(); unlock(); }}>
+              <LockLabel word="続きを見る" chars={rest} />
             </button>
           </div>
         </div>
+        <p style={{ fontSize: '0.7rem', color: 'rgba(232,227,216,0.7)', textAlign: 'center', margin: '0.45rem 0 0' }}>
+          〇〇の答えは、無料の会員登録で読めます
+        </p>
       </div>
     );
   }

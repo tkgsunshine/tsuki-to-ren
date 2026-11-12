@@ -40,3 +40,19 @@ test('self reading: no technical words on screen', () => {
     for (const it of getSelfReading(p, '九紫火星 (火)', '').items) assert.doesNotMatch(it.text + it.label, words);
   }
 });
+
+test('self reading: the masked word for guests is really in the first sentence (every pillar x type)', async () => {
+  const { maskedLead } = await import('../src/utils/selfReading.ts');
+  for (const p of PILLARS) {
+    for (const m of [...MBTI_COMPAT_TYPES, '']) {
+      const r = getSelfReading(p, '一白水星 (水)', m);
+      for (const it of r.items.slice(0, 2)) {
+        assert.ok(it.mask, `${p} ${m} ${it.label}`);
+        const lead = maskedLead(it.text, it.mask);
+        assert.ok(lead, `${p} ${m} ${it.label}: 「${it.mask}」が1文目にない`);
+        assert.equal(lead.before + it.mask + lead.after, it.text.slice(0, it.text.indexOf('。') + 1));
+        assert.ok(!(lead.before + lead.after).includes(it.mask));
+      }
+    }
+  }
+});
