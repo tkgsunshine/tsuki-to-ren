@@ -677,7 +677,7 @@ function App() {
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', dynamicDesc);
     } else if (params.get('type') === 'kaigou') {
-      document.title = `【四柱推命 魁罡（かいごう）】約3.3%の強運特殊干支・恋愛運勢鑑定 | 月と蓮`;
+      document.title = `【四柱推命 魁罡（かいごう）】約15人に1人の強運特殊干支・恋愛運勢鑑定 | 月と蓮`;
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', '四柱推命において極めて珍しい強運・カリスマの特殊星「魁罡（かいごう）」の性格特徴、相性の良い相手、恋愛開運バイオリズムを本格解密。');
     }
@@ -1042,7 +1042,7 @@ function App() {
     // 買い切りで解放したお相手は生年月日で決まる。生年月日を変えると、この行は解放の対象ではなくなる
     const leavesUnlock = Boolean(before?.unlocked && before.birth !== fields.birth);
     if (leavesUnlock && !confirmedUnlockEditRef.current) {
-      const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+      const limit = isSubscribed ? 5 : (isRegistered ? 2 : 1);
       // 解放済みは保存の上限に数えていないので、外れると上限を超えることがある
       if (savedPartners.filter((x) => !x.unlocked).length + 1 > limit) {
         showAlert(`⚠️ ${san(before?.name || 'お相手')}は、シングルプランで鑑定を解放したお相手です。\n生年月日を変えると解放の対象から外れ、保存の上限（${limit}人）を超えてしまうため、変更できません。\n\n別の方を占うときは、新しいお相手として追加してください。`);
@@ -1067,7 +1067,7 @@ function App() {
 
   // Checks the saved-partner limit for the member level; shows the upgrade prompt and returns false when full
   const canAddPartner = () => {
-    const limit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+    const limit = isSubscribed ? 5 : (isRegistered ? 2 : 1);
     // 買い切りで解放したお相手は上限に数えない
     if (savedPartners.filter((x) => !x.unlocked).length >= limit) {
       if (!isRegistered) {
@@ -1076,19 +1076,19 @@ function App() {
           setShowAuthModal(true);
         });
       } else if (!isSubscribed) {
-        showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大10人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
+        showConfirm(`無料会員の保存上限（2人）に達しています。\n月額980円の有料会員（プレミアム）になると最大5人まで保存できます。登録しますか？`, { okLabel: '登録へ進む', cancelLabel: 'あとで' }).then(ok => {
           if (!ok) return;
           openPremiumLP('monthly');
         });
       } else {
-        showAlert('有料会員の保存上限（10人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
+        showAlert('有料会員の保存上限（5人）に達しています。新しいお相手を保存する場合は、不要なデータを削除してください。');
       }
       return false;
     }
     return true;
   };
 
-  const partnerLimit = isSubscribed ? 10 : (isRegistered ? 2 : 1);
+  const partnerLimit = isSubscribed ? 5 : (isRegistered ? 2 : 1);
   // 保存済みかどうか。名前が空のお相手は「お相手」で保存されるのでそれとも比べる。
   // 買い切りで解放したお相手は生年月日で決まるので、生年月日が同じなら保存済み扱い
   const isSamePartner = (p: SavedPartner, name: string, birth: string) =>
@@ -1413,6 +1413,33 @@ function App() {
     );
   };
 
+  // 結果画面で、かんたん質問で決めた16タイプを入れて鑑定し直す（16タイプが未設定の以前の鑑定向け。TAKASHI 2026-11-12）
+  const handleSetMbti = (who: 'self' | 'partner', mbti: string) => {
+    const r = lastReadingRef.current as null | {
+      mName: string; mBirth: string; mMbti: string; mGender: 'male' | 'female';
+      oName: string; oBirth: string; oMbti: string; oGender: 'male' | 'female';
+      rel: string; runMode: 'single' | 'match'; selectedCharacter?: 'ren' | 'tsuki';
+    };
+    if (!r) return;
+    const next = { ...r, ...(who === 'self' ? { mMbti: mbti } : { oMbti: mbti }) };
+    if (who === 'self') {
+      setMyMbti(mbti);
+      try {
+        const prof = readLocalProfile();
+        if (prof) localStorage.setItem('hasu_user_profile', JSON.stringify({ ...prof, mbti }));
+      } catch { /* blocked storage */ }
+      pushProfile();
+    } else {
+      setOppMbti(mbti);
+      // 保存済みのお相手なら、タイプも入れておく
+      const list = savedPartnersRef.current;
+      if (list.some(p => isSamePartner(p, r.oName, r.oBirth) && (!p.mbti || p.mbti === 'UNKNOWN'))) {
+        setSavedPartners(list.map(p => (isSamePartner(p, r.oName, r.oBirth) && (!p.mbti || p.mbti === 'UNKNOWN') ? { ...p, mbti } : p)));
+      }
+    }
+    startDiagnosis(next.mName, next.mBirth, next.mMbti, next.mGender, next.oName, next.oBirth, next.oMbti, next.oGender, next.rel, next.runMode, true, next.selectedCharacter);
+  };
+
   const startDiagnosis = (
     mName: string,
     mBirth: string,
@@ -1700,9 +1727,9 @@ function App() {
       '--color-theme-accent': selectedCharacter === 'tsuki' ? '#9f86c0' : '#3a86ab',
       '--shadow-theme-glow': selectedCharacter === 'tsuki' ? '0 0 15px rgba(159, 134, 192, 0.45)' : '0 0 15px rgba(58, 134, 171, 0.45)',
     } as React.CSSProperties}>
-      {/* Dynamic Background Glow Orb (Smooth transition) */}
+      {/* Dynamic Background Glow Orb (Smooth transition)。ページがスクロールしても画面上の同じ位置に出す */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         top: '15%',
         left: '50%',
         transform: 'translateX(-50%)',
@@ -1816,6 +1843,7 @@ function App() {
                 hasOpponent={mode === 'match'}
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
+                onSetMbti={handleSetMbti}
                 isPartnerSaved={currentPartnerSaved}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
@@ -1857,6 +1885,7 @@ function App() {
                 hasOpponent={mode === 'match'}
                 onReset={handleResetFlow}
                 onSavePartner={handleSavePartner}
+                onSetMbti={handleSetMbti}
                 isPartnerSaved={currentPartnerSaved}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
@@ -2073,7 +2102,7 @@ function App() {
 
         {/* Tab 4: SETTINGS (MYPAGE) */}
         {activeTab === 'profile' && (
-          <div style={{ animation: 'fadeIn 0.4s ease', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2rem' }}>
+          <div data-clarity-mask="True" style={{ animation: 'fadeIn 0.4s ease', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2rem' }}>
             {/* Header / Back Navigation */}
             {settingsSubView !== 'main' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
@@ -2745,7 +2774,7 @@ function App() {
                   {/* シングルプランのお相手は上限に数えない（canAddPartner と同じ数え方） */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                     <span style={{ fontSize: '0.8rem', color: '#6fb08f', fontWeight: 'bold' }}>
-                      保存件数: {savedPartners.filter((x) => !x.unlocked).length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人
+                      保存件数: {savedPartners.filter((x) => !x.unlocked).length} / {isSubscribed ? 5 : (isRegistered ? 2 : 1)}人
                     </span>
                     {savedPartners.some((x) => x.unlocked) && (
                       <span style={{ fontSize: '0.68rem', color: '#e2c074', lineHeight: 1.5 }}>
@@ -2754,7 +2783,7 @@ function App() {
                     )}
                   </div>
                   <span style={{ fontSize: '0.65rem', color: '#a9a49a' }}>
-                    {isSubscribed ? '有料会員 (最大10人)' : (isRegistered ? '無料会員 (最大2人)' : '非会員 (最大1人)')}
+                    {isSubscribed ? '有料会員 (最大5人)' : (isRegistered ? '無料会員 (最大2人)' : '非会員 (最大1人)')}
                   </span>
                 </div>
 
@@ -3177,7 +3206,7 @@ function App() {
                         魁罡
                       </span>
                       <span style={{ fontSize: '0.68rem', color: '#e6a99c', fontWeight: 'bold' }}>
-                        出現率：3.3%
+                        約15人に1人
                       </span>
                     </div>
 
@@ -3220,7 +3249,7 @@ function App() {
 
                   <div style={{ fontSize: '0.74rem', color: '#d5cfc3', lineHeight: '1.55', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                     <div>
-                      <strong style={{ color: '#fbcfe8' }}>・魁罡（かいごう：3.3%）</strong>：全12干支キャラクターすべてにおいて3.3%の確率で宿る強力な神殺の化身。強烈なカリスマと勝負運を持つオーラが発動します。
+                      <strong style={{ color: '#fbcfe8' }}>・魁罡（かいごう：約15人に1人）</strong>：生まれた日の干支（日柱）が庚辰・壬辰・戊戌・庚戌の人に宿る、強力な神殺の化身。強烈なカリスマと勝負運を持つオーラが発動します。
                     </div>
                     <div>
                       <strong style={{ color: '#fbcfe8' }}>・選ばれし極星（7.0%）</strong>：全キャラクターに7.0%の確率で宿る幸運のソウルメイト属性。黄金ホログラムの虹色光彩エフェクトが発動します。

@@ -334,7 +334,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   };
 
   return (
-    <div className="chat-overlay">
+    <div className="chat-overlay" data-clarity-mask="True">
       <div className="chat-window" style={{ position: 'relative', overflow: 'hidden' }}>
         
         {/* Guest Free Member Registration Form Overlay */}
@@ -576,7 +576,7 @@ export const ChatModal: React.FC<ChatModalProps> = ({
                 {[
                   'お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁',
                   '月次・年次運勢スケジュールの完全閲覧',
-                  'お相手の保存上限が10人に拡大（無料会員2人 → 10人）',
+                  'お相手の保存上限が5人に拡大（無料会員2人 → 5人）',
                   '月 & 蓮へのチャット相談が無制限・全開放',
                   '本日の運気の波・LINE吉時間を毎日お届け'
                 ].map((item, idx) => (

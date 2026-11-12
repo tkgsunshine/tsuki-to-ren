@@ -16,6 +16,7 @@ import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showFieldError } from './AppDialog';
 import { saveImageBlob } from '../utils/saveImage';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
+import { getMbtiColor } from '../utils/mbtiColor';
 import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
 
 /** 守護カラーの値を、色名ごとにその色の文字で出す（黒・紺は白い光で縁取って読ませる） */
@@ -35,6 +36,8 @@ import { SelfReadingCard } from './SelfReadingCard';
 import { LuckyDaysSection } from './LuckyDaysSection';
 import type { ReferralStatus } from '../services/referral';
 import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
+import MbtiQuizModal from './MbtiQuizModal';
+import { isMbtiCode } from '../utils/mbtiQuiz';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -412,14 +415,6 @@ const ScoreLineChart = ({ items, locked, range }: { items: { key: string; label:
   );
 };
 
-const getMbtiColor = (mbtiCode: string) => {
-  const code = (mbtiCode || '').toUpperCase();
-  if (code.includes('N') && code.includes('F')) return '#6fb08f'; // Emerald Green
-  if (code.includes('N') && code.includes('T')) return '#b9a3d6'; // Purple
-  if (code.includes('S') && code.includes('J')) return '#5d9fc0'; // Blue
-  return '#e6b85c'; // Explorer Gold
-};
-
 const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
   const code = (mbtiCode || '').toUpperCase();
   // Group detection
@@ -491,6 +486,8 @@ interface ResultViewProps {
   hasOpponent: boolean;
   onReset?: () => void;
   onSavePartner?: () => void;
+  // 16タイプが決まっていない鑑定（以前の入力など）で、かんたん質問で決めたタイプを入れて鑑定し直す（TAKASHI 2026-11-12: 16タイプは必須）
+  onSetMbti?: (who: 'self' | 'partner', mbti: string) => void;
   isPartnerSaved?: boolean;
   onShowLegal?: () => void;
   // チャット相談を開く。質問ボタンから開いたときは、その質問を最初に送る
@@ -540,9 +537,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onShowLegal,
   onOpenChat,
   sharedBy,
+  onSetMbti,
   referral,
   referralGift = false
 }) => {
+  const [mbtiQuizFor, setMbtiQuizFor] = useState<'self' | 'partner' | null>(null);
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [registeringEmail, setRegisteringEmail] = useState(false);
@@ -562,8 +561,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           torisetsuRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
           return;
         }
-        const mainEl = document.querySelector('.main-content') as HTMLElement | null;
-        if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
         resultTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 150);
@@ -636,22 +633,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
     };
 
     const handleWindowScroll = () => checkScroll(window);
-    const mainEl = document.querySelector('.main-content') as HTMLElement;
-    const handleMainScroll = () => {
-      if (mainEl) checkScroll(mainEl);
-    };
-
     window.addEventListener('scroll', handleWindowScroll, { passive: true });
-    if (mainEl) {
-      mainEl.addEventListener('scroll', handleMainScroll, { passive: true });
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handleWindowScroll);
-      if (mainEl) {
-        mainEl.removeEventListener('scroll', handleMainScroll);
-      }
-    };
+    return () => window.removeEventListener('scroll', handleWindowScroll);
   }, []);
 
   const handleDismissA2hsBanner = (e: React.MouseEvent) => {
@@ -978,9 +961,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   }, [activeResult.baseScore, activeResult.dailyScore]);
 
   useEffect(() => {
-    const mainEl = document.querySelector('.main-content');
-    if (!mainEl) return;
-
     const handleScroll = () => {
       if (!myAstrologyRef.current) return;
       const rect = myAstrologyRef.current.getBoundingClientRect();
@@ -988,9 +968,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setIsPastGuardian(isPast);
     };
 
-    mainEl.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => mainEl.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const registerCardRef = React.useRef<HTMLDivElement>(null);
@@ -2107,6 +2087,36 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </p>
       </div>
 
+      {/* 16タイプが決まっていない鑑定（必須にする前の入力など）: かんたん質問で決めて鑑定し直す */}
+      {!sharedBy && onSetMbti && (() => {
+        const needSelf = !isMbtiCode(activeResult.myMbtiCode);
+        const needPartner = hasOpponent && !isMbtiCode(activeResult.opponentMbtiCode);
+        if (!needSelf && !needPartner) return null;
+        const who = needSelf ? 'self' : 'partner';
+        const whoName = who === 'self' ? 'あなた' : san(oppNickname || 'お相手');
+        return (
+          <div style={{ background: 'rgba(226, 192, 116, 0.07)', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '14px', padding: '0.85rem 0.95rem', marginBottom: '1rem' }}>
+            <div className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.3rem' }}>
+              {whoName}の16タイプがまだ決まっていません
+            </div>
+            <div style={{ fontSize: '0.76rem', color: '#d5cfc3', lineHeight: 1.7, marginBottom: '0.6rem' }}>
+              4つの質問に答えると、近いタイプで鑑定し直せます。正確な16タイプがわかると、鑑定結果の精度がもっと上がります。
+            </div>
+            <button type="button" onClick={() => setMbtiQuizFor(who)} style={{ width: '100%', padding: '0.65rem', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.84rem', color: '#1a1230', background: 'linear-gradient(135deg, #f2e2b3, #d4af37)' }}>
+              4つの質問で決める
+            </button>
+          </div>
+        );
+      })()}
+      {mbtiQuizFor && onSetMbti && (
+        <MbtiQuizModal
+          subject={mbtiQuizFor}
+          name={san(oppNickname || 'お相手')}
+          onClose={() => setMbtiQuizFor(null)}
+          onDone={(t) => { const w = mbtiQuizFor; setMbtiQuizFor(null); onSetMbti(w, t); }}
+        />
+      )}
+
       {/* Character Advice Cards (100% visible, no lock) */}
       {/* 月/蓮タブはここを過ぎたら隠す（守護獣を上へ移す前と同じ位置） */}
         <div ref={myAstrologyRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -2972,7 +2982,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {lockedText(at.outfit, locked)}
                       </div>
                       {at.mbtiTip && (
-                        <div style={lockStyle}><span style={label}>【{at.mbtiType}タイプのお相手に効く一工夫】</span>{lockedText(at.mbtiTip, locked)}</div>
+                        <div style={lockStyle}><span style={label}>【お相手に効く一工夫】</span>{lockedText(at.mbtiTip, locked)}</div>
                       )}
                       <div style={lockStyle}><span style={label}>【冷めやすいポイント】</span>{lockedText(at.ngStyle, locked)}</div>
                       {locked && (
@@ -3069,7 +3079,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     `結婚や大きな転機の年が分かる、10年先までの流れ`,
                     `毎朝の運勢メールが全文で届く`,
                     `${partnerCall}のことを、月と蓮にいつでも相談`,
-                    `気になる人を10人まで保存。ほかのお相手も全部読める`
+                    `気になる人を5人まで保存。ほかのお相手も全部読める`
                   ].map((t) => (
                     <div key={t} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
                       <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
@@ -3142,7 +3152,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>お相手の保存が10人まで（無料会員は2人）</strong></span>
+                    <span><strong>お相手の保存が5人まで（無料会員は2人）</strong></span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
                     <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
@@ -3480,12 +3490,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       <><strong>10年先までの年ごとの流れ</strong>（結婚・大きな転機の年）</>,
                       <><strong>今日の相性とLINEの送り方を毎日</strong>（シングルプランは購入日だけ）</>,
                       <><strong>月 ＆ 蓮へのチャット相談が無制限</strong></>,
-                      <><strong>お相手の保存が10人まで</strong>（ほかのお相手のトリセツも全部読める）</>
+                      <><strong>お相手の保存が5人まで</strong>（ほかのお相手のトリセツも全部読める）</>
                     ]
                   : [
                       <><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></>,
                       <><strong>月次・年次運勢スケジュールの完全閲覧</strong></>,
-                      <><strong>お相手の保存上限が10人に拡大</strong>（無料会員2人 → 10人）</>,
+                      <><strong>お相手の保存上限が5人に拡大</strong>（無料会員2人 → 5人）</>,
                       <><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></>,
                       <><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></>
                     ]

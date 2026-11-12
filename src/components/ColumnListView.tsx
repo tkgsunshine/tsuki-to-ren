@@ -271,8 +271,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
             disabled={currentPage === 1}
             onClick={() => {
               setCurrentPage(p => Math.max(1, p - 1));
-              const mainEl = document.querySelector('.main-content');
-              if (mainEl) mainEl.scrollTop = 0;
+              window.scrollTo(0, 0);
             }}
             style={{
               padding: '0.45rem 0.85rem',
@@ -294,8 +293,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
               type="button"
               onClick={() => {
                 setCurrentPage(page);
-                const mainEl = document.querySelector('.main-content');
-                if (mainEl) mainEl.scrollTop = 0;
+                window.scrollTo(0, 0);
               }}
               style={{
                 width: '34px',
@@ -321,8 +319,7 @@ export const ColumnListView: React.FC<ColumnListViewProps> = ({
             disabled={currentPage === totalPages}
             onClick={() => {
               setCurrentPage(p => Math.min(totalPages, p + 1));
-              const mainEl = document.querySelector('.main-content');
-              if (mainEl) mainEl.scrollTop = 0;
+              window.scrollTo(0, 0);
             }}
             style={{
               padding: '0.45rem 0.85rem',

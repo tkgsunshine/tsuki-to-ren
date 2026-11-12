@@ -203,8 +203,10 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
               ユーザーデータは、Google Firebase の暗号化されたセキュアなクラウド環境に保管され、不正アクセス・漏洩・滅失または毀損を防止するための厳格なセキュリティ措置を講じています。
             </Article>
 
-            <Article title="7. ローカルストレージの使用">
-              本サービスでは、ユーザー体験の向上および快適な機能提供（ログイン状態の保持、入力データの一時保存、通知設定の記憶等）のために、ブラウザのローカルストレージ（localStorage）およびWebストレージ機能を使用しています。追跡目的の不要なCookie等は使用しておりません。
+            <Article title="7. ローカルストレージ・Cookie・アクセス解析ツールの使用">
+              本サービスでは、ユーザー体験の向上および快適な機能提供（ログイン状態の保持、入力データの一時保存、通知設定の記憶等）のために、ブラウザのローカルストレージ（localStorage）およびWebストレージ機能を使用しています。
+              <br />
+              また、サービスの改善のため、Microsoft Corporation が提供するアクセス解析ツール「Microsoft Clarity」を使用しています。Clarity は Cookie 等を用いて、ページの閲覧状況や画面上の操作（タップ・スクロール等）の情報を収集し、Microsoft に送信します。生年月日・ニックネーム等の入力欄、AIチャット、マイページ、お問い合わせ、ログイン画面の内容は、送信前に伏せる設定にしています。収集された情報は Microsoft のプライバシーに関する声明（<a href="https://privacy.microsoft.com/ja-jp/privacystatement" target="_blank" rel="noopener noreferrer" style={{ color: '#a8d3b0' }}>https://privacy.microsoft.com/ja-jp/privacystatement</a>）に基づいて管理されます。Clarity と Microsoft による情報の利用方法の詳細は、<a href="https://clarity.microsoft.com/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#a8d3b0' }}>Microsoft Clarity の利用規約</a>をご確認ください。ブラウザの設定で Cookie を無効にすることで、収集を拒否できます。
             </Article>
 
             <Article title="8. 苦情・相談対応体制">
@@ -265,7 +267,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ onClose }) => {
                 </tr>
                 <tr>
                   <td style={{ color: '#a9a49a', whiteSpace: 'nowrap', paddingRight: '1.5rem', verticalAlign: 'top', fontWeight: '500' }}>制定日</td>
-                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年11月10日）</td>
+                  <td style={{ color: '#e7e1d5' }}>2026年9月1日（最終改定日：2026年11月11日）</td>
                 </tr>
               </tbody>
             </table>

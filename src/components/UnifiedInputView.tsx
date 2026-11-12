@@ -6,7 +6,33 @@ import { CustomDatePicker } from './CustomDatePicker';
 import { mbtiOptions } from '../constants/mbti';
 import { showFieldError, showConfirm } from './AppDialog';
 import { san } from '../utils/fortuneEngine';
+import MbtiQuizModal from './MbtiQuizModal';
+import { isMbtiCode } from '../utils/mbtiQuiz';
 export { mbtiOptions };
+
+// 入力画面の16タイプの選択肢。必須なので「選んでください」から始め、「わからない」を選ぶとかんたん質問を開く
+const mbtiSelectOptions = [
+  { value: '', label: '選んでください' },
+  ...mbtiOptions.filter(o => o.value !== 'UNKNOWN'),
+  { value: 'UNKNOWN', label: 'わからない（4つの質問で決める）' }
+];
+const estimateNoteStyle: React.CSSProperties = {
+  fontSize: '0.72rem',
+  color: '#c9c2b4',
+  lineHeight: 1.6,
+  textShadow: '0 1px 3px rgba(0,0,0,0.95)'
+};
+const quizLinkStyle: React.CSSProperties = {
+  alignSelf: 'flex-start',
+  background: 'none',
+  border: 'none',
+  padding: '0.1rem 0',
+  color: '#e2c074',
+  fontSize: '0.74rem',
+  textDecoration: 'underline',
+  cursor: 'pointer',
+  textShadow: '0 1px 3px rgba(0,0,0,0.95)'
+};
 
 interface UnifiedInputViewProps {
   selectedCharacter: 'ren' | 'tsuki';
@@ -54,10 +80,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       const stored = localStorage.getItem('hasu_user_profile');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.name) return parsed.name;
+        // 「あなた」は空欄のときの呼び名なので、入力欄には入れない（プレースホルダーだけ見せる）
+        if (parsed.name && parsed.name !== 'あなた') return parsed.name;
       }
     } catch (e) {}
-    return 'あなた';
+    return '';
   });
 
   const [myBirth, setMyBirth] = useState(() => {
@@ -97,10 +124,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       const stored = localStorage.getItem('hasu_user_profile');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.mbti) return parsed.mbti;
+        if (isMbtiCode(parsed.mbti)) return parsed.mbti;
       }
     } catch (e) {}
-    return 'UNKNOWN';
+    // 16タイプは必須（TAKASHI 2026-11-12）。未設定は空欄にして、選ぶかかんたん質問に答えてもらう
+    return '';
   });
 
   const [myGender, setMyGender] = useState<'male' | 'female'>(() => {
@@ -118,12 +146,19 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const mode = 'match' as const;
 
   // Opponent Info states
-  const [oppName, setOppName] = useState('お相手');
+  // 初期値は空欄（プレースホルダーだけ）。空欄で鑑定すると結果では「お相手」と呼ぶ
+  const [oppName, setOppName] = useState('');
   const [oppBirth, setOppBirth] = useState(() => prefill?.oppBirth || '');
   const [oppMbti, setOppMbti] = useState(() => {
-    if (urlPair?.opp) return urlPair.opp;
-    return 'UNKNOWN';
+    if (urlPair?.opp && isMbtiCode(urlPair.opp)) return urlPair.opp;
+    return '';
   });
+  // かんたん質問（16タイプがわからないとき）を開いている相手
+  const [quizFor, setQuizFor] = useState<'self' | 'partner' | null>(null);
+  // かんたん質問で決めたタイプか（予想なので、正確なタイプで精度が上がることを案内する）
+  const [estimated, setEstimated] = useState<{ self: boolean; partner: boolean }>({ self: false, partner: false });
+  const myMbtiRef = React.useRef<HTMLSelectElement>(null);
+  const oppMbtiRef = React.useRef<HTMLSelectElement>(null);
   const [oppGender, setOppGender] = useState<'male' | 'female'>(() => (myGender === 'female' ? 'male' : 'female'));
   const [relationship, setRelationship] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -140,9 +175,9 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
 
   React.useEffect(() => {
     if (loadedPartner) {
-      setOppName(loadedPartner.name);
+      setOppName(loadedPartner.name === 'お相手' ? '' : loadedPartner.name);
       setOppBirth(loadedPartner.birth);
-      setOppMbti(loadedPartner.mbti);
+      setOppMbti(isMbtiCode(loadedPartner.mbti) ? loadedPartner.mbti : '');
       setRelationship(loadedPartner.relationship);
 
       // Gender Validation: Ensure opposite gender combination (Male x Female) silently
@@ -186,13 +221,18 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       showFieldError('あなたの生年月日は「19950401」のように数字8桁で入力してください。', myBirthRef.current);
       return;
     }
+    // 16タイプは必須。わからないときは、かんたん質問に答えてもらう（TAKASHI 2026-11-12）
+    if (!isMbtiCode(myMbti)) {
+      showFieldError('あなたの16タイプを選んでください。わからないときは「わからない」を選ぶと、4つの質問で決められます。', myMbtiRef.current);
+      return;
+    }
     if (mode === 'match') {
-      if (!oppName || !oppName.trim()) {
-        showFieldError('お相手のニックネームを入力してください。', oppNameRef.current);
-        return;
-      }
       if (!oppBirth || oppBirth.length < 10) {
         showFieldError('お相手の生年月日は「19951221」のように数字8桁で入力してください。', oppBirthRef.current);
+        return;
+      }
+      if (!isMbtiCode(oppMbti)) {
+        showFieldError('お相手の16タイプを選んでください。わからないときは「わからない」を選ぶと、4つの質問で決められます。', oppMbtiRef.current);
         return;
       }
     }
@@ -200,7 +240,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     // Auto-save user profile to localStorage for future default pre-fill
     try {
       localStorage.setItem('hasu_user_profile', JSON.stringify({
-        name: myName || 'あなた',
+        name: myName.trim() || 'あなた',
         birth: myBirth,
         mbti: myMbti,
         gender: myGender
@@ -208,11 +248,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
     } catch (err) {}
     
     onSubmit({
-      myName: myName || 'あなた',
+      myName: myName.trim() || 'あなた',
       myBirth,
       myMbti,
       myGender,
-      oppName: oppName || 'お相手',
+      oppName: oppName.trim() || 'お相手',
       oppBirth,
       oppMbti,
       oppGender,
@@ -222,7 +262,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden', flexShrink: 0 }}>
+    <div data-clarity-mask="True" style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden', flexShrink: 0 }}>
       
       {/* Character selection instruction */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', margin: '0' }}>
@@ -325,7 +365,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
         )}
 
         {/* Your Info Section */}
-        <div className="glass-panel" style={{ padding: '1rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="glass-panel input-form-panel" style={{ padding: '1rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.4rem', marginBottom: '-0.25rem', fontWeight: 'bold' }}>
             あなたの情報
           </h2>
@@ -338,7 +378,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
               placeholder="あなた (最大8文字)"
               value={myName}
               onChange={(e) => setMyName(e.target.value.slice(0, 8))}
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+              style={{ background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
             />
           </div>
 
@@ -354,13 +394,13 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 required
                 value={myBirth.replace(/-/g, '/')}
                 onChange={(e) => setMyBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
-                style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                style={{ flex: 1, background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
               />
               <div style={{ position: 'relative', width: '42px', height: '42px' }}>
                 <button
                   type="button"
                   onClick={() => setShowMyDatePicker(true)}
-                  style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#e7e1d5' }}
+                  style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', color: '#e7e1d5' }}
                 >
                   <Calendar size={18} />
                 </button>
@@ -369,16 +409,28 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>16タイプ診断 (任意)</label>
+            <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>16タイプ診断 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
             <select
-              value={myMbti}
-              onChange={(e) => setMyMbti(e.target.value)}
-              style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+              ref={myMbtiRef}
+              value={isMbtiCode(myMbti) ? myMbti : ''}
+              onChange={(e) => {
+                if (e.target.value === 'UNKNOWN') { setQuizFor('self'); return; }
+                setMyMbti(e.target.value);
+                setEstimated(p => ({ ...p, self: false }));
+                e.target.classList.remove('field-invalid');
+              }}
+              style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: isMbtiCode(myMbti) ? 'white' : '#8a8478', outline: 'none', fontSize: '0.85rem' }}
             >
-              {mbtiOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              {mbtiSelectOptions.map(opt => (
+                <option key={opt.value} value={opt.value} disabled={opt.value === ''}>{opt.label}</option>
               ))}
             </select>
+            {!isMbtiCode(myMbti) && (
+              <button type="button" onClick={() => setQuizFor('self')} style={quizLinkStyle}>
+                わからないときは、4つの質問で決める →
+              </button>
+            )}
+            {isMbtiCode(myMbti) && estimated.self && <div style={estimateNoteStyle}>質問からの予想です。正確な16タイプがわかると、鑑定結果の精度がもっと上がります。</div>}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
@@ -388,11 +440,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 type="button"
                 onClick={() => handleMyGenderChange('female')}
                 style={{
-                  background: myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(255,255,255,0.02)',
-                  border: myGender === 'female' ? '1px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.08)',
+                  background: myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(8,12,22,0.7)',
+                  border: myGender === 'female' ? '1px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.2)',
                   borderRadius: '10px',
                   padding: '0.55rem',
-                  color: myGender === 'female' ? '#cdbfe2' : '#a9a49a',
+                  color: myGender === 'female' ? '#cdbfe2' : '#d8d2c6',
                   fontSize: '0.8rem',
                   fontWeight: '600',
                   cursor: 'pointer',
@@ -405,11 +457,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 type="button"
                 onClick={() => handleMyGenderChange('male')}
                 style={{
-                  background: myGender === 'male' ? 'rgba(58, 134, 171, 0.15)' : 'rgba(255,255,255,0.02)',
-                  border: myGender === 'male' ? '1px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.08)',
+                  background: myGender === 'male' ? 'rgba(58, 134, 171, 0.15)' : 'rgba(8,12,22,0.7)',
+                  border: myGender === 'male' ? '1px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.2)',
                   borderRadius: '10px',
                   padding: '0.55rem',
-                  color: myGender === 'male' ? '#9cc6d8' : '#a9a49a',
+                  color: myGender === 'male' ? '#9cc6d8' : '#d8d2c6',
                   fontSize: '0.8rem',
                   fontWeight: '600',
                   cursor: 'pointer',
@@ -424,7 +476,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
 
         {/* Opponent Info Section (Smooth Accordion Slide-Down) */}
         <div className="accordion-section expanded">
-          <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="glass-panel input-form-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.5rem', marginBottom: '0.25rem', fontWeight: 'bold' }}>
               お相手の情報
             </h2>
@@ -433,7 +485,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             {savedPartners && savedPartners.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.85rem' }}>
                 <span style={{ fontSize: '0.72rem', color: '#6fb08f', fontWeight: 'bold' }}>
-                  ● 保存したお相手から選ぶ ({savedPartners.length} / {isSubscribed ? 10 : (isRegistered ? 2 : 1)}人)
+                  ● 保存したお相手から選ぶ ({savedPartners.length} / {isSubscribed ? 5 : (isRegistered ? 2 : 1)}人)
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                   {savedPartners.map((partner) => {
@@ -526,7 +578,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 placeholder="お相手 (最大8文字)"
                 value={oppName}
                 onChange={(e) => setOppName(e.target.value.slice(0, 8))}
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                style={{ background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
               />
             </div>
 
@@ -541,13 +593,13 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   placeholder="例：19951221 (数字8桁)"
                   value={oppBirth.replace(/-/g, '/')}
                   onChange={(e) => setOppBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
-                  style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                  style={{ flex: 1, background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
                 />
                 <div style={{ position: 'relative', width: '42px', height: '42px' }}>
                   <button
                     type="button"
                     onClick={() => setShowOpponentDatePicker(true)}
-                    style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#e7e1d5' }}
+                    style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', color: '#e7e1d5' }}
                   >
                     <Calendar size={18} />
                   </button>
@@ -556,16 +608,41 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の16タイプ診断 (任意)</label>
+              <label style={{ fontSize: '0.78rem', color: '#f3efe6', fontWeight: 'bold', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>お相手の16タイプ診断 <span style={{ color: '#cf5a43' }}>(必須)</span></label>
               <select
-                value={oppMbti}
-                onChange={(e) => setOppMbti(e.target.value)}
-                style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                ref={oppMbtiRef}
+                value={isMbtiCode(oppMbti) ? oppMbti : ''}
+                onChange={(e) => {
+                  if (e.target.value === 'UNKNOWN') { setQuizFor('partner'); return; }
+                  setOppMbti(e.target.value);
+                  setEstimated(p => ({ ...p, partner: false }));
+                  e.target.classList.remove('field-invalid');
+                }}
+                style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: isMbtiCode(oppMbti) ? 'white' : '#8a8478', outline: 'none', fontSize: '0.85rem' }}
               >
-                {mbtiOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {mbtiSelectOptions.map(opt => (
+                  <option key={opt.value} value={opt.value} disabled={opt.value === ''}>{opt.label}</option>
                 ))}
               </select>
+              {!isMbtiCode(oppMbti) && (
+                <button type="button" onClick={() => setQuizFor('partner')} style={quizLinkStyle}>
+                  わからないときは、お相手について4つの質問で決める →
+                </button>
+              )}
+              {isMbtiCode(oppMbti) && estimated.partner && <div style={estimateNoteStyle}>質問からの予想です。正確な16タイプがわかると、鑑定結果の精度がもっと上がります。</div>}
+              {quizFor && (
+                <MbtiQuizModal
+                  subject={quizFor}
+                  name={san(oppName.trim() || 'お相手')}
+                  onClose={() => setQuizFor(null)}
+                  onDone={(t) => {
+                    if (quizFor === 'self') setMyMbti(t); else setOppMbti(t);
+                    setEstimated(p => ({ ...p, [quizFor]: true }));
+                    (quizFor === 'self' ? myMbtiRef.current : oppMbtiRef.current)?.classList.remove('field-invalid');
+                    setQuizFor(null);
+                  }}
+                />
+              )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>

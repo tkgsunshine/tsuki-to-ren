@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PurchaseTerms } from './PurchaseTerms';
-import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star } from 'lucide-react';
+import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star, ZoomIn, Users } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
 import { formatMonthDay } from '../services/premium';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
@@ -16,52 +16,63 @@ const benefits = [
   {
     Icon: Calendar,
     color: '#5d9fc0',
+    who: 'tsuki',
     title: '10年先までの、二人の未来の流れ',
     shot: '/assets/premium/timeline-line.webp',
     shotAlt: '14日間・月ごと・年ごとの相性の折れ線グラフの画面',
     // 画面イメージは縦長なので、10年先（年次）のグラフのところを見せる
     shotPos: '50% 58%',
-    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの14日間と月ごとの波も見れるので、近い予定から先の人生まで、見すえて動けますよ。'
+    body: 'この先10年、二人の運気が年ごとにどう動くかが読めます。「大開運の年」「整える年」などの大きな波と、結婚や同棲のような大きな決断に向いた時期がひと目で分かります。明日からの14日間と月ごとの波も見れるので、近い予定から先の人生まで、見すえて動けますよ。',
+    diffBody: 'シングルプランにはない、プレミアムだけの機能です。この先10年の年ごとの波（「大開運の年」や、結婚・同棲のような大きな決断に向いた時期）と、明日からの14日間・月ごとの相性の波が分かるので、近い予定から先の人生まで見すえて動けますよ。'
   },
   {
     Icon: Send,
     color: '#06c755',
+    who: 'ren',
     title: '今日のLINEの送り方と、二人のLINEのコツ',
     shot: '/assets/premium/line.webp',
     shotAlt: '本日のLINE吉時間とアプローチ助言、二人のLINEのコツの画面',
     pairNote: 'pairToday',
-    body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。返信が遅いときの理由や気持ちが伝わるコツも、二人に合わせてお伝えしますね。'
+    body: 'LINEを送るのにいい時間に合わせて、何をどう送ればいいかのアプローチ助言を最後まで読めます。返信が遅いときの理由や気持ちが伝わるコツも、二人に合わせてお伝えしますね。',
+    diffBody: 'シングルプランで見れるのは買った日の分だけ。プレミアムなら、今日の相性の点数と、LINEを送るのにいい時間・アプローチ助言・気持ちが伝わるコツを、毎日最後まで読めます。'
   },
   {
     Icon: Star,
     color: '#e2c074',
+    who: 'ren',
     title: '2人の最高シンクロ日と、あなたの恋愛運MAX日',
     shot: '/assets/premium/lucky-days.webp',
     shotAlt: '2人の最高シンクロ日とあなたの恋愛運MAX日の画面',
     pairNote: 'pairLucky',
+    hideInDiff: true,
     body: '二人の生年月日から一人ずつの「恋愛運が高まる日」を毎日調べ、二人の恋愛運がぴったり重なる日だけを選んだ「2人の最高シンクロ日」（1年に数日だけ）と、「あなたの恋愛運MAX日」の日付が分かります。告白やデートのお誘いは、この日に。'
   },
   {
     Icon: BookOpen,
     color: '#d68ba4',
+    who: 'tsuki',
     title: 'あの人のトリセツと、6つの相性グラフ',
     shot: '/assets/premium/torisetsu.webp',
     shotAlt: 'お相手のトリセツと6つの相性グラフの画面',
     pairNote: 'pairAll',
+    hideInDiff: true,
     body: '脈ありのサイン、すれ違ったときの立て直し方、心に届く言葉、避けたほうがいいこと。恋愛・価値観・身体・結婚・執着・信頼の6つの相性も、全部見れます。'
   },
   {
     Icon: Shirt,
     color: '#e28baa',
+    who: 'tsuki',
     title: 'あの人が惹かれるファッションと、ドキッとさせる仕草',
     shot: '/assets/premium/attraction.webp',
     shotAlt: 'お相手が惹かれるファッションとドキッとさせる仕草の画面',
     pairNote: 'pairAll',
+    hideInDiff: true,
     body: 'あの人の生まれ持った星と性格のタイプから、惹かれやすい色・服装・コーデの一工夫と、避けたい服装が絵つきで分かります。会ったときにドキッとさせる仕草も全部見れるので、次のデートの準備に使ってくださいね。'
   },
   {
     Icon: Bell,
     color: '#e8a93a',
+    who: 'ren',
     title: '毎朝の運勢メールが、全文で届く',
     shot: '/assets/premium/mail.webp',
     shotAlt: '毎朝届く運勢メールの画面',
@@ -70,20 +81,51 @@ const benefits = [
   {
     Icon: Heart,
     color: '#6fb08f',
-    title: '気になる人を10人まで保存',
+    who: 'ren',
+    title: '気になる人を5人まで保存',
     shot: '/assets/premium/partners.webp',
     shotAlt: '保存したお相手の一覧画面',
-    body: '本命の人も、まだ気になっているだけの人も、10人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。'
+    body: '本命の人も、まだ気になっているだけの人も、5人まで保存できます（無料会員は2人まで）。ワンタップで相性を見比べられますよ。',
+    diffBody: 'シングルプランの保存は無料会員と同じ2人まで（買ったお相手は枠に数えません）。プレミアムなら5人まで保存して、ワンタップで相性を見比べられます。'
   },
   {
     Icon: MessageCircle,
     color: '#b9a3d6',
+    who: 'tsuki',
     title: '私と蓮に、いつでも相談',
     shot: '/assets/premium/chat.webp',
     shotAlt: '月とのチャット画面',
-    body: '返信の文面を一緒に考えたり、あの人の本音を一緒に読み解いたり。24時間、回数を気にせず話しかけてくださいね。寄り添う私と、冷静に整理してくれる蓮がいます。'
+    body: '返信の文面を一緒に考えたり、あの人の本音を一緒に読み解いたり。24時間、回数を気にせず話しかけてくださいね。寄り添う私と、冷静に整理してくれる蓮がいます。',
+    diffBody: 'シングルプランのチャットは1日2回まで。プレミアムなら、24時間いつでも、回数を気にせず話しかけてくださいね。返信の文面も、あの人の本音も、私と蓮が一緒に考えます。'
   }
-];
+] as BenefitItem[];
+
+type BenefitItem = {
+  Icon: typeof Calendar;
+  color: string;
+  title: string;
+  /** 画面イメージ。無い項目は画像を出さない */
+  shot?: string;
+  shotAlt?: string;
+  shotPos?: string;
+  pairNote?: 'pairToday' | 'pairLucky' | 'pairAll';
+  /** 説明するキャラ（月・蓮の吹き出し） */
+  who: 'tsuki' | 'ren';
+  body: string;
+  /** シングルプランと見比べているとき（お相手あり）に、シングルプランとの違いとして出す文。無いときは body */
+  diffBody?: string;
+  /** シングルプランと見比べているときは出さない（シングルプランでも同じお相手なら見れるもの。先頭の「誰でも全部」にまとめる） */
+  hideInDiff?: boolean;
+};
+
+/** シングルプランと見比べているときに先頭に出す、「誰でも何人でも全部見れる」という前提の項目 */
+const unlimitedBenefit = (pairWho: string): BenefitItem => ({
+  Icon: Users,
+  color: '#d4af37',
+  who: 'tsuki',
+    title: '誰でも無制限に、全ての機能が見れる',
+  body: `シングルプランで見れるのは${pairWho}1人だけ。プレミアムなら、気になる人なら誰とでも、何人でも、全ての機能が見れますよ。`
+});
 
 const sectionTitleStyle: React.CSSProperties = {
   fontSize: '1rem',
@@ -185,6 +227,32 @@ const SampleBadge: React.FC = () => (
     pointerEvents: 'none'
   }}>
     イメージ（サンプル）
+  </span>
+);
+
+// 画面イメージの右下に重ねる「タップで拡大」。小さく暗い札だと気づかれにくかったので、
+// ゴールドの塗り＋虫めがねのアイコンにして、ゆっくり光らせる（動きを減らす設定の人は光らせない）
+const ZoomHint: React.FC = () => (
+  <span className="shot-zoom-hint" style={{
+    position: 'absolute',
+    right: '0.45rem',
+    bottom: '0.45rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+    padding: '4px 11px 4px 9px',
+    borderRadius: '9999px',
+    background: 'linear-gradient(135deg, #f2d98c 0%, #d4af37 100%)',
+    color: '#1a1230',
+    fontSize: '0.72rem',
+    fontWeight: 'bold',
+    lineHeight: 1.3,
+    letterSpacing: '0.03em',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.6)',
+    pointerEvents: 'none'
+  }}>
+    <ZoomIn size={13} strokeWidth={2.6} aria-hidden="true" />
+    タップで拡大
   </span>
 );
 
@@ -364,7 +432,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   useBackForwardReset(() => setIsProcessing(false));
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [zoomShot, setZoomShot] = useState<{ src: string; alt: string } | null>(null);
-  // 下の固定の購入ボタンは、いきなり出さない。説明（教育）を読み終えてプラン・料金の所まで来たら出す（一度出たら出たまま）
+  // 下の固定の購入ボタンは、いきなり出さない。お相手ありは「こんな夜はありませんか？」、それ以外は料金の所まで来たら出し、それより上に戻ったら消す
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const ctaMarkerRef = useRef<HTMLDivElement | null>(null);
   const [ctaReady, setCtaReady] = useState(false);
@@ -373,18 +441,19 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     const root = scrollRef.current;
     const marker = ctaMarkerRef.current;
     if (!root || !marker) { setCtaReady(true); return; }
-    // 目印（プラン・料金の手前）が画面の下から1/4より上に来たら出す。速くスクロールして通り過ぎた場合も出す
+    const pairLayout = Boolean(pair) && !isSubscribed;
+    // 目印が画面の下から1/4より上に来たら出す。速くスクロールして通り過ぎた場合も出す。
+    // 目印より上に戻ったら消す（2026-11-11 TAKASHI「こんな夜はありませんか？より上に戻ったら非表示」）
     const check = () => {
       const r = root.getBoundingClientRect();
-      if (marker.getBoundingClientRect().top < r.bottom - r.height * 0.25) {
-        setCtaReady(true);
-        root.removeEventListener('scroll', check);
-      }
+      // お相手ありは「こんな夜はありませんか？」の見出しが画面の上の方（上から2割）まで来たら（2026-11-11 TAKASHI「このタイミングで出して」）
+      const line = pairLayout ? r.top + r.height * 0.2 : r.bottom - r.height * 0.25;
+      setCtaReady(marker.getBoundingClientRect().top < line);
     };
     check();
     root.addEventListener('scroll', check, { passive: true });
     return () => root.removeEventListener('scroll', check);
-  }, [isOpen, Boolean(pair)]);
+  }, [isOpen, Boolean(pair), isSubscribed]);
   // 閉じたときに、一番下まで届いたまとまり（data-lp-sec の並び）・いた時間・閉じ方を1回送る（有料会員は送らない）
   const leaveRef = useRef({ reached: 'top' as LpSection, idx: -1, openedAt: 0, byX: false, layout: 'monthly' as 'pair' | 'monthly', subscribed: false });
   leaveRef.current.layout = Boolean(pair) && !isSubscribed ? 'pair' : 'monthly';
@@ -437,8 +506,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 58%', d: 'この先10年の年ごとの流れと、明日からの14日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
 
   // 上（2プランの比べ方）と下（画面下に固定）で同じボタンを出す。下では「解放済み」は出さない
-  const renderPlanButtons = (showUnlocked: boolean) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+  // compact: 画面下の固定ボタン用。ボタンの大きさは変えず、ボタンの間だけ詰める（2026-11-11 TAKASHI「ボタンのサイズはそのままで縦幅を狭く」）
+  const renderPlanButtons = (showUnlocked: boolean, compact = false) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? '0.4rem' : '0.55rem' }}>
       {(pair ? (['monthly', 'pair'] as const) : (['monthly'] as const)).map((kind) =>
         kind === 'monthly' ? (
           <button
@@ -512,26 +582,31 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     void Promise.resolve(onCancelSubscription?.([], '')).finally(() => setIsProcessing(false));
   };
 
+  // よくある質問（2026-11-11 TAKASHI「回答をブラッシュアップ」）。結論を先に、どちらのプランの話かが分かるように書く
   const faqs = [
     ...(pair ? [{
       q: 'シングルプラン（680円・買い切り）と月額の違いは？',
-      a: `シングルプランは、${pair.name}一人の「変わらない鑑定」（トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日）をずっと読めるものです。買った日は今日の相性やLINEの助言も全部見れます。毎日変わる内容を毎日見たいときや、ほかのお相手も見たいときは月額が向いています。`
+      a: `シングルプラン（680円・1回払い）は、${pair.name}1人の鑑定をずっと見られるプランです。トリセツ・深層鑑定・相性グラフ・2人の最高シンクロ日はいつでも読み返せて、買った日だけは今日の相性とLINEの助言も全部見られます。\nプレミアム（月額980円）は、気になる人なら誰でも、何人でも、全ての機能が見られます。今日の相性とLINEの助言は毎日、10年先までの二人の流れも見られます。\n迷ったら、${pair.name}のことを今じっくり知りたいならシングルプラン、毎日の流れを見ながら動きたい・ほかの人も占いたいならプレミアムがおすすめです。`
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
-      a: 'はい。お支払いのときに入力したメールアドレスで、アカウントを自動でお作りします。支払いが終わるとそのままログインした状態になり、別の端末では同じメールでログインすると引き継げます。'
+      a: 'はい、できます。お支払いのときに入力したメールアドレスで、アカウントを自動でお作りします。はじめての方は、お支払いが終わるとそのままログインした状態で戻るので、すぐに続きを読めます。別のスマホやパソコンでも、同じメールアドレスでログインすれば引き継げます。'
     },
     {
       q: 'いつでも解約できますか？',
-      a: 'はい、いつでもマイページからワンタップで解約できます。解約したあとも、有効期間が終わるまではプレミアムの機能をそのまま使えますよ。'
+      a: pair
+        ? 'プレミアムは、いつでもマイページから解約できます。解約しても、お支払い済みの期間が終わるまではそのまま使えて、次の更新日からは料金がかかりません。シングルプランは1回払いなので、解約の手続きはありません。'
+        : 'はい、いつでもマイページから解約できます。解約しても、お支払い済みの期間が終わるまではそのまま使えて、次の更新日からは料金がかかりません。'
     },
     {
       q: 'どんな支払い方法が使えますか？',
-      a: 'クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Payが使えます。'
+      a: 'クレジットカード（Visa / Mastercard / JCB / AMEX）、Apple Pay、Google Payが使えます。お支払いは世界中で使われている決済サービスStripeの画面で行うので、カード番号が月と蓮に保存されることはありません。'
     },
     {
       q: '登録したら、すぐに使えますか？',
-      a: 'はい、お支払いが終わったその瞬間から、鑑定結果のすべてと、月・蓮とのチャットなど、プレミアムの機能がすぐに使えます。'
+      a: pair
+        ? `はい、お支払いが終わったその場で開きます。プレミアムなら全ての機能と月・蓮とのチャットが、シングルプランなら${pair.name}の鑑定が、すぐに見られます。`
+        : 'はい、お支払いが終わったその場で、鑑定結果のすべてと月・蓮とのチャットなど、プレミアムの機能がすぐに使えます。'
     }
   ];
 
@@ -724,17 +799,13 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                     >
                       <img src={it.shot} alt={`${it.t}の画面イメージ`} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '130px', objectFit: 'cover', objectPosition: ('pos' in it && it.pos) || 'top' }} />
                       <SampleBadge />
-                      <span style={{ position: 'absolute', right: '0.4rem', bottom: '0.4rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(5, 7, 10, 0.75)', color: '#e8e3d8', fontSize: '0.6rem' }}>
-                        タップで拡大
-                      </span>
+                      <ZoomHint />
                     </button>
                   </CharBubble>
                 ))}
               </div>
             </div>
           )}
-
-          {showPlans && pair && <div ref={ctaMarkerRef} />}
 
           {showPlans && pair && <div data-lp-sec="plans" />}
           {/* プランを選ぶ（買い切り ¥680 と 月額 ¥980 を1枚で見比べる） */}
@@ -760,14 +831,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   ))}
                 </div>
                 {[
-                  { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', pair: null, monthly: '◯' },
-                  { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも無制限' },
-                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
+                  { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
+                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
+                  { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', pair: null, monthly: '◯' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
-                  { label: 'お相手の保存', pair: '2人', monthly: '10人' }
+                  { label: 'お相手の保存', pair: '2人', monthly: '5人' }
                 ].map((row, idx) => {
                   const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
                   return (
@@ -785,7 +856,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </p>
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
-                  {pair.name}のことを今日じっくり知りたいなら、シングルプランで十分ですよ。<br />
+                  {pair.name === 'お相手' ? '1人のお相手' : `${pair.name}1人`}のことを今日じっくり知りたいなら、シングルプランですよ。<br />
                   毎日、その日の相性やその日のLINEの助言も見たい、他の人のことも占いたいなら、月額で毎日そばにいさせてくださいね。
                 </CharBubble>
               </div>
@@ -797,6 +868,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
+          {/* お相手ありのとき、下の固定の購入ボタンは「こんな夜はありませんか？」まで来たら出す（2026-11-11 TAKASHI「表示が早すぎる」） */}
+          {showPlans && pair && <div ref={ctaMarkerRef} />}
           <div data-lp-sec="worries" />
           {/* こんなときに */}
           <div style={{ padding: '0 1.15rem 1.35rem' }}>
@@ -825,7 +898,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             <div style={{ marginTop: '0.8rem' }}>
               <CharBubble who="ren" small>
                 そういうときこそ、気持ちだけで動かずに、相手の流れを知っておくのが近道です。<br />
-                プレミアムプランでできることを、順番に整理してお伝えしますね。
+                {showPlans && pair ? 'シングルプランとの違いを、順番に整理してお伝えしますね。' : 'プレミアムプランでできることを、順番に整理してお伝えしますね。'}
               </CharBubble>
             </div>
           </div>
@@ -834,89 +907,43 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {/* できること */}
           <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
             <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-              プレミアムプラン（月額980円）でできること
+              {showPlans && pair ? <>シングルプランに加えて<br />プレミアム（月額980円）でできること</> : 'プレミアムプラン（月額980円）でできること'}
             </h2>
-            {benefits.map(({ Icon, color, title, body, shot, shotAlt, pairNote, shotPos }) => (
-              <div key={title} className="glass-panel" style={{
-                padding: '0.9rem 1rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-                border: `1px solid ${color}4d`,
-                background: `${color}0a`
-              }}>
-              <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  background: `${color}26`,
-                  border: `1px solid ${color}80`,
-                  borderRadius: '50%',
-                  color,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <Icon size={17} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f3efe6' }}>
-                    {title}
+            {/* シングルプランと見比べているとき（お相手あり）は、シングルプランとの違いだけを並べる。
+                先頭に「誰でも何人でも全部見れる」を置き、シングルプランでも同じお相手なら見れる項目（トリセツ・仕草・シンクロ日）はそこにまとめる */}
+            {(showPlans && pair
+              ? [unlimitedBenefit(pairWho), ...benefits.filter((b) => !b.hideInDiff).map((b) => ({ ...b, body: b.diffBody || b.body, pairNote: undefined }))]
+              : benefits
+            ).map(({ Icon, color, title, body, shot, shotAlt, pairNote, shotPos, who }) => (
+              // 説明は月と蓮のセリフ（吹き出し）で見せる（2026-11-11 TAKASHI「プレミアムの説明も月と蓮に言わせる」）
+              <CharBubble key={title} who={who} small>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.25rem' }}>
+                  <Icon size={14} style={{ color, flexShrink: 0 }} />{title}
+                </span>
+                {pairNote && (
+                  <span style={{ display: 'inline-block', marginBottom: '0.3rem', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
+                    {pairNote === 'pairAll'
+                      ? `シングルプラン（¥680）でも見れます（${pair ? pairWho : "お相手1人"}だけ）`
+                      : pairNote === 'pairLucky'
+                        ? `シングルプラン（¥680）でも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見れます`
+                        : 'シングルプラン（¥680）は購入日だけ'}
                   </span>
-                  {pairNote && (
-                    <span style={{ alignSelf: 'flex-start', fontSize: '0.64rem', fontWeight: 'bold', color: '#8ecaa5', border: '1px solid rgba(142,202,165,0.45)', background: 'rgba(142,202,165,0.08)', borderRadius: '9999px', padding: '1px 8px' }}>
-                      {pairNote === 'pairAll'
-                        ? `シングルプラン（¥680）でも見れます（${pair ? pairWho : "お相手1人"}だけ）`
-                        : pairNote === 'pairLucky'
-                          ? `シングルプラン（¥680）でも、${pair ? pairWho : "お相手1人"}との「2人の最高シンクロ日」が見れます`
-                          : 'シングルプラン（¥680）は購入日だけ'}
-                    </span>
-                  )}
-                  <p style={{ fontSize: '0.73rem', color: '#d8d2c6', lineHeight: '1.6', margin: 0 }}>
-                    {body}
-                  </p>
-                </div>
-              </div>
-                {/* 実際の画面の参考スクショ（ダミーデータ）。タップで全体を拡大 */}
-                <button
-                  type="button"
-                  aria-label={`${shotAlt}を拡大して見る`}
-                  onClick={() => setZoomShot({ src: shot, alt: shotAlt })}
-                  style={{
-                    position: 'relative',
-                    display: 'block',
-                    width: '100%',
-                    padding: 0,
-                    border: `1px solid ${color}40`,
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    background: '#0a0e14',
-                    cursor: 'zoom-in'
-                  }}
-                >
-                  <img
-                    src={shot}
-                    alt={shotAlt}
-                    loading="lazy"
-                    decoding="async"
-                    style={{ display: 'block', width: '100%', height: '170px', objectFit: 'cover', objectPosition: shotPos || 'top' }}
-                  />
-                  <SampleBadge />
-                  <span style={{
-                    position: 'absolute',
-                    right: '0.45rem',
-                    bottom: '0.45rem',
-                    padding: '2px 8px',
-                    borderRadius: '9999px',
-                    background: 'rgba(5, 7, 10, 0.75)',
-                    color: '#e8e3d8',
-                    fontSize: '0.62rem'
-                  }}>
-                    タップで拡大
-                  </span>
-                </button>
-              </div>
+                )}
+                <span style={{ display: 'block' }}>{body}</span>
+                {/* 実際の画面の参考スクショ（ダミーデータ）。タップで全体を拡大（画像のない項目は出さない） */}
+                {shot && (
+                  <button
+                    type="button"
+                    aria-label={`${shotAlt}を拡大して見る`}
+                    onClick={() => setZoomShot({ src: shot, alt: shotAlt || '' })}
+                    style={{ position: 'relative', display: 'block', width: '100%', marginTop: '0.55rem', padding: 0, border: `1px solid ${color}40`, borderRadius: '10px', overflow: 'hidden', background: '#0a0e14', cursor: 'zoom-in' }}
+                  >
+                    <img src={shot} alt={shotAlt} loading="lazy" decoding="async" style={{ display: 'block', width: '100%', height: '150px', objectFit: 'cover', objectPosition: shotPos || 'top' }} />
+                    <SampleBadge />
+                    <ZoomHint />
+                  </button>
+                )}
+              </CharBubble>
             ))}
           </div>
 
@@ -1047,7 +1074,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                       color: '#a9a49a',
                       lineHeight: '1.55',
                       borderTop: '1px dashed rgba(255,255,255,0.05)',
-                      paddingTop: '0.55rem'
+                      paddingTop: '0.55rem',
+                      whiteSpace: 'pre-line'
                     }}>
                       {faq.a}
                     </div>
@@ -1087,7 +1115,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
         {/* PINNED FIXED BOTTOM CTA FOOTER（未購読の人には、説明を読み終えてから出す） */}
         {(isSubscribed || ctaReady) && (
         <div className="lp-cta-footer" style={{
-          padding: '0.85rem 1.25rem max(1.75rem, calc(0.85rem + env(safe-area-inset-bottom, 24px))) 1.25rem',
+          padding: isSubscribed ? '0.85rem 1.25rem max(1.75rem, calc(0.85rem + env(safe-area-inset-bottom, 24px))) 1.25rem' : '0.55rem 1.25rem max(0.75rem, calc(0.4rem + env(safe-area-inset-bottom, 0px))) 1.25rem',
           background: 'rgba(12, 17, 24, 0.96)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
@@ -1137,8 +1165,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           ) : (
             <>
-              {renderPlanButtons(false)}
-              <PurchaseTerms compact plans={pair && !pair.unlocked ? ['monthly', 'pair'] : ['monthly']} />
+              {renderPlanButtons(false, true)}
+              <PurchaseTerms compact style={{ marginTop: '0.35rem', lineHeight: 1.4 }} plans={pair && !pair.unlocked ? ['monthly', 'pair'] : ['monthly']} />
             </>
           )}
         </div>

@@ -13,6 +13,8 @@ import { getJuniUn } from './fortuneEngine.ts';
 export interface SelfReadingItem {
   label: string;
   text: string;
+  /** 未登録に「〇〇〇〇〇」で伏せて見せる言葉（text の1文目に必ずある）。ふだん・恋愛の2項目だけ */
+  mask?: string;
 }
 
 export interface SelfReading {
@@ -124,6 +126,41 @@ const LOVE_MBTI: Record<string, string> = {
   'ESFP': '一緒にいて楽しいかどうかを大事にするタイプ。好きな人とは毎日でも会いたくて、気持ちがすぐ顔と態度に出てしまいます。'
 };
 
+// 未登録に見せる「〇〇〇〇〇」の伏せ字（2026-11-12 TAKASHI依頼「非会員の結果表示時の〇〇」）。
+// 各文の1文目にある、その人らしさの核になる言葉を1つ伏せる。登録すると全文が開き、同じ言葉がそのまま読める。
+// 根拠のない相手の気持ちは作らない。伏せるのは本文に本当に書いてある言葉だけ（scripts/test-self-reading.mjs で確認）。
+const MASK_CORE: Record<string, string> = {
+  '甲': '曲げない芯の強さ', '乙': 'すっとなじめる', '丙': '話の中心', '丁': '空気の変化', '戊': '相談ごと',
+  '己': '聞き役', '庚': '白黒はっきりさせたい', '辛': 'センスを褒められる', '壬': 'すぐ飛び込める', '癸': '言葉にしない本音'
+};
+const MASK_LOVE: Record<string, string> = {
+  '長生': 'ゆっくり信頼を積み重ねて', '沐浴': 'ときめき', '冠帯': '理想とこだわり', '建禄': '自分の生活リズム',
+  '帝旺': 'リードしたい', '衰': '一歩引いて', '病': '想像しすぎてしまう', '死': 'その人のことしか見えなくなる',
+  '墓': '本音をなかなか見せない', '絶': '直感', '胎': 'そわそわして', '養': 'かわいがられる'
+};
+const MASK_CORE_MBTI: Record<string, string> = {
+  'INTJ': '自分で決めたい', 'INTP': 'いつも忙しい', 'ENTJ': '最短ルートで進みたい', 'ENTP': '話していて飽きない',
+  'INFJ': '誰よりも早く気づく', 'INFP': '人の痛みに敏感な', 'ENFJ': '伸ばしてあげたくなる', 'ENFP': '場の空気をぱっと変えられる',
+  'ISTJ': 'きちんと守る', 'ISFJ': 'さりげなく支える', 'ESTJ': '段取りよく進める', 'ESFJ': 'いつも気にかけている',
+  'ISTP': '冷静に動ける', 'ISFP': '自分の「好き」を大事にする', 'ESTP': '空気を読んで立ち回れる', 'ESFP': 'ぱっと明るくする'
+};
+const MASK_LOVE_MBTI: Record<string, string> = {
+  'INTJ': '時間がかかる', 'INTP': 'つい分析してしまう', 'ENTJ': '自分からリードして', 'ENTP': '会話のテンポが合う',
+  'INFJ': '心から信頼できる', 'INFP': '相手との未来', 'ENFJ': '尽くしたくなる', 'ENFP': '一気に盛り上がる',
+  'ISTJ': '軽いノリの関係', 'ISFJ': 'ちょっとした変化', 'ESTJ': 'はっきりした関係', 'ESFJ': 'ありがとう',
+  'ISTP': '自分の時間とペース', 'ISFP': 'なかなか口にできない', 'ESTP': '迷わず自分から動く', 'ESFP': '楽しいかどうか'
+};
+
+/** 伏せ字で見せる部分: 1文目を、伏せる言葉の前と後に分ける。本物の言葉は返さない（画面に置かないため） */
+export function maskedLead(text: string, mask?: string): { before: string; after: string } | null {
+  if (!mask) return null;
+  const end = text.indexOf('。');
+  const first = end >= 0 ? text.slice(0, end + 1) : text;
+  const at = first.indexOf(mask);
+  if (at < 0) return null;
+  return { before: first.slice(0, at), after: first.slice(at + mask.length) };
+}
+
 const isMbti = (t?: string): t is string => !!t && /^[EI][NS][TF][JP]$/i.test(t);
 
 /**
@@ -136,7 +173,8 @@ export function getSelfReading(pillar: string, star: string, mbti?: string): Sel
   const stem = pillar?.[0];
   const branch = pillar?.[1];
   const core = stem ? CORE[stem] : undefined;
-  const love = stem && branch ? LOVE[getJuniUn(stem, branch)] : undefined;
+  const juniUn = stem && branch ? getJuniUn(stem, branch) : '';
+  const love = juniUn ? LOVE[juniUn] : undefined;
   if (!core || !love) return null;
   const starName = (star || '').split(' ')[0];
   const code = isMbti(mbti) ? mbti.toUpperCase() : '';
@@ -144,14 +182,14 @@ export function getSelfReading(pillar: string, star: string, mbti?: string): Sel
   // 選んでいない人: これまでどおり生まれた日の星（ふだん・恋愛）＋本命星
   const items: SelfReadingItem[] = code && CORE_MBTI[code]
     ? [
-        { label: 'ふだんのあなた', text: CORE_MBTI[code] },
-        { label: '恋をするとあなたは', text: LOVE_MBTI[code] },
+        { label: 'ふだんのあなた', text: CORE_MBTI[code], mask: MASK_CORE_MBTI[code] },
+        { label: '恋をするとあなたは', text: LOVE_MBTI[code], mask: MASK_LOVE_MBTI[code] },
         { label: 'もう一つの顔', text: core },
         { label: 'ついやってしまうこと', text: HABIT_MBTI[code] }
       ]
     : [
-        { label: 'ふだんのあなた', text: core },
-        { label: '恋をするとあなたは', text: love },
+        { label: 'ふだんのあなた', text: core, mask: MASK_CORE[stem ?? ''] },
+        { label: '恋をするとあなたは', text: love, mask: MASK_LOVE[juniUn] },
         ...(HABIT_STAR[starName] ? [{ label: 'ついやってしまうこと', text: HABIT_STAR[starName] }] : [])
       ];
   return { items, key: `${pillar}-${code || starName}` };

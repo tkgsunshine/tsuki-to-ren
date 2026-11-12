@@ -4,6 +4,7 @@ import { normalizeSource, normalizeLanding, normalizeDevice, jstDate, countPremi
 import track from '../api/track.js';
 import admin, { authorizeAdmin, parseAdminEmails } from '../api/admin.js';
 import { sourceFrom, landingFrom, deviceFrom } from '../src/services/analytics.ts';
+import { shouldLoadClarity } from '../src/services/clarity.ts';
 
 const mockRes = () => {
   const r = { code: 0, body: null, headers: {} };
@@ -455,4 +456,18 @@ test('admin: members carry gender / age band / MBTI from their saved profile, ne
   assert.deepEqual([by.b[0], by.b[1], by.b[2]], ['male', '40s', 'ENTJ']);
   assert.deepEqual(by.c, ['unknown', 'unknown', 'unknown']);
   assert.ok(!JSON.stringify(res.body).includes('1999-04-13'), 'no birth date in the answer');
+});
+
+test('Microsoft Clarity loads only on the production domain, with an ID, outside admin / owner / bots', () => {
+  const base = { projectId: 'abc123xyz9', hostname: 'www.tsuki-to-ren.com', isAdminPage: false, optedOut: false, automated: false };
+  assert.equal(shouldLoadClarity(base), true);
+  assert.equal(shouldLoadClarity({ ...base, hostname: 'tsuki-to-ren.com' }), true);
+  assert.equal(shouldLoadClarity({ ...base, projectId: undefined }), false);
+  assert.equal(shouldLoadClarity({ ...base, projectId: '' }), false);
+  assert.equal(shouldLoadClarity({ ...base, projectId: 'abc"><script>' }), false);
+  assert.equal(shouldLoadClarity({ ...base, hostname: 'hasu-to-tsuki-git-x.vercel.app' }), false);
+  assert.equal(shouldLoadClarity({ ...base, hostname: 'localhost' }), false);
+  assert.equal(shouldLoadClarity({ ...base, isAdminPage: true }), false);
+  assert.equal(shouldLoadClarity({ ...base, optedOut: true }), false);
+  assert.equal(shouldLoadClarity({ ...base, automated: true }), false);
 });

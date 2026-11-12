@@ -717,6 +717,20 @@ const homeSemanticHtml = `
   </div>
 `;
 
+// 管理画面（/admin）専用のHTML。ホーム画面に追加したときに、アプリのトップではなく管理画面が開くように、
+// manifest を start_url=/admin のもの（public/admin.webmanifest）に差し替える。iPhoneは追加した時点の manifest の start_url で開くため。
+// トップ用のSEO文は入れない（baseHtml は差し込み前のもの）。vercel.json で /admin → /admin.html に振り分ける。
+const adminHtml = baseHtml
+  .replace('<link rel="manifest" href="/site.webmanifest" />', '<link rel="manifest" href="/admin.webmanifest" />')
+  .replace(/<meta name="apple-mobile-web-app-title" content="[^"]*" \/>/, '<meta name="apple-mobile-web-app-title" content="月と蓮 管理" />')
+  .replace(/<title>[\s\S]*?<\/title>/, '<title>月と蓮 管理画面</title>');
+if (!adminHtml.includes('href="/admin.webmanifest"')) {
+  console.error('❌ admin.html: manifest の差し替えに失敗しました（index.html の manifest タグが変わった可能性）');
+  process.exit(1);
+}
+fs.writeFileSync(path.join(distDir, 'admin.html'), adminHtml, 'utf-8');
+console.log('✅ Generated: dist/admin.html (manifest start_url=/admin)');
+
 // Insert into dist/index.html
 // トップだけ og:url を外す。og:url がトップ固定だと、Xは ?utm_… 付きのURLも同じページとみなし、
 // 前に覚えた古いカード画像を出し続けるため（2026-11-02）。検索エンジン向けの canonical は残す。

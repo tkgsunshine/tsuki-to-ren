@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, signInWithGoogle, logOutUser } from '../services/firebase';
 import { COLUMNS_DATA } from '../data/columnsData';
 import { mbtiOptions } from '../constants/mbti';
+import AdminKpiCharts from './AdminKpiCharts';
 import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../services/analytics';
 
 // Admin page (/admin): visits, fortunes, sign-ups, shares and premium (page → payment page → paid) per day,
@@ -80,8 +81,12 @@ interface SentNotice {
   title: string;
   body: string;
   link: string;
+  channel?: 'app' | 'mail' | 'both';
+  mail?: { sent: number; failed: number; error?: string } | null;
   createdAt: string | null;
 }
+type NoticeChannel = 'app' | 'mail' | 'both';
+const CHANNEL_LABEL: Record<NoticeChannel, string> = { app: 'アプリ内', mail: 'メール', both: 'アプリ内＋メール' };
 interface AutoNoticeText { title: string; body: string; link: string }
 interface AutoNotice {
   kind: string;
@@ -100,6 +105,7 @@ interface AdminData {
   truncated: boolean;
   inquiries?: Inquiry[];
   notices?: SentNotice[];
+  noticeMailReach?: number;
   autoNotices?: AutoNotice[];
 }
 
@@ -323,19 +329,23 @@ function Inquiries({ items, members, onStatus }: { items: Inquiry[]; members: Me
 }
 
 // アプリ内のお知らせ（マイページの「お知らせ」・ホームの鈴）。全員向けか、会員1人あて。
-// 送ったものはすぐアプリに出る（メールやプッシュ通知は送らない）。「取り消す」でアプリから消える。
+// 送り方は「アプリ内」「メール」「両方」から選ぶ。アプリ内は「取り消す」で消えるが、メールは取り消せない。
 const NOTICE_MAX_TITLE = 60;
 const NOTICE_MAX_BODY = 1000;
 const inputStyle: React.CSSProperties = { background: '#0d0b19', color: '#ece8f6', border: '1px solid #3a3460', borderRadius: 8, padding: '8px 10px', fontSize: 13, width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' };
 
-function Notices({ items, members, target, setTarget, onSend, onDelete }: {
+function Notices({ items, members, mailReach, target, setTarget, onSend, onTestMail, onDelete }: {
   items: SentNotice[];
   members: Member[];
+  mailReach: number | null;
   target: string;
   setTarget: (to: string) => void;
-  onSend: (n: { to: string; title: string; body: string; link: string }) => Promise<boolean>;
+  onSend: (n: { to: string; title: string; body: string; link: string; channel: NoticeChannel }) => Promise<boolean>;
+  onTestMail: (n: { title: string; body: string; link: string }) => Promise<string | null>;
   onDelete: (id: string) => Promise<void>;
 }) {
+  const [channel, setChannel] = useState<NoticeChannel>('app');
+  const [testedTo, setTestedTo] = useState('');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [link, setLink] = useState('');
@@ -351,20 +361,32 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
   const candidates = q ? members.filter((m) => [m.email, m.name].some((v) => v?.toLowerCase().includes(q))).slice(0, 8) : [];
   const ready = title.trim() && body.trim() && title.length <= NOTICE_MAX_TITLE && body.length <= NOTICE_MAX_BODY;
 
+  const broadcast = target === 'all' || target === 'members';
+  const mailNote = broadcast
+    ? `メールは毎朝メールを有効にしている会員${mailReach === null ? '' : `（今 ${mailReach}人）`}にだけ届きます`
+    : 'メールはこの会員の確認済みアドレスに届きます';
   const send = async () => {
     const toLabel = audienceLabel(target) || who(target);
-    if (!window.confirm(`「${title.trim()}」を ${toLabel} に送ります。よろしいですか？\n（送るとすぐアプリに表示されます）`)) return;
+    const how = channel === 'app' ? '（送るとすぐアプリに表示されます）' : channel === 'mail' ? `（${mailNote}。メールは取り消せません）` : `（すぐアプリに表示されます。${mailNote}。メールは取り消せません）`;
+    if (!window.confirm(`「${title.trim()}」を ${toLabel} に【${CHANNEL_LABEL[channel]}】で送ります。よろしいですか？\n${how}`)) return;
     setBusy('send');
-    const ok = await onSend({ to: target, title, body, link });
+    const ok = await onSend({ to: target, title, body, link, channel });
     setBusy('');
-    if (ok) { setTitle(''); setBody(''); setLink(''); }
+    if (ok) { setTitle(''); setBody(''); setLink(''); setTestedTo(''); }
+  };
+  const testMail = async () => {
+    setBusy('test');
+    const to = await onTestMail({ title, body, link });
+    setBusy('');
+    if (to) setTestedTo(to);
   };
 
   return (
     <div style={c.card} id="admin-notices">
-      <h2 style={c.h2}>アプリ内のお知らせ</h2>
+      <h2 style={c.h2}>お知らせ（アプリ内・メール）</h2>
       <div style={{ ...c.muted, marginBottom: 12 }}>
-        マイページの「お知らせ」に出ます（未読があるとホームの鈴と下メニューに印）。メールやプッシュ通知は送りません。「全員」はログインしていない人にも見えます。「会員のみ」はログインしている人だけに見えます（後から登録した人にも、既読の状態で並びます）。
+        アプリ内: マイページの「お知らせ」に出ます（未読があるとホームの鈴と下メニューに印）。「全員」はログインしていない人にも見えます。「会員のみ」はログインしている人だけに見えます（後から登録した人にも、既読の状態で並びます）。<br />
+        メール: 一斉に送るときは、毎朝の運勢メールを有効にしている会員{mailReach === null ? '' : `（今 ${mailReach}人）`}だけに届きます（プライバシーポリシーの「メール通知はユーザーが有効化した場合のみ」に合わせています）。会員1人に送るときは、その人の確認済みアドレスに届きます。メールには「お知らせメールの停止」リンクが付きます。送ったメールは取り消せません。
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
@@ -382,15 +404,28 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
             ))}
           </div>
         )}
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`タイトル（${NOTICE_MAX_TITLE}文字まで）例: 新機能「○○」ができました`} style={inputStyle} />
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontWeight: 700 }}>送り方</span>
+          {(['app', 'mail', 'both'] as NoticeChannel[]).map((ch) => (
+            <button key={ch} style={{ ...c.btn, ...(channel === ch ? c.btnOn : {}) }} onClick={() => setChannel(ch)}>{CHANNEL_LABEL[ch]}</button>
+          ))}
+          {channel !== 'app' && <span style={c.muted}>{mailNote}</span>}
+        </div>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`タイトル（メールでは件名。${NOTICE_MAX_TITLE}文字まで）例: 新機能「○○」ができました`} style={inputStyle} />
         <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={5} placeholder={`本文（${NOTICE_MAX_BODY}文字まで。改行はそのまま出ます）`} style={{ ...inputStyle, resize: 'vertical' }} />
         <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="ボタンのリンク（任意）例: /column や https://…" style={inputStyle} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
           <span style={c.muted}>タイトル {title.length}/{NOTICE_MAX_TITLE}・本文 {body.length}/{NOTICE_MAX_BODY}</span>
-          <button style={{ ...c.btn, ...c.btnOn, marginLeft: 'auto', padding: '8px 18px', opacity: ready ? 1 : 0.5 }} disabled={!ready || busy === 'send'} onClick={() => { void send(); }}>
+          {channel !== 'app' && (
+            <button style={{ ...c.btn, marginLeft: 'auto', opacity: ready ? 1 : 0.5 }} disabled={!ready || busy === 'test'} onClick={() => { void testMail(); }}>
+              {busy === 'test' ? '送信中…' : 'メールを自分に試し送り'}
+            </button>
+          )}
+          <button style={{ ...c.btn, ...c.btnOn, marginLeft: channel !== 'app' ? 0 : 'auto', padding: '8px 18px', opacity: ready ? 1 : 0.5 }} disabled={!ready || busy === 'send'} onClick={() => { void send(); }}>
             {busy === 'send' ? '送信中…' : target === 'all' ? '全員に送る' : target === 'members' ? '会員だけに送る' : 'この会員に送る'}
           </button>
         </div>
+        {testedTo && channel !== 'app' && <div style={{ ...c.muted, color: '#7dbb8a' }}>{testedTo} に試し送りしました。受信箱（迷惑メールも）で見え方を確かめてから送ってください。</div>}
       </div>
       <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>送ったお知らせ（{items.length}件）</h3>
       {items.length === 0 ? (
@@ -401,8 +436,9 @@ function Notices({ items, members, target, setTarget, onSend, onDelete }: {
             <span style={{ fontWeight: 700 }}>{n.title}</span>
             <span style={c.muted}>{jst(n.createdAt)}</span>
             <span style={{ ...c.muted, color: n.to === 'all' ? '#e2c074' : n.to === 'members' ? '#7dbb8a' : '#a5b4fc' }}>{audienceLabel(n.to) || `会員: ${who(n.to)}`}</span>
+            <span style={c.muted}>{CHANNEL_LABEL[n.channel || 'app']}{n.mail ? `（メール ${n.mail.sent}通${n.mail.failed ? `・失敗 ${n.mail.failed}通` : ''}）` : ''}</span>
             <button style={{ ...c.btn, marginLeft: 'auto' }} disabled={busy === n.id}
-              onClick={() => { if (window.confirm(`「${n.title}」を取り消します（アプリから消えます）。よろしいですか？`)) { setBusy(n.id); void onDelete(n.id).finally(() => setBusy('')); } }}>
+              onClick={() => { if (window.confirm(`「${n.title}」を取り消します（アプリから消えます。${n.channel && n.channel !== 'app' ? '送ったメールは取り消せません。' : ''}）よろしいですか？`)) { setBusy(n.id); void onDelete(n.id).finally(() => setBusy('')); } }}>
               取り消す
             </button>
           </div>
@@ -497,10 +533,16 @@ function AutoNotices({ items, onSave }: { items: AutoNotice[]; onSave: (kind: st
   );
 }
 
-function Tile({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+// total: 期間に関係ない「今の数」（累計）。期間内の数と見分けるため、金の枠・色つきの背景・「累計」の札で表示する
+function Tile({ label, value, sub, total }: { label: string; value: string | number; sub?: string; total?: boolean }) {
   return (
-    <div style={{ ...c.card, marginBottom: 0, flex: '1 1 140px' }}>
-      <div style={c.muted}>{label}</div>
+    <div style={{ ...c.card, marginBottom: 0, flex: '1 1 140px', ...(total ? { background: '#2a2238', border: '1px solid #e2c074' } : {}) }}>
+      {total && (
+        <div style={{ display: 'inline-block', background: '#e2c074', color: '#1a1530', fontSize: 11, fontWeight: 700, borderRadius: 4, padding: '1px 6px', marginBottom: 4 }}>
+          累計（今の数）
+        </div>
+      )}
+      <div style={total ? { ...c.muted, color: '#e2c074' } : c.muted}>{label}</div>
       <div style={{ fontSize: 26, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
       {sub && <div style={c.muted}>{sub}</div>}
     </div>
@@ -960,6 +1002,23 @@ function ShareTable({ rows, total }: { rows: [string, number][]; total: number }
 }
 
 // 期間ボタン。offset は期間の終わりを何日前にするか（昨日 = 1日分、1日前で終わる／一昨日 = 1日分、2日前で終わる）
+// 画面をタブで分ける。URLの # で開くタブを決める（ホームの「自動のお知らせ」ボタンは #auto-notices）
+const TABS = [
+  { id: 'overview', label: '概要' },
+  { id: 'funnel', label: '購入までの流れ' },
+  { id: 'traffic', label: '集客・属性' },
+  { id: 'members', label: '会員' },
+  { id: 'notices', label: 'お知らせ' },
+  { id: 'inquiries', label: '問い合わせ' },
+] as const;
+type TabId = typeof TABS[number]['id'];
+const HASH_TAB: Record<string, TabId> = { 'auto-notices': 'notices', 'admin-notices': 'notices' };
+const tabFromHash = (): TabId => {
+  const h = (typeof window === 'undefined' ? '' : window.location.hash).replace(/^#/, '');
+  return HASH_TAB[h] || (TABS.some((t) => t.id === h) ? (h as TabId) : 'overview');
+};
+// 期間ボタンは概要・購入までの流れ・集客だけに出す（会員・お知らせ・問い合わせは期間に関係なく全部）
+
 const PERIODS = [
   { label: '今日', days: 1, offset: 0 },
   { label: '昨日', days: 1, offset: 1 },
@@ -976,6 +1035,16 @@ export default function AdminView() {
   const [data, setData] = useState<AdminData | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [tab, setTabState] = useState<TabId>(tabFromHash);
+  const setTab = (t: TabId) => {
+    setTabState(t);
+    if (window.location.hash !== `#${t}`) window.history.replaceState(null, '', `#${t}`);
+  };
+  useEffect(() => {
+    const onHash = () => setTabState(tabFromHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
   const [query, setQuery] = useState('');
   const [optedOut, setOptedOut] = useState(isTrackingOptedOut);
   const [showOwners, setShowOwners] = useState(false);
@@ -1033,6 +1102,10 @@ export default function AdminView() {
   // sign-up (no email; the buyer signs in with the purchase email and the purchase moves to that real account)
   const members = useMemo(() => allMembers.filter((m) => !m.owner && !m.guest), [allMembers]);
   const ownerCount = allMembers.filter((m) => m.owner).length;
+  const newInquiries = (data?.inquiries || []).filter((i) => i.status === 'new').length;
+  // 重要指標グラフ用: 会員（運営者・自動アカウント除く）を作った日時、と /api/admin の鍵
+  const memberCreatedAt = useMemo(() => members.map((m) => m.createdAt), [members]);
+  const getToken = useCallback(() => (user ? user.getIdToken() : Promise.reject(new Error('ログインが必要です'))), [user]);
   const guests = useMemo(() => allMembers.filter((m) => m.guest && !m.owner), [allMembers]);
   const [showGuests, setShowGuests] = useState(false);
   // The first day the per-session counters (鑑定した人・案内を見た人) have data
@@ -1086,15 +1159,27 @@ export default function AdminView() {
     return body;
   };
 
-  const sendNotice = async (n: { to: string; title: string; body: string; link: string }) => {
+  const sendNotice = async (n: { to: string; title: string; body: string; link: string; channel: NoticeChannel }) => {
     try {
       setError('');
       const body = await postAdmin({ action: 'noticeSend', ...n });
-      setData((d) => (d ? { ...d, notices: [body.notice as SentNotice, ...(d.notices || [])] } : d));
+      const sent = body.notice as SentNotice;
+      setData((d) => (d ? { ...d, notices: [sent, ...(d.notices || [])] } : d));
+      if (sent.mail?.failed) setError(`メールの一部が送れませんでした（成功 ${sent.mail.sent}通・失敗 ${sent.mail.failed}通${sent.mail.error ? `：${sent.mail.error}` : ''}）`);
       return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : '送れませんでした');
       return false;
+    }
+  };
+  const testNoticeMail = async (n: { title: string; body: string; link: string }) => {
+    try {
+      setError('');
+      const body = await postAdmin({ action: 'noticeMailTest', ...n });
+      return String(body.email || '自分のアドレス');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '試し送りできませんでした');
+      return null;
     }
   };
 
@@ -1129,7 +1214,8 @@ export default function AdminView() {
 
   const messageMember = (uid: string) => {
     setNoticeTarget(uid);
-    document.getElementById('admin-notices')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTab('notices');
+    window.setTimeout(() => document.getElementById('admin-notices')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   };
   const newMemberList = useMemo(() => (data ? members.filter((m) => (jstDay(m.createdAt) >= data.from && jstDay(m.createdAt) <= data.to)) : []), [data, members]);
   const newMembers = newMemberList.length;
@@ -1177,32 +1263,59 @@ export default function AdminView() {
     );
   }
 
+  // 期間ボタン（概要では「期間の数字」のすぐ上、流れ・集客では一番上）
+  const periodBar = data && (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 16 }}>
+      {PERIODS.map((p) => (
+        <button key={p.label} style={{ ...c.btn, ...(days === p.days && offset === p.offset ? c.btnOn : {}) }}
+          onClick={() => { setDays(p.days); setOffset(p.offset); }}>{p.label}</button>
+      ))}
+      <span style={{ ...c.muted, marginLeft: 4 }}>{data.from === data.to ? data.from : `${data.from} 〜 ${data.to}`}（日本時間）{loading ? ' 読み込み中…' : ''}</span>
+    </div>
+  );
+
   return (
     <div style={c.page}>
       <div style={c.wrap}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <h1 style={{ fontSize: 18, fontWeight: 700, marginRight: 'auto' }}>月と蓮 管理画面</h1>
-          {PERIODS.map((p) => (
-            <button key={p.label} style={{ ...c.btn, ...(days === p.days && offset === p.offset ? c.btnOn : {}) }}
-              onClick={() => { setDays(p.days); setOffset(p.offset); }}>{p.label}</button>
-          ))}
           <button style={c.btn} onClick={() => { void logOutUser().then(() => setData(null)); }}>ログアウト</button>
         </div>
-        <div style={{ ...c.muted, marginBottom: 12 }}>ログイン中: {user.email}　{data && `期間 ${data.from} 〜 ${data.to}（日本時間）`}</div>
-        {data && (
-          <div style={{ ...c.muted, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span>{optedOut ? 'このブラウザでの操作は集計に入りません。' : 'このブラウザでの操作も集計に入っています。'}</span>
-            <button style={c.btn} onClick={() => { setTrackingOptOut(!optedOut); setOptedOut(!optedOut); }}>
-              {optedOut ? '集計に入れる' : '集計から外す'}
-            </button>
-          </div>
-        )}
+        <div style={{ ...c.muted, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', marginBottom: 8 }}>
+          <span>ログイン中: {user.email}</span>
+          {data && (
+            <>
+              <span>／{optedOut ? 'このブラウザの操作は集計に入りません' : 'このブラウザの操作も集計に入っています'}</span>
+              <button style={{ ...c.btn, padding: '2px 8px', fontSize: 12 }} onClick={() => { setTrackingOptOut(!optedOut); setOptedOut(!optedOut); }}>
+                {optedOut ? '集計に入れる' : '集計から外す'}
+              </button>
+            </>
+          )}
+        </div>
 
         {error && <div style={{ ...c.card, borderColor: '#7f1d1d', color: '#fca5a5' }}>{error}</div>}
         {loading && !data && <div style={c.muted}>読み込み中…</div>}
 
         {data && (
           <>
+            <nav aria-label="管理画面のメニュー" style={{ position: 'sticky', top: 0, zIndex: 5, background: '#0d0b19', margin: '0 -16px 16px', padding: '8px 16px', borderBottom: '1px solid #2a2545', display: 'flex', gap: 6, overflowX: 'auto' }}>
+              {TABS.map((t) => (
+                <button key={t.id} onClick={() => { setTab(t.id); }} aria-current={tab === t.id ? 'page' : undefined}
+                  style={{ ...c.btn, ...(tab === t.id ? c.btnOn : {}), whiteSpace: 'nowrap', flex: '0 0 auto' }}>
+                  {t.label}
+                  {t.id === 'inquiries' && newInquiries > 0 ? `（未対応 ${newInquiries}）` : ''}
+                  {t.id === 'members' ? `（${members.length}）` : ''}
+                </button>
+              ))}
+            </nav>
+
+
+            {/* 概要は隠すだけ（重要指標グラフを、タブを切り替えるたびに読み直さないように） */}
+            <div hidden={tab !== 'overview'}>
+            <AdminKpiCharts getToken={getToken} memberCreatedAt={memberCreatedAt} />
+
+            <h2 style={{ ...c.h2, marginTop: 4 }}>期間の数字</h2>
+            {periodBar}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
               <Tile label="訪問" value={totals.visits} sub="ブラウザのセッション単位" />
               <Tile label="鑑定" value={totals.fortunes} sub={`鑑定した人 ${totals.fortuneSessions}（訪問の ${pct(totals.fortuneSessions, totals.visits)}）`} />
@@ -1214,8 +1327,8 @@ export default function AdminView() {
               <Tile label="買い切り購入（期間内）" value={totals.pairs} sub={`支払い画面へ ${totals.pairCheckouts} 回`} />
               <Tile label="月額の新規（期間内）" value={totals.premiums} sub={`支払い画面へ ${totals.checkouts} 回`} />
               <Tile label="売上（期間内）" value={salesYen(totals.salesYen)} sub="本番の購入額（月額の更新分は除く）" />
-              <Tile label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
-              <Tile label="月額プレミアム" value={paying} sub={`買い切りを買った人 ${pairBuyers} 人`} />
+              <Tile total label="会員の合計" value={members.length} sub={`毎朝メールON ${mailOn} 人`} />
+              <Tile total label="月額プレミアム" value={paying} sub={`買い切りを買った人 ${pairBuyers} 人`} />
             </div>
 
             {days > 1 && (
@@ -1225,26 +1338,25 @@ export default function AdminView() {
               </div>
             )}
 
-            <DailyTable days={daily} />
+            <ChatCost days={data.chat || []} />
+            </div>
 
+            {tab === 'funnel' && (
+              <>
+            {periodBar}
             <Funnel t={totals} since={sessionSince} ffSince={ffSince} lockSince={lockSince} />
+
+            <SignupFunnel t={totals} reg={sumReg(data.daily)} />
 
             <LpLeaveTable lv={sumLpLeave(data.daily)} />
 
             <LpExitTable ex={sumLpExit(data.daily)} />
+              </>
+            )}
 
-            <SignupFunnel t={totals} reg={sumReg(data.daily)} />
-
-            <AttributeTables docs={data.daily} newMembers={newMemberList} allMembers={members} />
-
-            <Inquiries items={data.inquiries || []} members={allMembers} onStatus={setInquiryStatus} />
-
-            <Notices items={data.notices || []} members={allMembers} target={noticeTarget} setTarget={setNoticeTarget} onSend={sendNotice} onDelete={deleteNotice} />
-
-            <AutoNotices items={data.autoNotices || []} onSave={saveAutoNotice} />
-
-            <ChatCost days={data.chat || []} />
-
+            {tab === 'traffic' && (
+              <>
+            {periodBar}
             <BreakdownTable title="流入元" rows={sumBy(data.daily, 'bySource')} label={sourceLabel}
               note="訪問はそのときの流入元、会員登録と購入はその人が最初に来たときの流入元（登録なしの購入は、支払い画面を開いたときの流入元）で数えています" />
             <BreakdownTable title="入口ページ（最初に開いたページ）" rows={sumBy(data.daily, 'byLanding')} label={landingLabel} />
@@ -1252,6 +1364,22 @@ export default function AdminView() {
               note="「ホーム画面のアプリ」は、ホーム画面に追加した月と蓮から開いたもの" />
             <ShareTable rows={sumShares(data.daily)} total={totals.shares} />
 
+            <AttributeTables docs={data.daily} newMembers={newMemberList} allMembers={members} />
+
+            <DailyTable days={daily} />
+
+            <p style={c.muted}>
+              訪問・鑑定・流入元は、この計測を入れた日から数えています（それより前の分はありません）。会員リストは、これまでに登録した全員です（自分のアカウントを除く）。
+              鑑定は入力フォームから鑑定した回数で、共有リンクや毎朝メールのリンクから結果を開いた回数は含みません。
+              共有・有料案内・月額の支払い画面と購入・端末・共有リンクの入口は、2026年10月下旬から数えています。買い切りの支払い画面と購入・売上・鑑定した人・案内を見た人は、2026年11月の計測見直しから数えています。
+              購入はStripeの本番決済だけで、テスト決済は数えません。AIチャットは、AIが答えた回数です。
+              この管理画面を開いたブラウザは、自動で集計から外れます（外す前の分は残ります）。管理者のアカウントでログインしたブラウザやホーム画面のアプリも、自動で外れます。
+            </p>
+              </>
+            )}
+
+            {tab === 'members' && (
+              <>
             <div style={c.card}>
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <h2 style={{ ...c.h2, margin: 0, marginRight: 'auto' }}>会員リスト（{filtered.length}人）</h2>
@@ -1319,13 +1447,22 @@ export default function AdminView() {
               </div>
             </div>
 
-            <p style={c.muted}>
-              訪問・鑑定・流入元は、この計測を入れた日から数えています（それより前の分はありません）。会員リストは、これまでに登録した全員です（自分のアカウントを除く）。
-              鑑定は入力フォームから鑑定した回数で、共有リンクや毎朝メールのリンクから結果を開いた回数は含みません。
-              共有・有料案内・月額の支払い画面と購入・端末・共有リンクの入口は、2026年10月下旬から数えています。買い切りの支払い画面と購入・売上・鑑定した人・案内を見た人は、2026年11月の計測見直しから数えています。
-              購入はStripeの本番決済だけで、テスト決済は数えません。AIチャットは、AIが答えた回数です。
-              この管理画面を開いたブラウザは、自動で集計から外れます（外す前の分は残ります）。管理者のアカウントでログインしたブラウザやホーム画面のアプリも、自動で外れます。
-            </p>
+              </>
+            )}
+
+            {tab === 'notices' && (
+              <>
+            <Notices items={data.notices || []} members={allMembers} mailReach={data.noticeMailReach ?? null} target={noticeTarget} setTarget={setNoticeTarget} onSend={sendNotice} onTestMail={testNoticeMail} onDelete={deleteNotice} />
+
+            <AutoNotices items={data.autoNotices || []} onSave={saveAutoNotice} />
+              </>
+            )}
+
+            {tab === 'inquiries' && (
+              <>
+            <Inquiries items={data.inquiries || []} members={allMembers} onStatus={setInquiryStatus} />
+              </>
+            )}
           </>
         )}
       </div>
