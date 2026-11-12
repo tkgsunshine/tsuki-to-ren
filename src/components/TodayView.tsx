@@ -536,6 +536,11 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
   );
 }
 
+const monthArrow = (off: boolean): React.CSSProperties => ({
+  width: 26, height: 26, borderRadius: '50%', border: '1px solid rgba(226,192,116,0.4)', background: off ? 'transparent' : 'rgba(212,175,55,0.15)',
+  color: off ? 'rgba(242,226,179,0.25)' : '#f2e2b3', fontSize: '1rem', lineHeight: 1, cursor: off ? 'default' : 'pointer', padding: 0
+});
+
 type CalMonth = { year: number; month: number; days: { day: number; score: number }[]; current: boolean };
 
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
@@ -544,6 +549,8 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
   months: CalMonth[]; luckTitle?: string;
 }) {
   const sm = getScoreMood(base, daily);
+  // 表示する月（今月／翌月をタップで切り替え。2026-11-12 TAKASHI）
+  const [monthIdx, setMonthIdx] = useState(0);
   const diffText = diff === null ? null : diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0';
   const LEVEL = {
     up: { label: '良い', bg: 'linear-gradient(160deg, #e9cf8a, #c9a24a)', border: '#f2e2b3', color: '#2a1d05' },
@@ -572,7 +579,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
       </div>
       {luckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.86rem', lineHeight: 1.6 }}>{luckTitle}</p>}
 
-      {months.map((mo) => {
+      {months.slice(monthIdx, monthIdx + 1).map((mo) => {
         // 月曜はじまり・日曜が一番右（2026-11-12 TAKASHI）
         const lead = (new Date(mo.year, mo.month, 1).getDay() + 6) % 7;
         const cells: ({ day: number; score: number } | null)[] = [...Array(lead).fill(null), ...mo.days];
@@ -580,7 +587,11 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
         return (
         <div key={`${mo.year}-${mo.month}`} style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.7rem', borderTop: '1px solid rgba(226,192,116,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-            <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{mo.year !== now.getFullYear() ? `${mo.year}年` : ''}{mo.month + 1}月の恋の暦</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+              <button type="button" aria-label="前の月" disabled={monthIdx === 0} onClick={() => setMonthIdx((i) => Math.max(0, i - 1))} style={monthArrow(monthIdx === 0)}>‹</button>
+              <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{mo.year !== now.getFullYear() ? `${mo.year}年` : ''}{mo.month + 1}月の恋の暦</span>
+              <button type="button" aria-label="次の月" disabled={monthIdx >= months.length - 1} onClick={() => setMonthIdx((i) => Math.min(months.length - 1, i + 1))} style={monthArrow(monthIdx >= months.length - 1)}>›</button>
+            </span>
             <span style={{ display: 'flex', gap: '0.5rem', fontSize: '0.64rem', color: '#a9a293' }}>
               {(['up', 'flat', 'down'] as const).map((k) => (
                 <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
