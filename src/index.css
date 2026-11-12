@@ -1595,3 +1595,29 @@ body.chat-keyboard-open .chat-partner-picker {
 @media (prefers-reduced-motion: reduce) {
   .shot-zoom-hint { animation: none; }
 }
+
+/* 月のかけらを使ったときの演出（二人の相性100。2026-11-12 TAKASHI「かけら使った時にアニメーション」） */
+@keyframes kakera-moon {
+  0% { transform: scale(0.5) rotate(-30deg); opacity: 0; filter: drop-shadow(0 0 0 rgba(245, 215, 122, 0)); }
+  35% { transform: scale(1.25) rotate(8deg); opacity: 1; filter: drop-shadow(0 0 18px rgba(245, 215, 122, 0.95)); }
+  70% { transform: scale(1) rotate(0deg); opacity: 1; filter: drop-shadow(0 0 28px rgba(255, 240, 190, 1)); }
+  100% { transform: scale(1.6); opacity: 0; filter: drop-shadow(0 0 40px rgba(255, 240, 190, 0)); }
+}
+@keyframes kakera-spark {
+  0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0; }
+}
+@keyframes kakera-flash {
+  0% { opacity: 0; transform: scale(0.3); }
+  60% { opacity: 0.85; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+@keyframes kakera-reveal {
+  0% { opacity: 0; transform: translateY(6px) scale(0.97); filter: blur(6px) brightness(1.6); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+.kakera-reveal { animation: kakera-reveal 0.7s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .kakera-reveal { animation: none; }
+}

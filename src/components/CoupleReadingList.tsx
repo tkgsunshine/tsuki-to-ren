@@ -5,7 +5,7 @@ import type { Person, CoupleReading } from '../utils/coupleReading';
 import { READING_TOPICS, READING_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { ReadingCategory } from '../data/coupleTopics';
 import type { CoupleAccess } from './CoupleHundredSection';
-import { DropPanel } from './CoupleDropPanel';
+import { DropPanel, justOpened } from './CoupleDropPanel';
 import type { CoupleDrops } from '../services/coupleDrops';
 
 // 「二人の相性100」の本格鑑定50（MBTI × 四柱推命 × 九星気学）。★1〜5＋上位◯%＋鑑定文＋根拠（判定に使った星だけ）。
@@ -30,8 +30,9 @@ const Stars: React.FC<{ n: number; size?: string }> = ({ n, size = '0.85rem' }) 
 );
 
 function ReadingCard({ title, r, pair }: { title: string; r: CoupleReading; pair: string }) {
+  const [fresh] = useState(justOpened);
   return (
-    <div style={{
+    <div className={fresh ? 'kakera-reveal' : undefined} style={{
       margin: '0.35rem 0 0.2rem', padding: '1rem 0.95rem 0.75rem', borderRadius: '12px',
       background: 'linear-gradient(160deg, rgba(38, 28, 66, 0.95), rgba(14, 12, 28, 0.95))',
       border: `1px solid ${r.stars >= 4 ? 'rgba(245, 215, 122, 0.7)' : 'rgba(212, 175, 55, 0.35)'}`,

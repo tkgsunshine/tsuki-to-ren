@@ -6,7 +6,7 @@ import { RANK_TOPICS, RANK_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { RankCategory } from '../data/coupleTopics';
 import { toPerson } from '../utils/coupleReading';
 import { CoupleReadingList } from './CoupleReadingList';
-import { DropBalance, DropPanel } from './CoupleDropPanel';
+import { DropBalance, DropPanel, justOpened } from './CoupleDropPanel';
 import { mbtiOptions } from '../constants/mbti';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 
@@ -79,8 +79,9 @@ function RankCard({ title, rank, reason, a, b, reasonOpen, onLockClick, lockWord
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string; dropSlot?: React.ReactNode;
 }) {
   const top = rank <= 10;
+  const [fresh] = useState(justOpened);
   return (
-    <div style={{
+    <div className={fresh ? 'kakera-reveal' : undefined} style={{
       margin: '0.35rem 0 0.2rem', padding: '1rem 0.95rem 0.75rem', borderRadius: '12px',
       background: 'linear-gradient(160deg, rgba(38, 28, 66, 0.95), rgba(14, 12, 28, 0.95))',
       border: `1px solid ${top ? 'rgba(245, 215, 122, 0.7)' : 'rgba(212, 175, 55, 0.35)'}`,
