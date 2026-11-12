@@ -38,9 +38,9 @@ const r = (no: number, title: string, category: RankCategory, posted = false): C
 export const RANK_TOPICS: CoupleTopic<RankCategory>[] = [
   r(1, '付き合うまでは長いのに、付き合ってからは早いカップル', 'start', true),
   r(2, '最初はお互い興味ゼロだったのに、気づいたら結婚してるカップル', 'start', true),
-  r(3, '友達期間がいちばん長いカップル', 'start'),
+  r(3, '片思いが実りやすいカップル', 'start'),
   r(4, '脈ありサインに気づきにくいカップル', 'start'),
-  r(5, '初デートで「この人だ」となりやすいカップル', 'start'),
+  r(5, '告白がうまくいきやすいカップル', 'start'),
   r(6, '友達止まりから抜け出しやすいカップル', 'start'),
   r(7, 'LINEだけで好きになるカップル', 'start'),
   r(8, '押しすぎると逃げられやすいカップル', 'start'),
