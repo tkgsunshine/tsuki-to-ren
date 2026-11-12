@@ -132,8 +132,9 @@ export const CoupleHundredSection: React.FC<Props> = ({
   const oppPerson = useMemo(() => toPerson(oppPillar, oppStar, oppMbti), [oppPillar, oppStar, oppMbti]);
   const ready = hasCoupleTypes(myMbti, oppMbti);
   const [openNo, setOpenNo] = useState<number | null>(focusNo);
-  // 最初は、見られるランキング＋まとまりごとに1個だけ並べ、残りは「ほかのランキングも見る」で出す（2026-11-12 TAKASHI「デフォで5個くらい他も表示」）
-  const [showAll, setShowAll] = useState(false);
+  // 最初は、見られるランキング＋まとまりごとに1個だけ並べ、残りはまとまりごとの「〇〇をすべて見る」で出す
+  // （2026-11-12 TAKASHI「デフォで5個くらい他も表示」、2026-11-13「ジャンルごとに、全て開けるようにして」）
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const focusRef = useRef<HTMLDivElement>(null);
 
   // X投稿から来たお題は、開いた状態でそこまでスクロール（結果画面の描画が落ち着いてから）
@@ -151,12 +152,12 @@ export const CoupleHundredSection: React.FC<Props> = ({
     return m;
   }, [ready, myMbti, oppMbti]);
 
-  const openCount = RANK_TOPICS.filter((t) => rankAccess(t.no) !== 'locked').length;
   // まとまりごとに1個だけ（見られるものがあればそれ、なければロック中の先頭）。2026-11-12 TAKASHI「それぞれ1個でいい」
-  const shown = new Set(showAll ? RANK_TOPICS.map((t) => t.no) : [
+  const shown = new Set([
     // 無料の見本（その二人でいちばん上位・下位）とXから来たランキングは、同じまとまりでも全部出す
     ...CATS.flatMap((c) => {
       const l = RANK_TOPICS.filter((t) => t.category === c);
+      if (expanded.has(c)) return l.map((t) => t.no);
       const samples = l.filter((t) => pinnedNos.includes(t.no));
       return samples.length ? samples.map((t) => t.no) : [(l.find((t) => rankAccess(t.no) === 'full') ?? l[0]).no];
     }),
@@ -231,6 +232,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
         CATS.map((cat) => {
           const list = RANK_TOPICS.filter((t) => t.category === cat && shown.has(t.no));
           if (list.length === 0) return null;
+          const hidden = RANK_TOPICS.filter((t) => t.category === cat).length - list.length;
           return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <span style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: 'bold' }}>● {RANK_CATEGORY_LABELS[cat]}</span>
@@ -278,20 +280,16 @@ export const CoupleHundredSection: React.FC<Props> = ({
                 </div>
               );
             })}
+            {hidden > 0 && (
+              <button type="button" onClick={() => setExpanded((s) => new Set(s).add(cat))} style={{ alignSelf: 'center', marginTop: '0.5rem', background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.74rem', padding: '0.4rem 0.95rem', cursor: 'pointer' }}>
+                「{RANK_CATEGORY_LABELS[cat]}」をすべて見る（あと{hidden}個）
+              </button>
+            )}
           </div>
           );
         })
       )}
 
-      {tab === 'rank' && ready && openCount < RANK_TOPICS.length && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
-          {shown.size < RANK_TOPICS.length && (
-            <button type="button" onClick={() => setShowAll(true)} style={{ background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.78rem', padding: '0.45rem 1rem', cursor: 'pointer' }}>
-              ほかのランキングも見る（あと{RANK_TOPICS.length - shown.size}個）
-            </button>
-          )}
-        </div>
-      )}
       {tab === 'rank' && <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>
         ※ 順位は、MBTIの4文字の組み合わせと二人のMBTIの相性をもとにした月と蓮の見立てです。
       </span>}

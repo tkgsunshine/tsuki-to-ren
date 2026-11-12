@@ -82,11 +82,10 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
     for (const no of openKey ? openKey.split(',').map(Number) : []) m.set(no, coupleReading(no, me, opp, { me: myName, opp: oppName }));
     return m;
   }, [me, opp, myName, oppName, openKey]);
-  const openCount = READING_TOPICS.filter((t) => access(t.no) === 'full').length;
-  // 最初は、まとまりごとに1個だけ（見られるものがあればそれ）。残りは「ほかのテーマも見る」で
-  const [showAll, setShowAll] = useState(false);
-  const shown = new Set(showAll ? READING_TOPICS.map((t) => t.no) : [
-    ...CATS.map((c) => { const l = READING_TOPICS.filter((t) => t.category === c); return (l.find((t) => access(t.no) === 'full') ?? l[0]).no; }),
+  // 最初は、まとまりごとに1個だけ（見られるものがあればそれ）。残りはまとまりごとの「〇〇をすべて見る」で（2026-11-13 TAKASHI）
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
+  const shown = new Set([
+    ...CATS.flatMap((c) => { const l = READING_TOPICS.filter((t) => t.category === c); return expanded.has(c) ? l.map((t) => t.no) : [(l.find((t) => access(t.no) === 'full') ?? l[0]).no]; }),
     ...(openNo ? [openNo] : [])
   ]);
 
@@ -95,6 +94,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
       {CATS.map((cat) => {
         const list = READING_TOPICS.filter((t) => t.category === cat && shown.has(t.no));
         if (list.length === 0) return null;
+        const hidden = READING_TOPICS.filter((t) => t.category === cat).length - list.length;
         return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <span style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: 'bold' }}>● {READING_CATEGORY_LABELS[cat]}</span>
@@ -136,18 +136,14 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
                 </div>
               );
             })}
+            {hidden > 0 && (
+              <button type="button" onClick={() => setExpanded((s) => new Set(s).add(cat))} style={{ alignSelf: 'center', marginTop: '0.5rem', background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.74rem', padding: '0.4rem 0.95rem', cursor: 'pointer' }}>
+                「{READING_CATEGORY_LABELS[cat]}」をすべて見る（あと{hidden}個）
+              </button>
+            )}
           </div>
         );
       })}
-      {openCount < READING_TOPICS.length && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
-          {shown.size < READING_TOPICS.length && (
-            <button type="button" onClick={() => setShowAll(true)} style={{ background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.78rem', padding: '0.45rem 1rem', cursor: 'pointer' }}>
-              ほかのテーマも見る（あと{READING_TOPICS.length - shown.size}個）
-            </button>
-          )}
-        </div>
-      )}
       <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>
         ※ 四柱推命（生まれた日の干支）・九星気学（本命星）・MBTIを組み合わせた、月と蓮の鑑定です。上位◯%は、生まれた日の干支・本命星・MBTIのすべての組み合わせの中での位置です。
       </span>
