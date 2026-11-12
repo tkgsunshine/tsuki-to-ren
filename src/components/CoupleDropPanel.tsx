@@ -124,7 +124,7 @@ export const MorePeek: React.FC<{ nextTitle: string; count: number; onOpen: () =
   <button
     type="button"
     onClick={onOpen}
-    aria-label={`あと${count}個を見る`}
+    aria-label={`もっと見る（あと${count}個）`}
     style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'inherit' }}
   >
     <span aria-hidden="true" style={{
@@ -132,7 +132,7 @@ export const MorePeek: React.FC<{ nextTitle: string; count: number; onOpen: () =
       height: '2.1rem', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0) 95%)', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0) 95%)'
     }}>{nextTitle}</span>
     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', marginTop: '-0.25rem', marginBottom: '0.35rem', fontSize: '0.78rem', fontWeight: 'bold', color: '#f5d77a' }}>
-      あと{count}個
+      もっと見る
       <ChevronDown size={16} style={{ animation: 'more-peek-bob 1.6s ease-in-out infinite' }} />
     </span>
   </button>
