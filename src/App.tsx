@@ -1326,7 +1326,7 @@ function App() {
   // 月のかけら（二人の相性100のお題を1つずつ開ける）。ログイン中・お相手ありの結果を開いたときに読む（補充もこのとき計算）
   const [coupleDrops, setCoupleDrops] = useState<CoupleDrops | null>(null);
   useEffect(() => {
-    if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth || !signedInUid) { setCoupleDrops(null); return; }
+    if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth) { setCoupleDrops(null); return; }
     let cancelled = false;
     void fetchCoupleDrops(oppBirth).then((r) => { if (!cancelled) setCoupleDrops(r.drops); });
     return () => { cancelled = true; };

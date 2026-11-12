@@ -171,7 +171,17 @@ export const CoupleHundredSection: React.FC<Props> = ({
       </p>
       {tab === 'rank' && ready && (
         <div style={{ textAlign: 'center', padding: '0.55rem 0.5rem', borderRadius: '10px', background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.25)' }}>
-          <TypePair a={myMbti || ''} b={oppMbti || ''} size="1.02rem" />
+          {/* 二人のニックネームとMBTI（2026-11-12 TAKASHI「ここにニックネームも記載」） */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            {([[myMbti || '', san(myName, 'あなた')], null, [oppMbti || '', san(oppName, 'お相手')]] as const).map((x, i) => x === null ? (
+              <span key={i} style={{ color: '#bfb8a8', fontSize: '1rem' }}>×</span>
+            ) : (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem', minWidth: 0 }}>
+                <span style={{ fontSize: '0.74rem', color: '#e8e2d4', maxWidth: '9.5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x[1]}</span>
+                <span style={{ color: typeColor(x[0]), fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap' }}>{typeLabel(x[0])}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       {drops && <DropBalance drops={drops} />}

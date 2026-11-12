@@ -11,7 +11,7 @@ export const DropBalance: React.FC<{ drops: CoupleDrops }> = ({ drops }) => (
   }}>
     <span style={{ fontSize: '0.82rem', color: '#f7ecc8', fontWeight: 'bold' }}>🌙 月のかけら {drops.balance}個</span>
     <span style={{ fontSize: '0.68rem', color: '#cfc3a0', lineHeight: 1.5 }}>
-      {drops.premium ? `毎日${drops.daily}個・お支払い日に50個（${drops.cap}個まで）` : `毎日${drops.daily}個（持ち越しはありません）`}
+      {drops.guest ? 'はじめての方へのプレゼント（会員登録すると毎日2個）' : drops.premium ? `毎日${drops.daily}個・お支払い日に50個（${drops.cap}個まで）` : `毎日${drops.daily}個（持ち越しはありません）`}
     </span>
   </div>
 );
@@ -44,7 +44,7 @@ export const DropPanel: React.FC<{
         </button>
       ) : (
         <span style={{ fontSize: '0.78rem', color: '#f7ecc8', textAlign: 'center', lineHeight: 1.6 }}>
-          今日の月のかけらは使い切りました。明日また{drops.daily}個届きます。
+          {drops.guest ? 'はじめての月のかけらは使い切りました。無料の会員登録で、毎日2個届きます。' : `今日の月のかけらは使い切りました。明日また${drops.daily}個届きます。`}
         </span>
       )}
       <span style={{ fontSize: '0.7rem', color: '#cfc3a0', textAlign: 'center', lineHeight: 1.6 }}>
