@@ -777,6 +777,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 {([
                   // 月額だけの「10年先」は、月額を先に見せるときは一番上に（2026-11-09 TAKASHI「10年先をもっと前に」）。買い切りを先に見せるときは最後
                   ...(pairFirst ? [] : [eduFuture]),
+                  { who: 'ren', t: '二人の相性100（3つの占術で読み解く本格鑑定 ＋ MBTIランキング）', shot: '/assets/premium/couple-100.webp', d: `${pair.name}と出会った意味、支え合い方、ケンカの本当の原因まで。16タイプ・四柱推命・九星気学で読み解く本格鑑定25個と、136組中何位かが分かるMBTIランキング25個を、ずっと見られます。` },
                   { who: 'tsuki', t: 'やってはいけないこと 5選 ＆ 返信が遅いときの心理・脈ありサイン', shot: '/assets/premium/edu-kotoba.webp', d: `${pair.name}に言うと一気に冷めてしまう一言、既読のまま止まったときの本当の気持ち、今どの段階にいるのか、少し離れかけたときの戻し方まで。一緒に見ていきましょうね。` },
                   { who: 'ren', t: '惹かれ合うポイント ＆ 地雷行動 3選', shot: '/assets/premium/edu-hikare.webp', d: '二人の組み合わせだからこそ起きやすい、すれ違いのパターンがあります。先に知っておけば、避けられますよ。' },
                   { who: 'tsuki', t: '惹かれるファッション ＆ ドキッとさせる仕草', shot: '/assets/premium/attraction.webp', d: `${pair.name}が思わず目で追ってしまう色や服装、会ったときにドキッとさせる仕草。次に会う日の準備に使ってくださいね。` },
@@ -832,6 +833,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 </div>
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも' },
+                  { label: '二人の相性100（本格鑑定・MBTIランキング）', pair: `${pair.name}だけ\n50個`, monthly: '誰でも\n100個' },
                   { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },

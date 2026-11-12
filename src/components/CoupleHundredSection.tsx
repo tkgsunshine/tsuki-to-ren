@@ -4,6 +4,8 @@ import { san } from '../utils/fortuneEngine';
 import { coupleRank, hasCoupleTypes, COUPLE_PAIR_COUNT } from '../utils/coupleRank';
 import { RANK_TOPICS, RANK_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { RankCategory } from '../data/coupleTopics';
+import { toPerson } from '../utils/coupleReading';
+import { CoupleReadingList } from './CoupleReadingList';
 
 // 「二人の相性100」（2026-11-12 TAKASHI決定）。結果画面（お相手あり）の欄。
 // ランキング50: 二人の16タイプの組が、お題ごとに136組中何位か＋理由の文。1〜136位の一覧は出さない（どのプランでも）。
@@ -17,8 +19,14 @@ interface Props {
   oppMbti?: string;
   myName?: string;
   oppName?: string;
+  /** 鑑定結果の日柱（"甲子"）と本命星（本格鑑定で使う） */
+  myPillar?: string;
+  myStar?: string;
+  oppPillar?: string;
+  oppStar?: string;
   /** お題番号ごとの見え方 */
   rankAccess: (no: number) => CoupleAccess;
+  readingAccess: (no: number) => CoupleAccess;
   /** X投稿から来たお題: 開いた状態でここまでスクロールする */
   focusNo?: number | null;
   onLockClick: (e?: React.MouseEvent) => void;
@@ -83,8 +91,12 @@ function RankCard({ title, rank, reason, pair, reasonOpen, onLockClick, lockWord
 }
 
 export const CoupleHundredSection: React.FC<Props> = ({
-  myMbti, oppMbti, myName, oppName, rankAccess, focusNo = null, onLockClick, lockWord, onAskMbti
+  myMbti, oppMbti, myName, oppName, myPillar, myStar, oppPillar, oppStar, rankAccess, readingAccess, focusNo = null, onLockClick, lockWord, onAskMbti
 }) => {
+  // 上に本格鑑定50、下にランキング50（タブ）。X投稿から来たときはランキングを先に開く
+  const [tab, setTab] = useState<'reading' | 'rank'>(focusNo ? 'rank' : 'reading');
+  const mePerson = useMemo(() => toPerson(myPillar, myStar, myMbti), [myPillar, myStar, myMbti]);
+  const oppPerson = useMemo(() => toPerson(oppPillar, oppStar, oppMbti), [oppPillar, oppStar, oppMbti]);
   const ready = hasCoupleTypes(myMbti, oppMbti);
   const [openNo, setOpenNo] = useState<number | null>(focusNo);
   // 結果画面が長くなりすぎないよう、最初は見られるお題だけ並べ、ほかは「ほかのお題も見る」で出す
@@ -95,6 +107,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
   // X投稿から来たお題は、開いた状態でそこまでスクロール（結果画面の描画が落ち着いてから）
   useEffect(() => {
     if (!focusNo || !ready) return;
+    setTab('rank');
     setOpenNo(focusNo);
     const t = window.setTimeout(() => focusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 700);
     return () => window.clearTimeout(t);
@@ -112,14 +125,31 @@ export const CoupleHundredSection: React.FC<Props> = ({
     <div id="couple-hundred" className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
       <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', margin: 0 }}>
         <Crown size={16} />
-        二人の相性ランキング50
+        二人の相性100
       </h2>
+      <div role="tablist" style={{ display: 'flex', gap: '0.4rem' }}>
+        {([['reading', '本格鑑定50'], ['rank', 'MBTIランキング50']] as const).map(([k, label]) => (
+          <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} style={{
+            flex: 1, padding: '0.55rem 0.4rem', borderRadius: '999px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold',
+            border: '1px solid rgba(212, 175, 55, 0.5)',
+            background: tab === k ? 'linear-gradient(135deg, #f2e2b3, #d4af37)' : 'rgba(11, 15, 21, 0.55)',
+            color: tab === k ? '#1a1230' : '#f5d77a'
+          }}>{label}</button>
+        ))}
+      </div>
       <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>
-        {san(myName, 'あなた')}と{san(oppName, 'お相手')}の16タイプの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のお題で見ていきます。
-        {ready && <span style={{ color: '#f5d77a' }}>（{pair}）</span>}
+        {tab === 'reading'
+          ? <>16タイプ・四柱推命・九星気学の3つの占術で読み解く本格鑑定。{san(myName, 'あなた')}と{san(oppName, 'お相手')}の生年月日まで使った、二人だけの50のお題です。</>
+          : <>{san(myName, 'あなた')}と{san(oppName, 'お相手')}の16タイプの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のお題で見ていきます。{ready && <span style={{ color: '#f5d77a' }}>（{pair}）</span>}</>}
       </p>
 
-      {!ready ? (
+      {tab === 'reading' ? (
+        mePerson && oppPerson ? (
+          <CoupleReadingList me={mePerson} opp={oppPerson} myName={myName} oppName={oppName} access={readingAccess} onLockClick={onLockClick} lockWord={lockWord} />
+        ) : (
+          <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>二人の16タイプが分かると、本格鑑定が見られます。</p>
+        )
+      ) : !ready ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.8rem', borderRadius: '10px', background: 'rgba(11, 15, 21, 0.55)', border: '1px dashed rgba(212, 175, 55, 0.4)' }}>
           <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>二人の16タイプが分かると、何位か分かります。</p>
           {onAskMbti && (
@@ -171,7 +201,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
         })
       )}
 
-      {ready && openCount < RANK_TOPICS.length && (
+      {tab === 'rank' && ready && openCount < RANK_TOPICS.length && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
           {!showAll && (
             <button type="button" onClick={() => setShowAll(true)} style={{ background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.78rem', padding: '0.45rem 1rem', cursor: 'pointer' }}>
@@ -182,9 +212,9 @@ export const CoupleHundredSection: React.FC<Props> = ({
           <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>
         </div>
       )}
-      <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>
+      {tab === 'rank' && <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>
         ※ 順位は、16タイプの4文字の組み合わせと二人の16タイプの相性をもとにした月と蓮の見立てです。
-      </span>
+      </span>}
     </div>
   );
 };

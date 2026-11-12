@@ -38,7 +38,7 @@ import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
 import MbtiQuizModal from './MbtiQuizModal';
 import { CoupleHundredSection } from './CoupleHundredSection';
 import type { CoupleAccess } from './CoupleHundredSection';
-import { SINGLE_RANK_NOS, FREE_RANK_NOS } from '../data/coupleTopics';
+import { SINGLE_RANK_NOS, FREE_RANK_NOS, SINGLE_READING_NOS, FREE_READING_NOS } from '../data/coupleTopics';
 import { isMbtiCode } from '../utils/mbtiQuiz';
 
 const GoogleIcon = () => (
@@ -1049,6 +1049,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
     if (isSubscribed) return 'full';
     if (pairOpen && SINGLE_RANK_NOS.includes(no)) return 'full';
     return FREE_RANK_NOS.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
+  };
+  // 本格鑑定50: シングルはそのお相手の25本（1〜25）。無料は見本1本。月額は月のしずくまでの間、50本すべて
+  const coupleReadingAccess = (no: number): CoupleAccess => {
+    if (!sharedBy && (isSubscribed || (pairOpen && SINGLE_READING_NOS.includes(no)))) return 'full';
+    return FREE_READING_NOS.includes(no) ? 'full' : 'locked';
   };
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
@@ -2628,7 +2633,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
             oppMbti={activeResult.opponentMbtiCode}
             myName={myName}
             oppName={oppNickname}
+            myPillar={activeResult.myPillar}
+            myStar={activeResult.myStar}
+            oppPillar={activeResult.opponentPillar}
+            oppStar={activeResult.opponentStar}
             rankAccess={coupleRankAccess}
+            readingAccess={coupleReadingAccess}
             focusNo={coupleFocusNo}
             onLockClick={handleDeepLockClick}
             lockWord={LOCK_WORD}
