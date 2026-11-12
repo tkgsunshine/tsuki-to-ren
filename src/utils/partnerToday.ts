@@ -9,6 +9,7 @@
 import { CRUSH_STEPS } from './stepTexts/crush.ts';
 import { COUPLE_STEPS } from './stepTexts/couple.ts';
 import { SITUATION_STEPS as SITUATION_STEPS_BY_TYPE } from './stepTexts/situation.ts';
+import { CRUSH16, COUPLE16, SITUATION16 } from './stepTexts/t16/index.ts';
 import type { StepAxis } from './stepTexts/types.ts';
 import { getDayInfo, getPersonDay, getTenGod, getJuniUn, isPersonalGood, isPairSyncDate } from './fortuneEngine.ts';
 import type { FortuneResult, TenGod, DayInfo, LuckPerson } from './fortuneEngine.ts';
@@ -256,7 +257,7 @@ const daySeed = (d: Date) => Math.floor(new Date(d.getFullYear(), d.getMonth(), 
 
 /**
  * 今日の一歩。流れ（踏み出す／いつもの／控えめ）は星（お相手の今日）、中身はお相手の16タイプ（E/I × T/F）から選ぶ（2026-11-12 TAKASHI）。
- * 1つの段階・状況・流れ・タイプにつき5文。日によって順に変わる。タイプがわからないお相手は、従来のタイプなしの文。
+ * 1つの段階・状況・流れ・タイプにつき5文（16タイプ別。SJの4タイプは E/I×T/F の4まとまり）。日によって順に変わる。タイプがわからないお相手は、従来のタイプなしの文。
  */
 export function getTodayStep(journey: Journey, today: PartnerToday, date: Date, mbti?: string): TodayStep {
   const seed = daySeed(date);
@@ -270,7 +271,10 @@ export function getTodayStep(journey: Journey, today: PartnerToday, date: Date, 
     const sitTable = sit ? SITUATION_STEPS_BY_TYPE[sit] : undefined;
     bySituation = !!sitTable;
     const table = sitTable || (journey.mode === 'couple' ? COUPLE_STEPS : CRUSH_STEPS)[stage];
-    text = pick(table[today.wave][axis], seed);
+    // 16タイプ別の文があればそれを使う（SJの4タイプは E/I×T/F の4まとまりの文）
+    const t16 = (sit && SITUATION16[sit]) || (journey.mode === 'couple' ? COUPLE16 : CRUSH16)[stage];
+    const own = t16?.[today.wave]?.[m];
+    text = pick(own && own.length ? own : table[today.wave][axis], seed);
   } else {
     const legacy = sit && SITUATION_STEPS[sit];
     bySituation = !!legacy;

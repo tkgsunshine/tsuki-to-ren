@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
 import { CRUSH_STEPS } from '../src/utils/stepTexts/crush.ts';
 import { COUPLE_STEPS } from '../src/utils/stepTexts/couple.ts';
 import { SITUATION_STEPS } from '../src/utils/stepTexts/situation.ts';
+import { CRUSH16, COUPLE16, SITUATION16 } from '../src/utils/stepTexts/t16/index.ts';
+import { TYPES_12 } from '../src/utils/stepTexts/types16.ts';
 import { computePartnerToday, getTodayStep, getCourage, cleanJourney, defaultJourney, JOURNEY_STAGES } from '../src/utils/partnerToday.ts';
 import { getDayInfo, calculateDayPillar } from '../src/utils/fortuneEngine.ts';
 
@@ -96,7 +98,12 @@ test('今日の一歩（タイプ別）: タイプがあればタイプの文、
   const seen = new Set();
   for (let i = 0; i < 5; i++) seen.add(getTodayStep(j, { wave: 'high' }, new Date(2026, 10, 12 + i), 'INFP').text);
   assert.equal(seen.size, 5);
-  for (const t of seen) assert.ok(CRUSH_STEPS[1].high.IF.includes(t));
+  for (const t of seen) assert.ok(CRUSH16[1].high.INFP.includes(t));
+  // SJの4タイプは E/I×T/F の4まとまりの文
+  const sj = new Set();
+  for (let i = 0; i < 5; i++) sj.add(getTodayStep(j, { wave: 'high' }, new Date(2026, 10, 12 + i), 'ISFJ').text);
+  assert.equal(sj.size, 5);
+  for (const t of sj) assert.ok(CRUSH_STEPS[1].high.IF.includes(t));
   for (const mb of ['ENFP', 'ESTJ', 'INFJ', 'INTP']) {
     for (let i = 0; i < 5; i++) assert.equal(getTodayStep({ mode: 'crush', stage: 0, situation: 'noreply' }, { wave: 'low' }, new Date(2026, 10, 12 + i), mb).wait, true);
   }
@@ -106,4 +113,26 @@ test('今日の一歩（タイプ別）: タイプがあればタイプの文、
   }
   // 告白の段階の追い風の日は、タイプがあっても「決めるのは本人」
   assert.equal(getTodayStep({ mode: 'crush', stage: 3 }, { wave: 'high' }, new Date(2026, 10, 12), 'ESTP').ownChoice, true);
+});
+
+test('今日の一歩（16タイプ別）: 12タイプ×14の段階・状況×3つの流れ×5文、重複なし、タイプ名を出さない、控えめの日の返信待ち・すれ違いは「待つ」言葉', () => {
+  const tables = [...CRUSH16, ...COUPLE16, ...Object.values(SITUATION16)];
+  assert.equal(tables.length, 14);
+  let n = 0;
+  for (const t of tables) for (const w of ['high', 'mid', 'low']) {
+    assert.deepEqual(Object.keys(t[w]).sort(), [...TYPES_12].sort(), w);
+    for (const ty of TYPES_12) {
+      const list = t[w][ty];
+      assert.equal(list.length, 5, `${w}/${ty}: ${list.length}`);
+      assert.equal(new Set(list).size, 5, `重複 ${w}/${ty}`);
+      for (const x of list) assert.doesNotMatch(x, /外向|内向|タイプ|MBTI|16|[EI][NS][TF][JP]/);
+      n += list.length;
+    }
+  }
+  // 12タイプ分 2,520文 ＋ SJの4タイプが使う4まとまり 840文 ＝ 3,360文
+  assert.equal(n, 2520);
+  for (const ty of TYPES_12) {
+    for (const x of SITUATION16.noreply.low[ty]) assert.match(x, /送らない|送らず/);
+    for (const x of SITUATION16.fight.low[ty]) assert.match(x, /話し合わない|話し合わず/);
+  }
 });
