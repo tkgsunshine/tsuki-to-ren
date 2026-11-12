@@ -54,6 +54,8 @@ import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFro
 import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
 import { decideSync, sameProfile, samePartners, type SyncProfile } from './utils/userDataSync';
 import type { PairUnlock, PartnerLock } from './components/ResultView';
+import { CoupleRankTeaser } from './components/CoupleRankTeaser';
+import { rankTopicFromUtm } from './utils/coupleRank';
 
 const formatBirthDate = (val: string): string => {
   const digits = val.replace(/\D/g, '').slice(0, 8);
@@ -68,6 +70,7 @@ const NEW_PARTNER_ID = '__new__';
 // 決済の直前に控える鑑定の入力（このタブだけ）と、読み込んだ時点のURL（?pair= などはすぐ消すため）
 const CHECKOUT_READING_KEY = 'hasu_checkout_reading';
 const INITIAL_SEARCH = typeof window === 'undefined' ? '' : window.location.search;
+const COUPLE_FOCUS_KEY = 'hasu_couple_focus';
 // 決済へ移ったとき購入LPを開いていたら、そのLPで先に見せていたプラン（このタブだけ）。Stripeから戻ったら同じLPを開き直す
 const CHECKOUT_LP_KEY = 'hasu_checkout_lp';
 // 読み込んだ時点の履歴（下の最初の effect で重ね表示を消す前）。ブラウザの「戻る」で読み込み直したとき、購入LPを開いていたかを見る
@@ -199,7 +202,19 @@ function App() {
   };
 
   // コラムの案内で入れてもらった生年月日。入力画面を開いたときに入れておく（ほかの方法で画面を移ったら消す）
-  const [inputPrefill, setInputPrefill] = useState<{ myBirth?: string; oppBirth?: string } | null>(null);
+  const [inputPrefill, setInputPrefill] = useState<{ myBirth?: string; oppBirth?: string; myMbti?: string; oppMbti?: string } | null>(null);
+  // 二人の相性100: X投稿（utm_content=couple-YYYYMMDD-N）から来たお題。入力画面の上に入口を出し、結果画面ではそのお題を開く。
+  // 入力の途中で再読み込みしても残るよう、このタブの間は sessionStorage に控える
+  const [coupleFocusNo] = useState<number | null>(() => {
+    try {
+      const fromUrl = rankTopicFromUtm(new URLSearchParams(INITIAL_SEARCH).get('utm_content'));
+      if (fromUrl) { sessionStorage.setItem(COUPLE_FOCUS_KEY, String(fromUrl)); return fromUrl; }
+      const saved = Number(sessionStorage.getItem(COUPLE_FOCUS_KEY));
+      return saved > 0 ? saved : null;
+    } catch {
+      return rankTopicFromUtm(new URLSearchParams(INITIAL_SEARCH).get('utm_content'));
+    }
+  });
   const handleTabChange = (tab: string) => {
     setInputPrefill(null);
     const cur = readNav();
@@ -1789,6 +1804,16 @@ function App() {
                 ) : (
                 <>
                 <Header currentUser={currentUser} onOpenAuth={() => setShowAuthModal(true)} unreadNotices={notices.unread} onOpenNotices={() => openSubView('news')} />
+                {coupleFocusNo && (
+                  <CoupleRankTeaser
+                    topicNo={coupleFocusNo}
+                    onContinue={(myMbti, oppMbti) => {
+                      setInputPrefill((p) => ({ ...(p || {}), myMbti, oppMbti }));
+                      setInputViewKey((k) => k + 1);
+                      window.setTimeout(() => document.querySelector('.home-input-flow form, .home-input-flow input')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+                    }}
+                  />
+                )}
                 <UnifiedInputView
                   key={inputViewKey}
                   selectedCharacter={selectedCharacter}
@@ -1825,6 +1850,7 @@ function App() {
             {flowStep === 'result' && activeResult && renResult && tsukiResult && (
               <ResultView
                 result={activeResult}
+                coupleFocusNo={coupleFocusNo}
                 renResult={renResult}
                 tsukiResult={tsukiResult}
                 selectedChar={selectedCharacter}
@@ -1867,6 +1893,7 @@ function App() {
             {renResult && tsukiResult && activeResult ? (
               <ResultView
                 result={activeResult}
+                coupleFocusNo={coupleFocusNo}
                 renResult={renResult}
                 tsukiResult={tsukiResult}
                 selectedChar={selectedCharacter}

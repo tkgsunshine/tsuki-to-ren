@@ -56,7 +56,7 @@ interface UnifiedInputViewProps {
   isRegistered?: boolean;
   isSubscribed?: boolean;
   /** コラムの案内で入れてもらった生年月日（YYYY-MM-DD）。入っていれば最初からその値を入れておく */
-  prefill?: { myBirth?: string; oppBirth?: string } | null;
+  prefill?: { myBirth?: string; oppBirth?: string; myMbti?: string; oppMbti?: string } | null;
   /** 「鑑定を開始する」のすぐ下に出すもの（友達紹介の一言・招待コード欄） */
   afterSubmit?: React.ReactNode;
 }
@@ -119,6 +119,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   }, []);
 
   const [myMbti, setMyMbti] = useState(() => {
+    if (prefill?.myMbti && isMbtiCode(prefill.myMbti)) return prefill.myMbti;
     if (urlPair?.my) return urlPair.my;
     try {
       const stored = localStorage.getItem('hasu_user_profile');
@@ -150,6 +151,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const [oppName, setOppName] = useState('');
   const [oppBirth, setOppBirth] = useState(() => prefill?.oppBirth || '');
   const [oppMbti, setOppMbti] = useState(() => {
+    if (prefill?.oppMbti && isMbtiCode(prefill.oppMbti)) return prefill.oppMbti;
     if (urlPair?.opp && isMbtiCode(urlPair.opp)) return urlPair.opp;
     return '';
   });

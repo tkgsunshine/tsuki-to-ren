@@ -36,6 +36,9 @@ import { LuckyDaysSection } from './LuckyDaysSection';
 import type { ReferralStatus } from '../services/referral';
 import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
 import MbtiQuizModal from './MbtiQuizModal';
+import { CoupleHundredSection } from './CoupleHundredSection';
+import type { CoupleAccess } from './CoupleHundredSection';
+import { SINGLE_RANK_NOS, FREE_RANK_NOS } from '../data/coupleTopics';
 import { isMbtiCode } from '../utils/mbtiQuiz';
 
 const GoogleIcon = () => (
@@ -504,6 +507,8 @@ interface ResultViewProps {
   sharedBy?: { name: string };
   /** 招待URL（またはコード）から占った友達: 恋愛運MAX日の直近の1日だけ開く（お相手の有無にかかわらず） */
   referralGift?: boolean;
+  /** 二人の相性100: X投稿（utm_content=couple-…）から来たお題の番号。開いた状態でスクロールし、順位は誰でも見られる */
+  coupleFocusNo?: number | null;
   /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
   referral?: {
     status: ReferralStatus | null;
@@ -546,7 +551,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   sharedBy,
   onSetMbti,
   referral,
-  referralGift = false
+  referralGift = false,
+  coupleFocusNo = null
 }) => {
   const [mbtiQuizFor, setMbtiQuizFor] = useState<'self' | 'partner' | null>(null);
   const [email, setEmail] = useState('');
@@ -1036,6 +1042,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
     </button>
   ) : null;
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
+  // 二人の相性100のランキング50（2026-11-12 TAKASHI）: シングル（¥680）はそのお相手の25本を理由つきで。
+  // 未登録・無料会員は代表2本＋X投稿から来たお題の順位だけ。月額プレミアムは「月のしずく」で開ける（別PR）までの間、50本すべて。
+  const coupleRankAccess = (no: number): CoupleAccess => {
+    if (sharedBy) return FREE_RANK_NOS.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
+    if (isSubscribed) return 'full';
+    if (pairOpen && SINGLE_RANK_NOS.includes(no)) return 'full';
+    return FREE_RANK_NOS.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
+  };
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
   // ロックの文言は全部「続きを見る」に統一（料金・違いは開いた先の購入LPで説明する）
@@ -2606,6 +2620,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
             onRedeem: referral.onRedeem
           } : undefined}
         />
+
+        {/* 二人の相性100（2026-11-12 TAKASHI）: ランキング50。お相手ありの鑑定だけ */}
+        {hasOpponent && (
+          <CoupleHundredSection
+            myMbti={activeResult.myMbtiCode}
+            oppMbti={activeResult.opponentMbtiCode}
+            myName={myName}
+            oppName={oppNickname}
+            rankAccess={coupleRankAccess}
+            focusNo={coupleFocusNo}
+            onLockClick={handleDeepLockClick}
+            lockWord={LOCK_WORD}
+            onAskMbti={!sharedBy && onSetMbti ? (who) => setMbtiQuizFor(who) : undefined}
+          />
+        )}
 
         {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ。結果画面では非表示（TAKASHI判断 2026-11-10。チャットタブは残す） */}
         {SHOW_RESULT_CHAT_CTA && onOpenChat && !sharedBy && (() => {
