@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 
+/** お相手との関係性（鑑定入力・保存したお相手の編集で同じ選択肢） */
+const RELATIONSHIP_OPTIONS = ['片思い中', '両思い・交際中', '復縁したい', '結婚・夫婦', '複雑愛・秘密の恋'];
+
 export interface SavedPartner {
   id: string;
   name: string;
@@ -1026,7 +1029,7 @@ function App() {
       birth: editPartnerBirth,
       mbti: editPartnerMbti,
       gender: editPartnerGender,
-      relationship: editPartnerRel
+      relationship: RELATIONSHIP_OPTIONS.includes(editPartnerRel) ? editPartnerRel : '片思い中'
     };
     if (editingPartnerId === NEW_PARTNER_ID) {
       const newPartner: SavedPartner = { id: `${fields.name}_${fields.birth}_${Date.now()}`, ...fields };
@@ -2976,6 +2979,26 @@ function App() {
                                   男性
                                 </button>
                               </div>
+                            </div>
+
+                            {/* お相手との関係性（鑑定入力と同じ5つ。2026-11-12 TAKASHI「ここに関係性も保存できるように」） */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                              <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>お相手との関係性</label>
+                              <select
+                                value={RELATIONSHIP_OPTIONS.includes(editPartnerRel) ? editPartnerRel : '片思い中'}
+                                onChange={(e) => setEditPartnerRel(e.target.value)}
+                                style={{
+                                  background: 'rgba(15, 21, 30, 0.95)',
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  borderRadius: '8px',
+                                  padding: '0.5rem 0.75rem',
+                                  color: 'white',
+                                  fontSize: '0.78rem',
+                                  outline: 'none'
+                                }}
+                              >
+                                {RELATIONSHIP_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                              </select>
                             </div>
 
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.35rem' }}>
