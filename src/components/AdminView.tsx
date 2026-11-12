@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, signInWithGoogle, logOutUser } from '../services/firebase';
 import { COLUMNS_DATA } from '../data/columnsData';
 import { mbtiOptions } from '../constants/mbti';
+import AdminKpiCharts from './AdminKpiCharts';
 import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../services/analytics';
 
 // Admin page (/admin): visits, fortunes, sign-ups, shares and premium (page → payment page → paid) per day,
@@ -1074,6 +1075,9 @@ export default function AdminView() {
   // sign-up (no email; the buyer signs in with the purchase email and the purchase moves to that real account)
   const members = useMemo(() => allMembers.filter((m) => !m.owner && !m.guest), [allMembers]);
   const ownerCount = allMembers.filter((m) => m.owner).length;
+  // 重要指標グラフ用: 会員（運営者・自動アカウント除く）を作った日時、と /api/admin の鍵
+  const memberCreatedAt = useMemo(() => members.map((m) => m.createdAt), [members]);
+  const getToken = useCallback(() => (user ? user.getIdToken() : Promise.reject(new Error('ログインが必要です'))), [user]);
   const guests = useMemo(() => allMembers.filter((m) => m.guest && !m.owner), [allMembers]);
   const [showGuests, setShowGuests] = useState(false);
   // The first day the per-session counters (鑑定した人・案内を見た人) have data
@@ -1256,6 +1260,8 @@ export default function AdminView() {
 
         {data && (
           <>
+            <AdminKpiCharts getToken={getToken} memberCreatedAt={memberCreatedAt} />
+
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
               <Tile label="訪問" value={totals.visits} sub="ブラウザのセッション単位" />
               <Tile label="鑑定" value={totals.fortunes} sub={`鑑定した人 ${totals.fortuneSessions}（訪問の ${pct(totals.fortuneSessions, totals.visits)}）`} />
