@@ -378,25 +378,22 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian, self = false }: { oppLabe
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
           <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>元気の量</p>
-          {/* 元気の量は電池の形（残量が多いほど緑寄りで明るく）。2026-11-12 TAKASHI「元気の量だから元気っぽい感じに」 */}
-          {(() => {
-            // 1=赤み 2=オレンジ 3=黄 4=黄緑 5=緑（下の説明文と言葉が重なるので、メーターに言葉は添えない）
-            const ENERGY = [{ color: '#e8826b' }, { color: '#efa25a' }, { color: '#f2cd5c' }, { color: '#b9dc62' }, { color: '#7fe08a' }];
-            const e = ENERGY[Math.max(1, Math.min(5, pt.energy)) - 1];
-            return (
-              <span aria-label={`元気の量 5段階中${pt.energy}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                  <span style={{ display: 'inline-flex', gap: '2px', padding: '2px', borderRadius: '4px', border: `1.5px solid ${e.color}`, boxShadow: `0 0 8px ${e.color}55` }}>
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <span key={n} style={{ width: 7, height: 12, borderRadius: '1.5px', background: n <= pt.energy ? e.color : 'rgba(255,255,255,0.08)' }} />
-                    ))}
-                  </span>
-                  <span style={{ width: 3, height: 7, marginLeft: 1, borderRadius: '0 2px 2px 0', background: e.color }} />
-                </span>
-                <span style={{ fontSize: '0.9rem', lineHeight: 1 }} aria-hidden="true">{pt.energy >= 4 ? '⚡' : pt.energy <= 1 ? '💤' : ''}</span>
-              </span>
-            );
-          })()}
+          {/* 元気の量は5つの炎（2026-11-12 TAKASHI「丸じゃなくて別の形」→B案の炎） */}
+          <span aria-label={`元気の量 5段階中${pt.energy}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              {[1, 2, 3, 4, 5].map((n) => {
+                const on = n <= pt.energy;
+                return (
+                  <svg key={n} width="13" height="16" viewBox="0 0 16 20" aria-hidden="true" style={{ filter: on ? `drop-shadow(0 0 3px ${accent}88)` : 'none' }}>
+                    <path d="M8 1 C9 5 14 8 14 13 A6 6 0 0 1 2 13 C2 9 5 8 5 5 C6.5 7 7 8 8 9 C8.5 6 8 4 8 1Z" fill={on ? accent : 'rgba(255,255,255,0.13)'} />
+                  </svg>
+                );
+              })}
+            </span>
+            <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 900, color: accent, lineHeight: 1 }}>
+              {pt.energy}<span style={{ fontSize: '0.62rem', color: '#8f887b', fontWeight: 'bold' }}> / 5</span>
+            </span>
+          </span>
         </div>
         <p style={{ ...body, fontSize: '0.84rem' }}>{pt.energyText}</p>
         <p style={sub}>十二運（じゅうにうん）＝星の元気の段階で、今日は「{pt.energyName}」</p>
