@@ -282,7 +282,6 @@ export const CoupleHundredSection: React.FC<Props> = ({
             </button>
           )}
           <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {RANK_TOPICS.length} 個です{drops ? '（ランキングを押すと、かけらで開けられます）' : ''}</span>
-          {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>
       )}
       {tab === 'rank' && <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>
