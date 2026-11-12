@@ -513,6 +513,8 @@ interface ResultViewProps {
   coupleFocusNo?: number | null;
   /** 月のかけら（ログイン中・お相手ありのときだけ。App.tsx が api/stripe/drops で持つ） */
   coupleDrops?: CoupleDrops | null;
+  /** 月のかけらを読めなかったときの理由（表示用） */
+  coupleDropsError?: string | null;
   /** かけらを1つ使ってお題を開ける。開けたら true */
   onOpenCoupleTopic?: (kind: DropKind, no: number) => Promise<boolean>;
   /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
@@ -560,6 +562,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   referralGift = false,
   coupleFocusNo = null,
   coupleDrops = null,
+  coupleDropsError = null,
   onOpenCoupleTopic
 }) => {
   const [mbtiQuizFor, setMbtiQuizFor] = useState<'self' | 'partner' | null>(null);
@@ -2178,6 +2181,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             lockWord={LOCK_WORD}
             onAskMbti={!sharedBy && onSetMbti ? (who) => setMbtiQuizFor(who) : undefined}
             drops={dropsOn ? coupleDrops : null}
+            dropsError={hasOpponent && !sharedBy ? coupleDropsError : null}
             onDrop={dropsOn ? onOpenCoupleTopic : undefined}
           />
         )}

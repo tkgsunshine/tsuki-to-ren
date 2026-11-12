@@ -48,7 +48,7 @@ const guestPost = async (body: Record<string, unknown>): Promise<{ drops: Couple
   return { drops, ...(error ? { error } : {}) };
 };
 
-const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops | null; error?: 'no_drops' | 'failed' }> => {
+const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops | null; error?: 'no_drops' | 'failed'; reason?: string }> => {
   const auth = getFirebaseAuth();
   await auth.authStateReady();
   const user = auth.currentUser;
@@ -60,7 +60,8 @@ const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops
       body: JSON.stringify(body)
     });
     const data = await res.json().catch(() => null);
-    if (!data || typeof data.balance !== 'number') return { drops: null, error: 'failed' };
+    // 読めなかった理由（HTTPの番号とサーバーの文）を画面に出して、原因を追えるようにする
+    if (!data || typeof data.balance !== 'number') return { drops: null, error: 'failed', reason: `${res.status} ${String(data?.message || '').slice(0, 60)}`.trim() };
     const drops: CoupleDrops = {
       premium: data.premium === true,
       balance: data.balance,
@@ -75,8 +76,8 @@ const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops
       })()
     };
     return { drops, ...(res.status === 409 ? { error: 'no_drops' as const } : res.ok ? {} : { error: 'failed' as const }) };
-  } catch {
-    return { drops: null, error: 'failed' };
+  } catch (e) {
+    return { drops: null, error: 'failed', reason: `通信エラー ${String((e as Error)?.message || '').slice(0, 60)}`.trim() };
   }
 };
 

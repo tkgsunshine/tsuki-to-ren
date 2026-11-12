@@ -40,6 +40,7 @@ interface Props {
   onAskMbti?: (who: 'self' | 'partner') => void;
   /** 月のかけら（ログイン中だけ）。あるとき、ロック中のお題はかけら1つで開ける */
   drops?: CoupleDrops | null;
+  dropsError?: string | null;
   onDrop?: (kind: DropKind, no: number) => Promise<boolean>;
 }
 
@@ -123,7 +124,7 @@ function RankCard({ title, rank, reason, a, b, reasonOpen, onLockClick, lockWord
 }
 
 export const CoupleHundredSection: React.FC<Props> = ({
-  myMbti, oppMbti, myName, oppName, myPillar, myStar, oppPillar, oppStar, rankAccess, readingAccess, focusNo = null, pinnedNos = [], onLockClick, lockWord, onAskMbti, drops = null, onDrop
+  myMbti, oppMbti, myName, oppName, myPillar, myStar, oppPillar, oppStar, rankAccess, readingAccess, focusNo = null, pinnedNos = [], onLockClick, lockWord, onAskMbti, drops = null, dropsError = null, onDrop
 }) => {
   // タブは左にMBTIランキング50、右に本格鑑定50（2026-11-12 TAKASHI「MBTIランキングを左にして」）。最初は左（ランキング）を開く
   const [tab, setTab] = useState<'reading' | 'rank'>('rank');
@@ -204,6 +205,12 @@ export const CoupleHundredSection: React.FC<Props> = ({
         </div>
       )}
       {drops && <DropBalance drops={drops} />}
+      {!drops && dropsError && (
+        <p style={{ margin: 0, textAlign: 'center', fontSize: '0.74rem', lineHeight: 1.6, color: '#cfc3a0' }}>
+          月のかけらを読み込めませんでした。ページを読み込み直してください。<br />
+          <span style={{ fontSize: '0.66rem', color: '#8f8778' }}>（{dropsError}）</span>
+        </p>
+      )}
 
       {tab === 'reading' ? (
         mePerson && oppPerson ? (

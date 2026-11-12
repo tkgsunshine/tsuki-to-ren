@@ -1325,10 +1325,11 @@ function App() {
   const signedInUid = currentUser?.uid;
   // 月のかけら（二人の相性100のお題を1つずつ開ける）。ログイン中・お相手ありの結果を開いたときに読む（補充もこのとき計算）
   const [coupleDrops, setCoupleDrops] = useState<CoupleDrops | null>(null);
+  const [coupleDropsError, setCoupleDropsError] = useState<string | null>(null);
   useEffect(() => {
-    if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth) { setCoupleDrops(null); return; }
+    if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth) { setCoupleDrops(null); setCoupleDropsError(null); return; }
     let cancelled = false;
-    void fetchCoupleDrops(oppBirth).then((r) => { if (!cancelled) setCoupleDrops(r.drops); });
+    void fetchCoupleDrops(oppBirth).then((r) => { if (!cancelled) { setCoupleDrops(r.drops); setCoupleDropsError(r.drops ? null : (r.reason || '不明')); } });
     return () => { cancelled = true; };
   }, [flowStep, renResult, mode, oppBirth, signedInUid, isSubscribed]);
   const handleOpenCoupleTopic = useCallback(async (kind: DropKind, no: number) => {
@@ -1869,6 +1870,7 @@ function App() {
                 result={activeResult}
                 coupleFocusNo={coupleFocusNo}
                 coupleDrops={coupleDrops}
+                coupleDropsError={coupleDropsError}
                 onOpenCoupleTopic={handleOpenCoupleTopic}
                 renResult={renResult}
                 tsukiResult={tsukiResult}
@@ -1914,6 +1916,7 @@ function App() {
                 result={activeResult}
                 coupleFocusNo={coupleFocusNo}
                 coupleDrops={coupleDrops}
+                coupleDropsError={coupleDropsError}
                 onOpenCoupleTopic={handleOpenCoupleTopic}
                 renResult={renResult}
                 tsukiResult={tsukiResult}
