@@ -1727,9 +1727,9 @@ function App() {
       '--color-theme-accent': selectedCharacter === 'tsuki' ? '#9f86c0' : '#3a86ab',
       '--shadow-theme-glow': selectedCharacter === 'tsuki' ? '0 0 15px rgba(159, 134, 192, 0.45)' : '0 0 15px rgba(58, 134, 171, 0.45)',
     } as React.CSSProperties}>
-      {/* Dynamic Background Glow Orb (Smooth transition) */}
+      {/* Dynamic Background Glow Orb (Smooth transition)。ページがスクロールしても画面上の同じ位置に出す */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         top: '15%',
         left: '50%',
         transform: 'translateX(-50%)',

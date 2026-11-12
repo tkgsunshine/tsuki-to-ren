@@ -561,8 +561,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           torisetsuRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
           return;
         }
-        const mainEl = document.querySelector('.main-content') as HTMLElement | null;
-        if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
         resultTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 150);
@@ -635,22 +633,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
     };
 
     const handleWindowScroll = () => checkScroll(window);
-    const mainEl = document.querySelector('.main-content') as HTMLElement;
-    const handleMainScroll = () => {
-      if (mainEl) checkScroll(mainEl);
-    };
-
     window.addEventListener('scroll', handleWindowScroll, { passive: true });
-    if (mainEl) {
-      mainEl.addEventListener('scroll', handleMainScroll, { passive: true });
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handleWindowScroll);
-      if (mainEl) {
-        mainEl.removeEventListener('scroll', handleMainScroll);
-      }
-    };
+    return () => window.removeEventListener('scroll', handleWindowScroll);
   }, []);
 
   const handleDismissA2hsBanner = (e: React.MouseEvent) => {
@@ -977,9 +961,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   }, [activeResult.baseScore, activeResult.dailyScore]);
 
   useEffect(() => {
-    const mainEl = document.querySelector('.main-content');
-    if (!mainEl) return;
-
     const handleScroll = () => {
       if (!myAstrologyRef.current) return;
       const rect = myAstrologyRef.current.getBoundingClientRect();
@@ -987,9 +968,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setIsPastGuardian(isPast);
     };
 
-    mainEl.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => mainEl.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const registerCardRef = React.useRef<HTMLDivElement>(null);
