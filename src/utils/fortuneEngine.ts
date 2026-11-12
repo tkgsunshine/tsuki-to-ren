@@ -1808,6 +1808,10 @@ export function getBranchCompatibility(myBranch: string, oppBranch: string, myNi
   };
 }
 
+/** 魁罡（かいごう）の日柱。伝統どおり、庚辰・壬辰・戊戌・庚戌の4つ */
+export const KAIGOU_PILLARS = ['庚辰', '壬辰', '戊戌', '庚戌'];
+export const isKaigoPillar = (pillar: string) => KAIGOU_PILLARS.includes(pillar);
+
 // 4. 九星気学 本命星相性判定
 export function getStarCompatibility(myStar: string, oppStar: string, myNick = 'あなた', oppNick = 'お相手') {
   const elA = starElements[myStar] || '水';
@@ -2456,14 +2460,15 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   // 自分のみモードか相手ありモードか判定
   const hasOpponent = !!input.opponentBirth || !!input.opponentMbti;
   
-  // 7% probability check for 極星 (Gokusei), 3.3% probability check for 魁罡 (Kaigo) across all zodiacs
+  // 魁罡は伝統どおり、日柱が庚辰・壬辰・戊戌・庚戌のとき（60通り中4つ＝約6.7%）。
+  // 極星はアプリ独自の演出（伝統の星ではない）なので、生年月日のハッシュで約7%のまま。魁罡の人には出さない。
   const myHashSeed = input.myBirth;
   let myHash = 0;
   for (let i = 0; i < myHashSeed.length; i++) {
     myHash = myHashSeed.charCodeAt(i) + ((myHash << 5) - myHash);
   }
   const absMyHash = Math.abs(myHash);
-  const isKaigo = (absMyHash % 1000) < 33; // 3.3% probability across all 12 zodiac animals
+  const isKaigo = isKaigoPillar(myPillar);
   const isRare = !isKaigo && (absMyHash % 100) < 7; // 7% probability for Gokusei
 
   // 自分の守護獣アバターの決定
@@ -2503,14 +2508,14 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     oppPillarObj = calculateDayPillar(oppDate);
     opponentPillar = `${oppPillarObj.stem}${oppPillarObj.branch}`;
     opponentStarObj = calculateHonmeiStar(oppDate);
-    // 7% probability for Gokusei, 3.3% probability for Kaigo
+    // 魁罡は日柱で判定（伝統どおり）。極星はハッシュで約7%（アプリ独自）
     const oppHashSeed = input.opponentBirth;
     let oppHash = 0;
     for (let i = 0; i < oppHashSeed.length; i++) {
       oppHash = oppHashSeed.charCodeAt(i) + ((oppHash << 5) - oppHash);
     }
     const absOppHash = Math.abs(oppHash);
-    opponentIsKaigo = (absOppHash % 1000) < 33; // 3.3% probability across all 12 zodiac animals
+    opponentIsKaigo = isKaigoPillar(opponentPillar);
     opponentIsRare = !opponentIsKaigo && (absOppHash % 100) < 7;
 
     oppStemTheme = stemThemes[oppPillarObj.stem] || { theme: '守護者', desc: 'オーラ', element: '木', color: '金' };

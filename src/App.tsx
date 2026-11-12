@@ -677,7 +677,7 @@ function App() {
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', dynamicDesc);
     } else if (params.get('type') === 'kaigou') {
-      document.title = `【四柱推命 魁罡（かいごう）】約3.3%の強運特殊干支・恋愛運勢鑑定 | 月と蓮`;
+      document.title = `【四柱推命 魁罡（かいごう）】約15人に1人の強運特殊干支・恋愛運勢鑑定 | 月と蓮`;
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', '四柱推命において極めて珍しい強運・カリスマの特殊星「魁罡（かいごう）」の性格特徴、相性の良い相手、恋愛開運バイオリズムを本格解密。');
     }
@@ -3206,7 +3206,7 @@ function App() {
                         魁罡
                       </span>
                       <span style={{ fontSize: '0.68rem', color: '#e6a99c', fontWeight: 'bold' }}>
-                        出現率：3.3%
+                        約15人に1人
                       </span>
                     </div>
 
@@ -3249,7 +3249,7 @@ function App() {
 
                   <div style={{ fontSize: '0.74rem', color: '#d5cfc3', lineHeight: '1.55', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                     <div>
-                      <strong style={{ color: '#fbcfe8' }}>・魁罡（かいごう：3.3%）</strong>：全12干支キャラクターすべてにおいて3.3%の確率で宿る強力な神殺の化身。強烈なカリスマと勝負運を持つオーラが発動します。
+                      <strong style={{ color: '#fbcfe8' }}>・魁罡（かいごう：約15人に1人）</strong>：生まれた日の干支（日柱）が庚辰・壬辰・戊戌・庚戌の人に宿る、強力な神殺の化身。強烈なカリスマと勝負運を持つオーラが発動します。
                     </div>
                     <div>
                       <strong style={{ color: '#fbcfe8' }}>・選ばれし極星（7.0%）</strong>：全キャラクターに7.0%の確率で宿る幸運のソウルメイト属性。黄金ホログラムの虹色光彩エフェクトが発動します。
