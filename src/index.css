@@ -1389,18 +1389,52 @@ body.chat-keyboard-open .chat-partner-picker {
 /* 守護獣の称号バッジ（例: 要塞の守護者 × 猿） */
 .astro-title-badge {
   display: inline-block;
-  padding: 0.45rem 1.1rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(48, 36, 12, 0.92) 0%, rgba(14, 20, 29, 0.92) 100%);
-  border: 1.5px solid rgba(226, 192, 116, 0.75);
-  box-shadow: 0 0 14px rgba(226, 192, 116, 0.28), inset 0 0 10px rgba(226, 192, 116, 0.12);
-  color: #fde68a;
-  font-size: 1.08rem;
+  font-size: 1.45rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  line-height: 1.35;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
   text-align: center;
-  text-shadow: 0 0 8px rgba(242, 226, 179, 0.45), 0 1px 3px rgba(0, 0, 0, 0.9);
+  background: linear-gradient(180deg, #fff6d5 0%, #e2c074 60%, #b8892e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
+}
+
+/* 称号の下の短い金の線 */
+.astro-title-badge::after {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 1px;
+  margin: 0.35rem auto 0;
+  background: linear-gradient(90deg, transparent, #e2c074, transparent);
+}
+
+/* 守護獣カードの見出し（枠なし）: 小さな GUARDIAN ＋ 「〇〇さんの守護獣」 */
+.guardian-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0.8rem 0 0.25rem;
+  position: relative;
+  z-index: 4;
+  max-width: calc(100% - 0.5rem);
+}
+.guardian-head-en {
+  font-size: 0.68rem;
+  letter-spacing: 0.35em;
+  color: rgba(226, 192, 116, 0.8);
+}
+.guardian-head-ja {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #f2e2b3;
+  margin-top: 0.1rem;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(242, 226, 179, 0.4), 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 /* ×などの小さなボタン: 見た目はそのまま、タップできる範囲を44×44px以上に広げる。

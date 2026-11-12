@@ -1796,31 +1796,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               overflow: 'hidden'
             }}
           >
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem',
-              padding: '0.25rem 0.95rem',
-              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%), rgba(11, 15, 21, 0.72)',
-              border: '1.5px solid rgba(226, 192, 116, 0.45)',
-              borderRadius: '20px',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-              position: 'relative',
-              margin: '0.7rem 0 0.3rem',
-              maxWidth: 'calc(100% - 0.5rem)',
-              whiteSpace: 'nowrap',
-              zIndex: 4
-            }}>
-              <span className="font-serif" style={{
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-                color: '#f2e2b3',
-                textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                letterSpacing: '0.05em'
-              }}>
-                ✦ {san(myName, 'あなた')}の守護獣 ✦
-              </span>
+            {/* 見出しは枠なし（2026-11-13 TAKASHI「B」）: 小さな GUARDIAN ＋ 名前 */}
+            <div className="guardian-head font-serif">
+              <span className="guardian-head-en">GUARDIAN</span>
+              <span className="guardian-head-ja">{san(myName, 'あなた')}の守護獣</span>
             </div>
 
             {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の下側に重ねる。見出しは顔にかぶらないよう画像の外（上）に置く */}
@@ -1844,7 +1823,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               </div>
 
               <div className="guardian-hero-caption">
-                {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                {/* 称号（タイプを覚えるための呼び名）。枠なしの金の文字＋下に短い線 */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
                   <span className="astro-title-badge font-serif">
                     {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
@@ -1976,31 +1955,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 overflow: 'hidden'
               }}
             >
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                padding: '0.25rem 0.95rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%), rgba(11, 15, 21, 0.72)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                position: 'relative',
-                margin: '0.7rem 0 0.3rem',
-                maxWidth: 'calc(100% - 0.5rem)',
-                whiteSpace: 'nowrap',
-                zIndex: 4
-              }}>
-                <span className="font-serif" style={{
-                  fontSize: '0.9rem',
-                  fontWeight: 'bold',
-                  color: '#f2e2b3',
-                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.05em'
-                }}>
-                  ✦ {san(oppNickname)}の守護獣 ✦
-                </span>
+              {/* 見出しは枠なし（2026-11-13 TAKASHI「B」）: 小さな GUARDIAN ＋ 名前 */}
+              <div className="guardian-head font-serif">
+                <span className="guardian-head-en">GUARDIAN</span>
+                <span className="guardian-head-ja">{san(oppNickname)}の守護獣</span>
               </div>
 
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の下側に重ねる。見出しは顔にかぶらないよう画像の外（上）に置く */}
@@ -2024,7 +1982,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
 
                 <div className="guardian-hero-caption">
-                  {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                  {/* 称号（タイプを覚えるための呼び名）。枠なしの金の文字＋下に短い線 */}
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
                     <span className="astro-title-badge font-serif">
                       {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
