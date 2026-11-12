@@ -1329,7 +1329,9 @@ function App() {
   useEffect(() => {
     if (flowStep !== 'result' || !renResult || mode !== 'match' || !oppBirth) { setCoupleDrops(null); setCoupleDropsError(null); return; }
     let cancelled = false;
-    void fetchCoupleDrops(oppBirth).then((r) => { if (!cancelled) { setCoupleDrops(r.drops); setCoupleDropsError(r.drops ? null : (r.reason || '不明')); } });
+    void fetchCoupleDrops(oppBirth)
+      .then((r) => { if (!cancelled) { setCoupleDrops(r.drops); setCoupleDropsError(r.drops ? null : (r.reason || '不明')); } })
+      .catch((e) => { if (!cancelled) setCoupleDropsError(`読み込みエラー ${String((e as Error)?.message || '').slice(0, 60)}`); });
     return () => { cancelled = true; };
   }, [flowStep, renResult, mode, oppBirth, signedInUid, isSubscribed]);
   const handleOpenCoupleTopic = useCallback(async (kind: DropKind, no: number) => {

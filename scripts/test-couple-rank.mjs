@@ -11,7 +11,8 @@ test('X投稿済みの17お題: お題名・136組の点・並び・Xに載せ�
   assert.deepEqual(COUPLE_TYPES, X.COUPLE_TYPES);
   X.COUPLE_THEMES.forEach(([title], ti) => {
     const topic = RANK_TOPICS.find((t) => t.no === COUPLE_THEMES[ti].no);
-    assert.equal(topic.title, title, `themeIndex ${ti}`);
+    // 名前を逆の意味にしたもの（flip）はアプリの名前が違う（2026-11-13 TAKASHI「1位が良い方に統一」）
+    if (!COUPLE_THEMES[ti].flip) assert.equal(topic.title, title, `themeIndex ${ti}`);
     assert.ok(topic.posted, `${title} は X投稿済み`);
     const mine = rankAllPairs(ti), theirs = X.rankAllPairs(ti);
     assert.deepEqual(mine.map((p) => [p.a, p.b, p.s]), theirs.map((p) => [p.a, p.b, p.s]), title);
@@ -19,12 +20,13 @@ test('X投稿済みの17お題: お題名・136組の点・並び・Xに載せ�
   });
 });
 
-test('X投稿の1〜30位の組は、画面でも同じ順位（入力の順番は問わない）', () => {
+test('X投稿の1〜30位の組は、画面でも同じ順位（名前を逆にしたものは逆順＝137−X順位。入力の順番は問わない）', () => {
   X.COUPLE_THEMES.forEach((_, ti) => {
     const no = COUPLE_THEMES[ti].no;
     X.pickPostPairs(ti).forEach((p, k) => {
-      assert.equal(coupleRank(no, p.a, p.b).rank, k + 1);
-      assert.equal(coupleRank(no, p.b.toLowerCase(), p.a).rank, k + 1);
+      const want = COUPLE_THEMES[ti].flip ? 136 - k : k + 1;
+      assert.equal(coupleRank(no, p.a, p.b).rank, want);
+      assert.equal(coupleRank(no, p.b.toLowerCase(), p.a).rank, want);
     });
   });
 });

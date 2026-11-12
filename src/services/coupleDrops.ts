@@ -49,9 +49,13 @@ const guestPost = async (body: Record<string, unknown>): Promise<{ drops: Couple
 };
 
 const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops | null; error?: 'no_drops' | 'failed'; reason?: string }> => {
-  const auth = getFirebaseAuth();
-  await auth.authStateReady();
-  const user = auth.currentUser;
+  // ログイン状態の確認が失敗・長引いても、未登録として端末のかけらを出す（表示ごと消えないように）
+  let user: Awaited<ReturnType<typeof getFirebaseAuth>>['currentUser'] = null;
+  try {
+    const auth = getFirebaseAuth();
+    await Promise.race([auth.authStateReady(), new Promise((r) => setTimeout(r, 4000))]);
+    user = auth.currentUser;
+  } catch { user = null; }
   if (!user) return guestPost(body);
   try {
     const res = await fetch('/api/stripe/drops', {
