@@ -565,11 +565,19 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
   // 表示する月（今月／翌月をタップで切り替え。2026-11-12 TAKASHI）
   const [monthIdx, setMonthIdx] = useState(() => Math.max(0, months.findIndex((m) => m.current)));
   const diffText = diff === null ? null : diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0';
-  const LEVEL = {
-    up: { label: '良い', bg: 'linear-gradient(160deg, #e9cf8a, #c9a24a)', border: '#f2e2b3', color: '#2a1d05' },
-    flat: { label: 'ふつう', bg: 'rgba(255,255,255,0.1)', border: 'rgba(255,255,255,0.18)', color: '#ffffff' },
-    down: { label: '控えめ', bg: 'linear-gradient(160deg, #3f6684, #2c4a63)', border: 'rgba(156,198,216,0.6)', color: '#ffffff' }
-  } as const;
+  // 点数が高い日ほど濃い金（1色の濃淡。2026-11-12 TAKASHI「点数が高いほど濃く」）
+  // 濃さは、この二人の3か月分の最低点〜最高点の中での位置で決める（基本の相性が高い二人でも差が見えるように）
+  const allScores = months.flatMap((m) => m.days.map((d) => d.score));
+  const lo = Math.min(...allScores);
+  const hi = Math.max(...allScores);
+  const shade = (score: number) => {
+    const t = hi > lo ? (score - lo) / (hi - lo) : 0.5;
+    return {
+      bg: `rgba(212, 175, 55, ${(0.06 + t * 0.84).toFixed(2)})`,
+      border: `rgba(242, 226, 179, ${(0.15 + t * 0.55).toFixed(2)})`,
+      color: t > 0.6 ? '#2a1d05' : '#ffffff'
+    };
+  };
   const today = now.getDate();
   return (
     <section style={{ ...card, gap: '0.8rem', border: '1px solid rgba(226,192,116,0.45)', background: 'linear-gradient(160deg, rgba(212,175,55,0.12), rgba(255,255,255,0.03))' }}>
@@ -605,12 +613,10 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
               <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{mo.year !== now.getFullYear() ? `${mo.year}年` : ''}{mo.month + 1}月の恋の暦</span>
               <button type="button" aria-label="次の月" disabled={monthIdx >= months.length - 1} onClick={() => setMonthIdx((i) => Math.min(months.length - 1, i + 1))} style={monthArrow(monthIdx >= months.length - 1)}>›</button>
             </span>
-            <span style={{ display: 'flex', gap: '0.5rem', fontSize: '0.64rem', color: '#a9a293' }}>
-              {(['up', 'flat', 'down'] as const).map((k) => (
-                <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
-                  <span style={{ width: 9, height: 9, borderRadius: 3, background: LEVEL[k].bg, border: `1px solid ${LEVEL[k].border}` }} />{LEVEL[k].label}
-                </span>
-              ))}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.64rem', color: '#a9a293' }}>
+              低い
+              <span style={{ width: 54, height: 9, borderRadius: 3, background: 'linear-gradient(90deg, rgba(212,175,55,0.08), rgba(212,175,55,0.9))', border: '1px solid rgba(242,226,179,0.35)' }} />
+              高い
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem' }}>
@@ -619,17 +625,19 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
             ))}
             {cells.map((c, i) => {
               if (!c) return <span key={i} />;
-              const lv = LEVEL[getScoreMood(base, c.score).trend];
+              const lv = shade(c.score);
               const isToday = mo.current && c.day === today;
               const past = mo.before || (mo.current && c.day < today);
               return (
                 <div key={i} style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.05rem',
+                  position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   aspectRatio: '1 / 1', borderRadius: '9px', background: lv.bg, border: isToday ? '2px solid #ffffff' : `1px solid ${lv.border}`,
-                  boxShadow: isToday ? '0 0 12px rgba(255,255,255,0.55)' : 'none', filter: past ? 'saturate(0.55) brightness(0.8)' : 'none'
+                  boxShadow: isToday ? '0 0 12px rgba(255,255,255,0.55)' : 'none', opacity: past ? 0.6 : 1
                 }}>
-                  <span style={{ fontSize: '0.66rem', fontWeight: 'bold', lineHeight: 1, color: lv.color, opacity: 0.85 }}>{c.day}{isToday ? ' 今日' : ''}</span>
-                  <span className="font-serif" style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1.05, color: lv.color }}>{c.score}</span>
+                  {/* 日付は左上に小さく、点数は真ん中に大きく（2026-11-12 TAKASHI「日付と点数の差が分かりづらい」） */}
+                  <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: lv.color, opacity: 0.7 }}>{c.day}</span>
+                  {isToday && <span style={{ position: 'absolute', top: -7, right: -3, fontSize: '0.5rem', fontWeight: 'bold', lineHeight: 1, color: '#0b0f15', background: '#ffffff', borderRadius: '6px', padding: '2px 4px' }}>今日</span>}
+                  <span className="font-serif" style={{ fontSize: '1.08rem', fontWeight: 900, lineHeight: 1, color: lv.color, marginTop: '0.35rem' }}>{c.score}</span>
                 </div>
               );
             })}
