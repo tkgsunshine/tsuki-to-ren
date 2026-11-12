@@ -1189,6 +1189,25 @@ body.chat-keyboard-open .chat-partner-picker {
   white-space: nowrap;
 }
 
+/* 未登録に見せる伏せ字「〇〇〇〇〇」。タップで「続きを見る」と同じ動き */
+.masked-word {
+  display: inline-block;
+  color: var(--color-gold);
+  letter-spacing: 0.04em;
+  padding: 0 2px;
+  margin: 0 1px;
+  border-bottom: 1px dashed rgba(226, 192, 116, 0.75);
+  text-shadow: 0 0 8px rgba(226, 192, 116, 0.45);
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .masked-word { animation: masked-word-glow 2.4s ease-in-out infinite; }
+}
+@keyframes masked-word-glow {
+  50% { text-shadow: 0 0 2px rgba(226, 192, 116, 0.15); }
+}
+
 .premium-lock-tag:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(226, 192, 116, 0.2);

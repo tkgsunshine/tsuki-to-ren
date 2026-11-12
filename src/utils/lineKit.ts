@@ -1,5 +1,5 @@
 // トリセツの「そのまま使えるLINEキラーテンプレート」の中身。
-// お相手の性格タイプ（MBTI）の4文字と、生まれ持った星（日柱の天干）から、
+// お相手の性格タイプ（MBTI）の4文字から（タイプがわからないときは生まれ持った星＝日柱の天干から）、
 // 1) お相手のLINEのタイプ（返信のペース・書き方など）の分析、2) 場面別にそのまま送れる文と効く理由、3) やりがちなNGと直し方 を作る。
 // 性格タイプが未入力のときは、星の五行（木火土金水）ごとの文を使う。
 // 鑑定の点数には関係しない（表示だけ）。fortuneEngine.ts は import を持てないので、こちらに分けている。
@@ -303,15 +303,17 @@ export function buildLineKit(oppMbtiCode: string | undefined, oppPillar: string 
     why: set[key][1]
   }));
 
+  // 送る文・響く言葉は「行動」なので、タイプがわかるときは16タイプだけで作る（2026-11-12 TAKASHI方針）。
+  // タイプがわからないときだけ、生まれ持った星（五行）から作る。
   const style: LineKit['style'] = known ? styleFromMbti(oppMbtiCode!) : [];
-  if (element) {
+  if (!known && element) {
     style.push({ label: '生まれ持った星から見た、響く言葉', text: STEM_POINT[stem] });
-    if (!known) style.unshift({ label: 'LINEの好み', text: ELEMENT_STYLE[element] });
+    style.unshift({ label: 'LINEの好み', text: ELEMENT_STYLE[element] });
   }
 
   return {
     basis: known
-      ? `${oppMbtiCode!.toUpperCase()}タイプ${element ? ' × 生まれ持った星' : ''}から分析`
+      ? 'お相手のLINEのくせから分析'
       : '生まれ持った星から分析',
     style,
     scenes,
