@@ -105,12 +105,10 @@ export const DropPanel: React.FC<{
           {drops.guest ? 'はじめての月のかけらは使い切りました。無料の会員登録で、毎日2個届きます。' : `今日の月のかけらは使い切りました。明日また${drops.daily}個届きます。`}
         </span>
       )}
-      <span style={{ fontSize: '0.7rem', color: '#cfc3a0', textAlign: 'center', lineHeight: 1.6 }}>
-        のこり {drops.balance}個。一度開けたランキング・テーマは、ずっと見られます。
-      </span>
-      {!drops.premium && (
+      {/* 「のこり〇個…」の文と「続きを見る」は削除（2026-11-13 TAKASHI）。かけらが0のときだけ、登録・購入への案内ボタンを出す */}
+      {empty && !drops.premium && (
         <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>
-          {empty && drops.guest ? '無料の会員登録で、かけらをもらう' : lockWord}
+          {drops.guest ? '無料の会員登録で、かけらをもらう' : lockWord}
         </button>
       )}
     </div>
