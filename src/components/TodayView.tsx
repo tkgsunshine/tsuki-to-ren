@@ -246,6 +246,14 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         />
       )}
 
+      {/* 今日の恋の過ごし方 */}
+      {topic && (
+        <section style={card}>
+          <h3 className="font-serif" style={h3}>{topic.title}</h3>
+          <p style={body}>{topic.text}</p>
+        </section>
+      )}
+
       {/* LINE吉時間と助言 */}
       {/* 鑑定書の「本日のLINE吉時間 ＆ 運勢」と同じ緑のデザイン（2026-11-12 TAKASHI） */}
       <section style={{
@@ -278,14 +286,6 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
           {advice.filter(Boolean).map((t, i) => <p key={i} style={{ ...body, fontSize: '0.84rem', lineHeight: 1.75 }}>{t}</p>)}
         </div>
       </section>
-
-      {/* 今日の恋の過ごし方 */}
-      {topic && (
-        <section style={card}>
-          <h3 className="font-serif" style={h3}>{topic.title}</h3>
-          <p style={body}>{topic.text}</p>
-        </section>
-      )}
 
       {/* 月・蓮にそのまま相談（質問の候補） */}
       {onOpenChat && (
