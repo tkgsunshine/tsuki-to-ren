@@ -146,7 +146,6 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
               ほかのテーマも見る（あと{READING_TOPICS.length - shown.size}個）
             </button>
           )}
-          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {READING_TOPICS.length} 個です{drops ? '（テーマを押すと、かけらで開けられます）' : ''}</span>
         </div>
       )}
       <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>
