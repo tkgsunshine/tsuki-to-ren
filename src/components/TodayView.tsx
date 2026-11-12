@@ -289,7 +289,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            {questions.map((q) => (
+            {questions.slice(0, 2).map((q) => (
               <button key={q} type="button" onClick={() => ask(q)} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', textAlign: 'left',
                 padding: '0.55rem 0.75rem', borderRadius: '12px', cursor: 'pointer', fontSize: '0.8rem', lineHeight: 1.5,
