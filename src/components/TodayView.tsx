@@ -236,6 +236,16 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         />
       )}
 
+      {/* 〇〇さんの今日（あなたの今日のすぐ下。2026-11-12 TAKASHI） */}
+      {partnerToday && stars?.partner && (
+        <PartnerTodayCard
+          oppLabel={oppLabel}
+          pt={partnerToday}
+          p={stars.partner}
+          guardian={result.opponentAvatarUrl ? { img: result.opponentAvatarUrl, name: result.opponentAstrologyName || '', theme: (result.opponentAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
+        />
+      )}
+
       {/* LINE吉時間と助言 */}
       {/* 鑑定書の「本日のLINE吉時間 ＆ 運勢」と同じ緑のデザイン（2026-11-12 TAKASHI） */}
       <section style={{
@@ -303,16 +313,6 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
       )}
 
       {/* ② お相手の今日（と、それに合わせた今日の一歩） */}
-      {/* 〇〇さんの今日（星から見たお相手の今日の傾向） */}
-      {partnerToday && stars?.partner && (
-        <PartnerTodayCard
-          oppLabel={oppLabel}
-          pt={partnerToday}
-          p={stars.partner}
-          guardian={result.opponentAvatarUrl ? { img: result.opponentAvatarUrl, name: result.opponentAstrologyName || '', theme: (result.opponentAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
-        />
-      )}
-
       {/* 二人の道のりと、今日の一歩 */}
       {partnerToday && (
         <StepCard
