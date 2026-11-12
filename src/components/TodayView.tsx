@@ -540,6 +540,9 @@ const monthArrow = (off: boolean): React.CSSProperties => ({
 type CalMonth = { year: number; month: number; days: { day: number; score: number }[]; current: boolean; before: boolean };
 
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
+// 恋の暦の色の段階（低い→高い）
+const SCALE_STOPS: [number, number, number][] = [[44, 58, 98], [96, 70, 138], [168, 88, 124], [216, 140, 78], [242, 206, 106]];
+
 function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
   months: CalMonth[]; luckTitle?: string; specials: NextDay[];
@@ -556,12 +559,19 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
   const allScores = months.flatMap((m) => m.days.map((d) => d.score));
   const lo = Math.min(...allScores);
   const hi = Math.max(...allScores);
+  // 低い日＝夜の藍 → 紫 → 薔薇色 → 橙 → 高い日＝金（2026-11-12 TAKASHI「1色だと地味」）
   const shade = (score: number) => {
     const t = hi > lo ? (score - lo) / (hi - lo) : 0.5;
+    const stops = SCALE_STOPS;
+    const x = t * (stops.length - 1);
+    const i = Math.min(stops.length - 2, Math.floor(x));
+    const f = x - i;
+    const mix = (k: number) => Math.round(stops[i][k] + (stops[i + 1][k] - stops[i][k]) * f);
+    const rgb = `${mix(0)}, ${mix(1)}, ${mix(2)}`;
     return {
-      bg: `rgba(212, 175, 55, ${(0.06 + t * 0.84).toFixed(2)})`,
-      border: `rgba(242, 226, 179, ${(0.15 + t * 0.55).toFixed(2)})`,
-      color: t > 0.6 ? '#2a1d05' : '#ffffff'
+      bg: `rgba(${rgb}, 0.92)`,
+      border: t > 0.85 ? 'rgba(255, 240, 200, 0.8)' : `rgba(${rgb}, 1)`,
+      color: t > 0.7 ? '#2a1d05' : '#ffffff'
     };
   };
   const today = now.getDate();
@@ -601,7 +611,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.64rem', color: '#a9a293' }}>
               低い
-              <span style={{ width: 54, height: 9, borderRadius: 3, background: 'linear-gradient(90deg, rgba(212,175,55,0.08), rgba(212,175,55,0.9))', border: '1px solid rgba(242,226,179,0.35)' }} />
+              <span style={{ width: 54, height: 9, borderRadius: 3, background: `linear-gradient(90deg, ${SCALE_STOPS.map((c) => `rgb(${c.join(',')})`).join(', ')})` }} />
               高い
             </span>
           </div>
