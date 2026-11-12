@@ -88,14 +88,20 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
   useEffect(() => {
     if (selectedChar !== 'tsuki') setSelectedChar('tsuki');
   }, [selectedChar, setSelectedChar]);
-  // 今月の毎日の点数（カレンダー用。今日は表示中の点数そのもの）
-  const month = useMemo(() => {
-    if (!input) return [] as { day: number; score: number }[];
-    const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    return Array.from({ length: last }, (_, i) => {
-      const day = i + 1;
-      if (day === now.getDate()) return { day, score: result.dailyScore };
-      return { day, score: generateFortuneResult(input, 'tsuki', new Date(now.getFullYear(), now.getMonth(), day, 12)).dailyScore };
+  // 今月と翌月の毎日の点数（カレンダー用。今日は表示中の点数そのもの。翌月も出す 2026-11-12 TAKASHI）
+  const months = useMemo(() => {
+    if (!input) return [] as CalMonth[];
+    return [0, 1].map((k) => {
+      const y = now.getFullYear();
+      const m = now.getMonth() + k;
+      const first = new Date(y, m, 1);
+      const last = new Date(y, m + 1, 0).getDate();
+      const days = Array.from({ length: last }, (_, i) => {
+        const day = i + 1;
+        if (k === 0 && day === now.getDate()) return { day, score: result.dailyScore };
+        return { day, score: generateFortuneResult(input, 'tsuki', new Date(y, m, day, 12)).dailyScore };
+      });
+      return { year: first.getFullYear(), month: first.getMonth(), days, current: k === 0 };
     });
   }, [input, now, result.dailyScore]);
 
@@ -199,7 +205,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         base={result.baseScore}
         daily={result.dailyScore}
         diff={diff}
-        month={month}
+        months={months}
         luckTitle={result.dailyLuckTitle}
       />
 
@@ -530,21 +536,20 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
   );
 }
 
+type CalMonth = { year: number; month: number; days: { day: number; score: number }[]; current: boolean };
+
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
-function KoyomiCard({ now, title, baseLabel, base, daily, diff, month, luckTitle }: {
+function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
-  month: { day: number; score: number }[]; luckTitle?: string;
+  months: CalMonth[]; luckTitle?: string;
 }) {
   const sm = getScoreMood(base, daily);
   const diffText = diff === null ? null : diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0';
   const LEVEL = {
-    up: { label: '良い', bg: 'linear-gradient(160deg, rgba(226,192,116,0.55), rgba(212,175,55,0.25))', border: 'rgba(242,226,179,0.7)', color: '#fff6dc' },
-    flat: { label: 'ふつう', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', color: '#d8d2c6' },
-    down: { label: '控えめ', bg: 'rgba(77,110,140,0.28)', border: 'rgba(120,160,190,0.35)', color: '#a9c3d6' }
+    up: { label: '良い', bg: 'linear-gradient(160deg, #e9cf8a, #c9a24a)', border: '#f2e2b3', color: '#2a1d05' },
+    flat: { label: 'ふつう', bg: 'rgba(255,255,255,0.1)', border: 'rgba(255,255,255,0.18)', color: '#ffffff' },
+    down: { label: '控えめ', bg: 'linear-gradient(160deg, #3f6684, #2c4a63)', border: 'rgba(156,198,216,0.6)', color: '#ffffff' }
   } as const;
-  const lead = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-  const cells: ({ day: number; score: number } | null)[] = [...Array(lead).fill(null), ...month];
-  while (cells.length % 7) cells.push(null);
   const today = now.getDate();
   return (
     <section style={{ ...card, gap: '0.8rem', border: '1px solid rgba(226,192,116,0.45)', background: 'linear-gradient(160deg, rgba(212,175,55,0.12), rgba(255,255,255,0.03))' }}>
@@ -567,10 +572,14 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, month, luckTitle
       </div>
       {luckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.86rem', lineHeight: 1.6 }}>{luckTitle}</p>}
 
-      {month.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.7rem', borderTop: '1px solid rgba(226,192,116,0.2)' }}>
+      {months.map((mo) => {
+        const lead = new Date(mo.year, mo.month, 1).getDay();
+        const cells: ({ day: number; score: number } | null)[] = [...Array(lead).fill(null), ...mo.days];
+        while (cells.length % 7) cells.push(null);
+        return (
+        <div key={`${mo.year}-${mo.month}`} style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.7rem', borderTop: '1px solid rgba(226,192,116,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-            <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{now.getMonth() + 1}月の恋の暦</span>
+            <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{mo.year !== now.getFullYear() ? `${mo.year}年` : ''}{mo.month + 1}月の恋の暦</span>
             <span style={{ display: 'flex', gap: '0.5rem', fontSize: '0.64rem', color: '#a9a293' }}>
               {(['up', 'flat', 'down'] as const).map((k) => (
                 <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
@@ -586,22 +595,23 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, month, luckTitle
             {cells.map((c, i) => {
               if (!c) return <span key={i} />;
               const lv = LEVEL[getScoreMood(base, c.score).trend];
-              const isToday = c.day === today;
-              const past = c.day < today;
+              const isToday = mo.current && c.day === today;
+              const past = mo.current && c.day < today;
               return (
                 <div key={i} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.05rem',
-                  aspectRatio: '1 / 1', borderRadius: '9px', background: lv.bg, border: isToday ? `2px solid ${GOLD}` : `1px solid ${lv.border}`,
-                  boxShadow: isToday ? '0 0 12px rgba(212,175,55,0.55)' : 'none', opacity: past ? 0.55 : 1
+                  aspectRatio: '1 / 1', borderRadius: '9px', background: lv.bg, border: isToday ? '2px solid #ffffff' : `1px solid ${lv.border}`,
+                  boxShadow: isToday ? '0 0 12px rgba(255,255,255,0.55)' : 'none', filter: past ? 'saturate(0.55) brightness(0.8)' : 'none'
                 }}>
-                  <span style={{ fontSize: '0.74rem', fontWeight: 'bold', lineHeight: 1, color: isToday ? '#ffffff' : lv.color }}>{c.day}</span>
-                  <span style={{ fontSize: '0.56rem', lineHeight: 1, color: isToday ? '#f2e2b3' : lv.color, opacity: 0.85 }}>{isToday ? '今日' : c.score}</span>
+                  <span style={{ fontSize: '0.66rem', fontWeight: 'bold', lineHeight: 1, color: lv.color, opacity: 0.85 }}>{c.day}{isToday ? ' 今日' : ''}</span>
+                  <span className="font-serif" style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1.05, color: lv.color }}>{c.score}</span>
                 </div>
               );
             })}
           </div>
         </div>
-      )}
+        );
+      })}
     </section>
   );
 }
