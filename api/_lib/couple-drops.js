@@ -39,16 +39,18 @@ export function refill(rec, { premium, periodEnd }, today) {
   // 今日の分も含めて、前回から何日分か（初めては今日の1日分）
   const days = last ? Math.max(0, dayNum(today) - dayNum(last)) : 1;
   const before = balance;
+  // 前回は月額でなかった（無料・未記録）なら、月額の毎日の分は今日の1日分だけ（無料だった日の分までさかのぼって足さない）
+  const wasPremium = rec?.tier === 'p';
   if (premium) {
     // 支払い日: 新しい支払い期間（期間の終わりの日時で見分ける）に入って最初の表示で50個
     const pk = periodEnd || 'unknown';
     if (!periods.includes(pk)) { balance = Math.min(PREMIUM_CAP, balance + PREMIUM_PAYDAY); periods.push(pk); }
-    if (days > 0) balance = Math.min(PREMIUM_CAP, balance + days * PREMIUM_DAILY);
+    if (days > 0) balance = Math.min(PREMIUM_CAP, balance + (wasPremium ? days : 1) * PREMIUM_DAILY);
   } else if (days > 0) {
     // 無料: 毎日2個、持ち越さない（残っていても2個まで）
     balance = Math.max(Math.min(balance, FREE_CAP), FREE_DAILY);
   }
-  return { balance, lastDaily: days > 0 || !last ? today : last, periods, granted: balance - before };
+  return { balance, lastDaily: days > 0 || !last ? today : last, periods, granted: balance - before, tier: premium ? 'p' : 'f' };
 }
 
 const cleanList = (v) => (Array.isArray(v) ? v.filter((n) => Number.isInteger(n) && n >= 1 && n <= TOPIC_MAX) : []);
@@ -121,10 +123,10 @@ export default async function handler(req, res, deps = {}) {
           }
         }
       }
-      const changed = openedNow || bonusGranted || bonus !== bonusBefore || r.balance !== Number(rec.balance || 0) || r.lastDaily !== rec.lastDaily || r.periods.length !== (rec.periods || []).length;
+      const changed = openedNow || bonusGranted || bonus !== bonusBefore || r.balance !== Number(rec.balance || 0) || r.lastDaily !== rec.lastDaily || r.periods.length !== (rec.periods || []).length || r.tier !== rec.tier;
       if (changed) {
         tx.set(ref, {
-          balance: r.balance, lastDaily: r.lastDaily, periods: r.periods,
+          balance: r.balance, lastDaily: r.lastDaily, periods: r.periods, tier: r.tier,
           ...(bonusGranted || bonus > 0 || rec?.bonus?.[key] ? { bonus: { [key]: bonus } } : {}),
           ...(bonusGranted ? { bonusFor: { [key]: pair.sessionId } } : {}),
           opened: { [key]: o }, updatedAt: new Date().toISOString()

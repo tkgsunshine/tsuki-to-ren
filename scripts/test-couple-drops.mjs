@@ -136,3 +136,119 @@ test('月額: 支払い日の50個を持っているとき（50個そのまま�
   res = await call(db, '2026-11-25');
   assert.equal(res.body.balance, PREMIUM_CAP); // 100で止まる
 });
+
+// ---- いろいろなパターン（2026-11-13 TAKASHI「いろんなパタンでテストして」） ----
+const callAs = async (db, today, body = {}, extra = {}) => { const res = mockRes(); await drops(req(body), res, { auth, db, live: true, today, premiumEmails: '', ...extra }); return res; };
+
+test('無料会員: 初日2個、使い切ると409、翌日は2個に戻る、何日空けても2個', async () => {
+  const db = mockDb();
+  let res = await callAs(db, '2026-11-12');
+  assert.equal(res.body.balance, 2); assert.equal(res.body.daily, 2); assert.equal(res.body.cap, 2); assert.equal(res.body.premium, false);
+  await callAs(db, '2026-11-12', { open: { kind: 'rank', no: 1 } });
+  res = await callAs(db, '2026-11-12', { open: { kind: 'reading', no: 1 } });
+  assert.equal(res.body.balance, 0);
+  res = await callAs(db, '2026-11-12', { open: { kind: 'rank', no: 2 } });
+  assert.equal(res.code, 409);
+  assert.deepEqual(res.body.opened, { rank: [1], reading: [1] }); // 失敗しても開けた分はそのまま
+  res = await callAs(db, '2026-11-13');
+  assert.equal(res.body.balance, 2);
+  await callAs(db, '2026-11-13', { open: { kind: 'rank', no: 2 } });
+  res = await callAs(db, '2026-12-30');
+  assert.equal(res.body.balance, 2); // 1個残し＋長く空けても2個
+  assert.deepEqual(res.body.opened.rank, [1, 2]);
+});
+
+test('無料→月額に入った日: 支払い日の50＋今日の5だけ（無料だった日の分はさかのぼらない）', async () => {
+  const db = mockDb({ 'coupleDrops/u1': { balance: 2, lastDaily: '2026-11-01', tier: 'f', opened: {} } });
+  db.docs['premium/u1'] = PREMIUM['premium/u1'];
+  const res = await callAs(db, '2026-11-12');
+  assert.equal(res.body.balance, 57); // 残り2＋50＋5
+  assert.equal(res.body.cap, 100);
+  assert.equal(res.body.daily, 5);
+});
+
+test('月額: 次の支払い日にまた50個。しばらく来なくても、来なかった日の分も入る（100まで）', async () => {
+  const db = mockDb({ ...PREMIUM });
+  await callAs(db, '2026-11-12'); // 55
+  for (let no = 1; no <= 40; no++) await callAs(db, '2026-11-12', { open: { kind: 'reading', no } });
+  let res = await callAs(db, '2026-11-12');
+  assert.equal(res.body.balance, 15);
+  res = await callAs(db, '2026-11-14');
+  assert.equal(res.body.balance, 25); // 2日ぶん
+  db.docs['premium/u1'] = { active: true, livemode: true, currentPeriodEnd: '2027-01-12T00:00:00.000Z' };
+  res = await callAs(db, '2026-12-12');
+  assert.equal(res.body.balance, 100); // 25＋50＋28日ぶん → 100で止まる
+});
+
+test('月額→解約: 翌日から無料の2個。月額中に開けた分は見えず、無料で開けた分は見える。再加入で戻る', async () => {
+  const db = mockDb({ 'coupleDrops/u1': { balance: 0, lastDaily: '2026-11-10', tier: 'f', opened: {} } });
+  await callAs(db, '2026-11-11', { open: { kind: 'rank', no: 9 } }); // 無料で開ける
+  db.docs['premium/u1'] = PREMIUM['premium/u1'];
+  await callAs(db, '2026-11-12', { open: { kind: 'rank', no: 10 } }); // 月額で開ける
+  db.docs['premium/u1'] = { active: false, livemode: true };
+  let res = await callAs(db, '2026-11-13');
+  assert.equal(res.body.balance, 2);
+  assert.deepEqual(res.body.opened.rank, [9]);
+  db.docs['premium/u1'] = { active: true, livemode: true, currentPeriodEnd: '2027-01-13T00:00:00.000Z' };
+  res = await callAs(db, '2026-12-13');
+  assert.deepEqual(res.body.opened.rank, [9, 10]);
+});
+
+test('テスト用の決済（Stripeのテストモード）の月額・シングルは、本番では数えない', async () => {
+  const key = partnerKey(BIRTH);
+  const db = mockDb({
+    'premium/u1': { active: true, livemode: false, currentPeriodEnd: '2026-12-12T00:00:00.000Z' },
+    'pairUnlocks/u1': { partners: { [key]: { sessionId: 'cs_test', livemode: false } } }
+  });
+  const res = await callAs(db, '2026-11-12');
+  assert.equal(res.body.premium, false);
+  assert.equal(res.body.balance, 2);
+  assert.equal(res.body.bonus, 0);
+});
+
+test('運営アカウント（PREMIUM_OVERRIDE_EMAILS）は月額と同じ。毎月1回50個', async () => {
+  const db = mockDb();
+  let res = await callAs(db, '2026-11-12', {}, { premiumEmails: 'a@example.com' });
+  assert.equal(res.body.premium, true);
+  assert.equal(res.body.balance, 55);
+  res = await callAs(db, '2026-11-20', {}, { premiumEmails: 'a@example.com' });
+  assert.equal(res.body.balance, 95); // 同じ月は50が増えない、8日ぶん
+  res = await callAs(db, '2026-12-01', {}, { premiumEmails: 'a@example.com' });
+  assert.equal(res.body.balance, 100);
+});
+
+test('シングル＋月額: 月額の毎日の分を先に使い、シングルの分は残る。月額の分は解約で消えても、シングルの分は残る', async () => {
+  const key = partnerKey(BIRTH);
+  const db = mockDb({ ...PREMIUM, 'pairUnlocks/u1': { partners: { [key]: { sessionId: 'cs_1', livemode: true } } } });
+  let res = await callAs(db, '2026-11-12');
+  assert.equal(res.body.balance, 65); // 50＋5＋シングル10
+  assert.equal(res.body.bonus, 10);
+  await callAs(db, '2026-11-12', { open: { kind: 'rank', no: 3 } });
+  res = await callAs(db, '2026-11-12');
+  assert.equal(res.body.bonus, 10); // 月額の分から減る
+  db.docs['premium/u1'] = { active: false, livemode: true };
+  res = await callAs(db, '2026-11-13');
+  assert.equal(res.body.balance, 12); // 無料2＋シングル10
+});
+
+test('同じ購入の記録が何度読まれても、シングルの10個は1回だけ。別のお相手には出ない', async () => {
+  const key = partnerKey(BIRTH);
+  const db = mockDb({ 'pairUnlocks/u1': { partners: { [key]: { sessionId: 'cs_1', livemode: true } } } });
+  for (const d of ['2026-11-12', '2026-11-12', '2026-11-13', '2026-11-20']) await callAs(db, d);
+  const res = await callAs(db, '2026-11-21');
+  assert.equal(res.body.bonus, 10);
+  const other = await callAs(db, '2026-11-21', {}, {});
+  assert.equal(other.body.bonus, 10);
+  const res2 = mockRes();
+  await drops(req({ oppBirth: '1995-03-03' }), res2, { auth, db, live: true, today: '2026-11-21', premiumEmails: '' });
+  assert.equal(res2.body.bonus, 0);
+  assert.equal(res2.body.balance, 2);
+});
+
+test('お相手ごとに開けた記録は別（同じ番号でも、別のお相手では開いていない）', async () => {
+  const db = mockDb({ ...PREMIUM });
+  await callAs(db, '2026-11-12', { open: { kind: 'rank', no: 7 } });
+  const res = mockRes();
+  await drops(req({ oppBirth: '1995-03-03' }), res, { auth, db, live: true, today: '2026-11-12', premiumEmails: '' });
+  assert.deepEqual(res.body.opened.rank, []);
+});
