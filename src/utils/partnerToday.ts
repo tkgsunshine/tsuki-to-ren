@@ -6,6 +6,10 @@
 // 点数の計算には使わない（表示だけ）。「本当の状態がわかる」とは書かず、「星から見た傾向」として出す。
 // 今日の一歩: 二人の道のり（片思い／付き合っている の5段階）と、本人が1タップで選ぶ今の状況、
 // お相手の今日の波から、今日やるとよい行動を1つだけ出す。告白・プロポーズは「星が背中を押す日」と示すだけで、決めるのは本人。
+import { CRUSH_STEPS } from './stepTexts/crush.ts';
+import { COUPLE_STEPS } from './stepTexts/couple.ts';
+import { SITUATION_STEPS as SITUATION_STEPS_BY_TYPE } from './stepTexts/situation.ts';
+import type { StepAxis } from './stepTexts/types.ts';
 import { getDayInfo, getPersonDay, getTenGod, getJuniUn, isPersonalGood, isPairSyncDate } from './fortuneEngine.ts';
 import type { FortuneResult, TenGod, DayInfo, LuckPerson } from './fortuneEngine.ts';
 import { toLuckPerson } from './luckyDays.ts';
@@ -250,14 +254,32 @@ const STEP_SIZE: Record<Wave, string> = { low: '控えめの一歩', mid: 'い�
 const pick = <T,>(list: T[], seed: number): T => list[((seed % list.length) + list.length) % list.length];
 const daySeed = (d: Date) => Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86400000);
 
-export function getTodayStep(journey: Journey, today: PartnerToday, date: Date): TodayStep {
+/**
+ * 今日の一歩。流れ（踏み出す／いつもの／控えめ）は星（お相手の今日）、中身はお相手の16タイプ（E/I × T/F）から選ぶ（2026-11-12 TAKASHI）。
+ * 1つの段階・状況・流れ・タイプにつき5文。日によって順に変わる。タイプがわからないお相手は、従来のタイプなしの文。
+ */
+export function getTodayStep(journey: Journey, today: PartnerToday, date: Date, mbti?: string): TodayStep {
   const seed = daySeed(date);
   const sit = journey.situation;
-  const bySituation = sit && SITUATION_STEPS[sit];
-  const steps = bySituation || STAGE_STEPS[journey.mode][Math.min(4, Math.max(0, journey.stage))];
-  const text = pick(steps[today.wave], seed);
+  const stage = Math.min(4, Math.max(0, journey.stage));
+  const m = (mbti || '').toUpperCase();
+  const axis = /^[EI][NS][TF][JP]$/.test(m) ? (`${m[0]}${m[2]}` as StepAxis) : null;
+  let text: string;
+  let bySituation: boolean;
+  if (axis) {
+    const sitTable = sit ? SITUATION_STEPS_BY_TYPE[sit] : undefined;
+    bySituation = !!sitTable;
+    const table = sitTable || (journey.mode === 'couple' ? COUPLE_STEPS : CRUSH_STEPS)[stage];
+    text = pick(table[today.wave][axis], seed);
+  } else {
+    const legacy = sit && SITUATION_STEPS[sit];
+    bySituation = !!legacy;
+    text = pick((legacy || STAGE_STEPS[journey.mode][stage])[today.wave], seed);
+  }
   const ownChoice = !bySituation && today.wave === 'high' && journey.stage === 3;
-  const wait = /送らない|送らなく|送らず|話し合わない|話し合わなく|切り出さない|伝えない|近づかず/.test(text);
+  // 返信待ち・すれ違いの控えめの日は、文に関係なく「待つ」一歩
+  const wait = /送らない|送らなく|送らず|話し合わない|話し合わなく|切り出さない|伝えない|近づかず/.test(text)
+    || (bySituation && today.wave === 'low' && (sit === 'noreply' || sit === 'fight'));
   return { size: STEP_SIZE[today.wave], text, ownChoice, wait };
 }
 

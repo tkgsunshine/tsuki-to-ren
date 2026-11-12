@@ -2,6 +2,9 @@
 // 「今日」画面の「〇〇さんの今日」と「今日の一歩」: 伝統の判定（十神・十二運）どおりであること、毎日の文が偏りすぎないこと。点数には使わない。
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { CRUSH_STEPS } from '../src/utils/stepTexts/crush.ts';
+import { COUPLE_STEPS } from '../src/utils/stepTexts/couple.ts';
+import { SITUATION_STEPS } from '../src/utils/stepTexts/situation.ts';
 import { computePartnerToday, getTodayStep, getCourage, cleanJourney, defaultJourney, JOURNEY_STAGES } from '../src/utils/partnerToday.ts';
 import { getDayInfo, calculateDayPillar } from '../src/utils/fortuneEngine.ts';
 
@@ -75,4 +78,32 @@ test('今日の一歩の伝え方: 16タイプから。待つ一歩は「待っ�
   assert.equal(getStepDelivery({ text: 'x', size: '' }, 'UNKNOWN'), null);
   // 心のモードの説明は状態だけ（「〜しましょう」など行動の案内を含めない）
   for (const t of Object.values(TEN_GOD_STATE)) assert.doesNotMatch(t, /しましょう|しておく|避け|控え/);
+});
+
+test('今日の一歩（タイプ別）: どの段階・状況・流れ・タイプにも5文あり、重複なし、タイプ名や性格分類の言葉を出さない', () => {
+  const tables = [...CRUSH_STEPS, ...COUPLE_STEPS, ...Object.values(SITUATION_STEPS)];
+  assert.equal(tables.length, 14);
+  for (const t of tables) for (const w of ['high', 'mid', 'low']) for (const a of ['EF', 'ET', 'IF', 'IT']) {
+    const list = t[w][a];
+    assert.equal(list.length, 5, `${w}/${a}`);
+    assert.equal(new Set(list).size, 5, `重複 ${w}/${a}`);
+    for (const x of list) assert.doesNotMatch(x, /外向|内向|タイプ|MBTI|16|[EI][NS][TF][JP]/);
+  }
+});
+
+test('今日の一歩（タイプ別）: タイプがあればタイプの文、5日で5文が一巡、返信待ちの控えめの日は「待つ」', () => {
+  const j = { mode: 'crush', stage: 1 };
+  const seen = new Set();
+  for (let i = 0; i < 5; i++) seen.add(getTodayStep(j, { wave: 'high' }, new Date(2026, 10, 12 + i), 'INFP').text);
+  assert.equal(seen.size, 5);
+  for (const t of seen) assert.ok(CRUSH_STEPS[1].high.IF.includes(t));
+  for (const mb of ['ENFP', 'ESTJ', 'INFJ', 'INTP']) {
+    for (let i = 0; i < 5; i++) assert.equal(getTodayStep({ mode: 'crush', stage: 0, situation: 'noreply' }, { wave: 'low' }, new Date(2026, 10, 12 + i), mb).wait, true);
+  }
+  // 返信待ちの「踏み出す一歩」は、待つ文ではなく送る文
+  for (const mb of ['ENFP', 'ESTJ', 'INFJ', 'INTP']) {
+    for (let i = 0; i < 5; i++) assert.equal(getTodayStep({ mode: 'crush', stage: 0, situation: 'noreply' }, { wave: 'high' }, new Date(2026, 10, 12 + i), mb).wait, false);
+  }
+  // 告白の段階の追い風の日は、タイプがあっても「決めるのは本人」
+  assert.equal(getTodayStep({ mode: 'crush', stage: 3 }, { wave: 'high' }, new Date(2026, 10, 12), 'ESTP').ownChoice, true);
 });

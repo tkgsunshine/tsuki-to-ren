@@ -431,7 +431,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
 }) {
   const mbtiAction = getMbtiAction(pt.tenGod, oppMbti);
   const stages = JOURNEY_STAGES[journey.mode];
-  const step = getTodayStep(journey, pt, now);
+  const step = getTodayStep(journey, pt, now, oppMbti);
   const delivery = getStepDelivery(step, oppMbti);
   const courage = getCourage(selectedChar, pt.wave, now);
   const charName = selectedChar === 'ren' ? '蓮' : '月';
@@ -492,7 +492,8 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', padding: '0.75rem 0.8rem', borderRadius: '12px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(226,192,116,0.35)' }}>
         <span style={{ alignSelf: 'flex-start', fontSize: '0.68rem', fontWeight: 'bold', color: '#0b0f15', background: WAVE_COLOR[pt.wave], borderRadius: '9999px', padding: '0.1rem 0.55rem' }}>{step.size}</span>
         <p style={{ ...body, fontSize: '0.9rem', color: '#ffffff', fontWeight: 'bold' }}>{step.text}</p>
-        {delivery && <p style={{ ...sub, color: '#9cc6d8' }}>{step.wait ? '待っていい理由：' : '伝え方：'}{delivery}</p>}
+        {/* 一歩の中身がお相手のタイプに合わせた文になったので、「伝え方」は出さない。待つ日だけ理由を添える */}
+        {delivery && step.wait && <p style={{ ...sub, color: '#9cc6d8' }}>待っていい理由：{delivery}</p>}
         {step.ownChoice && <p style={{ ...sub, color: '#f2e2b3' }}>決めるのはあなたです。星は背中を押すだけ。今日でなくても、あなたが「今だ」と思う日がいちばんの日です。</p>}
       </div>
 
