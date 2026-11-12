@@ -1,4 +1,4 @@
-// 「二人の相性100」のランキング50: 入力した二人の16タイプの組が、お題ごとに136組（同じタイプどうしを含む）の中で何位か。
+// 「二人の相性100」のランキング50: 入力した二人のMBTIの組が、お題ごとに136組（同じタイプどうしを含む）の中で何位か。
 //
 // 式は X 投稿のカップル相性ランキング（scripts/x/lib/couple-rank.mjs、couple-20261111-1〜17）と同じ。
 // X投稿済みの17お題は、X側の並び（themeIndex 0〜16）と点の式・同点の並べ方をそのまま使い、
@@ -39,12 +39,12 @@ export const coupleFeatures = (a: string, b: string): Features => ({
  * 点の式の1項。X側の式（例: x.JJ * 3 + x.sJP * 1.5 + x.dTF + x.love / 25 - Math.abs(x.love - 50) / 15）を、
  * 小数の計算順まで同じになるように表す（左から順に足す・引く）。
  *   mul: + x[f] * k（k=1 は x[f] そのもの） / div: + x.love / k / subDiv: − x.love / k / subAbs: − |x.love − 50| / k
- * why: その項が効いた（文字の組み合わせが当てはまった）ときの理由の文。{love} は16タイプの相性点に置き換える。
+ * why: その項が効いた（文字の組み合わせが当てはまった）ときの理由の文。{love} はMBTIの相性点に置き換える。
  */
 interface Term { f: Feature; op?: 'mul' | 'div' | 'subDiv' | 'subAbs'; k: number; why?: string }
 
 const T = (f: Feature, k: number, why: string): Term => ({ f, k, why });
-const loveDiv = (k: number, why = 'もともとの16タイプの相性（{love}点）が高いことも、順位を押し上げています'): Term => ({ f: 'love', op: 'div', k, why });
+const loveDiv = (k: number, why = 'もともとのMBTIの相性（{love}点）が高いことも、順位を押し上げています'): Term => ({ f: 'love', op: 'div', k, why });
 
 interface Theme { no: number; terms: Term[] }
 
@@ -63,7 +63,7 @@ export const COUPLE_THEMES: Theme[] = [
     T('dTF', 3, '論理派（T）と気持ち派（F）で、言い方の違いからケンカが起きやすい組み合わせです'),
     T('JJ', 1.5, '二人とも計画派（J）で、一度決めた関係を簡単には手放しません'),
     T('dJP', 1, '計画派（J）と自由派（P）で、予定の立て方でぶつかりやすいです'),
-    loveDiv(25, 'もともとの16タイプの相性（{love}点）が支えになって、ケンカしても戻ってこられます')
+    loveDiv(25, 'もともとのMBTIの相性（{love}点）が支えになって、ケンカしても戻ってこられます')
   ] },
   { no: 1, terms: [
     T('II', 3, '二人とも内向型（I）で、気持ちを口に出すまでに時間がかかります'),
@@ -80,7 +80,7 @@ export const COUPLE_THEMES: Theme[] = [
   { no: 34, terms: [
     T('dJP', 3, '計画派（J）と自由派（P）で、家事や片付けのペースがぶつかります'),
     T('NN', 1.5, '二人とも直感派（N）で、恋人の時間は話が尽きないぶん、暮らしへの理想も高くなります'),
-    loveDiv(15, 'もともとの16タイプの相性（{love}点）が高く、恋人の期間はとても楽しい二人です')
+    loveDiv(15, 'もともとのMBTIの相性（{love}点）が高く、恋人の期間はとても楽しい二人です')
   ] },
   { no: 2, terms: [
     T('dSN', 2, '現実派（S）と直感派（N）で、最初は「話が合わない」と感じやすいです'),
@@ -99,7 +99,7 @@ export const COUPLE_THEMES: Theme[] = [
     T('FF', 2, '二人とも気持ち派（F）で、気持ちが高ぶると別れ話が出やすいです'),
     T('dJP', 2, '計画派（J）と自由派（P）で、すれ違いが起きやすいです'),
     T('PP', 1, '二人とも自由派（P）で、その場の勢いで話が大きくなりがちです'),
-    loveDiv(20, 'もともとの16タイプの相性（{love}点）が高く、結局また戻ってきます')
+    loveDiv(20, 'もともとのMBTIの相性（{love}点）が高く、結局また戻ってきます')
   ] },
   { no: 22, terms: [
     T('dTF', 3, '論理派（T）と気持ち派（F）で、謝る役がどちらかに決まりやすいです'),
@@ -192,7 +192,7 @@ export const COUPLE_THEMES: Theme[] = [
     T('sSN', 2, 'ものの見方（S/N）が同じで、第一印象のあとも話が合います'),
     T('sJP', 1.5, '生活のリズム（J/P）が同じで、勢いで始まっても続けやすいです'),
     T('dEI', 1, '外向型（E）と内向型（I）で、惹かれる気持ちが強く働きます'),
-    loveDiv(15, 'もともとの16タイプの相性（{love}点）が高く、最初の直感が外れにくいです')
+    loveDiv(15, 'もともとのMBTIの相性（{love}点）が高く、最初の直感が外れにくいです')
   ] },
   { no: 10, terms: [
     T('II', 3, '二人とも内向型（I）で、どちらも相手の出方を待ってしまいます'),
@@ -335,7 +335,7 @@ export const COUPLE_THEMES: Theme[] = [
     loveDiv(30)
   ] },
   { no: 50, terms: [
-    loveDiv(10, 'もともとの16タイプの相性（{love}点）が高く、自然体で仲よくいられます'),
+    loveDiv(10, 'もともとのMBTIの相性（{love}点）が高く、自然体で仲よくいられます'),
     T('sJP', 1, '生活のリズム（J/P）が同じで、一緒にいて無理がありません'),
     T('dEI', 1, '外向型（E）と内向型（I）で、周りから見てバランスがいい二人です'),
     T('sSN', 1, 'ものの見方（S/N）が同じで、話が合います')
@@ -419,7 +419,7 @@ const normType = (t: string | undefined | null): string | null => {
   const u = (t || '').toUpperCase();
   return COUPLE_TYPES.includes(u) ? u : null;
 };
-/** 16タイプが2人とも決まっているか */
+/** MBTIが2人とも決まっているか */
 export const hasCoupleTypes = (a?: string | null, b?: string | null) => Boolean(normType(a) && normType(b));
 
 /** 文字の組み合わせの呼び名（理由の文で使う） */
@@ -450,7 +450,7 @@ export interface CoupleRankResult {
 }
 
 /**
- * 入力した二人（順不同）の、お題 topicNo での順位と理由。16タイプが決まっていなければ null。
+ * 入力した二人（順不同）の、お題 topicNo での順位と理由。MBTIが決まっていなければ null。
  * 理由: 上位側は「効いた文字の組み合わせ」のうち重いもの2つ、下位側は「このお題で効く組み合わせ」と二人の実際の組み合わせ。
  */
 export function coupleRank(topicNo: number, typeA?: string | null, typeB?: string | null): CoupleRankResult | null {
@@ -465,7 +465,7 @@ export function coupleRank(topicNo: number, typeA?: string | null, typeB?: strin
   const fill = (s: string) => s.replace('{love}', String(Math.round(x.love))) + '。';
   const fired = terms
     .filter((t) => (t.f === 'love' ? x.love >= 60 : x[t.f] === 1))
-    // 文字の組み合わせを先に（重い順）、16タイプの相性点は最後に
+    // 文字の組み合わせを先に（重い順）、MBTIの相性点は最後に
     .sort((p, q) => (p.f === 'love' ? 1 : 0) - (q.f === 'love' ? 1 : 0) || q.k - p.k);
   const heaviest = [...terms].filter((t) => t.f !== 'love').sort((p, q) => q.k - p.k)[0];
   let reason: string;
@@ -473,12 +473,12 @@ export function coupleRank(topicNo: number, typeA?: string | null, typeB?: strin
     reason = fired.slice(0, 2).map((t) => fill(t.why!)).join('');
   } else if (heaviest && x[heaviest.f] !== 1) {
     const dim = DIM_OF[heaviest.f];
-    reason = `このお題でいちばん効くのは「${FEATURE_LABEL[heaviest.f]}」の組み合わせ。この二人は${describeDim(a0, b0, dim)}なので、当てはまりにくい側です。`;
-    if (fired.length > 0) reason += fired[0].f === 'love' ? `ただ、もともとの16タイプの相性（${Math.round(x.love)}点）は高めです。` : `ただ、${fill(fired[0].why!)}`;
+    reason = `このランキングでいちばん効くのは「${FEATURE_LABEL[heaviest.f]}」の組み合わせ。この二人は${describeDim(a0, b0, dim)}なので、当てはまりにくい側です。`;
+    if (fired.length > 0) reason += fired[0].f === 'love' ? `ただ、もともとのMBTIの相性（${Math.round(x.love)}点）は高めです。` : `ただ、${fill(fired[0].why!)}`;
   } else {
     reason = fired.length > 0
       ? `${fill(fired[0].why!)}ただ、ほかの条件はそろわず、この順位です。`
-      : 'このお題で効く文字の組み合わせが少なく、当てはまりにくい側です。';
+      : 'このランキングで効く文字の組み合わせが少なく、当てはまりにくい側です。';
   }
   return { topicNo, rank, total: COUPLE_PAIR_COUNT, reason: reason.replace(/。。/g, '。') };
 }

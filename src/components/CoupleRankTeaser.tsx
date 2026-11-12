@@ -4,13 +4,13 @@ import { coupleRank, COUPLE_TYPES, COUPLE_PAIR_COUNT } from '../utils/coupleRank
 import { RANK_TOPICS } from '../data/coupleTopics';
 
 // X投稿（カップル相性ランキング）から来た人の入口（2026-11-12 TAKASHI）。
-// 入力画面の上に、投稿のお題と「二人の16タイプを選ぶと何位か分かる」欄を出す。選ぶとその場で順位を見せ、
+// 入力画面の上に、投稿のお題と「二人のMBTIを選ぶと何位か分かる」欄を出す。選ぶとその場で順位を見せ、
 // 続けて生年月日を入れると、結果画面の「二人の相性ランキング50」で同じお題が開いた状態になる。
 
 interface Props {
   topicNo: number;
   initialMy?: string;
-  /** 「生年月日も入れて…」: 選んだ16タイプを入力欄に入れて、入力欄へ */
+  /** 「生年月日も入れて…」: 選んだMBTIを入力欄に入れて、入力欄へ */
   onContinue: (myMbti: string, oppMbti: string) => void;
 }
 
@@ -33,15 +33,15 @@ export const CoupleRankTeaser: React.FC<Props> = ({ topicNo, initialMy = '', onC
       </span>
       <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#f3efe6', lineHeight: 1.5 }}>{topic.title}</div>
       <p style={{ margin: 0, fontSize: '0.8rem', color: '#e8e2d4', lineHeight: 1.7 }}>
-        二人の16タイプを選ぶと、全{COUPLE_PAIR_COUNT}組の中で何位か分かります。
+        二人のMBTIを選ぶと、全{COUPLE_PAIR_COUNT}組の中で何位か分かります。
       </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-        <select aria-label="あなたの16タイプ" value={my} onChange={(e) => setMy(e.target.value)} style={selectStyle}>
+        <select aria-label="あなたのMBTI" value={my} onChange={(e) => setMy(e.target.value)} style={selectStyle}>
           <option value="">あなた</option>
           {COUPLE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
         <span style={{ color: '#d4af37', fontWeight: 'bold' }}>×</span>
-        <select aria-label="お相手の16タイプ" value={opp} onChange={(e) => setOpp(e.target.value)} style={selectStyle}>
+        <select aria-label="お相手のMBTI" value={opp} onChange={(e) => setOpp(e.target.value)} style={selectStyle}>
           <option value="">お相手</option>
           {COUPLE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
@@ -54,7 +54,7 @@ export const CoupleRankTeaser: React.FC<Props> = ({ topicNo, initialMy = '', onC
             <span style={{ fontSize: '1rem', fontWeight: 'bold', color: top ? '#f5d77a' : '#f3efe6' }}>位</span>
           </div>
           <p style={{ margin: 0, fontSize: '0.78rem', color: '#e8e2d4', lineHeight: 1.7, textAlign: 'center' }}>
-            どうしてこの順位なのか、ほかの49のお題では何位かは、二人の生年月日を入れると見られます。
+            どうしてこの順位なのか、ほかの49のランキングでは何位かは、二人の生年月日を入れると見られます。
           </p>
           <button
             type="button"

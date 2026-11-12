@@ -11,7 +11,7 @@ import { mbtiOptions } from '../constants/mbti';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 
 // 「二人の相性100」（2026-11-12 TAKASHI決定）。結果画面（お相手あり）の欄。
-// ランキング50: 二人の16タイプの組が、お題ごとに136組中何位か＋理由の文。1〜136位の一覧は出さない（どのプランでも）。
+// ランキング50: 二人のMBTIの組が、お題ごとに136組中何位か＋理由の文。1〜136位の一覧は出さない（どのプランでも）。
 // 開いたカードには「月と蓮」とURLを必ず写す（スクショが入口になるように）。
 
 /** full: 順位＋理由、rank: 順位だけ（理由はぼかし）、locked: お題名だけ */
@@ -34,7 +34,7 @@ interface Props {
   focusNo?: number | null;
   onLockClick: (e?: React.MouseEvent) => void;
   lockWord: string;
-  /** 16タイプが決まっていないとき、かんたん質問を開く */
+  /** MBTIが決まっていないとき、かんたん質問を開く */
   onAskMbti?: (who: 'self' | 'partner') => void;
   /** 月のかけら（ログイン中だけ）。あるとき、ロック中のお題はかけら1つで開ける */
   drops?: CoupleDrops | null;
@@ -43,7 +43,7 @@ interface Props {
 
 const SITE = 'tsuki-to-ren.com';
 
-// 16タイプの4グループの色（NT=分析家 紫・NF=外交官 緑・SJ=番人 青・SP=探検家 黄。暗い背景で読める明るさ）
+// MBTIの4グループの色（NT=分析家 紫・NF=外交官 緑・SJ=番人 青・SP=探検家 黄。暗い背景で読める明るさ）
 const typeColor = (t: string) => {
   const u = t.toUpperCase();
   if (u[1] === 'N') return u[2] === 'T' ? '#c9a8ec' : '#8fd8a8';
@@ -51,7 +51,7 @@ const typeColor = (t: string) => {
 };
 const typeLabel = (t: string) => mbtiOptions.find((o) => o.value === t.toUpperCase())?.label ?? t.toUpperCase();
 
-/** 二人の16タイプを「INFJ（提唱者）× ENTP（討論者）」の形で、グループの色・太字で強調する */
+/** 二人のMBTIを「INFJ（提唱者）× ENTP（討論者）」の形で、グループの色・太字で強調する */
 const TypePair: React.FC<{ a: string; b: string; size?: string }> = ({ a, b, size = '0.95rem' }) => (
   <span style={{ display: 'inline-flex', alignItems: 'baseline', justifyContent: 'center', flexWrap: 'wrap', gap: '0.15rem 0.35rem', fontWeight: 'bold', fontSize: size, lineHeight: 1.4 }}>
     <span style={{ color: typeColor(a), whiteSpace: 'nowrap' }}>{typeLabel(a)}</span>
@@ -98,7 +98,7 @@ function RankCard({ title, rank, reason, a, b, reasonOpen, onLockClick, lockWord
       ) : (
         <div style={{ position: 'relative' }}>
           <p aria-hidden="true" style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.75, color: '#e8e2d4', filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.6, maxHeight: '3.5em', overflow: 'hidden' }}>
-            二人の文字の組み合わせのうち、このお題でいちばん効いているところと、順位がこの位置になった理由をお伝えします。
+            二人の文字の組み合わせのうち、このランキングでいちばん効いているところと、順位がこの位置になった理由をお伝えします。
           </p>
           {dropSlot ?? (
             <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick} style={{ display: 'block', margin: '0.4rem auto 0' }}>
@@ -124,8 +124,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
   const oppPerson = useMemo(() => toPerson(oppPillar, oppStar, oppMbti), [oppPillar, oppStar, oppMbti]);
   const ready = hasCoupleTypes(myMbti, oppMbti);
   const [openNo, setOpenNo] = useState<number | null>(focusNo);
-  // 結果画面が長くなりすぎないよう、最初は見られるお題だけ並べ、ほかは「ほかのお題も見る」で出す
-  const [showAll, setShowAll] = useState(false);
+  // 50個すべてを最初から並べる（2026-11-12 TAKASHI「クリックが多い」で「ほかの〜も見る」をやめた）
   const focusRef = useRef<HTMLDivElement>(null);
 
   // X投稿から来たお題は、開いた状態でそこまでスクロール（結果画面の描画が落ち着いてから）
@@ -167,8 +166,8 @@ export const CoupleHundredSection: React.FC<Props> = ({
       </div>
       <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>
         {tab === 'reading'
-          ? <>16タイプ・四柱推命・九星気学の3つの占術で読み解く本格鑑定。{san(myName, 'あなた')}と{san(oppName, 'お相手')}の生年月日まで使った、二人だけの50のお題です。</>
-          : <>{san(myName, 'あなた')}と{san(oppName, 'お相手')}の16タイプの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のお題で見ていきます。</>}
+          ? <>MBTI・四柱推命・九星気学の3つの占術で読み解く本格鑑定。{san(myName, 'あなた')}と{san(oppName, 'お相手')}の生年月日まで使った、二人だけの50のテーマです。</>
+          : <>{san(myName, 'あなた')}と{san(oppName, 'お相手')}のMBTIの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のランキングで見ていきます。</>}
       </p>
       {tab === 'rank' && ready && (
         <div style={{ textAlign: 'center', padding: '0.55rem 0.5rem', borderRadius: '10px', background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.25)' }}>
@@ -181,20 +180,20 @@ export const CoupleHundredSection: React.FC<Props> = ({
         mePerson && oppPerson ? (
           <CoupleReadingList me={mePerson} opp={oppPerson} myName={myName} oppName={oppName} access={readingAccess} onLockClick={onLockClick} lockWord={lockWord} drops={drops} onDrop={onDrop ? (no) => onDrop('reading', no) : undefined} />
         ) : (
-          <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>二人の16タイプが分かると、本格鑑定が見られます。</p>
+          <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>二人のMBTIが分かると、本格鑑定が見られます。</p>
         )
       ) : !ready ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.8rem', borderRadius: '10px', background: 'rgba(11, 15, 21, 0.55)', border: '1px dashed rgba(212, 175, 55, 0.4)' }}>
-          <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>二人の16タイプが分かると、何位か分かります。</p>
+          <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>二人のMBTIが分かると、何位か分かります。</p>
           {onAskMbti && (
             <button type="button" onClick={() => onAskMbti(hasCoupleTypes(myMbti, myMbti) ? 'partner' : 'self')} style={{ padding: '0.6rem', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.82rem', color: '#1a1230', background: 'linear-gradient(135deg, #f2e2b3, #d4af37)' }}>
-              かんたんな質問で16タイプを決める
+              かんたんな質問でMBTIを決める
             </button>
           )}
         </div>
       ) : (
         CATS.map((cat) => {
-          const list = RANK_TOPICS.filter((t) => t.category === cat && (showAll || rankAccess(t.no) !== 'locked'));
+          const list = RANK_TOPICS.filter((t) => t.category === cat);
           if (list.length === 0) return null;
           return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -243,17 +242,12 @@ export const CoupleHundredSection: React.FC<Props> = ({
 
       {tab === 'rank' && ready && openCount < RANK_TOPICS.length && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
-          {!showAll && (
-            <button type="button" onClick={() => setShowAll(true)} style={{ background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.78rem', padding: '0.45rem 1rem', cursor: 'pointer' }}>
-              ほかのお題も見る（あと{RANK_TOPICS.length - openCount}個）
-            </button>
-          )}
-          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {RANK_TOPICS.length} 個です{drops ? '（お題を押すと、かけらで開けられます）' : ''}</span>
+          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {RANK_TOPICS.length} 個です{drops ? '（ランキングを押すと、かけらで開けられます）' : ''}</span>
           {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>
       )}
       {tab === 'rank' && <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>
-        ※ 順位は、16タイプの4文字の組み合わせと二人の16タイプの相性をもとにした月と蓮の見立てです。
+        ※ 順位は、MBTIの4文字の組み合わせと二人のMBTIの相性をもとにした月と蓮の見立てです。
       </span>}
     </div>
   );

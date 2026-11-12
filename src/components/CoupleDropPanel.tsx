@@ -48,7 +48,7 @@ export const DropPanel: React.FC<{
         </span>
       )}
       <span style={{ fontSize: '0.7rem', color: '#cfc3a0', textAlign: 'center', lineHeight: 1.6 }}>
-        のこり {drops.balance}個。一度開けたお題は、ずっと見られます。
+        のこり {drops.balance}個。一度開けたランキング・テーマは、ずっと見られます。
       </span>
       {!drops.premium && (
         <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>

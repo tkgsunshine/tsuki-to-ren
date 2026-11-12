@@ -1,12 +1,12 @@
-// 「二人の相性100」の本格鑑定50（16タイプ × 四柱推命 × 九星気学。二人の生年月日を使う）。2026-11-12 TAKASHI決定。
+// 「二人の相性100」の本格鑑定50（MBTI × 四柱推命 × 九星気学。二人の生年月日を使う）。2026-11-12 TAKASHI決定。
 //
 // 伝統的な判定（AGENTS.md・fortune-engine-audit.md の方針で、できるだけ伝統どおり）:
 //   ・四柱推命 日干（にっかん）どうし: 干合（かんごう）／相生（そうじょう）／比和（ひわ）／相剋（そうこく）
 //   ・四柱推命 日支（にっし）どうし: 支合（しごう）／三合（さんごう）／冲（ちゅう）／五行の比和・相生・相剋
 //   ・九星気学 本命星（ほんめいせい）どうし: 相生／比和／相剋
 //   ・時期のお題: その年の干支（年柱）・月の干支（月柱）の十二支と二人の日支の 支合・三合・冲、その年の九星（年盤の中宮の星）と本命星の相生・相剋
-// オリジナル（伝統に対応するものがない部分）: お題ごとに、どの判定をどれだけ効かせるかの重み、★と「上位◯%」への換算、16タイプとの掛け合わせ。
-// 「上位◯%」は、日柱60×60通り・本命星9×9通り・16タイプ16×16通りを同じ重みで数えた分布の中での位置（生年月日の偏りは見ない）。
+// オリジナル（伝統に対応するものがない部分）: お題ごとに、どの判定をどれだけ効かせるかの重み、★と「上位◯%」への換算、MBTIとの掛け合わせ。
+// 「上位◯%」は、日柱60×60通り・本命星9×9通り・MBTI16×16通りを同じ重みで数えた分布の中での位置（生年月日の偏りは見ない）。
 // 既存の点数（基本の相性・今日の相性など）は使わず、変えない。根拠の文には、そのお題の判定に使った星だけを書く。
 import { calculateYearPillar, calculateMonthPillar, san } from './fortuneEngine.ts';
 import { coupleFeatures } from './coupleRank.ts';
@@ -169,7 +169,7 @@ export const READING_DEFS: ReadingDef[] = [
     'べったりでも疲れない二人。毎日会っても、心地よい距離が自然に保てます。',
     '週に何度か会い、あいだは連絡で温めるくらいがちょうどいい距離感です。',
     '一人の時間がしっかりあるほど、会ったときに優しくなれる二人。会わない日も大事にしてください。']),
-  // どう話し、伝わるか（16タイプ＋日干）
+  // どう話し、伝わるか（MBTI＋日干）
   D(21, { m: { sTF: 2, FF: 1 }, s: S_CALM }, [
     'いちばん伝わるのは「ありがとう」より具体的な一言。「あのとき助かった」と場面を添えて。',
     'いちばん伝わるのは、短くまっすぐな言葉。照れずに「好き」と言うだけで十分です。',
@@ -390,7 +390,7 @@ const add = (h: Hist, v: number, n = 1) => h.set(key(v), (h.get(key(v)) || 0) + 
 const conv = (x: Hist, y: Hist): Hist => { const out: Hist = new Map(); for (const [a, n] of x) for (const [b, m] of y) add(out, a + b, n * m); return out; };
 
 const histCache = new Map<string, { vals: number[]; cum: number[]; total: number }>();
-/** お題の点の分布（日柱60×60 × 本命星9×9 × 16タイプ16×16）。時期のお題は今の年月で計算し直す */
+/** お題の点の分布（日柱60×60 × 本命星9×9 × MBTI16×16）。時期のお題は今の年月で計算し直す */
 function distribution(def: ReadingDef, now: Date) {
   const { y, m } = jstYM(now);
   const ck = `${def.no}:${def.timing ? `${y}-${m}` : ''}`;
@@ -495,7 +495,7 @@ const describeDim = (a: string, b: string, dim: number): string => {
   return a[dim] === b[dim] ? `どちらも${label(a[dim])}` : `${first}と${second}`;
 };
 
-export type Method = '四柱推命' | '九星気学' | '16タイプ';
+export type Method = '四柱推命' | '九星気学' | 'MBTI';
 
 const fmtWhen = (w: When) => (w.m ? `${w.y}年${w.m}月` : `${w.y}年`);
 
@@ -537,11 +537,11 @@ function evidence(def: ReadingDef, A: Person, B: Person, me: string, opp: string
   if (def.w.m) {
     const x = coupleFeatures(A.mbti, B.mbti) as Record<MbtiKey, number>;
     const hits = (Object.keys(def.w.m) as MbtiKey[]).filter((k) => k !== 'love' && x[k] === 1).map((k) => MBTI_LABEL[k]!);
-    const love = def.w.m.love ? `16タイプの相性は${Math.round(x.love)}点` : '';
+    const love = def.w.m.love ? `MBTIの相性は${Math.round(x.love)}点` : '';
     // 当てはまった組み合わせがなければ、そのお題で見た文字の、二人の実際の組み合わせを書く
     const dims = [...new Set((Object.keys(def.w.m) as MbtiKey[]).filter((k) => k !== 'love').map((k) => DIM_OF[k]))];
     const actual = dims.slice(0, 2).map((d) => describeDim(A.mbti, B.mbti, d));
-    const t = [hits.length ? `16タイプは${A.mbti}×${B.mbti}で${hits.slice(0, 2).join('、')}` : actual.length ? `16タイプは${A.mbti}×${B.mbti}で${actual.join('、')}` : '', love].filter(Boolean).join('。');
+    const t = [hits.length ? `MBTIは${A.mbti}×${B.mbti}で${hits.slice(0, 2).join('、')}` : actual.length ? `MBTIは${A.mbti}×${B.mbti}で${actual.join('、')}` : '', love].filter(Boolean).join('。');
     if (t) items.push({ w: Math.max(...Object.values(def.w.m)), text: `${t}。` });
   }
   items.sort((p, q) => q.w - p.w);
@@ -552,7 +552,7 @@ const methodsOf = (def: ReadingDef): Method[] => {
   const m: Method[] = [];
   if (def.w.s || def.w.b || def.timing) m.push('四柱推命');
   if (def.w.k || (def.timing && def.timing !== 'turnYear' && !['bestMonth', 'driftMonth', 'confessMonth', 'fightMonth'].includes(def.timing))) m.push('九星気学');
-  if (def.w.m) m.push('16タイプ');
+  if (def.w.m) m.push('MBTI');
   return m;
 };
 
@@ -570,7 +570,7 @@ export interface CoupleReading {
   methods: Method[];
 }
 
-/** 鑑定結果の日柱（"甲子"）・本命星（"一白水星"）・16タイプから作る。足りなければ null */
+/** 鑑定結果の日柱（"甲子"）・本命星（"一白水星"）・MBTIから作る。足りなければ null */
 export function toPerson(pillar?: string, starText?: string, mbti?: string): Person | null {
   const u = (mbti || '').toUpperCase();
   // 鑑定結果の本命星は「一白水星 (水)」の形なので、星の名前だけを取り出す

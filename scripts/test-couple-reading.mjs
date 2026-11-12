@@ -47,7 +47,7 @@ test('根拠には、そのお題の判定に使った星だけを書く', () =>
     const usesStar = Boolean(def.w.k) || ['thisYear', 'nextYear', 'marryYear', 'in3', 'in10'].includes(def.timing);
     if (!usesStar) assert.ok(!ev.includes('本命星'), `${def.no} は本命星を使っていない: ${ev}`);
     if (!def.w.s && !def.timing) assert.ok(!ev.includes('日干'), `${def.no} は日干を使っていない: ${ev}`);
-    if (!def.w.m) assert.ok(!ev.includes('16タイプは'), `${def.no} は16タイプの文字を使っていない: ${ev}`);
+    if (!def.w.m) assert.ok(!ev.includes('MBTIは'), `${def.no} は16タイプの文字を使っていない: ${ev}`);
   }
 });
 

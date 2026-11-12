@@ -8,12 +8,12 @@ import type { CoupleAccess } from './CoupleHundredSection';
 import { DropPanel } from './CoupleDropPanel';
 import type { CoupleDrops } from '../services/coupleDrops';
 
-// 「二人の相性100」の本格鑑定50（16タイプ × 四柱推命 × 九星気学）。★1〜5＋上位◯%＋鑑定文＋根拠（判定に使った星だけ）。
+// 「二人の相性100」の本格鑑定50（MBTI × 四柱推命 × 九星気学）。★1〜5＋上位◯%＋鑑定文＋根拠（判定に使った星だけ）。
 // 見え方: full＝全部、それ以外＝お題名だけ（★や%も出さない。ロックを押すと購入画面へ）
 
 const SITE = 'tsuki-to-ren.com';
 const CATS: ReadingCategory[] = ['attract', 'support', 'talk', 'timing', 'future'];
-const METHOD_COLOR: Record<string, string> = { 四柱推命: '#e8a93a', 九星気学: '#5d9fc0', '16タイプ': '#b9a3d6' };
+const METHOD_COLOR: Record<string, string> = { 四柱推命: '#e8a93a', 九星気学: '#5d9fc0', 'MBTI': '#b9a3d6' };
 
 const rowStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%', textAlign: 'left',
@@ -73,7 +73,6 @@ interface Props {
 
 export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, access, onLockClick, lockWord, drops = null, onDrop }) => {
   const [openNo, setOpenNo] = useState<number | null>(null);
-  const [showAll, setShowAll] = useState(false);
   const pair = 'すべての組み合わせ';
   // 見られるお題だけ計算する（ロック中のお題は★も出さない）
   const openKey = READING_TOPICS.filter((t) => access(t.no) === 'full').map((t) => t.no).join(',');
@@ -87,7 +86,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
   return (
     <>
       {CATS.map((cat) => {
-        const list = READING_TOPICS.filter((t) => t.category === cat && (showAll || access(t.no) === 'full'));
+        const list = READING_TOPICS.filter((t) => t.category === cat);
         if (list.length === 0) return null;
         return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -132,17 +131,12 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
       })}
       {openCount < READING_TOPICS.length && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
-          {!showAll && (
-            <button type="button" onClick={() => setShowAll(true)} style={{ background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.78rem', padding: '0.45rem 1rem', cursor: 'pointer' }}>
-              ほかのお題も見る（あと{READING_TOPICS.length - openCount}個）
-            </button>
-          )}
-          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {READING_TOPICS.length} 個です{drops ? '（お題を押すと、かけらで開けられます）' : ''}</span>
+          <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {READING_TOPICS.length} 個です{drops ? '（テーマを押すと、かけらで開けられます）' : ''}</span>
           {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>
       )}
       <span style={{ fontSize: '0.66rem', color: '#8f8778', lineHeight: 1.6 }}>
-        ※ 四柱推命（生まれた日の干支）・九星気学（本命星）・16タイプを組み合わせた、月と蓮の鑑定です。上位◯%は、生まれた日の干支・本命星・16タイプのすべての組み合わせの中での位置です。
+        ※ 四柱推命（生まれた日の干支）・九星気学（本命星）・MBTIを組み合わせた、月と蓮の鑑定です。上位◯%は、生まれた日の干支・本命星・MBTIのすべての組み合わせの中での位置です。
       </span>
     </>
   );
