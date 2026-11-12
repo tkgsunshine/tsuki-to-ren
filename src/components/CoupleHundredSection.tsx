@@ -168,6 +168,12 @@ export const CoupleHundredSection: React.FC<Props> = ({
         <Crown size={16} />
         二人の相性100
       </h2>
+      {/* 2つのタブの紹介（2026-11-13 TAKASHI「二人の相性100の下に、MBTIと本格について紹介文」） */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.78rem', lineHeight: 1.7, color: '#d8d2c6' }}>
+        <p style={{ margin: 0 }}>二人の相性を、2つの見方で100項目読み解きます。</p>
+        <p style={{ margin: 0 }}><span style={{ color: '#f5d77a', fontWeight: 'bold' }}>MBTIランキング50</span>：二人のMBTIの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位か。「友達止まりから抜け出しやすい」「ケンカは多いのに、なぜか別れない」など、恋の50の場面でランキングします。</p>
+        <p style={{ margin: 0 }}><span style={{ color: '#f5d77a', fontWeight: 'bold' }}>本格鑑定50</span>：二人の生年月日から読む四柱推命・九星気学に、MBTIを重ねた鑑定です。出会った意味、ケンカの本当の原因、結婚に向く時期など、二人だけの50のテーマを読み解きます。</p>
+      </div>
       {/* タブ（選んでいる感が出るよう、ボタンでなく下線のタブにする。2026-11-12 TAKASHI「ボタンに見える」） */}
       <div role="tablist" style={{ display: 'flex', borderBottom: '1px solid rgba(212, 175, 55, 0.25)', margin: '0 -0.25rem' }}>
         {([['rank', 'MBTIランキング50'], ['reading', '本格鑑定50']] as const).map(([k, label]) => {
@@ -182,11 +188,6 @@ export const CoupleHundredSection: React.FC<Props> = ({
           );
         })}
       </div>
-      <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>
-        {tab === 'reading'
-          ? <>MBTI・四柱推命・九星気学の3つの占術で読み解く本格鑑定。{san(myName, 'あなた')}と{san(oppName, 'お相手')}の生年月日まで使った、二人だけの50のテーマです。</>
-          : <>{san(myName, 'あなた')}と{san(oppName, 'お相手')}のMBTIの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のランキングで見ていきます。</>}
-      </p>
       {tab === 'rank' && ready && (
         <div style={{ textAlign: 'center', padding: '0.2rem 0.25rem' }}>
           {/* 二人のニックネームとMBTI（2026-11-12 TAKASHI「ここにニックネームも記載」） */}
