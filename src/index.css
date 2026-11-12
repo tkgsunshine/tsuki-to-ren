@@ -30,18 +30,22 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ページ全体（window）がスクロールする作り（2026-11-13）。Microsoft Clarity の録画・スクロールの
+   ヒートマップは、ページ全体のスクロールしか数えないため。body・#root に overflow-x: hidden や
+   height: 100% を付けると body が独自にスクロールする箱になってしまうので、clip を使う */
 html, body {
   background-color: #0a1019;
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
   min-height: 100%;
   min-height: -webkit-fill-available;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
+  /* 背景色は html（画面全体）に任せる。body に色を付けると、背景の星空（.app-container::before, z-index:-1）を覆ってしまう */
+  background-color: transparent;
   font-family: var(--font-sans);
   color: #f3efe6;
   min-height: 100vh;
@@ -53,19 +57,18 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 #root {
   width: 100%;
-  height: 100%;
   min-height: 100vh;
   min-height: 100dvh;
   min-height: -webkit-fill-available;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* App container: optimal 480px phone viewport width with crisp starry wallpaper inside */
@@ -73,16 +76,11 @@ body {
   width: 100%;
   max-width: 480px;
   min-width: min(100vw, 480px);
-  height: 100vh;
-  height: 100dvh;
-  height: -webkit-fill-available;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
   position: relative;
-  overflow-x: hidden;
-  overflow-y: hidden;
-  background-image: url('/assets/bg-stars.webp');
-  background-size: cover;
-  background-position: center;
+  overflow-x: clip;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
   border-left: 1px solid rgba(255, 255, 255, 0.08);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -91,33 +89,46 @@ body {
   box-sizing: border-box;
 }
 
+/* 背景の星空は画面に固定し、ページがスクロールしても動かさない（外枠が縦に長くなるため、外枠自体には貼らない） */
+.app-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background-image: url('/assets/bg-stars.webp');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+  pointer-events: none;
+}
+
 /* トップの恋愛診断（入力画面）だけは紫の宇宙の背景のまま（TAKASHI判断 2026-10-15） */
-.app-container.bg-cosmos {
+.app-container.bg-cosmos::before {
   background-image: url('/assets/bg-cosmos.webp');
 }
 
-/* iOS ホーム画面アプリでは、アプリの表示領域が画面の下端まで届かないことがある（下端の帯は
-   システムが theme-color で塗る）。100dvh 等も実際の表示領域とずれて黒い帯が出るため、
-   外枠は表示領域の上端から下端までに固定する。クラスは pwaHelper.ts の installStandaloneBottomGapFix が付ける。 */
+/* iOS ホーム画面アプリ。以前は外枠を上下0に固定していたが、ページ全体をスクロールさせるため固定しない。
+   下端の帯は下メニュー側（--pwa-bottom-gap）で扱う。 */
 html.ios-standalone .app-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: auto !important;
-  min-height: 0 !important;
   min-width: 0;
   margin: 0 auto;
 }
 
-/* アプリは外枠（.app-container）の中だけでスクロールし、ページ全体は動かさない。iOS Safari では
-   ページ全体がスワイプで上下に動き、外枠ごと下メニューが持ち上がって下に空白が出るため、止める。
-   外枠のない /admin は対象外。 */
-html:has(.app-container),
-html:has(.app-container) body {
+/* ページ全体がスクロールする。引っ張りすぎたときのゴムのような動き（バウンス）だけ止める。
+   以前（PR #214）は外枠の中だけをスクロールさせていたが、Clarity がスクロールを数えられないため戻した（2026-11-13） */
+html:has(.app-container) {
+  overscroll-behavior-y: none;
+}
+
+/* チャットを開いている間は、後ろのページをスクロールさせない */
+html:has(body.chat-open),
+body.chat-open {
   overflow: hidden;
-  overscroll-behavior: none;
 }
 
 /* プレミアム案内（PremiumLPModal）の外枠。iOS Safari では 100vh・inset:0 がツールバーの裏まで
@@ -273,9 +284,7 @@ h1, h2, h3, h4, button, label {
 }
 
 .main-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex: 1 0 auto;
   width: 100%;
   max-width: 100%;
   padding: 0.75rem 1rem calc(4.5rem + max(1rem, env(safe-area-inset-bottom, 16px)));
@@ -1330,9 +1339,7 @@ body.chat-keyboard-open .chat-partner-picker {
   .app-container {
     border-radius: 0 !important;
     max-height: none !important;
-    height: 100% !important;
-    height: 100dvh !important;
-    height: -webkit-fill-available !important;
+    height: auto !important;
     min-height: 100% !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
