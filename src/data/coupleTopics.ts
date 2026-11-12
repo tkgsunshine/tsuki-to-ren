@@ -155,7 +155,7 @@ export const SINGLE_RANK_NOS: number[] = [
 /** シングルプランで開く本格鑑定25: 「なぜ惹かれ合うか」10＋「どう支え合うか」10＋「どう話し伝わるか」の前半5 */
 export const SINGLE_READING_NOS: number[] = Array.from({ length: 25 }, (_, i) => i + 1);
 
-/** 無料（未登録・無料会員）で順位だけ見られる代表のお題（X投稿から来たお題は、これに加えて開く） */
+/** 無料の見本の予備（MBTIが未定のとき）。ふだんは二人ごとに、いちばん上位と下位のランキング（coupleRank.ts の sampleRankNos） */
 export const FREE_RANK_NOS: number[] = [21, 33];
 
 /** 無料で見本として全文を見せる本格鑑定 */

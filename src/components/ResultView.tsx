@@ -40,6 +40,7 @@ import { CoupleHundredSection } from './CoupleHundredSection';
 import type { CoupleAccess } from './CoupleHundredSection';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 import { SINGLE_RANK_NOS, FREE_RANK_NOS, SINGLE_READING_NOS, FREE_READING_NOS } from '../data/coupleTopics';
+import { sampleRankNos } from '../utils/coupleRank';
 import { isMbtiCode } from '../utils/mbtiQuiz';
 
 const GoogleIcon = () => (
@@ -1054,11 +1055,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // ・月のかけら: 月額は支払い日に50個＋毎日10個、無料会員は毎日2個。かけら1つで1つのお題が開き、開けたお題はずっと見られる
   // ・未登録・無料会員: ランキングは代表2本＋X投稿から来たお題の順位だけ、本格鑑定は見本1本
   const dropsOn = hasOpponent && !sharedBy && Boolean(coupleDrops) && Boolean(onOpenCoupleTopic);
+  // 無料の見本は、その二人でいちばん上位と、いちばん下位のランキング（MBTIが未定なら固定の2つ）
+  const freeRankNos = sampleRankNos(activeResult?.myMbtiCode, activeResult?.opponentMbtiCode, FREE_RANK_NOS);
   const coupleRankAccess = (no: number): CoupleAccess => {
-    if (sharedBy) return FREE_RANK_NOS.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
+    if (sharedBy) return freeRankNos.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
     if (pairOpen && SINGLE_RANK_NOS.includes(no)) return 'full';
     if (coupleDrops?.opened.rank.includes(no)) return 'full';
-    return FREE_RANK_NOS.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
+    return freeRankNos.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
   };
   const coupleReadingAccess = (no: number): CoupleAccess => {
     if (FREE_READING_NOS.includes(no)) return 'full';

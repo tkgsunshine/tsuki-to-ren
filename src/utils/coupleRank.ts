@@ -489,3 +489,22 @@ if ((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) {
   const want = RANK_TOPICS.map((t) => t.no).join(',');
   if (nos !== want) console.warn('[coupleRank] お題の番号が coupleTopics と一致しません');
 }
+
+/**
+ * 無料の見本（順位だけ見られる）: その二人でいちばん上位のランキングと、いちばん下位のランキングの2つ（2026-11-12 TAKASHI
+ * 「その人ごとに、かなり上位のお題とかなり下位のお題を出して」）。MBTIが決まっていなければ fallback。
+ */
+const sampleCache = new Map<string, number[]>();
+export function sampleRankNos(a: string | undefined, b: string | undefined, fallback: number[]): number[] {
+  if (!hasCoupleTypes(a, b)) return fallback;
+  const key = `${a}|${b}`.toUpperCase();
+  const hit = sampleCache.get(key);
+  if (hit) return hit;
+  const all = RANK_TOPICS.map((t) => coupleRank(t.no, a, b)).filter((r): r is NonNullable<typeof r> => Boolean(r));
+  if (all.length === 0) return fallback;
+  const best = all.reduce((x, y) => (y.rank < x.rank ? y : x));
+  const worst = all.reduce((x, y) => (y.rank > x.rank ? y : x));
+  const out = best.topicNo === worst.topicNo ? [best.topicNo] : [best.topicNo, worst.topicNo];
+  sampleCache.set(key, out);
+  return out;
+}

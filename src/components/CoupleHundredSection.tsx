@@ -149,7 +149,12 @@ export const CoupleHundredSection: React.FC<Props> = ({
   const openCount = RANK_TOPICS.filter((t) => rankAccess(t.no) !== 'locked').length;
   // まとまりごとに1個だけ（見られるものがあればそれ、なければロック中の先頭）。2026-11-12 TAKASHI「それぞれ1個でいい」
   const shown = new Set(showAll ? RANK_TOPICS.map((t) => t.no) : [
-    ...CATS.map((c) => { const l = RANK_TOPICS.filter((t) => t.category === c); return (l.find((t) => rankAccess(t.no) !== 'locked') ?? l[0]).no; }),
+    // 無料の見本（その二人でいちばん上位・下位）とXから来たランキングは、同じまとまりでも全部出す
+    ...CATS.flatMap((c) => {
+      const l = RANK_TOPICS.filter((t) => t.category === c);
+      const samples = l.filter((t) => rankAccess(t.no) === 'rank');
+      return samples.length ? samples.map((t) => t.no) : [(l.find((t) => rankAccess(t.no) === 'full') ?? l[0]).no];
+    }),
     ...(openNo ? [openNo] : [])
   ]);
 
