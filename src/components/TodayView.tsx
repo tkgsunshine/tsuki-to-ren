@@ -491,7 +491,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
 
       {reachedCouple && (
         <button type="button" onClick={() => setJourney({ mode: 'couple', stage: 0 })} style={{ ...segBtn(true), padding: '0.55rem 0.7rem', textAlign: 'left', lineHeight: 1.5 }}>
-          おめでとうございます！ ここからは「付き合っている」の道のりへ進みましょう（ゴールは結婚）›
+          🌙 おめでとう！二人の恋が実ったね。ここからは「付き合っている」の暦で、結婚まで一緒に見ていこう ›
         </button>
       )}
 
