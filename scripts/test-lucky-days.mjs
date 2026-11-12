@@ -117,8 +117,8 @@ test('今日の点数: 2人の最高シンクロ日は、その二人の90日の
       assert.ok(scores[k] >= median, `${iso(d)}×${iso(e)} ${x.day.m}/${x.day.d}: ${scores[k]} < 中央値 ${median}`);
       syncDays++;
     }
-    // 7日グラフの2日目以降は、その日の今日の点数と同じ（グラフの下限30を除く）
-    for (let k = 1; k < 7; k++) assert.equal(r0.weeklyScores[k].score, Math.max(30, scores[k]));
+    // 7日グラフの2日目以降は、その日の今日の点数と同じ（二人の下限は今日の点数と同じ25点。2026-11-12）
+    for (let k = 1; k < 7; k++) assert.equal(r0.weeklyScores[k].score, scores[k]);
   }
   assert.ok(syncDays > 20, `シンクロ日 ${syncDays}`);
 });

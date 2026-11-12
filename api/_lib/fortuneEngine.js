@@ -150,6 +150,8 @@ export const DAILY_CENTER_OFFSET = -6;
 export const DAILY_PAIR_CENTER = 67;
 export const DAILY_BASE_WEIGHT = 0.4;
 export const DAILY_SWING = 2;
+/** 二人の今日の相性の下限（上限100と同じく、ここで止める） */
+export const DAILY_PAIR_FLOOR = 25;
 /** 今日の点数の「いつもの位置」（その二人の長い目で見た平均）。一人の運勢は基本運勢そのもの */
 export const getDailyCenter = (baseScore, pair) => pair ? DAILY_PAIR_CENTER + DAILY_BASE_WEIGHT * (baseScore - DAILY_PAIR_CENTER) : baseScore;
 // 月次・年次の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
@@ -2160,8 +2162,10 @@ export function generateFortuneResult(input, character, now = new Date()) {
     let dailyScore = Math.floor(rawDayScore(today));
     if (dailyScore > 100)
         dailyScore = 100;
-    if (dailyScore < 0)
-        dailyScore = 0;
+    // 二人の今日の相性は25点で止める（振れ幅を大きくしたので、0点のような日を出さない。2026-11-12 TAKASHI）
+    const dailyFloor = hasOpponent ? DAILY_PAIR_FLOOR : 0;
+    if (dailyScore < dailyFloor)
+        dailyScore = dailyFloor;
     // 相性レーダーの「日々の運気の波」用（印は入れない。従来どおり）
     const myDailyImpact = getDailyStemImpact(todayPillar.stem, myPillarObj.stem);
     const oppDailyImpact = hasOpponent ? getDailyStemImpact(todayPillar.stem, oppPillarObj.stem) : 0;
@@ -2428,8 +2432,8 @@ export function generateFortuneResult(input, character, now = new Date()) {
             score = Math.floor(rawDayScore(d));
             if (score > 100)
                 score = 100;
-            if (score < 30)
-                score = 30;
+            if (score < (hasOpponent ? DAILY_PAIR_FLOOR : 30))
+                score = hasOpponent ? DAILY_PAIR_FLOOR : 30;
         }
         let label = '通常';
         if (score >= 85)
