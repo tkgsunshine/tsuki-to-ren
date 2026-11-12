@@ -100,8 +100,8 @@ function RankCard({ title, rank, reason, pair, reasonOpen, onLockClick, lockWord
 export const CoupleHundredSection: React.FC<Props> = ({
   myMbti, oppMbti, myName, oppName, myPillar, myStar, oppPillar, oppStar, rankAccess, readingAccess, focusNo = null, onLockClick, lockWord, onAskMbti, drops = null, onDrop
 }) => {
-  // 上に本格鑑定50、下にランキング50（タブ）。X投稿から来たときはランキングを先に開く
-  const [tab, setTab] = useState<'reading' | 'rank'>(focusNo ? 'rank' : 'reading');
+  // タブは左にMBTIランキング50、右に本格鑑定50（2026-11-12 TAKASHI「MBTIランキングを左にして」）。最初は左（ランキング）を開く
+  const [tab, setTab] = useState<'reading' | 'rank'>('rank');
   const mePerson = useMemo(() => toPerson(myPillar, myStar, myMbti), [myPillar, myStar, myMbti]);
   const oppPerson = useMemo(() => toPerson(oppPillar, oppStar, oppMbti), [oppPillar, oppStar, oppMbti]);
   const ready = hasCoupleTypes(myMbti, oppMbti);
@@ -134,15 +134,19 @@ export const CoupleHundredSection: React.FC<Props> = ({
         <Crown size={16} />
         二人の相性100
       </h2>
-      <div role="tablist" style={{ display: 'flex', gap: '0.4rem' }}>
-        {([['reading', '本格鑑定50'], ['rank', 'MBTIランキング50']] as const).map(([k, label]) => (
-          <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} style={{
-            flex: 1, padding: '0.55rem 0.4rem', borderRadius: '999px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold',
-            border: '1px solid rgba(212, 175, 55, 0.5)',
-            background: tab === k ? 'linear-gradient(135deg, #f2e2b3, #d4af37)' : 'rgba(11, 15, 21, 0.55)',
-            color: tab === k ? '#1a1230' : '#f5d77a'
-          }}>{label}</button>
-        ))}
+      {/* タブ（選んでいる感が出るよう、ボタンでなく下線のタブにする。2026-11-12 TAKASHI「ボタンに見える」） */}
+      <div role="tablist" style={{ display: 'flex', borderBottom: '1px solid rgba(212, 175, 55, 0.25)', margin: '0 -0.25rem' }}>
+        {([['rank', 'MBTIランキング50'], ['reading', '本格鑑定50']] as const).map(([k, label]) => {
+          const on = tab === k;
+          return (
+            <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setTab(k)} style={{
+              flex: 1, padding: '0.6rem 0.25rem 0.55rem', cursor: 'pointer', background: 'none', border: 'none',
+              borderBottom: `3px solid ${on ? '#f5d77a' : 'transparent'}`, marginBottom: '-1px',
+              fontSize: '0.86rem', fontWeight: on ? 'bold' : 'normal',
+              color: on ? '#f5d77a' : 'rgba(232, 226, 212, 0.55)', transition: 'color 0.2s, border-color 0.2s'
+            }}>{label}</button>
+          );
+        })}
       </div>
       <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>
         {tab === 'reading'

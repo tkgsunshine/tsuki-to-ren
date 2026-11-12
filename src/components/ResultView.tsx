@@ -2197,6 +2197,28 @@ export const ResultView: React.FC<ResultViewProps> = ({
       {/* Main Content Area */}
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
+        {/* 二人の相性100（2026-11-12 TAKASHI）: お相手ありの鑑定だけ。LINE吉時間の箱のすぐ上（TAKASHI「LINEの上に移動」2026-11-12） */}
+        {hasOpponent && (
+          <CoupleHundredSection
+            myMbti={activeResult.myMbtiCode}
+            oppMbti={activeResult.opponentMbtiCode}
+            myName={myName}
+            oppName={oppNickname}
+            myPillar={activeResult.myPillar}
+            myStar={activeResult.myStar}
+            oppPillar={activeResult.opponentPillar}
+            oppStar={activeResult.opponentStar}
+            rankAccess={coupleRankAccess}
+            readingAccess={coupleReadingAccess}
+            focusNo={coupleFocusNo}
+            onLockClick={handleDeepLockClick}
+            lockWord={LOCK_WORD}
+            onAskMbti={!sharedBy && onSetMbti ? (who) => setMbtiQuizFor(who) : undefined}
+            drops={dropsOn ? coupleDrops : null}
+            onDrop={dropsOn ? onOpenCoupleTopic : undefined}
+          />
+        )}
+
         {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
       <div className="glass-panel" style={{
         padding: '1.15rem',
@@ -2636,28 +2658,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
             onRedeem: referral.onRedeem
           } : undefined}
         />
-
-        {/* 二人の相性100（2026-11-12 TAKASHI）: ランキング50。お相手ありの鑑定だけ */}
-        {hasOpponent && (
-          <CoupleHundredSection
-            myMbti={activeResult.myMbtiCode}
-            oppMbti={activeResult.opponentMbtiCode}
-            myName={myName}
-            oppName={oppNickname}
-            myPillar={activeResult.myPillar}
-            myStar={activeResult.myStar}
-            oppPillar={activeResult.opponentPillar}
-            oppStar={activeResult.opponentStar}
-            rankAccess={coupleRankAccess}
-            readingAccess={coupleReadingAccess}
-            focusNo={coupleFocusNo}
-            onLockClick={handleDeepLockClick}
-            lockWord={LOCK_WORD}
-            onAskMbti={!sharedBy && onSetMbti ? (who) => setMbtiQuizFor(who) : undefined}
-            drops={dropsOn ? coupleDrops : null}
-            onDrop={dropsOn ? onOpenCoupleTopic : undefined}
-          />
-        )}
 
         {/* 今日の運勢を読んだ流れで、選んでいるキャラ（月/蓮）のチャット相談へつなぐ。結果画面では非表示（TAKASHI判断 2026-11-10。チャットタブは残す） */}
         {SHOW_RESULT_CHAT_CTA && onOpenChat && !sharedBy && (() => {
