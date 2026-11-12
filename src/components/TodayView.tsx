@@ -88,10 +88,10 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
   useEffect(() => {
     if (selectedChar !== 'tsuki') setSelectedChar('tsuki');
   }, [selectedChar, setSelectedChar]);
-  // 今月と翌月の毎日の点数（カレンダー用。今日は表示中の点数そのもの。翌月も出す 2026-11-12 TAKASHI）
+  // 前月・今月・翌月の毎日の点数（カレンダー用。今日は表示中の点数そのもの。翌月も出す 2026-11-12 TAKASHI）
   const months = useMemo(() => {
     if (!input) return [] as CalMonth[];
-    return [0, 1].map((k) => {
+    return [-1, 0, 1].map((k) => {
       const y = now.getFullYear();
       const m = now.getMonth() + k;
       const first = new Date(y, m, 1);
@@ -101,7 +101,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         if (k === 0 && day === now.getDate()) return { day, score: result.dailyScore };
         return { day, score: generateFortuneResult(input, 'tsuki', new Date(y, m, day, 12)).dailyScore };
       });
-      return { year: first.getFullYear(), month: first.getMonth(), days, current: k === 0 };
+      return { year: first.getFullYear(), month: first.getMonth(), days, current: k === 0, before: k < 0 };
     });
   }, [input, now, result.dailyScore]);
 
@@ -541,7 +541,7 @@ const monthArrow = (off: boolean): React.CSSProperties => ({
   color: off ? 'rgba(242,226,179,0.25)' : '#f2e2b3', fontSize: '1rem', lineHeight: 1, cursor: off ? 'default' : 'pointer', padding: 0
 });
 
-type CalMonth = { year: number; month: number; days: { day: number; score: number }[]; current: boolean };
+type CalMonth = { year: number; month: number; days: { day: number; score: number }[]; current: boolean; before: boolean };
 
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
 function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle }: {
@@ -550,7 +550,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
 }) {
   const sm = getScoreMood(base, daily);
   // 表示する月（今月／翌月をタップで切り替え。2026-11-12 TAKASHI）
-  const [monthIdx, setMonthIdx] = useState(0);
+  const [monthIdx, setMonthIdx] = useState(() => Math.max(0, months.findIndex((m) => m.current)));
   const diffText = diff === null ? null : diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0';
   const LEVEL = {
     up: { label: '良い', bg: 'linear-gradient(160deg, #e9cf8a, #c9a24a)', border: '#f2e2b3', color: '#2a1d05' },
@@ -608,7 +608,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
               if (!c) return <span key={i} />;
               const lv = LEVEL[getScoreMood(base, c.score).trend];
               const isToday = mo.current && c.day === today;
-              const past = mo.current && c.day < today;
+              const past = mo.before || (mo.current && c.day < today);
               return (
                 <div key={i} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.05rem',
