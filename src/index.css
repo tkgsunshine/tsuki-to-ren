@@ -1655,3 +1655,12 @@ body.chat-keyboard-open .chat-partner-picker {
 @media (prefers-reduced-motion: reduce) {
   .kakera-reveal { animation: none; }
 }
+
+/* 二人の相性100: まとまりの続きがあることを示す矢印（MorePeek） */
+@keyframes more-peek-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="more-peek-bob"] { animation: none !important; }
+}

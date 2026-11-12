@@ -5,7 +5,7 @@ import type { Person, CoupleReading } from '../utils/coupleReading';
 import { READING_TOPICS, READING_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { ReadingCategory } from '../data/coupleTopics';
 import type { CoupleAccess } from './CoupleHundredSection';
-import { DropPanel, justOpened } from './CoupleDropPanel';
+import { DropPanel, MorePeek, justOpened } from './CoupleDropPanel';
 import type { CoupleDrops } from '../services/coupleDrops';
 
 // 「二人の相性100」の本格鑑定50（MBTI × 四柱推命 × 九星気学）。★1〜5＋上位◯%＋鑑定文＋根拠（判定に使った星だけ）。
@@ -137,9 +137,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
               );
             })}
             {hidden > 0 && (
-              <button type="button" onClick={() => setExpanded((s) => new Set(s).add(cat))} style={{ alignSelf: 'center', marginTop: '0.5rem', background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.74rem', padding: '0.4rem 0.95rem', cursor: 'pointer' }}>
-                「{READING_CATEGORY_LABELS[cat]}」をすべて見る（あと{hidden}個）
-              </button>
+              <MorePeek nextTitle={(READING_TOPICS.find((t) => t.category === cat && !shown.has(t.no))?.title ?? '')} count={hidden} onOpen={() => setExpanded((s) => new Set(s).add(cat))} />
             )}
           </div>
         );

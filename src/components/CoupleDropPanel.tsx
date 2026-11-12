@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { CoupleDrops } from '../services/coupleDrops';
 
 // 月のかけら: ロック中のお題を押したときに出る「かけらを1つ使って開ける」の箱と、残高の表示。
@@ -114,3 +115,25 @@ export const DropPanel: React.FC<{
     </div>
   );
 };
+
+/**
+ * まとまりの続きがあることを見せる行（2026-11-13 TAKASHI「枠のボタンやめて、直感的に続きがあるのが分かるデザインに」）。
+ * 次の項目の名前を下へ向かって消えるように薄く見せ、その下に金の「あと〇個 ⌄」。行全体を押すと、そのまとまりが全部開く。
+ */
+export const MorePeek: React.FC<{ nextTitle: string; count: number; onOpen: () => void }> = ({ nextTitle, count, onOpen }) => (
+  <button
+    type="button"
+    onClick={onOpen}
+    aria-label={`あと${count}個を見る`}
+    style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'inherit' }}
+  >
+    <span aria-hidden="true" style={{
+      display: 'block', padding: '0.7rem 0 0', fontSize: '0.8rem', lineHeight: 1.5, color: '#e8e2d4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      height: '2.1rem', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0) 95%)', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0) 95%)'
+    }}>{nextTitle}</span>
+    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', marginTop: '-0.25rem', marginBottom: '0.35rem', fontSize: '0.78rem', fontWeight: 'bold', color: '#f5d77a' }}>
+      あと{count}個
+      <ChevronDown size={16} style={{ animation: 'more-peek-bob 1.6s ease-in-out infinite' }} />
+    </span>
+  </button>
+);

@@ -6,7 +6,7 @@ import { RANK_TOPICS, RANK_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { RankCategory } from '../data/coupleTopics';
 import { toPerson } from '../utils/coupleReading';
 import { CoupleReadingList } from './CoupleReadingList';
-import { DropBalance, DropPanel, justOpened } from './CoupleDropPanel';
+import { DropBalance, DropPanel, MorePeek, justOpened } from './CoupleDropPanel';
 import { mbtiOptions } from '../constants/mbti';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 
@@ -281,9 +281,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
               );
             })}
             {hidden > 0 && (
-              <button type="button" onClick={() => setExpanded((s) => new Set(s).add(cat))} style={{ alignSelf: 'center', marginTop: '0.5rem', background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.74rem', padding: '0.4rem 0.95rem', cursor: 'pointer' }}>
-                「{RANK_CATEGORY_LABELS[cat]}」をすべて見る（あと{hidden}個）
-              </button>
+              <MorePeek nextTitle={(RANK_TOPICS.find((t) => t.category === cat && !shown.has(t.no))?.title ?? '')} count={hidden} onOpen={() => setExpanded((s) => new Set(s).add(cat))} />
             )}
           </div>
           );
