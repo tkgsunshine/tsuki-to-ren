@@ -5,6 +5,7 @@ import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
 import { AUDIENCES, AUTO_NOTICES, AUTO_SETTINGS, AUTO_SETTINGS_DOC, NOTICES, readAutoSettings, validateAutoNotice, validateNotice } from './_lib/notices.js';
 import { CHANNELS, MAIL_OPT_OUT, broadcastRecipients, mailRecipients, sendNoticeMail, sendsApp, sendsMail } from './_lib/notice-mail.js';
+import { handleMcp } from './_lib/dashboard-mcp.js';
 
 // Data for the admin page (/admin): daily counters, and the member list (with each member's premium state).
 // Only signed-in accounts whose verified email is listed in ADMIN_EMAILS (comma-separated, Vercel env) may read it.
@@ -16,6 +17,7 @@ import { CHANNELS, MAIL_OPT_OUT, broadcastRecipients, mailRecipients, sendNotice
 // POST { action: 'noticeMailTest', title, body, link } sends the mail version only to the signed-in admin's own address.
 // POST { action: 'noticeDelete', id } takes one back (it disappears from the app).
 // POST { action: 'autoNoticeSave', kind, title, body, link, enabled? } saves the text of an automatic お知らせ (sign-up / purchase / referral); empty = the default text.
+// ?mcp=<合言葉>: 数字だけを返すコネクタ（claude.ai の Data ダッシュボード用）。_lib/dashboard-mcp.js。/mcp/<合言葉> から rewrite で来る
 // Accounts whose email is in ADMIN_EMAILS (also with a +alias, e.g. name+1@) count as the owner's without a mark.
 const OWNERS = 'adminSettings'; // doc 'owners': { uids: [...] }
 const MAX_USER_PAGES = 20; // 20 x 1000 accounts
@@ -54,6 +56,18 @@ const providerLabel = (user) => {
 };
 
 export default async function handler(req, res, deps = {}) {
+  if (req.query?.mcp !== undefined) {
+    const db = deps.db || getDb();
+    const auth = deps.auth || getAdminAuth();
+    const adminBases = new Set(parseAdminEmails(deps.adminEmails ?? process.env.ADMIN_EMAILS).map(baseEmail));
+    let marked; // adminSettings/owners は、聞かれたときに1回だけ読む
+    const isOwner = async (uid, email) => {
+      if (email && adminBases.has(baseEmail(email))) return true;
+      if (!marked) marked = db.collection(OWNERS).doc('owners').get().then((s) => new Set(s.data()?.uids || []));
+      return (await marked).has(uid);
+    };
+    return handleMcp(req, res, { db, auth, isOwner, key: deps.mcpKey ?? process.env.DASHBOARD_MCP_KEY, now: deps.now });
+  }
   res.setHeader('Cache-Control', 'no-store, private');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).json({ status: 'error', message: 'Method not allowed' });

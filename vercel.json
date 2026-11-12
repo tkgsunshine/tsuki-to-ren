@@ -51,6 +51,10 @@
       "destination": "/admin.html"
     },
     {
+      "source": "/mcp/:key",
+      "destination": "/api/admin?mcp=:key"
+    },
+    {
       "source": "/fortune",
       "destination": "/index.html"
     },
