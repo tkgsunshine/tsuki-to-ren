@@ -4,7 +4,6 @@ import { coupleReading } from '../utils/coupleReading';
 import type { Person, CoupleReading } from '../utils/coupleReading';
 import { READING_TOPICS, READING_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { ReadingCategory } from '../data/coupleTopics';
-import { PREVIEW_LOCKED } from './CoupleHundredSection';
 import type { CoupleAccess } from './CoupleHundredSection';
 import { DropPanel } from './CoupleDropPanel';
 import type { CoupleDrops } from '../services/coupleDrops';
@@ -85,11 +84,10 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
     return m;
   }, [me, opp, myName, oppName, openKey]);
   const openCount = READING_TOPICS.filter((t) => access(t.no) === 'full').length;
-  // 最初は、見られるテーマ＋ロック中のものを5個まで。残りは「ほかのテーマも見る」で
+  // 最初は、まとまりごとに1個だけ（見られるものがあればそれ）。残りは「ほかのテーマも見る」で
   const [showAll, setShowAll] = useState(false);
   const shown = new Set(showAll ? READING_TOPICS.map((t) => t.no) : [
-    ...READING_TOPICS.filter((t) => access(t.no) === 'full').map((t) => t.no),
-    ...READING_TOPICS.filter((t) => access(t.no) !== 'full').slice(0, PREVIEW_LOCKED).map((t) => t.no),
+    ...CATS.map((c) => { const l = READING_TOPICS.filter((t) => t.category === c); return (l.find((t) => access(t.no) === 'full') ?? l[0]).no; }),
     ...(openNo ? [openNo] : [])
   ]);
 

@@ -42,8 +42,6 @@ interface Props {
 }
 
 const SITE = 'tsuki-to-ren.com';
-/** 最初から並べる、ロック中の項目の数 */
-export const PREVIEW_LOCKED = 5;
 
 // MBTIの4グループの色（NT=分析家 紫・NF=外交官 緑・SJ=番人 青・SP=探検家 黄。暗い背景で読める明るさ）
 const typeColor = (t: string) => {
@@ -128,7 +126,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
   const oppPerson = useMemo(() => toPerson(oppPillar, oppStar, oppMbti), [oppPillar, oppStar, oppMbti]);
   const ready = hasCoupleTypes(myMbti, oppMbti);
   const [openNo, setOpenNo] = useState<number | null>(focusNo);
-  // 最初は、見られるランキング＋ロック中のものを5個まで並べ、残りは「ほかのランキングも見る」で出す（2026-11-12 TAKASHI「デフォで5個くらい他も表示」）
+  // 最初は、見られるランキング＋まとまりごとに1個だけ並べ、残りは「ほかのランキングも見る」で出す（2026-11-12 TAKASHI「デフォで5個くらい他も表示」）
   const [showAll, setShowAll] = useState(false);
   const focusRef = useRef<HTMLDivElement>(null);
 
@@ -148,9 +146,9 @@ export const CoupleHundredSection: React.FC<Props> = ({
   }, [ready, myMbti, oppMbti]);
 
   const openCount = RANK_TOPICS.filter((t) => rankAccess(t.no) !== 'locked').length;
+  // まとまりごとに1個だけ（見られるものがあればそれ、なければロック中の先頭）。2026-11-12 TAKASHI「それぞれ1個でいい」
   const shown = new Set(showAll ? RANK_TOPICS.map((t) => t.no) : [
-    ...RANK_TOPICS.filter((t) => rankAccess(t.no) !== 'locked').map((t) => t.no),
-    ...RANK_TOPICS.filter((t) => rankAccess(t.no) === 'locked').slice(0, PREVIEW_LOCKED).map((t) => t.no),
+    ...CATS.map((c) => { const l = RANK_TOPICS.filter((t) => t.category === c); return (l.find((t) => rankAccess(t.no) !== 'locked') ?? l[0]).no; }),
     ...(openNo ? [openNo] : [])
   ]);
 
