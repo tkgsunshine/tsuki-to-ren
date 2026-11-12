@@ -11,7 +11,7 @@ import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
 
 // 月額プレミアム会員の「恋の暦」画面（旧称「今日」、名前は2026-11-12 TAKASHI）。結果画面の多くはお相手が同じなら毎日同じなので、
-// 毎日変わるもの（今日の相性・今日の星の動き・LINE吉時間・今日の過ごし方・14日間・次の特別な日）だけを集める。
+// 毎日変わるもの（今日の相性・今日の星の動き・LINE吉時間・今日の過ごし方・恋の暦・次の特別な日）だけを集める。
 // 変わらない鑑定（トリセツ・深層鑑定など）は「鑑定書」タブ（今までの結果画面）へ。点数の計算は変えない。
 // 今日の結果を見たまま、月・蓮へそのまま相談できる（下の入力欄・質問の候補。チャットには今日の星の動きも渡す）。
 
@@ -31,8 +31,6 @@ interface Props {
   onOpenChat?: (question?: string) => void;
   /** 保存したお相手の「二人の道のり」（片思い／付き合っている・段階・今の状況）を書き換える */
   onUpdateJourney?: (partnerId: string, journey: Journey) => void;
-  /** 14日間の折れ線グラフ（結果画面と同じ部品） */
-  weeklyChart: React.ReactNode;
   /** 画面下の入力欄の位置（相談の入力欄は TAKASHI判断 2026-11-12 で削除。今は使わない） */
   barBottom?: string;
 }
@@ -73,7 +71,7 @@ function StarsBlock({ p, self }: { p: PersonStars; self: boolean }) {
 
 const fmtDay = (n: NextDay) => `${n.date.m}月${n.date.d}日(${WEEKDAYS[n.date.weekday]})`;
 
-export function TodayView({ result, selectedChar, setSelectedChar, myName, oppName, hasOpponent, input, partners, onSwitch, onOpenBook, onOpenChat, onUpdateJourney, weeklyChart }: Props) {
+export function TodayView({ result, selectedChar, setSelectedChar, myName, oppName, hasOpponent, input, partners, onSwitch, onOpenBook, onOpenChat, onUpdateJourney }: Props) {
   const now = useMemo(() => new Date(), []);
   const oppLabel = san(oppName);
 
@@ -207,6 +205,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         diff={diff}
         months={months}
         luckTitle={result.dailyLuckTitle}
+        specials={[next.pair, next.solo].filter((n): n is NextDay => Boolean(n))}
       />
 
       {/* ① 二人の今日の相性 */}
@@ -329,23 +328,6 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         />
       )}
 
-      {/* ③ これから14日間の流れ */}
-      {/* これから14日間と、次の特別な日 */}
-      <section style={card}>
-        <h3 className="font-serif" style={h3}>これから14日間</h3>
-        {weeklyChart}
-        {(next.pair || next.solo) && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.3rem' }}>
-            {[next.pair, next.solo].filter((n): n is NextDay => Boolean(n)).map((n) => (
-              <div key={n.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem', padding: '0.55rem 0.75rem', borderRadius: '12px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(226,192,116,0.3)' }}>
-                <span style={{ fontSize: '0.78rem', color: '#f2e2b3', minWidth: 0 }}>次の{n.label}<br /><span style={{ color: '#b9b2a4' }}>{fmtDay(n)}</span></span>
-                <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 900, color: GOLD, whiteSpace: 'nowrap' }}>{n.daysAway === 0 ? '今日！' : `あと${n.daysAway}日`}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
       {/* 変わらない鑑定への入り口 */}
       <button type="button" onClick={onOpenBook} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.6rem', textAlign: 'left', cursor: 'pointer',
@@ -396,24 +378,25 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian, self = false }: { oppLabe
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
           <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>元気の量</p>
-          {/* 元気の量のメーター（5段の目盛り＋数字。2026-11-12 TAKASHI「もう少しいい感じに」） */}
-          <span aria-label={`5段階中${pt.energy}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: '3px', height: 18 }}>
-              {[1, 2, 3, 4, 5].map((n) => {
-                const on = n <= pt.energy;
-                return (
-                  <span key={n} style={{
-                    width: 7, height: 6 + n * 2.4, borderRadius: '2px',
-                    background: on ? `linear-gradient(180deg, ${accent === '#e2c074' ? '#f6e6c2' : '#cfe7f2'}, ${accent})` : 'rgba(255,255,255,0.1)',
-                    boxShadow: on ? `0 0 6px ${accent}66` : 'none'
-                  }} />
-                );
-              })}
-            </span>
-            <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 900, color: accent, lineHeight: 1 }}>
-              {pt.energy}<span style={{ fontSize: '0.62rem', color: '#8f887b', fontWeight: 'bold' }}> / 5</span>
-            </span>
-          </span>
+          {/* 元気の量は電池の形（残量が多いほど緑寄りで明るく）。2026-11-12 TAKASHI「元気の量だから元気っぽい感じに」 */}
+          {(() => {
+            // 1=赤み 2=オレンジ 3=黄 4=黄緑 5=緑（下の説明文と言葉が重なるので、メーターに言葉は添えない）
+            const ENERGY = [{ color: '#e8826b' }, { color: '#efa25a' }, { color: '#f2cd5c' }, { color: '#b9dc62' }, { color: '#7fe08a' }];
+            const e = ENERGY[Math.max(1, Math.min(5, pt.energy)) - 1];
+            return (
+              <span aria-label={`元気の量 5段階中${pt.energy}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <span style={{ display: 'inline-flex', gap: '2px', padding: '2px', borderRadius: '4px', border: `1.5px solid ${e.color}`, boxShadow: `0 0 8px ${e.color}55` }}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <span key={n} style={{ width: 7, height: 12, borderRadius: '1.5px', background: n <= pt.energy ? e.color : 'rgba(255,255,255,0.08)' }} />
+                    ))}
+                  </span>
+                  <span style={{ width: 3, height: 7, marginLeft: 1, borderRadius: '0 2px 2px 0', background: e.color }} />
+                </span>
+                <span style={{ fontSize: '0.9rem', lineHeight: 1 }} aria-hidden="true">{pt.energy >= 4 ? '⚡' : pt.energy <= 1 ? '💤' : ''}</span>
+              </span>
+            );
+          })()}
         </div>
         <p style={{ ...body, fontSize: '0.84rem' }}>{pt.energyText}</p>
         <p style={sub}>十二運（じゅうにうん）＝星の元気の段階で、今日は「{pt.energyName}」</p>
@@ -557,10 +540,13 @@ const monthArrow = (off: boolean): React.CSSProperties => ({
 type CalMonth = { year: number; month: number; days: { day: number; score: number }[]; current: boolean; before: boolean };
 
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
-function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle }: {
+function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
-  months: CalMonth[]; luckTitle?: string;
+  months: CalMonth[]; luckTitle?: string; specials: NextDay[];
 }) {
+  // 次の特別な日（シンクロ日＝♥、恋愛運MAX日＝★）は暦のマスに印をつけ、暦の下に「あと〇日」で出す（2026-11-12 TAKASHI「カレンダーのところにいい感じに」）
+  const markOf = (n: NextDay) => (n.label.includes('シンクロ') ? '♥' : '★');
+  const specialAt = (y: number, m: number, d: number) => specials.find((n) => n.date.y === y && n.date.m === m + 1 && n.date.d === d);
   const sm = getScoreMood(base, daily);
   // 表示する月（今月／翌月をタップで切り替え。2026-11-12 TAKASHI）
   const [monthIdx, setMonthIdx] = useState(() => Math.max(0, months.findIndex((m) => m.current)));
@@ -637,6 +623,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
                   {/* 日付は左上に小さく、点数は真ん中に大きく（2026-11-12 TAKASHI「日付と点数の差が分かりづらい」） */}
                   <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: lv.color, opacity: 0.7 }}>{c.day}日</span>
                   {isToday && <span style={{ position: 'absolute', top: -7, right: -3, fontSize: '0.5rem', fontWeight: 'bold', lineHeight: 1, color: '#0b0f15', background: '#ffffff', borderRadius: '6px', padding: '2px 4px' }}>今日</span>}
+                  {(() => { const sp = specialAt(mo.year, mo.month, c.day); return sp ? <span aria-label={sp.label} style={{ position: 'absolute', top: 2, right: 4, fontSize: '0.6rem', lineHeight: 1, color: sp && markOf(sp) === '♥' ? '#ff9db5' : '#fff3c4', textShadow: '0 0 4px rgba(0,0,0,0.6)' }}>{markOf(sp)}</span> : null; })()}
                   <span className="font-serif" style={{ fontSize: '1.08rem', fontWeight: 900, lineHeight: 1, color: lv.color, marginTop: '0.35rem' }}>{c.score}</span>
                 </div>
               );
@@ -645,6 +632,18 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
         </div>
         );
       })}
+
+      {specials.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {specials.map((n) => (
+            <div key={n.label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0.65rem', borderRadius: '10px', background: 'rgba(0,0,0,0.22)' }}>
+              <span style={{ fontSize: '0.85rem', color: markOf(n) === '♥' ? '#ff9db5' : '#fff3c4', width: '1rem', textAlign: 'center' }}>{markOf(n)}</span>
+              <span style={{ flex: 1, minWidth: 0, fontSize: '0.74rem', color: '#f2e2b3', lineHeight: 1.4 }}>次の{n.label}<br /><span style={{ color: '#b9b2a4', fontSize: '0.7rem' }}>{fmtDay(n)}</span></span>
+              <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 900, color: GOLD, whiteSpace: 'nowrap' }}>{n.daysAway === 0 ? '今日！' : `あと${n.daysAway}日`}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

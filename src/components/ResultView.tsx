@@ -1406,22 +1406,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           onOpenBook={() => { setResultTab('book'); resultTopRef.current?.scrollIntoView({ block: 'start' }); }}
           onOpenChat={onOpenChat}
           barBottom={RESULT_BAR_BOTTOM}
-          weeklyChart={(() => {
-            const items = activeResult.weeklyScores.map((day, index) => ({
-              key: day.day,
-              label: index === 0 ? `本日${day.day.match(/\(.\)/)?.[0] || ''}` : day.day,
-              score: day.score
-            }));
-            const scores = items.map((item) => item.score);
-            const range = { lo: Math.min(...scores), hi: Math.max(...scores) };
-            return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {[items.slice(0, 7), items.slice(7)].filter((row) => row.length > 0).map((row, i) => (
-                  <ScoreLineChart key={i} locked={false} items={row} range={range} />
-                ))}
-              </div>
-            );
-          })()}
         />
       )}
 
