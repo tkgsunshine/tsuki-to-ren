@@ -4,6 +4,7 @@ import { coupleReading } from '../utils/coupleReading';
 import type { Person, CoupleReading } from '../utils/coupleReading';
 import { READING_TOPICS, READING_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { ReadingCategory } from '../data/coupleTopics';
+import { PREVIEW_LOCKED } from './CoupleHundredSection';
 import type { CoupleAccess } from './CoupleHundredSection';
 import { DropPanel } from './CoupleDropPanel';
 import type { CoupleDrops } from '../services/coupleDrops';
@@ -16,9 +17,11 @@ const CATS: ReadingCategory[] = ['attract', 'support', 'talk', 'timing', 'future
 const METHOD_COLOR: Record<string, string> = { 四柱推命: '#e8a93a', 九星気学: '#5d9fc0', 'MBTI': '#b9a3d6' };
 
 const rowStyle: React.CSSProperties = {
+  // 押せる行は、金の枠＋うっすら金の地＋右端の矢印で「押せる」と分かるように（2026-11-12 TAKASHI「押せる所と押せない所の差が少ない」）
   display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%', textAlign: 'left',
-  padding: '0.6rem 0.7rem', borderRadius: '8px', cursor: 'pointer',
-  background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.22)', color: '#f3efe6'
+  padding: '0.65rem 0.7rem', borderRadius: '10px', cursor: 'pointer',
+  background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.04))',
+  border: '1px solid rgba(212, 175, 55, 0.55)', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)', color: '#f3efe6'
 };
 
 const Stars: React.FC<{ n: number; size?: string }> = ({ n, size = '0.85rem' }) => (
@@ -82,11 +85,18 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
     return m;
   }, [me, opp, myName, oppName, openKey]);
   const openCount = READING_TOPICS.filter((t) => access(t.no) === 'full').length;
+  // 最初は、見られるテーマ＋ロック中のものを5個まで。残りは「ほかのテーマも見る」で
+  const [showAll, setShowAll] = useState(false);
+  const shown = new Set(showAll ? READING_TOPICS.map((t) => t.no) : [
+    ...READING_TOPICS.filter((t) => access(t.no) === 'full').map((t) => t.no),
+    ...READING_TOPICS.filter((t) => access(t.no) !== 'full').slice(0, PREVIEW_LOCKED).map((t) => t.no),
+    ...(openNo ? [openNo] : [])
+  ]);
 
   return (
     <>
       {CATS.map((cat) => {
-        const list = READING_TOPICS.filter((t) => t.category === cat);
+        const list = READING_TOPICS.filter((t) => t.category === cat && shown.has(t.no));
         if (list.length === 0) return null;
         return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -111,7 +121,10 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
                   >
                     <span style={{ flex: 1, fontSize: '0.8rem', lineHeight: 1.5 }}>{t.title}</span>
                     {locked ? (
-                      <span style={{ fontSize: '0.75rem', color: '#bfb8a8', filter: 'blur(3px)' }} aria-hidden="true">★★★☆☆</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#bfb8a8', filter: 'blur(3px)' }} aria-hidden="true">★★★☆☆</span>
+                        <ChevronDown size={14} style={{ color: '#f5d77a' }} />
+                      </span>
                     ) : (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                         <Stars n={r.stars} size="0.72rem" />
@@ -131,6 +144,11 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
       })}
       {openCount < READING_TOPICS.length && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
+          {shown.size < READING_TOPICS.length && (
+            <button type="button" onClick={() => setShowAll(true)} style={{ background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.78rem', padding: '0.45rem 1rem', cursor: 'pointer' }}>
+              ほかのテーマも見る（あと{READING_TOPICS.length - shown.size}個）
+            </button>
+          )}
           <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {READING_TOPICS.length} 個です{drops ? '（テーマを押すと、かけらで開けられます）' : ''}</span>
           {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>

@@ -7,7 +7,7 @@ import type { CoupleDrops } from '../services/coupleDrops';
 export const DropBalance: React.FC<{ drops: CoupleDrops }> = ({ drops }) => (
   <div style={{
     display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap',
-    padding: '0.5rem 0.75rem', borderRadius: '10px', background: 'rgba(245, 215, 122, 0.08)', border: '1px solid rgba(245, 215, 122, 0.4)'
+    padding: '0.1rem 0.15rem'
   }}>
     <span style={{ fontSize: '0.82rem', color: '#f7ecc8', fontWeight: 'bold' }}>🌙 月のかけら {drops.balance}個</span>
     <span style={{ fontSize: '0.68rem', color: '#cfc3a0', lineHeight: 1.5 }}>
@@ -27,8 +27,7 @@ export const DropPanel: React.FC<{
   const empty = drops.balance < 1;
   return (
     <div style={{
-      margin: '0.35rem 0 0.2rem', padding: '0.8rem', borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
-      background: 'rgba(11, 15, 21, 0.7)', border: '1px dashed rgba(245, 215, 122, 0.5)'
+      margin: '0.45rem 0 0.3rem', padding: '0 0.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem'
     }}>
       {!empty ? (
         <button

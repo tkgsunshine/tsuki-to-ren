@@ -42,6 +42,8 @@ interface Props {
 }
 
 const SITE = 'tsuki-to-ren.com';
+/** 最初から並べる、ロック中の項目の数 */
+export const PREVIEW_LOCKED = 5;
 
 // MBTIの4グループの色（NT=分析家 紫・NF=外交官 緑・SJ=番人 青・SP=探検家 黄。暗い背景で読める明るさ）
 const typeColor = (t: string) => {
@@ -62,9 +64,11 @@ const TypePair: React.FC<{ a: string; b: string; size?: string }> = ({ a, b, siz
 const CATS: RankCategory[] = ['start', 'daily', 'fight', 'long', 'aruaru'];
 
 const rowStyle: React.CSSProperties = {
+  // 押せる行は、金の枠＋うっすら金の地＋右端の矢印で「押せる」と分かるように（2026-11-12 TAKASHI「押せる所と押せない所の差が少ない」）
   display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%', textAlign: 'left',
-  padding: '0.6rem 0.7rem', borderRadius: '8px', cursor: 'pointer',
-  background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.22)', color: '#f3efe6'
+  padding: '0.65rem 0.7rem', borderRadius: '10px', cursor: 'pointer',
+  background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.04))',
+  border: '1px solid rgba(212, 175, 55, 0.55)', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)', color: '#f3efe6'
 };
 const rankChip = (top: boolean): React.CSSProperties => ({
   flexShrink: 0, minWidth: '3.6rem', textAlign: 'right', fontWeight: 'bold', fontSize: '0.9rem',
@@ -124,7 +128,8 @@ export const CoupleHundredSection: React.FC<Props> = ({
   const oppPerson = useMemo(() => toPerson(oppPillar, oppStar, oppMbti), [oppPillar, oppStar, oppMbti]);
   const ready = hasCoupleTypes(myMbti, oppMbti);
   const [openNo, setOpenNo] = useState<number | null>(focusNo);
-  // 50個すべてを最初から並べる（2026-11-12 TAKASHI「クリックが多い」で「ほかの〜も見る」をやめた）
+  // 最初は、見られるランキング＋ロック中のものを5個まで並べ、残りは「ほかのランキングも見る」で出す（2026-11-12 TAKASHI「デフォで5個くらい他も表示」）
+  const [showAll, setShowAll] = useState(false);
   const focusRef = useRef<HTMLDivElement>(null);
 
   // X投稿から来たお題は、開いた状態でそこまでスクロール（結果画面の描画が落ち着いてから）
@@ -143,6 +148,11 @@ export const CoupleHundredSection: React.FC<Props> = ({
   }, [ready, myMbti, oppMbti]);
 
   const openCount = RANK_TOPICS.filter((t) => rankAccess(t.no) !== 'locked').length;
+  const shown = new Set(showAll ? RANK_TOPICS.map((t) => t.no) : [
+    ...RANK_TOPICS.filter((t) => rankAccess(t.no) !== 'locked').map((t) => t.no),
+    ...RANK_TOPICS.filter((t) => rankAccess(t.no) === 'locked').slice(0, PREVIEW_LOCKED).map((t) => t.no),
+    ...(openNo ? [openNo] : [])
+  ]);
 
   return (
     <div id="couple-hundred" className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
@@ -170,7 +180,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
           : <>{san(myName, 'あなた')}と{san(oppName, 'お相手')}のMBTIの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のランキングで見ていきます。</>}
       </p>
       {tab === 'rank' && ready && (
-        <div style={{ textAlign: 'center', padding: '0.55rem 0.5rem', borderRadius: '10px', background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.25)' }}>
+        <div style={{ textAlign: 'center', padding: '0.2rem 0.25rem' }}>
           {/* 二人のニックネームとMBTI（2026-11-12 TAKASHI「ここにニックネームも記載」） */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
             {([[myMbti || '', san(myName, 'あなた')], null, [oppMbti || '', san(oppName, 'お相手')]] as const).map((x, i) => x === null ? (
@@ -203,7 +213,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
         </div>
       ) : (
         CATS.map((cat) => {
-          const list = RANK_TOPICS.filter((t) => t.category === cat);
+          const list = RANK_TOPICS.filter((t) => t.category === cat && shown.has(t.no));
           if (list.length === 0) return null;
           return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -228,13 +238,21 @@ export const CoupleHundredSection: React.FC<Props> = ({
                   >
                     <span style={{ flex: 1, fontSize: '0.8rem', lineHeight: 1.5 }}>{t.title}</span>
                     {access === 'locked' || !r ? (
-                      <span style={{ ...rankChip(false), fontSize: '0.7rem', color: '#bfb8a8', fontFamily: 'inherit' }}>
-                        <span aria-hidden="true" style={{ filter: 'blur(4px)' }}>●●</span>位
+                      <span style={{ ...rankChip(false), fontSize: '0.7rem', color: '#bfb8a8', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'flex-end' }}>
+                        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.2 }}>
+                          <span style={{ fontSize: '0.6rem', fontWeight: 'normal' }}>{COUPLE_PAIR_COUNT}組中</span>
+                          <span><span aria-hidden="true" style={{ filter: 'blur(4px)' }}>●●</span>位</span>
+                        </span>
+                        <ChevronDown size={14} style={{ color: '#f5d77a' }} />
                       </span>
                     ) : (
+                      // 「136組中◯位」と分かるように、順位の上に母数を小さく（2026-11-12 TAKASHI）
                       <span style={{ ...rankChip(r.rank <= 10), display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'flex-end' }}>
-                        {r.rank}位
-                        <ChevronDown size={14} style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.15 }}>
+                          <span style={{ fontSize: '0.6rem', fontWeight: 'normal', color: '#bfb8a8', fontFamily: 'inherit' }}>{COUPLE_PAIR_COUNT}組中</span>
+                          <span>{r.rank}位</span>
+                        </span>
+                        <ChevronDown size={14} style={{ color: '#f5d77a', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                       </span>
                     )}
                   </button>
@@ -252,6 +270,11 @@ export const CoupleHundredSection: React.FC<Props> = ({
 
       {tab === 'rank' && ready && openCount < RANK_TOPICS.length && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem', marginTop: '0.2rem' }}>
+          {shown.size < RANK_TOPICS.length && (
+            <button type="button" onClick={() => setShowAll(true)} style={{ background: 'none', border: '1px solid rgba(212, 175, 55, 0.45)', borderRadius: '999px', color: '#f5d77a', fontSize: '0.78rem', padding: '0.45rem 1rem', cursor: 'pointer' }}>
+              ほかのランキングも見る（あと{RANK_TOPICS.length - shown.size}個）
+            </button>
+          )}
           <span style={{ fontSize: '0.74rem', color: '#bfb8a8' }}>いま見られるのは {openCount} / {RANK_TOPICS.length} 個です{drops ? '（ランキングを押すと、かけらで開けられます）' : ''}</span>
           {!drops?.premium && <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>{lockWord}</button>}
         </div>
