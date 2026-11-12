@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { generateFortuneResult, san, getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
@@ -84,6 +84,10 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
     return generateFortuneResult(input, 'tsuki', y).dailyScore;
   }, [input, now]);
   const diff = yesterdayScore === null ? null : result.dailyScore - yesterdayScore;
+  // 恋の暦は月だけで読む（月・蓮の切り替えは出さない。2026-11-12 TAKASHI「月の表示だけでOK」）
+  useEffect(() => {
+    if (selectedChar !== 'tsuki') setSelectedChar('tsuki');
+  }, [selectedChar, setSelectedChar]);
   // 今月の毎日の点数（カレンダー用。今日は表示中の点数そのもの）
   const month = useMemo(() => {
     if (!input) return [] as { day: number; score: number }[];
@@ -184,21 +188,6 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
           ))}
         </div>
       )}
-
-      {/* 月・蓮の切り替え（助言・相談の相手が変わる） */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem', padding: '0.25rem', borderRadius: '14px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(226,192,116,0.2)' }}>
-        {(['tsuki', 'ren'] as const).map((c) => (
-          <button key={c} type="button" onClick={() => setSelectedChar(c)} aria-pressed={selectedChar === c} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.35rem', borderRadius: '10px', cursor: 'pointer',
-            border: 'none', fontSize: '0.8rem', fontWeight: 'bold', fontFamily: 'var(--font-serif)',
-            background: selectedChar === c ? (c === 'ren' ? 'rgba(77, 140, 168, 0.22)' : 'rgba(159, 134, 192, 0.2)') : 'transparent',
-            color: selectedChar === c ? (c === 'ren' ? '#9cc6d8' : '#cdbfe2') : '#8f897d'
-          }}>
-            <img src={c === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp'} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />
-            {c === 'ren' ? '蓮の読み' : '月の読み'}
-          </button>
-        ))}
-      </div>
 
       {/* 今日の相性 */}
       {/* 日めくりの暦（鑑定書の丸いメーターとは別の見た目にして、同じ画面と勘違いさせない。2026-11-12 TAKASHI） */}
