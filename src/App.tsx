@@ -1199,6 +1199,8 @@ function App() {
     setMode('match');
   };
 
+  // 結果画面を「鑑定書」から開くか（入力画面から鑑定したとき true。アプリを開き直したときは false＝恋の暦から）
+  const [startOnBook, setStartOnBook] = useState(false);
   // 月額会員の「今日」画面で、お相手（または自分だけ）を切り替える。読み込み画面は出さずに、その場で鑑定し直す
   const handleTodaySwitch = (partner: SavedPartner | null) => {
     const cur = readingInput;
@@ -1431,6 +1433,8 @@ function App() {
     // 招待URL（またはコード）で来た人が占い終えた: 招待した会員に数える
     if (pendingRef) void sendRef(pendingRef, data.myBirth);
 
+    // 診断の入力画面から鑑定したときは、月額会員でも必ず鑑定書から見せる（2026-11-12 TAKASHI）
+    setStartOnBook(true);
     startDiagnosis(
       data.myName,
       data.myBirth,
@@ -1853,6 +1857,7 @@ function App() {
                 todayInput={readingInput}
                 todayPartners={savedPartners}
                 onTodaySwitch={handleTodaySwitch}
+                startOnBook={startOnBook}
                 onUpdateJourney={handleUpdateJourney}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
@@ -1898,6 +1903,7 @@ function App() {
                 todayInput={readingInput}
                 todayPartners={savedPartners}
                 onTodaySwitch={handleTodaySwitch}
+                startOnBook={startOnBook}
                 onUpdateJourney={handleUpdateJourney}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}

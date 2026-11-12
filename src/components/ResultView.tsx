@@ -518,6 +518,8 @@ interface ResultViewProps {
   todayInput?: DiagnosisInput | null;
   todayPartners?: SavedPartner[];
   onTodaySwitch?: (partner: SavedPartner | null) => void;
+  /** true: 鑑定書のタブから開く（診断の入力画面から鑑定したとき） */
+  startOnBook?: boolean;
   onUpdateJourney?: (partnerId: string, journey: Journey) => void;
 }
 
@@ -553,6 +555,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   todayInput = null,
   todayPartners = [],
   onTodaySwitch,
+  startOnBook,
   onUpdateJourney
 }) => {
   const [email, setEmail] = useState('');
@@ -567,7 +570,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const [showWelcomePremium, setShowWelcomePremium] = useState(false);
   // 月額プレミアム会員は、開いたときに「今日」（毎日変わる結果だけ）を見せ、タブで「鑑定書」（今までの結果画面）に切り替える（2026-11-12 TAKASHI）。
   // 共有リンクで開いた、ほかの人の結果では出さない
-  const [resultTab, setResultTab] = useState<'today' | 'book'>('today');
+  // 診断の入力画面から鑑定したときは鑑定書から（2026-11-12 TAKASHI）
+  const [resultTab, setResultTab] = useState<'today' | 'book'>(startOnBook ? 'book' : 'today');
+  useEffect(() => { setResultTab(startOnBook ? 'book' : 'today'); }, [startOnBook]);
   const showTodayTabs = isSubscribed && !sharedBy;
   const showToday = showTodayTabs && resultTab === 'today';
   useEffect(() => {
