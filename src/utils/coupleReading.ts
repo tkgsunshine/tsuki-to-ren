@@ -580,15 +580,20 @@ export function toPerson(pillar?: string, starText?: string, mbti?: string): Per
   return { stem: pillar[0], branch: pillar[1], star, mbti: u };
 }
 
+/** 点が高いほど悪い意味になるテーマ（運を下げる・ケンカ・言葉・すれ違い）。表示の★と上位◯%だけ逆にし、文は元の点で選ぶ（2026-11-13 TAKASHI「★が強さとして読める名前に」） */
+const INVERTED = new Set([18, 22, 24, 28]);
+
 export function coupleReading(no: number, A: Person, B: Person, names: { me?: string; opp?: string } = {}, now: Date = new Date()): CoupleReading | null {
   const def = defByNo.get(no);
   if (!def) return null;
   const me = san(names.me, 'あなた');
   const opp = san(names.opp, 'お相手');
   const { score, when } = totalScore(def, A, B, now);
-  const top = topPercent(def, score, now);
+  const raw = topPercent(def, score, now);
+  // 文は元の点で選ぶ（hi=当てはまる側）。逆のテーマは、表示の★と上位◯%だけ反対にする
+  const band = starsOf(raw) >= 4 ? 0 : starsOf(raw) === 3 ? 1 : 2;
+  const top = INVERTED.has(no) ? Math.max(1, 101 - raw) : raw;
   const stars = starsOf(top);
-  const band = stars >= 4 ? 0 : stars === 3 ? 1 : 2;
   const leadA = leadScore(A) >= leadScore(B);
   const text = def.text[band]
     .replace(/\{me\}/g, me).replace(/\{opp\}/g, opp)
