@@ -7,6 +7,7 @@ import type { RankCategory } from '../data/coupleTopics';
 import { toPerson } from '../utils/coupleReading';
 import { CoupleReadingList } from './CoupleReadingList';
 import { DropBalance, DropPanel } from './CoupleDropPanel';
+import { mbtiOptions } from '../constants/mbti';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 
 // 「二人の相性100」（2026-11-12 TAKASHI決定）。結果画面（お相手あり）の欄。
@@ -41,6 +42,23 @@ interface Props {
 }
 
 const SITE = 'tsuki-to-ren.com';
+
+// 16タイプの4グループの色（NT=分析家 紫・NF=外交官 緑・SJ=番人 青・SP=探検家 黄。暗い背景で読める明るさ）
+const typeColor = (t: string) => {
+  const u = t.toUpperCase();
+  if (u[1] === 'N') return u[2] === 'T' ? '#c9a8ec' : '#8fd8a8';
+  return u[3] === 'J' ? '#8cc8e6' : '#f2d27a';
+};
+const typeLabel = (t: string) => mbtiOptions.find((o) => o.value === t.toUpperCase())?.label ?? t.toUpperCase();
+
+/** 二人の16タイプを「INFJ（提唱者）× ENTP（討論者）」の形で、グループの色・太字で強調する */
+const TypePair: React.FC<{ a: string; b: string; size?: string }> = ({ a, b, size = '0.95rem' }) => (
+  <span style={{ display: 'inline-flex', alignItems: 'baseline', justifyContent: 'center', flexWrap: 'wrap', gap: '0.15rem 0.35rem', fontWeight: 'bold', fontSize: size, lineHeight: 1.4 }}>
+    <span style={{ color: typeColor(a), whiteSpace: 'nowrap' }}>{typeLabel(a)}</span>
+    <span style={{ color: '#bfb8a8', fontWeight: 'normal' }}>×</span>
+    <span style={{ color: typeColor(b), whiteSpace: 'nowrap' }}>{typeLabel(b)}</span>
+  </span>
+);
 const CATS: RankCategory[] = ['start', 'daily', 'fight', 'long', 'aruaru'];
 
 const rowStyle: React.CSSProperties = {
@@ -54,8 +72,8 @@ const rankChip = (top: boolean): React.CSSProperties => ({
 });
 
 /** スクショ用の1枚（開いたお題） */
-function RankCard({ title, rank, reason, pair, reasonOpen, onLockClick, lockWord, dropSlot }: {
-  title: string; rank: number; reason: string; pair: string; reasonOpen: boolean;
+function RankCard({ title, rank, reason, a, b, reasonOpen, onLockClick, lockWord, dropSlot }: {
+  title: string; rank: number; reason: string; a: string; b: string; reasonOpen: boolean;
   onLockClick: (e?: React.MouseEvent) => void; lockWord: string; dropSlot?: React.ReactNode;
 }) {
   const top = rank <= 10;
@@ -69,8 +87,8 @@ function RankCard({ title, rank, reason, pair, reasonOpen, onLockClick, lockWord
     }}>
       <div style={{ fontSize: '0.68rem', color: '#d4af37', letterSpacing: '0.08em' }}>月と蓮｜MBTI 二人の相性ランキング</div>
       <div style={{ fontSize: '0.92rem', fontWeight: 'bold', color: '#f3efe6', lineHeight: 1.5 }}>{title}</div>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.5rem', margin: '0.15rem 0' }}>
-        <span style={{ fontSize: '0.8rem', color: '#bfb8a8' }}>{pair}は</span>
+      <div style={{ textAlign: 'center' }}><TypePair a={a} b={b} size="0.92rem" /></div>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.5rem', margin: '0 0 0.15rem' }}>
         <span style={{ fontSize: '0.8rem', color: '#bfb8a8' }}>{COUPLE_PAIR_COUNT}組中</span>
         <span className="font-serif" style={{ fontSize: '2.2rem', fontWeight: 'bold', color: top ? '#f5d77a' : '#f3efe6', lineHeight: 1 }}>{rank}</span>
         <span style={{ fontSize: '1rem', fontWeight: 'bold', color: top ? '#f5d77a' : '#f3efe6' }}>位</span>
@@ -109,7 +127,6 @@ export const CoupleHundredSection: React.FC<Props> = ({
   // 結果画面が長くなりすぎないよう、最初は見られるお題だけ並べ、ほかは「ほかのお題も見る」で出す
   const [showAll, setShowAll] = useState(false);
   const focusRef = useRef<HTMLDivElement>(null);
-  const pair = `${(myMbti || '').toUpperCase()}×${(oppMbti || '').toUpperCase()}`;
 
   // X投稿から来たお題は、開いた状態でそこまでスクロール（結果画面の描画が落ち着いてから）
   useEffect(() => {
@@ -151,8 +168,13 @@ export const CoupleHundredSection: React.FC<Props> = ({
       <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.7, color: '#e8e2d4' }}>
         {tab === 'reading'
           ? <>16タイプ・四柱推命・九星気学の3つの占術で読み解く本格鑑定。{san(myName, 'あなた')}と{san(oppName, 'お相手')}の生年月日まで使った、二人だけの50のお題です。</>
-          : <>{san(myName, 'あなた')}と{san(oppName, 'お相手')}の16タイプの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のお題で見ていきます。{ready && <span style={{ color: '#f5d77a' }}>（{pair}）</span>}</>}
+          : <>{san(myName, 'あなた')}と{san(oppName, 'お相手')}の16タイプの組み合わせが、全{COUPLE_PAIR_COUNT}組の中で何位かを、50のお題で見ていきます。</>}
       </p>
+      {tab === 'rank' && ready && (
+        <div style={{ textAlign: 'center', padding: '0.55rem 0.5rem', borderRadius: '10px', background: 'rgba(11, 15, 21, 0.55)', border: '1px solid rgba(212, 175, 55, 0.25)' }}>
+          <TypePair a={myMbti || ''} b={oppMbti || ''} size="1.02rem" />
+        </div>
+      )}
       {drops && <DropBalance drops={drops} />}
 
       {tab === 'reading' ? (
@@ -208,7 +230,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
                     )}
                   </button>
                   {isOpen && r && (
-                    <RankCard title={t.title} rank={r.rank} reason={r.reason} pair={pair} reasonOpen={access === 'full'} onLockClick={onLockClick} lockWord={lockWord} dropSlot={panel} />
+                    <RankCard title={t.title} rank={r.rank} reason={r.reason} a={myMbti || ''} b={oppMbti || ''} reasonOpen={access === 'full'} onLockClick={onLockClick} lockWord={lockWord} dropSlot={panel} />
                   )}
                   {dropOpen && panel}
                 </div>
