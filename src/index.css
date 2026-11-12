@@ -172,6 +172,18 @@ h1, h2, h3, h4, button, label {
   border-color: rgba(255, 255, 255, 0.15);
 }
 
+/* 鑑定入力フォームの「あなたの情報」「お相手の情報」:
+   背景の星空が透けて文字が読みにくいので、カードと入力欄を濃くする */
+.glass-panel.input-form-panel {
+  background: rgba(12, 16, 28, 0.82);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.input-form-panel input::placeholder {
+  color: #9d978b;
+  opacity: 1;
+}
+
 /* Serif font style */
 .font-serif {
   font-family: var(--font-serif);
