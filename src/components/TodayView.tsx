@@ -548,7 +548,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
   // 次の特別な日（シンクロ日＝♥、恋愛運MAX日＝★）は暦のマスに印をつけ、暦の下に「あと〇日」で出す（2026-11-12 TAKASHI「カレンダーのところにいい感じに」）
   const markOf = (n: NextDay) => (n.label.includes('シンクロ') ? '♥' : '★');
   const specialAt = (y: number, m: number, d: number) => specials.find((n) => n.date.y === y && n.date.m === m + 1 && n.date.d === d);
-  const sm = getScoreMood(base, daily);
+  const sm = getScoreMood(base, daily, baseLabel === '基本の相性');
   // 表示する月（今月／翌月をタップで切り替え。2026-11-12 TAKASHI）
   const [monthIdx, setMonthIdx] = useState(() => Math.max(0, months.findIndex((m) => m.current)));
   const diffText = diff === null ? null : diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0';

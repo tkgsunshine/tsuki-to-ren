@@ -1581,7 +1581,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const daily = lockedScore(realDaily, 3, dailyHidden);
           const diff = daily - base;
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
-          const scoreMood = getScoreMood(base, realDaily);
+          const scoreMood = getScoreMood(base, realDaily, hasOpponent);
           const mood = { ...scoreMood, color: scoreMood.trend === 'up' ? '#8fd3ae' : scoreMood.trend === 'down' ? '#e0a9a0' : '#d8cfb8' };
           // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
           const labelsCollide = Math.abs(diff) < 28;
@@ -1692,7 +1692,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {mood.title}
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
-                  {baseLabel}より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
+                  {hasOpponent ? 'いつもより' : `${baseLabel}より`} <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
                 </div>
               </div>}
 

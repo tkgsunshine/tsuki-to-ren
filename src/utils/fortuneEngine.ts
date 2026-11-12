@@ -159,6 +159,18 @@ export const SOLO_BASE_CONSTANT = 70;
 // 2026-11 に恋の星・天乙貴人・空亡・2人の最高シンクロ日を足したので、-5 から -6 に合わせ直した。
 export const DAILY_CENTER_OFFSET = -6;
 
+// 二人の今日の相性の「真ん中」と「振れ幅」（アプリが決めた値。2026-11-12 TAKASHI判断）。
+// 旧版は「基本の相性＋その日の上下」で、基本の相性が低い二人は90点がまず出ず、高い二人はほぼ毎日高かった。
+// 基本の相性そのもの（baseScore）は変えない。今日の点数に入れるときだけ、基本の相性の差を4割に縮め、
+// その日の星による上下を2倍にする。全体の平均（約65点）は旧版とほぼ同じ。一人の運勢は旧版のまま。
+export const DAILY_PAIR_CENTER = 67;
+export const DAILY_BASE_WEIGHT = 0.4;
+export const DAILY_SWING = 2;
+
+/** 今日の点数の「いつもの位置」（その二人の長い目で見た平均）。一人の運勢は基本運勢そのもの */
+export const getDailyCenter = (baseScore: number, pair: boolean): number =>
+  pair ? DAILY_PAIR_CENTER + DAILY_BASE_WEIGHT * (baseScore - DAILY_PAIR_CENTER) : baseScore;
+
 // 月次・年次の点数の「ずれ」の中心を0に合わせるための補正（アプリが決めた値）。
 // 月次・年次は天干と十二支の2項目だけを足す（十二運・九星は入れていない）。2項目の平均は1人あたり約+4.1点（天干+2.3、十二支+1.8）なので、-4 で戻す。
 // 旧版は、二人分を合計（平均でなく）し、補正もなかったため、二人の鑑定で月次の100点が約7%・90点以上が約17%と出すぎていた。
@@ -2217,13 +2229,18 @@ export interface ScoreMood {
   trend: 'up' | 'flat' | 'down';
 }
 
-export function getScoreMood(baseScore: number, dailyScore: number): ScoreMood {
-  const diff = dailyScore - baseScore;
+/**
+ * 今日の調子（絶好調〜充電の日）。pair=true（二人の相性）は、基本の相性ではなく「いつもの位置」（getDailyCenter）と比べ、
+ * 振れ幅が2倍になったぶん区切りも広げる。diff / sign は「いつもより」の差。一人の運勢は基本運勢との差（旧版どおり）。
+ */
+export function getScoreMood(baseScore: number, dailyScore: number, pair = false): ScoreMood {
+  const diff = Math.round(dailyScore - getDailyCenter(baseScore, pair));
+  const [big, small] = pair ? [30, 10] : [20, 5];
   const sign = diff > 0 ? `+${diff}点` : diff < 0 ? `−${-diff}点` : '±0点';
-  if (diff >= 20) return { phase: 'full', title: '今日は絶好調', diff, sign, trend: 'up' };
-  if (diff >= 5) return { phase: 'gibbous', title: '今日は追い風', diff, sign, trend: 'up' };
-  if (diff > -5) return { phase: 'half', title: '今日はいつも通り', diff, sign, trend: 'flat' };
-  if (diff > -20) return { phase: 'crescent', title: '今日はひと休み', diff, sign, trend: 'down' };
+  if (diff >= big) return { phase: 'full', title: '今日は絶好調', diff, sign, trend: 'up' };
+  if (diff >= small) return { phase: 'gibbous', title: '今日は追い風', diff, sign, trend: 'up' };
+  if (diff > -small) return { phase: 'half', title: '今日はいつも通り', diff, sign, trend: 'flat' };
+  if (diff > -big) return { phase: 'crescent', title: '今日はひと休み', diff, sign, trend: 'down' };
   return { phase: 'thin', title: '今日は充電の日', diff, sign, trend: 'down' };
 }
 
@@ -2392,7 +2409,9 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     const juni = hasOpponent ? (myJuni + juniUnPoints(oppPillarObj.stem, dp.branch)) / 2 : myJuni;
     // 2人の最高シンクロ日（LuckyDaysSection と同じ判定）
     const sync = myLuck && oppLuck ? isPairSyncDate(myLuck, oppLuck, dayInfo) : false;
-    return baseScore + pairAvg(myStem, oppStem) + pairAvg(myBranch, oppBranch) + juni + dayStarOf(d) + DAILY_CENTER_OFFSET + (sync ? SYNC_DAY_BONUS : 0);
+    const swing = pairAvg(myStem, oppStem) + pairAvg(myBranch, oppBranch) + juni + dayStarOf(d) + DAILY_CENTER_OFFSET + (sync ? SYNC_DAY_BONUS : 0);
+    // 二人: いつもの位置（基本の差を4割に）＋その日の上下×2。一人: 基本運勢＋その日の上下（旧版どおり）
+    return hasOpponent ? getDailyCenter(baseScore, true) + DAILY_SWING * swing : baseScore + swing;
   };
 
   let dailyScore = Math.floor(rawDayScore(today));
