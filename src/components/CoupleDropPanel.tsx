@@ -52,7 +52,7 @@ export const DropBalance: React.FC<{ drops: CoupleDrops }> = ({ drops }) => {
         </span>
       </div>
       <span style={{ fontSize: '0.7rem', color: '#cfc3a0', textAlign: 'center', lineHeight: 1.6 }}>
-        {drops.guest ? 'はじめての方へのプレゼント。1個で1つ開けられます（会員登録すると毎日2個）' : drops.premium ? `1個で1つ開けられます。毎日${drops.daily}個・お支払い日に50個（${drops.cap}個まで）` : `1個で1つ開けられます。毎日${drops.daily}個届きます（持ち越しはありません）`}
+        {drops.guest ? '🎁 はじめての方に3個プレゼント。🌙 1個で1つ開けられます。使い切っても、無料の会員登録で毎日2個もらえます。' : drops.premium ? `1個で1つ開けられます。毎日${drops.daily}個・お支払い日に50個（${drops.cap}個まで）` : `1個で1つ開けられます。毎日${drops.daily}個届きます（持ち越しはありません）`}
       </span>
     </div>
   );
@@ -92,7 +92,13 @@ export const DropPanel: React.FC<{
             color: '#1a1230', background: 'linear-gradient(135deg, #fff6d8, #e8cf86)', opacity: busy ? 0.7 : 1
           }}
         >
-          {busy ? '開いています…' : `🌙 かけらを1つ使って${what}を見る`}
+          {busy ? '開いています…' : (
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem' }}>
+              {/* 金のボタンの上だと🌙が背景に溶けるので、濃紺の丸に乗せる（2026-11-13 TAKASHI「🌙が背景に混じってる」） */}
+              <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '1.6rem', height: '1.6rem', borderRadius: '50%', background: '#1a1230', fontSize: '0.95rem', lineHeight: 1, boxShadow: '0 0 6px rgba(26, 18, 48, 0.35)' }}>🌙</span>
+              {`かけらを1つ使って${what}を見る`}
+            </span>
+          )}
         </button>
       ) : (
         <span style={{ fontSize: '0.78rem', color: '#f7ecc8', textAlign: 'center', lineHeight: 1.6 }}>
