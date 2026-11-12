@@ -237,18 +237,16 @@ export const CoupleHundredSection: React.FC<Props> = ({
                     <span style={{ flex: 1, fontSize: '0.8rem', lineHeight: 1.5 }}>{t.title}</span>
                     {access === 'locked' || !r ? (
                       <span style={{ ...rankChip(false), fontSize: '0.7rem', color: '#bfb8a8', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'flex-end' }}>
-                        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.2 }}>
-                          <span style={{ fontSize: '0.6rem', fontWeight: 'normal' }}>{COUPLE_PAIR_COUNT}組中</span>
-                          <span><span aria-hidden="true" style={{ filter: 'blur(4px)' }}>●●</span>位</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>
+                          <span aria-hidden="true" style={{ filter: 'blur(4px)' }}>●●</span>位<span style={{ fontSize: '0.62rem', fontWeight: 'normal' }}>/{COUPLE_PAIR_COUNT}組</span>
                         </span>
                         <ChevronDown size={14} style={{ color: '#f5d77a' }} />
                       </span>
                     ) : (
-                      // 「136組中◯位」と分かるように、順位の上に母数を小さく（2026-11-12 TAKASHI）
+                      // 「6位/136組」の形で母数を添える（2026-11-12 TAKASHI）
                       <span style={{ ...rankChip(r.rank <= 10), display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'flex-end' }}>
-                        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.15 }}>
-                          <span style={{ fontSize: '0.6rem', fontWeight: 'normal', color: '#bfb8a8', fontFamily: 'inherit' }}>{COUPLE_PAIR_COUNT}組中</span>
-                          <span>{r.rank}位</span>
+                        <span style={{ whiteSpace: 'nowrap' }}>
+                          {r.rank}位<span style={{ fontSize: '0.62rem', fontWeight: 'normal', color: '#bfb8a8', fontFamily: 'inherit' }}>/{COUPLE_PAIR_COUNT}組</span>
                         </span>
                         <ChevronDown size={14} style={{ color: '#f5d77a', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                       </span>
