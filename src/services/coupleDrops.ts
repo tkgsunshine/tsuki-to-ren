@@ -10,7 +10,10 @@ export interface CoupleDrops {
   premium: boolean;
   /** 未登録（この端末だけで数える、はじめての3個） */
   guest?: boolean;
+  /** いま使えるかけらの合計（毎日の分＋シングルプランの分） */
   balance: number;
+  /** そのうち、シングルプラン（このお相手専用）の分 */
+  bonus?: number;
   cap: number;
   daily: number;
   /** 今回の表示で足されたかけら（支払い日・毎日の補充） */
@@ -69,6 +72,7 @@ const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops
     const drops: CoupleDrops = {
       premium: data.premium === true,
       balance: data.balance,
+      bonus: Number(data.bonus) || 0,
       cap: Number(data.cap) || 0,
       daily: Number(data.daily) || 0,
       granted: Number(data.granted) || 0,

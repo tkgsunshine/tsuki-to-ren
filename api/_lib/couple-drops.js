@@ -2,12 +2,15 @@ import { getDb, getAdminAuth } from './firestore.js';
 import { PREMIUM, isLiveKey, parseBody, verifyUser } from './stripe.js';
 import { isOverrideEmail } from './premium-override.js';
 import { isPremiumRecord, jstToday, partnerKey } from './partner-days.js';
+import { findPairUnlock } from './pair-unlock.js';
 
 // 「月のかけら」（2026-11-12 TAKASHI決定）: 「二人の相性100」のお題を1つずつ開けるためのかけら。
 // ・月額プレミアム: 支払い日（新しい支払い期間に入った最初の表示）に50個、毎日10個。貯められるのは100個まで
 // ・無料会員: 毎日2個。使わなかった分は持ち越さない（2個まで）
 // ・かけら1つで1つのお題が開く。一度開けたお題は、そのお相手についてずっと見られる
 //   （月額の間に開けたお題は、解約すると見られなくなる。無料会員のかけらで開けたお題は解約に関係なく見られる）
+// ・シングルプラン（¥680、お相手1人）: 買ったお相手に使えるかけらを50個（1回の購入につき1回だけ。上限・期限なし、
+//   毎日のかけらとは別に持つ。毎日の分を先に使う。開けたお題はずっと見られる）（2026-11-13 TAKASHI「かけら50個付与でいい。ユーザー自身が選べば良い」）
 // ・かけらは単体では売らない（お金で買えると資金決済法の対象になりうるため）
 // ・補充は定期実行を使わず、画面を開いたとき（このAPIを呼んだとき）に、前回からの日数ぶん計算する
 // 記録は coupleDrops/{uid} にサーバーだけが書く（firestore.rules で端末からは読み書き不可。今の課金記録と同じ守り方）。
@@ -18,6 +21,7 @@ export const PREMIUM_PAYDAY = 50;
 export const PREMIUM_CAP = 100;
 export const FREE_DAILY = 2;
 export const FREE_CAP = 2;
+export const PAIR_BONUS = 50;
 const TOPIC_MAX = 50;
 const BIRTH_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -86,45 +90,59 @@ export default async function handler(req, res, deps = {}) {
     const today = deps.today || jstToday();
     const key = partnerKey(birth);
     const ref = db.collection(COUPLE_DROPS).doc(user.uid);
+    const pair = await findPairUnlock(db, user.uid, birth, deps.live ?? isLiveKey());
 
     const out = await db.runTransaction(async (tx) => {
       const snap = await tx.get(ref);
       const rec = snap.exists ? snap.data() : {};
       const r = refill(rec, { premium, periodEnd }, today);
       const o = openedOf(rec, key);
+      // シングルプランのかけら（このお相手専用）。購入（sessionId）ごとに1回だけ50個
+      let bonus = Math.max(0, Number(rec?.bonus?.[key]) || 0);
+      const grantedFor = rec?.bonusFor?.[key] || null;
+      let bonusGranted = false;
+      if (pair?.sessionId && grantedFor !== pair.sessionId) { bonus += PAIR_BONUS; bonusGranted = true; }
+      const bonusBefore = bonus;
       let openedNow = false;
       let error = null;
       if (open) {
         const vis = visibleOpened(o, premium);
         const already = (open.kind === 'rank' ? vis.rank : vis.reading).includes(open.no);
         if (!already) {
-          if (r.balance < 1) error = 'no_drops';
+          if (r.balance + bonus < 1) error = 'no_drops';
           else {
-            r.balance -= 1;
-            const field = `${open.kind === 'rank' ? 'r' : 'g'}${premium ? 'p' : 'f'}`;
+            // 毎日の分（持ち越せない）を先に使い、なければシングルプランの分
+            const fromBonus = r.balance < 1;
+            if (fromBonus) bonus -= 1; else r.balance -= 1;
+            // シングルプランのかけらで開けたお題は、月額をやめても見られる（買い切りのため）
+            const field = `${open.kind === 'rank' ? 'r' : 'g'}${premium && !fromBonus ? 'p' : 'f'}`;
             o[field] = [...o[field], open.no];
             openedNow = true;
           }
         }
       }
-      const changed = openedNow || r.balance !== Number(rec.balance || 0) || r.lastDaily !== rec.lastDaily || r.periods.length !== (rec.periods || []).length;
+      const changed = openedNow || bonusGranted || bonus !== bonusBefore || r.balance !== Number(rec.balance || 0) || r.lastDaily !== rec.lastDaily || r.periods.length !== (rec.periods || []).length;
       if (changed) {
         tx.set(ref, {
           balance: r.balance, lastDaily: r.lastDaily, periods: r.periods,
+          ...(bonusGranted || bonus > 0 || rec?.bonus?.[key] ? { bonus: { [key]: bonus } } : {}),
+          ...(bonusGranted ? { bonusFor: { [key]: pair.sessionId } } : {}),
           opened: { [key]: o }, updatedAt: new Date().toISOString()
         }, { merge: true });
       }
-      return { r, o, openedNow, error };
+      return { r, o, openedNow, error, bonus, bonusGranted };
     });
 
     const payload = {
       status: out.error ? 'error' : 'ok',
       ...(out.error ? { code: out.error, message: 'かけらが足りません' } : {}),
       premium,
-      balance: out.r.balance,
+      // 画面には合計で見せる（毎日の分＋シングルプランの分）
+      balance: out.r.balance + out.bonus,
+      bonus: out.bonus,
       cap: premium ? PREMIUM_CAP : FREE_CAP,
       daily: premium ? PREMIUM_DAILY : FREE_DAILY,
-      granted: out.r.granted,
+      granted: out.r.granted + (out.bonusGranted ? PAIR_BONUS : 0),
       opened: visibleOpened(out.o, premium),
       openedNow: out.openedNow
     };

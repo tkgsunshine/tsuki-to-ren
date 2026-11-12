@@ -144,16 +144,14 @@ export const READING_TOPICS: CoupleTopic<ReadingCategory>[] = [
 ];
 
 /**
- * シングルプラン（¥680）で開くランキング25: X投稿済みの★17本＋各カテゴリから8本（2026-11-12 設計書 2章の案）。
- * 今後Xに出すお題も、この25本から選ぶ。
+ * Xに出すランキングの候補25本: X投稿済みの★17本＋各カテゴリから8本（2026-11-12 設計書 2章の案）。
+ * 2026-11-13 からシングルプランは「かけら50個」になり、この25本が自動で開くことはない（TAKASHI）。
  */
 export const SINGLE_RANK_NOS: number[] = [
   ...RANK_TOPICS.filter((t) => t.posted).map((t) => t.no),
   5, 9, 14, 17, 28, 38, 43, 50
 ].sort((a, b) => a - b);
 
-/** シングルプランで開く本格鑑定25: 「なぜ惹かれ合うか」10＋「どう支え合うか」10＋「どう話し伝わるか」の前半5 */
-export const SINGLE_READING_NOS: number[] = Array.from({ length: 25 }, (_, i) => i + 1);
 
 /** 無料の見本の予備（MBTIが未定のとき）。ふだんは二人ごとに、いちばん上位と下位のランキング（coupleRank.ts の sampleRankNos） */
 export const FREE_RANK_NOS: number[] = [21, 33];

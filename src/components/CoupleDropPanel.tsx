@@ -29,7 +29,7 @@ const KakeraBurst: React.FC = () => (
 export const DropBalance: React.FC<{ drops: CoupleDrops }> = ({ drops }) => {
   // いま持っているかけらが一目で分かるように、月の数で見せる（2026-11-12 TAKASHI「2個保有していることが分かるデザインに」）。
   // 枠では囲わない。上限が少ない（未登録3・無料2）ときは使った分を薄い月で、月額（100まで）は数字を大きく。
-  const slots = drops.cap <= 10 ? Math.max(drops.cap, drops.balance) : 0;
+  const slots = drops.cap <= 10 && drops.balance <= 10 ? Math.max(drops.cap, drops.balance) : 0;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', padding: '0.2rem 0' }}>
       <span style={{ fontSize: '0.72rem', color: '#cfc3a0', letterSpacing: '0.08em' }}>いま持っている月のかけら</span>
@@ -53,7 +53,7 @@ export const DropBalance: React.FC<{ drops: CoupleDrops }> = ({ drops }) => {
         </span>
       </div>
       <span style={{ fontSize: '0.7rem', color: '#cfc3a0', textAlign: 'center', lineHeight: 1.6 }}>
-        {drops.guest ? '🎁 はじめての方に3個プレゼント。🌙 1個で1つ開けられます。使い切っても、無料の会員登録で毎日2個もらえます。' : drops.premium ? `1個で1つ開けられます。毎日${drops.daily}個・お支払い日に50個（${drops.cap}個まで）` : `1個で1つ開けられます。毎日${drops.daily}個届きます（持ち越しはありません）`}
+        {drops.guest ? '🎁 はじめての方に3個プレゼント。🌙 1個で1つ開けられます。使い切っても、無料の会員登録で毎日2個もらえます。' : drops.bonus ? `1個で1つ開けられます。うち${drops.bonus}個はシングルプランの分で、このお相手にだけ使えます（期限なし）` : drops.premium ? `1個で1つ開けられます。毎日${drops.daily}個・お支払い日に50個（${drops.cap}個まで）` : `1個で1つ開けられます。毎日${drops.daily}個届きます（持ち越しはありません）`}
       </span>
     </div>
   );

@@ -94,3 +94,31 @@ test('ログインなし・不正な入力は断る', async () => {
   await drops(req({ oppBirth: '2000/1/1' }), res, { auth, db: mockDb() });
   assert.equal(res.code, 400);
 });
+
+test('シングルプラン: 買ったお相手に50個（購入ごとに1回）。毎日の分を先に使い、開けた分は月額をやめても見える', async () => {
+  const key = partnerKey(BIRTH);
+  const db = mockDb({ 'pairUnlocks/u1': { partners: { [key]: { sessionId: 'cs_1', purchasedOn: '2026-11-12', livemode: true } } } });
+  let res = await call(db, '2026-11-12');
+  assert.equal(res.body.balance, 52); // 無料の2＋50
+  assert.equal(res.body.bonus, 50);
+  res = await call(db, '2026-11-12');
+  assert.equal(res.body.balance, 52); // 二度は増えない
+  await call(db, '2026-11-12', { open: { kind: 'rank', no: 1 } });
+  await call(db, '2026-11-12', { open: { kind: 'rank', no: 2 } });
+  res = await call(db, '2026-11-12', { open: { kind: 'reading', no: 40 } });
+  assert.equal(res.body.bonus, 49); // 毎日の2個を先に使い、3つ目から50個の分
+  assert.equal(res.body.balance, 49);
+  res = await call(db, '2026-11-13');
+  assert.equal(res.body.balance, 51); // 翌日の2個＋残り49
+  // 別のお相手には使えない
+  const other = mockRes();
+  await drops(req({ oppBirth: '1999-05-05' }), other, { auth, db, live: true, today: '2026-11-13', premiumEmails: '' });
+  assert.equal(other.body.bonus, 0);
+  // 月額中にシングルのかけらで開けた分は、解約後も見える
+  db.docs['premium/u1'] = { active: true, livemode: true, currentPeriodEnd: '2026-12-13T00:00:00.000Z' };
+  db.docs['coupleDrops/u1'].balance = 0; db.docs['coupleDrops/u1'].periods = ['2026-12-13T00:00:00.000Z']; db.docs['coupleDrops/u1'].lastDaily = '2026-11-14';
+  await call(db, '2026-11-14', { open: { kind: 'reading', no: 45 } });
+  db.docs['premium/u1'] = { active: false, livemode: true };
+  res = await call(db, '2026-11-15');
+  assert.ok(res.body.opened.reading.includes(45));
+});

@@ -39,7 +39,7 @@ import MbtiQuizModal from './MbtiQuizModal';
 import { CoupleHundredSection } from './CoupleHundredSection';
 import type { CoupleAccess } from './CoupleHundredSection';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
-import { SINGLE_RANK_NOS, FREE_RANK_NOS, SINGLE_READING_NOS, FREE_READING_NOS } from '../data/coupleTopics';
+import { FREE_RANK_NOS, FREE_READING_NOS } from '../data/coupleTopics';
 import { sampleRankNos } from '../utils/coupleRank';
 import { isMbtiCode } from '../utils/mbtiQuiz';
 
@@ -1054,7 +1054,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   ) : null;
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
   // 二人の相性100（2026-11-12 TAKASHI）
-  // ・シングル（¥680）: そのお相手のランキング25本＋本格鑑定25本を、ずっと
+  // ・シングル（¥680）: そのお相手に使えるかけら50個（自分で選んで開ける。2026-11-13 TAKASHI）
   // ・月のかけら: 月額は支払い日に50個＋毎日10個、無料会員は毎日2個。かけら1つで1つのお題が開き、開けたお題はずっと見られる
   // ・未登録・無料会員: ランキングは代表2本＋X投稿から来たお題の順位だけ、本格鑑定は見本1本
   const dropsOn = hasOpponent && !sharedBy && Boolean(coupleDrops) && Boolean(onOpenCoupleTopic);
@@ -1063,14 +1063,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const freeRankNos = sampleRankNos(activeResult?.myMbtiCode, activeResult?.opponentMbtiCode, FREE_RANK_NOS);
   const coupleRankAccess = (no: number): CoupleAccess => {
     if (sharedBy) return freeRankNos.includes(no) || no === coupleFocusNo ? 'full' : 'locked';
-    if (pairOpen && SINGLE_RANK_NOS.includes(no)) return 'full';
     if (coupleDrops?.opened.rank.includes(no)) return 'full';
     return freeRankNos.includes(no) || no === coupleFocusNo ? 'full' : 'locked';
   };
   const coupleReadingAccess = (no: number): CoupleAccess => {
     if (FREE_READING_NOS.includes(no)) return 'full';
     if (sharedBy) return 'locked';
-    if (pairOpen && SINGLE_READING_NOS.includes(no)) return 'full';
     return coupleDrops?.opened.reading.includes(no) ? 'full' : 'locked';
   };
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
