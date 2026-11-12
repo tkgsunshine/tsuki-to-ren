@@ -573,7 +573,8 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
       {luckTitle && <p className="font-serif" style={{ ...body, color: '#f2e2b3', fontWeight: 'bold', fontSize: '0.86rem', lineHeight: 1.6 }}>{luckTitle}</p>}
 
       {months.map((mo) => {
-        const lead = new Date(mo.year, mo.month, 1).getDay();
+        // 月曜はじまり・日曜が一番右（2026-11-12 TAKASHI）
+        const lead = (new Date(mo.year, mo.month, 1).getDay() + 6) % 7;
         const cells: ({ day: number; score: number } | null)[] = [...Array(lead).fill(null), ...mo.days];
         while (cells.length % 7) cells.push(null);
         return (
@@ -589,8 +590,8 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem' }}>
-            {WEEKDAYS.map((w, i) => (
-              <span key={w} style={{ textAlign: 'center', fontSize: '0.62rem', fontWeight: 'bold', color: i === 0 ? '#e0a9a0' : i === 6 ? '#9cc6d8' : '#8f887b' }}>{w}</span>
+            {[1, 2, 3, 4, 5, 6, 0].map((i) => (
+              <span key={i} style={{ textAlign: 'center', fontSize: '0.62rem', fontWeight: 'bold', color: i === 0 ? '#e0a9a0' : i === 6 ? '#9cc6d8' : '#8f887b' }}>{WEEKDAYS[i]}</span>
             ))}
             {cells.map((c, i) => {
               if (!c) return <span key={i} />;
