@@ -1055,13 +1055,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // ・月のかけら: 月額は支払い日に50個＋毎日10個、無料会員は毎日2個。かけら1つで1つのお題が開き、開けたお題はずっと見られる
   // ・未登録・無料会員: ランキングは代表2本＋X投稿から来たお題の順位だけ、本格鑑定は見本1本
   const dropsOn = hasOpponent && !sharedBy && Boolean(coupleDrops) && Boolean(onOpenCoupleTopic);
-  // 無料の見本は、その二人でいちばん上位と、いちばん下位のランキング（MBTIが未定なら固定の2つ）
+  // 無料の見本は、その二人でいちばん上位と、いちばん下位のランキング（MBTIが未定なら固定の2つ）。
+  // 順位を見せるものは理由も見せ、順位を伏せるものは理由も伏せる（2026-11-12 TAKASHI「これで統一して」）
   const freeRankNos = sampleRankNos(activeResult?.myMbtiCode, activeResult?.opponentMbtiCode, FREE_RANK_NOS);
   const coupleRankAccess = (no: number): CoupleAccess => {
-    if (sharedBy) return freeRankNos.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
+    if (sharedBy) return freeRankNos.includes(no) || no === coupleFocusNo ? 'full' : 'locked';
     if (pairOpen && SINGLE_RANK_NOS.includes(no)) return 'full';
     if (coupleDrops?.opened.rank.includes(no)) return 'full';
-    return freeRankNos.includes(no) || no === coupleFocusNo ? 'rank' : 'locked';
+    return freeRankNos.includes(no) || no === coupleFocusNo ? 'full' : 'locked';
   };
   const coupleReadingAccess = (no: number): CoupleAccess => {
     if (FREE_READING_NOS.includes(no)) return 'full';
@@ -2214,7 +2215,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
             rankAccess={coupleRankAccess}
             readingAccess={coupleReadingAccess}
             focusNo={coupleFocusNo}
-            onLockClick={handleDeepLockClick}
+            pinnedNos={[...freeRankNos, ...(coupleFocusNo ? [coupleFocusNo] : [])]}
+            onLockClick={isRegistered ? handleDeepLockClick : (e) => { e?.stopPropagation(); handleScrollToRegister('lock'); }}
             lockWord={LOCK_WORD}
             onAskMbti={!sharedBy && onSetMbti ? (who) => setMbtiQuizFor(who) : undefined}
             drops={dropsOn ? coupleDrops : null}

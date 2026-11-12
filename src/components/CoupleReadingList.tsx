@@ -16,11 +16,10 @@ const CATS: ReadingCategory[] = ['attract', 'support', 'talk', 'timing', 'future
 const METHOD_COLOR: Record<string, string> = { 四柱推命: '#e8a93a', 九星気学: '#5d9fc0', 'MBTI': '#b9a3d6' };
 
 const rowStyle: React.CSSProperties = {
-  // 押せる行は、金の枠＋うっすら金の地＋右端の矢印で「押せる」と分かるように（2026-11-12 TAKASHI「押せる所と押せない所の差が少ない」）
+  // 枠で囲わず、区切り線だけのリストにする（2026-11-12 TAKASHI「枠で囲うのやめて」）。押せることは右端の金の矢印で示す
   display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%', textAlign: 'left',
-  padding: '0.65rem 0.7rem', borderRadius: '10px', cursor: 'pointer',
-  background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.04))',
-  border: '1px solid rgba(212, 175, 55, 0.55)', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)', color: '#f3efe6'
+  padding: '0.75rem 0.15rem', borderRadius: 0, cursor: 'pointer',
+  background: 'none', border: 'none', borderBottom: '1px solid rgba(212, 175, 55, 0.18)', color: '#f3efe6'
 };
 
 const Stars: React.FC<{ n: number; size?: string }> = ({ n, size = '0.85rem' }) => (
@@ -35,7 +34,6 @@ function ReadingCard({ title, r, pair }: { title: string; r: CoupleReading; pair
     <div className={fresh ? 'kakera-reveal' : undefined} style={{
       margin: '0.35rem 0 0.2rem', padding: '1rem 0.95rem 0.75rem', borderRadius: '12px',
       background: 'linear-gradient(160deg, rgba(38, 28, 66, 0.95), rgba(14, 12, 28, 0.95))',
-      border: `1px solid ${r.stars >= 4 ? 'rgba(245, 215, 122, 0.7)' : 'rgba(212, 175, 55, 0.35)'}`,
       display: 'flex', flexDirection: 'column', gap: '0.55rem'
     }}>
       <div style={{ fontSize: '0.68rem', color: '#d4af37', letterSpacing: '0.08em' }}>月と蓮｜3つの占術で読み解く本格鑑定</div>
@@ -98,7 +96,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
         const list = READING_TOPICS.filter((t) => t.category === cat && shown.has(t.no));
         if (list.length === 0) return null;
         return (
-          <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <span style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: 'bold' }}>● {READING_CATEGORY_LABELS[cat]}</span>
             {list.map((t) => {
               const r = results.get(t.no);

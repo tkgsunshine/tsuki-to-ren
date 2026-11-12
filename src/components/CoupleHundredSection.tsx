@@ -32,6 +32,8 @@ interface Props {
   readingAccess: (no: number) => CoupleAccess;
   /** X投稿から来たお題: 開いた状態でここまでスクロールする */
   focusNo?: number | null;
+  /** 最初の一覧で必ず出すランキング（無料の見本・Xから来たもの） */
+  pinnedNos?: number[];
   onLockClick: (e?: React.MouseEvent) => void;
   lockWord: string;
   /** MBTIが決まっていないとき、かんたん質問を開く */
@@ -62,11 +64,10 @@ const TypePair: React.FC<{ a: string; b: string; size?: string }> = ({ a, b, siz
 const CATS: RankCategory[] = ['start', 'daily', 'fight', 'long', 'aruaru'];
 
 const rowStyle: React.CSSProperties = {
-  // 押せる行は、金の枠＋うっすら金の地＋右端の矢印で「押せる」と分かるように（2026-11-12 TAKASHI「押せる所と押せない所の差が少ない」）
+  // 枠で囲わず、区切り線だけのリストにする（2026-11-12 TAKASHI「枠で囲うのやめて」）。押せることは右端の金の矢印で示す
   display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%', textAlign: 'left',
-  padding: '0.65rem 0.7rem', borderRadius: '10px', cursor: 'pointer',
-  background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.04))',
-  border: '1px solid rgba(212, 175, 55, 0.55)', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.35)', color: '#f3efe6'
+  padding: '0.75rem 0.15rem', borderRadius: 0, cursor: 'pointer',
+  background: 'none', border: 'none', borderBottom: '1px solid rgba(212, 175, 55, 0.18)', color: '#f3efe6'
 };
 const rankChip = (top: boolean): React.CSSProperties => ({
   flexShrink: 0, minWidth: '3.6rem', textAlign: 'right', fontWeight: 'bold', fontSize: '0.9rem',
@@ -84,8 +85,7 @@ function RankCard({ title, rank, reason, a, b, reasonOpen, onLockClick, lockWord
     <div className={fresh ? 'kakera-reveal' : undefined} style={{
       margin: '0.35rem 0 0.2rem', padding: '1rem 0.95rem 0.75rem', borderRadius: '12px',
       background: 'linear-gradient(160deg, rgba(38, 28, 66, 0.95), rgba(14, 12, 28, 0.95))',
-      border: `1px solid ${top ? 'rgba(245, 215, 122, 0.7)' : 'rgba(212, 175, 55, 0.35)'}`,
-      boxShadow: top ? '0 0 18px rgba(245, 215, 122, 0.18)' : 'none',
+      boxShadow: top ? '0 0 22px rgba(245, 215, 122, 0.16)' : 'none',
       display: 'flex', flexDirection: 'column', gap: '0.55rem'
     }}>
       <div style={{ fontSize: '0.68rem', color: '#d4af37', letterSpacing: '0.08em' }}>月と蓮｜MBTI 二人の相性ランキング</div>
@@ -100,6 +100,10 @@ function RankCard({ title, rank, reason, a, b, reasonOpen, onLockClick, lockWord
         <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.75, color: '#e8e2d4' }}>{reason}</p>
       ) : (
         <div style={{ position: 'relative' }}>
+          {/* 順位は見本として見せ、理由だけ閉じていることが分かるように（2026-11-12 TAKASHI「順位は出てるけど説明がない」） */}
+          <p style={{ margin: '0 0 0.25rem', fontSize: '0.78rem', fontWeight: 'bold', color: '#f5d77a', textAlign: 'center' }}>
+            なぜ{rank}位なのか？ 理由は、月のかけら1個で読めます
+          </p>
           <p aria-hidden="true" style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.75, color: '#e8e2d4', filter: 'blur(4.5px)', userSelect: 'none', opacity: 0.6, maxHeight: '3.5em', overflow: 'hidden' }}>
             二人の文字の組み合わせのうち、このランキングでいちばん効いているところと、順位がこの位置になった理由をお伝えします。
           </p>
@@ -119,7 +123,7 @@ function RankCard({ title, rank, reason, a, b, reasonOpen, onLockClick, lockWord
 }
 
 export const CoupleHundredSection: React.FC<Props> = ({
-  myMbti, oppMbti, myName, oppName, myPillar, myStar, oppPillar, oppStar, rankAccess, readingAccess, focusNo = null, onLockClick, lockWord, onAskMbti, drops = null, onDrop
+  myMbti, oppMbti, myName, oppName, myPillar, myStar, oppPillar, oppStar, rankAccess, readingAccess, focusNo = null, pinnedNos = [], onLockClick, lockWord, onAskMbti, drops = null, onDrop
 }) => {
   // タブは左にMBTIランキング50、右に本格鑑定50（2026-11-12 TAKASHI「MBTIランキングを左にして」）。最初は左（ランキング）を開く
   const [tab, setTab] = useState<'reading' | 'rank'>('rank');
@@ -152,7 +156,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
     // 無料の見本（その二人でいちばん上位・下位）とXから来たランキングは、同じまとまりでも全部出す
     ...CATS.flatMap((c) => {
       const l = RANK_TOPICS.filter((t) => t.category === c);
-      const samples = l.filter((t) => rankAccess(t.no) === 'rank');
+      const samples = l.filter((t) => pinnedNos.includes(t.no));
       return samples.length ? samples.map((t) => t.no) : [(l.find((t) => rankAccess(t.no) === 'full') ?? l[0]).no];
     }),
     ...(openNo ? [openNo] : [])
@@ -220,7 +224,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
           const list = RANK_TOPICS.filter((t) => t.category === cat && shown.has(t.no));
           if (list.length === 0) return null;
           return (
-          <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <span style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: 'bold' }}>● {RANK_CATEGORY_LABELS[cat]}</span>
             {list.map((t) => {
               const access = rankAccess(t.no);
