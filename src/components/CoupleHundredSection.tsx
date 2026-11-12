@@ -246,9 +246,10 @@ export const CoupleHundredSection: React.FC<Props> = ({
                   >
                     <span style={{ flex: 1, fontSize: '0.8rem', lineHeight: 1.5 }}>{t.title}</span>
                     {access === 'locked' || !r ? (
-                      <span style={{ ...rankChip(false), fontSize: '0.7rem', color: '#bfb8a8', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'flex-end' }}>
+                      <span style={{ ...rankChip(false), display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'flex-end' }}>
                         <span style={{ whiteSpace: 'nowrap' }}>
-                          <span aria-hidden="true" style={{ filter: 'blur(4px)' }}>●●</span>位<span style={{ fontSize: '0.62rem', fontWeight: 'normal', marginLeft: '0.3em' }}>/<span style={{ marginLeft: '0.3em' }}>{COUPLE_PAIR_COUNT}組</span></span>
+                          {/* 伏せた順位は、見えている順位と同じ大きさの数字を強くぼかす（2026-11-13 TAKASHI「モザイクが小さい」） */}
+                          <span aria-hidden="true" style={{ filter: 'blur(3.5px)', display: 'inline-block', padding: '0 0.1em', color: '#e8e2d4' }}>888</span>位<span style={{ fontSize: '0.62rem', fontWeight: 'normal', marginLeft: '0.3em' }}>/<span style={{ marginLeft: '0.3em' }}>{COUPLE_PAIR_COUNT}組</span></span>
                         </span>
                         <ChevronDown size={14} style={{ color: '#f5d77a' }} />
                       </span>
