@@ -3855,7 +3855,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 9995, // 下のシェアボタン（9990）より前に出す
+            zIndex: 100000, // 下のシェアボタン（9990）・下メニュー（99999）より前に出す
             animation: 'fadeIn 0.2s ease',
             padding: '1.5rem'
           }} onClick={() => setExplanation(null)}>
