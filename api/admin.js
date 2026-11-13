@@ -4,6 +4,7 @@ import { ATTRIBUTION, DAILY, ageBandFromBirth, ageFromBirth, jstDate, normalizeG
 import { USAGE_DAILY } from './_lib/chat-limit.js';
 import { INQUIRIES, STATUSES } from './_lib/inquiry.js';
 import { AUDIENCES, AUTO_NOTICES, AUTO_SETTINGS, AUTO_SETTINGS_DOC, NOTICES, readAutoSettings, validateAutoNotice, validateNotice } from './_lib/notices.js';
+import { readXDaily } from './_lib/x-daily.js';
 import { CHANNELS, MAIL_OPT_OUT, broadcastRecipients, mailRecipients, sendNoticeMail, sendsApp, sendsMail } from './_lib/notice-mail.js';
 
 // Data for the admin page (/admin): daily counters, and the member list (with each member's premium state).
@@ -144,7 +145,8 @@ export default async function handler(req, res, deps = {}) {
     // ?only=daily: 日別の数だけ（/admin 上部の重要指標グラフ用。会員一覧などは読まない）
     if (req.query?.only === 'daily') {
       const snap = await db.collection(DAILY).where(FieldPath.documentId(), '>=', from).get();
-      return res.status(200).json({ status: 'success', from, to, daily: snap.docs.filter(inPeriod).map((d) => d.data()).sort((a, b) => a.date.localeCompare(b.date)) });
+      // x: Xの日ごとのフォロワー数・表示回数・いいね（毎朝の自動取得の保存分。_lib/x-daily.js）
+      return res.status(200).json({ status: 'success', from, to, daily: snap.docs.filter(inPeriod).map((d) => d.data()).sort((a, b) => a.date.localeCompare(b.date)), x: (deps.readXDaily || readXDaily)(from, to) });
     }
 
     const [dailySnap, subsSnap, attribSnap, chatSnap, inquirySnap, premiumSnap, ownersSnap, noticeSnap, pairSnap, userDataSnap, autoSettings, mailOptOutSnap] = await Promise.all([
