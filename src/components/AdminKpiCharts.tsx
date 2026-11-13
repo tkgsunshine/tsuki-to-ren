@@ -2,14 +2,18 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 // /admin 上部の「重要指標」グラフ（期間ボタンとは別に、いつも直近90日・今月分）。
 // 1. 今月の売上の累計と、月商目標のペース  2. 日ごとの購入数（月額・シングル）
-// 3. 転換率の推移（7日平均）  4. 日ごとの会員登録
+// 3. 転換率の推移（7日平均）  4. 日ごとの会員登録  5. 日ごとの訪問数・鑑定数
+// 6. Xのフォロワー数・表示回数・いいね（毎朝5:40 JSTに GitHub Actions が X API から取った保存分。api/_lib/x-daily.js）
 // 売上は本番の購入額（salesYen）。月額の毎月の更新分は計測していないので入らない。
+
+export interface XDay { date: string; followers?: number; impressions: number; likes: number; posts: number }
 
 export const MONTHLY_GOAL_YEN = 3_000_000;
 
 export interface KpiDay {
   date: string;
   visits?: number;
+  fortunes?: number;
   fortuneSessions?: number;
   premiums?: number;
   pairs?: number;
@@ -20,6 +24,8 @@ const COLORS = {
   gold: '#e2c074',
   purple: '#8b80d8',
   teal: '#5ec4b6',
+  blue: '#6fa8f0',
+  pink: '#e58fb4',
   grid: '#2a2545',
   axis: '#9a93b5',
   text: '#ece8f6',
@@ -30,6 +36,8 @@ const h3: React.CSSProperties = { fontSize: 14, fontWeight: 700, margin: '0 0 4p
 const muted: React.CSSProperties = { color: '#9a93b5', fontSize: 12 };
 const yenFmt = (n: number) => `¥${Math.round(n).toLocaleString('ja-JP')}`;
 const yenShort = (n: number) => (n >= 10000 ? `${Math.round(n / 1000) / 10}万` : `${Math.round(n).toLocaleString('ja-JP')}`);
+const numFmt = (n: number) => Math.round(n).toLocaleString('ja-JP');
+const numShort = (n: number) => (n >= 10000 ? `${Math.round(n / 1000) / 10}万` : numFmt(n));
 const pctFmt = (v: number) => `${(v * 100).toFixed(v < 0.1 ? 1 : 0)}%`;
 const md = (date: string) => `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}`;
 
@@ -181,6 +189,7 @@ function Chart({ dates, series, kind, yFmt, tipFmt, height = 170, xLabel, int, r
 export default function AdminKpiCharts({ getToken, memberCreatedAt }: { getToken: () => Promise<string>; memberCreatedAt: (string | null)[] }) {
   const [days, setDays] = useState<KpiDay[] | null>(null);
   const [range, setRange] = useState<{ from: string; to: string } | null>(null);
+  const [x, setX] = useState<{ updatedAt: string | null; daily: XDay[] } | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -190,9 +199,9 @@ export default function AdminKpiCharts({ getToken, memberCreatedAt }: { getToken
       .then(async (r) => {
         const body = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(body.message || `読み込みに失敗しました（${r.status}）`);
-        return body as { from: string; to: string; daily: KpiDay[] };
+        return body as { from: string; to: string; daily: KpiDay[]; x?: { updatedAt: string | null; daily: XDay[] } | null };
       })
-      .then((b) => { if (!cancelled) { setDays(b.daily); setRange({ from: b.from, to: b.to }); } })
+      .then((b) => { if (!cancelled) { setDays(b.daily); setRange({ from: b.from, to: b.to }); setX(b.x || null); } })
       .catch((e) => { if (!cancelled) setError(e.message); });
     return () => { cancelled = true; };
   }, [getToken]);
@@ -205,6 +214,13 @@ export default function AdminKpiCharts({ getToken, memberCreatedAt }: { getToken
     const first = all.findIndex((d) => Number(d.visits) > 0);
     return first > 0 ? all.slice(first) : all;
   }, [days, range]);
+
+  // Xは、記録を始めた日（最初にフォロワー数か投稿がある日）から今日まで。フォロワー数の無い日は線を切る
+  const xRows = useMemo(() => {
+    if (!x?.daily?.length || !range) return [];
+    const byDate = new Map(x.daily.map((d) => [d.date, d]));
+    return dateRange(x.daily[0].date, range.to).map((date) => byDate.get(date) || { date, impressions: 0, likes: 0, posts: 0 });
+  }, [x, range]);
 
   if (error) return <div style={{ ...card, marginBottom: 16, color: '#fca5a5' }}>重要指標のグラフ: {error}</div>;
   if (!range) return <div style={{ ...card, marginBottom: 16, ...muted }}>重要指標のグラフを読み込み中…</div>;
@@ -281,6 +297,53 @@ export default function AdminKpiCharts({ getToken, memberCreatedAt }: { getToken
             series={[{ key: 'signups', label: '会員登録', color: COLORS.purple, values: dates.map((d) => signupByDate.get(d) || 0) }]} />
           <div style={{ ...muted, marginTop: 6 }}>アカウントを作った日で数えます（運営者・購入用の自動アカウントを除く）。</div>
         </div>
+
+        <div style={card}>
+          <h3 style={h3}>日ごとの訪問数・鑑定数</h3>
+          <Chart dates={dates} kind="line" int yFmt={numShort} tipFmt={numFmt}
+            series={[
+              { key: 'visits', label: '訪問', color: COLORS.blue, values: rows.map((r) => num(r.visits)) },
+              { key: 'fortunes', label: '鑑定（回）', color: COLORS.gold, values: rows.map((r) => num(r.fortunes)) },
+              { key: 'fortuneSessions', label: '鑑定した人', color: COLORS.teal, values: rows.map((r, i) => (i >= startIdx ? num(r.fortuneSessions) : null)) },
+            ]} />
+          <div style={{ ...muted, marginTop: 6 }}>サイト独自の計測（運営者の端末を除く）。「鑑定した人」は同じ訪問で何回鑑定しても1人（{rows[startIdx]?.date || '—'} から計測）。</div>
+        </div>
+
+        {xRows.length > 0 ? <>
+          <div style={card}>
+            <h3 style={h3}>Xのフォロワー数</h3>
+            {(() => {
+              const f = xRows.filter((r) => r.followers != null);
+              const last = f[f.length - 1]?.followers ?? 0;
+              const week = f.length > 7 ? last - (f[f.length - 8].followers ?? 0) : null;
+              return (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', margin: '6px 0 8px', fontVariantNumeric: 'tabular-nums' }}>
+                  <span><span style={{ fontSize: 22, fontWeight: 700, color: COLORS.pink }}>{numFmt(last)}</span> <span style={muted}>人</span></span>
+                  {week !== null && <span style={muted}>7日前から <b style={{ color: week >= 0 ? '#4ade80' : '#f87171' }}>{week >= 0 ? '+' : ''}{week}</b></span>}
+                </div>
+              );
+            })()}
+            <Chart dates={xRows.map((r) => r.date)} kind="line" int yFmt={numShort} tipFmt={(v) => `${numFmt(v)}人`}
+              series={[{ key: 'followers', label: 'フォロワー', color: COLORS.pink, values: xRows.map((r) => (r.followers == null ? null : r.followers)) }]} />
+            <div style={{ ...muted, marginTop: 6 }}>毎朝5:40ごろの人数。</div>
+          </div>
+
+          <div style={card}>
+            <h3 style={h3}>Xの表示回数（投稿した日ごと）</h3>
+            <Chart dates={xRows.map((r) => r.date)} kind="bar" int yFmt={numShort} tipFmt={numFmt}
+              series={[{ key: 'impressions', label: '表示回数', color: COLORS.blue, values: xRows.map((r) => r.impressions) }]} />
+            <div style={{ ...muted, marginTop: 6 }}>その日に投稿したポスト（返信を含む）の表示回数の合計。投稿のあとも伸びるので、直近の日は少なめに出ます。</div>
+          </div>
+
+          <div style={card}>
+            <h3 style={h3}>Xのいいね（投稿した日ごと）</h3>
+            <Chart dates={xRows.map((r) => r.date)} kind="bar" int yFmt={numShort} tipFmt={numFmt}
+              series={[{ key: 'likes', label: 'いいね', color: COLORS.pink, values: xRows.map((r) => r.likes) }]} />
+            <div style={{ ...muted, marginTop: 6 }}>その日に投稿したポストのいいねの合計（投稿から3日までの値）。Xの数字の更新: {x?.updatedAt ? new Date(x.updatedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}</div>
+          </div>
+        </> : (
+          <div style={{ ...card, ...muted }}>Xの数字がありません（毎朝の自動取得の保存分が見つかりません）。</div>
+        )}
       </div>
     </section>
   );
