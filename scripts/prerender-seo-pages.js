@@ -723,9 +723,18 @@ const homeSemanticHtml = `
 const adminHtml = baseHtml
   .replace('<link rel="manifest" href="/site.webmanifest" />', '<link rel="manifest" href="/admin.webmanifest" />')
   .replace(/<meta name="apple-mobile-web-app-title" content="[^"]*" \/>/, '<meta name="apple-mobile-web-app-title" content="月と蓮 管理" />')
-  .replace(/<title>[\s\S]*?<\/title>/, '<title>月と蓮 管理画面</title>');
+  .replace(/<title>[\s\S]*?<\/title>/, '<title>月と蓮 管理画面</title>')
+  // ファビコン・ホーム画面のアイコンは管理画面だけ蓮（public/admin-*.png）。アプリ側は月のまま。
+  .replace('<link rel="icon" href="/favicon.ico" sizes="any" />', '<link rel="icon" type="image/png" sizes="48x48" href="/admin-favicon.png" />')
+  .replace(/\n[ \t]*<link rel="icon" type="image\/svg\+xml" href="\/favicon\.svg" \/>/, '')
+  .replace('<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />', '<link rel="icon" type="image/png" sizes="192x192" href="/admin-icon-192.png" />')
+  .replace('<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />', '<link rel="apple-touch-icon" sizes="180x180" href="/admin-apple-touch-icon.png" />');
 if (!adminHtml.includes('href="/admin.webmanifest"')) {
   console.error('❌ admin.html: manifest の差し替えに失敗しました（index.html の manifest タグが変わった可能性）');
+  process.exit(1);
+}
+if (!adminHtml.includes('href="/admin-favicon.png"') || !adminHtml.includes('href="/admin-apple-touch-icon.png"') || adminHtml.includes('href="/favicon.svg"')) {
+  console.error('❌ admin.html: ファビコンの差し替えに失敗しました（index.html のアイコンのタグが変わった可能性）');
   process.exit(1);
 }
 fs.writeFileSync(path.join(distDir, 'admin.html'), adminHtml, 'utf-8');
