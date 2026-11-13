@@ -73,7 +73,12 @@ export const normalizeGender = (v) => (GENDERS.has(String(v ?? '')) ? String(v) 
 export const normalizeAgeBand = (v) => (AGE_BANDS.includes(String(v ?? '')) ? String(v) : 'unknown');
 // 'UNKNOWN'（わからない・未選択）も 'unknown' にまとめる
 export const normalizeMbti = (v) => { const s = String(v ?? '').toUpperCase(); return MBTI_TYPES.has(s) ? s : 'unknown'; };
-export const fortuneAttrKeys = (body = {}) => [`g_${normalizeGender(body.g)}`, `a_${normalizeAgeBand(body.a)}`, `m_${normalizeMbti(body.m)}`];
+// 恋の状況（k=片想い中 h=片想いされ中 r=両思い・交際中 f=復縁したい m=結婚・夫婦 c=複雑愛・秘密の恋 n=お相手なし）。2026-11-13〜。送られてこない古い画面の分は数えない
+export const REL_KEYS = new Set(['k', 'h', 'r', 'f', 'm', 'c', 'n']);
+export const fortuneAttrKeys = (body = {}) => [
+  `g_${normalizeGender(body.g)}`, `a_${normalizeAgeBand(body.a)}`, `m_${normalizeMbti(body.m)}`,
+  ...(body.r ? [`r_${REL_KEYS.has(String(body.r)) ? String(body.r) : 'unknown'}`] : []),
+];
 /** 生年月日（YYYY-MM-DD）→ 今日（日本時間）の年齢の年代。読めない日付は 'unknown' */
 // 今日（日本時間）時点の満年齢。生年月日が無い・おかしいときは null
 export function ageFromBirth(birth, now = new Date()) {
