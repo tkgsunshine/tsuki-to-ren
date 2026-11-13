@@ -17,26 +17,38 @@ const isPreviewHost =
   /\.vercel\.app$/.test(window.location.hostname) && window.location.hostname !== 'hasu-to-tsuki-two.vercel.app'
 const wantsFresh = (isPreviewHost || import.meta.env.DEV) && new URLSearchParams(window.location.search).has('fresh')
 
+// 片付けのどれか（他のタブが開いているデータベースの削除など）が終わらなくても、必ず数秒でトップへ移る
+const withTimeout = <T,>(p: Promise<T> | undefined, ms: number) => Promise.race([p, new Promise<void>((r) => setTimeout(r, ms))])
+
 async function resetToFirstVisit() {
+  // 起動の見張り（index.html）が「うまく読み込めませんでした」を出さないように
+  ;(window as unknown as { __tsrBooted?: boolean }).__tsrBooted = true
+  const hardStop = setTimeout(() => window.location.replace('/'), 4000)
+  await doReset()
+  clearTimeout(hardStop)
+  window.location.replace('/')
+}
+
+async function doReset() {
   try { localStorage.clear() } catch { /* 何もしない */ }
   try { sessionStorage.clear() } catch { /* 何もしない */ }
   try {
     const idb = indexedDB as IDBFactory & { databases?: () => Promise<{ name?: string }[]> }
-    const names = idb.databases ? (await idb.databases()).map((d) => d.name).filter(Boolean) as string[] : ['firebaseLocalStorageDb']
-    await Promise.all(names.map((n) => new Promise<void>((done) => {
+    const list = idb.databases ? await withTimeout(idb.databases(), 800) : undefined
+    const names = list ? (list as { name?: string }[]).map((d) => d.name).filter(Boolean) as string[] : ['firebaseLocalStorageDb']
+    await withTimeout(Promise.all(names.map((n) => new Promise<void>((done) => {
       const req = indexedDB.deleteDatabase(n)
       req.onsuccess = req.onerror = req.onblocked = () => done()
-    })))
+    }))), 1200)
   } catch { /* 何もしない */ }
   try {
-    const regs = await navigator.serviceWorker?.getRegistrations?.()
-    await Promise.all((regs || []).map((r) => r.unregister()))
+    const regs = await withTimeout(navigator.serviceWorker?.getRegistrations?.(), 800)
+    await withTimeout(Promise.all(((regs || []) as readonly ServiceWorkerRegistration[]).map((r) => r.unregister())), 800)
   } catch { /* 何もしない */ }
   try {
-    const keys = await caches.keys()
-    await Promise.all(keys.map((k) => caches.delete(k)))
+    const keys = await withTimeout(caches.keys(), 800)
+    await withTimeout(Promise.all(((keys || []) as string[]).map((k) => caches.delete(k))), 800)
   } catch { /* 何もしない */ }
-  window.location.replace('/')
 }
 
 if (wantsFresh) void resetToFirstVisit()
