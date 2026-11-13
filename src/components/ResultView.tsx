@@ -40,6 +40,11 @@ import type { ReferralStatus } from '../services/referral';
 import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
 import { GuardianSummonFx } from './GuardianSummonFx';
 import MbtiQuizModal from './MbtiQuizModal';
+import { CoupleHundredSection } from './CoupleHundredSection';
+import type { CoupleAccess } from './CoupleHundredSection';
+import type { CoupleDrops, DropKind } from '../services/coupleDrops';
+import { FREE_RANK_NOS, FREE_READING_NOS } from '../data/coupleTopics';
+import { sampleRankNos } from '../utils/coupleRank';
 import { isMbtiCode } from '../utils/mbtiQuiz';
 
 const GoogleIcon = () => (
@@ -500,6 +505,14 @@ interface ResultViewProps {
   sharedBy?: { name: string };
   /** 招待URL（またはコード）から占った友達: 恋愛運MAX日の直近の1日だけ開く（お相手の有無にかかわらず） */
   referralGift?: boolean;
+  /** 二人の相性100: X投稿（utm_content=couple-…）から来たお題の番号。開いた状態でスクロールし、順位は誰でも見られる */
+  coupleFocusNo?: number | null;
+  /** 月のかけら（ログイン中・お相手ありのときだけ。App.tsx が api/stripe/drops で持つ） */
+  coupleDrops?: CoupleDrops | null;
+  /** 月のかけらを読めなかったときの理由（表示用） */
+  coupleDropsError?: string | null;
+  /** かけらを1つ使ってお題を開ける。開けたら true */
+  onOpenCoupleTopic?: (kind: DropKind, no: number, gate?: Promise<unknown>) => Promise<boolean>;
   /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
   referral?: {
     status: ReferralStatus | null;
@@ -542,7 +555,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
   sharedBy,
   onSetMbti,
   referral,
-  referralGift = false
+  referralGift = false,
+  coupleFocusNo = null,
+  coupleDrops = null,
+  coupleDropsError = null,
+  onOpenCoupleTopic
 }) => {
   const [mbtiQuizFor, setMbtiQuizFor] = useState<'self' | 'partner' | null>(null);
   // 4つの質問で16タイプを決めて鑑定し直したあと、同じ場所（このカードがあったところ）に戻す。
@@ -1027,6 +1044,24 @@ export const ResultView: React.FC<ResultViewProps> = ({
     </button>
   ) : null;
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
+  // 二人の相性100（2026-11-12 TAKASHI）
+  // ・シングル（¥680）: そのお相手に使えるかけら10個＋無料会員の毎日2個（自分で選んで開ける。2026-11-13 TAKASHI）
+  // ・月のかけら: 月額は支払い日に50個＋毎日5個、無料会員は毎日2個。かけら1つで1つのお題が開き、開けたお題はずっと見られる
+  // ・未登録・無料会員: ランキングは代表2本＋X投稿から来たお題の順位だけ、本格鑑定は見本1本
+  const dropsOn = hasOpponent && !sharedBy && Boolean(coupleDrops) && Boolean(onOpenCoupleTopic);
+  // 無料の見本は、その二人でいちばん上位と、いちばん下位のランキング（MBTIが未定なら固定の2つ）。
+  // 順位を見せるものは理由も見せ、順位を伏せるものは理由も伏せる（2026-11-12 TAKASHI「これで統一して」）
+  const freeRankNos = sampleRankNos(activeResult?.myMbtiCode, activeResult?.opponentMbtiCode, FREE_RANK_NOS);
+  const coupleRankAccess = (no: number): CoupleAccess => {
+    if (sharedBy) return freeRankNos.includes(no) || no === coupleFocusNo ? 'full' : 'locked';
+    if (coupleDrops?.opened.rank.includes(no)) return 'full';
+    return freeRankNos.includes(no) || no === coupleFocusNo ? 'full' : 'locked';
+  };
+  const coupleReadingAccess = (no: number): CoupleAccess => {
+    if (FREE_READING_NOS.includes(no)) return 'full';
+    if (sharedBy) return 'locked';
+    return coupleDrops?.opened.reading.includes(no) ? 'full' : 'locked';
+  };
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
   // ロックの文言は全部「続きを見る」に統一（料金・違いは開いた先の購入LPで説明する）
@@ -1784,31 +1819,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               overflow: 'hidden'
             }}
           >
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem',
-              padding: '0.25rem 0.95rem',
-              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%), rgba(11, 15, 21, 0.72)',
-              border: '1.5px solid rgba(226, 192, 116, 0.45)',
-              borderRadius: '20px',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-              position: 'relative',
-              margin: '0.7rem 0 0.3rem',
-              maxWidth: 'calc(100% - 0.5rem)',
-              whiteSpace: 'nowrap',
-              zIndex: 4
-            }}>
-              <span className="font-serif" style={{
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-                color: '#f2e2b3',
-                textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                letterSpacing: '0.05em'
-              }}>
-                ✦ {san(myName, 'あなた')}の守護獣 ✦
-              </span>
+            {/* 見出しは枠なし（2026-11-13 TAKASHI「B」）: 小さな GUARDIAN ＋ 名前 */}
+            <div className="guardian-head font-serif">
+              <span className="guardian-head-en">GUARDIAN</span>
+              <span className="guardian-head-ja">{san(myName, 'あなた')}の守護獣</span>
             </div>
 
             {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の下側に重ねる。見出しは顔にかぶらないよう画像の外（上）に置く */}
@@ -1833,7 +1847,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <GuardianSummonFx />
 
               <div className="guardian-hero-caption">
-                {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                {/* 称号（タイプを覚えるための呼び名）。枠なしの金の文字＋下に短い線 */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
                   <span className="astro-title-badge font-serif">
                     {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
@@ -1965,31 +1979,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 overflow: 'hidden'
               }}
             >
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                padding: '0.25rem 0.95rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%), rgba(11, 15, 21, 0.72)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                position: 'relative',
-                margin: '0.7rem 0 0.3rem',
-                maxWidth: 'calc(100% - 0.5rem)',
-                whiteSpace: 'nowrap',
-                zIndex: 4
-              }}>
-                <span className="font-serif" style={{
-                  fontSize: '0.9rem',
-                  fontWeight: 'bold',
-                  color: '#f2e2b3',
-                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.05em'
-                }}>
-                  ✦ {san(oppNickname)}の守護獣 ✦
-                </span>
+              {/* 見出しは枠なし（2026-11-13 TAKASHI「B」）: 小さな GUARDIAN ＋ 名前 */}
+              <div className="guardian-head font-serif">
+                <span className="guardian-head-en">GUARDIAN</span>
+                <span className="guardian-head-ja">{san(oppNickname)}の守護獣</span>
               </div>
 
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の下側に重ねる。見出しは顔にかぶらないよう画像の外（上）に置く */}
@@ -2014,7 +2007,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <GuardianSummonFx />
 
                 <div className="guardian-hero-caption">
-                  {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                  {/* 称号（タイプを覚えるための呼び名）。枠なしの金の文字＋下に短い線 */}
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
                     <span className="astro-title-badge font-serif">
                       {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
@@ -2188,6 +2181,30 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
       {/* Main Content Area */}
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+        {/* 二人の相性100（2026-11-12 TAKASHI）: お相手ありの鑑定だけ。LINE吉時間の箱のすぐ上（TAKASHI「LINEの上に移動」2026-11-12） */}
+        {hasOpponent && (
+          <CoupleHundredSection
+            myMbti={activeResult.myMbtiCode}
+            oppMbti={activeResult.opponentMbtiCode}
+            myName={myName}
+            oppName={oppNickname}
+            myPillar={activeResult.myPillar}
+            myStar={activeResult.myStar}
+            oppPillar={activeResult.opponentPillar}
+            oppStar={activeResult.opponentStar}
+            rankAccess={coupleRankAccess}
+            readingAccess={coupleReadingAccess}
+            focusNo={coupleFocusNo}
+            pinnedNos={[...freeRankNos, ...(coupleFocusNo ? [coupleFocusNo] : [])]}
+            onLockClick={isRegistered ? handleDeepLockClick : (e) => { e?.stopPropagation(); handleScrollToRegister('lock'); }}
+            lockWord={LOCK_WORD}
+            onAskMbti={!sharedBy && onSetMbti ? (who) => setMbtiQuizFor(who) : undefined}
+            drops={dropsOn ? coupleDrops : null}
+            dropsError={hasOpponent && !sharedBy ? coupleDropsError : null}
+            onDrop={dropsOn ? onOpenCoupleTopic : undefined}
+          />
+        )}
 
         {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
       {/* 大見出しはカードの外（ResultSection）。LINEの緑ロゴはカードの中の「推奨送信タイミング」に残す */}
