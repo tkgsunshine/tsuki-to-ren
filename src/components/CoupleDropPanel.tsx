@@ -62,7 +62,7 @@ export const DropBalance: React.FC<{ drops: CoupleDrops }> = ({ drops }) => {
         </span>
       </div>
       <span style={{ fontSize: '0.7rem', color: '#cfc3a0', textAlign: 'center', lineHeight: 1.6 }}>
-        {drops.guest ? '🎁 はじめての方に3個プレゼント。1個で1つ開けられます。使い切っても、無料の会員登録で毎日2個もらえます。' : drops.bonus ? `1個で1つ開けられます。うち${drops.bonus}個はシングルプランの分で、このお相手にだけ使えます（期限なし）` : drops.premium ? `1個で1つ開けられます。毎日${drops.daily}個・お支払い日に50個（${drops.cap}個まで）` : `1個で1つ開けられます。毎日${drops.daily}個届きます（持ち越しはありません）`}
+        {drops.guest ? '🎁 はじめての方に3個プレゼント。1個で1つ開けられます。使い切っても、無料の会員登録で毎日2個もらえます。' : drops.bonus ? `1個で1つ開けられます。うち${drops.bonus}個はシングルプランの分で、このお相手にだけ使えます（期限なし）` : drops.premium ? `1個で1つ開けられます。毎月50個・毎日${drops.daily}個（${drops.cap}個まで）` : `1個で1つ開けられます。毎日${drops.daily}個届きます（持ち越しはありません）`}
       </span>
     </div>
   );
