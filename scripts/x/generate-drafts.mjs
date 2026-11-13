@@ -8,12 +8,11 @@ import path from 'node:path';
 import { buildBrief, jstDateString, dayPillar, MBTI_TYPES } from './lib/signals.mjs';
 import { lintPost, SITE_URL } from './lib/lint.mjs';
 import { computeAll, buildBeastItems } from './lib/characters.mjs';
-import { FORMAT_TEASER, withTeaser, BEAST_TEASER, GAP_LINK, PAIR_LINK, GAP_CTA, withLink, withProfileCta } from './lib/teasers.mjs';
+import { FORMAT_TEASER, withTeaser, BEAST_TEASER, PAIR_LINK, withLink, withRankTail } from './lib/teasers.mjs';
 import { addMbtiNicks, addMbtiNicksInline } from './lib/mbti-nick.mjs';
 import { pickFormats, buildFacts, SYSTEMS, PURPOSES, REPLY_GUIDE, BUZZ_SLOTS } from './lib/formats.mjs';
 import { readQueue, writeQueue, readConfig, writeJson, BRIEF_DIR } from './lib/queue.mjs';
-import { parseCardText, renderCard, EXPRESSIONS } from './lib/card.mjs';
-import { attachRankImages } from './lib/rank-card.mjs';
+import { parseCardText, EXPRESSIONS } from './lib/card.mjs';
 import { pickColumn, COLUMN_GUIDE, withColumnUrl } from './lib/column-post.mjs';
 import fs from 'node:fs';
 
@@ -88,10 +87,13 @@ const detSlots = activeSlots.filter((k) => planned[k].build);
 const llmSlots = activeSlots.filter((k) => !planned[k].build);
 const all = computeAll(date); // 守護獣・本命星の今日の点数（アプリの鑑定ロジック）。ランキングなどの事実と、守護獣の投稿に使う
 // 守護獣・MBTIの話題の返信には、アプリの予告の行（署名の直前）を自動で入れる
-const finalReply = (f, text) => {
+const finalReply = (f, text, id) => {
   const t = FORMAT_TEASER[f.id] ? withTeaser(String(text).trim(), FORMAT_TEASER[f.id]) : String(text).trim();
-  return f.id === 'gap_rank' ? withLink(t, GAP_LINK) : f.siteLink ? withLink(t, PAIR_LINK) : t; // ランキングと相性占いの紹介の返信だけ、サイトのリンクを入れる（2026-10-31〜。URLはリプ欄にだけ）
+  if (f.id === 'gap_rank') return withRankTail(t, id); // ランキングは、お題ごとの誘導の一言＋URL＋締めの定型（2026-11-13〜。署名なし）
+  return f.siteLink ? withLink(t, PAIR_LINK) : t; // 相性占いの紹介の返信だけ、サイトのリンクを入れる（2026-10-31〜。URLはリプ欄にだけ）
 };
+/** ランキング（gap_rank）の本文: 署名「-月-」を外す（2026-11-11 運営の指定） */
+const rankText = (text) => String(text || '').trim().replace(/\n*-月-\s*$/, '').trim();
 const describe = (slot, f) => {
   const facts = buildFacts(f, { date, all });
   const reply = f.replyGuide ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${f.replyGuide}` : f.poll ? `\n- replyText も書く（この投稿への返信として、あとで出す）: ${REPLY_GUIDE}` : '';
@@ -129,9 +131,10 @@ function validate(posts) {
     }
     const f = planned[slot];
     const candidate = { ...p, slot, kind: f.kind || 'value' };
-    if (f.id === 'gap_rank') candidate.text = withProfileCta(String(p.text || '').trim(), GAP_CTA); // 本文にも、プロフィールへ誘う一言が自動で入る（2026-10-31〜）
+    // ランキング（gap_rank）の本文は「1〜3位、14〜16位はリプ欄..↓」で締め、署名もプロフィールへの一言も入れない（2026-11-10・11-11 運営の指定）
+    if (f.id === 'gap_rank') candidate.text = rankText(p.text);
     for (const pr of lintPost(candidate, history, { allowLinks, maxWeight: f.maxWeight })) problems.push(`${slot}: ${pr}`);
-    if (!/-月-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」の署名を付ける（話し手は月だけ）`);
+    if (f.id !== 'gap_rank' && !/-月-\s*$/.test(String(p.text || '').trim())) problems.push(`${slot}: 末尾に「-月-」の署名を付ける（話し手は月だけ）`);
     if (f.card) {
       if (!p.card) problems.push(`${slot}: 画像つきの型は card（画像に載せる言葉）も書く`);
       if (!EXPRESSIONS[p.expression]) problems.push(`${slot}: expression（月の表情）は ${Object.keys(EXPRESSIONS).join(' / ')} のどれか1つにする`);
@@ -149,11 +152,16 @@ function validate(posts) {
     } else if (f.all16) {
       for (const c of MBTI_TYPES.map((x) => x.code)) if ((String(p.text).match(new RegExp(`(^|[^A-Z])${c}(?![A-Z])`, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、1回だけ書かれていない（16タイプ全員を、1行ずつ、抜け・重複なし）`);
     } else if (f.rank16) {
-      if (!p.replyText) problems.push(`${slot}: 続き（1位・2位・15位・16位）の replyText も書く`);
+      if (!p.replyText) problems.push(`${slot}: 続き（1〜3位・14〜16位）の replyText も書く`);
       else {
-        for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText) }, history, { allowLinks, maxWeight: f.maxWeight, siteUrl: true })) problems.push(`${slot}の返信: ${pr}`);
-        if (/^\s*(1|2|15|16)位\s+[EI][NS][FT][JP]/m.test(p.text)) problems.push(`${slot}: 1位・2位・15位・16位は、投稿ではなくリプ欄（replyText）に書く`);
-        for (const n of [1, 2, 15, 16]) if (!new RegExp(`^\\s*${n}位`, 'm').test(p.replyText)) problems.push(`${slot}: replyText に「${n}位」の行がない`);
+        for (const pr of lintPost({ slot, kind: 'value', text: finalReply(f, p.replyText, `${date}-${slot}`) }, history, { allowLinks, maxWeight: f.maxWeight, siteUrl: true })) problems.push(`${slot}の返信: ${pr}`);
+        const title = String(p.text || '').trim().split('\n')[0];
+        if (!/MBTI（16タイプ）$/.test(title) || /【|】|MBTI（16タイプ）別/.test(title)) problems.push(`${slot}: 1行目は「見た目は〇〇、恋愛はいちばん△△なMBTI（16タイプ）」の形（お題が先、MBTI（16タイプ）が最後。【】・「別」は付けない）`);
+        if (!/1〜3位、14〜16位はリプ欄\.\.↓$/.test(rankText(p.text))) problems.push(`${slot}: 本文の最後の行は「1〜3位、14〜16位はリプ欄..↓」にする（署名は付けない）`);
+        if (/^\s*(1|2|3|14|15|16)位\s+[EI][NS][FT][JP]/m.test(p.text)) problems.push(`${slot}: 1〜3位・14〜16位は、投稿ではなくリプ欄（replyText）に書く`);
+        for (const n of [1, 2, 3, 14, 15, 16]) if (!new RegExp(`^\\s*${n}位`, 'm').test(p.replyText)) problems.push(`${slot}: replyText に「${n}位」の行がない`);
+        const last = rankText(p.replyText).split('\n').pop();
+        if (!/↓$/.test(last) || /あなたと好きな人の相性↓|鑑定できます↓|ここで↓/.test(last)) problems.push(`${slot}: replyText の最後の行は、お題に合わせた誘導の一言で「↓」で終える（例「一途なあの人に選ばれるか、二人の相性↓」。「あなたと好きな人の相性↓」は使わない）`);
         const joined = `${p.text}\n${p.replyText}`;
         for (const c of MBTI_TYPES.map((t) => t.code)) if ((joined.match(new RegExp(c, 'g')) || []).length !== 1) problems.push(`${slot}: ${c} が、投稿と返信で1回ずつになっていない（16タイプ全員を重複なく）`);
       }
@@ -326,7 +334,7 @@ const buzzItem = (slot, time) => {
   const f = planned[slot];
   const p = posts.find((x) => x.slot === slot);
   const item = {
-    id: `${date}-${slot}`, date, slot, kind: f.kind || 'value', text: f.id === 'gap_rank' ? withProfileCta(p.text.trim(), GAP_CTA) : p.text.trim(),
+    id: `${date}-${slot}`, date, slot, kind: f.kind || 'value', text: f.id === 'gap_rank' ? rankText(p.text) : p.text.trim(),
     format: f.id, system: f.system, purpose: f.purpose, ...(f.maxWeight ? { maxWeight: f.maxWeight } : {}), // 反応の比較用（どの型が取れたか）
     status: 'scheduled', createdAt: new Date().toISOString(),
   };
@@ -348,7 +356,7 @@ const replyOf = (slot) => {
     status: 'scheduled', createdAt: new Date().toISOString(),
   }] : [];
   return [{
-    id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: finalReply(f, p.replyText), replyTo: `${date}-${slot}`,
+    id: `${date}-${slot}-reply`, date, slot, kind: 'value', text: finalReply(f, p.replyText, `${date}-${slot}`), replyTo: `${date}-${slot}`,
     format: `${f.id}_reply`, system: f.system, purpose: f.purpose,
     status: 'scheduled', createdAt: new Date().toISOString(),
   }, ...second];
@@ -392,21 +400,12 @@ if (col) {
 }
 const items = [...beastItems, ...columnItems, ...activeSlots.flatMap((slot) => [buzzItem(slot), ...replyOf(slot)])];
 
+// 投稿に画像は付けない（2026-11-13 運営の指定「投稿に画像は全部いらない」）。一言カード・ランキング・守護獣の画像は作らず、項目からも外す
+for (const it of items) { delete it.image; delete it.images; delete it.card; }
+
 if (dryRun) {
   console.log(JSON.stringify(items, null, 2));
   process.exit(0);
-}
-// 画像つきの一言カードのPNGを作る（リポジトリ内に置き、投稿時にアップロードされる）
-for (const it of items.filter((x) => x.card)) {
-  const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(it.image));
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, await renderCard(it.card));
-}
-// 16タイプのランキングに画像を付ける（投稿用＝1・2・15・16位を隠す／返信用＝全順位。2026-11-03 運営の承認）
-for (const f of await attachRankImages(items)) {
-  const file = path.join(path.dirname(BRIEF_DIR), 'cards', path.basename(f.image));
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, f.png);
 }
 writeJson(path.join(BRIEF_DIR, `${date}.json`), brief);
 writeQueue([...queue, ...items]);
