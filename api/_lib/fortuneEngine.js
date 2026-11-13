@@ -2425,14 +2425,18 @@ export function generateFortuneResult(input, character, now = new Date()) {
     const oppStemTrait = oppPillarObj ? getStemTraits(oppPillarObj.stem, oppNickname) : null;
     let oneLiner = '';
     let summary = '';
-    // 状況（片思い中など）に合わせた月・蓮のひとこと。サマリーの末尾ではなく「今日の恋の過ごし方」（旧「月からあなたへ」）のカードの先頭に出す（同じ月の言葉が続けて2つ並ばないように）
+    // 状況（片想い中など）に合わせた月・蓮のひとこと。サマリーの末尾ではなく「今日の恋の過ごし方」（旧「月からあなたへ」）のカードの先頭に出す（同じ月の言葉が続けて2つ並ばないように）
     let relAdviceText = '';
     if (hasOpponent) {
-        const relKey = input.relationship || '片思い中';
+        const relKey = (input.relationship === '片思い中' ? '片想い中' : input.relationship) || '片想い中';
         const relAdviceMap = {
-            '片思い中': {
+            '片想い中': {
                 tsuki: `${san(myNickname)}の自然な優しさや気配りを、そのまま届けてみてください。少しずつ心を開いてもらえて、${san(oppNickname)}にとって「かけがえのない大切な存在」へ一歩ずつ近づけます。`,
                 ren: `お相手の性格タイプに合わせて、「返事がしやすく、負担にならない具体的なお誘い」を送るのが、一番うまくいくやり方です。`
+            },
+            '片想いされ中': {
+                tsuki: `${san(oppNickname)}が向けてくれる好意は、急いで答えを出さなくて大丈夫です。${san(myNickname)}の気持ちがどこにあるのか、まずはゆっくり確かめてあげてくださいね。`,
+                ren: `気持ちが決まるまでは、思わせぶりにも冷たくもせず、いつもどおりの丁寧な返事を続けるのが一番です。答えを出すときは、短くはっきり伝えましょう。`
             },
             '両思い・交際中': {
                 tsuki: `二人の信頼関係は非常に良好です。日頃の「ありがとう」や素直な感謝の言葉を日常的に伝えることで、愛の絆はより一層深まります。`,
@@ -2451,7 +2455,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
                 ren: `気持ちに流されず、冷静でいることが大切です。連絡する時間帯や会う場面はとても慎重に選び、無理のない形で関わりましょう。`
             }
         };
-        const curRelAdvice = relAdviceMap[relKey] || relAdviceMap['片思い中'];
+        const curRelAdvice = relAdviceMap[relKey] || relAdviceMap['片想い中'];
         relAdviceText = character === 'tsuki' ? curRelAdvice.tsuki : curRelAdvice.ren;
         const sType = stemComp?.type || '宿命';
         const sTitle = stemComp?.title || '【宿命の結びつき】';

@@ -208,11 +208,18 @@ function App() {
 
   // コラムの案内で入れてもらった生年月日。入力画面を開いたときに入れておく（ほかの方法で画面を移ったら消す）
   const [inputPrefill, setInputPrefill] = useState<{ myBirth?: string; oppBirth?: string } | null>(null);
+  // 下のタブで離れた画面のスクロール位置（画面ごと）。タブで戻ってきたときに、離れたときの位置へ戻す
+  const tabScrollRef = useRef<Record<string, number>>({});
   const handleTabChange = (tab: string) => {
     setInputPrefill(null);
     const cur = readNav();
     const next: PageFields = { tab, slug: null, subView: 'main', legal: false, flowStep: tab === 'home' ? 'input' : cur.flowStep };
-    if (pageKey(next) !== pageKey(cur)) pushNav(next);
+    const curKey = pageKey(cur);
+    const nextKey = pageKey(next);
+    tabScrollRef.current[curKey] = Math.max(window.scrollY || 0, document.documentElement.scrollTop || 0);
+    if (nextKey !== curKey) pushNav(next);
+    // 別のタブから戻ってきたときは離れたときの位置へ。今いるタブをもう一度押したとき・「恋愛診断」（入力画面から始め直す）は一番上
+    const restoreTop = nextKey !== curKey && tab !== 'home' ? (tabScrollRef.current[nextKey] ?? 0) : 0;
 
     setActiveTab(tab);
     setIsChatOpen(false);
@@ -230,7 +237,9 @@ function App() {
       setSharedView(null);
       setSharedTeaser(null);
     }
-    scrollMainTo(0);
+    scrollMainTo(restoreTop);
+    // 描画のあとでないとページの高さが足りず届かないので、描画のあとにもう一度
+    if (restoreTop > 0) requestAnimationFrame(() => requestAnimationFrame(() => scrollMainTo(restoreTop)));
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
   // 共有リンクから来た人に見せる、共有した人の鑑定結果（URLは読んだあと消す）。
@@ -635,8 +644,9 @@ function App() {
   useEffect(() => {
     // Helper to decode 1-char relationship codes & short params
     const decodeRel = (val: string | null) => {
-      if (!val) return '片思い中';
-      if (val === 'k' || val === 'single' || val === '片思い中') return '片思い中';
+      if (!val) return '片想い中';
+      if (val === 'k' || val === 'single' || val === '片想い中' || val === '片思い中') return '片想い中';
+      if (val === 'h' || val === '片想いされ中') return '片想いされ中';
       if (val === 'r' || val === 'ryoomoi' || val === '交際中' || val === '両思い・交際中') return '両思い・交際中';
       if (val === 'f' || val === 'fukuen' || val === '復縁したい') return '復縁したい';
       if (val === 'm' || val === 'kekkon' || val === '結婚・夫婦') return '結婚・夫婦';
@@ -769,7 +779,7 @@ function App() {
                 lastInput.oBirth || '',
                 lastInput.oMbti || 'UNKNOWN',
                 lastInput.oGender || 'male',
-                lastInput.rel || '片思い中',
+                lastInput.rel || '片想い中',
                 'match',
                 true,
                 lastInput.selectedCharacter,
@@ -787,7 +797,7 @@ function App() {
                 '',
                 'UNKNOWN',
                 'female',
-                lastInput.rel || '片思い中',
+                lastInput.rel || '片想い中',
                 'single',
                 true,
                 lastInput.selectedCharacter,
@@ -929,7 +939,7 @@ function App() {
   // Saves the subscription with "me" from the profile and the chosen partner (null = solo fortune)
   const buildNotifyData = (email: string, partner: SavedPartner | 'keep' | null): EmailSubscriptionData => {
     const opp = partner === 'keep' && notifySub
-      ? { oppName: notifySub.oppName || '', oppBirth: notifySub.oppBirth || '', oppGender: notifySub.oppGender, oppMbti: notifySub.oppMbti || 'UNKNOWN', relationship: notifySub.relationship || '片思い中', mode: 'match' as const }
+      ? { oppName: notifySub.oppName || '', oppBirth: notifySub.oppBirth || '', oppGender: notifySub.oppGender, oppMbti: notifySub.oppMbti || 'UNKNOWN', relationship: notifySub.relationship || '片想い中', mode: 'match' as const }
       : partner && partner !== 'keep'
         ? { oppName: partner.name, oppBirth: partner.birth.replace(/\//g, '-'), oppGender: partner.gender, oppMbti: partner.mbti, relationship: partner.relationship, mode: 'match' as const }
         : { oppName: '', oppBirth: '', oppGender: 'male' as const, oppMbti: 'UNKNOWN', relationship: relationship, mode: 'single' as const };
@@ -1019,7 +1029,7 @@ function App() {
     setEditPartnerBirth('');
     setEditPartnerMbti('UNKNOWN');
     setEditPartnerGender(myGender === 'female' ? 'male' : 'female');
-    setEditPartnerRel('片思い中');
+    setEditPartnerRel('片想い中');
     return true;
   };
 
@@ -1029,7 +1039,7 @@ function App() {
     setEditPartnerBirth(partner.birth);
     setEditPartnerMbti(partner.mbti);
     setEditPartnerGender(partner.gender);
-    setEditPartnerRel(partner.relationship);
+    setEditPartnerRel(partner.relationship === '片思い中' ? '片想い中' : partner.relationship);
   };
 
   // 解放済みのお相手の生年月日を変える確認で「変更する」を押したあと、もう一度保存を通すため
@@ -1206,7 +1216,7 @@ function App() {
     // Gender Validation: Ensure opposite gender combination (Male x Female)
     const validOppGender = partner.gender === myGender ? (myGender === 'female' ? 'male' : 'female') : partner.gender;
     setOppGender(validOppGender);
-    setRelationship(partner.relationship);
+    setRelationship(partner.relationship === '片思い中' ? '片想い中' : partner.relationship);
     setMode('match');
   };
 
@@ -1408,7 +1418,7 @@ function App() {
     setRelationship(data.relationship);
     setMode(data.mode);
     pushProfile(); // the input form has just saved the profile on this device
-    trackFortune({ birth: data.myBirth, gender: data.myGender, mbti: data.myMbti });
+    trackFortune({ birth: data.myBirth, gender: data.myGender, mbti: data.myMbti, rel: data.mode === 'match' && data.oppBirth ? data.relationship : '' });
     if (data.mode === 'match' && data.oppBirth) {
       autoSavePartner({
         name: data.oppName || 'お相手',
@@ -1459,7 +1469,7 @@ function App() {
         setSavedPartners(list.map(p => (isSamePartner(p, r.oName, r.oBirth) && (!p.mbti || p.mbti === 'UNKNOWN') ? { ...p, mbti } : p)));
       }
     }
-    startDiagnosis(next.mName, next.mBirth, next.mMbti, next.mGender, next.oName, next.oBirth, next.oMbti, next.oGender, next.rel, next.runMode, true, next.selectedCharacter);
+    startDiagnosis(next.mName, next.mBirth, next.mMbti, next.mGender, next.oName, next.oBirth, next.oMbti, next.oGender, next.rel, next.runMode, true, next.selectedCharacter, false, true);
   };
 
   const startDiagnosis = (
@@ -1476,7 +1486,9 @@ function App() {
     skipLoading = false,
     presetCharacter?: 'ren' | 'tsuki',
     // true: 結果を用意するだけで、画面（タブ・履歴・スクロール・キャラ）は変えない（共有リンクを開いたときの前回結果の復元）
-    background = false
+    background = false,
+    // true: 今のスクロール位置のまま結果を差し替える（結果画面の中で16タイプを決めて鑑定し直したとき。位置合わせは ResultView 側）
+    keepScroll = false
   ) => {
     const execute = () => {
       const input = {
@@ -1542,7 +1554,11 @@ function App() {
       } else {
         pushNav({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' }, '/result' + window.location.search);
       }
-      scrollMainTo(0);
+      if (!keepScroll) {
+        scrollMainTo(0);
+        // 新しい結果なので、下のタブで戻ってきたときの位置（前の結果のもの）は使わない
+        delete tabScrollRef.current[pageKey({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' })];
+      }
       if (pendingLPRef.current) {
         if (!lpReopenRef.current) lpFromMailRef.current = true;
         openPremiumLP(pendingLPRef.current);
@@ -1708,7 +1724,7 @@ function App() {
         opponentBirth: partner?.birth,
         opponentMbti: partner?.mbti,
         opponentGender: partnerGender,
-        relationship: partner?.relationship || '片思い中'
+        relationship: partner?.relationship || '片想い中'
       }, selectedCharacter);
     } catch (e) {
       console.error(e);
@@ -2838,7 +2854,7 @@ function App() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {(editingPartnerId === NEW_PARTNER_ID
-                      ? [...savedPartners, { id: NEW_PARTNER_ID, name: '', birth: '', mbti: 'UNKNOWN', gender: 'male' as const, relationship: '片思い中' }]
+                      ? [...savedPartners, { id: NEW_PARTNER_ID, name: '', birth: '', mbti: 'UNKNOWN', gender: 'male' as const, relationship: '片想い中' }]
                       : savedPartners
                     ).map((partner) => {
                       if (editingPartnerId === partner.id) {

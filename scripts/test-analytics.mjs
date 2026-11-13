@@ -414,6 +414,17 @@ test('track: the first fortune of a visit counts the person\'s gender / age band
   assert.deepEqual(Object.keys(db.writes[3].data.byFortuneAttr).sort(), ['a_unknown', 'g_unknown', 'm_unknown']);
 });
 
+test('track: the first fortune also counts the relationship status (r_*); unknown codes become r_unknown', async () => {
+  const db = mockDb();
+  const send = (body) => track({ method: 'POST', headers: { 'user-agent': UA }, body: { type: 'fortune', source: 'x', landing: 'home', device: 'mobile_browser', ...body } }, mockRes(), { db });
+  await send({ first: '1', g: 'female', a: '20_24', m: 'INFP', r: 'h' });
+  await send({ first: '1', g: 'female', a: '20_24', m: 'INFP', r: 'zz' });
+  await send({ first: '0', r: 'k' });
+  assert.deepEqual(Object.keys(db.writes[0].data.byFortuneAttr).sort(), ['a_20_24', 'g_female', 'm_INFP', 'r_h']);
+  assert.ok(Object.keys(db.writes[1].data.byFortuneAttr).includes('r_unknown'));
+  assert.equal(db.writes[2].data.byFortuneAttr, undefined);
+});
+
 test('age band: the same cut on the server and in the browser (JST, birthday not yet reached)', async () => {
   const { ageBandFromBirth } = await import('../api/_lib/analytics.js');
   const { ageBand } = await import('../src/services/analytics.ts');

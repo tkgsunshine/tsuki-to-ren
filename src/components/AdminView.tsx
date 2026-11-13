@@ -986,6 +986,38 @@ function AttributeTables({ docs, newMembers, allMembers }: { docs: DailyDoc[]; n
   );
 }
 
+// 鑑定した人の恋の状況（入力画面の選択肢、1回の訪問の最初の鑑定だけ。2026-11-13〜）
+const REL_ROWS: [string, string][] = [['k', '片想い中'], ['h', '片想いされ中'], ['r', '両思い・交際中'], ['f', '復縁したい'], ['m', '結婚・夫婦'], ['c', '複雑愛・秘密の恋'], ['n', 'お相手なし（自分だけ）'], ['unknown', '不明']];
+function RelationshipTable({ docs }: { docs: DailyDoc[] }) {
+  const fa = sumFortuneAttr(docs);
+  const total = REL_ROWS.reduce((n, [k]) => n + (fa[`r_${k}`] || 0), 0);
+  const since = docs.find((d) => Object.keys(d.byFortuneAttr || {}).some((k) => k.startsWith('r_')))?.date || null;
+  const rows = [...REL_ROWS].sort((a, b) => (fa[`r_${b[0]}`] || 0) - (fa[`r_${a[0]}`] || 0));
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>鑑定した人の恋の状況（{total}）</h2>
+      {total === 0 ? (
+        <div style={c.muted}>まだデータがありません</div>
+      ) : (
+        <table style={c.table}>
+          <tbody>
+            {rows.map(([k, label]) => (
+              <tr key={k}>
+                <td style={c.td}>{label}</td>
+                <td style={{ ...c.td, ...c.num }}>{fa[`r_${k}`] || 0}</td>
+                <td style={{ ...c.td, ...c.num, ...c.muted }}>{pct(fa[`r_${k}`] || 0, total)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        入力画面の「恋の状況」で、1回の訪問の最初の鑑定だけ数えます（2026-11-13 から計測{since ? `。この期間は ${since} から` : ''}）。多い順。
+      </div>
+    </div>
+  );
+}
+
 function ShareTable({ rows, total }: { rows: [string, number][]; total: number }) {
   return (
     <div style={c.card}>
@@ -1373,6 +1405,7 @@ export default function AdminView() {
             <ShareTable rows={sumShares(data.daily)} total={totals.shares} />
 
             <AttributeTables docs={data.daily} newMembers={newMemberList} allMembers={members} />
+            <RelationshipTable docs={data.daily} />
 
             <DailyTable days={daily} />
 

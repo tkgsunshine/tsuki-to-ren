@@ -2,6 +2,8 @@ import React from 'react';
 import { getSelfReading, maskedLead } from '../utils/selfReading';
 import { san } from '../utils/fortuneEngine';
 import { LockLabel, countChars } from './LockRest';
+import { UserRound } from 'lucide-react';
+import { ResultSection } from './ResultSection';
 
 // 鑑定結果の冒頭（点数のすぐ下）に出す「あなたってこんな人」。
 // 本人の性格・恋愛の傾向を先に見せて「当たってる」と感じてもらい、その先の相性・運勢を読む気持ちにつなげる。
@@ -40,10 +42,8 @@ export const SelfReadingCard: React.FC<{
     ? (char === 'ren' ? `${opp}との相性を読む前に、まず${who}がどんな人かを見ておこう。` : `${opp}との相性を見る前に、まずは${who}のことから。`)
     : (char === 'ren' ? `運勢を読む前に、まず${who}がどんな人かを見ておこう。` : `運勢を見る前に、まずは${who}のことから。`);
   return (
+    <ResultSection title={`${who}ってこんな人`} icon={<UserRound />}>
     <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
-      <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.55rem', fontWeight: 'bold', textAlign: 'center', letterSpacing: '0.05em' }}>
-        {who}ってこんな人
-      </h2>
       <p className="font-serif" style={{ display: 'flex', alignItems: 'center', fontSize: '0.84rem', color: accent, margin: '0 0 0.85rem', lineHeight: 1.6 }}>
         {charIcon}
         <span>{intro}</span>
@@ -57,6 +57,7 @@ export const SelfReadingCard: React.FC<{
         ))}
       </div>
     </div>
+    </ResultSection>
   );
 };
 
@@ -73,12 +74,9 @@ const OpponentReadingCard: React.FC<{
   const accent = char === 'ren' ? '#9cc6d8' : '#cdbfe2';
   const intro = char === 'ren' ? `次は、${who}がどんな人かを見ておこう。` : `次は、${who}のことも見てみましょう。`;
   const label = (l: string) => l.replace('あなた', who);
-  // 見出し＋月/蓮のひとことは、自分の「こんな人」と同じ形にそろえる（2026-11-07 TAKASHI指示）
+  // 見出し＋月/蓮のひとことは、自分の「こんな人」と同じ形にそろえる（2026-11-07 TAKASHI指示）。大見出しはカードの外（ResultSection、2026-11-13）
   const heading = (
     <>
-      <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', margin: '0 0 0.55rem', fontWeight: 'bold', textAlign: 'center', letterSpacing: '0.05em' }}>
-        {who}ってこんな人
-      </h2>
       <p className="font-serif" style={{ display: 'flex', alignItems: 'center', fontSize: '0.84rem', color: accent, margin: '0 0 0.85rem', lineHeight: 1.6 }}>
         {charIcon}
         <span>{intro}</span>
@@ -95,6 +93,7 @@ const OpponentReadingCard: React.FC<{
     const rest = Math.max(0, countChars(...reading.items.map((it) => it.text)) - shown);
     const unlock = () => onUnlock?.();
     return (
+      <ResultSection title={`${who}ってこんな人`} icon={<UserRound />}>
       <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
         {heading}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
@@ -148,10 +147,12 @@ const OpponentReadingCard: React.FC<{
           〇〇の答えは、無料の会員登録で読めます
         </p>
       </div>
+      </ResultSection>
     );
   }
 
   return (
+    <ResultSection title={`${who}ってこんな人`} icon={<UserRound />}>
     <div className="glass-panel" style={{ padding: '1.2rem 1.2rem 1.1rem', border: '1px solid rgba(226,192,116,0.3)' }}>
       {heading}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -163,5 +164,6 @@ const OpponentReadingCard: React.FC<{
         ))}
       </div>
     </div>
+    </ResultSection>
   );
 };

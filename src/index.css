@@ -1614,3 +1614,43 @@ body.chat-keyboard-open .chat-partner-picker {
 @media (prefers-reduced-motion: reduce) {
   .shot-zoom-hint { animation: none; }
 }
+
+/* 鑑定結果の大見出し（src/components/ResultSection.tsx。カードの外・左寄せ・明朝・金・1.1rem・金の線アイコン） */
+.result-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  scroll-margin-top: 1rem;
+}
+.result-section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.3rem;
+}
+.result-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+.result-section-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--color-gold);
+}
+.result-section-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.result-section-aside {
+  flex-shrink: 0;
+}
