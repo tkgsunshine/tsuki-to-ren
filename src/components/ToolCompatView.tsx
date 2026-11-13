@@ -98,13 +98,10 @@ export const ToolCompatView: React.FC = () => {
             <p style={{ ...textStyle, margin: 0, fontSize: '0.78rem' }}>16タイプだけの点数です。鑑定では、生年月日から見る四柱推命・九星気学の相性も足して出します。</p>
             <a
               href={`/compatibility/${me.toLowerCase()}-${opp.toLowerCase()}`}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 100%)', color: '#000', padding: '0.8rem 1rem', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.95rem' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 100%)', color: '#000', padding: '0.8rem 0.75rem', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.95rem' }}
             >
-              {/* 狭い画面では「、」の後ろで改行する（「詳しく／占う」のような切れ方を防ぐ）。広い画面では1行 */}
-              <span>
-                <span style={{ display: 'inline-block' }}>生年月日を入れて、</span>
-                <span style={{ display: 'inline-block' }}>二人の相性を詳しく占う</span>
-              </span>
+              {/* 文はそのまま、スマホでは文字を小さくして1行に収める（「詳しく／占う」で改行していた。TAKASHI判断 2026-11-13） */}
+              <span style={{ whiteSpace: 'nowrap', fontSize: 'clamp(0.6rem, calc((100vw - 124px) / 20.5), 0.95rem)' }}>生年月日を入れて、二人の相性を詳しく占う</span>
               <ChevronRight size={16} style={{ flexShrink: 0 }} />
             </a>
           </div>
