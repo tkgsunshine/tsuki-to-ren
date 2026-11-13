@@ -285,7 +285,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
               );
             })}
             {hidden > 0 && (
-              <MorePeek nextTitle={(RANK_TOPICS.find((t) => t.category === cat && !shown.has(t.no))?.title ?? '')} count={hidden} onOpen={() => setExpanded((s) => new Set(s).add(cat))} />
+              <MorePeek nextTitles={RANK_TOPICS.filter((t) => t.category === cat && !shown.has(t.no)).slice(0, 2).map((t) => t.title)} count={hidden} onOpen={() => setExpanded((s) => new Set(s).add(cat))} />
             )}
             {hidden === 0 && expanded.has(cat) && (
               <MoreClose onClose={() => setExpanded((s) => { const n = new Set(s); n.delete(cat); return n; })} />

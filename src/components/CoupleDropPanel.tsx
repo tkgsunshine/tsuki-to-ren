@@ -124,18 +124,23 @@ export const DropPanel: React.FC<{
  * まとまりの続きがあることを見せる行（2026-11-13 TAKASHI「枠のボタンやめて、直感的に続きがあるのが分かるデザインに」）。
  * 次の項目の名前を下へ向かって消えるように薄く見せ、その下に金の「あと〇個 ⌄」。行全体を押すと、そのまとまりが全部開く。
  */
-export const MorePeek: React.FC<{ nextTitle: string; count: number; onOpen: () => void }> = ({ nextTitle, count, onOpen }) => (
+export const MorePeek: React.FC<{ nextTitles: string[]; count: number; onOpen: () => void }> = ({ nextTitles, count, onOpen }) => (
   <button
     type="button"
     onClick={onOpen}
     aria-label={`もっと見る（あと${count}個）`}
     style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'inherit' }}
   >
+    {/* 次の項目を2つ、下へ向かって消えるように薄く見せる（2026-11-13 TAKASHI「次の項目のぼかしを2行に」） */}
     <span aria-hidden="true" style={{
-      display: 'block', padding: '0.7rem 0 0', fontSize: '0.8rem', lineHeight: 1.5, color: '#e8e2d4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-      height: '2.1rem', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0) 95%)', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0) 95%)'
-    }}>{nextTitle}</span>
-    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', marginTop: '-0.25rem', marginBottom: '0.35rem', fontSize: '0.78rem', fontWeight: 'bold', color: '#f5d77a' }}>
+      display: 'flex', flexDirection: 'column', padding: '0.7rem 0 0', fontSize: '0.8rem', lineHeight: 1.5, color: '#e8e2d4',
+      WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 92%)', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 92%)'
+    }}>
+      {nextTitles.slice(0, 2).map((t, i) => (
+        <span key={i} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0.35rem 0', borderBottom: i === 0 && nextTitles.length > 1 ? '1px solid rgba(212, 175, 55, 0.18)' : 'none' }}>{t}</span>
+      ))}
+    </span>
+    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', marginTop: '-0.3rem', marginBottom: '0.35rem', fontSize: '0.78rem', fontWeight: 'bold', color: '#f5d77a' }}>
       もっと見る
       <ChevronDown size={16} style={{ animation: 'more-peek-bob 1.6s ease-in-out infinite' }} />
     </span>

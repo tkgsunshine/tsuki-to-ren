@@ -138,7 +138,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
               );
             })}
             {hidden > 0 && (
-              <MorePeek nextTitle={(READING_TOPICS.find((t) => t.category === cat && !shown.has(t.no))?.title ?? '')} count={hidden} onOpen={() => setExpanded((s) => new Set(s).add(cat))} />
+              <MorePeek nextTitles={READING_TOPICS.filter((t) => t.category === cat && !shown.has(t.no)).slice(0, 2).map((t) => t.title)} count={hidden} onOpen={() => setExpanded((s) => new Set(s).add(cat))} />
             )}
             {hidden === 0 && expanded.has(cat) && (
               <MoreClose onClose={() => setExpanded((s) => { const n = new Set(s); n.delete(cat); return n; })} />
