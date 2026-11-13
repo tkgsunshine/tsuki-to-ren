@@ -14,7 +14,7 @@ import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../se
 // *Sessions = ブラウザのセッションで最初の1回だけ数えた「人数」（流れの表はこちらで割る）。salesYen = 本番の購入額（円）
 const METRIC_KEYS = ['visits', 'fortunes', 'fortuneSessions', 'signups', 'shares', 'premiumViews', 'premiumViewSessions', 'premiumViewFortuneSessions', 'lockViewSessions', 'premiumViewsPair', 'premiumViewsMail', 'premiumViewsMailPair',
   'checkouts', 'pairCheckouts', 'premiums', 'pairs', 'salesYen', 'toolUses', 'toolCtas', 'columnCtaMids', 'columnCtaEnds',
-  'regViews', 'regClicks', 'regSubmits', 'authOpens',
+  'regViews', 'regClicks', 'regSubmits', 'authOpens', 'regSubmitPeople', 'regSubmitsReturning', 'regErrors',
   'refSends', 'refFriends'] as const; // 友達紹介: 招待URLを送った回数（LINE・コピー）／招待URLから占ったお友達（数えた人） // 会員登録までの段階（登録の箱が見えた・ボタン・登録開始・ログイン画面）
 type Metric = typeof METRIC_KEYS[number];
 type Counts = Partial<Record<Metric, number>>;
@@ -207,6 +207,10 @@ const REG_LABELS: Record<string, string> = {
   click_top: '点数の下', click_bar: '画面下のバー', click_lock: '鍵のかかった所', click_other: 'その他',
   submit_card_email: '結果画面・メール', submit_card_google: '結果画面・Google', submit_card_x: '結果画面・X',
   submit_modal_email: 'ログイン画面・メール', submit_modal_google: 'ログイン画面・Google', submit_modal_x: 'ログイン画面・X', submit_other: 'その他',
+  signup_email: 'メール', signup_google: 'Google', signup_x: 'X', signup_other: 'その他',
+  error_google_cancel: 'Googleの画面でやめた', error_google_network: 'Google・通信エラー', error_google_inapp: 'アプリ内の画面でGoogleを押した',
+  error_google_other: 'Google・その他のエラー', error_x_cancel: 'Xの画面でやめた', error_x_network: 'X・通信エラー', error_x_other: 'X・その他のエラー',
+  error_email_send: 'メールが送れなかった', error_email_link: 'メールのリンクでログインできなかった', error_redirect: '戻ったあとの失敗', error_other: 'その他',
 };
 const regDetail = (reg: Record<string, number>, prefix: string) =>
   Object.entries(reg).filter(([k, n]) => k.startsWith(prefix) && n).sort((a, b) => b[1] - a[1])
@@ -730,7 +734,8 @@ function SignupFunnel({ t, reg }: { t: FullCounts; reg: Record<string, number> }
     ['登録へのボタンを押した', t.regClicks, regDetail(reg, 'click_')],
     ['ログイン画面を開いた', t.authOpens, 'メニュー・チャットなどから'],
     ['登録を始めた（メール送信・Google・X）', t.regSubmits, regDetail(reg, 'submit_')],
-    ['会員登録', t.signups, ''],
+    ['　うち 始めた人（訪問ごとに1人・入り直しを除く）', t.regSubmitPeople, `入り直し（前に会員だった端末）${t.regSubmitsReturning} 回`],
+    ['会員登録', t.signups, regDetail(reg, 'signup_')],
   ];
   return (
     <div style={c.card}>
@@ -758,7 +763,10 @@ function SignupFunnel({ t, reg }: { t: FullCounts; reg: Record<string, number> }
         </table>
       </div>
       <div style={{ ...c.muted, marginTop: 8 }}>
-        「鑑定した人」は、1回の訪問で何度鑑定しても1人です。会員登録はメニューやチャットからの登録も含みます。途中の段（登録の箱・ボタン・ログイン画面・登録開始）は、この表を入れた日から数えています。
+        「鑑定した人」は、1回の訪問で何度鑑定しても1人です。会員登録はメニューやチャットからの登録も含みます。途中の段（登録の箱・ボタン・ログイン画面・登録開始）は、この表を入れた日から数えています。「始めた人」「会員登録の方法」「失敗した理由」は 2026-11-13 から数えています。
+      </div>
+      <div style={{ ...c.muted, marginTop: 6 }}>
+        <strong>失敗・やめた（{t.regErrors} 回）</strong>{t.regErrors ? `：${regDetail(reg, 'error_')}` : '：まだありません'}
       </div>
     </div>
   );

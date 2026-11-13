@@ -471,3 +471,41 @@ test('Microsoft Clarity loads only on the production domain, with an ID, outside
   assert.equal(shouldLoadClarity({ ...base, optedOut: true }), false);
   assert.equal(shouldLoadClarity({ ...base, automated: true }), false);
 });
+
+test('track: sign-up starts count people once per visit, re-logins apart, and failures by reason (2026-11-13)', async () => {
+  const db = mockDb();
+  const send = async (body) => {
+    const res = mockRes();
+    await track({ method: 'POST', headers: { 'user-agent': UA }, body: { source: 'x', landing: 'home', device: 'mobile_browser', ...body } }, res, { db });
+    return res.code;
+  };
+  await send({ type: 'reg_submit', place: 'card_email', first: '1', ret: '0' });
+  await send({ type: 'reg_submit', place: 'card_google', first: '0', ret: '0' });
+  await send({ type: 'reg_submit', place: 'modal_google', first: '1', ret: '1' });
+  assert.equal(await send({ type: 'reg_error', place: 'google_inapp' }), 204);
+  await send({ type: 'reg_error', place: 'nope' });
+  const [first, again, returning, err, odd] = db.writes.map((w) => w.data);
+  assert.ok(first.regSubmitPeople);
+  assert.equal(again.regSubmitPeople, undefined, 'pressing again in the same visit is not another person');
+  assert.equal(returning.regSubmitPeople, undefined, 'a former member signing in again is not a new person');
+  assert.ok(returning.regSubmitsReturning);
+  assert.ok(err.regErrors);
+  assert.deepEqual(Object.keys(err.byReg), ['error_google_inapp']);
+  assert.deepEqual(Object.keys(odd.byReg), ['error_other']);
+});
+
+test('track: a sign-up is counted with its method', async () => {
+  const counted = async (providerData, email) => {
+    const db = mockDb();
+    const auth = {
+      verifyIdToken: async () => ({ uid: 'u1' }),
+      getUser: async () => ({ email, providerData, metadata: { creationTime: new Date().toUTCString() } }),
+    };
+    await track({ method: 'POST', headers: { 'user-agent': UA, authorization: 'Bearer t' }, body: { type: 'signup', source: 'x', landing: 'home' } }, mockRes(), { db, auth });
+    return Object.keys(db.writes.find((w) => w.name === 'analyticsDaily').data.byReg);
+  };
+  assert.deepEqual(await counted([{ providerId: 'google.com' }], 'a@example.com'), ['signup_google']);
+  assert.deepEqual(await counted([{ providerId: 'twitter.com' }], null), ['signup_x']);
+  assert.deepEqual(await counted([{ providerId: 'password' }], 'a@example.com'), ['signup_email']);
+  assert.deepEqual(await counted([], null), ['signup_other']);
+});
