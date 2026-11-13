@@ -100,7 +100,7 @@ export const DropPanel: React.FC<{
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.35 }}>
                 {`かけらを1つ使って${what}を見る`}
                 {/* 残りの数（2026-11-13 TAKASHI「かけら使うのボタンにかけらの残数表示して」） */}
-                <span style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#5a4a22' }}>いまの月のかけら：のこり{drops.balance}個</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#5a4a22' }}>月のかけら：残り{drops.balance}個</span>
               </span>
             </span>
           )}
