@@ -77,7 +77,7 @@ export const subjectFor = (date) => `🌙【月と蓮】本日の運勢＆LINE�
 const SITE = 'https://www.tsuki-to-ren.com';
 const GOLD = '#e2c074';
 
-const REL_CODES = { '片思い中': 'k', '両思い・交際中': 'r', '交際中': 'r', '復縁したい': 'f', '結婚・夫婦': 'm', '複雑愛・秘密の恋': 'c' };
+const REL_CODES = { '片思い中': 'k', '片想いされ中': 'h', '両思い・交際中': 'r', '交際中': 'r', '復縁したい': 'f', '結婚・夫婦': 'm', '複雑愛・秘密の恋': 'c' };
 
 /**
  * The "本日の詳細鑑定を見る" link: carries the same inputs the mail was computed from, in the short keys the app's
