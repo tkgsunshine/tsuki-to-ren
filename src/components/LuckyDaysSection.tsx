@@ -53,7 +53,7 @@ const labelsOf = (marks: LuckMark[] | undefined): string[] => {
 
 const FALLBACK_LABEL = '運気が追い風';
 // 2人の最高シンクロ日のタグは日ごとに出さず、決め打ちの一式を一覧の上に1回だけ出す（2026-11-10 TAKASHI「ほぼ一緒だから全部1か所に」）。
-// 実際に重なる星は日によって違う（3000組の試算で1日平均3.1個）ので、「日によって重なり方は変わります」を添える。日の選び方・点数は変えない。
+// 実際に重なる星は日によって違う（3000組の試算で1日平均3.1個）。注記「※日によって重なり方は変わります」は2026-11-13 TAKASHI指示で削除。日の選び方・点数は変えない。
 const PAIR_FIXED_LABELS: string[] = (['love', 'tentoku', 'kango', 'shigo', 'teio', 'kenroku', 'seiki'] as LuckMark[]).map((k) => LUCK_MARK_LABELS[k]);
 
 const chipStyle: React.CSSProperties = {
@@ -176,7 +176,6 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
               <span style={{ fontSize: '0.74rem', color: '#f3efe6', fontWeight: 'bold' }}>シンクロ日に重なる星</span>
               <Chips labels={PAIR_FIXED_LABELS} />
-              <span style={{ fontSize: '0.68rem', color: '#bfb8a8' }}>※日によって重なり方は変わります</span>
             </div>
           )}
           <DayList days={pairDays} locked={pairLocked} showPair myLabel={myLabel} oppLabel={oppLabel} onLockClick={onPairLockClick || onLockClick} lockWord={lockWord} />
