@@ -8,6 +8,7 @@ import { toPerson } from '../utils/coupleReading';
 import { CoupleReadingList } from './CoupleReadingList';
 import { DropBalance, DropPanel, MoreClose, MorePeek, OPEN_ROW, OPEN_WRAP, justOpened } from './CoupleDropPanel';
 import { mbtiOptions } from '../constants/mbti';
+import { ResultSection } from './ResultSection';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 
 // 「二人の相性100」（2026-11-12 TAKASHI決定）。結果画面（お相手あり）の欄。
@@ -166,11 +167,9 @@ export const CoupleHundredSection: React.FC<Props> = ({
   ]);
 
   return (
-    <div id="couple-hundred" className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-      <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', margin: 0 }}>
-        <Crown size={16} />
-        二人の相性100
-      </h2>
+    // 大見出しはカードの外（ResultSection、2026-11-13 TAKASHI「大タイトルは枠外にして統一」）。id は見出しごとスクロールで見せるため section 側
+    <ResultSection id="couple-hundred" title="二人の相性100" icon={<Crown />}>
+    <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
       {/* 2つのタブの紹介（2026-11-13 TAKASHI「二人の相性100の下に、MBTIと本格について紹介文」） */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.78rem', lineHeight: 1.7, color: '#d8d2c6' }}>
         <p style={{ margin: 0 }}>二人の相性を、2つの見方で100項目読み解きます。</p>
@@ -299,5 +298,6 @@ export const CoupleHundredSection: React.FC<Props> = ({
         ※ 順位は、MBTIの4文字の組み合わせと二人のMBTIの相性をもとにした月と蓮の見立てです。
       </span>}
     </div>
+    </ResultSection>
   );
 };
