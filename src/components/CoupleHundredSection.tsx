@@ -184,9 +184,10 @@ export const CoupleHundredSection: React.FC<Props> = ({
           return (
             <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setTab(k)} style={{
               flex: 1, padding: '0.6rem 0.25rem 0.55rem', cursor: 'pointer', background: 'none', border: 'none',
-              borderBottom: `3px solid ${on ? '#f5d77a' : 'transparent'}`, marginBottom: '-1px',
+              // 選んでいるタブは金ではなく、薄紫（金は月のかけら・順位の色なので分ける。2026-11-13 TAKASHI「ここが金じゃなくて色変えて」）
+              borderBottom: `3px solid ${on ? '#b79cff' : 'transparent'}`, marginBottom: '-1px',
               fontSize: '0.86rem', fontWeight: on ? 'bold' : 'normal',
-              color: on ? '#f5d77a' : 'rgba(232, 226, 212, 0.55)', transition: 'color 0.2s, border-color 0.2s'
+              color: on ? '#e2d6ff' : 'rgba(232, 226, 212, 0.55)', transition: 'color 0.2s, border-color 0.2s'
             }}>{label}</button>
           );
         })}
@@ -236,7 +237,8 @@ export const CoupleHundredSection: React.FC<Props> = ({
           const hidden = RANK_TOPICS.filter((t) => t.category === cat).length - list.length;
           return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            <span style={{ fontSize: '0.8rem', color: '#d4af37', fontWeight: 'bold' }}>● {RANK_CATEGORY_LABELS[cat]}</span>
+            {/* ジャンル名は金でなく薄紫（金は月のかけら・順位の色。2026-11-13 TAKASHI） */}
+            <span style={{ fontSize: '0.8rem', color: '#c9b6ff', fontWeight: 'bold', marginTop: '0.35rem' }}>● {RANK_CATEGORY_LABELS[cat]}</span>
             {list.map((t) => {
               const access = rankAccess(t.no);
               const r = results.get(t.no);
