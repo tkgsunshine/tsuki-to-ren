@@ -174,9 +174,11 @@ export const ageBand = (birth: string, now = new Date()): string => {
 };
 
 /** One fortune run from the input form. The visit's first one also sends the person's gender, age band and MBTI (not the birth date). */
-export const trackFortune = (me?: { birth: string; gender: string; mbti: string }) => {
+// 恋の状況（入力画面の選択肢）→ 1文字。お相手なしは 'n'。api/_lib/analytics.js の REL_KEYS と合わせる
+const REL_CODE: Record<string, string> = { '片想い中': 'k', '片思い中': 'k', '片想いされ中': 'h', '両思い・交際中': 'r', '復縁したい': 'f', '結婚・夫婦': 'm', '複雑愛・秘密の恋': 'c' };
+export const trackFortune = (me?: { birth: string; gender: string; mbti: string; rel?: string }) => {
   const first = firstInSession('fortune');
-  const attr: Record<string, string> = first === '1' && me ? { g: me.gender, a: ageBand(me.birth), m: me.mbti } : {};
+  const attr: Record<string, string> = first === '1' && me ? { g: me.gender, a: ageBand(me.birth), m: me.mbti, r: me.rel ? (REL_CODE[me.rel] || 'u') : 'n' } : {};
   void send({ type: 'fortune', first, ...attr, ...current() });
 };
 
@@ -188,8 +190,30 @@ export const trackFortune = (me?: { birth: string; gender: string; mbti: string 
  * auth_open  = the sign-in window opened for someone not signed in
  */
 export type RegPlace = 'top' | 'bar' | 'lock' | `${'card' | 'modal'}_${'email' | 'google' | 'x'}`;
+// このブラウザで一度でも会員としてログインしたことがあるか（ログアウトしても消さない）。
+// 入り直しの「登録を始めた」を、新しく登録する人と分けて数えるため（2026-11-13〜）
+const EVER_MEMBER_KEY = 'hasu_ever_member';
+export const markEverMember = () => write(local(), EVER_MEMBER_KEY, '1');
+const everMember = () => {
+  try { return local()?.getItem(EVER_MEMBER_KEY) === '1'; } catch { return false; }
+};
 export const trackRegStep = (type: 'reg_view' | 'reg_click' | 'reg_submit' | 'auth_open', place?: RegPlace) => {
-  void send({ type, ...current(), ...(place ? { place } : {}) });
+  // reg_submit: first = 訪問で最初の1回（同じ人が押し直しても1人）、ret = 前に会員だったブラウザ（入り直し）
+  const extra: Record<string, string> = type === 'reg_submit' ? { first: firstInSession('reg_submit'), ret: everMember() ? '1' : '0' } : {};
+  void send({ type, ...current(), ...(place ? { place } : {}), ...extra });
+};
+
+/** 登録・ログインが失敗した理由（方法_理由）。/admin の「鑑定から会員登録まで」に出す */
+export type RegError = 'google_cancel' | 'google_network' | 'google_inapp' | 'google_other' | 'x_cancel' | 'x_network' | 'x_other'
+  | 'email_send' | 'email_link' | 'redirect';
+export const trackRegError = (place: RegError) => {
+  void send({ type: 'reg_error', place, ...current() });
+};
+/** Firebase のエラーコード → RegError */
+export const regErrorFrom = (method: 'google' | 'x', code: string): RegError => {
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request' || code === 'auth/user-cancelled') return `${method}_cancel`;
+  if (code === 'auth/network-request-failed' || code === 'auth/timeout') return `${method}_network`;
+  return `${method}_other`;
 };
 
 export type ShareChannel = 'x' | 'line' | 'link' | 'image';

@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { PurchaseTerms } from './PurchaseTerms';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
-import { trackLockView, trackRegStep } from '../services/analytics';
-import { Calendar, Download, X, Heart, Smartphone, Share } from 'lucide-react';
-import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
+import { handleSignInError } from '../utils/signInGuide';
+import { trackLockView, trackRegError, trackRegStep } from '../services/analytics';
+import { Calendar, Download, X, Heart, Smartphone, Share, MessageCircle } from 'lucide-react';
+import { ResultSection } from './ResultSection';
+import { MoonMark, PillarsMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
 import { useBackForwardReset } from '../utils/useBackForwardReset';
 import type { FortuneResult } from '../utils/fortuneEngine';
@@ -16,6 +18,7 @@ import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showFieldError } from './AppDialog';
 import { saveImageBlob } from '../utils/saveImage';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
+import { getMbtiColor } from '../utils/mbtiColor';
 import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
 
 /** 守護カラーの値を、色名ごとにその色の文字で出す（黒・紺は白い光で縁取って読ませる） */
@@ -35,6 +38,7 @@ import { SelfReadingCard } from './SelfReadingCard';
 import { LuckyDaysSection } from './LuckyDaysSection';
 import type { ReferralStatus } from '../services/referral';
 import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
+import { GuardianSummonFx } from './GuardianSummonFx';
 import MbtiQuizModal from './MbtiQuizModal';
 import { CoupleHundredSection } from './CoupleHundredSection';
 import type { CoupleAccess } from './CoupleHundredSection';
@@ -419,14 +423,6 @@ const ScoreLineChart = ({ items, locked, range }: { items: { key: string; label:
   );
 };
 
-const getMbtiColor = (mbtiCode: string) => {
-  const code = (mbtiCode || '').toUpperCase();
-  if (code.includes('N') && code.includes('F')) return '#6fb08f'; // Emerald Green
-  if (code.includes('N') && code.includes('T')) return '#b9a3d6'; // Purple
-  if (code.includes('S') && code.includes('J')) return '#5d9fc0'; // Blue
-  return '#e6b85c'; // Explorer Gold
-};
-
 const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
   const code = (mbtiCode || '').toUpperCase();
   // Group detection
@@ -566,6 +562,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onOpenCoupleTopic
 }) => {
   const [mbtiQuizFor, setMbtiQuizFor] = useState<'self' | 'partner' | null>(null);
+  // 4つの質問で16タイプを決めて鑑定し直したあと、同じ場所（このカードがあったところ）に戻す。
+  // カードは決めると消えるので、カードの直後の目印が、カードがあった高さに来るようにずらす
+  const mbtiCardRef = useRef<HTMLDivElement>(null);
+  const afterMbtiCardRef = useRef<HTMLDivElement>(null);
+  const mbtiAnchorTopRef = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const before = mbtiAnchorTopRef.current;
+    if (before === null) return;
+    mbtiAnchorTopRef.current = null;
+    const el = afterMbtiCardRef.current;
+    if (!el) return;
+    const delta = el.getBoundingClientRect().top - before;
+    if (delta) window.scrollBy(0, delta);
+  }, [renResult, tsukiResult]);
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [registeringEmail, setRegisteringEmail] = useState(false);
@@ -573,7 +583,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // サブスク登録が完了した瞬間に、お相手のトリセツ（有料で解放される最初の部分）へ移動する。
   // トリセツが無い鑑定（お相手なし）のときは、鑑定結果の先頭へ戻す
   const resultTopRef = useRef<HTMLDivElement>(null);
-  const torisetsuRef = useRef<HTMLDivElement>(null);
+  const torisetsuRef = useRef<HTMLElement>(null);
   const wasSubscribedRef = useRef(isSubscribed);
   const [showWelcomePremium, setShowWelcomePremium] = useState(false);
   useEffect(() => {
@@ -585,8 +595,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           torisetsuRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
           return;
         }
-        const mainEl = document.querySelector('.main-content') as HTMLElement | null;
-        if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
         resultTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 150);
@@ -659,22 +667,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
     };
 
     const handleWindowScroll = () => checkScroll(window);
-    const mainEl = document.querySelector('.main-content') as HTMLElement;
-    const handleMainScroll = () => {
-      if (mainEl) checkScroll(mainEl);
-    };
-
     window.addEventListener('scroll', handleWindowScroll, { passive: true });
-    if (mainEl) {
-      mainEl.addEventListener('scroll', handleMainScroll, { passive: true });
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handleWindowScroll);
-      if (mainEl) {
-        mainEl.removeEventListener('scroll', handleMainScroll);
-      }
-    };
+    return () => window.removeEventListener('scroll', handleWindowScroll);
   }, []);
 
   const handleDismissA2hsBanner = (e: React.MouseEvent) => {
@@ -1001,9 +995,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   }, [activeResult.baseScore, activeResult.dailyScore]);
 
   useEffect(() => {
-    const mainEl = document.querySelector('.main-content');
-    if (!mainEl) return;
-
     const handleScroll = () => {
       if (!myAstrologyRef.current) return;
       const rect = myAstrologyRef.current.getBoundingClientRect();
@@ -1011,9 +1002,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setIsPastGuardian(isPast);
     };
 
-    mainEl.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => mainEl.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const registerCardRef = React.useRef<HTMLDivElement>(null);
@@ -1263,6 +1254,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setEmailSent(true);
     } catch (err: any) {
       console.error('Registration email error:', err);
+      trackRegError('email_send');
       const detail = err?.code ? ` (${err.code}: ${err.message})` : '';
       showAlert(`認証メールの送信に失敗しました。${detail}`);
     } finally {
@@ -1512,42 +1504,72 @@ export const ResultView: React.FC<ResultViewProps> = ({
         background: 'linear-gradient(135deg, rgba(30, 25, 55, 0.85) 0%, rgba(13, 18, 27, 0.95) 100%)',
         boxShadow: '0 12px 35px rgba(0,0,0,0.6), 0 0 25px rgba(226,192,116,0.1)'
       }}>
-        {/* Pair Name Tag */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.45rem',
-          fontSize: '0.85rem',
-          color: '#f2e2b3',
-          background: 'linear-gradient(90deg, rgba(226,192,116,0.15) 0%, rgba(159, 134, 192,0.15) 100%)',
-          border: '1px solid rgba(226,192,116,0.4)',
-          borderRadius: '20px',
-          padding: '0.4rem 1.1rem',
-          width: 'fit-content',
-          margin: '0 auto',
-          fontWeight: 'bold',
-          letterSpacing: '0.03em',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-        }}>
-          <Heart size={14} style={{ fill: '#f2e2b3', color: '#f2e2b3' }} />
-          <span>{hasOpponent ? `${myName} × ${oppNickname}` : `${myName} の全運勢`}</span>
-        </div>
+        {/* 名前の見出し（C案）: 二人を左右に、真ん中に月の紋。一人で占うときは月の紋＋名前 */}
+        {(() => {
+          const me = myName || 'あなた';
+          const opp = oppNickname;
+          const nameSize = (n: string) => (n.length >= 9 ? '0.9rem' : n.length >= 6 ? '1.02rem' : '1.2rem');
+          const labelStyle: React.CSSProperties = {
+            display: 'block',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.6rem',
+            fontWeight: 500,
+            color: 'rgba(226, 192, 116, 0.65)',
+            letterSpacing: '0.12em',
+            marginBottom: '0.1rem'
+          };
+          const nameStyle = (n: string): React.CSSProperties => ({
+            fontFamily: 'var(--font-serif)',
+            fontWeight: 700,
+            fontSize: nameSize(n),
+            color: '#f6e7bd',
+            letterSpacing: '0.06em',
+            lineHeight: 1.3,
+            minWidth: 0,
+            overflowWrap: 'anywhere'
+          });
+          const emblem = (
+            <div aria-hidden="true" style={{
+              width: '40px',
+              height: '40px',
+              flexShrink: 0,
+              borderRadius: '50%',
+              border: '1px solid rgba(226, 192, 116, 0.6)',
+              display: 'grid',
+              placeItems: 'center',
+              background: 'radial-gradient(circle, rgba(226,192,116,0.22) 0%, rgba(226,192,116,0) 70%)',
+              boxShadow: '0 0 14px rgba(226, 192, 116, 0.25)'
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M15 3a9 9 0 1 0 6 15.5A8 8 0 0 1 15 3z" fill="#e8c96a" /></svg>
+            </div>
+          );
+          return hasOpponent ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+              <div style={{ ...nameStyle(me), textAlign: 'right' }}><span style={labelStyle}>あなた</span>{me}</div>
+              {emblem}
+              <div style={{ ...nameStyle(opp), textAlign: 'left' }}><span style={labelStyle}>お相手</span>{opp}</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', width: '100%' }}>
+              {emblem}
+              <div style={nameStyle(me)}><span style={labelStyle}>あなたの全運勢</span>{me}</div>
+            </div>
+          );
+        })()}
 
-        {/* 鑑定の方式のバッジ */}
-        <div style={{
-          fontSize: '0.66rem',
-          color: '#e2c074',
-          background: 'rgba(226, 192, 116, 0.08)',
-          border: '1px solid rgba(226, 192, 116, 0.25)',
-          borderRadius: '12px',
-          padding: '0.25rem 0.65rem',
-          margin: '0 auto -0.1rem',
-          textAlign: 'center',
-          fontWeight: '600',
-          letterSpacing: '0.02em'
-        }}>
-          四柱推命・九星気学・16タイプから読み解く鑑定
+        {/* 鑑定の方式: 3つの小さな札 */}
+        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '0.4rem', margin: '0 auto -0.1rem' }}>
+          {['四柱推命', '九星気学', '16タイプ'].map((m) => (
+            <span key={m} style={{
+              fontSize: '0.64rem',
+              color: '#e2c074',
+              border: '1px solid rgba(226, 192, 116, 0.3)',
+              borderRadius: '4px',
+              padding: '0.12rem 0.45rem',
+              fontWeight: 600,
+              letterSpacing: '0.04em'
+            }}>{m}</span>
+          ))}
         </div>
         
         {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}
@@ -1822,6 +1844,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </>
                 )}
               </div>
+              <GuardianSummonFx />
 
               <div className="guardian-hero-caption">
                 {/* 称号（タイプを覚えるための呼び名）。枠なしの金の文字＋下に短い線 */}
@@ -1981,6 +2004,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </>
                   )}
                 </div>
+                <GuardianSummonFx />
 
                 <div className="guardian-hero-caption">
                   {/* 称号（タイプを覚えるための呼び名）。枠なしの金の文字＋下に短い線 */}
@@ -2081,12 +2105,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       )}
 
       {/* Free Summary Section (Fully Visible) */}
+      {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる。大見出しはカードの外（ResultSection） */}
+      <ResultSection title={hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`} icon={<MoonMark />}>
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
-        <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-          <MoonMark size={16} />
-          {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる */}
-          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
-        </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
           {(() => {
             const text = formatAppraisalText(activeResult.summary);
@@ -2105,6 +2126,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           })()}
         </p>
       </div>
+      </ResultSection>
 
       {/* 16タイプが決まっていない鑑定（必須にする前の入力など）: かんたん質問で決めて鑑定し直す */}
       {!sharedBy && onSetMbti && (() => {
@@ -2114,7 +2136,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         const who = needSelf ? 'self' : 'partner';
         const whoName = who === 'self' ? 'あなた' : san(oppNickname || 'お相手');
         return (
-          <div style={{ background: 'rgba(226, 192, 116, 0.07)', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '14px', padding: '0.85rem 0.95rem', marginBottom: '1rem' }}>
+          <div ref={mbtiCardRef} style={{ background: 'rgba(226, 192, 116, 0.07)', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '14px', padding: '0.85rem 0.95rem', marginBottom: '1rem' }}>
             <div className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.3rem' }}>
               {whoName}の16タイプがまだ決まっていません
             </div>
@@ -2127,12 +2149,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         );
       })()}
+      {!sharedBy && onSetMbti && <div ref={afterMbtiCardRef} aria-hidden="true" />}
       {mbtiQuizFor && onSetMbti && (
         <MbtiQuizModal
           subject={mbtiQuizFor}
           name={san(oppNickname || 'お相手')}
           onClose={() => setMbtiQuizFor(null)}
-          onDone={(t) => { const w = mbtiQuizFor; setMbtiQuizFor(null); onSetMbti(w, t); }}
+          onDone={(t) => { const w = mbtiQuizFor; mbtiAnchorTopRef.current = mbtiCardRef.current ? mbtiCardRef.current.getBoundingClientRect().top : null; setMbtiQuizFor(null); onSetMbti(w, t); }}
         />
       )}
 
@@ -2141,19 +2164,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div ref={myAstrologyRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {/* 2枚目（月「恋愛運を開く鍵」／蓮「うまくいくためのアドバイス」）は表示しない（TAKASHI判断 2026-11-06） */}
           {activeResult.topics.slice(0, 1).map((topic) => (
-            <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
-              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                {/* 見出しは「今日の恋の過ごし方」（内容が分かる名前に。旧「月/蓮から〇〇さんへ」）。絵文字はキャラのアイコンに置き換える */}
-                <CharHeadingIcon char={topic.title.startsWith('🔮') ? '蓮' : '月'} size={36} />
-                {topic.title.replace(/^(🌙|🔮)\s*/u, '')}
-              </h3>
-              <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
+            // 見出しは「今日の恋の過ごし方」（内容が分かる名前に。旧「月/蓮から〇〇さんへ」）。大見出しはカードの外（ResultSection）、キャラの顔はカードの中の文の横
+            <ResultSection key={topic.title} title={topic.title.replace(/^(🌙|🔮)\s*/u, '')} icon={<Heart />}>
+            <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+              <CharHeadingIcon char={topic.title.startsWith('🔮') ? '蓮' : '月'} size={36} />
+              <p className="font-serif" style={{ flex: 1, minWidth: 0, fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {/* 未登録・無料会員は1行だけ見せ、2行目以降をぼかす（TAKASHI判断 2026-11-07） */}
                 {readingOpen
                   ? formatAppraisalText(topic.text)
                   : <RegisterMosaicText text={formatAppraisalText(topic.text)} visibleLines={1} headChars={40} onUnlock={handleReadingLockClick} />}
               </p>
             </div>
+            </ResultSection>
           ))}
         </div>
 
@@ -2185,6 +2207,16 @@ export const ResultView: React.FC<ResultViewProps> = ({
         )}
 
         {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
+      {/* 大見出しはカードの外（ResultSection）。LINEの緑ロゴはカードの中の「推奨送信タイミング」に残す */}
+      <ResultSection
+        title={hasOpponent ? '本日のLINE吉時間 ＆ 運勢' : '本日の開運黄金時間 ＆ 運勢'}
+        icon={<MessageCircle />}
+        aside={(
+          <span style={{ fontSize: '0.65rem', color: '#a8d3b0', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
+            毎日0時更新
+          </span>
+        )}
+      >
       <div className="glass-panel" style={{
         padding: '1.15rem',
         display: 'flex',
@@ -2194,19 +2226,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
         background: 'linear-gradient(135deg, rgba(14, 19, 27, 0.75) 0%, rgba(12, 16, 23, 0.85) 100%)',
         boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 199, 85, 0.1)'
       }}>
-        {/* Header with Official LINE Logo */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-            <LineLogoIcon size={22} />
-            <span style={{ fontSize: '0.92rem', fontWeight: '800', color: '#ffffff', letterSpacing: '0.02em' }}>
-              {hasOpponent ? '本日のLINE吉時間 ＆ 運勢' : '本日の開運黄金時間 ＆ 運勢'}
-            </span>
-          </div>
-          <span style={{ fontSize: '0.65rem', color: '#a8d3b0', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
-            毎日0時更新
-          </span>
-        </div>
-
         {/* HERO CARD: LINE 吉時間 (Full Width Spacious Layout) */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(6, 199, 85, 0.16) 0%, rgba(0, 0, 0, 0.5) 100%)',
@@ -2390,13 +2409,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         </div>
       </div>
+      </ResultSection>
 
         {/* 5 Detailed Appraisal Topics（LINE吉時間の下・最高シンクロ日の上。TAKASHI判断 2026-11-10） */}
-        <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-          <MoonMark size={18} />
-          {hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : `${san(myName, 'あなた')}の深層鑑定結果`}
-        </h2>
-
+        <ResultSection title={hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : `${san(myName, 'あなた')}の深層鑑定結果`} icon={<PillarsMark />}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {detailedTopics.map((topic, index) => {
           // 「惹かれ合うポイント＆地雷行動3選」「二人のこれから」はプレミアム限定（無料会員も冒頭の1文だけ）。他の項目は無料会員なら全文。
           const premiumOnly = hasOpponent && (topic.title.includes('惹かれ合うポイント') || topic.title.includes('二人のこれから'));
@@ -2485,7 +2502,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       ✉️ 認証メールを送信しました！
                     </div>
                     「<strong>{email}</strong>」宛にログイン認証リンクを送信しました。<br />
-                    届いたメール内の「月と蓮にログイン」リンクをタップして会員登録を完了させてください。
+                    届いたメールのリンクをタップすると、会員登録が完了します。
+                    <div style={{ marginTop: '0.55rem', fontSize: '0.75rem', color: '#c9d8cf', lineHeight: 1.65 }}>
+                      数分たっても届かないときは、<strong>迷惑メールフォルダ</strong>も見てください。<br />
+                      届かないときは、下の「Googleで登録」が早くて確実です。
+                    </div>
                   </div>
                 ) : (
                   <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -2524,6 +2545,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           await signInWithGoogle();
                         } catch (e) {
                           console.error(e);
+                          const msg = handleSignInError('google', e);
+                          if (msg) showAlert(msg);
                         }
                       }}
                       style={{
@@ -2553,6 +2576,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           await signInWithX();
                         } catch (e) {
                           console.error(e);
+                          const msg = handleSignInError('x', e);
+                          if (msg) showAlert(msg);
                         }
                       }}
                       style={{
@@ -2602,6 +2627,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </React.Fragment>
           );
         })}
+        </div>
+        </ResultSection>
 
         {/* 最高シンクロ日・恋愛運MAX日（深層鑑定結果のすぐ下。LINEの吉時間の箱からは外した（TAKASHI判断 2026-11-10）。根拠・珍しさは全員に、日付は月額プレミアムか、そのお相手の買い切り） */}
         <LuckyDaysSection
@@ -2698,8 +2725,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
         {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
       {activeResult.opponentTorisetsu && (
-        <div ref={torisetsuRef} className="glass-panel" style={{
-          scrollMarginTop: '1rem',
+        <ResultSection ref={torisetsuRef} title={`${san(oppNickname)}の取扱説明書（トリセツ）`} icon={<TorisetsuBookMark />}>
+        <div className="glass-panel" style={{
           padding: '1.25rem',
           display: 'flex',
           flexDirection: 'column',
@@ -2711,13 +2738,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           overflow: 'hidden'
         }}>
           {welcomePremiumBanner}
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
-            <TorisetsuBookMark size={21} style={{ color: 'var(--color-gold)' }} />
-            <h2 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0, whiteSpace: 'nowrap', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {san(oppNickname)}の取扱説明書（トリセツ）
-            </h2>
-          </div>
 
           {/* 2. 絶対NG行動 5選 (Item 1 is visible teaser, Item 2-5 are blurred) */}
           <div style={{ background: 'rgba(207, 90, 67, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(207, 90, 67, 0.2)', position: 'relative' }}>
@@ -3252,6 +3272,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             )}
           </div>
         </div>
+        </ResultSection>
       )}
 
         {/* 6-Axis Compatibility Radar Chart with Monetization Lock (二人の相性なので、お相手ありの鑑定だけ) */}
@@ -3273,12 +3294,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       />
       )}
 
-        {/* 10. Future Timeline Schedule Preview */}
+        {/* 10. Future Timeline Schedule Preview（大見出しはカードの外＝ResultSection） */}
+        <ResultSection title={hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : `${san(myName, 'あなた')}の未来予測スケジュール`} icon={<Calendar />}>
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-            <Calendar size={16} />
-            {hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : `${san(myName, 'あなた')}の未来予測スケジュール`}
-          </h2>
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
@@ -3571,8 +3589,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
           )}
         </div>
-
-        
+        </ResultSection>
 
         {/* Reset Button (Diagnose Again) */}
         {onReset && (

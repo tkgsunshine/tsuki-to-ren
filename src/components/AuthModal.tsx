@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { X as CloseIcon, LogOut, CheckCircle, ShieldCheck, Mail, User } from 'lucide-react';
 import { MoonMark } from './icons/BrandIcons';
 import { signInWithGoogle, signInWithX, sendEmailMagicLink, logOutUser, accountNeedsEmail, sendAddEmailLink, isGuestAccount, type UserProfile } from '../services/firebase';
-import { trackRegStep } from '../services/analytics';
+import { trackRegError, trackRegStep } from '../services/analytics';
+import { handleSignInError } from '../utils/signInGuide';
 
 interface AuthModalProps {
   currentUser: UserProfile | null;
@@ -66,6 +67,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
       setEmailSent(true);
     } catch (err: any) {
       console.error('Email signin error:', err);
+      trackRegError('email_send');
       const detail = err?.code ? ` (${err.code}: ${err.message})` : '';
       setErrorMsg(`認証メールの送信に失敗しました。${detail}`);
     } finally {
@@ -85,16 +87,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
       }
     } catch (err: any) {
       console.error('Google Sign-in error:', err);
-      const code = err?.code || '';
-      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-        setErrorMsg(null);
-      } else if (code === 'auth/popup-blocked') {
-        setErrorMsg('ポップアップが制限されています。画面の指示に従ってログインを完了してください。');
-      } else if (code === 'auth/network-request-failed') {
-        setErrorMsg('通信環境が不安定です。ネットワーク接続をご確認ください。');
-      } else {
-        setErrorMsg('Googleログインに失敗しました。メールアドレスでの登録もお試しいただけます。');
-      }
+      setErrorMsg(handleSignInError('google', err));
     } finally {
       setLoading(null);
     }
@@ -112,16 +105,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
       }
     } catch (err: any) {
       console.error('X Sign-in error:', err);
-      const code = err?.code || '';
-      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-        setErrorMsg(null);
-      } else if (code === 'auth/operation-not-allowed' || code === 'auth/configuration-not-found' || code === 'auth/invalid-api-key') {
-        setErrorMsg('X（旧Twitter）連携は現在準備中です。Googleアカウントまたはメールアドレスでご登録ください。');
-      } else if (code === 'auth/popup-blocked') {
-        setErrorMsg('ポップアップが制限されています。画面の指示に従ってログインを完了してください。');
-      } else {
-        setErrorMsg('Xログインに失敗しました。Googleまたはメール登録をお試しください。');
-      }
+      setErrorMsg(handleSignInError('x', err));
     } finally {
       setLoading(null);
     }
@@ -448,7 +432,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ currentUser, onClose, onAu
                   ✉️ 認証メールを送信しました！
                 </div>
                 「<strong>{emailInput}</strong>」宛にログイン認証リンクを送信しました。<br />
-                メール内の「月と蓮にログイン」をタップすると自動的に登録・解放が完了します。
+                届いたメールのリンクをタップすると、自動的に登録・解放が完了します。
+                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#c9d8cf', lineHeight: 1.65 }}>
+                  数分たっても届かないときは、<strong>迷惑メールフォルダ</strong>も見てください。届かないときは、上の「Googleで登録」が早くて確実です。
+                </div>
               </div>
             ) : (
               <form onSubmit={handleEmailSignIn} style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>

@@ -43,7 +43,7 @@ import { LpExitSurvey } from './components/LpExitSurvey';
 import { ReferralCodeEntry } from './components/ReferralInvite';
 import { captureRefFromUrl, completeRef, fetchMyReferral, getPendingRef, hasSentRef, setPendingRef as savePendingRef, type ReferralStatus } from './services/referral';
 import { signInWithCustomToken } from 'firebase/auth';
-import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, isReturningFromRedirect, lastRedirectFailed, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
@@ -94,6 +94,14 @@ interface InitialRoute {
   settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news';
   compatibilityPair: { myMbti: string; oppMbti: string } | null;
 }
+
+// メールのリンクでログインできなかったときの案内（Firebase のエラーコードごと）
+const emailLinkFailMessage = (code?: string): string =>
+  code === 'auth/invalid-action-code' || code === 'auth/expired-action-code'
+    ? 'このログイン用のリンクは、期限が切れたか、すでに使われています。お手数ですが、もう一度メールを送ってください（届いたメールのうち一番新しいものを開いてください）。'
+    : code === 'auth/network-request-failed'
+      ? '通信が不安定なため、ログインできませんでした。電波のよいところで、もう一度メールのリンクを開いてください。'
+      : 'メールのリンクでログインできませんでした。お手数ですが、もう一度メールを送るか、Googleでの登録をお試しください。';
 
 const IS_PRODUCTION_SITE = typeof window !== 'undefined' && window.location.hostname.endsWith('tsuki-to-ren.com');
 
@@ -217,11 +225,18 @@ function App() {
       return rankTopicFromUtm(new URLSearchParams(INITIAL_SEARCH).get('utm_content'));
     }
   });
+  // 下のタブで離れた画面のスクロール位置（画面ごと）。タブで戻ってきたときに、離れたときの位置へ戻す
+  const tabScrollRef = useRef<Record<string, number>>({});
   const handleTabChange = (tab: string) => {
     setInputPrefill(null);
     const cur = readNav();
     const next: PageFields = { tab, slug: null, subView: 'main', legal: false, flowStep: tab === 'home' ? 'input' : cur.flowStep };
-    if (pageKey(next) !== pageKey(cur)) pushNav(next);
+    const curKey = pageKey(cur);
+    const nextKey = pageKey(next);
+    tabScrollRef.current[curKey] = Math.max(window.scrollY || 0, document.documentElement.scrollTop || 0);
+    if (nextKey !== curKey) pushNav(next);
+    // 別のタブから戻ってきたときは離れたときの位置へ。今いるタブをもう一度押したとき・「恋愛診断」（入力画面から始め直す）は一番上
+    const restoreTop = nextKey !== curKey && tab !== 'home' ? (tabScrollRef.current[nextKey] ?? 0) : 0;
 
     setActiveTab(tab);
     setIsChatOpen(false);
@@ -239,7 +254,9 @@ function App() {
       setSharedView(null);
       setSharedTeaser(null);
     }
-    scrollMainTo(0);
+    scrollMainTo(restoreTop);
+    // 描画のあとでないとページの高さが足りず届かないので、描画のあとにもう一度
+    if (restoreTop > 0) requestAnimationFrame(() => requestAnimationFrame(() => scrollMainTo(restoreTop)));
   };
   const [flowStep, setFlowStep] = useState<'input' | 'loading' | 'result'>('input');
   // 共有リンクから来た人に見せる、共有した人の鑑定結果（URLは読んだあと消す）。
@@ -294,6 +311,8 @@ function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showLegalPage, setShowLegalPage] = useState(initialRoute.legal);
   const [showEmailPromptModal, setShowEmailPromptModal] = useState(false);
+  // Google・X のログインから戻ってきて、結果を受け取っている間（画面に「ログインしています」）
+  const [finishingSignIn, setFinishingSignIn] = useState(false);
   const [promptEmailInput, setPromptEmailInput] = useState('');
   const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
 
@@ -310,15 +329,23 @@ function App() {
       }
     } catch {}
 
-    // Defer network-based Firebase Auth subscription to idle time after critical rendering completes
+    // Defer network-based Firebase Auth subscription to idle time after critical rendering completes.
+    // Google・X のログインから戻ってきたときは待たずにすぐ受け取り、終わるまで「ログインしています」を出す
+    // （以前は1秒待ってから受け取り、その間は未登録の画面のままだったので、遅い・失敗したように見えた）
+    const returning = isReturningFromRedirect();
+    if (returning) setFinishingSignIn(true);
+    // 受け取りが終わらないときも、15秒で「ログインしています」を消す（画面が操作できないままにしない）
+    const finishTimer = returning ? setTimeout(() => setFinishingSignIn(false), 15000) : undefined;
     let unsubscribe: (() => void) | undefined;
     const timer = setTimeout(() => {
       checkRedirectAuthResult().then((user) => {
         if (user) {
           setCurrentUser(user);
           setIsRegistered(true);
+        } else if (returning && lastRedirectFailed()) {
+          showAlert('ログインが完了しませんでした。もう一度お試しいただくか、メールアドレスで登録してください。');
         }
-      });
+      }).finally(() => setFinishingSignIn(false));
 
       // Link from "メールアドレスを追加": attach the address to the signed-in account
       if (isAddEmailLink()) {
@@ -347,6 +374,9 @@ function App() {
           setIsRegistered(true);
         } else if (res.needsEmailPrompt) {
           setShowEmailPromptModal(true);
+        } else if (res.failed) {
+          // 以前は何も出さず、未登録の画面のままだった
+          showAlert(emailLinkFailMessage(res.code));
         }
       });
 
@@ -359,10 +389,11 @@ function App() {
           setIsRegistered(false);
         }
       });
-    }, 1000);
+    }, returning ? 0 : 1000);
 
     return () => {
       clearTimeout(timer);
+      if (finishTimer) clearTimeout(finishTimer);
       if (unsubscribe) unsubscribe();
     };
   }, []);
@@ -630,8 +661,9 @@ function App() {
   useEffect(() => {
     // Helper to decode 1-char relationship codes & short params
     const decodeRel = (val: string | null) => {
-      if (!val) return '片思い中';
-      if (val === 'k' || val === 'single' || val === '片思い中') return '片思い中';
+      if (!val) return '片想い中';
+      if (val === 'k' || val === 'single' || val === '片想い中' || val === '片思い中') return '片想い中';
+      if (val === 'h' || val === '片想いされ中') return '片想いされ中';
       if (val === 'r' || val === 'ryoomoi' || val === '交際中' || val === '両思い・交際中') return '両思い・交際中';
       if (val === 'f' || val === 'fukuen' || val === '復縁したい') return '復縁したい';
       if (val === 'm' || val === 'kekkon' || val === '結婚・夫婦') return '結婚・夫婦';
@@ -764,7 +796,7 @@ function App() {
                 lastInput.oBirth || '',
                 lastInput.oMbti || 'UNKNOWN',
                 lastInput.oGender || 'male',
-                lastInput.rel || '片思い中',
+                lastInput.rel || '片想い中',
                 'match',
                 true,
                 lastInput.selectedCharacter,
@@ -782,7 +814,7 @@ function App() {
                 '',
                 'UNKNOWN',
                 'female',
-                lastInput.rel || '片思い中',
+                lastInput.rel || '片想い中',
                 'single',
                 true,
                 lastInput.selectedCharacter,
@@ -924,7 +956,7 @@ function App() {
   // Saves the subscription with "me" from the profile and the chosen partner (null = solo fortune)
   const buildNotifyData = (email: string, partner: SavedPartner | 'keep' | null): EmailSubscriptionData => {
     const opp = partner === 'keep' && notifySub
-      ? { oppName: notifySub.oppName || '', oppBirth: notifySub.oppBirth || '', oppGender: notifySub.oppGender, oppMbti: notifySub.oppMbti || 'UNKNOWN', relationship: notifySub.relationship || '片思い中', mode: 'match' as const }
+      ? { oppName: notifySub.oppName || '', oppBirth: notifySub.oppBirth || '', oppGender: notifySub.oppGender, oppMbti: notifySub.oppMbti || 'UNKNOWN', relationship: notifySub.relationship || '片想い中', mode: 'match' as const }
       : partner && partner !== 'keep'
         ? { oppName: partner.name, oppBirth: partner.birth.replace(/\//g, '-'), oppGender: partner.gender, oppMbti: partner.mbti, relationship: partner.relationship, mode: 'match' as const }
         : { oppName: '', oppBirth: '', oppGender: 'male' as const, oppMbti: 'UNKNOWN', relationship: relationship, mode: 'single' as const };
@@ -1014,7 +1046,7 @@ function App() {
     setEditPartnerBirth('');
     setEditPartnerMbti('UNKNOWN');
     setEditPartnerGender(myGender === 'female' ? 'male' : 'female');
-    setEditPartnerRel('片思い中');
+    setEditPartnerRel('片想い中');
     return true;
   };
 
@@ -1024,7 +1056,7 @@ function App() {
     setEditPartnerBirth(partner.birth);
     setEditPartnerMbti(partner.mbti);
     setEditPartnerGender(partner.gender);
-    setEditPartnerRel(partner.relationship);
+    setEditPartnerRel(partner.relationship === '片思い中' ? '片想い中' : partner.relationship);
   };
 
   // 解放済みのお相手の生年月日を変える確認で「変更する」を押したあと、もう一度保存を通すため
@@ -1201,7 +1233,7 @@ function App() {
     // Gender Validation: Ensure opposite gender combination (Male x Female)
     const validOppGender = partner.gender === myGender ? (myGender === 'female' ? 'male' : 'female') : partner.gender;
     setOppGender(validOppGender);
-    setRelationship(partner.relationship);
+    setRelationship(partner.relationship === '片思い中' ? '片想い中' : partner.relationship);
     setMode('match');
   };
 
@@ -1423,7 +1455,7 @@ function App() {
     setRelationship(data.relationship);
     setMode(data.mode);
     pushProfile(); // the input form has just saved the profile on this device
-    trackFortune({ birth: data.myBirth, gender: data.myGender, mbti: data.myMbti });
+    trackFortune({ birth: data.myBirth, gender: data.myGender, mbti: data.myMbti, rel: data.mode === 'match' && data.oppBirth ? data.relationship : '' });
     if (data.mode === 'match' && data.oppBirth) {
       autoSavePartner({
         name: data.oppName || 'お相手',
@@ -1474,7 +1506,7 @@ function App() {
         setSavedPartners(list.map(p => (isSamePartner(p, r.oName, r.oBirth) && (!p.mbti || p.mbti === 'UNKNOWN') ? { ...p, mbti } : p)));
       }
     }
-    startDiagnosis(next.mName, next.mBirth, next.mMbti, next.mGender, next.oName, next.oBirth, next.oMbti, next.oGender, next.rel, next.runMode, true, next.selectedCharacter);
+    startDiagnosis(next.mName, next.mBirth, next.mMbti, next.mGender, next.oName, next.oBirth, next.oMbti, next.oGender, next.rel, next.runMode, true, next.selectedCharacter, false, true);
   };
 
   const startDiagnosis = (
@@ -1491,7 +1523,9 @@ function App() {
     skipLoading = false,
     presetCharacter?: 'ren' | 'tsuki',
     // true: 結果を用意するだけで、画面（タブ・履歴・スクロール・キャラ）は変えない（共有リンクを開いたときの前回結果の復元）
-    background = false
+    background = false,
+    // true: 今のスクロール位置のまま結果を差し替える（結果画面の中で16タイプを決めて鑑定し直したとき。位置合わせは ResultView 側）
+    keepScroll = false
   ) => {
     const execute = () => {
       const input = {
@@ -1557,7 +1591,11 @@ function App() {
       } else {
         pushNav({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' }, '/result' + window.location.search);
       }
-      scrollMainTo(0);
+      if (!keepScroll) {
+        scrollMainTo(0);
+        // 新しい結果なので、下のタブで戻ってきたときの位置（前の結果のもの）は使わない
+        delete tabScrollRef.current[pageKey({ tab: 'fortune', slug: null, subView: 'main', legal: false, flowStep: 'result' })];
+      }
       if (pendingLPRef.current) {
         if (!lpReopenRef.current) lpFromMailRef.current = true;
         openPremiumLP(pendingLPRef.current);
@@ -1723,7 +1761,7 @@ function App() {
         opponentBirth: partner?.birth,
         opponentMbti: partner?.mbti,
         opponentGender: partnerGender,
-        relationship: partner?.relationship || '片思い中'
+        relationship: partner?.relationship || '片想い中'
       }, selectedCharacter);
     } catch (e) {
       console.error(e);
@@ -1764,9 +1802,9 @@ function App() {
       '--color-theme-accent': selectedCharacter === 'tsuki' ? '#9f86c0' : '#3a86ab',
       '--shadow-theme-glow': selectedCharacter === 'tsuki' ? '0 0 15px rgba(159, 134, 192, 0.45)' : '0 0 15px rgba(58, 134, 171, 0.45)',
     } as React.CSSProperties}>
-      {/* Dynamic Background Glow Orb (Smooth transition) */}
+      {/* Dynamic Background Glow Orb (Smooth transition)。ページがスクロールしても画面上の同じ位置に出す */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         top: '15%',
         left: '50%',
         transform: 'translateX(-50%)',
@@ -2871,7 +2909,7 @@ function App() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {(editingPartnerId === NEW_PARTNER_ID
-                      ? [...savedPartners, { id: NEW_PARTNER_ID, name: '', birth: '', mbti: 'UNKNOWN', gender: 'male' as const, relationship: '片思い中' }]
+                      ? [...savedPartners, { id: NEW_PARTNER_ID, name: '', birth: '', mbti: 'UNKNOWN', gender: 'male' as const, relationship: '片想い中' }]
                       : savedPartners
                     ).map((partner) => {
                       if (editingPartnerId === partner.id) {
@@ -3868,6 +3906,16 @@ function App() {
         onRegisterFirst={() => setShowAuthModal(true)}
       />
 
+      {/* Google・X から戻ってきて、ログインの結果を受け取っている間 */}
+      {finishingSignIn && (
+        <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, background: 'rgba(8, 10, 20, 0.78)', backdropFilter: 'blur(6px)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
+          <div className="glass-panel" style={{ padding: '1.4rem 1.6rem', borderRadius: '18px', textAlign: 'center', border: '1px solid rgba(226, 192, 116, 0.35)', color: '#f2e2b3', fontSize: '0.9rem', lineHeight: 1.7 }}>
+            <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.7rem', border: '3px solid rgba(226,192,116,0.25)', borderTopColor: '#e2c074', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+            ログインしています…
+          </div>
+        </div>
+      )}
+
       {/* Email Verification Prompt Modal (for cross-browser/device link clicks) */}
       {showEmailPromptModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
@@ -3900,7 +3948,7 @@ function App() {
                   setIsRegistered(true);
                   setShowEmailPromptModal(false);
                 } else {
-                  showAlert('認証に失敗しました。メールアドレスが正しいかご確認ください。');
+                  showAlert(res.code === 'auth/invalid-email' || !res.code ? '認証に失敗しました。メールを送ったときと同じメールアドレスかご確認ください。' : emailLinkFailMessage(res.code));
                 }
               }}
               className="consult-btn font-serif"
