@@ -435,6 +435,58 @@ const LpOpeningGlow: React.FC = () => (
   </div>
 );
 
+// 見比べ用（仮）: ?lpa=b で蓮の花、?lpa=c で満ちる月。決まったら1つに絞る
+const lpOpenVariant = (): 'a' | 'b' | 'c' => {
+  try {
+    const v = new URLSearchParams(window.location.search).get('lpa');
+    return v === 'b' || v === 'c' ? v : 'a';
+  } catch { return 'a'; }
+};
+
+// 案B: 金の蓮の花がひらいて、光になってほどける
+const LOTUS_PETALS = [-60, -30, 0, 30, 60];
+const LpOpeningLotus: React.FC = () => (
+  <div className="lp-open-glow" aria-hidden="true">
+    <div className="lp-lotus-light" />
+    <svg className="lp-lotus" viewBox="-60 -70 120 80" width="150" height="100">
+      {LOTUS_PETALS.map((deg, i) => (
+        <path
+          key={deg}
+          className="lp-lotus-petal"
+          d="M0 0 C -11 -18 -9 -40 0 -58 C 9 -40 11 -18 0 0 Z"
+          transform={`rotate(${deg})`}
+          style={{ animationDelay: `${0.15 + Math.abs(i - 2) * 0.12}s` }}
+        />
+      ))}
+    </svg>
+    {LP_OPEN_SPARKS.slice(0, 8).map((p, i) => (
+      <span
+        key={i}
+        className="lp-open-spark"
+        style={{ left: `${p.x}%`, top: `${p.y + 10}%`, width: `${p.s}px`, height: `${p.s}px`, animationDelay: `${p.d + 0.5}s` }}
+      />
+    ))}
+  </div>
+);
+
+// 案C: 細い三日月が満月まで満ち、その光の輪が広がって月の絵が現れる
+const LP_STARS = [
+  { x: 12, y: 14, d: 0.2 }, { x: 84, y: 10, d: 0.35 }, { x: 22, y: 46, d: 0.5 }, { x: 78, y: 40, d: 0.3 },
+  { x: 50, y: 8, d: 0.45 }, { x: 8, y: 64, d: 0.6 }, { x: 92, y: 62, d: 0.4 }, { x: 36, y: 24, d: 0.55 },
+];
+const LpOpeningMoon: React.FC = () => (
+  <div className="lp-open-glow" aria-hidden="true">
+    <div className="lp-moon-veil" />
+    <div className="lp-moon">
+      <div className="lp-moon-shadow" />
+    </div>
+    <div className="lp-moon-ring" />
+    {LP_STARS.map((p, i) => (
+      <span key={i} className="lp-moon-star" style={{ left: `${p.x}%`, top: `${p.y}%`, animationDelay: `${p.d}s` }} />
+    ))}
+  </div>
+);
+
 export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   isOpen,
   onClose,
@@ -724,7 +776,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               inset: 0,
               background: 'linear-gradient(180deg, rgba(17, 24, 35, 0) 55%, rgba(17, 24, 35, 0.85) 85%, #111823 100%)'
             }} />
-            <LpOpeningGlow />
+            {(() => { const v = lpOpenVariant(); return v === 'b' ? <LpOpeningLotus /> : v === 'c' ? <LpOpeningMoon /> : <LpOpeningGlow />; })()}
             <div className="lp-open-title" style={{ position: 'absolute', left: 0, right: 0, bottom: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>
               <div style={{ fontSize: '0.72rem', color: '#e8b7c7', fontWeight: 'bold', letterSpacing: '0.12em', marginBottom: '0.35rem' }}>
                 月からのご案内
