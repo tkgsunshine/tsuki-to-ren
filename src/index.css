@@ -1591,6 +1591,103 @@ body.chat-keyboard-open .chat-partner-picker {
   .app-header.is-opening > div:not(.opening-glow) { animation: none; }
 }
 
+/* 購入LP（PremiumLPModal）を開いた瞬間の演出。開くたびに1回・約1.8秒。
+   光と粒は pointer-events: none で、閉じるボタン・購入ボタンの操作を邪魔しない */
+.lp-open-card {
+  animation: lp-open-card 0.5s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+.lp-open-hero > img {
+  animation: lp-open-moon 1.6s cubic-bezier(0.22, 0.8, 0.3, 1) 0.1s both;
+}
+.lp-open-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.lp-open-beam {
+  position: absolute;
+  left: 50%;
+  top: -10%;
+  width: 70%;
+  height: 120%;
+  margin-left: -35%;
+  background: linear-gradient(180deg, rgba(255, 244, 214, 0.55) 0%, rgba(226, 192, 116, 0.22) 45%, rgba(226, 192, 116, 0) 80%);
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  filter: blur(8px);
+  opacity: 0;
+  transform-origin: 50% 0;
+  animation: lp-open-beam 1.7s ease-out 0.2s forwards;
+}
+.lp-open-halo {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  width: 90%;
+  aspect-ratio: 1;
+  margin-left: -45%;
+  transform: translateY(-50%) scale(0.3);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 240, 200, 0.5) 0%, rgba(226, 192, 116, 0.2) 35%, rgba(226, 192, 116, 0) 65%);
+  opacity: 0;
+  animation: lp-open-halo 1.6s ease-out 0.35s forwards;
+}
+.lp-open-spark {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff6d8;
+  box-shadow: 0 0 6px 2px rgba(242, 226, 179, 0.85), 0 0 12px 3px rgba(232, 183, 199, 0.35);
+  opacity: 0;
+  animation: lp-open-spark 1.6s ease-out forwards;
+}
+.lp-open-title {
+  animation: lp-open-title 1.2s ease-out 0.55s both;
+}
+.lp-open-rise {
+  animation: lp-open-rise 0.7s ease-out 0.9s both;
+}
+
+@keyframes lp-open-card {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes lp-open-moon {
+  from { opacity: 0.35; transform: scale(1.06); filter: brightness(0.7); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes lp-open-beam {
+  0% { opacity: 0; transform: scaleY(0.4); }
+  35% { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+@keyframes lp-open-halo {
+  0% { opacity: 0; transform: translateY(-50%) scale(0.3); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-50%) scale(1.25); }
+}
+@keyframes lp-open-spark {
+  0% { opacity: 0; transform: translateY(10px) scale(0.4); }
+  30% { opacity: 1; transform: translateY(0) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-28px) scale(0.5); }
+}
+@keyframes lp-open-title {
+  0% { opacity: 0; transform: translateY(6px); filter: blur(6px); }
+  60% { opacity: 1; transform: none; filter: blur(0) drop-shadow(0 0 18px rgba(255, 236, 180, 0.9)); }
+  100% { opacity: 1; transform: none; filter: drop-shadow(0 0 0 rgba(255, 236, 180, 0)); }
+}
+@keyframes lp-open-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-open-glow { display: none; }
+  .lp-open-card,
+  .lp-open-hero > img,
+  .lp-open-title,
+  .lp-open-rise { animation: none; }
+}
+
 /* プレミアム案内の画面イメージ拡大: 「スクロールで全部見れます」の矢印を上下にはねさせる */
 @keyframes shot-scroll-hint {
   0%, 100% { transform: translateY(0); }
