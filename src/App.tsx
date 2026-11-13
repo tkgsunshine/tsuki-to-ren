@@ -613,8 +613,8 @@ function App() {
   useEffect(() => {
     // Helper to decode 1-char relationship codes & short params
     const decodeRel = (val: string | null) => {
-      if (!val) return '片思い中';
-      if (val === 'k' || val === 'single' || val === '片思い中') return '片思い中';
+      if (!val) return '片想い中';
+      if (val === 'k' || val === 'single' || val === '片想い中' || val === '片思い中') return '片想い中';
       if (val === 'h' || val === '片想いされ中') return '片想いされ中';
       if (val === 'r' || val === 'ryoomoi' || val === '交際中' || val === '両思い・交際中') return '両思い・交際中';
       if (val === 'f' || val === 'fukuen' || val === '復縁したい') return '復縁したい';
@@ -748,7 +748,7 @@ function App() {
                 lastInput.oBirth || '',
                 lastInput.oMbti || 'UNKNOWN',
                 lastInput.oGender || 'male',
-                lastInput.rel || '片思い中',
+                lastInput.rel || '片想い中',
                 'match',
                 true,
                 lastInput.selectedCharacter,
@@ -766,7 +766,7 @@ function App() {
                 '',
                 'UNKNOWN',
                 'female',
-                lastInput.rel || '片思い中',
+                lastInput.rel || '片想い中',
                 'single',
                 true,
                 lastInput.selectedCharacter,
@@ -908,7 +908,7 @@ function App() {
   // Saves the subscription with "me" from the profile and the chosen partner (null = solo fortune)
   const buildNotifyData = (email: string, partner: SavedPartner | 'keep' | null): EmailSubscriptionData => {
     const opp = partner === 'keep' && notifySub
-      ? { oppName: notifySub.oppName || '', oppBirth: notifySub.oppBirth || '', oppGender: notifySub.oppGender, oppMbti: notifySub.oppMbti || 'UNKNOWN', relationship: notifySub.relationship || '片思い中', mode: 'match' as const }
+      ? { oppName: notifySub.oppName || '', oppBirth: notifySub.oppBirth || '', oppGender: notifySub.oppGender, oppMbti: notifySub.oppMbti || 'UNKNOWN', relationship: notifySub.relationship || '片想い中', mode: 'match' as const }
       : partner && partner !== 'keep'
         ? { oppName: partner.name, oppBirth: partner.birth.replace(/\//g, '-'), oppGender: partner.gender, oppMbti: partner.mbti, relationship: partner.relationship, mode: 'match' as const }
         : { oppName: '', oppBirth: '', oppGender: 'male' as const, oppMbti: 'UNKNOWN', relationship: relationship, mode: 'single' as const };
@@ -998,7 +998,7 @@ function App() {
     setEditPartnerBirth('');
     setEditPartnerMbti('UNKNOWN');
     setEditPartnerGender(myGender === 'female' ? 'male' : 'female');
-    setEditPartnerRel('片思い中');
+    setEditPartnerRel('片想い中');
     return true;
   };
 
@@ -1008,7 +1008,7 @@ function App() {
     setEditPartnerBirth(partner.birth);
     setEditPartnerMbti(partner.mbti);
     setEditPartnerGender(partner.gender);
-    setEditPartnerRel(partner.relationship);
+    setEditPartnerRel(partner.relationship === '片思い中' ? '片想い中' : partner.relationship);
   };
 
   // 解放済みのお相手の生年月日を変える確認で「変更する」を押したあと、もう一度保存を通すため
@@ -1185,7 +1185,7 @@ function App() {
     // Gender Validation: Ensure opposite gender combination (Male x Female)
     const validOppGender = partner.gender === myGender ? (myGender === 'female' ? 'male' : 'female') : partner.gender;
     setOppGender(validOppGender);
-    setRelationship(partner.relationship);
+    setRelationship(partner.relationship === '片思い中' ? '片想い中' : partner.relationship);
     setMode('match');
   };
 
@@ -1387,7 +1387,7 @@ function App() {
     setRelationship(data.relationship);
     setMode(data.mode);
     pushProfile(); // the input form has just saved the profile on this device
-    trackFortune({ birth: data.myBirth, gender: data.myGender, mbti: data.myMbti });
+    trackFortune({ birth: data.myBirth, gender: data.myGender, mbti: data.myMbti, rel: data.mode === 'match' && data.oppBirth ? data.relationship : '' });
     if (data.mode === 'match' && data.oppBirth) {
       autoSavePartner({
         name: data.oppName || 'お相手',
@@ -1687,7 +1687,7 @@ function App() {
         opponentBirth: partner?.birth,
         opponentMbti: partner?.mbti,
         opponentGender: partnerGender,
-        relationship: partner?.relationship || '片思い中'
+        relationship: partner?.relationship || '片想い中'
       }, selectedCharacter);
     } catch (e) {
       console.error(e);
@@ -2817,7 +2817,7 @@ function App() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {(editingPartnerId === NEW_PARTNER_ID
-                      ? [...savedPartners, { id: NEW_PARTNER_ID, name: '', birth: '', mbti: 'UNKNOWN', gender: 'male' as const, relationship: '片思い中' }]
+                      ? [...savedPartners, { id: NEW_PARTNER_ID, name: '', birth: '', mbti: 'UNKNOWN', gender: 'male' as const, relationship: '片想い中' }]
                       : savedPartners
                     ).map((partner) => {
                       if (editingPartnerId === partner.id) {

@@ -174,9 +174,11 @@ export const ageBand = (birth: string, now = new Date()): string => {
 };
 
 /** One fortune run from the input form. The visit's first one also sends the person's gender, age band and MBTI (not the birth date). */
-export const trackFortune = (me?: { birth: string; gender: string; mbti: string }) => {
+// 恋の状況（入力画面の選択肢）→ 1文字。お相手なしは 'n'。api/_lib/analytics.js の REL_KEYS と合わせる
+const REL_CODE: Record<string, string> = { '片想い中': 'k', '片思い中': 'k', '片想いされ中': 'h', '両思い・交際中': 'r', '復縁したい': 'f', '結婚・夫婦': 'm', '複雑愛・秘密の恋': 'c' };
+export const trackFortune = (me?: { birth: string; gender: string; mbti: string; rel?: string }) => {
   const first = firstInSession('fortune');
-  const attr: Record<string, string> = first === '1' && me ? { g: me.gender, a: ageBand(me.birth), m: me.mbti } : {};
+  const attr: Record<string, string> = first === '1' && me ? { g: me.gender, a: ageBand(me.birth), m: me.mbti, r: me.rel ? (REL_CODE[me.rel] || 'u') : 'n' } : {};
   void send({ type: 'fortune', first, ...attr, ...current() });
 };
 

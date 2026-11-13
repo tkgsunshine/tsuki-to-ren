@@ -168,10 +168,10 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       if (r === 'f') return '復縁したい';
       if (r === 'm') return '結婚・夫婦';
       if (r === 'c') return '複雑愛・秘密の恋';
-      if (r === 'k') return '片思い中';
+      if (r === 'k') return '片想い中';
       if (r === 'h') return '片想いされ中';
     }
-    return '片思い中';
+    return '片想い中';
   });
 
   React.useEffect(() => {
@@ -179,7 +179,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       setOppName(loadedPartner.name === 'お相手' ? '' : loadedPartner.name);
       setOppBirth(loadedPartner.birth);
       setOppMbti(isMbtiCode(loadedPartner.mbti) ? loadedPartner.mbti : '');
-      setRelationship(loadedPartner.relationship);
+      setRelationship(loadedPartner.relationship === '片思い中' ? '片想い中' : loadedPartner.relationship); // 旧表記の保存データ
 
       // Gender Validation: Ensure opposite gender combination (Male x Female) silently
       if (loadedPartner.gender === myGender) {
@@ -257,7 +257,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       oppBirth,
       oppMbti,
       oppGender,
-      relationship: relationship || '片思い中',
+      relationship: relationship || '片想い中',
       mode
     });
   };
@@ -665,7 +665,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   boxShadow: '0 0 10px rgba(226, 192, 116, 0.1)'
                 }}
               >
-                <option value="片思い中">片思い中</option>
+                <option value="片想い中">片想い中</option>
                 <option value="片想いされ中">片想いされ中</option>
                 <option value="両思い・交際中">両思い・交際中</option>
                 <option value="復縁したい">復縁したい</option>
