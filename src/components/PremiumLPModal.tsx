@@ -32,8 +32,8 @@ const benefits = [
     title: '「二人の相性100」を、月のかけらで開ける',
     shot: '/assets/premium/couple-100.webp',
     shotAlt: '月のかけらで開けた、MBTIランキングの画面',
-    body: '本格鑑定50とMBTIランキング50。好きなランキング・テーマを、月のかけら1つで1つずつ開けられます。かけらはお支払い日に50個、毎日5個届きます（100個まで貯められます）。一度開けたものは、プレミアムの間ずっと見られますよ。',
-    diffBody: 'シングルプランは、そのお相手だけに使える月のかけらが10個（購入時）＋毎日2個。プレミアムなら、お支払い日に50個・毎日5個届く月のかけらで、気になる人なら誰のランキング・テーマでも開けられます（100個まで貯められます）。'
+    body: '本格鑑定50とMBTIランキング50。好きなランキング・テーマを、月のかけら1つで1つずつ開けられます。かけらは毎月50個、毎日5個届きます（100個まで貯められます）。一度開けたものは、プレミアムの間ずっと見られますよ。',
+    diffBody: 'プレミアムなら、毎月50個・毎日5個届く月のかけらで、気になる人なら誰のランキング・テーマでも開けられます（100個まで貯められます）。'
   },
   {
     Icon: Send,
@@ -869,7 +869,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
                   { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', pair: null, monthly: '◯' },
                   // 月のかけらは別の行に（2026-11-13 TAKASHI「かけらについては別行にして」「10年先の下」）
-                  { label: '月のかけら（1個で1つ開ける）', pair: '購入時10個\n＋毎日2個', monthly: 'お支払い日50個\n＋毎日5個' },
+                  { label: '月のかけら（1個で1つ開ける）', pair: '購入時10個\n＋毎日2個', monthly: '毎月50個\n＋毎日5個' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
                   { label: 'お相手の保存', pair: '2人', monthly: '5人' }
                 ].map((row, idx) => {
@@ -895,9 +895,6 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <PurchaseTerms plans={pair.unlocked ? ['monthly'] : ['monthly', 'pair']} style={{ marginBottom: '0.6rem' }} />
               {renderPlanButtons(true)}
-              <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                シングルプランのお相手は生年月日で決まります。
-              </p>
             </div>
           )}
 
