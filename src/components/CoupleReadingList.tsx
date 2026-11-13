@@ -98,7 +98,7 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
         return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {/* ジャンル名は金でなく薄紫（金は月のかけら・順位の色。2026-11-13 TAKASHI） */}
-            <span style={{ fontSize: '0.8rem', color: '#c9b6ff', fontWeight: 'bold', marginTop: '0.35rem' }}>● {READING_CATEGORY_LABELS[cat]}</span>
+            <span style={{ fontSize: '0.8rem', color: '#7fe0d2', fontWeight: 'bold', marginTop: '0.35rem' }}>● {READING_CATEGORY_LABELS[cat]}</span>
             {list.map((t) => {
               const r = results.get(t.no);
               const locked = !r;

@@ -185,9 +185,9 @@ export const CoupleHundredSection: React.FC<Props> = ({
             <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setTab(k)} style={{
               flex: 1, padding: '0.6rem 0.25rem 0.55rem', cursor: 'pointer', background: 'none', border: 'none',
               // 選んでいるタブは金ではなく、薄紫（金は月のかけら・順位の色なので分ける。2026-11-13 TAKASHI「ここが金じゃなくて色変えて」）
-              borderBottom: `3px solid ${on ? '#b79cff' : 'transparent'}`, marginBottom: '-1px',
+              borderBottom: `3px solid ${on ? '#5fd4c4' : 'transparent'}`, marginBottom: '-1px',
               fontSize: '0.86rem', fontWeight: on ? 'bold' : 'normal',
-              color: on ? '#e2d6ff' : 'rgba(232, 226, 212, 0.55)', transition: 'color 0.2s, border-color 0.2s'
+              color: on ? '#d2f5ef' : 'rgba(232, 226, 212, 0.55)', transition: 'color 0.2s, border-color 0.2s'
             }}>{label}</button>
           );
         })}
@@ -238,7 +238,7 @@ export const CoupleHundredSection: React.FC<Props> = ({
           return (
           <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {/* ジャンル名は金でなく薄紫（金は月のかけら・順位の色。2026-11-13 TAKASHI） */}
-            <span style={{ fontSize: '0.8rem', color: '#c9b6ff', fontWeight: 'bold', marginTop: '0.35rem' }}>● {RANK_CATEGORY_LABELS[cat]}</span>
+            <span style={{ fontSize: '0.8rem', color: '#7fe0d2', fontWeight: 'bold', marginTop: '0.35rem' }}>● {RANK_CATEGORY_LABELS[cat]}</span>
             {list.map((t) => {
               const access = rankAccess(t.no);
               const r = results.get(t.no);
