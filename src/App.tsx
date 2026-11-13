@@ -43,7 +43,7 @@ import { LpExitSurvey } from './components/LpExitSurvey';
 import { ReferralCodeEntry } from './components/ReferralInvite';
 import { captureRefFromUrl, completeRef, fetchMyReferral, getPendingRef, hasSentRef, setPendingRef as savePendingRef, type ReferralStatus } from './services/referral';
 import { signInWithCustomToken } from 'firebase/auth';
-import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
+import { getFirebaseAuth, subscribeAuthChange, clearAccountDataOnDevice, sendEmailMagicLink, completeEmailMagicLinkSignIn, isAddEmailLink, completeAddEmailLink, accountNeedsEmail, isGuestAccount, checkRedirectAuthResult, isReturningFromRedirect, lastRedirectFailed, saveEmailSubscriptionData, enableDailyMailForNewMember, getEmailSubscription, updateEmailSubscriptionProfile, unsubscribeEmailSubscription, type EmailSubscriptionData, type UserProfile as FirebaseUser } from './services/firebase';
 import { showAlert, showConfirm, showFieldError } from './components/AppDialog';
 import { PremiumWelcomeModal } from './components/PremiumWelcomeModal';
 import { SharedResultView, readSharedResult } from './components/SharedResultView';
@@ -89,6 +89,14 @@ interface InitialRoute {
   settingsSubView: 'main' | 'profile' | 'partners' | 'about' | 'tokushoho' | 'privacy' | 'company' | 'contact' | 'news';
   compatibilityPair: { myMbti: string; oppMbti: string } | null;
 }
+
+// メールのリンクでログインできなかったときの案内（Firebase のエラーコードごと）
+const emailLinkFailMessage = (code?: string): string =>
+  code === 'auth/invalid-action-code' || code === 'auth/expired-action-code'
+    ? 'このログイン用のリンクは、期限が切れたか、すでに使われています。お手数ですが、もう一度メールを送ってください（届いたメールのうち一番新しいものを開いてください）。'
+    : code === 'auth/network-request-failed'
+      ? '通信が不安定なため、ログインできませんでした。電波のよいところで、もう一度メールのリンクを開いてください。'
+      : 'メールのリンクでログインできませんでした。お手数ですが、もう一度メールを送るか、Googleでの登録をお試しください。';
 
 const IS_PRODUCTION_SITE = typeof window !== 'undefined' && window.location.hostname.endsWith('tsuki-to-ren.com');
 
@@ -286,6 +294,8 @@ function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showLegalPage, setShowLegalPage] = useState(initialRoute.legal);
   const [showEmailPromptModal, setShowEmailPromptModal] = useState(false);
+  // Google・X のログインから戻ってきて、結果を受け取っている間（画面に「ログインしています」）
+  const [finishingSignIn, setFinishingSignIn] = useState(false);
   const [promptEmailInput, setPromptEmailInput] = useState('');
   const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
 
@@ -302,15 +312,23 @@ function App() {
       }
     } catch {}
 
-    // Defer network-based Firebase Auth subscription to idle time after critical rendering completes
+    // Defer network-based Firebase Auth subscription to idle time after critical rendering completes.
+    // Google・X のログインから戻ってきたときは待たずにすぐ受け取り、終わるまで「ログインしています」を出す
+    // （以前は1秒待ってから受け取り、その間は未登録の画面のままだったので、遅い・失敗したように見えた）
+    const returning = isReturningFromRedirect();
+    if (returning) setFinishingSignIn(true);
+    // 受け取りが終わらないときも、15秒で「ログインしています」を消す（画面が操作できないままにしない）
+    const finishTimer = returning ? setTimeout(() => setFinishingSignIn(false), 15000) : undefined;
     let unsubscribe: (() => void) | undefined;
     const timer = setTimeout(() => {
       checkRedirectAuthResult().then((user) => {
         if (user) {
           setCurrentUser(user);
           setIsRegistered(true);
+        } else if (returning && lastRedirectFailed()) {
+          showAlert('ログインが完了しませんでした。もう一度お試しいただくか、メールアドレスで登録してください。');
         }
-      });
+      }).finally(() => setFinishingSignIn(false));
 
       // Link from "メールアドレスを追加": attach the address to the signed-in account
       if (isAddEmailLink()) {
@@ -339,6 +357,9 @@ function App() {
           setIsRegistered(true);
         } else if (res.needsEmailPrompt) {
           setShowEmailPromptModal(true);
+        } else if (res.failed) {
+          // 以前は何も出さず、未登録の画面のままだった
+          showAlert(emailLinkFailMessage(res.code));
         }
       });
 
@@ -351,10 +372,11 @@ function App() {
           setIsRegistered(false);
         }
       });
-    }, 1000);
+    }, returning ? 0 : 1000);
 
     return () => {
       clearTimeout(timer);
+      if (finishTimer) clearTimeout(finishTimer);
       if (unsubscribe) unsubscribe();
     };
   }, []);
@@ -3829,6 +3851,16 @@ function App() {
         onRegisterFirst={() => setShowAuthModal(true)}
       />
 
+      {/* Google・X から戻ってきて、ログインの結果を受け取っている間 */}
+      {finishingSignIn && (
+        <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, background: 'rgba(8, 10, 20, 0.78)', backdropFilter: 'blur(6px)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
+          <div className="glass-panel" style={{ padding: '1.4rem 1.6rem', borderRadius: '18px', textAlign: 'center', border: '1px solid rgba(226, 192, 116, 0.35)', color: '#f2e2b3', fontSize: '0.9rem', lineHeight: 1.7 }}>
+            <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.7rem', border: '3px solid rgba(226,192,116,0.25)', borderTopColor: '#e2c074', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+            ログインしています…
+          </div>
+        </div>
+      )}
+
       {/* Email Verification Prompt Modal (for cross-browser/device link clicks) */}
       {showEmailPromptModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
@@ -3861,7 +3893,7 @@ function App() {
                   setIsRegistered(true);
                   setShowEmailPromptModal(false);
                 } else {
-                  showAlert('認証に失敗しました。メールアドレスが正しいかご確認ください。');
+                  showAlert(res.code === 'auth/invalid-email' || !res.code ? '認証に失敗しました。メールを送ったときと同じメールアドレスかご確認ください。' : emailLinkFailMessage(res.code));
                 }
               }}
               className="consult-btn font-serif"

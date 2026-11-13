@@ -18,7 +18,7 @@ import {
 } from 'firebase/auth';
 
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { optOutIfAdmin, trackSignupIfNew } from './analytics';
+import { markEverMember, optOutIfAdmin, regErrorFrom, trackRegError, trackSignupIfNew } from './analytics';
 import { clearAllChatHistory } from '../utils/chatHistory';
 
 declare global {
@@ -57,6 +57,8 @@ let _authInstance: ReturnType<typeof getAuth> | null = null;
 export const getFirebaseAuth = () => {
   if (!_authInstance) {
     _authInstance = getAuth(app);
+    // ログイン用メール・Google の画面を日本語に（未設定だと Firebase の既定の言語で届く）
+    _authInstance.languageCode = 'ja';
   }
   return _authInstance;
 };
@@ -99,9 +101,50 @@ const isMobileDevice = (): boolean => {
   return isMobileUA || isStandalone;
 };
 
+// LINE・Instagram・Facebook・TikTok などアプリの中の画面（WebView）。Google はここでのログインを断る（403 disallowed_useragent）。
+// X アプリの中の画面は判定に入れていない（Google が通るか実機で確かめていないため）
+export const isInAppBrowser = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /\bLine\/|FBAN|FBAV|Instagram|BytedanceWebview|musical_ly|TikTok|KAKAOTALK|YJApp-|; wv\)/i.test(ua);
+};
+export const IN_APP_BROWSER_ERROR = 'hasu/in-app-browser';
+/** LINE の中の画面なら、同じページをスマホのブラウザ（Safari・Chrome）で開き直せる URL。LINE 以外は null */
+export const externalBrowserUrl = (): string | null => {
+  if (typeof window === 'undefined' || !/\bLine\//i.test(navigator.userAgent || '')) return null;
+  const url = new URL(window.location.href);
+  url.searchParams.set('openExternalBrowser', '1');
+  return url.toString();
+};
+
+// Google・X のログイン画面へ移る直前に印を付け、戻ってきたページで待ち時間なしに結果を受け取る（App.tsx）。
+// 中身はどの方法か（'google' | 'x'）。10分たった印は使わない
+const REDIRECT_KEY = 'hasu_auth_redirect';
+const markRedirect = (method: 'google' | 'x') => {
+  try { window.sessionStorage.setItem(REDIRECT_KEY, `${method}:${Date.now()}`); } catch {}
+};
+const readRedirect = (): 'google' | 'x' | null => {
+  try {
+    const [method, at] = (window.sessionStorage.getItem(REDIRECT_KEY) || '').split(':');
+    if ((method === 'google' || method === 'x') && Date.now() - Number(at) < 10 * 60 * 1000) return method;
+  } catch {}
+  return null;
+};
+/** Google・X のログインから戻ってきたところか */
+export const isReturningFromRedirect = (): boolean => readRedirect() !== null;
+
+// 最後の checkRedirectAuthResult が、Google・X から戻ったのにエラーで終わったか（やめただけのときは false）
+let redirectFailed = false;
+export const lastRedirectFailed = () => redirectFailed;
+
 export const checkRedirectAuthResult = async (): Promise<UserProfile | null> => {
+  const pending = readRedirect();
+  redirectFailed = false;
+  try { window.sessionStorage.removeItem(REDIRECT_KEY); } catch {}
   try {
     const result = await getRedirectResult(auth);
+    // 印があるのに結果がない = ログイン画面で戻る・閉じるなどしてやめた
+    if (pending && !result?.user) trackRegError(`${pending}_cancel`);
     if (result && result.user) {
       const user = result.user;
       const additionalInfo = getAdditionalUserInfo(result);
@@ -132,6 +175,10 @@ export const checkRedirectAuthResult = async (): Promise<UserProfile | null> => 
     }
   } catch (err: any) {
     console.warn('Firebase getRedirectResult error:', err?.code, err?.message);
+    if (pending) {
+      redirectFailed = true;
+      trackRegError(regErrorFrom(pending, err?.code || ''));
+    }
   }
   return null;
 };
@@ -141,8 +188,15 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
 
+  // アプリの中の画面では Google が「このブラウザは安全ではない」と断るので、移る前に止めて案内を出す（呼び出し側）
+  if (isInAppBrowser()) {
+    trackRegError('google_inapp');
+    throw Object.assign(new Error('In-app browser'), { code: IN_APP_BROWSER_ERROR });
+  }
+
   // On SP / mobile browsers, use same-window redirect to avoid detached popup tabs that cannot close
   if (isMobileDevice()) {
+    markRedirect('google');
     await signInWithRedirect(auth, provider);
     return new Promise(() => {}); // Execution continues after redirect back
   }
@@ -171,6 +225,7 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
       code === 'auth/cancelled-popup-request'
     ) {
       console.log('Falling back to signInWithRedirect for Google Auth...');
+      markRedirect('google');
       await signInWithRedirect(auth, provider);
       return new Promise(() => {});
     }
@@ -183,6 +238,7 @@ export const signInWithX = async (): Promise<UserProfile> => {
   const provider = new TwitterAuthProvider();
 
   if (isMobileDevice()) {
+    markRedirect('x');
     await signInWithRedirect(auth, provider);
     return new Promise(() => {});
   }
@@ -216,6 +272,7 @@ export const signInWithX = async (): Promise<UserProfile> => {
     console.warn('signInWithX error:', code, err?.message);
     if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
       console.log('Falling back to signInWithRedirect for X Auth...');
+      markRedirect('x');
       await signInWithRedirect(auth, provider);
       return new Promise(() => {});
     }
@@ -263,6 +320,8 @@ export interface MagicLinkResult {
   success: boolean;
   user?: UserProfile;
   needsEmailPrompt?: boolean;
+  failed?: boolean; // リンクでのログインに失敗した（期限切れ・使用済みなど）
+  code?: string;
 }
 
 // Complete Email Magic Link Sign-In on redirect back
@@ -302,9 +361,11 @@ export const completeEmailMagicLinkSignIn = async (providedEmail?: string): Prom
         window.history.replaceState({}, document.title, window.location.pathname);
       }
       return { success: true, user: userProfile };
-    } catch (e) {
+    } catch (e: any) {
       console.error('Magic link completion error:', e);
-      return { success: false };
+      trackRegError('email_link');
+      // 期限切れ・使用済みのリンク（auth/invalid-action-code, auth/expired-action-code）など。App.tsx が案内を出す
+      return { success: false, failed: true, code: e?.code || '' };
     }
   }
   return { success: false };
@@ -442,6 +503,8 @@ export const subscribeAuthChange = (callback: (user: UserProfile | null) => void
 
     void trackSignupIfNew(user);
     void optOutIfAdmin(user);
+    // 登録なし購入で自動で作られたアカウント（guest）は会員ではないので印を付けない
+    void user.getIdTokenResult().then((r) => { if (r.claims.guest !== true) markEverMember(); }).catch(() => {});
 
     const rawProvider = user.providerData[0]?.providerId || '';
     let providerId: 'google.com' | 'twitter.com' | 'email' = 'google.com';

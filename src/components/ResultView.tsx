@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { PurchaseTerms } from './PurchaseTerms';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
-import { trackLockView, trackRegStep } from '../services/analytics';
+import { handleSignInError } from '../utils/signInGuide';
+import { trackLockView, trackRegError, trackRegStep } from '../services/analytics';
 import { Calendar, Download, X, Heart, Smartphone, Share, MessageCircle } from 'lucide-react';
 import { ResultSection } from './ResultSection';
 import { MoonMark, PillarsMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
@@ -1217,6 +1218,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setEmailSent(true);
     } catch (err: any) {
       console.error('Registration email error:', err);
+      trackRegError('email_send');
       const detail = err?.code ? ` (${err.code}: ${err.message})` : '';
       showAlert(`認証メールの送信に失敗しました。${detail}`);
     } finally {
@@ -2480,7 +2482,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       ✉️ 認証メールを送信しました！
                     </div>
                     「<strong>{email}</strong>」宛にログイン認証リンクを送信しました。<br />
-                    届いたメール内の「月と蓮にログイン」リンクをタップして会員登録を完了させてください。
+                    届いたメールのリンクをタップすると、会員登録が完了します。
+                    <div style={{ marginTop: '0.55rem', fontSize: '0.75rem', color: '#c9d8cf', lineHeight: 1.65 }}>
+                      数分たっても届かないときは、<strong>迷惑メールフォルダ</strong>も見てください。<br />
+                      届かないときは、下の「Googleで登録」が早くて確実です。
+                    </div>
                   </div>
                 ) : (
                   <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -2519,6 +2525,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           await signInWithGoogle();
                         } catch (e) {
                           console.error(e);
+                          const msg = handleSignInError('google', e);
+                          if (msg) showAlert(msg);
                         }
                       }}
                       style={{
@@ -2548,6 +2556,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           await signInWithX();
                         } catch (e) {
                           console.error(e);
+                          const msg = handleSignInError('x', e);
+                          if (msg) showAlert(msg);
                         }
                       }}
                       style={{
