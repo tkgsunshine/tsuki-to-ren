@@ -895,9 +895,6 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <PurchaseTerms plans={pair.unlocked ? ['monthly'] : ['monthly', 'pair']} style={{ marginBottom: '0.6rem' }} />
               {renderPlanButtons(true)}
-              <p style={{ fontSize: '0.64rem', color: '#a9a49a', lineHeight: 1.5, margin: '0.55rem 0 0' }}>
-                シングルプランのお相手は生年月日で決まります。
-              </p>
             </div>
           )}
 
