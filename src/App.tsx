@@ -3908,7 +3908,7 @@ function App() {
 
       {/* Google・X から戻ってきて、ログインの結果を受け取っている間 */}
       {finishingSignIn && (
-        <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, background: 'rgba(8, 10, 20, 0.78)', backdropFilter: 'blur(6px)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
+        <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, background: 'rgba(8, 10, 20, 0.78)', backdropFilter: 'blur(6px)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
           <div className="glass-panel" style={{ padding: '1.4rem 1.6rem', borderRadius: '18px', textAlign: 'center', border: '1px solid rgba(226, 192, 116, 0.35)', color: '#f2e2b3', fontSize: '0.9rem', lineHeight: 1.7 }}>
             <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.7rem', border: '3px solid rgba(226,192,116,0.25)', borderTopColor: '#e2c074', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
             ログインしています…
@@ -3918,7 +3918,7 @@ function App() {
 
       {/* Email Verification Prompt Modal (for cross-browser/device link clicks) */}
       {showEmailPromptModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem' }}>
           <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '1.75rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.1rem', border: '1px solid rgba(226, 192, 116, 0.4)', borderRadius: '20px' }}>
             <h3 className="font-serif gold-text" style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: 0 }}>
               ✉️ メール認証の最終確認

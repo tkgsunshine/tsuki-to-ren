@@ -34,7 +34,7 @@ export const InstallGuideModal: React.FC<InstallGuideModalProps> = ({ isOpen, on
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 10000,
+        zIndex: 100000, // 下メニュー（99999）より前に出す
         animation: 'fadeIn 0.25s ease',
         padding: 'calc(1.5rem + env(safe-area-inset-top, 28px)) 1rem calc(2rem + env(safe-area-inset-bottom, 20px))',
         boxSizing: 'border-box'

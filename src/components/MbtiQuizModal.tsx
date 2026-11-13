@@ -32,11 +32,11 @@ export default function MbtiQuizModal({
       role="dialog"
       aria-modal="true"
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, zIndex: 10050, background: 'rgba(5, 7, 12, 0.78)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 100000, background: 'rgba(5, 7, 12, 0.78)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px))', boxSizing: 'border-box' }}
     >
       <div
         onClick={e => e.stopPropagation()}
-        style={{ width: '100%', maxWidth: '420px', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', background: '#121826', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '16px', padding: '1.1rem 1rem 1rem', boxSizing: 'border-box', position: 'relative' }}
+        style={{ width: '100%', maxWidth: '420px', maxHeight: '100%', overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', background: '#121826', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '16px', padding: '1.1rem 1rem 1rem', boxSizing: 'border-box', position: 'relative' }}
       >
         <button
           type="button"
