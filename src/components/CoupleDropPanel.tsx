@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { CoupleDrops } from '../services/coupleDrops';
 
 // 月のかけら: ロック中のお題を押したときに出る「かけらを1つ使って開ける」の箱と、残高の表示。
@@ -135,5 +135,17 @@ export const MorePeek: React.FC<{ nextTitle: string; count: number; onOpen: () =
       もっと見る
       <ChevronDown size={16} style={{ animation: 'more-peek-bob 1.6s ease-in-out infinite' }} />
     </span>
+  </button>
+);
+
+/** 「もっと見る」で開いたまとまりを、元の1個に戻す（2026-11-13 TAKASHI「もっと見るの状態の時。閉じるも表示して」） */
+export const MoreClose: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+  <button
+    type="button"
+    onClick={onClose}
+    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', width: '100%', padding: '0.6rem 0 0.4rem', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 'bold', color: '#f5d77a' }}
+  >
+    閉じる
+    <ChevronUp size={16} />
   </button>
 );

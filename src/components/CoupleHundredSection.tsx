@@ -6,7 +6,7 @@ import { RANK_TOPICS, RANK_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { RankCategory } from '../data/coupleTopics';
 import { toPerson } from '../utils/coupleReading';
 import { CoupleReadingList } from './CoupleReadingList';
-import { DropBalance, DropPanel, MorePeek, justOpened } from './CoupleDropPanel';
+import { DropBalance, DropPanel, MoreClose, MorePeek, justOpened } from './CoupleDropPanel';
 import { mbtiOptions } from '../constants/mbti';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 
@@ -283,6 +283,9 @@ export const CoupleHundredSection: React.FC<Props> = ({
             })}
             {hidden > 0 && (
               <MorePeek nextTitle={(RANK_TOPICS.find((t) => t.category === cat && !shown.has(t.no))?.title ?? '')} count={hidden} onOpen={() => setExpanded((s) => new Set(s).add(cat))} />
+            )}
+            {hidden === 0 && expanded.has(cat) && (
+              <MoreClose onClose={() => setExpanded((s) => { const n = new Set(s); n.delete(cat); return n; })} />
             )}
           </div>
           );
