@@ -615,6 +615,7 @@ function App() {
     const decodeRel = (val: string | null) => {
       if (!val) return '片思い中';
       if (val === 'k' || val === 'single' || val === '片思い中') return '片思い中';
+      if (val === 'h' || val === '片想いされ中') return '片想いされ中';
       if (val === 'r' || val === 'ryoomoi' || val === '交際中' || val === '両思い・交際中') return '両思い・交際中';
       if (val === 'f' || val === 'fukuen' || val === '復縁したい') return '復縁したい';
       if (val === 'm' || val === 'kekkon' || val === '結婚・夫婦') return '結婚・夫婦';

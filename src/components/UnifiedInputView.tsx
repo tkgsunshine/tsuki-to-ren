@@ -169,6 +169,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       if (r === 'm') return '結婚・夫婦';
       if (r === 'c') return '複雑愛・秘密の恋';
       if (r === 'k') return '片思い中';
+      if (r === 'h') return '片想いされ中';
     }
     return '片思い中';
   });
@@ -665,6 +666,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 }}
               >
                 <option value="片思い中">片思い中</option>
+                <option value="片想いされ中">片想いされ中</option>
                 <option value="両思い・交際中">両思い・交際中</option>
                 <option value="復縁したい">復縁したい</option>
                 <option value="結婚・夫婦">結婚・夫婦</option>
