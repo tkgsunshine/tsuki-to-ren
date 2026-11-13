@@ -49,9 +49,10 @@ export const CoupleRankTeaser: React.FC<Props> = ({ topicNo, initialMy = '', onC
       {r && (
         <>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.45rem' }}>
-            <span style={{ fontSize: '0.8rem', color: '#bfb8a8' }}>{COUPLE_PAIR_COUNT}組中</span>
             <span className="font-serif" style={{ fontSize: '2.3rem', fontWeight: 'bold', color: top ? '#f5d77a' : '#f3efe6', lineHeight: 1 }}>{r.rank}</span>
             <span style={{ fontSize: '1rem', fontWeight: 'bold', color: top ? '#f5d77a' : '#f3efe6' }}>位</span>
+            {/* 「1位 / 136組中」の順（2026-11-13 TAKASHI） */}
+            <span style={{ fontSize: '0.8rem', color: '#bfb8a8' }}>/<span style={{ marginLeft: '0.35em' }}>{COUPLE_PAIR_COUNT}組中</span></span>
           </div>
           <p style={{ margin: 0, fontSize: '0.78rem', color: '#e8e2d4', lineHeight: 1.7, textAlign: 'center' }}>
             どうしてこの順位なのか、ほかの49のランキングでは何位かは、二人の生年月日を入れると見られます。

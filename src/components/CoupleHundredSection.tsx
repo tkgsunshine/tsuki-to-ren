@@ -93,9 +93,10 @@ function RankCard({ title, rank, reason, a, b, reasonOpen, onLockClick, lockWord
       <div style={{ fontSize: '0.92rem', fontWeight: 'bold', color: '#f3efe6', lineHeight: 1.5 }}>{title}</div>
       <div style={{ textAlign: 'center' }}><TypePair a={a} b={b} size="0.92rem" /></div>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '0.5rem', margin: '0 0 0.15rem' }}>
-        <span style={{ fontSize: '0.8rem', color: '#bfb8a8' }}>{COUPLE_PAIR_COUNT}組中</span>
         <span className="font-serif" style={{ fontSize: '2.2rem', fontWeight: 'bold', color: top ? '#f5d77a' : '#f3efe6', lineHeight: 1 }}>{rank}</span>
         <span style={{ fontSize: '1rem', fontWeight: 'bold', color: top ? '#f5d77a' : '#f3efe6' }}>位</span>
+        {/* 「1位 / 136組中」の順（2026-11-13 TAKASHI） */}
+        <span style={{ fontSize: '0.8rem', color: '#bfb8a8' }}>/<span style={{ marginLeft: '0.35em' }}>{COUPLE_PAIR_COUNT}組中</span></span>
       </div>
       {reasonOpen ? (
         <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.75, color: '#e8e2d4' }}>{reason}</p>
