@@ -31,8 +31,9 @@ export const ResultSection = React.forwardRef<HTMLElement, {
   aside?: React.ReactNode;
   children: React.ReactNode;
   style?: React.CSSProperties;
-}>(({ title, icon, aside, children, style }, ref) => (
-  <section ref={ref} className="result-section" style={style}>
+  id?: string;
+}>(({ title, icon, aside, children, style, id }, ref) => (
+  <section ref={ref} id={id} className="result-section" style={style}>
     <SectionHeading icon={icon} aside={aside}>{title}</SectionHeading>
     {children}
   </section>
