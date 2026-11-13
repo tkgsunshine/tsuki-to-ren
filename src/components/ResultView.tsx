@@ -1452,42 +1452,72 @@ export const ResultView: React.FC<ResultViewProps> = ({
         background: 'linear-gradient(135deg, rgba(30, 25, 55, 0.85) 0%, rgba(13, 18, 27, 0.95) 100%)',
         boxShadow: '0 12px 35px rgba(0,0,0,0.6), 0 0 25px rgba(226,192,116,0.1)'
       }}>
-        {/* Pair Name Tag */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.45rem',
-          fontSize: '0.85rem',
-          color: '#f2e2b3',
-          background: 'linear-gradient(90deg, rgba(226,192,116,0.15) 0%, rgba(159, 134, 192,0.15) 100%)',
-          border: '1px solid rgba(226,192,116,0.4)',
-          borderRadius: '20px',
-          padding: '0.4rem 1.1rem',
-          width: 'fit-content',
-          margin: '0 auto',
-          fontWeight: 'bold',
-          letterSpacing: '0.03em',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-        }}>
-          <Heart size={14} style={{ fill: '#f2e2b3', color: '#f2e2b3' }} />
-          <span>{hasOpponent ? `${myName} × ${oppNickname}` : `${myName} の全運勢`}</span>
-        </div>
+        {/* 名前の見出し（C案）: 二人を左右に、真ん中に月の紋。一人で占うときは月の紋＋名前 */}
+        {(() => {
+          const me = myName || 'あなた';
+          const opp = oppNickname;
+          const nameSize = (n: string) => (n.length >= 9 ? '0.9rem' : n.length >= 6 ? '1.02rem' : '1.2rem');
+          const labelStyle: React.CSSProperties = {
+            display: 'block',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.6rem',
+            fontWeight: 500,
+            color: 'rgba(226, 192, 116, 0.65)',
+            letterSpacing: '0.12em',
+            marginBottom: '0.1rem'
+          };
+          const nameStyle = (n: string): React.CSSProperties => ({
+            fontFamily: 'var(--font-serif)',
+            fontWeight: 700,
+            fontSize: nameSize(n),
+            color: '#f6e7bd',
+            letterSpacing: '0.06em',
+            lineHeight: 1.3,
+            minWidth: 0,
+            overflowWrap: 'anywhere'
+          });
+          const emblem = (
+            <div aria-hidden="true" style={{
+              width: '40px',
+              height: '40px',
+              flexShrink: 0,
+              borderRadius: '50%',
+              border: '1px solid rgba(226, 192, 116, 0.6)',
+              display: 'grid',
+              placeItems: 'center',
+              background: 'radial-gradient(circle, rgba(226,192,116,0.22) 0%, rgba(226,192,116,0) 70%)',
+              boxShadow: '0 0 14px rgba(226, 192, 116, 0.25)'
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M15 3a9 9 0 1 0 6 15.5A8 8 0 0 1 15 3z" fill="#e8c96a" /></svg>
+            </div>
+          );
+          return hasOpponent ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+              <div style={{ ...nameStyle(me), textAlign: 'right' }}><span style={labelStyle}>あなた</span>{me}</div>
+              {emblem}
+              <div style={{ ...nameStyle(opp), textAlign: 'left' }}><span style={labelStyle}>お相手</span>{opp}</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', width: '100%' }}>
+              {emblem}
+              <div style={nameStyle(me)}><span style={labelStyle}>あなたの全運勢</span>{me}</div>
+            </div>
+          );
+        })()}
 
-        {/* 鑑定の方式のバッジ */}
-        <div style={{
-          fontSize: '0.66rem',
-          color: '#e2c074',
-          background: 'rgba(226, 192, 116, 0.08)',
-          border: '1px solid rgba(226, 192, 116, 0.25)',
-          borderRadius: '12px',
-          padding: '0.25rem 0.65rem',
-          margin: '0 auto -0.1rem',
-          textAlign: 'center',
-          fontWeight: '600',
-          letterSpacing: '0.02em'
-        }}>
-          四柱推命・九星気学・16タイプから読み解く鑑定
+        {/* 鑑定の方式: 3つの小さな札 */}
+        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '0.4rem', margin: '0 auto -0.1rem' }}>
+          {['四柱推命', '九星気学', '16タイプ'].map((m) => (
+            <span key={m} style={{
+              fontSize: '0.64rem',
+              color: '#e2c074',
+              border: '1px solid rgba(226, 192, 116, 0.3)',
+              borderRadius: '4px',
+              padding: '0.12rem 0.45rem',
+              fontWeight: 600,
+              letterSpacing: '0.04em'
+            }}>{m}</span>
+          ))}
         </div>
         
         {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}
