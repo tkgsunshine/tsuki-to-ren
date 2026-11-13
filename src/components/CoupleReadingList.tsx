@@ -5,7 +5,7 @@ import type { Person, CoupleReading } from '../utils/coupleReading';
 import { READING_TOPICS, READING_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { ReadingCategory } from '../data/coupleTopics';
 import type { CoupleAccess } from './CoupleHundredSection';
-import { DropPanel, MoreClose, MorePeek, justOpened } from './CoupleDropPanel';
+import { DropPanel, MoreClose, MorePeek, OPEN_ROW, OPEN_WRAP, justOpened } from './CoupleDropPanel';
 import type { CoupleDrops } from '../services/coupleDrops';
 
 // 「二人の相性100」の本格鑑定50（MBTI × 四柱推命 × 九星気学）。★1〜5＋上位◯%＋鑑定文＋根拠（判定に使った星だけ）。
@@ -105,10 +105,10 @@ export const CoupleReadingList: React.FC<Props> = ({ me, opp, myName, oppName, a
               const canDrop = locked && drops && onDrop;
               const dropOpen = openNo === t.no && canDrop;
               return (
-                <div key={t.no}>
+                <div key={t.no} style={isOpen || dropOpen ? OPEN_WRAP : undefined}>
                   <button
                     type="button"
-                    style={{ ...rowStyle, ...(locked ? { opacity: 0.85 } : {}) }}
+                    style={{ ...rowStyle, ...(locked ? { opacity: 0.85 } : {}), ...(isOpen || dropOpen ? OPEN_ROW : {}) }}
                     {...(locked ? { 'data-paid-lock': true } : {})}
                     onClick={(e) => {
                       if (locked && !canDrop) { onLockClick(e); return; }

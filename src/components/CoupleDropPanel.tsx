@@ -97,7 +97,11 @@ export const DropPanel: React.FC<{
             <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem' }}>
               {/* 金のボタンの上だと🌙が背景に溶けるので、濃紺の丸に乗せる（2026-11-13 TAKASHI「🌙が背景に混じってる」） */}
               <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '1.6rem', height: '1.6rem', borderRadius: '50%', background: '#1a1230', fontSize: '0.95rem', lineHeight: 1, boxShadow: '0 0 6px rgba(26, 18, 48, 0.35)' }}>🌙</span>
-              {`かけらを1つ使って${what}を見る`}
+              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.35 }}>
+                {`かけらを1つ使って${what}を見る`}
+                {/* 残りの数（2026-11-13 TAKASHI「かけら使うのボタンにかけらの残数表示して」） */}
+                <span style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#5a4a22' }}>いまの月のかけら：のこり{drops.balance}個</span>
+              </span>
             </span>
           )}
         </button>
@@ -149,3 +153,7 @@ export const MoreClose: React.FC<{ onClose: () => void }> = ({ onClose }) => (
     <ChevronUp size={16} />
   </button>
 );
+
+/** 開いているお題の行を囲む薄い金の背景（2026-11-13 TAKASHI「このお題だけ開いていることが分かりずらい、薄く背景入れるとか」） */
+export const OPEN_WRAP: React.CSSProperties = { background: 'rgba(212, 175, 55, 0.09)', borderRadius: '12px', margin: '0.3rem -0.55rem', padding: '0 0.55rem 0.6rem', boxShadow: 'inset 0 0 0 1px rgba(212, 175, 55, 0.25)' };
+export const OPEN_ROW: React.CSSProperties = { borderBottom: 'none', opacity: 1, color: '#f5d77a', fontWeight: 'bold' };

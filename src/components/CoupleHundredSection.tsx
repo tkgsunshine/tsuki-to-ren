@@ -6,7 +6,7 @@ import { RANK_TOPICS, RANK_CATEGORY_LABELS } from '../data/coupleTopics';
 import type { RankCategory } from '../data/coupleTopics';
 import { toPerson } from '../utils/coupleReading';
 import { CoupleReadingList } from './CoupleReadingList';
-import { DropBalance, DropPanel, MoreClose, MorePeek, justOpened } from './CoupleDropPanel';
+import { DropBalance, DropPanel, MoreClose, MorePeek, OPEN_ROW, OPEN_WRAP, justOpened } from './CoupleDropPanel';
 import { mbtiOptions } from '../constants/mbti';
 import type { CoupleDrops, DropKind } from '../services/coupleDrops';
 
@@ -244,10 +244,11 @@ export const CoupleHundredSection: React.FC<Props> = ({
               const dropOpen = openNo === t.no && access === 'locked' && drops && onDrop;
               const panel = drops && onDrop ? <DropPanel drops={drops} what={access === 'locked' ? '順位と理由' : '理由'} onDrop={(gate) => onDrop('rank', t.no, gate)} onLockClick={onLockClick} lockWord={lockWord} /> : undefined;
               return (
-                <div key={t.no} ref={t.no === focusNo ? focusRef : undefined}>
+                // 開いているお題は、薄い金の背景で囲んで見分けやすく（2026-11-13 TAKASHI「このお題だけ開いていることが分かりずらい」）
+                <div key={t.no} ref={t.no === focusNo ? focusRef : undefined} style={isOpen || dropOpen ? OPEN_WRAP : undefined}>
                   <button
                     type="button"
-                    style={{ ...rowStyle, ...(access === 'locked' ? { opacity: 0.85 } : {}) }}
+                    style={{ ...rowStyle, ...(access === 'locked' ? { opacity: 0.85 } : {}), ...(isOpen || dropOpen ? OPEN_ROW : {}) }}
                     {...(access === 'locked' ? { 'data-paid-lock': true } : {})}
                     onClick={(e) => {
                       if (access === 'locked' && !panel) { onLockClick(e); return; }
