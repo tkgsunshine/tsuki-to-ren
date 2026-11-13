@@ -414,6 +414,24 @@ const ShotZoom: React.FC<{ src: string; alt: string; onClose: () => void }> = ({
   );
 };
 
+// 購入LPを開いた瞬間の演出: 細い三日月（🌙と同じ左向き）が満月まで満ち、その光の輪が広がって月の絵が現れる（約1.9秒・タップは素通り）
+const LP_STARS = [
+  { x: 12, y: 14, d: 0.2 }, { x: 84, y: 10, d: 0.35 }, { x: 22, y: 46, d: 0.5 }, { x: 78, y: 40, d: 0.3 },
+  { x: 50, y: 8, d: 0.45 }, { x: 8, y: 64, d: 0.6 }, { x: 92, y: 62, d: 0.4 }, { x: 36, y: 24, d: 0.55 },
+];
+const LpOpeningMoon: React.FC = () => (
+  <div className="lp-open-glow" aria-hidden="true">
+    <div className="lp-moon-veil" />
+    <div className="lp-moon">
+      <div className="lp-moon-shadow" />
+    </div>
+    <div className="lp-moon-ring" />
+    {LP_STARS.map((p, i) => (
+      <span key={i} className="lp-moon-star" style={{ left: `${p.x}%`, top: `${p.y}%`, animationDelay: `${p.d}s` }} />
+    ))}
+  </div>
+);
+
 export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   isOpen,
   onClose,
@@ -623,7 +641,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     }}>
       {/* 高さの上限は外枠（実際に見えている範囲）に合わせる。90vh だと iOS Safari ではツールバーを
           除いた見える高さより大きくなり、上下がツールバーの裏に隠れていた */}
-      <div style={{
+      <div className="lp-open-card" style={{
         width: '100%',
         maxWidth: '440px',
         maxHeight: '100%',
@@ -686,7 +704,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           paddingBottom: '1.5rem'
         }}>
           {/* Hero: 祈る月と、月からの語りかけ */}
-          <div style={{ position: 'relative' }}>
+          <div className="lp-open-hero" style={{ position: 'relative', overflow: 'hidden' }}>
             <img
               src="/assets/tsuki-prayer.webp"
               alt="プレミアムを案内する月"
@@ -703,7 +721,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               inset: 0,
               background: 'linear-gradient(180deg, rgba(17, 24, 35, 0) 55%, rgba(17, 24, 35, 0.85) 85%, #111823 100%)'
             }} />
-            <div style={{ position: 'absolute', left: 0, right: 0, bottom: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>
+            <LpOpeningMoon />
+            <div className="lp-open-title" style={{ position: 'absolute', left: 0, right: 0, bottom: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>
               <div style={{ fontSize: '0.72rem', color: '#e8b7c7', fontWeight: 'bold', letterSpacing: '0.12em', marginBottom: '0.35rem' }}>
                 月からのご案内
               </div>
@@ -719,7 +738,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </h1>
             </div>
           </div>
-          <div style={{ padding: '0.9rem 1.15rem 1.35rem' }}>
+          <div className="lp-open-rise" style={{ padding: '0.9rem 1.15rem 1.35rem' }}>
             <CharBubble>
               ここまで見てくれて、ありがとう。<br />
               あの人のこと、きっとたくさん考えてきたんですよね。<br />
