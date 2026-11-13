@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { PurchaseTerms } from './PurchaseTerms';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
@@ -542,6 +542,20 @@ export const ResultView: React.FC<ResultViewProps> = ({
   referralGift = false
 }) => {
   const [mbtiQuizFor, setMbtiQuizFor] = useState<'self' | 'partner' | null>(null);
+  // 4つの質問で16タイプを決めて鑑定し直したあと、同じ場所（このカードがあったところ）に戻す。
+  // カードは決めると消えるので、カードの直後の目印が、カードがあった高さに来るようにずらす
+  const mbtiCardRef = useRef<HTMLDivElement>(null);
+  const afterMbtiCardRef = useRef<HTMLDivElement>(null);
+  const mbtiAnchorTopRef = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const before = mbtiAnchorTopRef.current;
+    if (before === null) return;
+    mbtiAnchorTopRef.current = null;
+    const el = afterMbtiCardRef.current;
+    if (!el) return;
+    const delta = el.getBoundingClientRect().top - before;
+    if (delta) window.scrollBy(0, delta);
+  }, [renResult, tsukiResult]);
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [registeringEmail, setRegisteringEmail] = useState(false);
@@ -2095,7 +2109,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         const who = needSelf ? 'self' : 'partner';
         const whoName = who === 'self' ? 'あなた' : san(oppNickname || 'お相手');
         return (
-          <div style={{ background: 'rgba(226, 192, 116, 0.07)', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '14px', padding: '0.85rem 0.95rem', marginBottom: '1rem' }}>
+          <div ref={mbtiCardRef} style={{ background: 'rgba(226, 192, 116, 0.07)', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '14px', padding: '0.85rem 0.95rem', marginBottom: '1rem' }}>
             <div className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.3rem' }}>
               {whoName}の16タイプがまだ決まっていません
             </div>
@@ -2108,12 +2122,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         );
       })()}
+      {!sharedBy && onSetMbti && <div ref={afterMbtiCardRef} aria-hidden="true" />}
       {mbtiQuizFor && onSetMbti && (
         <MbtiQuizModal
           subject={mbtiQuizFor}
           name={san(oppNickname || 'お相手')}
           onClose={() => setMbtiQuizFor(null)}
-          onDone={(t) => { const w = mbtiQuizFor; setMbtiQuizFor(null); onSetMbti(w, t); }}
+          onDone={(t) => { const w = mbtiQuizFor; mbtiAnchorTopRef.current = mbtiCardRef.current ? mbtiCardRef.current.getBoundingClientRect().top : null; setMbtiQuizFor(null); onSetMbti(w, t); }}
         />
       )}
 
