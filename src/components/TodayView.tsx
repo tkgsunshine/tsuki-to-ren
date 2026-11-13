@@ -527,7 +527,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
         }}>
           <img src={selectedChar === 'ren' ? '/assets/ren.webp' : '/assets/tsuki.webp'} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid rgba(255,255,255,0.7)' }} />
           <span style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 900, lineHeight: 1.35 }}>{step.wait ? `${charName}に、待つあいだの過ごし方を聞く` : `${charName}と、送るLINEを考える`}</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 900, lineHeight: 1.35 }}>{step.wait ? `${charName}に、待つあいだの過ごし方を聞く` : `${charName}にLINEする内容を相談する`}</span>
             <span style={{ fontSize: '0.7rem', fontWeight: 'bold', color: 'rgba(26, 18, 48, 0.72)', lineHeight: 1.4 }}>{step.wait ? '気持ちが落ち着く過ごし方を一緒に考えます' : 'この一歩に合う文面を、一緒に作ります'}</span>
           </span>
           <MessageCircle size={20} style={{ flexShrink: 0 }} />
