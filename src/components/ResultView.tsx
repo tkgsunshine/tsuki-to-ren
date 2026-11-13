@@ -38,6 +38,7 @@ import { SelfReadingCard } from './SelfReadingCard';
 import { LuckyDaysSection } from './LuckyDaysSection';
 import type { ReferralStatus } from '../services/referral';
 import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
+import { GuardianSummonFx } from './GuardianSummonFx';
 import MbtiQuizModal from './MbtiQuizModal';
 import { isMbtiCode } from '../utils/mbtiQuiz';
 
@@ -1829,6 +1830,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </>
                 )}
               </div>
+              <GuardianSummonFx />
 
               <div className="guardian-hero-caption">
                 {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
@@ -2009,6 +2011,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </>
                   )}
                 </div>
+                <GuardianSummonFx />
 
                 <div className="guardian-hero-caption">
                   {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
