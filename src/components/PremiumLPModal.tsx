@@ -862,12 +862,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                 </div>
                 {[
                   { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも' },
-                  { label: '二人の相性100（本格鑑定・MBTIランキング）', pair: `${pair.name}だけ\nかけら10個\n＋毎日2個`, monthly: '誰でも\n月のかけらで\n毎日5個' },
+                  { label: '二人の相性100（本格鑑定・MBTIランキング）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
                   { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
                   { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
                   { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', pair: null, monthly: '◯' },
+                  // 月のかけらは別の行に（2026-11-13 TAKASHI「かけらについては別行にして」「10年先の下」）
+                  { label: '月のかけら（1個で1つ開ける）', pair: '購入時10個\n＋毎日2個', monthly: 'お支払い日50個\n＋毎日5個' },
                   { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
                   { label: 'お相手の保存', pair: '2人', monthly: '5人' }
                 ].map((row, idx) => {
