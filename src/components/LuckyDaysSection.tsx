@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Star } from 'lucide-react';
+import { ResultSection } from './ResultSection';
 import { san } from '../utils/fortuneEngine';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import {
@@ -150,11 +151,9 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
   const hasSango = Boolean(me && partner && getSangoBranch(me, partner)) && pairDays.some((x) => x.sango);
 
   return (
+    // 大見出しはカードの外（ResultSection、2026-11-13）
+    <ResultSection title={partner ? `${oppLabel}との最高シンクロ日` : `${myLabel}の恋愛運MAX日`} icon={<Star />}>
     <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
-      <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-        <Star size={16} />
-        {partner ? `${oppLabel}との最高シンクロ日` : `${myLabel}の恋愛運MAX日`}
-      </h2>
 
       {partner && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -222,5 +221,6 @@ export function LuckyDaysSection({ result, isSubscribed, pairOpen = false, myNam
         )}
       </div>
     </div>
+    </ResultSection>
   );
 }
