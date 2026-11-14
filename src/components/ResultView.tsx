@@ -1691,7 +1691,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {partnerLock?.status === 'free' && (
                 <div style={{ textAlign: 'center', fontSize: '0.74rem', color: '#cfc8b8', lineHeight: 1.6 }}>
                   {partnerLock.guest
-                    ? <>明日からも見るなら、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください</>
+                    ? <><strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>で明日以降も点数を確認できます</>
                     : partnerLock.daysLeft > 0
                       ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見れます</>
                       : <>{partnerCall}との今日の相性を無料で見れるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見れます</>}
