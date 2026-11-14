@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { PurchaseTerms } from './PurchaseTerms';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { handleSignInError } from '../utils/signInGuide';
@@ -8,7 +7,6 @@ import { Calendar, Download, X, Heart, Smartphone, Share, MessageCircle } from '
 import { ResultSection } from './ResultSection';
 import { MoonMark, PillarsMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
-import { useBackForwardReset } from '../utils/useBackForwardReset';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
@@ -483,8 +481,6 @@ interface ResultViewProps {
   // 買い切り「お相手1人の深層鑑定」（¥680）。unlocked: このお相手を買った、today: 買ったのが今日（日本時間）
   pairUnlock?: PairUnlock;
   onBuyPair?: () => Promise<void> | void;
-  // 購入済みの方のログイン（未登録のときだけ、プランの説明の下に出す）
-  onOpenLogin?: () => void;
   onSubscribe: () => void;
   // 購入LPを開く。focus: 先に見せるプラン（買い切り ¥680 か 月額）
   onOpenPremiumLP?: (focus?: 'pair' | 'monthly') => void;
@@ -541,7 +537,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   partnerLock = null,
   pairUnlock = null,
   onBuyPair,
-  onOpenLogin,
   onSubscribe,
   onOpenPremiumLP,
   selectedChar,
@@ -1070,14 +1065,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // ロックの文言は全部「続きを見る」に統一（料金・違いは開いた先の購入LPで説明する）
   const deepLockWord = LOCK_WORD;
   const pairCardRef = React.useRef<HTMLDivElement>(null);
-  const [buyingPair, setBuyingPair] = useState(false);
-  useBackForwardReset(() => setBuyingPair(false));
-  // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
-  const handleBuyPair = async () => {
-    if (!onBuyPair || buyingPair) return;
-    setBuyingPair(true);
-    try { await onBuyPair(); } finally { setBuyingPair(false); }
-  };
   // 変わらない鑑定（トリセツ・深層鑑定・相性グラフ・年次）のロック: ¥680を先に見せたLPへ
   const handleDeepLockClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -3201,17 +3188,21 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 </div>
 
                 {(() => {
-                  // [項目, プレミアム, シングル]。数字は実装に合わせる（保存数 App.tsx partnerLimit、かけら api/_lib/couple-drops.js、チャット api/_lib/chat-limit.js）
+                  // [項目, プレミアム, シングル]。購入LPの比較表（PremiumLPModal.tsx「プランを選ぶ」）と同じ行・同じ文言（2026-11-14 TAKASHI「表の内容はLPと合わせて」）
+                  const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
                   const rows: [string, string, string][] = [
-                    ['トリセツ・深層鑑定・相性グラフ', 'お相手全員', `${partnerCall}だけ・ずっと`],
-                    ['今日の相性・LINEの送り方', '毎日', '買った日だけ'],
-                    ['14日間・月ごと・10年先の流れ', '○', '－'],
-                    ['毎朝の運勢メール', '毎日全文', '買った日だけ全文'],
-                    ['月のかけら（※）', '毎月50個＋毎日5個', '10個＋毎日2個'],
-                    ['月 ＆ 蓮へのチャット相談', '回数を気にせず', '1日2回'],
-                    ['お相手の保存', '5人まで', `2人＋${partnerCall}`],
+                    ['トリセツ・深層鑑定・相性グラフ', '誰でも', `${partnerCall}だけ`],
+                    ['二人の相性100（本格鑑定・MBTIランキング）', '誰でも', `${partnerCall}だけ`],
+                    ['惹かれるファッション・ドキッとさせる仕草', '誰でも', `${partnerCall}だけ`],
+                    ['2人の最高シンクロ日（日付）', '誰でも', `${partnerCall}だけ`],
+                    ['今日の相性と、本日のLINEの送り方', '毎日', `本日分(${todayJst})`],
+                    ['あなたの恋愛運MAX日（日付）', '○', '○'],
+                    ['10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', '○', '－'],
+                    ['月のかけら（1個で1つ開ける）', '毎月50個\n＋毎日5個', '購入時10個\n＋毎日2個'],
+                    ['月・蓮へのチャット相談', '無制限', '1日2回'],
+                    ['お相手の保存', '5人', '2人'],
                   ];
-                  const cell: React.CSSProperties = { padding: '0.45rem 0.3rem', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: '0.68rem', lineHeight: 1.45, verticalAlign: 'middle' };
+                  const cell: React.CSSProperties = { padding: '0.45rem 0.3rem', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: '0.68rem', lineHeight: 1.45, verticalAlign: 'middle', whiteSpace: 'pre-line', overflowWrap: 'anywhere' };
                   const head: React.CSSProperties = { padding: '0.4rem 0.3rem', fontSize: '0.68rem', fontWeight: 'bold', lineHeight: 1.35 };
                   if (!canBuyPair) {
                     return (
@@ -3219,7 +3210,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         {rows.map(([label, p]) => (
                           <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
                             <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                            <span><strong>{label.replace('（※）', '')}</strong>{p !== '○' && <>：{p}</>}</span>
+                            <span><strong>{label}</strong>{p !== '○' && <>：{p.replace('\n', '')}</>}</span>
                           </div>
                         ))}
                       </div>
@@ -3245,78 +3236,41 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         ))}
                       </tbody>
                       <tfoot>
-                        <tr><td colSpan={3} style={{ ...cell, textAlign: 'left', fontSize: '0.62rem', color: '#a9a294' }}>※ 月のかけら1つで「二人の相性100」のお題が1つ開きます</td></tr>
+                        <tr><td colSpan={3} style={{ ...cell, textAlign: 'left', fontSize: '0.62rem', color: '#a9a294' }}>※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。</td></tr>
                       </tfoot>
                     </table>
                   );
                 })()}
 
-                {/* ボタンは購入LPの2つのボタン（PremiumLPModal.tsx renderPlanButtons）と同じ見た目・文言（2026-11-14 TAKASHI「CTAをLPと同様に」） */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', marginTop: '0.3rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (onOpenPremiumLP) {
-                        onOpenPremiumLP('monthly');
-                      } else {
-                        onSubscribe();
-                        setSubSuccess(true);
-                      }
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.8rem 1rem',
-                      background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
-                      color: '#000',
-                      border: 'none',
-                      borderRadius: '9999px',
-                      fontSize: '0.9rem',
-                      fontWeight: 800,
-                      letterSpacing: '0.03em',
-                      boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    誰でも無制限に鑑定を見る（980円/月）
-                  </button>
-                  {canBuyPair && (
-                    <button
-                      type="button"
-                      onClick={handleBuyPair}
-                      disabled={buyingPair}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        borderRadius: '9999px',
-                        border: '1.5px solid rgba(226, 192, 116, 0.6)',
-                        background: 'rgba(226, 192, 116, 0.07)',
-                        color: '#f2e2b3',
-                        fontSize: '0.88rem',
-                        fontWeight: 'bold',
-                        cursor: buyingPair ? 'wait' : 'pointer',
-                        opacity: buyingPair ? 0.7 : 1
-                      }}
-                    >
-                      {buyingPair ? '決済画面へ移動しています...' : `${partnerCall}の鑑定だけ見る（680円/買い切り）`}
-                    </button>
-                  )}
-                </div>
-
-                {canBuyPair && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      シングルはお相手の生年月日ごとの購入です。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
-                      {!isRegistered && onOpenLogin && (
-                        <>
-                          <br />購入済みの方は
-                          <button type="button" onClick={onOpenLogin} style={{ background: 'none', border: 'none', padding: '0 0.15rem', color: '#f2e2b3', textDecoration: 'underline', fontSize: 'inherit', cursor: 'pointer' }}>購入時のメールでログイン</button>
-                          してください。
-                        </>
-                      )}
-                    </div>
-                    <PurchaseTerms plans={['pair']} />
-                  </div>
-                )}
+                {/* ボタンは購入LPへ進む1つだけ。料金の細かい説明・規約・支払い方法は購入LPと利用規約にある（2026-11-14 TAKASHI「鑑定ページのCTAは一つ、表と1つのボタンだけ」） */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenPremiumLP) {
+                      onOpenPremiumLP('monthly');
+                    } else {
+                      onSubscribe();
+                      setSubSuccess(true);
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    marginTop: '0.3rem',
+                    padding: '0.8rem 0.6rem',
+                    background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '9999px',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.9rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.03em',
+                    boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  プランを選んで続きを見る
+                </button>
               </div>
             )}
           </div>

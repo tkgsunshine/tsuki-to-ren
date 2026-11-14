@@ -1932,7 +1932,6 @@ function App() {
                 partnerLock={partnerLock}
                 pairUnlock={pairUnlock}
                 onBuyPair={handleBuyPair}
-                onOpenLogin={() => setShowAuthModal(true)}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={openPremiumLP}
                 onOpenShareCard={() => setShowShareCard(true)}
@@ -1979,7 +1978,6 @@ function App() {
                 partnerLock={partnerLock}
                 pairUnlock={pairUnlock}
                 onBuyPair={handleBuyPair}
-                onOpenLogin={() => setShowAuthModal(true)}
                 onSubscribe={handleStartCheckout}
                 onOpenPremiumLP={openPremiumLP}
                 onOpenShareCard={() => setShowShareCard(true)}
