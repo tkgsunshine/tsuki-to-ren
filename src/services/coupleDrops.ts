@@ -20,7 +20,7 @@ export interface CoupleDrops {
   /** 今回の表示で足されたかけら（支払い日・毎日の補充） */
   granted: number;
   /** このお相手について、かけらで開けたお題 */
-  opened: { rank: number[]; reading: number[] };
+  opened: { rank: number[]; reading: number[]; days?: string[] };
 }
 
 export type DropKind = 'rank' | 'reading';
@@ -45,6 +45,8 @@ const guestPost = async (body: Record<string, unknown>): Promise<{ drops: Couple
   const birth = String(body.oppBirth || '');
   const o = rec.opened[birth] || { rank: [], reading: [] };
   const open = body.open as { kind: DropKind; no: number } | undefined;
+  // 恋の暦の先の日は月額会員（ログインしている）だけ。未登録の端末のかけらでは開けない
+  if ((body.open as { kind?: string } | undefined)?.kind === 'day') return { drops: null, error: 'failed' };
   let error: 'no_drops' | undefined;
   if (open && !o[open.kind].includes(open.no)) {
     if (rec.balance < 1) error = 'no_drops';
@@ -90,7 +92,8 @@ const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops
       opened: (() => {
         const g = readGuest().opened[String(body.oppBirth || '')];
         const u = (x: number[], y?: number[]) => [...new Set([...x, ...(y || [])])].sort((m, n) => m - n);
-        return { rank: u(nums(data.opened?.rank), g?.rank), reading: u(nums(data.opened?.reading), g?.reading) };
+        const days = Array.isArray(data.opened?.days) ? data.opened.days.filter((d: unknown): d is string => typeof d === 'string') : [];
+        return { rank: u(nums(data.opened?.rank), g?.rank), reading: u(nums(data.opened?.reading), g?.reading), days };
       })()
     };
     return { drops, ...(res.status === 409 ? { error: 'no_drops' as const } : res.ok ? {} : { error: 'failed' as const }) };
@@ -104,3 +107,7 @@ export const fetchCoupleDrops = (oppBirth: string) => post({ oppBirth });
 
 /** かけらを1つ使ってお題を開ける（もう開いていれば使わない） */
 export const openCoupleTopic = (oppBirth: string, kind: DropKind, no: number) => post({ oppBirth, open: { kind, no } });
+
+/** 恋の暦の先の日（今日から15日目より先）を、かけら10個で開ける（月額会員だけ。サーバーが確かめる） */
+export const DAY_COST = 10;
+export const openKoyomiDay = (oppBirth: string, date: string) => post({ oppBirth, open: { kind: 'day', date } });

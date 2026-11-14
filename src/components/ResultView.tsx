@@ -7,7 +7,11 @@ import { Calendar, Download, X, Heart, Smartphone, Share, MessageCircle } from '
 import { ResultSection } from './ResultSection';
 import { MoonMark, PillarsMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
-import type { FortuneResult } from '../utils/fortuneEngine';
+import { getAstrologyNameReading } from '../utils/astrologyNameReading';
+import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
+import { TodayView } from './TodayView';
+import type { Journey } from '../utils/partnerToday';
+import type { SavedPartner } from '../App';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
@@ -523,6 +527,13 @@ interface ResultViewProps {
     onOpen: () => void;
     onRedeem: (code: string) => Promise<string | null>;
   };
+  /** 月額プレミアム会員の「今日」画面（2026-11-12 TAKASHI）: いま表示している鑑定の入力・保存したお相手・お相手の切り替え */
+  todayInput?: DiagnosisInput | null;
+  todayPartners?: SavedPartner[];
+  onTodaySwitch?: (partner: SavedPartner | null) => void;
+  /** true: 鑑定書のタブから開く（診断の入力画面から鑑定したとき） */
+  startOnBook?: boolean;
+  onUpdateJourney?: (partnerId: string, journey: Journey) => void;
 }
 
 // 画面下のバー（無料で続きを見る／シェア）の位置: 下メニューのすぐ上（約6px空ける）。
@@ -555,6 +566,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
   onSetMbti,
   referral,
   referralGift = false,
+  todayInput = null,
+  todayPartners = [],
+  onTodaySwitch,
+  startOnBook,
+  onUpdateJourney,
   coupleFocusNo = null,
   coupleDrops = null,
   coupleDropsError = null,
@@ -585,8 +601,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
   const torisetsuRef = useRef<HTMLElement>(null);
   const wasSubscribedRef = useRef(isSubscribed);
   const [showWelcomePremium, setShowWelcomePremium] = useState(false);
+  // 月額プレミアム会員は、開いたときに「今日」（毎日変わる結果だけ）を見せ、タブで「鑑定書」（今までの結果画面）に切り替える（2026-11-12 TAKASHI）。
+  // 共有リンクで開いた、ほかの人の結果では出さない
+  // 診断の入力画面から鑑定したときは鑑定書から（2026-11-12 TAKASHI）
+  const [resultTab, setResultTab] = useState<'today' | 'book'>(startOnBook ? 'book' : 'today');
+  useEffect(() => { setResultTab(startOnBook ? 'book' : 'today'); }, [startOnBook]);
+  const showTodayTabs = isSubscribed && !sharedBy;
+  const showToday = showTodayTabs && resultTab === 'today';
   useEffect(() => {
     if (isSubscribed && !wasSubscribedRef.current) {
+      // 購入した直後は、開いたトリセツへ案内する（鑑定書のほう）
+      setResultTab('book');
       setShowWelcomePremium(true);
       // モーダルが閉じてから戻す（閉じる前だと body のスクロールロック解除で位置がずれる）
       const timer = setTimeout(() => {
@@ -677,24 +702,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
     try {
       localStorage.setItem('hasu_a2hs_banner_dismissed', 'true');
     } catch {}
-  };
-
-  // 守護獣の名前（例: 壬虎）のふりがな（例: みずのえとら）。魁罡・極稀の印は読みから外す
-  const getAstrologyNameReading = (name?: string): string => {
-    if (!name) return '';
-    const core = name.replace(/👑[^👑]*👑\s*/u, '').trim();
-    if (core.length !== 2) return '';
-    const stemReadings: Record<string, string> = {
-      '甲': 'きのえ', '乙': 'きのと', '丙': 'ひのえ', '丁': 'ひのと', '戊': 'つちのえ',
-      '己': 'つちのと', '庚': 'かのえ', '辛': 'かのと', '壬': 'みずのえ', '癸': 'みずのと'
-    };
-    const animalReadings: Record<string, string> = {
-      '鼠': 'ねずみ', '牛': 'うし', '虎': 'とら', '兎': 'うさぎ', '龍': 'りゅう', '蛇': 'へび',
-      '馬': 'うま', '羊': 'ひつじ', '猿': 'さる', '鳥': 'とり', '犬': 'いぬ', '猪': 'いのしし'
-    };
-    const stem = stemReadings[core[0]];
-    const animal = animalReadings[core[1]];
-    return stem && animal ? stem + animal : '';
   };
 
   const getKanjiReading = (pillar: string): string => {
@@ -1373,6 +1380,50 @@ export const ResultView: React.FC<ResultViewProps> = ({
         </div>
       )}
 
+      {/* 月額プレミアム会員: 「今日」と「鑑定書」の切り替え */}
+      {showTodayTabs && (
+        <div role="tablist" aria-label="結果の表示" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem', width: '100%', maxWidth: '360px', margin: '0 auto', padding: '0.3rem', boxSizing: 'border-box', borderRadius: '9999px', background: 'rgba(11, 15, 21, 0.85)', border: '1px solid rgba(226, 192, 116, 0.35)' }}>
+          {([['today', '恋の暦'], ['book', hasOpponent ? '二人の鑑定書' : 'あなたの鑑定書']] as const).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={resultTab === key}
+              onClick={() => { setResultTab(key); resultTopRef.current?.scrollIntoView({ block: 'start' }); }}
+              className="font-serif"
+              style={{
+                padding: '0.5rem 0.4rem', borderRadius: '9999px', border: 'none', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 'bold',
+                background: resultTab === key ? 'linear-gradient(90deg, #ecc87a 0%, #d9a441 100%)' : 'transparent',
+                color: resultTab === key ? '#1a1230' : '#b9b2a4'
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {showToday && (
+        <TodayView
+          result={activeResult}
+          selectedChar={selectedChar}
+          setSelectedChar={setSelectedChar}
+          myName={myName}
+          oppName={opponentName}
+          hasOpponent={hasOpponent}
+          input={todayInput}
+          partners={todayPartners}
+          onSwitch={onTodaySwitch}
+          onUpdateJourney={onUpdateJourney}
+          onOpenBook={() => { setResultTab('book'); resultTopRef.current?.scrollIntoView({ block: 'start' }); }}
+          onOpenChat={onOpenChat}
+          barBottom={RESULT_BAR_BOTTOM}
+        />
+      )}
+
+      {/* 「今日」を見ているあいだは、鑑定書（ここから下）を隠す。display: contents なので、表示中の並び・余白は今までと同じ */}
+      <div style={{ display: showToday ? 'none' : 'contents' }}>
+
       {/* 🌙 / 🔮 Character Switch Tabs (Sticky fixed to top of view) */}
       <div style={{
         display: 'flex',
@@ -1572,7 +1623,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           const daily = lockedScore(realDaily, 3, dailyHidden);
           const diff = daily - base;
           const clamp = (v: number) => Math.max(0, Math.min(100, v));
-          const scoreMood = getScoreMood(base, realDaily);
+          const scoreMood = getScoreMood(base, realDaily, hasOpponent);
           const mood = { ...scoreMood, color: scoreMood.trend === 'up' ? '#8fd3ae' : scoreMood.trend === 'down' ? '#e0a9a0' : '#d8cfb8' };
           // 2つの点が近いとバー上のラベルが重なるので、そのときは基本のラベルをバーの下に回す
           const labelsCollide = Math.abs(diff) < 28;
@@ -1683,7 +1734,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   {mood.title}
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#a9a293', letterSpacing: '0.05em' }}>
-                  {baseLabel}より <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
+                  {hasOpponent ? 'いつもより' : `${baseLabel}より`} <span className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 800, color: mood.color, textShadow: `0 0 8px ${mood.color}55` }}>{mood.sign}</span>
                 </div>
               </div>}
 
@@ -4038,6 +4089,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         isOpen={showA2hsModal}
         onClose={() => setShowA2hsModal(false)}
       />
+      </div>
     </div>
   );
 };

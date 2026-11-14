@@ -110,7 +110,7 @@ export const SharedResultView: React.FC<Props> = ({ shared, onStart }) => {
   const hasOpponent = !!oppName;
   const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
   const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
-  const mood = baseScore !== undefined && dailyScore !== undefined ? getScoreMood(baseScore, dailyScore) : null;
+  const mood = baseScore !== undefined && dailyScore !== undefined ? getScoreMood(baseScore, dailyScore, hasOpponent) : null;
   const cta = (
     <button type="button" className="consult-btn font-serif" onClick={onStart} style={{ width: '100%', maxWidth: '340px', margin: '0 auto' }}>
       あなたも無料で鑑定する
@@ -173,7 +173,7 @@ export const SharedResultView: React.FC<Props> = ({ shared, onStart }) => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.15rem' }}>
             <MoonPhaseMark size={30} phase={mood.phase} />
             <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '0.12em', color: '#f2e2b3' }}>{mood.title}</div>
-            <div style={{ fontSize: '0.72rem', color: '#a9a293' }}>{baseLabel}より {mood.sign}</div>
+            <div style={{ fontSize: '0.72rem', color: '#a9a293' }}>{hasOpponent ? 'いつもより' : `${baseLabel}より`} {mood.sign}</div>
           </div>
         )}
 

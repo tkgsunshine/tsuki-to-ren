@@ -23,6 +23,12 @@ export const PREMIUM_CAP = 100;
 export const FREE_DAILY = 2;
 export const FREE_CAP = 2;
 export const PAIR_BONUS = 10;
+// 恋の暦（月額の「今日」画面）のカレンダーは、今日から14日間だけ点数が見える。その先の日は、かけら10個で1日ずつ開ける
+// （2026-11-14 TAKASHI「かけら10個で未来の日付も解放できるようにして」）。開けられるのは、暦に出る翌月の終わりまで
+export const DAY_COST = 10;
+export const DAY_FREE_AHEAD = 14;
+export const DAY_MAX_AHEAD = 62;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TOPIC_MAX = 50;
 const BIRTH_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -81,7 +87,7 @@ export function dropCounts({ r, bonusGranted, seg, used, firstUse }) {
   else add('grant_f', r.granted);
   if (bonusGranted) add('grant_s', PAIR_BONUS);
   if (used) {
-    add(`use_${used.pool}_${used.kind}`, 1);
+    add(`use_${used.pool}_${used.kind}`, used.kind === 'day' ? DAY_COST : 1);
     for (const k of dropTopicKeys(used.kind, used.no)) add(k, 1);
     if (firstUse) add(`users_${seg}`, 1);
   }
@@ -102,7 +108,7 @@ export function mergeDropsRecords(to, from, { premiumMoved = false } = {}) {
     const a = openedOf({ opened }, key);
     const b = openedOf(f, key);
     const u = (x, y) => [...new Set([...x, ...y])].sort((m, n) => m - n);
-    opened[key] = { rp: u(a.rp, b.rp), rf: u(a.rf, b.rf), gp: u(a.gp, b.gp), gf: u(a.gf, b.gf) };
+    opened[key] = { rp: u(a.rp, b.rp), rf: u(a.rf, b.rf), gp: u(a.gp, b.gp), gf: u(a.gf, b.gf), d: [...new Set([...a.d, ...b.d])].sort() };
   }
   const bonus = { ...(t.bonus || {}) };
   for (const [key, n] of Object.entries(f.bonus || {})) bonus[key] = Math.max(0, Number(bonus[key]) || 0) + Math.max(0, Number(n) || 0);
@@ -132,21 +138,32 @@ export async function moveCoupleDrops(db, fromUid, toUid, { premiumMoved = false
 }
 
 const cleanList = (v) => (Array.isArray(v) ? v.filter((n) => Number.isInteger(n) && n >= 1 && n <= TOPIC_MAX) : []);
-/** そのお相手について開けたお題（r: ランキング、g: 本格鑑定。p: 月額の間に開けた、f: 無料のかけらで開けた） */
+const cleanDays = (v) => (Array.isArray(v) ? v.filter((d) => typeof d === 'string' && DATE_RE.test(d)) : []);
+/** そのお相手について開けたお題（r: ランキング、g: 本格鑑定。p: 月額の間に開けた、f: 無料のかけらで開けた。d: 恋の暦で開けた先の日） */
 export const openedOf = (rec, key) => {
   const o = rec?.opened?.[key] || {};
-  return { rp: cleanList(o.rp), rf: cleanList(o.rf), gp: cleanList(o.gp), gf: cleanList(o.gf) };
+  return { rp: cleanList(o.rp), rf: cleanList(o.rf), gp: cleanList(o.gp), gf: cleanList(o.gf), d: cleanDays(o.d) };
 };
 /** 画面に返す「見られるお題」。月額でなくなったら、月額の間に開けた分は外す */
 export const visibleOpened = (o, premium) => ({
   rank: [...new Set([...o.rf, ...(premium ? o.rp : [])])].sort((a, b) => a - b),
-  reading: [...new Set([...o.gf, ...(premium ? o.gp : [])])].sort((a, b) => a - b)
+  reading: [...new Set([...o.gf, ...(premium ? o.gp : [])])].sort((a, b) => a - b),
+  // 恋の暦は月額の画面にしかないので、月額かどうかで分けない
+  days: [...new Set(o.d || [])].sort()
 });
 
+/** 恋の暦で開けられる日か（今日から15日目〜翌月の終わりあたりまで） */
+export const isOpenableDay = (date, today) => {
+  if (!DATE_RE.test(String(date || '')) || Number.isNaN(Date.parse(`${date}T00:00:00Z`))) return false;
+  const ahead = dayNum(date) - dayNum(today);
+  return ahead >= DAY_FREE_AHEAD && ahead <= DAY_MAX_AHEAD;
+};
+
 /**
- * POST /api/stripe/drops { oppBirth, open?: { kind: 'rank' | 'reading', no } }
- * → { balance, cap, daily, premium, opened: { rank: [...], reading: [...] }, granted, opened_now? }
+ * POST /api/stripe/drops { oppBirth, open?: { kind: 'rank' | 'reading', no } | { kind: 'day', date: 'YYYY-MM-DD' } }
+ * → { balance, cap, daily, premium, opened: { rank: [...], reading: [...], days: [...] }, granted, opened_now? }
  * open を付けると、かけらを1つ使ってそのお題を開ける（もう開いていれば使わない）。
+ * kind 'day' は恋の暦の先の日を、かけら10個で開ける（月額会員だけ）。
  */
 export default async function handler(req, res, deps = {}) {
   res.setHeader('Cache-Control', 'no-store, private');
@@ -158,9 +175,11 @@ export default async function handler(req, res, deps = {}) {
     const birth = String(body.oppBirth || '');
     if (!BIRTH_RE.test(birth)) return res.status(400).json({ status: 'error', message: 'Invalid oppBirth' });
     const open = body.open && typeof body.open === 'object' ? body.open : null;
-    if (open && (!['rank', 'reading'].includes(open.kind) || !Number.isInteger(open.no) || open.no < 1 || open.no > TOPIC_MAX)) {
+    const isDay = open?.kind === 'day';
+    if (open && !isDay && (!['rank', 'reading'].includes(open.kind) || !Number.isInteger(open.no) || open.no < 1 || open.no > TOPIC_MAX)) {
       return res.status(400).json({ status: 'error', message: 'Invalid topic' });
     }
+    if (isDay && !isOpenableDay(open.date, deps.today || jstToday())) return res.status(400).json({ status: 'error', message: 'Invalid date' });
 
     const db = deps.db || getDb();
     const p = (await db.collection(PREMIUM).doc(user.uid).get()).data();
@@ -173,6 +192,7 @@ export default async function handler(req, res, deps = {}) {
     const pair = await findPairUnlock(db, user.uid, birth, deps.live ?? isLiveKey());
     // シングルプランを買ったお相手: 月額の間に開けたお題も、解約後ずっと見られる（買い切りのため。2026-11-14 TAKASHI「解約後も見えるほうがいい」）
     const keepAll = Boolean(pair);
+    if (isDay && !premium) return res.status(403).json({ status: 'error', message: 'Premium only' });
 
     const out = await db.runTransaction(async (tx) => {
       const snap = await tx.get(ref);
@@ -188,7 +208,21 @@ export default async function handler(req, res, deps = {}) {
       let openedNow = false;
       let used = null;
       let error = null;
-      if (open) {
+      // 過ぎた日は記録から外す（もう誰でも見える日なので）
+      if (o.d.some((d) => d < today)) o.d = o.d.filter((d) => d >= today);
+      if (open && isDay) {
+        if (!o.d.includes(open.date)) {
+          if (r.balance + bonus < DAY_COST) error = 'no_drops';
+          else {
+            // 毎日の分を先に使い、足りない分をシングルプランの分から
+            const fromDaily = Math.min(r.balance, DAY_COST);
+            r.balance -= fromDaily; bonus -= DAY_COST - fromDaily;
+            o.d = [...o.d, open.date].sort();
+            openedNow = true;
+            used = { kind: 'day', date: open.date, pool: fromDaily < DAY_COST ? 's' : 'p' };
+          }
+        }
+      } else if (open) {
         const vis = visibleOpened(o, premium || keepAll);
         const already = (open.kind === 'rank' ? vis.rank : vis.reading).includes(open.no);
         if (!already) {
@@ -206,7 +240,7 @@ export default async function handler(req, res, deps = {}) {
           }
         }
       }
-      const changed = openedNow || bonusGranted || bonus !== bonusBefore || r.balance !== Number(rec.balance || 0) || r.lastDaily !== rec.lastDaily || r.periods.length !== (rec.periods || []).length || r.tier !== rec.tier;
+      const changed = openedNow || o.d.length !== openedOf(rec, key).d.length || bonusGranted || bonus !== bonusBefore || r.balance !== Number(rec.balance || 0) || r.lastDaily !== rec.lastDaily || r.periods.length !== (rec.periods || []).length || r.tier !== rec.tier;
       if (changed) {
         tx.set(ref, {
           balance: r.balance, lastDaily: r.lastDaily, periods: r.periods, tier: r.tier,

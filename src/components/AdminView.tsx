@@ -1039,7 +1039,8 @@ function DropsTable({ docs }: { docs: DailyDoc[] }) {
   const since = docs.find((d) => d.byDrops && Object.keys(d.byDrops).length)?.date || null;
   const grant: Record<string, number> = { p: n('grant_payday') + n('grant_p'), s: n('grant_s'), f: n('grant_f'), g: n('grant_g') };
   const use = (seg: string, kind: string) => n(`use_${seg}_${kind}`);
-  const usedAll = DROP_SEGS.reduce((t, [s]) => t + use(s, 'rank') + use(s, 'reading'), 0);
+  // 恋の暦の先の日（1日＝かけら10個。use_*_day は個数で数える。2026-11-14〜）
+  const usedAll = DROP_SEGS.reduce((t, [s]) => t + use(s, 'rank') + use(s, 'reading') + use(s, 'day'), 0);
   const grantAll = Object.values(grant).reduce((a, b) => a + b, 0);
   const usersAll = DROP_SEGS.reduce((t, [s]) => t + n(`users_${s}`), 0);
   const shortAll = DROP_SEGS.reduce((t, [s]) => t + n(`short_${s}`), 0);
@@ -1091,6 +1092,7 @@ function DropsTable({ docs }: { docs: DailyDoc[] }) {
                   <th style={{ ...c.th, ...c.num }}>配った</th>
                   <th style={{ ...c.th, ...c.num }}>使った：ランキング</th>
                   <th style={{ ...c.th, ...c.num }}>使った：テーマ</th>
+                  <th style={{ ...c.th, ...c.num }}>使った：恋の暦の日</th>
                   <th style={{ ...c.th, ...c.num }}>使った人（日ごと）</th>
                   <th style={{ ...c.th, ...c.num }}>使い切り</th>
                   <th style={{ ...c.th, ...c.num }}>→案内を押した</th>
@@ -1103,6 +1105,7 @@ function DropsTable({ docs }: { docs: DailyDoc[] }) {
                     <td style={{ ...c.td, ...c.num }}>{grant[s]}{s === 'p' && n('grant_payday') ? <div style={c.muted}>うち支払い日 {n('grant_payday')}</div> : null}</td>
                     <td style={{ ...c.td, ...c.num }}>{use(s, 'rank')}</td>
                     <td style={{ ...c.td, ...c.num }}>{use(s, 'reading')}</td>
+                    <td style={{ ...c.td, ...c.num }}>{use(s, 'day')}{use(s, 'day') ? <div style={c.muted}>{use(s, 'day') / 10}日分</div> : null}</td>
                     <td style={{ ...c.td, ...c.num }}>{n(`users_${s}`)}</td>
                     <td style={{ ...c.td, ...c.num }}>{s === 's' ? '—' : n(`short_${s}`)}</td>
                     <td style={{ ...c.td, ...c.num }}>{s === 's' ? '—' : n(`shortcta_${s}`)}</td>

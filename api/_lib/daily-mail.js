@@ -62,7 +62,7 @@ export function buildDailyContent(sub, access = { premium: true }) {
   if (locked) {
     // Only today's flow (the weather word and moon) — the same thing the locked result screen still shows
     const match = generateFortuneResult(buildInput(sub, true), character);
-    const mood = getScoreMood(match.baseScore, match.dailyScore);
+    const mood = getScoreMood(match.baseScore, match.dailyScore, true);
     // baseScore / dailyScore: the pair's, for the rings (today's is drawn blurred, never as a number)
     content.partnerTeaser = { title: mood.title, phase: mood.phase, baseScore: match.baseScore, dailyScore: match.dailyScore, pair: access.pair?.unlocked === true, pairOffer: canPromotePair(access) };
   }
@@ -120,7 +120,7 @@ const MOOD_COLORS = { up: '#8fd3ae', flat: '#d8cfb8', down: '#e0a9a0' };
 export function renderScoreRings(baseScore, dailyScore, hasOpponent, locked = false) {
   const base = clampScore(baseScore);
   const daily = clampScore(dailyScore);
-  const mood = getScoreMood(base, daily);
+  const mood = getScoreMood(base, daily, hasOpponent);
   const suffix = hasOpponent ? '' : '-solo';
   const baseLabel = hasOpponent ? '基本の相性' : '基本運勢';
   const todayLabel = hasOpponent ? '今日の相性' : '今日の運勢';
@@ -141,7 +141,7 @@ export function renderScoreRings(baseScore, dailyScore, hasOpponent, locked = fa
                     </div>
                     <div style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 20px; font-weight: bold; color: #f2c98a; letter-spacing: 0.12em; margin-top: 2px;">${esc(mood.title)}</div>
                     ${locked ? '' : `<div style="font-size: 12px; color: #a9a293; letter-spacing: 0.05em; margin-top: 4px;">
-                      ${baseLabel}より <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
+                      ${hasOpponent ? 'いつもより' : `${baseLabel}より`} <span style="font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; font-size: 17px; font-weight: bold; color: ${MOOD_COLORS[mood.trend]};">${esc(mood.sign)}</span>
                     </div>`}
                   </td>
                 </tr>

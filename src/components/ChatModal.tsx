@@ -6,6 +6,13 @@ import { getFirebaseAuth, signInWithGoogle, signInWithX } from '../services/fire
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { san } from '../utils/fortuneEngine';
 import { generateChatResponse } from '../utils/chatEngine';
+import { getTodayStars, todayStarsForChat } from '../utils/todayStars';
+import { getPartnerToday, WAVE_LABEL } from '../utils/partnerToday';
+import type { PartnerToday } from '../utils/partnerToday';
+
+// 「今日」画面の「お相手の今日」（星から見た傾向）をチャットにも渡す
+const partnerTodayForChat = (pt: PartnerToday | null): string =>
+  pt ? `\nお相手の今日の様子（星から見た傾向）: ${pt.mood}・元気${pt.energy}/5（十二運 ${pt.energyName}：${pt.energyText}）${pt.sway ? '・心が揺れやすい日' : ''}・${WAVE_LABEL[pt.wave]}` : '';
 import { showAlert, showConfirm, showFieldError } from './AppDialog';
 import { chatHistoryKey, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chatHistory';
 import type { SavedPartner } from '../App';
@@ -209,6 +216,14 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   const getDiagnosedDataText = (): string => {
     if (!result) return '';
     const hasOpp = !!result.opponentPillar;
+    // 今日の見出し・LINE吉時間・今日の星の動き（「今日」画面と同じ根拠）。今日の相性を見られないお相手には渡さない
+    const todayText = hideDailyScore ? '' : `
+
+【今日の運勢（${new Date().getMonth() + 1}月${new Date().getDate()}日）】
+今日の見出し: ${(result.dailyLuckTitle || '').replace(/\n/g, ' ')}
+LINE吉時間: ${result.bestContactHour || ''}
+今日の星の動き:
+${todayStarsForChat(getTodayStars(result, new Date(), 'あなた', hasOppNickname ? oppNickname : undefined))}${partnerTodayForChat(getPartnerToday(result, new Date()))}`;
     const basicInfo = `【あなたの属性】
 命式の日干（本質）: ${result.myPillar}
 本命星（九星）: ${result.myStar}
@@ -226,10 +241,10 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 【現在の二人の相性】
 基本相性値: ${result.baseScore}点
 今日のバイオリズム相性値: ${hideDailyScore ? '非公開（プレミアム限定。点数は答えないこと）' : `${result.dailyScore}点`}
-二人の相性一言要約: "${result.oneLiner}"`;
+二人の相性一言要約: "${result.oneLiner}"${todayText}`;
     }
     
-    return basicInfo;
+    return `${basicInfo}${todayText}`;
   };
 
   const handleSend = async (text: string) => {
@@ -268,7 +283,10 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       }));
 
       // The server counts each account's chats (api/_lib/chat-limit.js), so it needs to know who is asking
-      const idToken = await getFirebaseAuth().currentUser?.getIdToken().catch(() => undefined);
+      // 開いた直後はログイン状態の読み込みが終わっていないことがあるので、待ってから鍵をもらう
+      const auth = getFirebaseAuth();
+      await auth.authStateReady().catch(() => undefined);
+      const idToken = await auth.currentUser?.getIdToken().catch(() => undefined);
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -285,6 +303,17 @@ export const ChatModal: React.FC<ChatModalProps> = ({
       
       if (response.status === 401) {
         setIsTyping(false);
+        // アプリでは会員なのにサーバーでログインを確かめられないとき（ログイン切れ・開発用ボタンで会員にしただけ等）は、
+        // 「無料で登録」ではなく、ログインし直す案内を出す（2026-11-12 TAKASHI「有料なのにアラートでる」）
+        if (isRegistered) {
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            sender: 'bot',
+            text: 'ごめんなさい、ログインの確認ができませんでした。お手数ですが、マイページから一度ログインし直してから、もう一度送ってくださいね。'
+          }]);
+          setChatCount(prev => Math.max(0, prev - 1));
+          return;
+        }
         setShowRegisterOverlay(true);
         return;
       }

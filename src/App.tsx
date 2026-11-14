@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 
+/** お相手との関係性（鑑定入力・保存したお相手の編集で同じ選択肢） */
+const RELATIONSHIP_OPTIONS = ['片思い中', '両思い・交際中', '復縁したい', '結婚・夫婦', '複雑愛・秘密の恋'];
+
 export interface SavedPartner {
   id: string;
   name: string;
@@ -9,6 +12,8 @@ export interface SavedPartner {
   relationship: string;
   /** 買い切り（お相手1人の深層鑑定 ¥680）で解放したお相手。保存上限に数えない */
   unlocked?: boolean;
+  /** 月額会員の「今日」画面の二人の道のり（片思い／付き合っている・段階・今の状況）。端末とアカウントで同期する */
+  journey?: Journey;
 }
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
@@ -20,7 +25,8 @@ import { ResultView } from './components/ResultView';
 import { PartnerReplaceModal } from './components/PartnerReplaceModal';
 import { ShareCardModal } from './components/ShareCardModal';
 import { generateFortuneResult, san } from './utils/fortuneEngine';
-import type { FortuneResult } from './utils/fortuneEngine';
+import type { FortuneResult, DiagnosisInput } from './utils/fortuneEngine';
+import type { Journey } from './utils/partnerToday';
 import { HelpCircle, Lock, ChevronRight, User, Users, Trash2, Pencil, BookOpen, ShieldAlert, FileText, Building2, ArrowLeft, MessageCircle, Calendar, Bell, Crown, Smartphone, Megaphone } from 'lucide-react';
 import { MoonMark } from './components/icons/BrandIcons';
 import { CustomDatePicker } from './components/CustomDatePicker';
@@ -1068,11 +1074,11 @@ function App() {
       return;
     }
     const fields = {
-      name: editPartnerName || 'お相手',
+      name: editPartnerName.trim().slice(0, 8) || 'お相手',
       birth: editPartnerBirth,
       mbti: editPartnerMbti,
       gender: editPartnerGender,
-      relationship: editPartnerRel
+      relationship: RELATIONSHIP_OPTIONS.includes(editPartnerRel) ? editPartnerRel : '片思い中'
     };
     if (editingPartnerId === NEW_PARTNER_ID) {
       const newPartner: SavedPartner = { id: `${fields.name}_${fields.birth}_${Date.now()}`, ...fields };
@@ -1107,6 +1113,11 @@ function App() {
     const updated = savedPartners.map(p => (p.id === editingPartnerId ? { ...p, ...fields, ...(leavesUnlock ? { unlocked: false } : {}) } : p));
     setSavedPartners(updated);
     setEditingPartnerId(null);
+    // いま結果画面に出しているお相手を直したときは、結果もその場で新しい名前・生年月日で出し直す
+    // （出し直さないと、「恋の暦」の切り替えに古い名前のお相手と直したお相手の2人が並ぶ。2026-11-12 TAKASHI報告）
+    if (before && readingInput && readingInput.opponentName === before.name && readingInput.opponentBirth === before.birth) {
+      handleTodaySwitch({ ...before, ...fields });
+    }
     // If this partner is the one the daily mail is about, the mail follows the edit
     if (before && isSubPartner(before) && notifySub?.enabled && notifySub.email) {
       saveNotifySubscription(notifySub.email, { ...before, ...fields });
@@ -1237,12 +1248,35 @@ function App() {
     setMode('match');
   };
 
+  // 結果画面を「鑑定書」から開くか（入力画面から鑑定したとき true。アプリを開き直したときは false＝恋の暦から）
+  const [startOnBook, setStartOnBook] = useState(false);
+  // 月額会員の「今日」画面で、お相手（または自分だけ）を切り替える。読み込み画面は出さずに、その場で鑑定し直す
+  const handleTodaySwitch = (partner: SavedPartner | null) => {
+    const cur = readingInput;
+    if (!cur) return;
+    if (!partner) {
+      setMode('single');
+      startDiagnosis(cur.myName, cur.myBirth, cur.myMbti, cur.myGender, '', '', 'UNKNOWN', 'female', cur.relationship || '片思い中', 'single', true);
+      return;
+    }
+    handleSelectPartner(partner);
+    const g = partner.gender === cur.myGender ? (cur.myGender === 'female' ? 'male' : 'female') : partner.gender;
+    startDiagnosis(cur.myName, cur.myBirth, cur.myMbti, cur.myGender, partner.name, partner.birth, partner.mbti, g, partner.relationship, 'match', true);
+  };
+
+  // 「今日」画面の二人の道のり・今の状況を、保存したお相手に書く（アカウントへは保存したお相手と一緒に送られる）
+  const handleUpdateJourney = (partnerId: string, journey: Journey) => {
+    setSavedPartners((prev) => prev.map((p) => (p.id === partnerId ? { ...p, journey } : p)));
+  };
+
   // Diagnostic Results Cache
   const [renResult, setRenResult] = useState<FortuneResult | null>(null);
   const [tsukiResult, setTsukiResult] = useState<FortuneResult | null>(null);
   // お相手ありの鑑定のときの、自分だけの鑑定結果（共有カードの「自分の運勢」タブ用。一人で占ったときと同じ計算）
   const [soloRenResult, setSoloRenResult] = useState<FortuneResult | null>(null);
   const [soloTsukiResult, setSoloTsukiResult] = useState<FortuneResult | null>(null);
+  // いま表示している鑑定の入力（月額会員の「今日」画面で、昨日の点数・お相手ごとの点数を出すのに使う）
+  const [readingInput, setReadingInput] = useState<DiagnosisInput | null>(null);
 
   // 同じお相手との「今日の相性」は無料で7日分まで（ログインなしは1日分）。結果を出すたびにサーバーで「見た日」を数える。
   // null = 制限なし（プレミアム・自分だけの鑑定）。確認中は点数を伏せ、確認できなかったときは見せる。
@@ -1476,6 +1510,8 @@ function App() {
     // 招待URL（またはコード）で来た人が占い終えた: 招待した会員に数える
     if (pendingRef) void sendRef(pendingRef, data.myBirth);
 
+    // 診断の入力画面から鑑定したときは、月額会員でも必ず鑑定書から見せる（2026-11-12 TAKASHI）
+    setStartOnBook(true);
     startDiagnosis(
       data.myName,
       data.myBirth,
@@ -1573,6 +1609,7 @@ function App() {
         console.error(e);
       }
 
+      setReadingInput(input);
       // Generate results for both characters to allow instant tab toggling
       const resRen = generateFortuneResult(input, 'ren');
       const resTsuki = generateFortuneResult(input, 'tsuki');
@@ -1942,6 +1979,11 @@ function App() {
                 onSavePartner={handleSavePartner}
                 onSetMbti={handleSetMbti}
                 isPartnerSaved={currentPartnerSaved}
+                todayInput={readingInput}
+                todayPartners={savedPartners}
+                onTodaySwitch={handleTodaySwitch}
+                startOnBook={startOnBook}
+                onUpdateJourney={handleUpdateJourney}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
                 onOpenChat={(question) => {
@@ -1988,6 +2030,11 @@ function App() {
                 onSavePartner={handleSavePartner}
                 onSetMbti={handleSetMbti}
                 isPartnerSaved={currentPartnerSaved}
+                todayInput={readingInput}
+                todayPartners={savedPartners}
+                onTodaySwitch={handleTodaySwitch}
+                startOnBook={startOnBook}
+                onUpdateJourney={handleUpdateJourney}
                 referral={mode === 'match' ? referralProp : undefined}
                 referralGift={refSent}
                 onOpenChat={(question) => {
@@ -2943,8 +2990,9 @@ function App() {
                               <input
                                 type="text"
                                 value={editPartnerName}
-                                onChange={(e) => setEditPartnerName(e.target.value)}
-                                placeholder="お相手のニックネーム"
+                                maxLength={8}
+                                onChange={(e) => setEditPartnerName(e.target.value.slice(0, 8))}
+                                placeholder="お相手のニックネーム (最大8文字)"
                                 style={{
                                   background: 'rgba(0,0,0,0.3)',
                                   border: '1px solid rgba(255,255,255,0.1)',
@@ -3067,6 +3115,26 @@ function App() {
                                   男性
                                 </button>
                               </div>
+                            </div>
+
+                            {/* お相手との関係性（鑑定入力と同じ5つ。2026-11-12 TAKASHI「ここに関係性も保存できるように」） */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                              <label style={{ fontSize: '0.72rem', color: '#a9a49a' }}>お相手との関係性</label>
+                              <select
+                                value={RELATIONSHIP_OPTIONS.includes(editPartnerRel) ? editPartnerRel : '片思い中'}
+                                onChange={(e) => setEditPartnerRel(e.target.value)}
+                                style={{
+                                  background: 'rgba(15, 21, 30, 0.95)',
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  borderRadius: '8px',
+                                  padding: '0.5rem 0.75rem',
+                                  color: 'white',
+                                  fontSize: '0.78rem',
+                                  outline: 'none'
+                                }}
+                              >
+                                {RELATIONSHIP_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                              </select>
                             </div>
 
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.35rem' }}>
