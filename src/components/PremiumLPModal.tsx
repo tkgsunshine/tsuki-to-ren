@@ -832,7 +832,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {showPlans && pair && (
             <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-                プレミアム（月額980円）だけでできること
+                プレミアムだけでできること
               </h2>
               {[unlimitedBenefit(pairWho), ...benefits.filter((b) => !b.hideInDiff).map((b) => ({ ...b, body: b.diffBody || b.body, pairNote: undefined }))].map(renderBenefit)}
             </div>
