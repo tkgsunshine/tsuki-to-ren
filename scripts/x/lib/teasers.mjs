@@ -42,3 +42,13 @@ export function withProfileCta(text, cta) {
   const sign = lines.pop();
   return [...lines, '', cta, sign].join('\n');
 }
+
+/** 投稿の締めの定型（2026-11-13 運営の指定）。最後のかたまり（返信があれば返信）の末尾に1回だけ */
+export const CLOSING_LINE = '月と蓮では、今日も二人の恋愛を診断しています🔮プロフィールから覗いてみてね';
+/** ランキング（gap_rank）の返信の最後: お題に合わせた誘導の一言（AIが書く。「↓」で終わる）のあとに、URL（utm_content に投稿のid）と締めの定型を入れる（2026-11-11・11-13 運営の指定。署名「-月-」は付けない） */
+export function withRankTail(text, id) {
+  const t = String(text).trim().replace(/\n*-月-\s*$/, '').trim();
+  const url = `${RANK_LINK_URL}${id ? `&utm_content=${id}` : ''}`;
+  if (t.includes(CLOSING_LINE)) return t;
+  return `${t}\n${url}\n\n${CLOSING_LINE}`;
+}
