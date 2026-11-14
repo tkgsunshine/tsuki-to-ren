@@ -135,7 +135,7 @@ const unlimitedBenefit = (pairWho: string): BenefitItem => ({
   color: '#d4af37',
   who: 'tsuki',
     title: '誰でも無制限に、全ての機能が見れる',
-  body: `シングルプランで見れるのは${pairWho}1人だけ。プレミアムなら、気になる人なら誰とでも、何人でも、全ての機能が見れますよ。`
+  body: `シングルプランで見れるのは${pairWho}1人だけ。プレミアムなら、気になる人なら誰とでも、何人でも、全ての鑑定結果が見れますよ。`
 });
 
 const sectionTitleStyle: React.CSSProperties = {
