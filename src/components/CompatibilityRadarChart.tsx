@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, Hexagon } from 'lucide-react';
+import { ResultSection } from './ResultSection';
 import { MoonMark } from './icons/BrandIcons';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
 import type { CompatibilityRadarScores } from '../utils/fortuneEngine';
@@ -76,6 +77,8 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
   const fillColor = character === 'ren' ? 'rgba(58, 134, 171, 0.25)' : 'rgba(217, 164, 65, 0.22)';
 
   return (
+    // 大見出しはカードの外（ResultSection、2026-11-13）。カードの中は「多角相性 6軸アナリシス」の札と説明だけ
+    <ResultSection title={`${partnerLabel}との詳細相性レーダー`} icon={<Hexagon />}>
     <div style={{
       background: 'linear-gradient(135deg, rgba(18, 24, 35, 0.95) 0%, rgba(11, 17, 27, 0.98) 100%)',
       border: '1px solid rgba(226, 192, 116, 0.35)',
@@ -83,7 +86,6 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
       padding: '1.25rem 1rem',
       position: 'relative',
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(226, 192, 116, 0.05)',
-      marginTop: '1.25rem',
       boxSizing: 'border-box'
     }}>
       {/* Header */}
@@ -105,15 +107,7 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
           <MoonMark className="w-3.5 h-3.5" />
           多角相性 6軸アナリシス
         </div>
-        <h3 className="font-serif" style={{
-          fontSize: '1.2rem',
-          color: '#f9fafb',
-          fontWeight: '700',
-          margin: '0.4rem 0 0.1rem 0'
-        }}>
-          {partnerLabel}との詳細相性レーダー
-        </h3>
-        <p style={{ fontSize: '0.72rem', color: '#a9a49a', margin: 0 }}>
+        <p style={{ fontSize: '0.72rem', color: '#a9a49a', margin: '0.45rem 0 0' }}>
           四柱推命・16タイプ・九星気学を統合した精密判定
         </p>
       </div>
@@ -382,5 +376,6 @@ export const CompatibilityRadarChart: React.FC<CompatibilityRadarChartProps> = (
         })}
       </div>
     </div>
+    </ResultSection>
   );
 };

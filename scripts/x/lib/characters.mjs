@@ -63,7 +63,8 @@ export function computeAll(dateStr) {
         { myName: 'あなた', myBirth: isoOf(d), myMbti: 'UNKNOWN', myGender: 'female', relationship: 'single' },
         'tsuki',
       );
-      if (r.isKaigo || r.isRare) continue; // レア属性の演出は対象外（別の日付で再挑戦）
+      // 極星（抽選のレア演出）は対象外（別の日付で再挑戦）。魁罡は2026-11-12（#430）から日柱で決まるため、除くとその日柱が0件になる。そのまま使う
+      if (r.isRare) continue;
       // 蓮の署名の日は、蓮のトーンの解説を使う（同じ入力・同じ点数で、文面だけ違う）
       const rRen = generateFortuneResult(
         { myName: 'あなた', myBirth: isoOf(d), myMbti: 'UNKNOWN', myGender: 'female', relationship: 'single' },
@@ -105,6 +106,10 @@ export function computeAll(dateStr) {
         oneLine, hours, imageF, imageM: imageF.replace(/\.jpg$/, '_male.jpg'),
       });
     }
+    // 魁罡の4日柱は、アプリの表示が「神格化身・魁罡」になる。投稿では専門用語を出さないため、同じ十干の通常の呼び名にそろえる
+    const stemTheme = {};
+    for (const c of out) if (!/魁罡/.test(c.theme)) stemTheme[c.stem] ??= c.theme;
+    for (const c of out) if (/魁罡/.test(c.theme) && stemTheme[c.stem]) c.theme = stemTheme[c.stem];
     // 60干支の順（甲子=0, 乙丑=1, …）に並べる
     return out.sort((a, b) => cycleIndex(a) - cycleIndex(b));
   });

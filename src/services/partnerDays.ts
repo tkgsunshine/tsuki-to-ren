@@ -15,7 +15,7 @@ export interface PartnerAccess {
 export const GUEST_PARTNER_DAYS = 1;
 const GUEST_KEY = 'hasu_partner_days';
 
-const jstToday = () => new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+export const jstToday = () => new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 // Same rule as nextPartnerDay on the server: a day is counted once, then locked after the limit
 const guestAccess = (oppBirth: string): PartnerAccess => {

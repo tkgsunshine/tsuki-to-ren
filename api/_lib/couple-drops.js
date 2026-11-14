@@ -1,0 +1,253 @@
+import { getDb, getAdminAuth } from './firestore.js';
+import { PREMIUM, isLiveKey, parseBody, verifyUser } from './stripe.js';
+import { isOverrideEmail } from './premium-override.js';
+import { isPremiumRecord, jstToday, partnerKey } from './partner-days.js';
+import { findPairUnlock } from './pair-unlock.js';
+import { dropTopicKeys, recordDrops } from './analytics.js';
+
+// 「月のかけら」（2026-11-12 TAKASHI決定）: 「二人の相性100」のお題を1つずつ開けるためのかけら。
+// ・月額プレミアム: 支払い日（新しい支払い期間に入った最初の表示）に50個、毎日5個。貯められるのは100個まで
+// ・無料会員: 毎日2個。使わなかった分は持ち越さない（2個まで）
+// ・かけら1つで1つのお題が開く。一度開けたお題は、そのお相手についてずっと見られる
+//   （月額の間に開けたお題は、解約すると見られなくなる。無料会員のかけらで開けたお題は解約に関係なく見られる）
+// ・シングルプラン（¥680、お相手1人）: 買ったお相手に使えるかけらを10個（1回の購入につき1回だけ。上限・期限なし、
+//   毎日のかけらとは別に持つ。毎日の分を先に使う。開けたお題はずっと見られる）（2026-11-13 TAKASHI、のち「シングル：支払い日に10個、毎日2個」で10個に。「かけら50個付与でいい。ユーザー自身が選べば良い」）
+// ・かけらは単体では売らない（お金で買えると資金決済法の対象になりうるため）
+// ・補充は定期実行を使わず、画面を開いたとき（このAPIを呼んだとき）に、前回からの日数ぶん計算する
+// 記録は coupleDrops/{uid} にサーバーだけが書く（firestore.rules で端末からは読み書き不可。今の課金記録と同じ守り方）。
+// お相手は誕生日から作る記号（partnerKey）で持ち、誕生日そのものは保存しない。
+export const COUPLE_DROPS = 'coupleDrops';
+export const PREMIUM_DAILY = 5;
+export const PREMIUM_PAYDAY = 50;
+export const PREMIUM_CAP = 100;
+export const FREE_DAILY = 2;
+export const FREE_CAP = 2;
+export const PAIR_BONUS = 10;
+const TOPIC_MAX = 50;
+const BIRTH_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+const dayNum = (iso) => Math.floor(Date.parse(`${iso}T00:00:00Z`) / 86400000);
+
+/**
+ * 前回の記録から、今日の残高を計算する（純粋な関数。書き込みはしない）。
+ * rec: { balance, lastDaily, periods: [支払い期間の終わり（ISO）] }, premium: { active, periodEnd }
+ * 返り値: { balance, lastDaily, periods, granted }（granted: 今回足した数）
+ */
+export function refill(rec, { premium, periodEnd }, today) {
+  let balance = Math.max(0, Number(rec?.balance) || 0);
+  const periods = Array.isArray(rec?.periods) ? rec.periods.slice(-12) : [];
+  const last = typeof rec?.lastDaily === 'string' ? rec.lastDaily : null;
+  // 今日の分も含めて、前回から何日分か（初めては今日の1日分）
+  const days = last ? Math.max(0, dayNum(today) - dayNum(last)) : 1;
+  const before = balance;
+  let payday = 0;
+  // 前回は月額でなかった（無料・未記録）なら、月額の毎日の分は今日の1日分だけ（無料だった日の分までさかのぼって足さない）
+  const wasPremium = rec?.tier === 'p';
+  if (premium) {
+    // 支払い日: 新しい支払い期間（期間の終わりの日時で見分ける）に入って最初の表示で50個
+    const pk = periodEnd || 'unknown';
+    if (!periods.includes(pk)) { balance = Math.min(PREMIUM_CAP, balance + PREMIUM_PAYDAY); periods.push(pk); payday = balance - before; }
+    // 無料だった日に月額になったとき（同じ日の2回目の表示）も、その日の5個を足す（初めて月額で開いた人と同じ55個にそろえる）
+    if (days > 0 || (last && !wasPremium)) balance = Math.min(PREMIUM_CAP, balance + (wasPremium ? days : 1) * PREMIUM_DAILY);
+  } else if (days > 0 || wasPremium) {
+    // 無料: 毎日2個、持ち越さない（残っていても2個まで）。
+    // 月額が終わった日（同じ日の2回目の表示）も、ここで2個までに戻す（月額の残りを無料のかけらとして使えないように）
+    balance = Math.max(Math.min(balance, FREE_CAP), FREE_DAILY);
+  }
+  return { balance, lastDaily: days > 0 || !last ? today : last, periods, granted: balance - before, payday, tier: premium ? 'p' : 'f' };
+}
+
+// 計測から外すアカウント: 運営（ADMIN_EMAILS、+別名も）と、管理画面で「自分」にしたアカウント（adminSettings/owners）。
+// api/admin.js と同じ考え方（あちらを読み込むと、この関数にメール送信などが入るので、ここに小さく持つ）
+const baseEmail = (email) => String(email || '').toLowerCase().replace(/\+[^@]*(?=@)/, '');
+async function isCounted(db, user, { override, noTrack, deps }) {
+  const env = deps.vercelEnv ?? process.env.VERCEL_ENV;
+  if (env && env !== 'production') return false; // Preview の確認操作を本番の数字に入れない
+  if (noTrack || override) return false; // 運営の端末（hasu_no_track）・支払いなしで月額扱いの運営アカウント
+  const admins = String(deps.adminEmails ?? process.env.ADMIN_EMAILS ?? '').split(',').map((e) => baseEmail(e.trim())).filter(Boolean);
+  if (user.email && admins.includes(baseEmail(user.email))) return false;
+  const owners = (await db.collection('adminSettings').doc('owners').get()).data()?.uids || [];
+  return !owners.includes(user.uid);
+}
+
+/**
+ * 1回の呼び出しで byDrops に足す数（_lib/analytics.js の recordDrops のキー）。
+ * seg = この人: p 月額 / s シングルを買った人（このお相手） / f 無料会員
+ */
+export function dropCounts({ r, bonusGranted, seg, used, firstUse }) {
+  const out = {};
+  const add = (k, n) => { if (n > 0) out[k] = (out[k] || 0) + n; };
+  if (seg === 'p') { add('grant_payday', r.payday || 0); add('grant_p', r.granted - (r.payday || 0)); }
+  else add('grant_f', r.granted);
+  if (bonusGranted) add('grant_s', PAIR_BONUS);
+  if (used) {
+    add(`use_${used.pool}_${used.kind}`, 1);
+    for (const k of dropTopicKeys(used.kind, used.no)) add(k, 1);
+    if (firstUse) add(`users_${seg}`, 1);
+  }
+  return out;
+}
+
+/**
+ * 登録なしの購入でできた自動アカウント（from）の月のかけらを、本人のアカウント（to）へ引き継ぐときの、引き継ぎ後の記録（純粋な関数）。
+ * ・開けたお題・シングルプランの残り・「この購入の10個は配った」印（bonusFor）を足し合わせる（引き継いだあとに10個をもう一度配らない）
+ * ・月額も引き継いだとき（premiumMoved）は、月額の残りと「この支払い期間の50個は配った」印（periods）も移す
+ * ・無料の毎日の分は持ち越さないものなので移さない
+ */
+export function mergeDropsRecords(to, from, { premiumMoved = false } = {}) {
+  const t = to || {};
+  const f = from || {};
+  const opened = { ...(t.opened || {}) };
+  for (const [key, o] of Object.entries(f.opened || {})) {
+    const a = openedOf({ opened }, key);
+    const b = openedOf(f, key);
+    const u = (x, y) => [...new Set([...x, ...y])].sort((m, n) => m - n);
+    opened[key] = { rp: u(a.rp, b.rp), rf: u(a.rf, b.rf), gp: u(a.gp, b.gp), gf: u(a.gf, b.gf) };
+  }
+  const bonus = { ...(t.bonus || {}) };
+  for (const [key, n] of Object.entries(f.bonus || {})) bonus[key] = Math.max(0, Number(bonus[key]) || 0) + Math.max(0, Number(n) || 0);
+  const out = { ...t, opened, bonus, bonusFor: { ...(t.bonusFor || {}), ...(f.bonusFor || {}) } };
+  if (premiumMoved) {
+    out.periods = [...new Set([...(Array.isArray(t.periods) ? t.periods : []), ...(Array.isArray(f.periods) ? f.periods : [])])].slice(-12);
+    if (f.tier === 'p') {
+      out.balance = Math.min(PREMIUM_CAP, Math.max(0, Number(t.balance) || 0) + Math.max(0, Number(f.balance) || 0));
+      out.tier = 'p';
+      const days = [t.lastDaily, f.lastDaily].filter((d) => typeof d === 'string').sort();
+      if (days.length) out.lastDaily = days[days.length - 1];
+    }
+  }
+  return out;
+}
+
+/** 自動アカウントの月のかけらを本人のアカウントへ移す（transferGuestPurchases から呼ぶ）。移したら元の記録は消す */
+export async function moveCoupleDrops(db, fromUid, toUid, { premiumMoved = false } = {}) {
+  if (!fromUid || !toUid || fromUid === toUid) return;
+  const fromRef = db.collection(COUPLE_DROPS).doc(fromUid);
+  const from = (await fromRef.get()).data();
+  if (!from) return;
+  const toRef = db.collection(COUPLE_DROPS).doc(toUid);
+  const to = (await toRef.get()).data();
+  await toRef.set({ ...mergeDropsRecords(to, from, { premiumMoved }), updatedAt: new Date().toISOString() });
+  await fromRef.delete();
+}
+
+const cleanList = (v) => (Array.isArray(v) ? v.filter((n) => Number.isInteger(n) && n >= 1 && n <= TOPIC_MAX) : []);
+/** そのお相手について開けたお題（r: ランキング、g: 本格鑑定。p: 月額の間に開けた、f: 無料のかけらで開けた） */
+export const openedOf = (rec, key) => {
+  const o = rec?.opened?.[key] || {};
+  return { rp: cleanList(o.rp), rf: cleanList(o.rf), gp: cleanList(o.gp), gf: cleanList(o.gf) };
+};
+/** 画面に返す「見られるお題」。月額でなくなったら、月額の間に開けた分は外す */
+export const visibleOpened = (o, premium) => ({
+  rank: [...new Set([...o.rf, ...(premium ? o.rp : [])])].sort((a, b) => a - b),
+  reading: [...new Set([...o.gf, ...(premium ? o.gp : [])])].sort((a, b) => a - b)
+});
+
+/**
+ * POST /api/stripe/drops { oppBirth, open?: { kind: 'rank' | 'reading', no } }
+ * → { balance, cap, daily, premium, opened: { rank: [...], reading: [...] }, granted, opened_now? }
+ * open を付けると、かけらを1つ使ってそのお題を開ける（もう開いていれば使わない）。
+ */
+export default async function handler(req, res, deps = {}) {
+  res.setHeader('Cache-Control', 'no-store, private');
+  if (req.method !== 'POST') return res.status(405).json({ status: 'error', message: 'Method not allowed' });
+  try {
+    const user = await verifyUser(req, deps.auth || getAdminAuth());
+    if (user.error) return res.status(user.error.status).json({ status: 'error', message: user.error.message });
+    const body = parseBody(req.body);
+    const birth = String(body.oppBirth || '');
+    if (!BIRTH_RE.test(birth)) return res.status(400).json({ status: 'error', message: 'Invalid oppBirth' });
+    const open = body.open && typeof body.open === 'object' ? body.open : null;
+    if (open && (!['rank', 'reading'].includes(open.kind) || !Number.isInteger(open.no) || open.no < 1 || open.no > TOPIC_MAX)) {
+      return res.status(400).json({ status: 'error', message: 'Invalid topic' });
+    }
+
+    const db = deps.db || getDb();
+    const p = (await db.collection(PREMIUM).doc(user.uid).get()).data();
+    const override = isOverrideEmail(user.email, deps.premiumEmails);
+    const premium = isPremiumRecord(p, deps.live ?? isLiveKey()) || override;
+    const periodEnd = override && !isPremiumRecord(p, deps.live ?? isLiveKey()) ? `override:${(deps.today || jstToday()).slice(0, 7)}` : (p?.currentPeriodEnd || null);
+    const today = deps.today || jstToday();
+    const key = partnerKey(birth);
+    const ref = db.collection(COUPLE_DROPS).doc(user.uid);
+    const pair = await findPairUnlock(db, user.uid, birth, deps.live ?? isLiveKey());
+    // シングルプランを買ったお相手: 月額の間に開けたお題も、解約後ずっと見られる（買い切りのため。2026-11-14 TAKASHI「解約後も見えるほうがいい」）
+    const keepAll = Boolean(pair);
+
+    const out = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const rec = snap.exists ? snap.data() : {};
+      const r = refill(rec, { premium, periodEnd }, today);
+      const o = openedOf(rec, key);
+      // シングルプランのかけら（このお相手専用）。購入（sessionId）ごとに1回だけ10個
+      let bonus = Math.max(0, Number(rec?.bonus?.[key]) || 0);
+      const grantedFor = rec?.bonusFor?.[key] || null;
+      let bonusGranted = false;
+      if (pair?.sessionId && grantedFor !== pair.sessionId) { bonus += PAIR_BONUS; bonusGranted = true; }
+      const bonusBefore = bonus;
+      let openedNow = false;
+      let used = null;
+      let error = null;
+      if (open) {
+        const vis = visibleOpened(o, premium || keepAll);
+        const already = (open.kind === 'rank' ? vis.rank : vis.reading).includes(open.no);
+        if (!already) {
+          if (r.balance + bonus < 1) error = 'no_drops';
+          else {
+            // 毎日の分（持ち越せない）を先に使い、なければシングルプランの分
+            const fromBonus = r.balance < 1;
+            if (fromBonus) bonus -= 1; else r.balance -= 1;
+            // シングルプランのかけらで開けたお題は、月額をやめても見られる（買い切りのため）
+            // シングルプランを買ったお相手は、月額のかけらで開けても解約後も見える（2026-11-14 TAKASHI）
+            const field = `${open.kind === 'rank' ? 'r' : 'g'}${premium && !fromBonus && !keepAll ? 'p' : 'f'}`;
+            o[field] = [...o[field], open.no];
+            openedNow = true;
+            used = { kind: open.kind, no: open.no, pool: fromBonus ? 's' : premium ? 'p' : 'f' };
+          }
+        }
+      }
+      const changed = openedNow || bonusGranted || bonus !== bonusBefore || r.balance !== Number(rec.balance || 0) || r.lastDaily !== rec.lastDaily || r.periods.length !== (rec.periods || []).length || r.tier !== rec.tier;
+      if (changed) {
+        tx.set(ref, {
+          balance: r.balance, lastDaily: r.lastDaily, periods: r.periods, tier: r.tier,
+          ...(bonusGranted || bonus > 0 || rec?.bonus?.[key] ? { bonus: { [key]: bonus } } : {}),
+          ...(bonusGranted ? { bonusFor: { [key]: pair.sessionId } } : {}),
+          opened: { [key]: o },
+          // その日に初めて使った日（/admin の「使った人」を日ごとに1回だけ数える）
+          ...(openedNow ? { lastUse: today } : {}),
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      }
+      return { r, o, openedNow, error, bonus, bonusGranted, used, firstUse: openedNow && rec?.lastUse !== today };
+    });
+
+    // 計測（/admin「月のかけら」）。失敗しても画面の答えは返す
+    try {
+      const seg = premium ? 'p' : pair?.sessionId ? 's' : 'f';
+      const counts = dropCounts({ ...out, seg });
+      if (Object.keys(counts).length && await isCounted(db, user, { override, noTrack: body.nt === '1', deps })) {
+        await (deps.recordDrops || recordDrops)(db, counts, today);
+      }
+    } catch (e) {
+      console.error('⚠️ Could not count the drops:', e?.message);
+    }
+
+    const payload = {
+      status: out.error ? 'error' : 'ok',
+      ...(out.error ? { code: out.error, message: 'かけらが足りません' } : {}),
+      premium,
+      // 画面には合計で見せる（毎日の分＋シングルプランの分）
+      balance: out.r.balance + out.bonus,
+      bonus: out.bonus,
+      cap: premium ? PREMIUM_CAP : FREE_CAP,
+      daily: premium ? PREMIUM_DAILY : FREE_DAILY,
+      granted: out.r.granted + (out.bonusGranted ? PAIR_BONUS : 0),
+      opened: visibleOpened(out.o, premium || keepAll),
+      openedNow: out.openedNow
+    };
+    return res.status(out.error ? 409 : 200).json(payload);
+  } catch (e) {
+    console.error('❌ Could not read the drops:', e?.message);
+    return res.status(500).json({ status: 'error', message: 'Could not read the drops' });
+  }
+}

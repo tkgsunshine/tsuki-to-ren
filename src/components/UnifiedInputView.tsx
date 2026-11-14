@@ -56,7 +56,7 @@ interface UnifiedInputViewProps {
   isRegistered?: boolean;
   isSubscribed?: boolean;
   /** コラムの案内で入れてもらった生年月日（YYYY-MM-DD）。入っていれば最初からその値を入れておく */
-  prefill?: { myBirth?: string; oppBirth?: string } | null;
+  prefill?: { myBirth?: string; oppBirth?: string; myMbti?: string; oppMbti?: string } | null;
   /** 「鑑定を開始する」のすぐ下に出すもの（友達紹介の一言・招待コード欄） */
   afterSubmit?: React.ReactNode;
 }
@@ -119,6 +119,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   }, []);
 
   const [myMbti, setMyMbti] = useState(() => {
+    if (prefill?.myMbti && isMbtiCode(prefill.myMbti)) return prefill.myMbti;
     if (urlPair?.my) return urlPair.my;
     try {
       const stored = localStorage.getItem('hasu_user_profile');
@@ -150,6 +151,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   const [oppName, setOppName] = useState('');
   const [oppBirth, setOppBirth] = useState(() => prefill?.oppBirth || '');
   const [oppMbti, setOppMbti] = useState(() => {
+    if (prefill?.oppMbti && isMbtiCode(prefill.oppMbti)) return prefill.oppMbti;
     if (urlPair?.opp && isMbtiCode(urlPair.opp)) return urlPair.opp;
     return '';
   });
@@ -168,9 +170,10 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       if (r === 'f') return '復縁したい';
       if (r === 'm') return '結婚・夫婦';
       if (r === 'c') return '複雑愛・秘密の恋';
-      if (r === 'k') return '片思い中';
+      if (r === 'k') return '片想い中';
+      if (r === 'h') return '片想いされ中';
     }
-    return '片思い中';
+    return '片想い中';
   });
 
   React.useEffect(() => {
@@ -178,7 +181,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       setOppName(loadedPartner.name === 'お相手' ? '' : loadedPartner.name);
       setOppBirth(loadedPartner.birth);
       setOppMbti(isMbtiCode(loadedPartner.mbti) ? loadedPartner.mbti : '');
-      setRelationship(loadedPartner.relationship);
+      setRelationship(loadedPartner.relationship === '片思い中' ? '片想い中' : loadedPartner.relationship); // 旧表記の保存データ
 
       // Gender Validation: Ensure opposite gender combination (Male x Female) silently
       if (loadedPartner.gender === myGender) {
@@ -256,7 +259,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
       oppBirth,
       oppMbti,
       oppGender,
-      relationship: relationship || '片思い中',
+      relationship: relationship || '片想い中',
       mode
     });
   };
@@ -365,7 +368,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
         )}
 
         {/* Your Info Section */}
-        <div className="glass-panel" style={{ padding: '1rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="glass-panel input-form-panel" style={{ padding: '1rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.4rem', marginBottom: '-0.25rem', fontWeight: 'bold' }}>
             あなたの情報
           </h2>
@@ -378,7 +381,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
               placeholder="あなた (最大8文字)"
               value={myName}
               onChange={(e) => setMyName(e.target.value.slice(0, 8))}
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+              style={{ background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
             />
           </div>
 
@@ -394,13 +397,13 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 required
                 value={myBirth.replace(/-/g, '/')}
                 onChange={(e) => setMyBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
-                style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                style={{ flex: 1, background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
               />
               <div style={{ position: 'relative', width: '42px', height: '42px' }}>
                 <button
                   type="button"
                   onClick={() => setShowMyDatePicker(true)}
-                  style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#e7e1d5' }}
+                  style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', color: '#e7e1d5' }}
                 >
                   <Calendar size={18} />
                 </button>
@@ -419,7 +422,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 setEstimated(p => ({ ...p, self: false }));
                 e.target.classList.remove('field-invalid');
               }}
-              style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: isMbtiCode(myMbti) ? 'white' : '#8a8478', outline: 'none', fontSize: '0.85rem' }}
+              style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: isMbtiCode(myMbti) ? 'white' : '#8a8478', outline: 'none', fontSize: '0.85rem' }}
             >
               {mbtiSelectOptions.map(opt => (
                 <option key={opt.value} value={opt.value} disabled={opt.value === ''}>{opt.label}</option>
@@ -440,11 +443,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 type="button"
                 onClick={() => handleMyGenderChange('female')}
                 style={{
-                  background: myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(255,255,255,0.02)',
-                  border: myGender === 'female' ? '1px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.08)',
+                  background: myGender === 'female' ? 'rgba(159, 134, 192, 0.15)' : 'rgba(8,12,22,0.7)',
+                  border: myGender === 'female' ? '1px solid var(--color-tsuki)' : '1px solid rgba(255,255,255,0.2)',
                   borderRadius: '10px',
                   padding: '0.55rem',
-                  color: myGender === 'female' ? '#cdbfe2' : '#a9a49a',
+                  color: myGender === 'female' ? '#cdbfe2' : '#d8d2c6',
                   fontSize: '0.8rem',
                   fontWeight: '600',
                   cursor: 'pointer',
@@ -457,11 +460,11 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 type="button"
                 onClick={() => handleMyGenderChange('male')}
                 style={{
-                  background: myGender === 'male' ? 'rgba(58, 134, 171, 0.15)' : 'rgba(255,255,255,0.02)',
-                  border: myGender === 'male' ? '1px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.08)',
+                  background: myGender === 'male' ? 'rgba(58, 134, 171, 0.15)' : 'rgba(8,12,22,0.7)',
+                  border: myGender === 'male' ? '1px solid var(--color-ren)' : '1px solid rgba(255,255,255,0.2)',
                   borderRadius: '10px',
                   padding: '0.55rem',
-                  color: myGender === 'male' ? '#9cc6d8' : '#a9a49a',
+                  color: myGender === 'male' ? '#9cc6d8' : '#d8d2c6',
                   fontSize: '0.8rem',
                   fontWeight: '600',
                   cursor: 'pointer',
@@ -476,7 +479,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
 
         {/* Opponent Info Section (Smooth Accordion Slide-Down) */}
         <div className="accordion-section expanded">
-          <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="glass-panel input-form-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.5rem', marginBottom: '0.25rem', fontWeight: 'bold' }}>
               お相手の情報
             </h2>
@@ -578,7 +581,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                 placeholder="お相手 (最大8文字)"
                 value={oppName}
                 onChange={(e) => setOppName(e.target.value.slice(0, 8))}
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                style={{ background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
               />
             </div>
 
@@ -593,13 +596,13 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   placeholder="例：19951221 (数字8桁)"
                   value={oppBirth.replace(/-/g, '/')}
                   onChange={(e) => setOppBirth(formatBirthDate(e.target.value).replace(/\//g, '-'))}
-                  style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
+                  style={{ flex: 1, background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: 'white', outline: 'none', fontSize: '0.85rem' }}
                 />
                 <div style={{ position: 'relative', width: '42px', height: '42px' }}>
                   <button
                     type="button"
                     onClick={() => setShowOpponentDatePicker(true)}
-                    style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: '#e7e1d5' }}
+                    style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(8,12,22,0.78)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', color: '#e7e1d5' }}
                   >
                     <Calendar size={18} />
                   </button>
@@ -618,7 +621,7 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   setEstimated(p => ({ ...p, partner: false }));
                   e.target.classList.remove('field-invalid');
                 }}
-                style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: isMbtiCode(oppMbti) ? 'white' : '#8a8478', outline: 'none', fontSize: '0.85rem' }}
+                style={{ background: '#0b111b', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '0.65rem 0.75rem', color: isMbtiCode(oppMbti) ? 'white' : '#8a8478', outline: 'none', fontSize: '0.85rem' }}
               >
                 {mbtiSelectOptions.map(opt => (
                   <option key={opt.value} value={opt.value} disabled={opt.value === ''}>{opt.label}</option>
@@ -664,7 +667,8 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
                   boxShadow: '0 0 10px rgba(226, 192, 116, 0.1)'
                 }}
               >
-                <option value="片思い中">片思い中</option>
+                <option value="片想い中">片想い中</option>
+                <option value="片想いされ中">片想いされ中</option>
                 <option value="両思い・交際中">両思い・交際中</option>
                 <option value="復縁したい">復縁したい</option>
                 <option value="結婚・夫婦">結婚・夫婦</option>

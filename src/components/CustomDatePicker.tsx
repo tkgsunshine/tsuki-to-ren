@@ -88,7 +88,7 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ value, onCha
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      zIndex: 1100,
+      zIndex: 100000, // 下メニュー（99999）より前に出す
       animation: 'fadeIn 0.25s ease'
     }}>
       <div className="glass-panel" style={{

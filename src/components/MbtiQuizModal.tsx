@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { mbtiOptions } from '../constants/mbti';
 import { getQuizQuestions, quizToMbti } from '../utils/mbtiQuiz';
+import { getMbtiColor } from '../utils/mbtiColor';
 import type { QuizSubject } from '../utils/mbtiQuiz';
 
 // 16タイプがわからない人向けの「かんたん質問」（4問・2択）。答えると近いタイプを出して、入力欄に入れる。
@@ -31,11 +32,11 @@ export default function MbtiQuizModal({
       role="dialog"
       aria-modal="true"
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, zIndex: 10050, background: 'rgba(5, 7, 12, 0.78)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', boxSizing: 'border-box' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 100000, background: 'rgba(5, 7, 12, 0.78)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px))', boxSizing: 'border-box' }}
     >
       <div
         onClick={e => e.stopPropagation()}
-        style={{ width: '100%', maxWidth: '420px', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', background: '#121826', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '16px', padding: '1.1rem 1rem 1rem', boxSizing: 'border-box', position: 'relative' }}
+        style={{ width: '100%', maxWidth: '420px', maxHeight: '100%', overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', background: '#121826', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '16px', padding: '1.1rem 1rem 1rem', boxSizing: 'border-box', position: 'relative' }}
       >
         <button
           type="button"
@@ -90,7 +91,7 @@ export default function MbtiQuizModal({
           {result ? (
             <>
               <div style={{ fontSize: '0.76rem', color: '#a9a49a' }}>{who}にいちばん近いタイプ</div>
-              <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#f2e2b3', margin: '0.2rem 0 0.6rem' }}>{label}</div>
+              <div className="font-serif" style={{ fontSize: '1.1rem', fontWeight: 'bold', color: getMbtiColor(result), margin: '0.2rem 0 0.6rem' }}>{label}</div>
               <div style={{ fontSize: '0.72rem', color: '#a9a49a', lineHeight: 1.6, margin: '-0.2rem 0 0.6rem', textAlign: 'left' }}>
                 4つの質問からの予想です。正確な16タイプがわかると、鑑定結果の精度がもっと上がります。わかったときは、あとから選び直せます。
               </div>

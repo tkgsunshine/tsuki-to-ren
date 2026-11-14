@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { PurchaseTerms } from './PurchaseTerms';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
-import { trackLockView, trackRegStep } from '../services/analytics';
-import { Calendar, Download, X, Heart, Smartphone, Share } from 'lucide-react';
-import { MoonMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
+import { handleSignInError } from '../utils/signInGuide';
+import { trackLockView, trackRegError, trackRegStep } from '../services/analytics';
+import { Calendar, Download, X, Heart, Smartphone, Share, MessageCircle } from 'lucide-react';
+import { ResultSection } from './ResultSection';
+import { MoonMark, PillarsMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
-import { useBackForwardReset } from '../utils/useBackForwardReset';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
 import { TodayView } from './TodayView';
 import type { Journey } from '../utils/partnerToday';
@@ -14,11 +14,13 @@ import type { SavedPartner } from '../App';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
+import { PlanCompareTable, planCompareRows } from './PlanCompareTable';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showFieldError } from './AppDialog';
 import { saveImageBlob } from '../utils/saveImage';
 import { ELEMENT_COLORS, ELEMENT_NOTES } from '../utils/elementColors';
+import { getMbtiColor } from '../utils/mbtiColor';
 import { PERSONALITY_NOTES, GUARDIAN_COLOR_NOTES, COLOR_SWATCHES, splitGuardianColors } from '../utils/attributeNotes';
 
 /** 守護カラーの値を、色名ごとにその色の文字で出す（黒・紺は白い光で縁取って読ませる） */
@@ -38,7 +40,13 @@ import { SelfReadingCard } from './SelfReadingCard';
 import { LuckyDaysSection } from './LuckyDaysSection';
 import type { ReferralStatus } from '../services/referral';
 import { LockLabel, countChars, clampLines, blurLinesFor } from './LockRest';
+import { GuardianSummonFx } from './GuardianSummonFx';
 import MbtiQuizModal from './MbtiQuizModal';
+import { CoupleHundredSection } from './CoupleHundredSection';
+import type { CoupleAccess } from './CoupleHundredSection';
+import type { CoupleDrops, DropKind } from '../services/coupleDrops';
+import { FREE_RANK_NOS, FREE_READING_NOS } from '../data/coupleTopics';
+import { sampleRankNos } from '../utils/coupleRank';
 import { isMbtiCode } from '../utils/mbtiQuiz';
 
 const GoogleIcon = () => (
@@ -417,14 +425,6 @@ const ScoreLineChart = ({ items, locked, range }: { items: { key: string; label:
   );
 };
 
-const getMbtiColor = (mbtiCode: string) => {
-  const code = (mbtiCode || '').toUpperCase();
-  if (code.includes('N') && code.includes('F')) return '#6fb08f'; // Emerald Green
-  if (code.includes('N') && code.includes('T')) return '#b9a3d6'; // Purple
-  if (code.includes('S') && code.includes('J')) return '#5d9fc0'; // Blue
-  return '#e6b85c'; // Explorer Gold
-};
-
 const getMbtiEmblem = (mbtiCode: string, size: number = 14) => {
   const code = (mbtiCode || '').toUpperCase();
   // Group detection
@@ -507,6 +507,14 @@ interface ResultViewProps {
   sharedBy?: { name: string };
   /** 招待URL（またはコード）から占った友達: 恋愛運MAX日の直近の1日だけ開く（お相手の有無にかかわらず） */
   referralGift?: boolean;
+  /** 二人の相性100: X投稿（utm_content=couple-…）から来たお題の番号。開いた状態でスクロールし、順位は誰でも見られる */
+  coupleFocusNo?: number | null;
+  /** 月のかけら（ログイン中・お相手ありのときだけ。App.tsx が api/stripe/drops で持つ） */
+  coupleDrops?: CoupleDrops | null;
+  /** 月のかけらを読めなかったときの理由（表示用） */
+  coupleDropsError?: string | null;
+  /** かけらを1つ使ってお題を開ける。開けたら true */
+  onOpenCoupleTopic?: (kind: DropKind, no: number, gate?: Promise<unknown>) => Promise<boolean>;
   /** 友達紹介（LuckyDaysSection の恋愛運MAX日）。App.tsx が api/stripe/referral で持つ */
   referral?: {
     status: ReferralStatus | null;
@@ -561,9 +569,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
   todayPartners = [],
   onTodaySwitch,
   startOnBook,
-  onUpdateJourney
+  onUpdateJourney,
+  coupleFocusNo = null,
+  coupleDrops = null,
+  coupleDropsError = null,
+  onOpenCoupleTopic
 }) => {
   const [mbtiQuizFor, setMbtiQuizFor] = useState<'self' | 'partner' | null>(null);
+  // 4つの質問で16タイプを決めて鑑定し直したあと、同じ場所（このカードがあったところ）に戻す。
+  // カードは決めると消えるので、カードの直後の目印が、カードがあった高さに来るようにずらす
+  const mbtiCardRef = useRef<HTMLDivElement>(null);
+  const afterMbtiCardRef = useRef<HTMLDivElement>(null);
+  const mbtiAnchorTopRef = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const before = mbtiAnchorTopRef.current;
+    if (before === null) return;
+    mbtiAnchorTopRef.current = null;
+    const el = afterMbtiCardRef.current;
+    if (!el) return;
+    const delta = el.getBoundingClientRect().top - before;
+    if (delta) window.scrollBy(0, delta);
+  }, [renResult, tsukiResult]);
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [registeringEmail, setRegisteringEmail] = useState(false);
@@ -571,7 +597,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // サブスク登録が完了した瞬間に、お相手のトリセツ（有料で解放される最初の部分）へ移動する。
   // トリセツが無い鑑定（お相手なし）のときは、鑑定結果の先頭へ戻す
   const resultTopRef = useRef<HTMLDivElement>(null);
-  const torisetsuRef = useRef<HTMLDivElement>(null);
+  const torisetsuRef = useRef<HTMLElement>(null);
   const wasSubscribedRef = useRef(isSubscribed);
   const [showWelcomePremium, setShowWelcomePremium] = useState(false);
   // 月額プレミアム会員は、開いたときに「今日」（毎日変わる結果だけ）を見せ、タブで「鑑定書」（今までの結果画面）に切り替える（2026-11-12 TAKASHI）。
@@ -592,8 +618,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           torisetsuRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
           return;
         }
-        const mainEl = document.querySelector('.main-content') as HTMLElement | null;
-        if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
         resultTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 150);
@@ -666,22 +690,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
     };
 
     const handleWindowScroll = () => checkScroll(window);
-    const mainEl = document.querySelector('.main-content') as HTMLElement;
-    const handleMainScroll = () => {
-      if (mainEl) checkScroll(mainEl);
-    };
-
     window.addEventListener('scroll', handleWindowScroll, { passive: true });
-    if (mainEl) {
-      mainEl.addEventListener('scroll', handleMainScroll, { passive: true });
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handleWindowScroll);
-      if (mainEl) {
-        mainEl.removeEventListener('scroll', handleMainScroll);
-      }
-    };
+    return () => window.removeEventListener('scroll', handleWindowScroll);
   }, []);
 
   const handleDismissA2hsBanner = (e: React.MouseEvent) => {
@@ -1008,9 +1018,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   }, [activeResult.baseScore, activeResult.dailyScore]);
 
   useEffect(() => {
-    const mainEl = document.querySelector('.main-content');
-    if (!mainEl) return;
-
     const handleScroll = () => {
       if (!myAstrologyRef.current) return;
       const rect = myAstrologyRef.current.getBoundingClientRect();
@@ -1018,9 +1025,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setIsPastGuardian(isPast);
     };
 
-    mainEl.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => mainEl.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const registerCardRef = React.useRef<HTMLDivElement>(null);
@@ -1060,19 +1067,29 @@ export const ResultView: React.FC<ResultViewProps> = ({
     </button>
   ) : null;
   const todayOpen = isSubscribed || (pairOpen && pairUnlock?.today === true);
+  // 二人の相性100（2026-11-12 TAKASHI）
+  // ・シングル（¥680）: そのお相手に使えるかけら10個＋無料会員の毎日2個（自分で選んで開ける。2026-11-13 TAKASHI）
+  // ・月のかけら: 月額は支払い日に50個＋毎日5個、無料会員は毎日2個。かけら1つで1つのお題が開き、開けたお題はずっと見られる
+  // ・未登録・無料会員: ランキングは代表2本＋X投稿から来たお題の順位だけ、本格鑑定は見本1本
+  const dropsOn = hasOpponent && !sharedBy && Boolean(coupleDrops) && Boolean(onOpenCoupleTopic);
+  // 無料の見本は、その二人でいちばん上位と、いちばん下位のランキング（MBTIが未定なら固定の2つ）。
+  // 順位を見せるものは理由も見せ、順位を伏せるものは理由も伏せる（2026-11-12 TAKASHI「これで統一して」）
+  const freeRankNos = sampleRankNos(activeResult?.myMbtiCode, activeResult?.opponentMbtiCode, FREE_RANK_NOS);
+  const coupleRankAccess = (no: number): CoupleAccess => {
+    if (sharedBy) return freeRankNos.includes(no) || no === coupleFocusNo ? 'full' : 'locked';
+    if (coupleDrops?.opened.rank.includes(no)) return 'full';
+    return freeRankNos.includes(no) || no === coupleFocusNo ? 'full' : 'locked';
+  };
+  const coupleReadingAccess = (no: number): CoupleAccess => {
+    if (FREE_READING_NOS.includes(no)) return 'full';
+    if (sharedBy) return 'locked';
+    return coupleDrops?.opened.reading.includes(no) ? 'full' : 'locked';
+  };
   // 会員で、お相手ありの鑑定を見ているときだけ買える（未登録はまず無料会員登録へ）
   const canBuyPair = hasOpponent && !sharedBy && !isSubscribed && !pairOpen && Boolean(onBuyPair);
   // ロックの文言は全部「続きを見る」に統一（料金・違いは開いた先の購入LPで説明する）
   const deepLockWord = LOCK_WORD;
   const pairCardRef = React.useRef<HTMLDivElement>(null);
-  const [buyingPair, setBuyingPair] = useState(false);
-  useBackForwardReset(() => setBuyingPair(false));
-  // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
-  const handleBuyPair = async () => {
-    if (!onBuyPair || buyingPair) return;
-    setBuyingPair(true);
-    try { await onBuyPair(); } finally { setBuyingPair(false); }
-  };
   // 変わらない鑑定（トリセツ・深層鑑定・相性グラフ・年次）のロック: ¥680を先に見せたLPへ
   const handleDeepLockClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -1252,6 +1269,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
       setEmailSent(true);
     } catch (err: any) {
       console.error('Registration email error:', err);
+      trackRegError('email_send');
       const detail = err?.code ? ` (${err.code}: ${err.message})` : '';
       showAlert(`認証メールの送信に失敗しました。${detail}`);
     } finally {
@@ -1545,42 +1563,72 @@ export const ResultView: React.FC<ResultViewProps> = ({
         background: 'linear-gradient(135deg, rgba(30, 25, 55, 0.85) 0%, rgba(13, 18, 27, 0.95) 100%)',
         boxShadow: '0 12px 35px rgba(0,0,0,0.6), 0 0 25px rgba(226,192,116,0.1)'
       }}>
-        {/* Pair Name Tag */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.45rem',
-          fontSize: '0.85rem',
-          color: '#f2e2b3',
-          background: 'linear-gradient(90deg, rgba(226,192,116,0.15) 0%, rgba(159, 134, 192,0.15) 100%)',
-          border: '1px solid rgba(226,192,116,0.4)',
-          borderRadius: '20px',
-          padding: '0.4rem 1.1rem',
-          width: 'fit-content',
-          margin: '0 auto',
-          fontWeight: 'bold',
-          letterSpacing: '0.03em',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-        }}>
-          <Heart size={14} style={{ fill: '#f2e2b3', color: '#f2e2b3' }} />
-          <span>{hasOpponent ? `${myName} × ${oppNickname}` : `${myName} の全運勢`}</span>
-        </div>
+        {/* 名前の見出し（C案）: 二人を左右に、真ん中に月の紋。一人で占うときは月の紋＋名前 */}
+        {(() => {
+          const me = myName || 'あなた';
+          const opp = oppNickname;
+          const nameSize = (n: string) => (n.length >= 9 ? '0.9rem' : n.length >= 6 ? '1.02rem' : '1.2rem');
+          const labelStyle: React.CSSProperties = {
+            display: 'block',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.6rem',
+            fontWeight: 500,
+            color: 'rgba(226, 192, 116, 0.65)',
+            letterSpacing: '0.12em',
+            marginBottom: '0.1rem'
+          };
+          const nameStyle = (n: string): React.CSSProperties => ({
+            fontFamily: 'var(--font-serif)',
+            fontWeight: 700,
+            fontSize: nameSize(n),
+            color: '#f6e7bd',
+            letterSpacing: '0.06em',
+            lineHeight: 1.3,
+            minWidth: 0,
+            overflowWrap: 'anywhere'
+          });
+          const emblem = (
+            <div aria-hidden="true" style={{
+              width: '40px',
+              height: '40px',
+              flexShrink: 0,
+              borderRadius: '50%',
+              border: '1px solid rgba(226, 192, 116, 0.6)',
+              display: 'grid',
+              placeItems: 'center',
+              background: 'radial-gradient(circle, rgba(226,192,116,0.22) 0%, rgba(226,192,116,0) 70%)',
+              boxShadow: '0 0 14px rgba(226, 192, 116, 0.25)'
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M15 3a9 9 0 1 0 6 15.5A8 8 0 0 1 15 3z" fill="#e8c96a" /></svg>
+            </div>
+          );
+          return hasOpponent ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '0.75rem', width: '100%' }}>
+              <div style={{ ...nameStyle(me), textAlign: 'right' }}><span style={labelStyle}>あなた</span>{me}</div>
+              {emblem}
+              <div style={{ ...nameStyle(opp), textAlign: 'left' }}><span style={labelStyle}>お相手</span>{opp}</div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', width: '100%' }}>
+              {emblem}
+              <div style={nameStyle(me)}><span style={labelStyle}>あなたの全運勢</span>{me}</div>
+            </div>
+          );
+        })()}
 
-        {/* 鑑定の方式のバッジ */}
-        <div style={{
-          fontSize: '0.66rem',
-          color: '#e2c074',
-          background: 'rgba(226, 192, 116, 0.08)',
-          border: '1px solid rgba(226, 192, 116, 0.25)',
-          borderRadius: '12px',
-          padding: '0.25rem 0.65rem',
-          margin: '0 auto -0.1rem',
-          textAlign: 'center',
-          fontWeight: '600',
-          letterSpacing: '0.02em'
-        }}>
-          四柱推命・九星気学・16タイプから読み解く鑑定
+        {/* 鑑定の方式: 3つの小さな札 */}
+        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '0.4rem', margin: '0 auto -0.1rem' }}>
+          {['四柱推命', '九星気学', '16タイプ'].map((m) => (
+            <span key={m} style={{
+              fontSize: '0.64rem',
+              color: '#e2c074',
+              border: '1px solid rgba(226, 192, 116, 0.3)',
+              borderRadius: '4px',
+              padding: '0.12rem 0.45rem',
+              fontWeight: 600,
+              letterSpacing: '0.04em'
+            }}>{m}</span>
+          ))}
         </div>
         
         {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}
@@ -1830,31 +1878,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               overflow: 'hidden'
             }}
           >
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.4rem',
-              padding: '0.25rem 0.95rem',
-              background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(159, 134, 192, 0.14) 100%), rgba(11, 15, 21, 0.72)',
-              border: '1.5px solid rgba(226, 192, 116, 0.45)',
-              borderRadius: '20px',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-              position: 'relative',
-              margin: '0.7rem 0 0.3rem',
-              maxWidth: 'calc(100% - 0.5rem)',
-              whiteSpace: 'nowrap',
-              zIndex: 4
-            }}>
-              <span className="font-serif" style={{
-                fontSize: '0.9rem',
-                fontWeight: 'bold',
-                color: '#f2e2b3',
-                textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                letterSpacing: '0.05em'
-              }}>
-                ✦ {san(myName, 'あなた')}の守護獣 ✦
-              </span>
+            {/* 見出しは枠なし（2026-11-13 TAKASHI「B」）: 小さな GUARDIAN ＋ 名前 */}
+            <div className="guardian-head font-serif">
+              <span className="guardian-head-en">GUARDIAN</span>
+              <span className="guardian-head-ja">{san(myName, 'あなた')}の守護獣</span>
             </div>
 
             {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の下側に重ねる。見出しは顔にかぶらないよう画像の外（上）に置く */}
@@ -1876,9 +1903,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </>
                 )}
               </div>
+              <GuardianSummonFx />
 
               <div className="guardian-hero-caption">
-                {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                {/* 称号（タイプを覚えるための呼び名）。枠なしの金の文字＋下に短い線 */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
                   <span className="astro-title-badge font-serif">
                     {(activeResult.myAstrologyTheme || '').replace(/[【】]/g, '')}
@@ -2010,31 +2038,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 overflow: 'hidden'
               }}
             >
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                padding: '0.25rem 0.95rem',
-                background: 'linear-gradient(135deg, rgba(226, 192, 116, 0.18) 0%, rgba(58, 134, 171, 0.14) 100%), rgba(11, 15, 21, 0.72)',
-                border: '1.5px solid rgba(226, 192, 116, 0.45)',
-                borderRadius: '20px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 0 10px rgba(226, 192, 116, 0.2)',
-                position: 'relative',
-                margin: '0.7rem 0 0.3rem',
-                maxWidth: 'calc(100% - 0.5rem)',
-                whiteSpace: 'nowrap',
-                zIndex: 4
-              }}>
-                <span className="font-serif" style={{
-                  fontSize: '0.9rem',
-                  fontWeight: 'bold',
-                  color: '#f2e2b3',
-                  textShadow: '0 0 10px rgba(242, 226, 179, 0.6), 0 1px 3px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.05em'
-                }}>
-                  ✦ {san(oppNickname)}の守護獣 ✦
-                </span>
+              {/* 見出しは枠なし（2026-11-13 TAKASHI「B」）: 小さな GUARDIAN ＋ 名前 */}
+              <div className="guardian-head font-serif">
+                <span className="guardian-head-en">GUARDIAN</span>
+                <span className="guardian-head-ja">{san(oppNickname)}の守護獣</span>
               </div>
 
               {/* 守護獣画像をカード幅いっぱいに敷き、下へ溶かす。称号は画像の下側に重ねる。見出しは顔にかぶらないよう画像の外（上）に置く */}
@@ -2056,9 +2063,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     </>
                   )}
                 </div>
+                <GuardianSummonFx />
 
                 <div className="guardian-hero-caption">
-                  {/* 称号（タイプを覚えるための呼び名）。金枠のバッジで目立たせる */}
+                  {/* 称号（タイプを覚えるための呼び名）。枠なしの金の文字＋下に短い線 */}
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
                     <span className="astro-title-badge font-serif">
                       {(activeResult.opponentAstrologyTheme || '').replace(/[【】]/g, '')}
@@ -2156,12 +2164,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       )}
 
       {/* Free Summary Section (Fully Visible) */}
+      {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる。大見出しはカードの外（ResultSection） */}
+      <ResultSection title={hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`} icon={<MoonMark />}>
       <div className="glass-panel" style={{ padding: '1.25rem' }}>
-        <h2 className="font-serif gold-text" style={{ fontSize: '1.05rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-          <MoonMark size={16} />
-          {/* 上の「こんな人」から相性・運勢の話に戻るので、だれとの相性かを見出しに入れる */}
-          {hasOpponent ? `${san(oppNickname)}との基本相性サマリー` : `${san(myName, 'あなた')}の基本運勢サマリー`}
-        </h2>
         <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', whiteSpace: 'pre-wrap', margin: 0 }}>
           {(() => {
             const text = formatAppraisalText(activeResult.summary);
@@ -2180,6 +2185,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
           })()}
         </p>
       </div>
+      </ResultSection>
 
       {/* 16タイプが決まっていない鑑定（必須にする前の入力など）: かんたん質問で決めて鑑定し直す */}
       {!sharedBy && onSetMbti && (() => {
@@ -2189,7 +2195,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
         const who = needSelf ? 'self' : 'partner';
         const whoName = who === 'self' ? 'あなた' : san(oppNickname || 'お相手');
         return (
-          <div style={{ background: 'rgba(226, 192, 116, 0.07)', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '14px', padding: '0.85rem 0.95rem', marginBottom: '1rem' }}>
+          <div ref={mbtiCardRef} style={{ background: 'rgba(226, 192, 116, 0.07)', border: '1px solid rgba(226, 192, 116, 0.35)', borderRadius: '14px', padding: '0.85rem 0.95rem', marginBottom: '1rem' }}>
             <div className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f2e2b3', marginBottom: '0.3rem' }}>
               {whoName}の16タイプがまだ決まっていません
             </div>
@@ -2202,12 +2208,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         );
       })()}
+      {!sharedBy && onSetMbti && <div ref={afterMbtiCardRef} aria-hidden="true" />}
       {mbtiQuizFor && onSetMbti && (
         <MbtiQuizModal
           subject={mbtiQuizFor}
           name={san(oppNickname || 'お相手')}
           onClose={() => setMbtiQuizFor(null)}
-          onDone={(t) => { const w = mbtiQuizFor; setMbtiQuizFor(null); onSetMbti(w, t); }}
+          onDone={(t) => { const w = mbtiQuizFor; mbtiAnchorTopRef.current = mbtiCardRef.current ? mbtiCardRef.current.getBoundingClientRect().top : null; setMbtiQuizFor(null); onSetMbti(w, t); }}
         />
       )}
 
@@ -2216,26 +2223,59 @@ export const ResultView: React.FC<ResultViewProps> = ({
         <div ref={myAstrologyRef} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {/* 2枚目（月「恋愛運を開く鍵」／蓮「うまくいくためのアドバイス」）は表示しない（TAKASHI判断 2026-11-06） */}
           {activeResult.topics.slice(0, 1).map((topic) => (
-            <div className="glass-panel" key={topic.title} style={{ padding: '1.25rem' }}>
-              <h3 className="font-serif" style={{ color: selectedChar === 'ren' ? '#9cc6d8' : '#cdbfe2', fontSize: '1.05rem', marginBottom: '0.65rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                {/* 見出しは「今日の恋の過ごし方」（内容が分かる名前に。旧「月/蓮から〇〇さんへ」）。絵文字はキャラのアイコンに置き換える */}
-                <CharHeadingIcon char={topic.title.startsWith('🔮') ? '蓮' : '月'} size={36} />
-                {topic.title.replace(/^(🌙|🔮)\s*/u, '')}
-              </h3>
-              <p className="font-serif" style={{ fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
+            // 見出しは「今日の恋の過ごし方」（内容が分かる名前に。旧「月/蓮から〇〇さんへ」）。大見出しはカードの外（ResultSection）、キャラの顔はカードの中の文の横
+            <ResultSection key={topic.title} title={topic.title.replace(/^(🌙|🔮)\s*/u, '')} icon={<Heart />}>
+            <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+              <CharHeadingIcon char={topic.title.startsWith('🔮') ? '蓮' : '月'} size={36} />
+              <p className="font-serif" style={{ flex: 1, minWidth: 0, fontSize: '0.86rem', lineHeight: '1.85', letterSpacing: '0.025em', color: '#d5cfc3', margin: 0, whiteSpace: 'pre-wrap' }}>
                 {/* 未登録・無料会員は1行だけ見せ、2行目以降をぼかす（TAKASHI判断 2026-11-07） */}
                 {readingOpen
                   ? formatAppraisalText(topic.text)
                   : <RegisterMosaicText text={formatAppraisalText(topic.text)} visibleLines={1} headChars={40} onUnlock={handleReadingLockClick} />}
               </p>
             </div>
+            </ResultSection>
           ))}
         </div>
 
       {/* Main Content Area */}
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
+        {/* 二人の相性100（2026-11-12 TAKASHI）: お相手ありの鑑定だけ。LINE吉時間の箱のすぐ上（TAKASHI「LINEの上に移動」2026-11-12） */}
+        {hasOpponent && (
+          <CoupleHundredSection
+            myMbti={activeResult.myMbtiCode}
+            oppMbti={activeResult.opponentMbtiCode}
+            myName={myName}
+            oppName={oppNickname}
+            myPillar={activeResult.myPillar}
+            myStar={activeResult.myStar}
+            oppPillar={activeResult.opponentPillar}
+            oppStar={activeResult.opponentStar}
+            rankAccess={coupleRankAccess}
+            readingAccess={coupleReadingAccess}
+            focusNo={coupleFocusNo}
+            pinnedNos={[...freeRankNos, ...(coupleFocusNo ? [coupleFocusNo] : [])]}
+            onLockClick={isRegistered ? handleDeepLockClick : (e) => { e?.stopPropagation(); handleScrollToRegister('lock'); }}
+            lockWord={LOCK_WORD}
+            onAskMbti={!sharedBy && onSetMbti ? (who) => setMbtiQuizFor(who) : undefined}
+            drops={dropsOn ? coupleDrops : null}
+            dropsError={hasOpponent && !sharedBy ? coupleDropsError : null}
+            onDrop={dropsOn ? onOpenCoupleTopic : undefined}
+          />
+        )}
+
         {/* Feature 2: Daily Luck & Notification Card (Spacious LINE Golden Hours Layout) */}
+      {/* 大見出しはカードの外（ResultSection）。LINEの緑ロゴはカードの中の「推奨送信タイミング」に残す */}
+      <ResultSection
+        title={hasOpponent ? '本日のLINE吉時間 ＆ 運勢' : '本日の開運黄金時間 ＆ 運勢'}
+        icon={<MessageCircle />}
+        aside={(
+          <span style={{ fontSize: '0.65rem', color: '#a8d3b0', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
+            毎日0時更新
+          </span>
+        )}
+      >
       <div className="glass-panel" style={{
         padding: '1.15rem',
         display: 'flex',
@@ -2245,19 +2285,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
         background: 'linear-gradient(135deg, rgba(14, 19, 27, 0.75) 0%, rgba(12, 16, 23, 0.85) 100%)',
         boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 199, 85, 0.1)'
       }}>
-        {/* Header with Official LINE Logo */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-            <LineLogoIcon size={22} />
-            <span style={{ fontSize: '0.92rem', fontWeight: '800', color: '#ffffff', letterSpacing: '0.02em' }}>
-              {hasOpponent ? '本日のLINE吉時間 ＆ 運勢' : '本日の開運黄金時間 ＆ 運勢'}
-            </span>
-          </div>
-          <span style={{ fontSize: '0.65rem', color: '#a8d3b0', background: 'rgba(6, 199, 85, 0.15)', border: '1px solid rgba(6, 199, 85, 0.3)', padding: '2px 8px', borderRadius: '10px', fontWeight: '600' }}>
-            毎日0時更新
-          </span>
-        </div>
-
         {/* HERO CARD: LINE 吉時間 (Full Width Spacious Layout) */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(6, 199, 85, 0.16) 0%, rgba(0, 0, 0, 0.5) 100%)',
@@ -2441,13 +2468,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </div>
         </div>
       </div>
+      </ResultSection>
 
         {/* 5 Detailed Appraisal Topics（LINE吉時間の下・最高シンクロ日の上。TAKASHI判断 2026-11-10） */}
-        <h2 className="font-serif gold-text" style={{ fontSize: '1.1rem', margin: '0.75rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-          <MoonMark size={18} />
-          {hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : `${san(myName, 'あなた')}の深層鑑定結果`}
-        </h2>
-
+        <ResultSection title={hasOpponent ? `${san(oppNickname)}との深層鑑定結果` : `${san(myName, 'あなた')}の深層鑑定結果`} icon={<PillarsMark />}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {detailedTopics.map((topic, index) => {
           // 「惹かれ合うポイント＆地雷行動3選」「二人のこれから」はプレミアム限定（無料会員も冒頭の1文だけ）。他の項目は無料会員なら全文。
           const premiumOnly = hasOpponent && (topic.title.includes('惹かれ合うポイント') || topic.title.includes('二人のこれから'));
@@ -2536,7 +2561,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       ✉️ 認証メールを送信しました！
                     </div>
                     「<strong>{email}</strong>」宛にログイン認証リンクを送信しました。<br />
-                    届いたメール内の「月と蓮にログイン」リンクをタップして会員登録を完了させてください。
+                    届いたメールのリンクをタップすると、会員登録が完了します。
+                    <div style={{ marginTop: '0.55rem', fontSize: '0.75rem', color: '#c9d8cf', lineHeight: 1.65 }}>
+                      数分たっても届かないときは、<strong>迷惑メールフォルダ</strong>も見てください。<br />
+                      届かないときは、下の「Googleで登録」が早くて確実です。
+                    </div>
                   </div>
                 ) : (
                   <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -2575,6 +2604,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           await signInWithGoogle();
                         } catch (e) {
                           console.error(e);
+                          const msg = handleSignInError('google', e);
+                          if (msg) showAlert(msg);
                         }
                       }}
                       style={{
@@ -2604,6 +2635,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                           await signInWithX();
                         } catch (e) {
                           console.error(e);
+                          const msg = handleSignInError('x', e);
+                          if (msg) showAlert(msg);
                         }
                       }}
                       style={{
@@ -2653,6 +2686,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </React.Fragment>
           );
         })}
+        </div>
+        </ResultSection>
 
         {/* 最高シンクロ日・恋愛運MAX日（深層鑑定結果のすぐ下。LINEの吉時間の箱からは外した（TAKASHI判断 2026-11-10）。根拠・珍しさは全員に、日付は月額プレミアムか、そのお相手の買い切り） */}
         <LuckyDaysSection
@@ -2749,8 +2784,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
         {/* Feature 4: Torisetsu (取扱説明書) Card - Placed ABOVE 深層鑑定結果 with 50% blur for non-registered users */}
       {activeResult.opponentTorisetsu && (
-        <div ref={torisetsuRef} className="glass-panel" style={{
-          scrollMarginTop: '1rem',
+        <ResultSection ref={torisetsuRef} title={`${san(oppNickname)}の取扱説明書（トリセツ）`} icon={<TorisetsuBookMark />}>
+        <div className="glass-panel" style={{
           padding: '1.25rem',
           display: 'flex',
           flexDirection: 'column',
@@ -2762,13 +2797,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
           overflow: 'hidden'
         }}>
           {welcomePremiumBanner}
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
-            <TorisetsuBookMark size={21} style={{ color: 'var(--color-gold)' }} />
-            <h2 className="font-serif gold-text" style={{ fontSize: '0.95rem', fontWeight: 'bold', margin: 0, whiteSpace: 'nowrap', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {san(oppNickname)}の取扱説明書（トリセツ）
-            </h2>
-          </div>
 
           {/* 2. 絶対NG行動 5選 (Item 1 is visible teaser, Item 2-5 are blurred) */}
           <div style={{ background: 'rgba(207, 90, 67, 0.05)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(207, 90, 67, 0.2)', position: 'relative' }}>
@@ -3201,11 +3229,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 width: '100%',
                 boxSizing: 'border-box'
               }}>
+                {/* 2つのプランの違い（2026-11-14 実装の仕様に合わせて書き直し: 月額＝お相手全員・毎日、シングル＝このお相手だけ・ずっと） */}
                 <div>
                   <span style={{
                     fontSize: '0.6rem',
                     color: 'var(--color-gold)',
-                    textTransform: 'uppercase',
                     letterSpacing: '1px',
                     fontWeight: 'bold',
                     background: 'rgba(226, 192, 116, 0.1)',
@@ -3213,96 +3241,68 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     borderRadius: '20px',
                     border: '1px solid rgba(226, 192, 116, 0.2)'
                   }}>
-                    ✦ プレミアムプラン解放 ✦
+                    ✦ {partnerCall}のことをもっと深く知る ✦
                   </span>
                   <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>
-                    <span style={{ display: 'inline-block', maxWidth: '100%' }}>{san(oppNickname)}のトリセツ・</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>6軸の詳しい相性・</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>未来予測をすべて解禁</span>
+                    {canBuyPair ? '2つのプランの違い' : 'プレミアム（月額980円）でできること'}
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
                     <p style={{ fontSize: '0.72rem', color: '#e2d9ee', lineHeight: '1.6', margin: 0 }}>
-                      月額980円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
+                      {canBuyPair
+                        ? `今日${partnerCall}のことだけ知りたいなら、シングルプランで。${partnerCall}のことを毎日もっと深く知りたい、他の気になる人のことも知りたいなら、プレミアムがおすすめですよ。`
+                        : '気になる人みんなの鑑定と、毎日の相性・これからの流れを、私がいつでもお見せしますね。'}
                     </p>
                   </div>
                 </div>
 
-                {/* Comprehensive Premium Benefits list */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>トリセツ・深層鑑定・6つの相性グラフ（誰でも無制限）</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>今日の相性とLINEの送り方を毎日</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>これからの14日間・月ごと・年ごとの流れ</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>毎朝の運勢メールが全文で届く</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>お相手の保存が5人まで（無料会員は2人）</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>月 ＆ 蓮へのチャット相談が無制限</strong></span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
-                  <PremiumUnlockButton
-                    onClick={() => {
-                      if (onOpenPremiumLP) {
-                        onOpenPremiumLP('monthly');
-                      } else {
-                        onSubscribe();
-                        setSubSuccess(true);
-                      }
-                    }}
-                  />
-                </div>
-
-                {/* 買い切り: このお相手だけ、変わらない鑑定をずっと。買った日は今日の相性も全部 */}
-                {canBuyPair && (
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.74rem', color: '#e8e3d8', lineHeight: 1.6 }}>
-                      <strong style={{ color: '#f2e2b3' }}>{partnerCall}のことだけ知りたい方は</strong><br />
-                      トリセツ・深層鑑定・6つの相性グラフを、{PAIR_PRICE_LABEL}の1回払いでずっと読めます。買った日は、今日の相性とLINEの助言も全部見れます。
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleBuyPair}
-                      disabled={buyingPair}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        borderRadius: '999px',
-                        border: '1px solid rgba(226, 192, 116, 0.55)',
-                        background: 'rgba(226, 192, 116, 0.06)',
-                        color: '#f2e2b3',
-                        fontSize: '0.85rem',
-                        fontWeight: 'bold',
-                        cursor: buyingPair ? 'wait' : 'pointer',
-                        opacity: buyingPair ? 0.7 : 1
-                      }}
-                    >
-                      {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで続きを見る`}
-                    </button>
-                    <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
-                    </div>
-                    <PurchaseTerms plans={['pair']} />
+                {canBuyPair ? (
+                  <PlanCompareTable name={partnerCall} />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    {planCompareRows(partnerCall).map(({ label, monthly }) => (
+                      <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
+                        <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                        <span><strong>{label}</strong>{monthly !== '○' && <>：{monthly.replace('\n', '')}</>}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
+
+                {/* ボタンは購入LPへ進む1つだけ。料金の細かい説明・規約・支払い方法は購入LPと利用規約にある（2026-11-14 TAKASHI「鑑定ページのCTAは一つ、表と1つのボタンだけ」） */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenPremiumLP) {
+                      onOpenPremiumLP('monthly');
+                    } else {
+                      onSubscribe();
+                      setSubSuccess(true);
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    marginTop: '0.3rem',
+                    padding: '0.8rem 0.6rem',
+                    background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '9999px',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.9rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.03em',
+                    boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  プランを詳しく見る
+                </button>
               </div>
             )}
           </div>
         </div>
+        </ResultSection>
       )}
 
         {/* 6-Axis Compatibility Radar Chart with Monetization Lock (二人の相性なので、お相手ありの鑑定だけ) */}
@@ -3324,12 +3324,9 @@ export const ResultView: React.FC<ResultViewProps> = ({
       />
       )}
 
-        {/* 10. Future Timeline Schedule Preview */}
+        {/* 10. Future Timeline Schedule Preview（大見出しはカードの外＝ResultSection） */}
+        <ResultSection title={hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : `${san(myName, 'あなた')}の未来予測スケジュール`} icon={<Calendar />}>
         <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <h2 className="font-serif gold-text" style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
-            <Calendar size={16} />
-            {hasOpponent ? `${san(oppNickname)}との未来予測スケジュール` : `${san(myName, 'あなた')}の未来予測スケジュール`}
-          </h2>
 
           {/* Weekly Scores */}
           <div style={{ margin: '0.5rem 0', position: 'relative' }}>
@@ -3587,11 +3584,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       <><strong>お相手の保存が5人まで</strong>（ほかのお相手のトリセツも全部読める）</>
                     ]
                   : [
-                      <><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></>,
-                      <><strong>月次・年次運勢スケジュールの完全閲覧</strong></>,
-                      <><strong>お相手の保存上限が5人に拡大</strong>（無料会員2人 → 5人）</>,
-                      <><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></>,
-                      <><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></>
+                      <><strong>これからの14日間・月ごと・10年先までの流れ</strong></>,
+                      <><strong>今日の相性とLINEの送り方を毎日</strong>（毎朝の運勢メールも全文）</>,
+                      <><strong>お相手全員のトリセツ・深層鑑定・6つの相性グラフ</strong></>,
+                      <><strong>お相手の保存が5人まで</strong>（無料会員は2人）</>,
+                      <><strong>月 ＆ 蓮へのチャット相談</strong>が回数を気にせずできる（無料は1日2回）</>,
+                      <><strong>月のかけら</strong>が毎月50個＋毎日5個（二人の相性100のお題を開く）</>
                     ]
                 ).map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
@@ -3622,8 +3620,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             </div>
           )}
         </div>
-
-        
+        </ResultSection>
 
         {/* Reset Button (Diagnose Again) */}
         {onReset && (
@@ -3889,7 +3886,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 9995, // 下のシェアボタン（9990）より前に出す
+            zIndex: 100000, // 下のシェアボタン（9990）・下メニュー（99999）より前に出す
             animation: 'fadeIn 0.2s ease',
             padding: '1.5rem'
           }} onClick={() => setExplanation(null)}>

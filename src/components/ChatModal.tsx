@@ -707,7 +707,7 @@ ${todayStarsForChat(getTodayStars(result, new Date(), 'あなた', hasOppNicknam
               <button key={p.id} className="chat-option-btn chat-partner-btn" onClick={() => partnerPicker.onPick(p)}>
                 <span className="chat-partner-name">💞 {san(p.name)}</span>
                 {p.relationship && p.relationship !== 'single' && p.relationship !== 'partner' && (
-                  <span className="chat-partner-rel">{p.relationship}</span>
+                  <span className="chat-partner-rel">{p.relationship === '片思い中' ? '片想い中' : p.relationship}</span>
                 )}
               </button>
             ))}

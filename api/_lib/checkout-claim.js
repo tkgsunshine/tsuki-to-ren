@@ -2,6 +2,7 @@ import { getDb, getAdminAuth } from './firestore.js';
 import { PREMIUM, getStripe, parseBody } from './stripe.js';
 import { PAIR_UNLOCKS } from './pair-unlock.js';
 import { NOTICES } from './notices.js';
+import { moveCoupleDrops } from './couple-drops.js';
 
 // 登録なしの購入（買い切り・月額とも）。
 // アカウントを自動で作り、戻ってきた端末をその場でログイン状態にする。
@@ -98,9 +99,11 @@ export async function transferGuestPurchases(db, user, deps = {}) {
     for (const n of noticeSnap.docs || []) await db.collection(NOTICES).doc(n.id).set({ ...n.data(), to: user.uid });
     const srcPremRef = db.collection(PREMIUM).doc(c.uid);
     const prem = (await srcPremRef.get()).data();
+    let premiumMoved = false;
     if (prem) {
       const target = (await db.collection(PREMIUM).doc(user.uid).get()).data();
       if (target?.active !== true) { // never overwrite a live membership of the real account
+        premiumMoved = true;
         await db.collection(PREMIUM).doc(user.uid).set(prem);
         await srcPremRef.delete();
         if (prem.subscriptionId) {
@@ -112,6 +115,12 @@ export async function transferGuestPurchases(db, user, deps = {}) {
           }
         }
       }
+    }
+    // 月のかけら（開けたお題・シングルプランの残り・配った印）も移す。移さないと、開けたお題が消え、シングルの10個がもう一度配られる
+    try {
+      await moveCoupleDrops(db, c.uid, user.uid, { premiumMoved });
+    } catch (e) {
+      console.error('⚠️ Could not move the drops:', e?.message);
     }
     await db.collection(CLAIMS).doc(doc.id).set({ ...c, transferred: true, transferredTo: user.uid, transferredAt: new Date().toISOString() });
   }
