@@ -11,7 +11,7 @@ export const planCompareRows = (name: string): PlanRow[] => {
     { label: '二人の相性100（本格鑑定・MBTIランキング）', monthly: '誰でも無制限', pair: `${name}だけ` },
     { label: '惹かれるファッション・ドキッとさせる仕草', monthly: '誰でも無制限', pair: `${name}だけ` },
     { label: '2人の最高シンクロ日（日付）', monthly: '誰でも無制限', pair: `${name}だけ` },
-    { label: '今日の相性と、本日のLINEの送り方', monthly: '毎日', pair: `本日分(${todayJst})` },
+    { label: '今日の相性と、本日のLINEの送り方', monthly: '毎日', pair: `本日分(${todayJst})だけ` },
     { label: 'あなたの恋愛運MAX日（日付）', monthly: '○', pair: '○' },
     { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', monthly: '○', pair: '－' },
     // 月のかけらは別の行に（2026-11-13 TAKASHI「かけらについては別行にして」「10年先の下」）
