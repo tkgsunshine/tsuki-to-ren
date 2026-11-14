@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronRight, MessageCircle } from 'lucide-react';
+import { ChevronDown, ChevronRight, MessageCircle } from 'lucide-react';
 import { generateFortuneResult, san, getScoreMood } from '../utils/fortuneEngine';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
 import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
@@ -596,6 +596,8 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
 }) {
   // 15日目より先の日をタップ → かけら10個で開けるかの確認（ブラウザのダイアログは使わず、暦の下に出す）
   const [ask, setAsk] = useState<{ iso: string; label: string } | null>(null);
+  // その月の運気の説明（開閉式・最初は閉じる。2026-11-14 TAKASHI）
+  const [luckOpen, setLuckOpen] = useState(false);
   const [asking, setAsking] = useState<'idle' | 'busy' | 'no_drops' | 'failed'>('idle');
   const confirmOpen = async () => {
     if (!ask || !onOpenDay || asking === 'busy') return;
@@ -659,6 +661,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
         const lead = (new Date(mo.year, mo.month, 1).getDay() + 6) % 7;
         const cells: (CalDay | null)[] = [...Array(lead).fill(null), ...mo.days];
         while (cells.length % 7) cells.push(null);
+        const mf = mo.before ? null : monthly.find((x) => x.month === `${mo.month + 1}月`);
         return (
         <div key={`${mo.year}-${mo.month}`} style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.7rem', borderTop: '1px solid rgba(226,192,116,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
@@ -667,12 +670,23 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
               <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{mo.year !== now.getFullYear() ? `${mo.year}年` : ''}{mo.month + 1}月の恋の暦</span>
               <button type="button" aria-label="次の月" disabled={monthIdx >= months.length - 1} onClick={() => { setMonthIdx((i) => Math.min(months.length - 1, i + 1)); setAsk(null); }} style={monthArrow(monthIdx >= months.length - 1)}>›</button>
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.64rem', color: '#a9a293' }}>
-              低い
-              <span style={{ width: 54, height: 9, borderRadius: 3, background: `linear-gradient(90deg, ${SCALE_STOPS.map((c, k) => `rgb(${c.join(',')}) ${SCALE_POS[k] * 100}%`).join(', ')})` }} />
-              高い
-            </span>
+            {/* その月の運気（鑑定書の月次運勢スケジュールと同じ。2026-11-14 TAKASHI「この部分に満ちる月 (絶好調)を入れて」）。先月は出さない */}
+            {mf && (
+              <button type="button" aria-expanded={luckOpen} onClick={() => setLuckOpen((v) => !v)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.28rem 0.5rem 0.28rem 0.6rem', borderRadius: '999px', border: '1px solid rgba(226,192,116,0.45)', background: 'rgba(212,175,55,0.1)', color: GOLD, fontSize: '0.74rem', fontWeight: 'bold', whiteSpace: 'nowrap', cursor: 'pointer', flexShrink: 0 }}>
+                <span className="font-serif">{mf.label}</span>
+                <ChevronDown size={14} style={{ transform: luckOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+            )}
           </div>
+          {mf && luckOpen && (
+            <p style={{ ...body, fontSize: '0.78rem', lineHeight: 1.75, color: '#d8d2c6', padding: '0.6rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>{mf.text}</p>
+          )}
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.35rem', fontSize: '0.64rem', color: '#a9a293' }}>
+            低い
+            <span style={{ width: 54, height: 9, borderRadius: 3, background: `linear-gradient(90deg, ${SCALE_STOPS.map((c, k) => `rgb(${c.join(',')}) ${SCALE_POS[k] * 100}%`).join(', ')})` }} />
+            高い
+          </span>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem' }}>
             {[1, 2, 3, 4, 5, 6, 0].map((i) => (
               <span key={i} style={{ textAlign: 'center', fontSize: '0.62rem', fontWeight: 'bold', color: i === 0 ? '#e0a9a0' : i === 6 ? '#9cc6d8' : '#8f887b' }}>{WEEKDAYS[i]}</span>
@@ -752,19 +766,6 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
               {typeof kakera === 'number' && kakera < DAY_COST && asking !== 'no_drops' && <p style={{ margin: 0, fontSize: '0.68rem', color: '#b9b2a4', lineHeight: 1.5 }}>あと{DAY_COST - kakera}個たまると開けられます（かけらは毎日増えます）。</p>}
             </div>
           )}
-          {/* その月の運気（鑑定書の月次運勢スケジュールと同じ文。2026-11-14 TAKASHI「月毎の運気も表示して」）。先月は出さない */}
-          {(() => {
-            const mf = mo.before ? null : monthly.find((x) => x.month === `${mo.month + 1}月`);
-            if (!mf) return null;
-            return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', padding: '0.7rem 0.8rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)', marginTop: '0.2rem' }}>
-                <p className="font-serif" style={{ margin: 0, fontSize: '0.84rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>
-                  {mo.month + 1}月の運気：<span style={{ color: GOLD }}>{mf.label}</span>
-                </p>
-                <p style={{ ...body, fontSize: '0.78rem', lineHeight: 1.75, color: '#d8d2c6' }}>{mf.text}</p>
-              </div>
-            );
-          })()}
         </div>
         );
       })}
