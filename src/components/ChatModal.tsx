@@ -221,7 +221,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 呼び名: ${san(oppNickname)}` : ''}
 命式の日干: ${result.opponentPillar}
 本命星: ${result.opponentStar}
-性格タイプ: ${result.opponentMbtiText || '不明'} (${result.opponentMbtiName || '不明'})
+性格タイプ: ${result.opponentMbtiText || '不明'} (${result.opponentMbtiName || '不明'})${result.relationship ? `
+今の二人の関係（あなたが選んだ恋の状況）: ${result.relationship}` : ''}
 
 【現在の二人の相性】
 基本相性値: ${result.baseScore}点

@@ -34,6 +34,13 @@ const stripBirth = (v) => {
   return v;
 };
 
+// The love situation (片想い中・復縁したい・複雑愛 …) is the sender's private answer: a shared link is often sent to the other person, so it is not kept
+const stripPrivate = (r) => {
+  const out = stripBirth(r);
+  if (out && typeof out === 'object') delete out.relationship;
+  return out;
+};
+
 const isScore = (n) => Number.isFinite(n) && n >= 0 && n <= 100;
 // The avatars are always this site's own images (fortuneEngine getAstrologyAvatar). Anything else — another site's URL,
 // javascript:, data: — is refused, so a forged save cannot make the visitor's browser load or open a URL of the sender's choosing.
@@ -55,8 +62,8 @@ export function cleanShared(body) {
     myName: clip(body.myName, 8) || 'あなた',
     oppName: mode === 'match' ? clip(body.oppName, 8) || 'お相手' : '',
     character: body.character === 'ren' ? 'ren' : 'tsuki',
-    tsuki: stripBirth(body.tsuki),
-    ren: stripBirth(body.ren),
+    tsuki: stripPrivate(body.tsuki),
+    ren: stripPrivate(body.ren),
   };
   return Buffer.byteLength(JSON.stringify(data)) <= MAX_BYTES ? data : null;
 }

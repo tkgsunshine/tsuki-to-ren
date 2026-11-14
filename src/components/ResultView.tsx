@@ -2952,7 +2952,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
             {/* 6. そのまま使えるLINEキラーテンプレート（お相手の性格タイプ×生まれ持った星から作る。中身は utils/lineKit.ts） */}
             {(() => {
-              const kit = buildLineKit(activeResult.opponentMbtiCode, activeResult.opponentPillar);
+              const kit = buildLineKit(activeResult.opponentMbtiCode, activeResult.opponentPillar, activeResult.relationship);
               return kit ? (
                 <LineKitSection kit={kit} isSubscribed={deepOpen} isRegistered={isRegistered} onLockClick={handleDeepLockClick} lockWord={deepLockWord} partnerLabel={san(oppNickname)} />
               ) : null;

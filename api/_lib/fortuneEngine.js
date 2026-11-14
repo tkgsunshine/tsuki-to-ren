@@ -2427,6 +2427,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
     let summary = '';
     // 状況（片想い中など）に合わせた月・蓮のひとこと。サマリーの末尾ではなく「今日の恋の過ごし方」（旧「月からあなたへ」）のカードの先頭に出す（同じ月の言葉が続けて2つ並ばないように）
     let relAdviceText = '';
+    let relKeyOut;
     if (hasOpponent) {
         const relKey = (input.relationship === '片思い中' ? '片想い中' : input.relationship) || '片想い中';
         const relAdviceMap = {
@@ -2456,6 +2457,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
             }
         };
         const curRelAdvice = relAdviceMap[relKey] || relAdviceMap['片想い中'];
+        relKeyOut = relAdviceMap[relKey] ? relKey : '片想い中';
         relAdviceText = character === 'tsuki' ? curRelAdvice.tsuki : curRelAdvice.ren;
         const sType = stemComp?.type || '宿命';
         const sTitle = stemComp?.title || '【宿命の結びつき】';
@@ -3621,6 +3623,7 @@ export function generateFortuneResult(input, character, now = new Date()) {
         myMbtiCode: input.myMbti,
         myMbtiName: mbtiNames[input.myMbti] || '未選択',
         opponentMbtiCode: input.opponentMbti || 'UNKNOWN',
+        relationship: relKeyOut,
         opponentMbtiName: input.opponentMbti ? (mbtiNames[input.opponentMbti] || '未選択') : undefined,
         isKaigo,
         opponentIsKaigo: hasOpponent ? opponentIsKaigo : undefined,

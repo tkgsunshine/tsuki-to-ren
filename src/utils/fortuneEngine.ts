@@ -788,6 +788,8 @@ export interface FortuneResult {
   myMbtiCode: string;
   myMbtiName: string;
   opponentMbtiCode?: string;
+  // 入力された恋の状況（片想い中など。お相手ありのみ）。LINEキラーテンプレートの場面とチャットのAIに使う。点数には使わない
+  relationship?: string;
   opponentMbtiName?: string;
   isKaigo?: boolean;
   opponentIsKaigo?: boolean;
@@ -2704,6 +2706,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   let summary = '';
   // 状況（片想い中など）に合わせた月・蓮のひとこと。サマリーの末尾ではなく「今日の恋の過ごし方」（旧「月からあなたへ」）のカードの先頭に出す（同じ月の言葉が続けて2つ並ばないように）
   let relAdviceText = '';
+  let relKeyOut: string | undefined;
 
   if (hasOpponent) {
     const relKey = (input.relationship === '片思い中' ? '片想い中' : input.relationship) || '片想い中';
@@ -2734,6 +2737,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
       }
     };
     const curRelAdvice = relAdviceMap[relKey] || relAdviceMap['片想い中'];
+    relKeyOut = relAdviceMap[relKey] ? relKey : '片想い中';
     relAdviceText = character === 'tsuki' ? curRelAdvice.tsuki : curRelAdvice.ren;
 
     const sType = stemComp?.type || '宿命';
@@ -3764,6 +3768,7 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     myMbtiCode: input.myMbti,
     myMbtiName: mbtiNames[input.myMbti] || '未選択',
     opponentMbtiCode: input.opponentMbti || 'UNKNOWN',
+    relationship: relKeyOut,
     opponentMbtiName: input.opponentMbti ? (mbtiNames[input.opponentMbti] || '未選択') : undefined,
     isKaigo,
     opponentIsKaigo: hasOpponent ? opponentIsKaigo : undefined,
