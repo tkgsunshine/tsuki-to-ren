@@ -1321,7 +1321,11 @@ function App() {
           const r = await claimCheckout(checkoutSid);
           if (cancelled) return;
           if (!r.pending) {
-            if (r.token) {
+            if (r.duplicate) {
+              // 同じメールで、もう同じものを買っていた（Webhook が全額返金済み。duplicate-purchase.js）
+              showAlert(`このメールアドレス${r.email ? `（${r.email}）` : ''}では、すでに同じプランをご購入済みでした。\n今回のお支払いは自動で全額返金しました（カードへの反映は数日〜2週間ほど）。\n購入済みの内容は、このメールアドレスでログインするとご覧いただけます。`);
+              setShowAuthModal(true);
+            } else if (r.token) {
               // この購入で新しく作られたアカウント。1回かぎりのトークンでそのままログイン。
               // トークンは使い切りなので、失敗してもclaimを呼び直さない（呼び直すと「登録済みのメール」と誤って案内してしまう）
               try {
@@ -3911,7 +3915,8 @@ function App() {
         isSubscribed={isSubscribed}
         premiumEndsOn={premiumEndsOn}
         isRegistered={isRegistered}
-        onRegisterFirst={() => setShowAuthModal(true)}
+        // 購入済みの方のログイン（LPの上にはログインの画面が出ないので、LPを閉じてから開く。見送り理由の質問は出さない）
+        onRegisterFirst={() => { lpSkipSurveyRef.current = true; setShowPremiumLP(false); setShowAuthModal(true); }}
       />
 
       {/* Google・X から戻ってきて、ログインの結果を受け取っている間 */}

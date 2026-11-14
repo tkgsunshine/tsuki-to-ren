@@ -55,6 +55,8 @@ export async function resolveCheckoutAccount(db, auth, session) {
     email: email || null,
     created,
     claimed: false,
+    // 二重の購入かどうかを Webhook が決めるまで、その場ログインのトークンは渡さない（duplicate-purchase.js の settleClaim が外す）
+    checking: true,
     livemode: session.livemode === true,
     mode: session.mode,
     at: new Date().toISOString()
@@ -144,13 +146,15 @@ export default async function handler(req, res, deps = {}) {
       const snap = await tx.get(ref);
       if (!snap.exists) return { pending: true };
       const c = snap.data();
-      const give = c.created === true && c.claimed !== true && Boolean(c.uid);
+      if (c.checking === true) return { pending: true };
+      // 二重の購入で返金したとき（duplicate）は、その場ログインはさせない（購入済みのアカウントへは、メールでログインして引き継ぐ）
+      const give = c.created === true && c.claimed !== true && Boolean(c.uid) && c.duplicate !== true;
       if (give) tx.set(ref, { ...c, claimed: true, claimedAt: new Date().toISOString() });
-      return { uid: c.uid, email: c.email || null, give };
+      return { uid: c.uid, email: c.email || null, give, duplicate: c.duplicate === true };
     });
     if (grant.pending) return res.status(404).json({ status: 'pending' });
     const token = grant.give ? await auth.createCustomToken(grant.uid) : null;
-    return res.status(200).json({ status: 'ok', token, email: grant.email });
+    return res.status(200).json({ status: 'ok', token, email: grant.email, ...(grant.duplicate ? { duplicate: true } : {}) });
   } catch (e) {
     console.error('❌ Could not claim the checkout:', e?.message);
     return res.status(500).json({ status: 'error', message: 'Could not claim the checkout' });

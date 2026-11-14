@@ -62,7 +62,7 @@ export const startPremiumCheckout = () => postForUrl('/api/stripe/checkout', {})
 
 /** 登録なしの購入のあと、この端末をログイン状態にする（checkout-claim.js）。
  * この購入で新しく作られたアカウントのときだけ token が入る。pending = Webhook 待ち（少しあとに再度呼ぶ）。 */
-export const claimCheckout = async (sessionId: string): Promise<{ pending: boolean; token: string | null; email: string | null }> => {
+export const claimCheckout = async (sessionId: string): Promise<{ pending: boolean; token: string | null; email: string | null; duplicate?: boolean }> => {
   const res = await fetch('/api/stripe/claim', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -71,7 +71,7 @@ export const claimCheckout = async (sessionId: string): Promise<{ pending: boole
   if (res.status === 404) return { pending: true, token: null, email: null };
   if (!res.ok) throw new Error('購入の確認ができませんでした');
   const data = await res.json();
-  return { pending: false, token: data.token ?? null, email: data.email ?? null };
+  return { pending: false, token: data.token ?? null, email: data.email ?? null, duplicate: data.duplicate === true };
 };
 
 /** One-time purchase (¥680) of one partner's reading, identified by the partner's birth date. */

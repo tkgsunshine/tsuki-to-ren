@@ -452,7 +452,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   premiumEndsOn,
   pair = null,
   focus = 'monthly',
-  onPlansSeen
+  onPlansSeen,
+  isRegistered,
+  onRegisterFirst
 }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -618,7 +620,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
     }] : []),
     {
       q: '会員登録をしていなくても購入できますか？',
-      a: 'はい、できます。お支払いのときに入力したメールアドレスで、アカウントを自動でお作りします。はじめての方は、お支払いが終わるとそのままログインした状態で戻るので、すぐに続きを読めます。別のスマホやパソコンでも、同じメールアドレスでログインすれば引き継げます。'
+      a: 'はい、できます。お支払いのときに入力したメールアドレスで、アカウントを自動でお作りします。はじめての方は、お支払いが終わるとそのままログインした状態で戻るので、すぐに続きを読めます。別のスマホやパソコンでも、同じメールアドレスでログインすれば引き継げます。すでに購入済みの方は、購入時のメールでログインしてください（同じプランを二重に購入された場合は、自動で全額返金します）。'
     },
     {
       q: 'いつでも解約できますか？',
@@ -895,6 +897,14 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               </div>
               <PurchaseTerms plans={pair.unlocked ? ['monthly'] : ['monthly', 'pair']} style={{ marginBottom: '0.6rem' }} />
               {renderPlanButtons(true)}
+              {/* ログアウト中の二重購入を減らす（二重になったときは自動で全額返金。2026-11-14 TAKASHI） */}
+              {!isRegistered && (
+                <p style={{ fontSize: '0.7rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.6rem 0 0', textAlign: 'center' }}>
+                  購入済みの方は
+                  <button type="button" onClick={onRegisterFirst} style={{ background: 'none', border: 'none', padding: '0 0.15rem', color: '#f2e2b3', textDecoration: 'underline', fontSize: 'inherit', cursor: 'pointer' }}>購入時のメールでログイン</button>
+                  してください
+                </p>
+              )}
             </div>
           )}
 
