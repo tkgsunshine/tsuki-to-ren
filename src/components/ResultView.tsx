@@ -1548,20 +1548,22 @@ export const ResultView: React.FC<ResultViewProps> = ({
           );
         })()}
 
-        {/* 鑑定の方式: 3つの小さな札 */}
-        <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '0.4rem', margin: '0 auto -0.1rem' }}>
-          {['四柱推命', '九星気学', '16タイプ'].map((m) => (
-            <span key={m} style={{
-              fontSize: '0.64rem',
-              color: '#e2c074',
-              border: '1px solid rgba(226, 192, 116, 0.3)',
-              borderRadius: '4px',
-              padding: '0.12rem 0.45rem',
-              fontWeight: 600,
-              letterSpacing: '0.04em'
-            }}>{m}</span>
-          ))}
-        </div>
+        {/* 鑑定の方式: 枠なし・金の細線と×でつなぐ（ボタンに見えないように） */}
+        {(() => {
+          const line = (dir: 'l' | 'r'): React.CSSProperties => ({ flex: '0 1 24px', minWidth: 0, height: '1px', background: `linear-gradient(${dir === 'l' ? '90deg' : '270deg'}, rgba(226,192,116,0), rgba(226,192,116,0.6))` });
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', margin: '0 auto -0.1rem' }}>
+              <span aria-hidden="true" style={line('l')} />
+              {['四柱推命', '九星気学', '16タイプ'].map((m, i) => (
+                <React.Fragment key={m}>
+                  {i > 0 && <span aria-hidden="true" style={{ color: 'rgba(226,192,116,0.6)', fontSize: '0.7rem' }}>×</span>}
+                  <span style={{ fontFamily: 'var(--font-serif)', fontSize: '0.72rem', fontWeight: 700, color: '#e2c074', letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>{m}</span>
+                </React.Fragment>
+              ))}
+              <span aria-hidden="true" style={line('r')} />
+            </div>
+          );
+        })()}
         
         {/* Score Rings: 基本（小）と今日（大）を2つの丸いメーターで比べる。一人で占うときは「基本運勢」「今日の運勢」 */}
         {(() => {
@@ -1691,7 +1693,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
               {partnerLock?.status === 'free' && (
                 <div style={{ textAlign: 'center', fontSize: '0.74rem', color: '#cfc8b8', lineHeight: 1.6 }}>
                   {partnerLock.guest
-                    ? <>明日からも見るなら、<strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>をしてください</>
+                    ? <><strong style={{ color: '#f2e2b3' }}>無料会員登録</strong>で明日以降も点数を確認できます</>
                     : partnerLock.daysLeft > 0
                       ? <>{partnerCall}との今日の相性は、無料であと<strong style={{ color: '#f2e2b3' }}>{partnerLock.daysLeft}日</strong>見れます</>
                       : <>{partnerCall}との今日の相性を無料で見れるのは<strong style={{ color: '#f2e2b3' }}>今日が最後</strong>です。明日からはプレミアムで見れます</>}
