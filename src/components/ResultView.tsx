@@ -3269,7 +3269,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     cursor: 'pointer'
                   }}
                 >
-                  詳しく見る
+                  プランを詳しく見る
                 </button>
               </div>
             )}
