@@ -7,10 +7,10 @@ export type PlanRow = { label: string; monthly: string; pair: string };
 export const planCompareRows = (name: string): PlanRow[] => {
   const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   return [
-    { label: 'トリセツ・深層鑑定・相性グラフ', monthly: '誰でも', pair: `${name}だけ` },
-    { label: '二人の相性100（本格鑑定・MBTIランキング）', monthly: '誰でも', pair: `${name}だけ` },
-    { label: '惹かれるファッション・ドキッとさせる仕草', monthly: '誰でも', pair: `${name}だけ` },
-    { label: '2人の最高シンクロ日（日付）', monthly: '誰でも', pair: `${name}だけ` },
+    { label: 'トリセツ・深層鑑定・相性グラフ', monthly: '誰でも無制限', pair: `${name}だけ` },
+    { label: '二人の相性100（本格鑑定・MBTIランキング）', monthly: '誰でも無制限', pair: `${name}だけ` },
+    { label: '惹かれるファッション・ドキッとさせる仕草', monthly: '誰でも無制限', pair: `${name}だけ` },
+    { label: '2人の最高シンクロ日（日付）', monthly: '誰でも無制限', pair: `${name}だけ` },
     { label: '今日の相性と、本日のLINEの送り方', monthly: '毎日', pair: `本日分(${todayJst})` },
     { label: 'あなたの恋愛運MAX日（日付）', monthly: '○', pair: '○' },
     { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', monthly: '○', pair: '－' },
@@ -29,7 +29,7 @@ export const PlanCompareTable: React.FC<{ name: string; pairFirst?: boolean; sty
   const cols = pairFirst ? (['pair', 'monthly'] as const) : (['monthly', 'pair'] as const);
   const header = {
     monthly: <th key="m" style={{ ...head, color: '#1a1230', background: 'linear-gradient(135deg, #e9cf8f, #d4af37)' }}>プレミアム<br /><span style={{ fontWeight: 'normal' }}>¥980 / 月額</span></th>,
-    pair: <th key="p" style={{ ...head, color: '#f2e2b3', background: 'rgba(226, 192, 116, 0.08)' }}>シングル<br /><span style={{ fontWeight: 'normal' }}>¥680 / 買い切り</span></th>
+    pair: <th key="p" style={{ ...head, color: '#f2e2b3', background: 'rgba(226, 192, 116, 0.08)' }}>シングル<br /><span style={{ fontWeight: 'normal', whiteSpace: 'nowrap', fontSize: '0.62rem' }}>¥680 / 買い切り</span></th>
   };
   return (
     <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', textAlign: 'center', background: 'rgba(255,255,255,0.015)', borderRadius: '10px', overflow: 'hidden', ...style }}>
