@@ -11,6 +11,7 @@ import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
 import { fetchCoupleDrops, openKoyomiDay, DAY_COST } from '../services/coupleDrops';
 import { KakeraGem } from './CoupleDropPanel';
+import { getAstrologyNameReading } from '../utils/astrologyNameReading';
 
 // 月額プレミアム会員の「恋の暦」画面（旧称「今日」、名前は2026-11-12 TAKASHI）。結果画面の多くはお相手が同じなら毎日同じなので、
 // 毎日変わるもの（今日の相性・今日の星の動き・LINE吉時間・今日の過ごし方・恋の暦・次の特別な日）だけを集める。
@@ -401,7 +402,8 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian, now, self = false }: { op
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', minWidth: 0 }}>
             <span style={{ ...sub, color: accent }}>{oppLabel}の守護獣</span>
             {guardian.theme && <span className="font-serif" style={{ fontSize: '0.86rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.4 }}>{guardian.theme}</span>}
-            {guardian.name && <span style={{ ...sub, color: '#d8d2c6' }}>{guardian.name}</span>}
+            {/* 鑑定書と同じく、名前にふりがなを添える（2026-11-14 TAKASHI「ここ統一されてる？」） */}
+            {guardian.name && <span style={{ ...sub, color: '#d8d2c6' }}>{guardian.name}{getAstrologyNameReading(guardian.name) ? `（${getAstrologyNameReading(guardian.name)}）` : ''}</span>}
           </div>
         </div>
       ) : null}
