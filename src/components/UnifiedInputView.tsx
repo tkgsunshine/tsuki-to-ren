@@ -267,26 +267,15 @@ export const UnifiedInputView: React.FC<UnifiedInputViewProps> = ({
   return (
     <div data-clarity-mask="True" style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem', paddingBottom: '2rem', animation: 'fadeIn 0.4s ease', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden', flexShrink: 0 }}>
       
-      {/* Character selection instruction */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', margin: '0' }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.35rem 1.1rem',
-          background: 'rgba(10, 13, 19, 0.85)',
-          border: '1px solid rgba(226, 192, 116, 0.45)',
-          borderRadius: '20px',
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.6), 0 0 15px rgba(226, 192, 116, 0.2)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)'
-        }}>
-          <span style={{ fontSize: '0.75rem', color: '#e2c074' }}>✦</span>
-          <span className="font-serif" style={{ fontSize: '0.92rem', color: '#f2e2b3', letterSpacing: '0.04em', fontWeight: 'bold', textShadow: '0 2px 4px rgba(0,0,0,0.95)' }}>
-            相談するキャラクターを選んでください
-          </span>
-          <span style={{ fontSize: '0.75rem', color: '#e2c074' }}>✦</span>
-        </div>
+      {/* Character selection instruction（ボタンに見えないよう、枠なしで左右に金の細線） */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', width: '100%', margin: '0.15rem 0 0' }}>
+        <span aria-hidden="true" style={{ flex: '0 1 64px', minWidth: '14px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226, 192, 116, 0.8))' }} />
+        <span aria-hidden="true" style={{ fontSize: '0.62rem', color: '#e2c074' }}>✦</span>
+        <span className="font-serif" style={{ fontSize: 'min(0.9rem, 4.1vw)', color: '#f2e2b3', letterSpacing: '0.06em', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.9), 0 0 12px rgba(8,6,20,0.95)', whiteSpace: 'nowrap' }}>
+          相談する鑑定士を選んでください
+        </span>
+        <span aria-hidden="true" style={{ fontSize: '0.62rem', color: '#e2c074' }}>✦</span>
+        <span aria-hidden="true" style={{ flex: '0 1 64px', minWidth: '14px', height: '1px', background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.8), transparent)' }} />
       </div>
 
       {/* 🔮 / 🌙 Side-by-side Character Visuals */}

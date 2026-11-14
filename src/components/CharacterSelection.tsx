@@ -12,7 +12,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   return (
     <div className="character-select-container">
       <div className="character-select-title">
-        相談するキャラクターを選んでください
+        相談する鑑定士を選んでください
       </div>
       <div className="character-cards-grid">
         {/* Card Ren */}

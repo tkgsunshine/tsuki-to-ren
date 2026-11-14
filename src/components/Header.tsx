@@ -35,6 +35,52 @@ const OpeningGlow: React.FC = () => (
   </div>
 );
 
+const READ_SHADOW = '0 1px 2px rgba(0,0,0,0.9), 0 0 14px rgba(8,6,20,0.95)';
+
+// 蓮の飾り罫（本の扉のように文を区切る）
+const LotusRule: React.FC = () => (
+  <div aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem' }}>
+    <span style={{ width: '90px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(226,192,116,0.85))' }} />
+    <svg width="22" height="12" viewBox="0 0 22 12" fill="none" stroke="#e2c074" strokeWidth="1">
+      <path d="M11 1 C8.5 4 8.5 8 11 11 C13.5 8 13.5 4 11 1 Z" />
+      <path d="M11 11 C7.5 10 5 7.5 4.5 4 C7.5 5 9.5 7.5 11 11 Z" />
+      <path d="M11 11 C14.5 10 17 7.5 17.5 4 C14.5 5 12.5 7.5 11 11 Z" />
+      <path d="M1 11 H21" />
+    </svg>
+    <span style={{ width: '90px', height: '1px', background: 'linear-gradient(90deg, rgba(226,192,116,0.85), transparent)' }} />
+  </div>
+);
+
+// キャッチの「相性」は蓮のピンク、「本性」は紫で光らせる
+const HERO_HL_PINK: React.CSSProperties = { color: '#ffb8d9', WebkitTextFillColor: '#ffb8d9', textShadow: '0 0 10px rgba(255, 150, 200, 0.75)' };
+const HERO_HL_PURPLE: React.CSSProperties = { color: '#dccbff', WebkitTextFillColor: '#dccbff', textShadow: '0 0 10px rgba(185, 155, 255, 0.85), 0 0 20px rgba(160, 120, 255, 0.45)' };
+
+// 鑑定で分かること（トップのアピール）
+// 2つずつ3行で並べる（小さいスマホでも行の数がそろうように）
+const HERO_FEATURES = [['相性の点数', '相性ランキング'], ['最高シンクロ日', '未来予想'], ['あの人のトリセツ', 'あの人のLINE心理']];
+
+// 「月と蓮」の下の説明（枠なし。大きいキャッチ → 蓮の罫 → 分かること）
+const HeroCopy: React.FC = () => (
+  <div style={{ position: 'relative', margin: '0.5rem auto 0', maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+    <div aria-hidden="true" style={{ position: 'absolute', inset: '-8% -4%', background: 'radial-gradient(ellipse at center, rgba(10,7,26,0.7) 0%, rgba(10,7,26,0.4) 50%, rgba(10,7,26,0) 75%)', pointerEvents: 'none' }} />
+    <div style={{ position: 'relative' }}>
+      <p className="font-serif gold-text" style={{ margin: 0, fontSize: 'min(1.25rem, 5.6vw)', fontWeight: 700, lineHeight: 1.45, letterSpacing: '0.05em' }}>
+        <span className="nobr">生年月日と16タイプで</span><br /><span className="nobr">二人の<span style={HERO_HL_PINK}>相性</span>と<span style={HERO_HL_PURPLE}>本性</span>を本格鑑定</span>
+      </p>
+      <div style={{ margin: '0.4rem 0 0.3rem' }}><LotusRule /></div>
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: '0.1rem', fontSize: 'min(0.84rem, 3.9vw)', fontWeight: 600, color: '#ece6da', lineHeight: 1.6, letterSpacing: '0.02em', textShadow: READ_SHADOW }}>
+        {HERO_FEATURES.map((row) => (
+          <li key={row[0]} style={{ display: 'flex', justifyContent: 'center', columnGap: '0.85em', whiteSpace: 'nowrap' }}>
+            {row.map((f) => (
+              <span key={f}><span aria-hidden="true" style={{ color: '#e2c074', marginRight: '0.25em' }}>✦</span>{f}</span>
+            ))}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+);
+
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth, unreadNotices = 0, onOpenNotices }) => {
   const [opening, setOpening] = useState(() => !openingPlayed);
 
@@ -144,52 +190,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenAuth, unreadN
         月と蓮
       </h1>
 
-      {/* Subtitle Badge - High Impact */}
-      <div style={{
-        margin: '0.4rem auto 0',
-        maxWidth: '100%',
-        boxSizing: 'border-box',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.4rem',
-        padding: '0.3rem 0.85rem',
-        background: 'linear-gradient(90deg, rgba(226, 192, 116, 0.12) 0%, rgba(159, 134, 192, 0.12) 100%)',
-        border: '1px solid rgba(226, 192, 116, 0.3)',
-        borderRadius: '20px',
-        boxShadow: '0 0 15px rgba(226, 192, 116, 0.15)'
-      }}>
-        <span className="font-serif gold-text" style={{ fontSize: '0.82rem', fontWeight: '700', letterSpacing: '0.03em', textAlign: 'center', lineHeight: '1.45' }}>
-          <span className="nobr">四柱推命 × 九星気学 × 16タイプで</span><span className="nobr">解き明かす</span><br />
-          <span className="nobr">生年月日で分かる</span><span className="nobr">本格恋愛相性診断</span>
-        </span>
-      </div>
-
-      {/* Impact Catchphrase Box */}
-      <div style={{
-        padding: '0.65rem 1rem',
-        background: 'linear-gradient(135deg, rgba(17, 23, 33, 0.85) 0%, rgba(30, 20, 50, 0.85) 100%)',
-        border: '1.5px solid rgba(226, 192, 116, 0.4)',
-        borderRadius: '16px',
-        width: '100%',
-        maxWidth: '380px',
-        boxSizing: 'border-box',
-        margin: '0.6rem auto 0',
-        fontSize: '0.88rem',
-        color: '#f3efe6',
-        lineHeight: '1.55',
-        textAlign: 'center',
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(226, 192, 116, 0.08)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)'
-      }}>
-        <div style={{ fontWeight: 'bold', color: '#ffffff', marginBottom: '0.2rem', fontSize: '0.86rem', letterSpacing: '0.01em', lineHeight: '1.5' }}>
-          東洋の<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>命式</span>と<span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>16タイプ</span>で読み解く<br />
-          <span style={{ color: '#f2e2b3', textShadow: '0 0 8px rgba(242, 226, 179, 0.6)', fontWeight: '800' }}>二人だけ</span>の相性
-        </div>
-        <div style={{ color: '#d8d2c6', fontSize: '0.78rem', fontWeight: '500', letterSpacing: '-0.01em', wordBreak: 'break-word' }}>
-          <span className="nobr">二人の魂の相性・運気のバイオリズム・</span><span className="nobr">LINE攻略法を徹底鑑定します。</span>
-        </div>
-      </div>
+      <HeroCopy />
     </header>
   );
 };
