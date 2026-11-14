@@ -2641,6 +2641,25 @@ export function generateFortuneResult(input, character, now = new Date()) {
         // 二人: いつもの位置（基本の差を4割に）＋その日の上下×2。一人: 基本運勢＋その日の上下（旧版どおり）
         return hasOpponent ? getDailyCenter(baseScore, true) + DAILY_SWING * swing : baseScore + swing;
     };
+    /** 一人で占ったときの、その日の上下（rawDayScore の一人の場合と同じ式） */
+    const soloSwing = (d, who) => {
+        const dayInfo = getDayInfo(d);
+        if (who === 'opp' && !hasOpponent)
+            return null;
+        const luck = who === 'me' ? myLuck : oppLuck;
+        const pillar = who === 'me' ? myPillarObj : oppPillarObj;
+        const star = who === 'me' ? myStarObj : opponentStarObj;
+        if (!pillar || !star)
+            return null;
+        const pd = luck ? getPersonDay(luck, dayInfo) : null;
+        return getDailyMarkedStemImpact(luck, pd, dayInfo.stem, pillar.stem)
+            + Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(dayInfo.branch, pillar.branch))
+            + juniUnPoints(pillar.stem, dayInfo.branch)
+            + getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), star.element)
+            + DAILY_CENTER_OFFSET;
+    };
+    const myDaySwing = soloSwing(today, 'me') ?? 0;
+    const opponentDaySwing = soloSwing(today, 'opp');
     let dailyScore = Math.floor(rawDayScore(today));
     if (dailyScore > 100)
         dailyScore = 100;
@@ -3865,6 +3884,8 @@ export function generateFortuneResult(input, character, now = new Date()) {
     return {
         baseScore,
         dailyScore,
+        myDaySwing,
+        opponentDaySwing,
         myPillar,
         myStar: `${myStarObj.name} (${starElements[myStarObj.name] || ''})`,
         myGender: input.myGender,

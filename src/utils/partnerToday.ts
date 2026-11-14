@@ -68,7 +68,17 @@ export interface PartnerToday {
   wave: Wave;
 }
 
-export function computePartnerToday(me: LuckPerson | null, partner: LuckPerson, day: DayInfo): PartnerToday {
+/** 「引く日／追い風」の境目（その人一人の今日の運勢が、いつもより何点上下しているか）。
+ *  旧版の星の足し引きと、引く日・ふつう・追い風の割合がほぼ同じになる位置（2026-11-14、500人×1年で確認） */
+export const WAVE_LOW_MAX = -5;
+export const WAVE_HIGH_MIN = 8;
+
+/**
+ * daySwing: その人一人の今日の運勢の上下（FortuneResult.myDaySwing / opponentDaySwing）。
+ * あれば引く日・ふつう・追い風は点数と同じ材料で決める（相性や今日の運勢の点数と食い違わないように。2026-11-14 TAKASHI）。
+ * 無いとき（古い結果など）は従来の星の足し引きで決める。二人のシンクロ日はどちらでも追い風。
+ */
+export function computePartnerToday(me: LuckPerson | null, partner: LuckPerson, day: DayInfo, daySwing?: number | null): PartnerToday {
   const pd = getPersonDay(partner, day);
   const tenGod = getTenGod(partner.stem, day.stem);
   const juniun = getJuniUn(partner.stem, day.branch);
@@ -84,7 +94,9 @@ export function computePartnerToday(me: LuckPerson | null, partner: LuckPerson, 
   if (isPersonalGood(pd)) p += 1;
   if (sway) p -= 1;
   // 揺れの日は、ほかが良くても「追い風」にはしない（大きな行動は別の日に）
-  const wave: Wave = sync ? 'high' : !sway && (p >= 2 || (p === 1 && GOOD_GODS.includes(tenGod))) ? 'high' : p <= -1 ? 'low' : 'mid';
+  const wave: Wave = sync ? 'high'
+    : typeof daySwing === 'number' ? (daySwing <= WAVE_LOW_MAX ? 'low' : daySwing >= WAVE_HIGH_MIN ? 'high' : 'mid')
+    : !sway && (p >= 2 || (p === 1 && GOOD_GODS.includes(tenGod))) ? 'high' : p <= -1 ? 'low' : 'mid';
   return { tenGod, mood: TEN_GOD_MOOD[tenGod], juniun, energyName: en.name, energy: en.level, energyText: en.text, sway, sync, wave };
 }
 
@@ -92,7 +104,7 @@ export function getPartnerToday(result: FortuneResult, date: Date): PartnerToday
   const partner = toLuckPerson(result.opponentPillar, result.opponentStar, result.opponentGender);
   if (!partner) return null;
   const me = toLuckPerson(result.myPillar, result.myStar, result.myGender);
-  return computePartnerToday(me, partner, getDayInfo(date));
+  return computePartnerToday(me, partner, getDayInfo(date), result.opponentDaySwing);
 }
 
 /** 自分の今日（お相手と同じ見方で、自分の生まれた日の星から。2026-11-12 TAKASHI「自分の分も出してOK」） */
@@ -100,7 +112,7 @@ export function getMyToday(result: FortuneResult, date: Date): PartnerToday | nu
   const me = toLuckPerson(result.myPillar, result.myStar, result.myGender);
   if (!me) return null;
   const opp = toLuckPerson(result.opponentPillar, result.opponentStar, result.opponentGender);
-  return computePartnerToday(opp, me, getDayInfo(date));
+  return computePartnerToday(opp, me, getDayInfo(date), result.myDaySwing);
 }
 
 // ───────── 二人の道のり ─────────

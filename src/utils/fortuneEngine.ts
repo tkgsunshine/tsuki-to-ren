@@ -767,6 +767,10 @@ export interface FortuneResult {
   radarScores?: CompatibilityRadarScores;
   baseScore: number;
   dailyScore: number;
+  /** 今日の、その人一人の運勢の上下（一人で占ったときの「今日の運勢 − 基本運勢」。上限・下限で止める前）。
+   *  恋の暦の「〇〇さんの今日」（引く日／ふつう／追い風）をこれで決め、点数と食い違わないようにする（2026-11-14 TAKASHI）。点数には使わない */
+  myDaySwing?: number;
+  opponentDaySwing?: number | null;
   myPillar: string;
   myStar: string;
   myGender: 'male' | 'female';
@@ -2930,6 +2934,24 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
     return hasOpponent ? getDailyCenter(baseScore, true) + DAILY_SWING * swing : baseScore + swing;
   };
 
+  /** 一人で占ったときの、その日の上下（rawDayScore の一人の場合と同じ式） */
+  const soloSwing = (d: Date, who: 'me' | 'opp'): number | null => {
+    const dayInfo = getDayInfo(d);
+    if (who === 'opp' && !hasOpponent) return null;
+    const luck = who === 'me' ? myLuck : oppLuck;
+    const pillar = who === 'me' ? myPillarObj : oppPillarObj;
+    const star = who === 'me' ? myStarObj : opponentStarObj;
+    if (!pillar || !star) return null;
+    const pd = luck ? getPersonDay(luck, dayInfo) : null;
+    return getDailyMarkedStemImpact(luck, pd, dayInfo.stem, pillar.stem)
+      + Math.round(DAILY_BRANCH_WEIGHT * getBranchImpact(dayInfo.branch, pillar.branch))
+      + juniUnPoints(pillar.stem, dayInfo.branch)
+      + getDayStarPoints(d.getFullYear(), d.getMonth() + 1, d.getDate(), star.element)
+      + DAILY_CENTER_OFFSET;
+  };
+  const myDaySwing = soloSwing(today, 'me') ?? 0;
+  const opponentDaySwing = soloSwing(today, 'opp');
+
   let dailyScore = Math.floor(rawDayScore(today));
   if (dailyScore > 100) dailyScore = 100;
   // 二人の今日の相性は25点で止める（振れ幅を大きくしたので、0点のような日を出さない。2026-11-12 TAKASHI）
@@ -4024,6 +4046,8 @@ export function generateFortuneResult(input: DiagnosisInput, character: 'ren' | 
   return {
     baseScore,
     dailyScore,
+    myDaySwing,
+    opponentDaySwing,
     myPillar,
     myStar: `${myStarObj.name} (${starElements[myStarObj.name] || ''})`,
     myGender: input.myGender,

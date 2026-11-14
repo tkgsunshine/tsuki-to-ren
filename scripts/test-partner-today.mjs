@@ -153,3 +153,22 @@ test('今日の接し方・心のモード: 同じお相手で30日に30通り�
     for (const t of s) assert.doesNotMatch(t, /しましょう|しておく|避け|控え/);
   }
 });
+
+test('引く日／ふつう／追い風は、その人一人の今日の運勢の上下で決める（点数と食い違わない）', async () => {
+  const { generateFortuneResult } = await import('../src/utils/fortuneEngine.ts');
+  const { getMyToday, getPartnerToday, WAVE_LOW_MAX, WAVE_HIGH_MIN } = await import('../src/utils/partnerToday.ts');
+  for (let i = 0; i < 40; i++) {
+    for (let k = 0; k < 20; k++) {
+      const date = new Date(2026, 10, 14 + k, 12);
+      const input = { myName: 'A', myBirth: `${1988 + (i % 15)}-0${1 + (i % 9)}-1${i % 9}`, myMbti: 'INFP', myGender: 'female', opponentName: 'B', opponentBirth: `${1990 + (i % 11)}-1${i % 3}-0${1 + (i % 8)}`, opponentMbti: 'ENTJ', opponentGender: 'male', relationship: '片想い中' };
+      const r = generateFortuneResult(input, 'tsuki', date);
+      for (const [t, s] of [[getMyToday(r, date), r.myDaySwing], [getPartnerToday(r, date), r.opponentDaySwing]]) {
+        if (t.sync) { assert.equal(t.wave, 'high'); continue; }
+        assert.equal(t.wave, s <= WAVE_LOW_MAX ? 'low' : s >= WAVE_HIGH_MIN ? 'high' : 'mid');
+      }
+      // 一人で占った今日の運勢と同じ上下
+      const solo = generateFortuneResult({ myName: 'B', myBirth: input.opponentBirth, myMbti: 'ENTJ', myGender: 'male' }, 'tsuki', date);
+      if (solo.dailyScore > 0 && solo.dailyScore < 100) assert.equal(Math.floor(solo.baseScore + r.opponentDaySwing), solo.dailyScore);
+    }
+  }
+});
