@@ -2,6 +2,15 @@ import React, { useRef, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { getPillarWithReading } from '../utils/fortuneEngine';
+import { getAstrologyNameReading } from '../utils/astrologyNameReading';
+
+// 守護獣の名前（例: 辛牛（かのとうし））。鑑定書・恋の暦と同じ書き方にそろえる（2026-11-14 TAKASHI。前は日柱の「辛丑」を出していた）
+const guardianWithReading = (name?: string) => {
+  const core = String(name || '').replace(/👑[^👑]*👑\s*/u, '').trim();
+  if (!core) return '';
+  const r = getAstrologyNameReading(core);
+  return r ? `${core} (${r})` : core;
+};
 import { showAlert } from './AppDialog';
 import { saveImageBlob } from '../utils/saveImage';
 import { trackShare } from '../services/analytics';
@@ -527,7 +536,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                   fontSize: '18px',
                   fontWeight: 'bold'
                 }}>
-                  あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
+                  あなた：{guardianWithReading(result.myAstrologyName) || getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
                   {result.isKaigo ? ' / 魁罡' : (result.isRare ? ' / 極星' : '')}
                 </div>
               </div>
@@ -887,7 +896,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               {!showOpponent && (
                 <div style={{ fontSize: '0.6rem', color: myTagColor, display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
                   <span style={{ background: myTagBg, padding: '4px 10px', borderRadius: '8px', border: myTagBorder, fontWeight: '500', width: '100%', boxSizing: 'border-box' }}>
-                    あなた：{getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
+                    あなた：{guardianWithReading(result.myAstrologyName) || getPillarWithReading(result.myPillar)} / {result.myStar} / {result.myMbtiText.split(' ')[0]}
                     {result.isKaigo ? ' / 魁罡' : (result.isRare ? ' / 極星' : '')}
                   </span>
                 </div>
