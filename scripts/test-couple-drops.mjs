@@ -149,7 +149,7 @@ test('無料会員: 初日2個、使い切ると409、翌日は2個に戻る、�
   assert.equal(res.body.balance, 0);
   res = await callAs(db, '2026-11-12', { open: { kind: 'rank', no: 2 } });
   assert.equal(res.code, 409);
-  assert.deepEqual(res.body.opened, { rank: [1], reading: [1] }); // 失敗しても開けた分はそのまま
+  assert.deepEqual(res.body.opened, { rank: [1], reading: [1], days: [] }); // 失敗しても開けた分はそのまま
   res = await callAs(db, '2026-11-13');
   assert.equal(res.body.balance, 2);
   await callAs(db, '2026-11-13', { open: { kind: 'rank', no: 2 } });
@@ -339,4 +339,42 @@ test('無料で表示した日に月額になったとき: その日の5個も�
   assert.equal(res.body.balance, 55);
   res = await call(db, '2026-11-14');
   assert.equal(res.body.balance, 55); // 同じ日の3回目以降は増えない
+});
+
+test('恋の暦: 15日目より先の日をかけら10個で開ける（月額だけ・同じ日は二度と減らない・過ぎた日は記録から外す）', async () => {
+  const db = mockDb({ ...PREMIUM });
+  let res = await call(db, '2026-11-14');
+  assert.equal(res.body.balance, 55);
+  // 14日間の内側（今日から13日後）と、翌月の終わりより先は開けられない
+  res = await call(db, '2026-11-14', { open: { kind: 'day', date: '2026-11-27' } });
+  assert.equal(res.code, 400);
+  res = await call(db, '2026-11-14', { open: { kind: 'day', date: '2027-01-20' } });
+  assert.equal(res.code, 400);
+  res = await call(db, '2026-11-14', { open: { kind: 'day', date: 'x' } });
+  assert.equal(res.code, 400);
+  res = await call(db, '2026-11-14', { open: { kind: 'day', date: '2026-11-28' } });
+  assert.equal(res.code, 200);
+  assert.equal(res.body.balance, 45);
+  assert.deepEqual(res.body.opened.days, ['2026-11-28']);
+  res = await call(db, '2026-11-14', { open: { kind: 'day', date: '2026-11-28' } });
+  assert.equal(res.body.balance, 45);
+  assert.equal(res.body.openedNow, false);
+  res = await call(db, '2026-11-14', { open: { kind: 'day', date: '2026-12-31' } });
+  assert.deepEqual(res.body.opened.days, ['2026-11-28', '2026-12-31']);
+  assert.equal(res.body.balance, 35);
+  // お題の記録はそのまま
+  assert.deepEqual(res.body.opened.rank, []);
+  // 11/29 になると 11/28 は過ぎた日なので外れる
+  res = await call(db, '2026-11-29');
+  assert.deepEqual(res.body.opened.days, ['2026-12-31']);
+});
+
+test('恋の暦: 10個に足りないと409、無料会員は403（恋の暦は月額の画面）', async () => {
+  let db = mockDb({ ...PREMIUM, 'coupleDrops/u1': { balance: 4, lastDaily: '2026-11-14', tier: 'p', periods: ['2026-12-12T00:00:00.000Z'], opened: {} } });
+  let res = await call(db, '2026-11-14', { open: { kind: 'day', date: '2026-12-01' } });
+  assert.equal(res.code, 409);
+  assert.equal(res.body.balance, 4);
+  db = mockDb({});
+  res = await call(db, '2026-11-14', { open: { kind: 'day', date: '2026-12-01' } });
+  assert.equal(res.code, 403);
 });

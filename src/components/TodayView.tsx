@@ -9,6 +9,8 @@ import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
 import { getPartnerToday, getMyToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, getTenGodState, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
 import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
+import { fetchCoupleDrops, openKoyomiDay, DAY_COST } from '../services/coupleDrops';
+import { KakeraGem } from './CoupleDropPanel';
 
 // 月額プレミアム会員の「恋の暦」画面（旧称「今日」、名前は2026-11-12 TAKASHI）。結果画面の多くはお相手が同じなら毎日同じなので、
 // 毎日変わるもの（今日の相性・今日の星の動き・LINE吉時間・今日の過ごし方・恋の暦・次の特別な日）だけを集める。
@@ -86,27 +88,46 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
   useEffect(() => {
     if (selectedChar !== 'tsuki') setSelectedChar('tsuki');
   }, [selectedChar, setSelectedChar]);
-  // 前月・今月（・翌月）の毎日の点数（カレンダー用。今日は表示中の点数そのもの）
+  // 恋の暦の先の日を開けるための月のかけら（お相手ごと。自分だけのときは自分の誕生日で数える）
+  const dropKey = (hasOpponent && input?.opponentBirth) || input?.myBirth || '';
+  const [kakera, setKakera] = useState<{ key: string; balance: number | null; days: string[] }>({ key: '', balance: null, days: [] });
+  useEffect(() => {
+    if (!dropKey) return;
+    let alive = true;
+    fetchCoupleDrops(dropKey).then(({ drops }) => {
+      if (alive) setKakera({ key: dropKey, balance: drops ? drops.balance : null, days: drops?.opened.days || [] });
+    });
+    return () => { alive = false; };
+  }, [dropKey]);
+  const openedDays = useMemo(() => (kakera.key === dropKey ? kakera.days : []), [kakera, dropKey]);
+  const openDay = async (iso: string): Promise<'ok' | 'no_drops' | 'failed'> => {
+    const { drops, error } = await openKoyomiDay(dropKey, iso);
+    if (drops) setKakera({ key: dropKey, balance: drops.balance, days: drops.opened.days || [] });
+    return error === 'no_drops' ? 'no_drops' : drops && !error ? 'ok' : 'failed';
+  };
+
+  // 前月・今月・翌月の毎日の点数（カレンダー用。今日は表示中の点数そのもの）
   // 先の日は今日を含めて14日分だけ（未来予測スケジュールの14日間とそろえる。2026-11-14 TAKASHI「14日先までしか見れないように」）
+  // その先の日は、かけら10個で1日ずつ開ける（2026-11-14 TAKASHI）。開けられる日があるので翌月も出す
   const months = useMemo(() => {
     if (!input) return [] as CalMonth[];
     const limit = new Date(now.getFullYear(), now.getMonth(), now.getDate() + CAL_AHEAD_DAYS - 1, 12);
-    const ks = limit.getMonth() !== now.getMonth() ? [-1, 0, 1] : [-1, 0];
-    return ks.map((k) => {
+    return [-1, 0, 1].map((k) => {
       const y = now.getFullYear();
       const m = now.getMonth() + k;
       const first = new Date(y, m, 1);
       const last = new Date(y, m + 1, 0).getDate();
       const days = Array.from({ length: last }, (_, i) => {
         const day = i + 1;
-        if (k === 0 && day === now.getDate()) return { day, score: result.dailyScore };
+        if (k === 0 && day === now.getDate()) return { day, score: result.dailyScore, iso: isoOf(new Date(y, m, day, 12)) };
         const d = new Date(y, m, day, 12);
-        if (d.getTime() > limit.getTime()) return { day, score: null };
-        return { day, score: generateFortuneResult(input, 'tsuki', d).dailyScore };
+        const iso = isoOf(d);
+        if (d.getTime() > limit.getTime() && !openedDays.includes(iso)) return { day, score: null, iso };
+        return { day, score: generateFortuneResult(input, 'tsuki', d).dailyScore, iso };
       });
       return { year: first.getFullYear(), month: first.getMonth(), days, current: k === 0, before: k < 0 };
     });
-  }, [input, now, result.dailyScore]);
+  }, [input, now, result.dailyScore, openedDays]);
 
   // お相手ごとの今日の点数（保存したお相手＋自分だけ）。点数はキャラで変わらないので月で計算
   const chips = useMemo(() => {
@@ -211,6 +232,8 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         months={months}
         luckTitle={result.dailyLuckTitle}
         specials={[next.pair, next.solo].filter((n): n is NextDay => Boolean(n))}
+        kakera={kakera.key === dropKey ? kakera.balance : null}
+        onOpenDay={dropKey ? openDay : undefined}
       />
 
       {/* ① 二人の今日の相性 */}
@@ -550,7 +573,8 @@ const monthArrow = (off: boolean): React.CSSProperties => ({
 });
 
 const CAL_AHEAD_DAYS = 14;
-type CalDay = { day: number; score: number | null };
+const isoOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+type CalDay = { day: number; score: number | null; iso: string };
 type CalMonth = { year: number; month: number; days: CalDay[]; current: boolean; before: boolean };
 
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
@@ -560,10 +584,22 @@ const SCALE_STOPS: [number, number, number][] = [[34, 42, 104], [116, 74, 196], 
 // 各色の位置（0＝最低点〜1＝最高点）。上位およそ2割がはっきり金になるよう、金を手前に置く（2026-11-12 TAKASHI「地味すぎる、90点でも薄い」）
 const SCALE_POS = [0, 0.5, 0.8];
 
-function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials }: {
+function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials, kakera, onOpenDay }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
   months: CalMonth[]; luckTitle?: string; specials: NextDay[];
+  /** いま使える月のかけら（読めないときは null） */
+  kakera?: number | null;
+  onOpenDay?: (iso: string) => Promise<'ok' | 'no_drops' | 'failed'>;
 }) {
+  // 15日目より先の日をタップ → かけら10個で開けるかの確認（ブラウザのダイアログは使わず、暦の下に出す）
+  const [ask, setAsk] = useState<{ iso: string; label: string } | null>(null);
+  const [asking, setAsking] = useState<'idle' | 'busy' | 'no_drops' | 'failed'>('idle');
+  const confirmOpen = async () => {
+    if (!ask || !onOpenDay || asking === 'busy') return;
+    setAsking('busy');
+    const r = await onOpenDay(ask.iso);
+    if (r === 'ok') { setAsk(null); setAsking('idle'); } else setAsking(r);
+  };
   // 次の特別な日（シンクロ日＝♥、恋愛運MAX日＝★）は暦のマスに印をつけ、暦の下に「あと〇日」で出す（2026-11-12 TAKASHI「カレンダーのところにいい感じに」）
   const markOf = (n: NextDay) => (n.label.includes('シンクロ') ? '♥' : '★');
   const specialAt = (y: number, m: number, d: number) => specials.find((n) => n.date.y === y && n.date.m === m + 1 && n.date.d === d);
@@ -624,9 +660,9 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
         <div key={`${mo.year}-${mo.month}`} style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.7rem', borderTop: '1px solid rgba(226,192,116,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-              <button type="button" aria-label="前の月" disabled={monthIdx === 0} onClick={() => setMonthIdx((i) => Math.max(0, i - 1))} style={monthArrow(monthIdx === 0)}>‹</button>
+              <button type="button" aria-label="前の月" disabled={monthIdx === 0} onClick={() => { setMonthIdx((i) => Math.max(0, i - 1)); setAsk(null); }} style={monthArrow(monthIdx === 0)}>‹</button>
               <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{mo.year !== now.getFullYear() ? `${mo.year}年` : ''}{mo.month + 1}月の恋の暦</span>
-              <button type="button" aria-label="次の月" disabled={monthIdx >= months.length - 1} onClick={() => setMonthIdx((i) => Math.min(months.length - 1, i + 1))} style={monthArrow(monthIdx >= months.length - 1)}>›</button>
+              <button type="button" aria-label="次の月" disabled={monthIdx >= months.length - 1} onClick={() => { setMonthIdx((i) => Math.min(months.length - 1, i + 1)); setAsk(null); }} style={monthArrow(monthIdx >= months.length - 1)}>›</button>
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.64rem', color: '#a9a293' }}>
               低い
@@ -641,11 +677,20 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
             {cells.map((c, i) => {
               if (!c) return <span key={i} />;
               // 15日目より先は日付だけ薄く（点数・印は出さない）
-              if (c.score === null) return (
-                <div key={i} style={{ position: 'relative', aspectRatio: '1 / 1', borderRadius: '9px', border: '1px dashed rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}>
-                  <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: '#6f6a60' }}>{c.day}日</span>
-                </div>
-              );
+              // 15日目より先は日付と小さなかけらだけ。タップでかけら10個で開ける
+              if (c.score === null) {
+                const picked = ask?.iso === c.iso;
+                return (
+                  <button key={i} type="button" disabled={!onOpenDay} aria-label={`${mo.month + 1}月${c.day}日をかけら${DAY_COST}個で開ける`}
+                    onClick={() => { setAsk({ iso: c.iso, label: `${mo.month + 1}月${c.day}日(${WEEKDAYS[new Date(mo.year, mo.month, c.day).getDay()]})` }); setAsking('idle'); }}
+                    style={{ position: 'relative', aspectRatio: '1 / 1', borderRadius: '9px', padding: 0, cursor: onOpenDay ? 'pointer' : 'default',
+                      border: picked ? '1.5px solid rgba(245,215,122,0.9)' : '1px dashed rgba(255,255,255,0.14)', background: picked ? 'rgba(212,175,55,0.14)' : 'rgba(255,255,255,0.02)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: '#6f6a60' }}>{c.day}日</span>
+                    <span style={{ marginTop: '0.35rem', opacity: picked ? 1 : 0.55, display: 'inline-flex' }}><KakeraGem size={14} glow={false} /></span>
+                  </button>
+                );
+              }
               const lv = shade(c.score);
               const isToday = mo.current && c.day === today;
               const past = mo.before || (mo.current && c.day < today);
@@ -677,7 +722,33 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
               );
             })}
           </div>
-          {mo.days.some((d) => d.score === null) && <p style={{ margin: 0, fontSize: '0.62rem', color: '#8f887b', textAlign: 'right' }}>点数は今日から{CAL_AHEAD_DAYS}日間</p>}
+          {mo.days.some((d) => d.score === null) && !ask && (
+            <p style={{ margin: 0, fontSize: '0.64rem', color: '#a9a293', textAlign: 'right', lineHeight: 1.5 }}>
+              点数は今日から{CAL_AHEAD_DAYS}日間。その先の日は、タップして月のかけら{DAY_COST}個で開けられます
+            </p>
+          )}
+          {ask && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.7rem 0.8rem', borderRadius: '12px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(226,192,116,0.4)' }}>
+              <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.55 }}>
+                {ask.label}の点数を、月のかけら{DAY_COST}個で開けますか？
+              </p>
+              <p style={{ margin: 0, fontSize: '0.7rem', color: '#b9b2a4', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <KakeraGem size={13} glow={false} /> いま持っているかけら：{kakera ?? '—'}個
+              </p>
+              <p style={{ margin: 0, fontSize: '0.68rem', color: '#a9a293', lineHeight: 1.5 }}>一度開けた日は、その日が来るまでずっと見られます。</p>
+              {asking === 'no_drops' && <p style={{ margin: 0, fontSize: '0.72rem', color: '#f0b4a6', lineHeight: 1.5 }}>かけらが足りません。かけらは毎日増えます。</p>}
+              {asking === 'failed' && <p style={{ margin: 0, fontSize: '0.72rem', color: '#f0b4a6', lineHeight: 1.5 }}>うまく開けられませんでした。少し待ってから、もう一度お試しください。</p>}
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button type="button" onClick={() => { setAsk(null); setAsking('idle'); }} style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.18)', background: 'transparent', color: '#d8d2c6', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}>やめる</button>
+                <button type="button" onClick={confirmOpen} disabled={asking === 'busy' || (kakera !== null && kakera !== undefined && kakera < DAY_COST)}
+                  style={{ flex: 2, padding: '0.6rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 100%)', color: '#1a1230', fontSize: '0.82rem', fontWeight: 900, cursor: 'pointer',
+                    opacity: asking === 'busy' || (typeof kakera === 'number' && kakera < DAY_COST) ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
+                  <KakeraGem size={15} glow={false} /> {asking === 'busy' ? '開けています…' : `かけら${DAY_COST}個で開ける`}
+                </button>
+              </div>
+              {typeof kakera === 'number' && kakera < DAY_COST && asking !== 'no_drops' && <p style={{ margin: 0, fontSize: '0.68rem', color: '#b9b2a4', lineHeight: 1.5 }}>あと{DAY_COST - kakera}個たまると開けられます（かけらは毎日増えます）。</p>}
+            </div>
+          )}
         </div>
         );
       })}
