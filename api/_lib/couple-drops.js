@@ -45,12 +45,57 @@ export function refill(rec, { premium, periodEnd }, today) {
     // 支払い日: 新しい支払い期間（期間の終わりの日時で見分ける）に入って最初の表示で50個
     const pk = periodEnd || 'unknown';
     if (!periods.includes(pk)) { balance = Math.min(PREMIUM_CAP, balance + PREMIUM_PAYDAY); periods.push(pk); }
-    if (days > 0) balance = Math.min(PREMIUM_CAP, balance + (wasPremium ? days : 1) * PREMIUM_DAILY);
-  } else if (days > 0) {
-    // 無料: 毎日2個、持ち越さない（残っていても2個まで）
+    // 無料だった日に月額になったとき（同じ日の2回目の表示）も、その日の5個を足す（初めて月額で開いた人と同じ55個にそろえる）
+    if (days > 0 || (last && !wasPremium)) balance = Math.min(PREMIUM_CAP, balance + (wasPremium ? days : 1) * PREMIUM_DAILY);
+  } else if (days > 0 || wasPremium) {
+    // 無料: 毎日2個、持ち越さない（残っていても2個まで）。
+    // 月額が終わった日（同じ日の2回目の表示）も、ここで2個までに戻す（月額の残りを無料のかけらとして使えないように）
     balance = Math.max(Math.min(balance, FREE_CAP), FREE_DAILY);
   }
   return { balance, lastDaily: days > 0 || !last ? today : last, periods, granted: balance - before, tier: premium ? 'p' : 'f' };
+}
+
+/**
+ * 登録なしの購入でできた自動アカウント（from）の月のかけらを、本人のアカウント（to）へ引き継ぐときの、引き継ぎ後の記録（純粋な関数）。
+ * ・開けたお題・シングルプランの残り・「この購入の10個は配った」印（bonusFor）を足し合わせる（引き継いだあとに10個をもう一度配らない）
+ * ・月額も引き継いだとき（premiumMoved）は、月額の残りと「この支払い期間の50個は配った」印（periods）も移す
+ * ・無料の毎日の分は持ち越さないものなので移さない
+ */
+export function mergeDropsRecords(to, from, { premiumMoved = false } = {}) {
+  const t = to || {};
+  const f = from || {};
+  const opened = { ...(t.opened || {}) };
+  for (const [key, o] of Object.entries(f.opened || {})) {
+    const a = openedOf({ opened }, key);
+    const b = openedOf(f, key);
+    const u = (x, y) => [...new Set([...x, ...y])].sort((m, n) => m - n);
+    opened[key] = { rp: u(a.rp, b.rp), rf: u(a.rf, b.rf), gp: u(a.gp, b.gp), gf: u(a.gf, b.gf) };
+  }
+  const bonus = { ...(t.bonus || {}) };
+  for (const [key, n] of Object.entries(f.bonus || {})) bonus[key] = Math.max(0, Number(bonus[key]) || 0) + Math.max(0, Number(n) || 0);
+  const out = { ...t, opened, bonus, bonusFor: { ...(t.bonusFor || {}), ...(f.bonusFor || {}) } };
+  if (premiumMoved) {
+    out.periods = [...new Set([...(Array.isArray(t.periods) ? t.periods : []), ...(Array.isArray(f.periods) ? f.periods : [])])].slice(-12);
+    if (f.tier === 'p') {
+      out.balance = Math.min(PREMIUM_CAP, Math.max(0, Number(t.balance) || 0) + Math.max(0, Number(f.balance) || 0));
+      out.tier = 'p';
+      const days = [t.lastDaily, f.lastDaily].filter((d) => typeof d === 'string').sort();
+      if (days.length) out.lastDaily = days[days.length - 1];
+    }
+  }
+  return out;
+}
+
+/** 自動アカウントの月のかけらを本人のアカウントへ移す（transferGuestPurchases から呼ぶ）。移したら元の記録は消す */
+export async function moveCoupleDrops(db, fromUid, toUid, { premiumMoved = false } = {}) {
+  if (!fromUid || !toUid || fromUid === toUid) return;
+  const fromRef = db.collection(COUPLE_DROPS).doc(fromUid);
+  const from = (await fromRef.get()).data();
+  if (!from) return;
+  const toRef = db.collection(COUPLE_DROPS).doc(toUid);
+  const to = (await toRef.get()).data();
+  await toRef.set({ ...mergeDropsRecords(to, from, { premiumMoved }), updatedAt: new Date().toISOString() });
+  await fromRef.delete();
 }
 
 const cleanList = (v) => (Array.isArray(v) ? v.filter((n) => Number.isInteger(n) && n >= 1 && n <= TOPIC_MAX) : []);
