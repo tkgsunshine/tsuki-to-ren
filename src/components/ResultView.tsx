@@ -3181,7 +3181,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     <CharHeadingIcon char="月" size={34} />
                     <p style={{ fontSize: '0.72rem', color: '#e2d9ee', lineHeight: '1.6', margin: 0 }}>
                       {canBuyPair
-                        ? `まずは${partnerCall}のことだけ知りたいなら、シングルプランで。${partnerCall}のことを毎日の相性やこれからの流れまでもっと深く知りたい、ほかの気になる人のことも占いたいなら、プレミアムがおすすめですよ。`
+                        ? `今日${partnerCall}のことだけ知りたいなら、シングルプランで。${partnerCall}のことを毎日もっと深く知りたい、他の気になる人のことも知りたいなら、プレミアムがおすすめですよ。`
                         : '気になる人みんなの鑑定と、毎日の相性・これからの流れを、私がいつでもお見せしますね。'}
                     </p>
                   </div>
