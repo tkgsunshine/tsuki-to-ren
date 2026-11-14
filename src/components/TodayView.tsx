@@ -86,10 +86,13 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
   useEffect(() => {
     if (selectedChar !== 'tsuki') setSelectedChar('tsuki');
   }, [selectedChar, setSelectedChar]);
-  // 前月・今月・翌月の毎日の点数（カレンダー用。今日は表示中の点数そのもの。翌月も出す 2026-11-12 TAKASHI）
+  // 前月・今月（・翌月）の毎日の点数（カレンダー用。今日は表示中の点数そのもの）
+  // 先の日は今日を含めて14日分だけ（未来予測スケジュールの14日間とそろえる。2026-11-14 TAKASHI「14日先までしか見れないように」）
   const months = useMemo(() => {
     if (!input) return [] as CalMonth[];
-    return [-1, 0, 1].map((k) => {
+    const limit = new Date(now.getFullYear(), now.getMonth(), now.getDate() + CAL_AHEAD_DAYS - 1, 12);
+    const ks = limit.getMonth() !== now.getMonth() ? [-1, 0, 1] : [-1, 0];
+    return ks.map((k) => {
       const y = now.getFullYear();
       const m = now.getMonth() + k;
       const first = new Date(y, m, 1);
@@ -97,7 +100,9 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
       const days = Array.from({ length: last }, (_, i) => {
         const day = i + 1;
         if (k === 0 && day === now.getDate()) return { day, score: result.dailyScore };
-        return { day, score: generateFortuneResult(input, 'tsuki', new Date(y, m, day, 12)).dailyScore };
+        const d = new Date(y, m, day, 12);
+        if (d.getTime() > limit.getTime()) return { day, score: null };
+        return { day, score: generateFortuneResult(input, 'tsuki', d).dailyScore };
       });
       return { year: first.getFullYear(), month: first.getMonth(), days, current: k === 0, before: k < 0 };
     });
@@ -544,7 +549,9 @@ const monthArrow = (off: boolean): React.CSSProperties => ({
   color: off ? 'rgba(242,226,179,0.25)' : '#f2e2b3', fontSize: '1rem', lineHeight: 1, cursor: off ? 'default' : 'pointer', padding: 0
 });
 
-type CalMonth = { year: number; month: number; days: { day: number; score: number }[]; current: boolean; before: boolean };
+const CAL_AHEAD_DAYS = 14;
+type CalDay = { day: number; score: number | null };
+type CalMonth = { year: number; month: number; days: CalDay[]; current: boolean; before: boolean };
 
 /** 恋の暦の今日の相性: 今日の点数と、今月のカレンダー（基本の相性より上＝良い・同じくらい＝ふつう・下＝控えめ） */
 // 恋の暦の色の段階（低い→高い）
@@ -566,7 +573,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
   const diffText = diff === null ? null : diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0';
   // 点数が高い日ほど濃い金（1色の濃淡。2026-11-12 TAKASHI「点数が高いほど濃く」）
   // 濃さは、この二人の3か月分の最低点〜最高点の中での位置で決める（基本の相性が高い二人でも差が見えるように）
-  const allScores = months.flatMap((m) => m.days.map((d) => d.score));
+  const allScores = months.flatMap((m) => m.days.flatMap((d) => (d.score === null ? [] : [d.score])));
   const lo = Math.min(...allScores);
   const hi = Math.max(...allScores);
   // 低い日＝夜の藍 → 紫 → 薔薇色 → 橙 → 高い日＝金（2026-11-12 TAKASHI「1色だと地味」）
@@ -611,7 +618,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
       {months.slice(monthIdx, monthIdx + 1).map((mo) => {
         // 月曜はじまり・日曜が一番右（2026-11-12 TAKASHI）
         const lead = (new Date(mo.year, mo.month, 1).getDay() + 6) % 7;
-        const cells: ({ day: number; score: number } | null)[] = [...Array(lead).fill(null), ...mo.days];
+        const cells: (CalDay | null)[] = [...Array(lead).fill(null), ...mo.days];
         while (cells.length % 7) cells.push(null);
         return (
         <div key={`${mo.year}-${mo.month}`} style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.7rem', borderTop: '1px solid rgba(226,192,116,0.2)' }}>
@@ -633,6 +640,12 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
             ))}
             {cells.map((c, i) => {
               if (!c) return <span key={i} />;
+              // 15日目より先は日付だけ薄く（点数・印は出さない）
+              if (c.score === null) return (
+                <div key={i} style={{ position: 'relative', aspectRatio: '1 / 1', borderRadius: '9px', border: '1px dashed rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}>
+                  <span style={{ position: 'absolute', top: 3, left: 5, fontSize: '0.56rem', fontWeight: 500, lineHeight: 1, color: '#6f6a60' }}>{c.day}日</span>
+                </div>
+              );
               const lv = shade(c.score);
               const isToday = mo.current && c.day === today;
               const past = mo.before || (mo.current && c.day < today);
@@ -664,6 +677,7 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
               );
             })}
           </div>
+          {mo.days.some((d) => d.score === null) && <p style={{ margin: 0, fontSize: '0.62rem', color: '#8f887b', textAlign: 'right' }}>点数は今日から{CAL_AHEAD_DAYS}日間</p>}
         </div>
         );
       })}
