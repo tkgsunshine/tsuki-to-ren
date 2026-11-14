@@ -194,7 +194,7 @@ const sumLpLeave = (docs: DailyDoc[]) => {
 };
 // 購入LPのまとまり（上から順）。買い切りと月額を見比べる形（pair）と、月額だけの形（monthly）で並びが違う
 const LP_SECTION_LABELS: Record<string, string> = {
-  top: '最初の画面（月の語りかけ）', intro: '無料で見えているのは入り口', premium: 'プレミアムだけでできること', common: 'どちらのプランでも見れること', plans: 'プランを選ぶ（¥680 / ¥980 の比較）',
+  top: '最初の画面（月の語りかけ）', intro: '無料で見えているのは入り口', premium: 'プレミアムだけでできること', common: '〇〇さんのこと、ここまで分かります（どちらのプランでも）', plans: 'プランを選ぶ（¥680 / ¥980 の比較）',
   worries: 'こんな夜はありませんか？', benefits: 'プレミアムでできること', price: '料金（¥980）', faq: 'よくある質問', end: '一番下'
 };
 const LP_LAYOUTS: [string, string, string[]][] = [

@@ -833,7 +833,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {showPlans && pair && !pair.unlocked && (
             <div style={{ padding: '0 1.15rem 1.35rem' }}>
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-                どちらのプランでも見れる、{pair.name}のこと
+                {pair.name}のこと、ここまで分かります
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '0.7rem' }}>
                 {([
