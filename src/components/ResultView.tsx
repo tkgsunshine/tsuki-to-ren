@@ -11,6 +11,7 @@ import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
+import { PlanCompareTable, planCompareRows } from './PlanCompareTable';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showFieldError } from './AppDialog';
@@ -3187,60 +3188,18 @@ export const ResultView: React.FC<ResultViewProps> = ({
                   </div>
                 </div>
 
-                {(() => {
-                  // [項目, プレミアム, シングル]。購入LPの比較表（PremiumLPModal.tsx「プランを選ぶ」）と同じ行・同じ文言（2026-11-14 TAKASHI「表の内容はLPと合わせて」）
-                  const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
-                  const rows: [string, string, string][] = [
-                    ['トリセツ・深層鑑定・相性グラフ', '誰でも', `${partnerCall}だけ`],
-                    ['二人の相性100（本格鑑定・MBTIランキング）', '誰でも', `${partnerCall}だけ`],
-                    ['惹かれるファッション・ドキッとさせる仕草', '誰でも', `${partnerCall}だけ`],
-                    ['2人の最高シンクロ日（日付）', '誰でも', `${partnerCall}だけ`],
-                    ['今日の相性と、本日のLINEの送り方', '毎日', `本日分(${todayJst})`],
-                    ['あなたの恋愛運MAX日（日付）', '○', '○'],
-                    ['10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', '○', '－'],
-                    ['月のかけら（1個で1つ開ける）', '毎月50個\n＋毎日5個', '購入時10個\n＋毎日2個'],
-                    ['月・蓮へのチャット相談', '無制限', '1日2回'],
-                    ['お相手の保存', '5人', '2人'],
-                  ];
-                  const cell: React.CSSProperties = { padding: '0.45rem 0.3rem', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: '0.68rem', lineHeight: 1.45, verticalAlign: 'middle', whiteSpace: 'pre-line', overflowWrap: 'anywhere' };
-                  const head: React.CSSProperties = { padding: '0.4rem 0.3rem', fontSize: '0.68rem', fontWeight: 'bold', lineHeight: 1.35 };
-                  if (!canBuyPair) {
-                    return (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        {rows.map(([label, p]) => (
-                          <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
-                            <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                            <span><strong>{label}</strong>{p !== '○' && <>：{p.replace('\n', '')}</>}</span>
-                          </div>
-                        ))}
+                {canBuyPair ? (
+                  <PlanCompareTable name={partnerCall} />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    {planCompareRows(partnerCall).map(({ label, monthly }) => (
+                      <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
+                        <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                        <span><strong>{label}</strong>{monthly !== '○' && <>：{monthly.replace('\n', '')}</>}</span>
                       </div>
-                    );
-                  }
-                  return (
-                    <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', textAlign: 'center', background: 'rgba(255,255,255,0.015)', borderRadius: '10px', overflow: 'hidden' }}>
-                      <colgroup><col style={{ width: '36%' }} /><col style={{ width: '33%' }} /><col style={{ width: '31%' }} /></colgroup>
-                      <thead>
-                        <tr>
-                          <th style={head}></th>
-                          <th style={{ ...head, color: '#1a1230', background: 'linear-gradient(135deg, #e9cf8f, #d4af37)' }}>プレミアム<br /><span style={{ fontWeight: 'normal' }}>月額980円</span></th>
-                          <th style={{ ...head, color: '#f2e2b3', background: 'rgba(226, 192, 116, 0.08)' }}>シングル<br /><span style={{ fontWeight: 'normal' }}>{PAIR_PRICE_LABEL}・1回払い</span></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rows.map(([label, p, s]) => (
-                          <tr key={label}>
-                            <th scope="row" style={{ ...cell, textAlign: 'left', fontWeight: 'normal', color: '#cfc8bb' }}>{label}</th>
-                            <td style={{ ...cell, color: '#f2e2b3', fontWeight: 'bold', background: 'rgba(226, 192, 116, 0.05)' }}>{p}</td>
-                            <td style={{ ...cell, color: s === '－' ? '#7d776c' : '#e8e3d8' }}>{s}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr><td colSpan={3} style={{ ...cell, textAlign: 'left', fontSize: '0.62rem', color: '#a9a294' }}>※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。</td></tr>
-                      </tfoot>
-                    </table>
-                  );
-                })()}
+                    ))}
+                  </div>
+                )}
 
                 {/* ボタンは購入LPへ進む1つだけ。料金の細かい説明・規約・支払い方法は購入LPと利用規約にある（2026-11-14 TAKASHI「鑑定ページのCTAは一つ、表と1つのボタンだけ」） */}
                 <button

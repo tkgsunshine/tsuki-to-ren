@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { PlanCompareTable } from './PlanCompareTable';
 import { PurchaseTerms } from './PurchaseTerms';
 import { Crown, ShieldCheck, Heart, Bell, MessageCircle, Send, Calendar, BookOpen, Shirt, ChevronDown, Moon, ArrowRight, X, Lock, Star, ZoomIn, Users } from 'lucide-react';
 import { SubscriptionCancelModal } from './SubscriptionCancelModal';
@@ -529,7 +530,6 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   // 買い切りボタンの「〇〇さんだけ」。名前が空のとき（san() が「お相手」を返す）は「このお相手だけ」
   const pairWho = !pair || pair.name === 'お相手' ? 'このお相手' : pair.name;
   // 買い切りで「今日」の内容が見れるのは購入日（日本時間）だけ。表では今日の日付で見せる（例: 11/4）
-  const todayJst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date());
   const pairFirst = showPlans && focus === 'pair';
   const eduFuture = { who: 'tsuki', t: '10年先までの、二人の未来の流れ', shot: '/assets/premium/edu-future.webp', pos: '50% 58%', d: 'この先10年の年ごとの流れと、明日からの14日間・月ごとの相性の波。「大開運の年」や、結婚・同棲のような大きな決断に向いた時期も見えるので、先を見すえて動けますよ。（プレミアムプランで読めます）' } as const;
 
@@ -844,49 +844,8 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
               <h2 className="font-serif gold-text" style={sectionTitleStyle}>
                 {pair.name}のこと、どこまで知りたいですか？
               </h2>
-              <div style={{
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '14px',
-                overflow: 'hidden',
-                fontSize: '0.72rem',
-                color: '#e8e3d8'
-              }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', background: 'rgba(255,255,255,0.05)', fontWeight: 'bold', textAlign: 'center' }}>
-                  <div style={{ padding: '0.55rem 0.5rem', textAlign: 'left' }}>できること</div>
-                  {(pairFirst
-                    ? ['シングル\nプラン\n¥680', 'プレミアム\nプラン\n¥980/月']
-                    : ['プレミアム\nプラン\n¥980/月', 'シングル\nプラン\n¥680']
-                  ).map((h, i) => (
-                    <div key={h} style={{ padding: '0.55rem 0.25rem', color: (pairFirst ? i === 1 : i === 0) ? '#f2e2b3' : '#d8d2c6', lineHeight: 1.4, whiteSpace: 'pre-line', fontSize: '0.72rem' }}>{h}</div>
-                  ))}
-                </div>
-                {[
-                  { label: 'トリセツ・深層鑑定・相性グラフ', pair: `${pair.name}だけ`, monthly: '誰でも' },
-                  { label: '二人の相性100（本格鑑定・MBTIランキング）', pair: `${pair.name}だけ`, monthly: '誰でも' },
-                  { label: '惹かれるファッション・ドキッとさせる仕草', pair: `${pair.name}だけ`, monthly: '誰でも' },
-                  { label: '2人の最高シンクロ日（日付）', pair: `${pair.name}だけ`, monthly: '誰でも' },
-                  { label: '今日の相性と、本日のLINEの送り方', pair: `本日分(${todayJst})`, monthly: '毎日' },
-                  { label: 'あなたの恋愛運MAX日（日付）', pair: '◯', monthly: '◯' },
-                  { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', pair: null, monthly: '◯' },
-                  // 月のかけらは別の行に（2026-11-13 TAKASHI「かけらについては別行にして」「10年先の下」）
-                  { label: '月のかけら（1個で1つ開ける）', pair: '購入時10個\n＋毎日2個', monthly: '毎月50個\n＋毎日5個' },
-                  { label: '月・蓮へのチャット相談', pair: '1日2回', monthly: '無制限' },
-                  { label: 'お相手の保存', pair: '2人', monthly: '5人' }
-                ].map((row, idx) => {
-                  const cells = pairFirst ? [row.pair, row.monthly] : [row.monthly, row.pair];
-                  return (
-                    <div key={row.label} style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.06)', background: idx % 2 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
-                      <div style={{ padding: '0.5rem', lineHeight: 1.45 }}>{row.label}</div>
-                      {cells.map((c, i) => (
-                        <div key={i} style={{ padding: '0.5rem 0.25rem', textAlign: 'center', alignSelf: 'center', whiteSpace: 'pre-line', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.4, color: c ? '#8ecaa5' : '#6b665c', fontWeight: c ? 600 : 400 }}>{c ?? '−'}</div>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-              <p style={{ fontSize: '0.68rem', color: '#a9a49a', lineHeight: 1.6, margin: '0.5rem 0 0.8rem' }}>
-                ※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。
-              </p>
+              {/* 鑑定結果のプランの箱と同じ表（PlanCompareTable） */}
+              <PlanCompareTable name={pair.name} pairFirst={pairFirst} style={{ margin: '0 0 0.8rem' }} />
               <div style={{ marginBottom: '0.85rem' }}>
                 <CharBubble who="tsuki" small>
                   {pair.name === 'お相手' ? '1人のお相手' : `${pair.name}1人`}のことを今日じっくり知りたいなら、シングルプランですよ。<br />
