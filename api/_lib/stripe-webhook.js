@@ -4,6 +4,7 @@ import { checkoutAttribution, countPair, countPremium } from './analytics.js';
 import { recordPairPurchase } from './pair-unlock.js';
 import { resolveCheckoutAccount } from './checkout-claim.js';
 import { sendPurchaseThanks } from './notices.js';
+import { alreadyRefunded, findPairHolder, findPremiumHolder, refundDuplicatePair, settleClaim, refundDuplicateSubscription, relatedUids } from './duplicate-purchase.js';
 
 // Stripe → app: keeps premium/{uid} in step with the subscription,
 // and records one-time pair purchases (checkout.session.completed with mode=payment) in pairUnlocks/{uid}.
@@ -52,10 +53,24 @@ export default async function handler(req, res, deps = {}) {
       if (session.payment_status !== 'paid') return res.status(200).json({ status: 'ignored' });
       try {
         const db = deps.db || getDb();
+        if (await alreadyRefunded(db, session.id)) return res.status(200).json({ status: 'refunded' });
         // A guest purchase names no account: make or find one for the payer's email (checkout-claim.js)
         const account = await resolveCheckoutAccount(db, deps.auth ?? null, session);
         if (!account) return res.status(200).json({ status: 'ignored' });
+        // 二重の購入（同じ人が、同じお相手のシングルプランをもう持っている）: 全額返金して、記録は書かない
+        const partner = session.metadata?.partner;
+        if (session.metadata?.kind === 'pair' && partner) {
+          const live = session.livemode === true;
+          const holder = await findPairHolder(db, await relatedUids(db, account.uid, session, live), partner, session.id, live);
+          if (holder) {
+            await refundDuplicatePair(db, stripe, session, { uid: account.uid, holder });
+            await settleClaim(db, session.id, { duplicate: true });
+            console.log('💳 duplicate pair purchase refunded');
+            return res.status(200).json({ status: 'refunded' });
+          }
+        }
         const done = await recordPairPurchase(db, session, (event.created || 0) * 1000 || Date.now(), account.uid);
+        await settleClaim(db, session.id);
         if (done) {
           console.log(`💳 pair purchase recorded${account.created ? ' (new account)' : ''}`);
           // For the admin page's counters (live payments only, once per session)
@@ -106,6 +121,19 @@ export default async function handler(req, res, deps = {}) {
       return res.status(200).json({ status: 'ignored' });
     }
     const db = deps.db || getDb();
+    if (await alreadyRefunded(db, sub.id)) return res.status(200).json({ status: 'refunded' });
+    // 二重の契約（同じ人に、別の月額の契約がもう続いている）: 新しい契約の支払いを全額返金して、すぐ解約する
+    if (record.active) {
+      const uids = checkoutSession ? await relatedUids(db, uid, checkoutSession, record.livemode) : [uid];
+      const holder = await findPremiumHolder(db, stripe, uids, sub.id, record.livemode);
+      if (holder) {
+        await refundDuplicateSubscription(db, stripe, sub, { uid, holder, invoiceId: typeof checkoutSession?.invoice === 'string' ? checkoutSession.invoice : null, amount: checkoutSession?.amount_total ?? null });
+        if (checkoutSession) await settleClaim(db, checkoutSession.id, { duplicate: true });
+        console.log('💳 duplicate subscription refunded and cancelled');
+        return res.status(200).json({ status: 'refunded' });
+      }
+    }
+    if (checkoutSession) await settleClaim(db, checkoutSession.id);
     const ref = db.collection(PREMIUM).doc(uid);
     // A newer membership of the same account must not be overwritten by events about an older, ended one
     const current = (await ref.get()).data();

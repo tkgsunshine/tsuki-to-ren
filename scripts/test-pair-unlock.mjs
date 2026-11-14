@@ -5,6 +5,7 @@ import checkout, { PAIR_TERMS } from '../api/_lib/stripe-checkout.js';
 import webhook from '../api/_lib/stripe-webhook.js';
 import partner, { FREE_PARTNER_DAYS, partnerKey } from '../api/_lib/partner-days.js';
 import { pairAccess, recordPairPurchase } from '../api/_lib/pair-unlock.js';
+import { settleClaim } from '../api/_lib/duplicate-purchase.js';
 
 // 買い切り「お相手1人の深層鑑定」（api/_lib/pair-unlock.js）
 
@@ -329,6 +330,11 @@ test('claim signs in only the account this purchase created, and only once', asy
   assert.equal(res.code, 404);
 
   await resolveCheckoutAccount(db, auth, paidSession({ id: 'cs_new_000000000', client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'buyer@example.com' } }));
+  // the webhook has not yet decided whether it is a duplicate purchase: still pending
+  res = mockRes();
+  await claim(ask('cs_new_000000000'), res, { db, auth });
+  assert.equal(res.code, 404);
+  await settleClaim(db, 'cs_new_000000000');
   res = mockRes();
   await claim(ask('cs_new_000000000'), res, { db, auth });
   assert.equal(res.body.token, 'token_new_u1');
@@ -340,6 +346,7 @@ test('claim signs in only the account this purchase created, and only once', asy
 
   // an existing account never gets a token this way (only the sign-in email)
   await resolveCheckoutAccount(db, guestAuth({ 'owner@example.com': 'u_owner' }), paidSession({ id: 'cs_old_000000000', client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'owner@example.com' } }));
+  await settleClaim(db, 'cs_old_000000000');
   res = mockRes();
   await claim(ask('cs_old_000000000'), res, { db, auth });
   assert.equal(res.body.token, null);
