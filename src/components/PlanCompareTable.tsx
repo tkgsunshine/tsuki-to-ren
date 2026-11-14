@@ -50,9 +50,6 @@ export const PlanCompareTable: React.FC<{ name: string; pairFirst?: boolean; sty
           </tr>
         ))}
       </tbody>
-      <tfoot>
-        <tr><td colSpan={3} style={{ ...cell, textAlign: 'left', fontSize: '0.62rem', color: '#a9a294' }}>※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。</td></tr>
-      </tfoot>
     </table>
   );
 };
