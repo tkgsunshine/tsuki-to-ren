@@ -116,7 +116,7 @@ test('シングルプラン: 買ったお相手に10個（購入ごとに1回）
   assert.equal(other.body.bonus, 0);
   // 月額中にシングルのかけらで開けた分は、解約後も見える
   db.docs['premium/u1'] = { active: true, livemode: true, currentPeriodEnd: '2026-12-13T00:00:00.000Z' };
-  db.docs['coupleDrops/u1'].balance = 0; db.docs['coupleDrops/u1'].periods = ['2026-12-13T00:00:00.000Z']; db.docs['coupleDrops/u1'].lastDaily = '2026-11-14';
+  db.docs['coupleDrops/u1'].balance = 0; db.docs['coupleDrops/u1'].periods = ['2026-12-13T00:00:00.000Z']; db.docs['coupleDrops/u1'].lastDaily = '2026-11-14'; db.docs['coupleDrops/u1'].tier = 'p';
   await call(db, '2026-11-14', { open: { kind: 'reading', no: 45 } });
   db.docs['premium/u1'] = { active: false, livemode: true };
   res = await call(db, '2026-11-15');
@@ -251,4 +251,33 @@ test('お相手ごとに開けた記録は別（同じ番号でも、別のお�
   const res = mockRes();
   await drops(req({ oppBirth: '1995-03-03' }), res, { auth, db, live: true, today: '2026-11-12', premiumEmails: '' });
   assert.deepEqual(res.body.opened.rank, []);
+});
+
+// 2026-11-14 境界ケースの洗い出しで見つけた不具合
+test('月額が終わった日（同じ日の2回目の表示）: 月額の残りは無料の2個に戻り、無料のかけらとして使えない', async () => {
+  const db = mockDb({ ...PREMIUM });
+  let res = await call(db, '2026-11-14');
+  assert.equal(res.body.balance, 55);
+  db.docs['premium/u1'] = { active: false, livemode: true, currentPeriodEnd: PREMIUM['premium/u1'].currentPeriodEnd };
+  res = await call(db, '2026-11-14');
+  assert.equal(res.body.premium, false);
+  assert.equal(res.body.balance, FREE_CAP);
+  for (let no = 1; no <= 5; no++) await call(db, '2026-11-14', { open: { kind: 'rank', no } });
+  res = await call(db, '2026-11-14');
+  assert.equal(res.body.balance, 0);
+  assert.deepEqual(res.body.opened.rank, [1, 2]); // 無料のかけらで開いたのは2つだけ
+  res = await call(db, '2026-11-15');
+  assert.equal(res.body.balance, FREE_CAP);
+});
+
+test('無料で表示した日に月額になったとき: その日の5個も入る（初めて月額で開いた人と同じく50＋5）', async () => {
+  const db = mockDb({});
+  let res = await call(db, '2026-11-14', { open: { kind: 'rank', no: 1 } });
+  res = await call(db, '2026-11-14', { open: { kind: 'rank', no: 2 } });
+  assert.equal(res.body.balance, 0);
+  db.docs['premium/u1'] = PREMIUM['premium/u1'];
+  res = await call(db, '2026-11-14');
+  assert.equal(res.body.balance, 55);
+  res = await call(db, '2026-11-14');
+  assert.equal(res.body.balance, 55); // 同じ日の3回目以降は増えない
 });
