@@ -51,7 +51,7 @@ import { SHARE_MBTI_NAMES, shareLineCode, shareTitleCode } from '../api/_lib/sha
 import { claimCheckout, fetchPremiumStatus, formatMonthDay, openBillingPortal, readCachedPremium, startPairCheckout, startPremiumCheckout } from './services/premium';
 import { fetchCoupleDrops, openCoupleTopic } from './services/coupleDrops';
 import type { CoupleDrops, DropKind } from './services/coupleDrops';
-import { fetchPartnerAccess, readCachedPartnerAccess, writeCachedPartnerAccess } from './services/partnerDays';
+import { fetchPartnerAccess, jstToday, readCachedPartnerAccess, writeCachedPartnerAccess } from './services/partnerDays';
 import { readNav, replaceNav, pushNav, goBackOr, syncOverlays, pageKey, routeFromPath, type NavState, type OverlayName, type PageFields, type SettingsSubView } from './utils/navHistory';
 import { fetchUserData, saveUserData, readSyncOwner, writeSyncOwner } from './services/userData';
 import { decideSync, sameProfile, samePartners, type SyncProfile } from './utils/userDataSync';
@@ -1355,6 +1355,14 @@ function App() {
     });
   }, []);
   const signedInUid = currentUser?.uid;
+  // 日本時間の今日。結果を開いたまま日付をまたいでアプリに戻ったとき、かけらの補充・「今日の相性」・シングルの購入日の範囲を読み直す
+  const [jstDay, setJstDay] = useState(jstToday);
+  useEffect(() => {
+    const check = () => { if (document.visibilityState === 'visible') setJstDay(jstToday()); };
+    document.addEventListener('visibilitychange', check);
+    window.addEventListener('pageshow', check);
+    return () => { document.removeEventListener('visibilitychange', check); window.removeEventListener('pageshow', check); };
+  }, []);
   // 月のかけら（二人の相性100のお題を1つずつ開ける）。ログイン中・お相手ありの結果を開いたときに読む（補充もこのとき計算）
   const [coupleDrops, setCoupleDrops] = useState<CoupleDrops | null>(null);
   const [coupleDropsError, setCoupleDropsError] = useState<string | null>(null);
@@ -1366,7 +1374,7 @@ function App() {
       .catch((e) => { if (!cancelled) setCoupleDropsError(`読み込みエラー ${String((e as Error)?.message || '').slice(0, 60)}`); });
     return () => { cancelled = true; };
   // シングルプランを買った直後（購入の記録が届いた時）にも読み直して、10個を反映する
-  }, [flowStep, renResult, mode, oppBirth, signedInUid, isSubscribed, pairUnlock?.unlocked]);
+  }, [flowStep, renResult, mode, oppBirth, signedInUid, isSubscribed, pairUnlock?.unlocked, jstDay]);
   const handleOpenCoupleTopic = useCallback(async (kind: DropKind, no: number, gate?: Promise<unknown>) => {
     if (!oppBirth) return false;
     // 通信は押した瞬間に始め、演出（gate）が終わったらすぐ開く（2026-11-13 TAKASHI「アニメーションの後のためが長すぎる」）
@@ -1419,7 +1427,7 @@ function App() {
       }
     })();
     return () => { cancelled = true; };
-  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid, pairReturn]);
+  }, [flowStep, renResult, mode, oppBirth, isSubscribed, signedInUid, pairReturn, jstDay]);
   // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
   const handleBuyPair = async () => {
     trackCheckout('pair');

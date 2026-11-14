@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { PurchaseTerms } from './PurchaseTerms';
 import { SHOW_SHARE_BUTTON } from '../constants/features';
 import { signInWithGoogle, signInWithX } from '../services/firebase';
 import { handleSignInError } from '../utils/signInGuide';
@@ -8,11 +7,11 @@ import { Calendar, Download, X, Heart, Smartphone, Share, MessageCircle } from '
 import { ResultSection } from './ResultSection';
 import { MoonMark, PillarsMark, MoonPhaseMark, TorisetsuBookMark, PiercedHeartMark, CautionMark, ReplyMoonMark, PulseUpMark, ReversalMark, GiftMark, HangerMark, RoadmapMark, LoveLetterMark, PraiseSparkMark, SpotPinMark } from './icons/BrandIcons';
 import { getScoreMood, san } from '../utils/fortuneEngine';
-import { useBackForwardReset } from '../utils/useBackForwardReset';
 import type { FortuneResult } from '../utils/fortuneEngine';
 import { CompatibilityRadarChart } from './CompatibilityRadarChart';
 import { ATTRACTION_VISUALS, AttractionMotif, ColorSwatches, CoordFlatLay } from './AttractionVisual';
 import { PremiumUnlockButton } from './PremiumUnlockButton';
+import { PlanCompareTable, planCompareRows } from './PlanCompareTable';
 import { InstallGuideModal } from './InstallGuideModal';
 import { getDevicePwaStatus } from '../utils/pwaHelper';
 import { showAlert, showFieldError } from './AppDialog';
@@ -1067,14 +1066,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   // ロックの文言は全部「続きを見る」に統一（料金・違いは開いた先の購入LPで説明する）
   const deepLockWord = LOCK_WORD;
   const pairCardRef = React.useRef<HTMLDivElement>(null);
-  const [buyingPair, setBuyingPair] = useState(false);
-  useBackForwardReset(() => setBuyingPair(false));
-  // 登録なしでも買える（Stripeで入力したメールでアカウントを自動で作る）
-  const handleBuyPair = async () => {
-    if (!onBuyPair || buyingPair) return;
-    setBuyingPair(true);
-    try { await onBuyPair(); } finally { setBuyingPair(false); }
-  };
   // 変わらない鑑定（トリセツ・深層鑑定・相性グラフ・年次）のロック: ¥680を先に見せたLPへ
   const handleDeepLockClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -3170,11 +3161,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 width: '100%',
                 boxSizing: 'border-box'
               }}>
+                {/* 2つのプランの違い（2026-11-14 実装の仕様に合わせて書き直し: 月額＝お相手全員・毎日、シングル＝このお相手だけ・ずっと） */}
                 <div>
                   <span style={{
                     fontSize: '0.6rem',
                     color: 'var(--color-gold)',
-                    textTransform: 'uppercase',
                     letterSpacing: '1px',
                     fontWeight: 'bold',
                     background: 'rgba(226, 192, 116, 0.1)',
@@ -3182,92 +3173,63 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     borderRadius: '20px',
                     border: '1px solid rgba(226, 192, 116, 0.2)'
                   }}>
-                    ✦ プレミアムプラン解放 ✦
+                    ✦ {partnerCall}のことをもっと深く知る ✦
                   </span>
                   <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>
-                    <span style={{ display: 'inline-block', maxWidth: '100%' }}>{san(oppNickname)}のトリセツ・</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>6軸の詳しい相性・</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>未来予測をすべて解禁</span>
+                    {canBuyPair ? '2つのプランの違い' : 'プレミアム（月額980円）でできること'}
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
                     <p style={{ fontSize: '0.72rem', color: '#e2d9ee', lineHeight: '1.6', margin: 0 }}>
-                      月額980円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
+                      {canBuyPair
+                        ? `今日${partnerCall}のことだけ知りたいなら、シングルプランで。${partnerCall}のことを毎日もっと深く知りたい、他の気になる人のことも知りたいなら、プレミアムがおすすめですよ。`
+                        : '気になる人みんなの鑑定と、毎日の相性・これからの流れを、私がいつでもお見せしますね。'}
                     </p>
                   </div>
                 </div>
 
-                {/* Comprehensive Premium Benefits list */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>トリセツ・深層鑑定・6つの相性グラフ（誰でも無制限）</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>今日の相性とLINEの送り方を毎日</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>これからの14日間・月ごと・年ごとの流れ</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>毎朝の運勢メールが全文で届く</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>お相手の保存が5人まで（無料会員は2人）</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>月 ＆ 蓮へのチャット相談が無制限</strong></span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
-                  <PremiumUnlockButton
-                    onClick={() => {
-                      if (onOpenPremiumLP) {
-                        onOpenPremiumLP('monthly');
-                      } else {
-                        onSubscribe();
-                        setSubSuccess(true);
-                      }
-                    }}
-                  />
-                </div>
-
-                {/* 買い切り: このお相手だけ、変わらない鑑定をずっと。買った日は今日の相性も全部 */}
-                {canBuyPair && (
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.74rem', color: '#e8e3d8', lineHeight: 1.6 }}>
-                      <strong style={{ color: '#f2e2b3' }}>{partnerCall}のことだけ知りたい方は</strong><br />
-                      トリセツ・深層鑑定・6つの相性グラフを、{PAIR_PRICE_LABEL}の1回払いでずっと読めます。買った日は、今日の相性とLINEの助言も全部見れます。
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleBuyPair}
-                      disabled={buyingPair}
-                      style={{
-                        width: '100%',
-                        padding: '0.8rem 1rem',
-                        borderRadius: '999px',
-                        border: '1px solid rgba(226, 192, 116, 0.55)',
-                        background: 'rgba(226, 192, 116, 0.06)',
-                        color: '#f2e2b3',
-                        fontSize: '0.85rem',
-                        fontWeight: 'bold',
-                        cursor: buyingPair ? 'wait' : 'pointer',
-                        opacity: buyingPair ? 0.7 : 1
-                      }}
-                    >
-                      {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで続きを見る`}
-                    </button>
-                    <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
-                    </div>
-                    <PurchaseTerms plans={['pair']} />
+                {canBuyPair ? (
+                  <PlanCompareTable name={partnerCall} />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    {planCompareRows(partnerCall).map(({ label, monthly }) => (
+                      <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
+                        <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                        <span><strong>{label}</strong>{monthly !== '○' && <>：{monthly.replace('\n', '')}</>}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
+
+                {/* ボタンは購入LPへ進む1つだけ。料金の細かい説明・規約・支払い方法は購入LPと利用規約にある（2026-11-14 TAKASHI「鑑定ページのCTAは一つ、表と1つのボタンだけ」） */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenPremiumLP) {
+                      onOpenPremiumLP('monthly');
+                    } else {
+                      onSubscribe();
+                      setSubSuccess(true);
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    marginTop: '0.3rem',
+                    padding: '0.8rem 0.6rem',
+                    background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '9999px',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.9rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.03em',
+                    boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  プランを詳しく見る
+                </button>
               </div>
             )}
           </div>
@@ -3554,11 +3516,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       <><strong>お相手の保存が5人まで</strong>（ほかのお相手のトリセツも全部読める）</>
                     ]
                   : [
-                      <><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></>,
-                      <><strong>月次・年次運勢スケジュールの完全閲覧</strong></>,
-                      <><strong>お相手の保存上限が5人に拡大</strong>（無料会員2人 → 5人）</>,
-                      <><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></>,
-                      <><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></>
+                      <><strong>これからの14日間・月ごと・10年先までの流れ</strong></>,
+                      <><strong>今日の相性とLINEの送り方を毎日</strong>（毎朝の運勢メールも全文）</>,
+                      <><strong>お相手全員のトリセツ・深層鑑定・6つの相性グラフ</strong></>,
+                      <><strong>お相手の保存が5人まで</strong>（無料会員は2人）</>,
+                      <><strong>月 ＆ 蓮へのチャット相談</strong>が回数を気にせずできる（無料は1日2回）</>,
+                      <><strong>月のかけら</strong>が毎月50個＋毎日5個（二人の相性100のお題を開く）</>
                     ]
                 ).map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>

@@ -9,6 +9,12 @@ import data from '../data/mbti-compat-page.json' with { type: 'json' };
 
 const TYPE_NAMES = data.types as Record<string, string>;
 
+/** ベスト10の一覧だけで使う短い呼び名（スマホで1行に収めるため。TAKASHI判断 2026-11-13「エンターテイナーはエンターでよい」） */
+const SHORT_NAMES: Record<string, string> = { ESFP: 'エンター' };
+const shortName = (t: string) => SHORT_NAMES[t] || TYPE_NAMES[t];
+/** 「97／点」「ENFP（運動家）」の途中で改行させない */
+const nowrap: React.CSSProperties = { whiteSpace: 'nowrap' };
+
 const bandOf = (score: number) => data.bands.find((b) => score >= b.min)?.label || '';
 
 /** 点数の色（高いほど金色が濃い） */
@@ -92,9 +98,11 @@ export const ToolCompatView: React.FC = () => {
             <p style={{ ...textStyle, margin: 0, fontSize: '0.78rem' }}>16タイプだけの点数です。鑑定では、生年月日から見る四柱推命・九星気学の相性も足して出します。</p>
             <a
               href={`/compatibility/${me.toLowerCase()}-${opp.toLowerCase()}`}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 100%)', color: '#000', padding: '0.8rem 1rem', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.95rem' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', background: 'linear-gradient(135deg, #fef08a 0%, #e2c074 100%)', color: '#000', padding: '0.8rem 0.75rem', borderRadius: '30px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.95rem' }}
             >
-              生年月日を入れて、二人の相性を詳しく占う <ChevronRight size={16} />
+              {/* 文はそのまま、スマホでは文字を小さくして1行に収める（「詳しく／占う」で改行していた。TAKASHI判断 2026-11-13） */}
+              <span style={{ whiteSpace: 'nowrap', fontSize: 'clamp(0.6rem, calc((100vw - 124px) / 20.5), 0.95rem)' }}>生年月日を入れて、二人の相性を詳しく占う</span>
+              <ChevronRight size={16} style={{ flexShrink: 0 }} />
             </a>
           </div>
         )}
@@ -105,7 +113,9 @@ export const ToolCompatView: React.FC = () => {
         <h2 className="font-serif gold-text" style={h2Style}>点数が高い組み合わせ ベスト10</h2>
         <ol style={{ ...textStyle, paddingLeft: '1.4rem', margin: 0 }}>
           {topPairs.map((p) => (
-            <li key={p.a + p.b}>{p.a}（{TYPE_NAMES[p.a]}）× {p.b}（{TYPE_NAMES[p.b]}）：<strong style={{ color: '#f2e2b3' }}>{p.score}点</strong></li>
+            <li key={p.a + p.b}>
+              <span style={nowrap}>{p.a}（{shortName(p.a)}）</span>× <span style={nowrap}>{p.b}（{shortName(p.b)}）</span>：<strong style={{ ...nowrap, color: '#f2e2b3' }}>{p.score}点</strong>
+            </li>
           ))}
         </ol>
       </section>

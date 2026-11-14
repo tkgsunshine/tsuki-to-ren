@@ -385,3 +385,25 @@ test('a guest account buying again gets its earlier purchase email filled in (on
   await checkout(buy({ oppBirth: '1999-09-09' }), mockRes(), { auth: guestAuth, db: mockDb(), stripe: stripe2, pairPriceId: 'price_pair', live: true });
   assert.equal(stripe2.params.customer_email, undefined);
 });
+
+test('引き継ぎ: 自動アカウントで使った月のかけら（開けたお題・シングルの残り・10個を配った印）も本人へ移る', async () => {
+  const { default: drops } = await import('../api/_lib/couple-drops.js');
+  const db = mockDb();
+  const session = paidSession({ id: 'cs_tr_000000000003', client_reference_id: null, metadata: { kind: 'pair', partner: KEY, guest: '1' }, customer_details: { email: 'kakera@example.com' } });
+  const account = await resolveCheckoutAccount(db, guestAuth(), session);
+  await recordPairPurchase(db, session, Date.now(), account.uid);
+  db.runTransaction = async (fn) => fn({ get: (r) => r.get(), set: (r, data) => r.set(data, { merge: true }) });
+  const ask = async (uid, today, body = {}) => {
+    const res = mockRes();
+    const auth = { verifyIdToken: async () => ({ uid, email: uid === account.uid ? undefined : 'kakera@example.com', email_verified: true }) };
+    await drops({ method: 'POST', headers: { authorization: 'Bearer t' }, body: { oppBirth: BIRTH, ...body } }, res, { auth, db, live: true, today, premiumEmails: '' });
+    return res.body;
+  };
+  assert.equal((await ask(account.uid, '2026-11-14')).balance, 12);
+  for (let no = 1; no <= 5; no++) await ask(account.uid, '2026-11-14', { open: { kind: 'reading', no } });
+  await transferGuestPurchases(db, { uid: 'u_kakera', email: 'kakera@example.com' }, { stripe: { subscriptions: { update: async () => {} } } });
+  const b = await ask('u_kakera', '2026-11-14');
+  assert.deepEqual(b.opened.reading, [1, 2, 3, 4, 5]);
+  assert.equal(b.bonus, 7); // 10個がもう一度配られない
+  assert.equal(db.docs[`coupleDrops/${account.uid}`], undefined);
+});
