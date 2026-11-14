@@ -3172,7 +3172,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     borderRadius: '20px',
                     border: '1px solid rgba(226, 192, 116, 0.2)'
                   }}>
-                    ✦ 続きを読めるプラン ✦
+                    ✦ 有料プラン ✦
                   </span>
                   <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>
                     {canBuyPair ? '2つのプランの違い' : 'プレミアム（月額980円）でできること'}
