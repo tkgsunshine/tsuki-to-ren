@@ -5,6 +5,8 @@ import { getPillarWithReading } from '../utils/fortuneEngine';
 import { getAstrologyNameReading } from '../utils/astrologyNameReading';
 
 // 守護獣の名前（例: 辛牛（かのとうし））。鑑定書・恋の暦と同じ書き方にそろえる（2026-11-14 TAKASHI。前は日柱の「辛丑」を出していた）
+const SHOW_SOLO_TAB = false;
+
 const guardianWithReading = (name?: string) => {
   const core = String(name || '').replace(/👑[^👑]*👑\s*/u, '').trim();
   if (!core) return '';
@@ -604,7 +606,8 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         </div>
 
         {/* Tab Toggle Switch (only shown if in match mode) */}
-        {hasOpponent && (
+        {/* 「自分の運勢」タブは出さない（自分だけの鑑定は機能として無くしたため。2026-11-14 TAKASHI「シェアカードも無くしてOK」）。お相手ありは「二人の相性」だけ */}
+        {SHOW_SOLO_TAB && hasOpponent && (
           <div style={{
             display: 'flex',
             background: 'rgba(13, 18, 26, 0.8)',
