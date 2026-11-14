@@ -483,6 +483,8 @@ interface ResultViewProps {
   // 買い切り「お相手1人の深層鑑定」（¥680）。unlocked: このお相手を買った、today: 買ったのが今日（日本時間）
   pairUnlock?: PairUnlock;
   onBuyPair?: () => Promise<void> | void;
+  // 購入済みの方のログイン（未登録のときだけ、プランの説明の下に出す）
+  onOpenLogin?: () => void;
   onSubscribe: () => void;
   // 購入LPを開く。focus: 先に見せるプラン（買い切り ¥680 か 月額）
   onOpenPremiumLP?: (focus?: 'pair' | 'monthly') => void;
@@ -539,6 +541,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   partnerLock = null,
   pairUnlock = null,
   onBuyPair,
+  onOpenLogin,
   onSubscribe,
   onOpenPremiumLP,
   selectedChar,
@@ -3170,11 +3173,11 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 width: '100%',
                 boxSizing: 'border-box'
               }}>
+                {/* 2つのプランの違い（2026-11-14 実装の仕様に合わせて書き直し: 月額＝お相手全員・毎日、シングル＝このお相手だけ・ずっと） */}
                 <div>
                   <span style={{
                     fontSize: '0.6rem',
                     color: 'var(--color-gold)',
-                    textTransform: 'uppercase',
                     letterSpacing: '1px',
                     fontWeight: 'bold',
                     background: 'rgba(226, 192, 116, 0.1)',
@@ -3182,49 +3185,76 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     borderRadius: '20px',
                     border: '1px solid rgba(226, 192, 116, 0.2)'
                   }}>
-                    ✦ プレミアムプラン解放 ✦
+                    ✦ 続きを読めるプラン ✦
                   </span>
                   <h3 className="font-serif gold-text" style={{ fontSize: '0.92rem', fontWeight: 'bold', marginTop: '0.5rem', marginBottom: '0.35rem', lineHeight: '1.45', wordBreak: 'keep-all', overflowWrap: 'anywhere' }}>
-                    <span style={{ display: 'inline-block', maxWidth: '100%' }}>{san(oppNickname)}のトリセツ・</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>6軸の詳しい相性・</span><span style={{ display: 'inline-block', maxWidth: '100%' }}>未来予測をすべて解禁</span>
+                    {canBuyPair ? '2つのプランの違い' : 'プレミアム（月額980円）でできること'}
                   </h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
                     <CharHeadingIcon char="月" size={34} />
                     <p style={{ fontSize: '0.72rem', color: '#e2d9ee', lineHeight: '1.6', margin: 0 }}>
-                      月額980円で、取扱説明書の8つの項目も、6軸の詳しい相性も、これからの運勢の流れも、私がいつでもお見せしますね。
+                      {canBuyPair
+                        ? `毎日の相性やこれからの流れまで見守るならプレミアム、${partnerCall}の鑑定だけ読みたいならシングルプランがおすすめです。`
+                        : '気になる人みんなの鑑定と、毎日の相性・これからの流れを、私がいつでもお見せしますね。'}
                     </p>
                   </div>
                 </div>
 
-                {/* Comprehensive Premium Benefits list */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>トリセツ・深層鑑定・6つの相性グラフ（誰でも無制限）</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>今日の相性とLINEの送り方を毎日</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>これからの14日間・月ごと・年ごとの流れ</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>毎朝の運勢メールが全文で届く</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>お相手の保存が5人まで（無料会員は2人）</strong></span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
-                    <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
-                    <span><strong>月 ＆ 蓮へのチャット相談が無制限</strong></span>
-                  </div>
-                </div>
+                {(() => {
+                  // [項目, プレミアム, シングル]。数字は実装に合わせる（保存数 App.tsx partnerLimit、かけら api/_lib/couple-drops.js、チャット api/_lib/chat-limit.js）
+                  const rows: [string, string, string][] = [
+                    ['トリセツ・深層鑑定・相性グラフ', 'お相手全員', `${partnerCall}だけ・ずっと`],
+                    ['今日の相性・LINEの送り方', '毎日', '買った日だけ'],
+                    ['14日間・月ごと・10年先の流れ', '○', '－'],
+                    ['毎朝の運勢メール', '毎日全文', '買った日だけ全文'],
+                    ['月のかけら（※）', '毎月50個＋毎日5個', '10個＋毎日2個'],
+                    ['月 ＆ 蓮へのチャット相談', '回数を気にせず', '1日2回'],
+                    ['お相手の保存', '5人まで', `2人＋${partnerCall}`],
+                  ];
+                  const cell: React.CSSProperties = { padding: '0.45rem 0.3rem', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: '0.68rem', lineHeight: 1.45, verticalAlign: 'middle' };
+                  const head: React.CSSProperties = { padding: '0.4rem 0.3rem', fontSize: '0.68rem', fontWeight: 'bold', lineHeight: 1.35 };
+                  if (!canBuyPair) {
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', textAlign: 'left', background: 'rgba(255,255,255,0.015)', padding: '0.75rem 0.85rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        {rows.map(([label, p]) => (
+                          <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8', lineHeight: 1.5 }}>
+                            <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>✔</span>
+                            <span><strong>{label.replace('（※）', '')}</strong>{p !== '○' && <>：{p}</>}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+                  return (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', textAlign: 'center', background: 'rgba(255,255,255,0.015)', borderRadius: '10px', overflow: 'hidden' }}>
+                      <colgroup><col style={{ width: '36%' }} /><col style={{ width: '33%' }} /><col style={{ width: '31%' }} /></colgroup>
+                      <thead>
+                        <tr>
+                          <th style={head}></th>
+                          <th style={{ ...head, color: '#1a1230', background: 'linear-gradient(135deg, #e9cf8f, #d4af37)' }}>プレミアム<br /><span style={{ fontWeight: 'normal' }}>月額980円</span></th>
+                          <th style={{ ...head, color: '#f2e2b3', background: 'rgba(226, 192, 116, 0.08)' }}>シングル<br /><span style={{ fontWeight: 'normal' }}>{PAIR_PRICE_LABEL}・1回払い</span></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map(([label, p, s]) => (
+                          <tr key={label}>
+                            <th scope="row" style={{ ...cell, textAlign: 'left', fontWeight: 'normal', color: '#cfc8bb' }}>{label}</th>
+                            <td style={{ ...cell, color: '#f2e2b3', fontWeight: 'bold', background: 'rgba(226, 192, 116, 0.05)' }}>{p}</td>
+                            <td style={{ ...cell, color: s === '－' ? '#7d776c' : '#e8e3d8' }}>{s}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr><td colSpan={3} style={{ ...cell, textAlign: 'left', fontSize: '0.62rem', color: '#a9a294' }}>※ 月のかけら1つで「二人の相性100」のお題が1つ開きます</td></tr>
+                      </tfoot>
+                    </table>
+                  );
+                })()}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.3rem' }}>
-                  <PremiumUnlockButton
+                {/* ボタンは購入LPの2つのボタン（PremiumLPModal.tsx renderPlanButtons）と同じ見た目・文言（2026-11-14 TAKASHI「CTAをLPと同様に」） */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', marginTop: '0.3rem' }}>
+                  <button
+                    type="button"
                     onClick={() => {
                       if (onOpenPremiumLP) {
                         onOpenPremiumLP('monthly');
@@ -3233,16 +3263,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         setSubSuccess(true);
                       }
                     }}
-                  />
-                </div>
-
-                {/* 買い切り: このお相手だけ、変わらない鑑定をずっと。買った日は今日の相性も全部 */}
-                {canBuyPair && (
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ fontSize: '0.74rem', color: '#e8e3d8', lineHeight: 1.6 }}>
-                      <strong style={{ color: '#f2e2b3' }}>{partnerCall}のことだけ知りたい方は</strong><br />
-                      トリセツ・深層鑑定・6つの相性グラフを、{PAIR_PRICE_LABEL}の1回払いでずっと読めます。買った日は、今日の相性とLINEの助言も全部見れます。
-                    </div>
+                    style={{
+                      width: '100%',
+                      padding: '0.8rem 1rem',
+                      background: 'linear-gradient(90deg, #b07d2b 0%, #f2e2b3 25%, #e2c074 50%, #f2e2b3 75%, #b07d2b 100%)',
+                      color: '#000',
+                      border: 'none',
+                      borderRadius: '9999px',
+                      fontSize: '0.9rem',
+                      fontWeight: 800,
+                      letterSpacing: '0.03em',
+                      boxShadow: '0 6px 18px rgba(217, 164, 65, 0.45)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    誰でも無制限に鑑定を見る（980円/月）
+                  </button>
+                  {canBuyPair && (
                     <button
                       type="button"
                       onClick={handleBuyPair}
@@ -3250,20 +3287,32 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       style={{
                         width: '100%',
                         padding: '0.8rem 1rem',
-                        borderRadius: '999px',
-                        border: '1px solid rgba(226, 192, 116, 0.55)',
-                        background: 'rgba(226, 192, 116, 0.06)',
+                        borderRadius: '9999px',
+                        border: '1.5px solid rgba(226, 192, 116, 0.6)',
+                        background: 'rgba(226, 192, 116, 0.07)',
                         color: '#f2e2b3',
-                        fontSize: '0.85rem',
+                        fontSize: '0.88rem',
                         fontWeight: 'bold',
                         cursor: buyingPair ? 'wait' : 'pointer',
                         opacity: buyingPair ? 0.7 : 1
                       }}
                     >
-                      {buyingPair ? '決済画面を開いています…' : `${PAIR_PRICE_LABEL}/買い切りで続きを見る`}
+                      {buyingPair ? '決済画面へ移動しています...' : `${partnerCall}の鑑定だけ見る（680円/買い切り）`}
                     </button>
+                  )}
+                </div>
+
+                {canBuyPair && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ fontSize: '0.64rem', color: '#a9a294', lineHeight: 1.5 }}>
-                      お相手は生年月日で決まります。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
+                      シングルはお相手の生年月日ごとの購入です。会員登録なしでも購入できます（決済のときのメールでアカウントをお作りします）。
+                      {!isRegistered && onOpenLogin && (
+                        <>
+                          <br />購入済みの方は
+                          <button type="button" onClick={onOpenLogin} style={{ background: 'none', border: 'none', padding: '0 0.15rem', color: '#f2e2b3', textDecoration: 'underline', fontSize: 'inherit', cursor: 'pointer' }}>購入時のメールでログイン</button>
+                          してください。
+                        </>
+                      )}
                     </div>
                     <PurchaseTerms plans={['pair']} />
                   </div>
@@ -3554,11 +3603,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       <><strong>お相手の保存が5人まで</strong>（ほかのお相手のトリセツも全部読める）</>
                     ]
                   : [
-                      <><strong>お相手の取扱説明書（トリセツ）＆深層鑑定の全解禁</strong></>,
-                      <><strong>月次・年次運勢スケジュールの完全閲覧</strong></>,
-                      <><strong>お相手の保存上限が5人に拡大</strong>（無料会員2人 → 5人）</>,
-                      <><strong>月 ＆ 蓮へのチャット相談が無制限・全解放</strong></>,
-                      <><strong>本日の運気の波・LINE吉時間を毎日お届け</strong></>
+                      <><strong>これからの14日間・月ごと・10年先までの流れ</strong></>,
+                      <><strong>今日の相性とLINEの送り方を毎日</strong>（毎朝の運勢メールも全文）</>,
+                      <><strong>お相手全員のトリセツ・深層鑑定・6つの相性グラフ</strong></>,
+                      <><strong>お相手の保存が5人まで</strong>（無料会員は2人）</>,
+                      <><strong>月 ＆ 蓮へのチャット相談</strong>が回数を気にせずできる（無料は1日2回）</>,
+                      <><strong>月のかけら</strong>が毎月50個＋毎日5個（二人の相性100のお題を開く）</>
                     ]
                 ).map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.72rem', color: '#e8e3d8' }}>
