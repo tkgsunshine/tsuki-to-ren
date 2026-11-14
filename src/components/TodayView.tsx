@@ -90,20 +90,27 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
   }, [selectedChar, setSelectedChar]);
   // 恋の暦の先の日を開けるための月のかけら（お相手ごと。自分だけのときは自分の誕生日で数える）
   const dropKey = (hasOpponent && input?.opponentBirth) || input?.myBirth || '';
-  const [kakera, setKakera] = useState<{ key: string; balance: number | null; days: string[] }>({ key: '', balance: null, days: [] });
+  // note: guest＝ログインしていない（端末だけで数える未登録の3個は、恋の暦では使えない）／failed＝読めなかった
+  const [kakera, setKakera] = useState<{ key: string; balance: number | null; days: string[]; note?: 'guest' | 'failed' }>({ key: '', balance: null, days: [] });
   useEffect(() => {
     if (!dropKey) return;
     let alive = true;
     fetchCoupleDrops(dropKey).then(({ drops }) => {
-      if (alive) setKakera({ key: dropKey, balance: drops ? drops.balance : null, days: drops?.opened.days || [] });
+      if (!alive) return;
+      if (!drops) setKakera({ key: dropKey, balance: null, days: [], note: 'failed' });
+      else if (drops.guest) setKakera({ key: dropKey, balance: null, days: [], note: 'guest' });
+      else setKakera({ key: dropKey, balance: drops.balance, days: drops.opened.days || [] });
     });
     return () => { alive = false; };
   }, [dropKey]);
   const openedDays = useMemo(() => (kakera.key === dropKey ? kakera.days : []), [kakera, dropKey]);
-  const openDay = async (iso: string): Promise<'ok' | 'no_drops' | 'failed'> => {
-    const { drops, error } = await openKoyomiDay(dropKey, iso);
-    if (drops) setKakera({ key: dropKey, balance: drops.balance, days: drops.opened.days || [] });
-    return error === 'no_drops' ? 'no_drops' : drops && !error ? 'ok' : 'failed';
+  const openDay = async (iso: string): Promise<'ok' | 'no_drops' | 'failed' | 'premium'> => {
+    const { drops, error, reason } = await openKoyomiDay(dropKey, iso) as Awaited<ReturnType<typeof openKoyomiDay>> & { reason?: string };
+    if (drops && !drops.guest) setKakera({ key: dropKey, balance: drops.balance, days: drops.opened.days || [] });
+    if (error === 'no_drops') return 'no_drops';
+    // サーバーで月額会員と確認できなかった（開発用の「会員ステータス」で有料にしただけ、など）
+    if (String(reason || '').startsWith('403')) return 'premium';
+    return drops && !error ? 'ok' : 'failed';
   };
 
   // 前月・今月・翌月の毎日の点数（カレンダー用。今日は表示中の点数そのもの）
@@ -233,6 +240,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         luckTitle={result.dailyLuckTitle}
         specials={[next.pair, next.solo].filter((n): n is NextDay => Boolean(n))}
         kakera={kakera.key === dropKey ? kakera.balance : null}
+        kakeraNote={kakera.key === dropKey ? kakera.note : undefined}
         monthly={result.monthlyPreviews}
         onOpenDay={dropKey ? openDay : undefined}
       />
@@ -473,7 +481,8 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
     <section style={{ ...card, border: '1px solid rgba(226,192,116,0.45)' }}>
       <h3 className="font-serif" style={h3}>今日の一歩</h3>
 
-      {/* 片思い／付き合っている */}
+      {/* 片思い／付き合っている（上にかんたんな案内。2026-11-14 TAKASHI） */}
+      <p style={{ ...sub, color: '#d8d2c6' }}>今の二人の関係を選ぶと、それに合わせた今日の一歩をお届けします。</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
         {([['crush', '片思い中'], ['couple', '付き合っている']] as const).map(([m, label]) => (
           <button key={m} type="button" aria-pressed={journey.mode === m} onClick={() => setMode(m)} style={segBtn(journey.mode === m)}>{label}</button>
@@ -482,7 +491,7 @@ function StepCard({ journey, setJourney, pt, now, oppLabel, selectedChar, saved,
 
       {/* 道のり（タップで今の段階を選ぶ） */}
       <div>
-        <p style={{ ...sub, marginBottom: '0.35rem' }}>二人の道のり（今いるところをタップ）{journey.mode === 'couple' ? '　ゴールは結婚' : ''}</p>
+        <p style={{ ...sub, marginBottom: '0.35rem' }}>二人の現在地は？{journey.mode === 'couple' ? '　ゴールは結婚' : ''}</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '0.15rem', position: 'relative' }}>
           <span aria-hidden="true" style={{ position: 'absolute', top: 9, left: '10%', right: '10%', height: 2, background: 'rgba(226,192,116,0.25)' }} />
           {stages.map((label, i) => {
@@ -585,12 +594,13 @@ const SCALE_STOPS: [number, number, number][] = [[34, 42, 104], [116, 74, 196], 
 // 各色の位置（0＝最低点〜1＝最高点）。上位およそ2割がはっきり金になるよう、金を手前に置く（2026-11-12 TAKASHI「地味すぎる、90点でも薄い」）
 const SCALE_POS = [0, 0.5, 0.8];
 
-function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials, kakera, onOpenDay, monthly = [] }: {
+function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials, kakera, kakeraNote, onOpenDay, monthly = [] }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
   months: CalMonth[]; luckTitle?: string; specials: NextDay[];
   /** いま使える月のかけら（読めないときは null） */
   kakera?: number | null;
-  onOpenDay?: (iso: string) => Promise<'ok' | 'no_drops' | 'failed'>;
+  kakeraNote?: 'guest' | 'failed';
+  onOpenDay?: (iso: string) => Promise<'ok' | 'no_drops' | 'failed' | 'premium'>;
   /** 月ごとの運気（鑑定書の「月次運勢スケジュール」と同じもの。今月から3か月） */
   monthly?: FortuneResult['monthlyPreviews'];
 }) {
@@ -598,7 +608,10 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
   const [ask, setAsk] = useState<{ iso: string; label: string } | null>(null);
   // その月の運気の説明（開閉式・最初は閉じる。2026-11-14 TAKASHI）
   const [luckOpen, setLuckOpen] = useState(false);
-  const [asking, setAsking] = useState<'idle' | 'busy' | 'no_drops' | 'failed'>('idle');
+  const [asking, setAsking] = useState<'idle' | 'busy' | 'no_drops' | 'failed' | 'premium'>('idle');
+  // お相手を切り替えたら（暦の中身が変わったら）、開きかけの確認は閉じる（前のお相手の日を開けないように）
+  useEffect(() => { setAsk(null); setAsking('idle'); }, [months]);
+  const cannot = kakeraNote === 'guest' || (typeof kakera === 'number' && kakera < DAY_COST);
   const confirmOpen = async () => {
     if (!ask || !onOpenDay || asking === 'busy') return;
     setAsking('busy');
@@ -664,17 +677,17 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
         const mf = mo.before ? null : monthly.find((x) => x.month === `${mo.month + 1}月`);
         return (
         <div key={`${mo.year}-${mo.month}`} style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.7rem', borderTop: '1px solid rgba(226,192,116,0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem 0.5rem', flexWrap: 'wrap' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
               <button type="button" aria-label="前の月" disabled={monthIdx === 0} onClick={() => { setMonthIdx((i) => Math.max(0, i - 1)); setAsk(null); }} style={monthArrow(monthIdx === 0)}>‹</button>
               <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.25 }}>
-                <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3' }}>{mo.year !== now.getFullYear() ? `${mo.year}年` : ''}{mo.month + 1}月の恋の暦</span>
+                <span className="font-serif" style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#f2e2b3', whiteSpace: 'nowrap' }}>{mo.year !== now.getFullYear() ? `${mo.year}年` : ''}{mo.month + 1}月の恋の暦</span>
                 {/* その月の運気（鑑定書の月次運勢スケジュールと同じ。2026-11-14 TAKASHI「満ちる月 (絶好調)は11月の恋の暦の部分に表示」）。先月は出さない */}
-                {mf && <span className="font-serif" style={{ fontSize: '0.7rem', fontWeight: 'bold', color: GOLD }}>{mf.label}</span>}
+                {mf && <span className="font-serif" style={{ fontSize: '0.7rem', fontWeight: 'bold', color: GOLD, whiteSpace: 'nowrap' }}>{mf.label}</span>}
               </span>
               <button type="button" aria-label="次の月" disabled={monthIdx >= months.length - 1} onClick={() => { setMonthIdx((i) => Math.min(months.length - 1, i + 1)); setAsk(null); }} style={monthArrow(monthIdx >= months.length - 1)}>›</button>
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.64rem', color: '#a9a293', flexShrink: 0 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.64rem', color: '#a9a293', flexShrink: 0, marginLeft: 'auto' }}>
               低い
               <span style={{ width: 54, height: 9, borderRadius: 3, background: `linear-gradient(90deg, ${SCALE_STOPS.map((c, k) => `rgb(${c.join(',')}) ${SCALE_POS[k] * 100}%`).join(', ')})` }} />
               高い
@@ -743,16 +756,17 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
                 {ask.label}の点数を、月のかけら{DAY_COST}個で開けますか？
               </p>
               <p style={{ margin: 0, fontSize: '0.7rem', color: '#b9b2a4', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <KakeraGem size={13} glow={false} /> いま持っているかけら：{kakera ?? '—'}個
+                <KakeraGem size={13} glow={false} /> いま持っているかけら：{kakeraNote === 'guest' ? '—' : `${kakera ?? '—'}個`}
               </p>
               <p style={{ margin: 0, fontSize: '0.68rem', color: '#a9a293', lineHeight: 1.5 }}>一度開けた日は、その日が来るまでずっと見られます。</p>
               {asking === 'no_drops' && <p style={{ margin: 0, fontSize: '0.72rem', color: '#f0b4a6', lineHeight: 1.5 }}>かけらが足りません。かけらは毎日増えます。</p>}
+              {(kakeraNote === 'guest' || asking === 'premium') && <p style={{ margin: 0, fontSize: '0.72rem', color: '#f0b4a6', lineHeight: 1.5 }}>月額会員のアカウントでログインすると、かけらで開けられます。</p>}
               {asking === 'failed' && <p style={{ margin: 0, fontSize: '0.72rem', color: '#f0b4a6', lineHeight: 1.5 }}>うまく開けられませんでした。少し待ってから、もう一度お試しください。</p>}
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button type="button" onClick={() => { setAsk(null); setAsking('idle'); }} style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.18)', background: 'transparent', color: '#d8d2c6', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}>やめる</button>
-                <button type="button" onClick={confirmOpen} disabled={asking === 'busy' || (kakera !== null && kakera !== undefined && kakera < DAY_COST)}
+                <button type="button" onClick={confirmOpen} disabled={asking === 'busy' || cannot}
                   style={{ flex: 2, padding: '0.6rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(90deg, #ecc87a 0%, #d9a441 100%)', color: '#1a1230', fontSize: '0.82rem', fontWeight: 900, cursor: 'pointer',
-                    opacity: asking === 'busy' || (typeof kakera === 'number' && kakera < DAY_COST) ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
+                    opacity: asking === 'busy' || cannot ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
                   <KakeraGem size={15} glow={false} /> {asking === 'busy' ? '開けています…' : `かけら${DAY_COST}個で開ける`}
                 </button>
               </div>
