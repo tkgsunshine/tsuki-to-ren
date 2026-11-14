@@ -11,11 +11,11 @@ export const planCompareRows = (name: string): PlanRow[] => {
     { label: '二人の相性100（本格鑑定・MBTIランキング）', monthly: '誰でも無制限', pair: `${name}だけ` },
     { label: '惹かれるファッション・ドキッとさせる仕草', monthly: '誰でも無制限', pair: `${name}だけ` },
     { label: '2人の最高シンクロ日（日付）', monthly: '誰でも無制限', pair: `${name}だけ` },
-    { label: '今日の相性と、本日のLINEの送り方', monthly: '毎日', pair: `本日分(${todayJst})` },
+    { label: '今日の相性と、本日のLINEの送り方', monthly: '毎日', pair: `本日分(${todayJst})だけ` },
     { label: 'あなたの恋愛運MAX日（日付）', monthly: '○', pair: '○' },
     { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', monthly: '○', pair: '－' },
     // 月のかけらは別の行に（2026-11-13 TAKASHI「かけらについては別行にして」「10年先の下」）
-    { label: '月のかけら（1個で1つ開ける）', monthly: '毎月50個\n＋毎日5個', pair: '購入時10個\n＋毎日2個' },
+    { label: '月のかけら', monthly: '毎月50個\n＋毎日5個', pair: '購入時10個\n＋毎日2個' },
     { label: '月・蓮へのチャット相談', monthly: '無制限', pair: '1日2回' },
     { label: 'お相手の保存', monthly: '5人', pair: '2人' }
   ];
@@ -50,9 +50,6 @@ export const PlanCompareTable: React.FC<{ name: string; pairFirst?: boolean; sty
           </tr>
         ))}
       </tbody>
-      <tfoot>
-        <tr><td colSpan={3} style={{ ...cell, textAlign: 'left', fontSize: '0.62rem', color: '#a9a294' }}>※ チャット1日2回・保存2人は、無料会員なら誰でも使える分です（シングルプランで買ったお相手は2人の枠に数えません）。</td></tr>
-      </tfoot>
     </table>
   );
 };
