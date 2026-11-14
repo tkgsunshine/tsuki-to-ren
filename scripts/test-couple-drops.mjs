@@ -229,6 +229,15 @@ test('シングル＋月額: 月額の毎日の分を先に使い、シングル
   db.docs['premium/u1'] = { active: false, livemode: true };
   res = await callAs(db, '2026-11-13');
   assert.equal(res.body.balance, 12); // 無料2＋シングル10
+  assert.deepEqual(res.body.opened.rank, [3]); // シングルを買ったお相手は、月額のかけらで開けたお題も解約後に見える（2026-11-14 TAKASHI）
+  // ほかのお相手（シングルなし）で月額中に開けたお題は、解約後は見えない
+  const other = mockRes();
+  db.docs['premium/u1'] = { ...PREMIUM['premium/u1'] };
+  await drops(req({ oppBirth: '1995-03-03', open: { kind: 'rank', no: 4 } }), other, { auth, db, live: true, today: '2026-11-13', premiumEmails: '' });
+  db.docs['premium/u1'] = { active: false, livemode: true };
+  const after = mockRes();
+  await drops(req({ oppBirth: '1995-03-03' }), after, { auth, db, live: true, today: '2026-11-14', premiumEmails: '' });
+  assert.deepEqual(after.body.opened.rank, []);
 });
 
 test('同じ購入の記録が何度読まれても、シングルの10個は1回だけ。別のお相手には出ない', async () => {
