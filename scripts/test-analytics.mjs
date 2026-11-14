@@ -520,3 +520,16 @@ test('track: a sign-up is counted with its method', async () => {
   assert.deepEqual(await counted([{ providerId: 'password' }], 'a@example.com'), ['signup_email']);
   assert.deepEqual(await counted([], null), ['signup_other']);
 });
+
+test('月のかけら（/api/track の kakera）: 未登録の3個・使ったお題・使い切り。おかしな値は断る', async () => {
+  const { clientDropKeys } = await import('../api/_lib/analytics.js');
+  assert.deepEqual(clientDropKeys({ ev: 'grant' }), { grant_g: 3 });
+  assert.deepEqual(clientDropKeys({ ev: 'open', kind: 'rank', no: 12, first: '1' }), { use_g_rank: 1, topic_r_12: 1, users_g: 1 });
+  assert.deepEqual(clientDropKeys({ ev: 'open', kind: 'reading', no: 3 }), { use_g_reading: 1, topic_g_3: 1 });
+  assert.deepEqual(clientDropKeys({ ev: 'short', seg: 'f' }), { short_f: 1 });
+  assert.deepEqual(clientDropKeys({ ev: 'short_cta', seg: 'g' }), { shortcta_g: 1 });
+  assert.equal(clientDropKeys({ ev: 'open', kind: 'rank', no: 99 }), null);
+  assert.equal(clientDropKeys({ ev: 'open', kind: 'x', no: 1 }), null);
+  assert.equal(clientDropKeys({ ev: 'short', seg: 'zz' }), null);
+  assert.equal(clientDropKeys({ ev: 'hack' }), null);
+});

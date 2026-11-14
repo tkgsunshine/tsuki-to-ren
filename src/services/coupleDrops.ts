@@ -1,4 +1,5 @@
 import { getFirebaseAuth } from './firebase';
+import { trackKakera, trackingOff } from './analytics';
 
 // 月のかけら（api/_lib/couple-drops.js）。「二人の相性100」のお題を1つずつ開ける。
 // 残高・開けたお題はサーバー（Firestore）だけが記録する。この端末は表示するだけ。
@@ -37,6 +38,9 @@ const readGuest = (): GuestRec => {
   return { balance: GUEST_DROPS, opened: {} };
 };
 const guestPost = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops | null; error?: 'no_drops' | 'failed' }> => {
+  // 初めて3個を配った（この端末に記録がまだない）。保存できない端末は数えない（毎回数えてしまうため）
+  let fresh = false;
+  try { fresh = localStorage.getItem(GUEST_KEY) === null; } catch { fresh = false; }
   const rec = readGuest();
   const birth = String(body.oppBirth || '');
   const o = rec.opened[birth] || { rank: [], reading: [] };
@@ -44,9 +48,14 @@ const guestPost = async (body: Record<string, unknown>): Promise<{ drops: Couple
   let error: 'no_drops' | undefined;
   if (open && !o[open.kind].includes(open.no)) {
     if (rec.balance < 1) error = 'no_drops';
-    else { rec.balance -= 1; o[open.kind] = [...o[open.kind], open.no]; rec.opened[birth] = o; }
+    else {
+      const first = rec.balance === GUEST_DROPS;
+      rec.balance -= 1; o[open.kind] = [...o[open.kind], open.no]; rec.opened[birth] = o;
+      trackKakera('open', { kind: open.kind, no: open.no, first });
+    }
   }
   try { localStorage.setItem(GUEST_KEY, JSON.stringify(rec)); } catch { /* ignore */ }
+  if (fresh) trackKakera('grant');
   const drops: CoupleDrops = { premium: false, guest: true, balance: rec.balance, cap: GUEST_DROPS, daily: 0, granted: 0, opened: { rank: [...o.rank], reading: [...o.reading] } };
   return { drops, ...(error ? { error } : {}) };
 };
@@ -64,7 +73,8 @@ const post = async (body: Record<string, unknown>): Promise<{ drops: CoupleDrops
     const res = await fetch('/api/stripe/drops', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await user.getIdToken()}` },
-      body: JSON.stringify(body)
+      // nt: この端末は運営の端末（計測しない）。サーバーはこの端末の分を /admin の数字に入れない
+      body: JSON.stringify(trackingOff() ? { ...body, nt: '1' } : body)
     });
     const data = await res.json().catch(() => null);
     // 読めなかった理由（HTTPの番号とサーバーの文）を画面に出して、原因を追えるようにする

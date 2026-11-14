@@ -3,6 +3,7 @@ import { PREMIUM, isLiveKey, parseBody, verifyUser } from './stripe.js';
 import { isOverrideEmail } from './premium-override.js';
 import { isPremiumRecord, jstToday, partnerKey } from './partner-days.js';
 import { findPairUnlock } from './pair-unlock.js';
+import { dropTopicKeys, recordDrops } from './analytics.js';
 
 // 「月のかけら」（2026-11-12 TAKASHI決定）: 「二人の相性100」のお題を1つずつ開けるためのかけら。
 // ・月額プレミアム: 支払い日（新しい支払い期間に入った最初の表示）に50個、毎日5個。貯められるのは100個まで
@@ -39,12 +40,13 @@ export function refill(rec, { premium, periodEnd }, today) {
   // 今日の分も含めて、前回から何日分か（初めては今日の1日分）
   const days = last ? Math.max(0, dayNum(today) - dayNum(last)) : 1;
   const before = balance;
+  let payday = 0;
   // 前回は月額でなかった（無料・未記録）なら、月額の毎日の分は今日の1日分だけ（無料だった日の分までさかのぼって足さない）
   const wasPremium = rec?.tier === 'p';
   if (premium) {
     // 支払い日: 新しい支払い期間（期間の終わりの日時で見分ける）に入って最初の表示で50個
     const pk = periodEnd || 'unknown';
-    if (!periods.includes(pk)) { balance = Math.min(PREMIUM_CAP, balance + PREMIUM_PAYDAY); periods.push(pk); }
+    if (!periods.includes(pk)) { balance = Math.min(PREMIUM_CAP, balance + PREMIUM_PAYDAY); periods.push(pk); payday = balance - before; }
     // 無料だった日に月額になったとき（同じ日の2回目の表示）も、その日の5個を足す（初めて月額で開いた人と同じ55個にそろえる）
     if (days > 0 || (last && !wasPremium)) balance = Math.min(PREMIUM_CAP, balance + (wasPremium ? days : 1) * PREMIUM_DAILY);
   } else if (days > 0 || wasPremium) {
@@ -52,7 +54,38 @@ export function refill(rec, { premium, periodEnd }, today) {
     // 月額が終わった日（同じ日の2回目の表示）も、ここで2個までに戻す（月額の残りを無料のかけらとして使えないように）
     balance = Math.max(Math.min(balance, FREE_CAP), FREE_DAILY);
   }
-  return { balance, lastDaily: days > 0 || !last ? today : last, periods, granted: balance - before, tier: premium ? 'p' : 'f' };
+  return { balance, lastDaily: days > 0 || !last ? today : last, periods, granted: balance - before, payday, tier: premium ? 'p' : 'f' };
+}
+
+// 計測から外すアカウント: 運営（ADMIN_EMAILS、+別名も）と、管理画面で「自分」にしたアカウント（adminSettings/owners）。
+// api/admin.js と同じ考え方（あちらを読み込むと、この関数にメール送信などが入るので、ここに小さく持つ）
+const baseEmail = (email) => String(email || '').toLowerCase().replace(/\+[^@]*(?=@)/, '');
+async function isCounted(db, user, { override, noTrack, deps }) {
+  const env = deps.vercelEnv ?? process.env.VERCEL_ENV;
+  if (env && env !== 'production') return false; // Preview の確認操作を本番の数字に入れない
+  if (noTrack || override) return false; // 運営の端末（hasu_no_track）・支払いなしで月額扱いの運営アカウント
+  const admins = String(deps.adminEmails ?? process.env.ADMIN_EMAILS ?? '').split(',').map((e) => baseEmail(e.trim())).filter(Boolean);
+  if (user.email && admins.includes(baseEmail(user.email))) return false;
+  const owners = (await db.collection('adminSettings').doc('owners').get()).data()?.uids || [];
+  return !owners.includes(user.uid);
+}
+
+/**
+ * 1回の呼び出しで byDrops に足す数（_lib/analytics.js の recordDrops のキー）。
+ * seg = この人: p 月額 / s シングルを買った人（このお相手） / f 無料会員
+ */
+export function dropCounts({ r, bonusGranted, seg, used, firstUse }) {
+  const out = {};
+  const add = (k, n) => { if (n > 0) out[k] = (out[k] || 0) + n; };
+  if (seg === 'p') { add('grant_payday', r.payday || 0); add('grant_p', r.granted - (r.payday || 0)); }
+  else add('grant_f', r.granted);
+  if (bonusGranted) add('grant_s', PAIR_BONUS);
+  if (used) {
+    add(`use_${used.pool}_${used.kind}`, 1);
+    for (const k of dropTopicKeys(used.kind, used.no)) add(k, 1);
+    if (firstUse) add(`users_${seg}`, 1);
+  }
+  return out;
 }
 
 /**
@@ -153,6 +186,7 @@ export default async function handler(req, res, deps = {}) {
       if (pair?.sessionId && grantedFor !== pair.sessionId) { bonus += PAIR_BONUS; bonusGranted = true; }
       const bonusBefore = bonus;
       let openedNow = false;
+      let used = null;
       let error = null;
       if (open) {
         const vis = visibleOpened(o, premium || keepAll);
@@ -168,6 +202,7 @@ export default async function handler(req, res, deps = {}) {
             const field = `${open.kind === 'rank' ? 'r' : 'g'}${premium && !fromBonus && !keepAll ? 'p' : 'f'}`;
             o[field] = [...o[field], open.no];
             openedNow = true;
+            used = { kind: open.kind, no: open.no, pool: fromBonus ? 's' : premium ? 'p' : 'f' };
           }
         }
       }
@@ -177,11 +212,25 @@ export default async function handler(req, res, deps = {}) {
           balance: r.balance, lastDaily: r.lastDaily, periods: r.periods, tier: r.tier,
           ...(bonusGranted || bonus > 0 || rec?.bonus?.[key] ? { bonus: { [key]: bonus } } : {}),
           ...(bonusGranted ? { bonusFor: { [key]: pair.sessionId } } : {}),
-          opened: { [key]: o }, updatedAt: new Date().toISOString()
+          opened: { [key]: o },
+          // その日に初めて使った日（/admin の「使った人」を日ごとに1回だけ数える）
+          ...(openedNow ? { lastUse: today } : {}),
+          updatedAt: new Date().toISOString()
         }, { merge: true });
       }
-      return { r, o, openedNow, error, bonus, bonusGranted };
+      return { r, o, openedNow, error, bonus, bonusGranted, used, firstUse: openedNow && rec?.lastUse !== today };
     });
+
+    // 計測（/admin「月のかけら」）。失敗しても画面の答えは返す
+    try {
+      const seg = premium ? 'p' : pair?.sessionId ? 's' : 'f';
+      const counts = dropCounts({ ...out, seg });
+      if (Object.keys(counts).length && await isCounted(db, user, { override, noTrack: body.nt === '1', deps })) {
+        await (deps.recordDrops || recordDrops)(db, counts, today);
+      }
+    } catch (e) {
+      console.error('⚠️ Could not count the drops:', e?.message);
+    }
 
     const payload = {
       status: out.error ? 'error' : 'ok',

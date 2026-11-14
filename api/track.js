@@ -1,5 +1,5 @@
 import { getDb, getAdminAuth } from './_lib/firestore.js';
-import { ATTRIBUTION, BOT_RE, fortuneAttrKeys, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, MAIL_PAIR_VIEW_METRIC, MAIL_VIEW_METRIC, PAIR_VIEW_METRIC, REG_SUBMIT_PEOPLE_METRIC, REG_SUBMIT_RETURNING_METRIC, SIGNUP_METHODS, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeLpExit, normalizeLpLeave, normalizeRegPlace, normalizeSource, recordEvent } from './_lib/analytics.js';
+import { ATTRIBUTION, BOT_RE, clientDropKeys, fortuneAttrKeys, CLIENT_TYPES, FIRST_METRICS, FORTUNE_VIEW_METRIC, MAIL_PAIR_VIEW_METRIC, MAIL_VIEW_METRIC, PAIR_VIEW_METRIC, REG_SUBMIT_PEOPLE_METRIC, REG_SUBMIT_RETURNING_METRIC, SIGNUP_METHODS, jstDate, normalizeChannel, normalizeDevice, normalizeLanding, normalizeLpExit, normalizeLpLeave, normalizeRegPlace, normalizeSource, recordDrops, recordEvent } from './_lib/analytics.js';
 import { handleInquiry } from './_lib/inquiry.js';
 
 // Receives the site's own counters: a visit (once per browser session), a fortune (each time the form is submitted),
@@ -30,6 +30,18 @@ export default async function handler(req, res, deps = {}) {
   // （除外の印はURLごと、ADMIN_EMAILS は本番だけ）。確認の操作が本番の数字に混ざらないよう、本番以外は数えない
   const env = deps.vercelEnv ?? process.env.VERCEL_ENV;
   if (env && env !== 'production') return res.status(204).end();
+  // 月のかけら（未登録の端末のかけら・使い切ったとき）。流入元などは付けず、byDrops だけに数える
+  if (type === 'kakera') {
+    const keys = clientDropKeys(body);
+    if (!keys) return res.status(400).json({ status: 'error', message: 'Unknown kakera event' });
+    try {
+      await recordDrops(deps.db || getDb(), keys);
+      return res.status(204).end();
+    } catch (e) {
+      console.error('⚠️ Could not record the kakera event:', e?.message);
+      return res.status(500).json({ status: 'error', message: 'Could not record the event' });
+    }
+  }
   const source = normalizeSource(body.source);
   const landing = normalizeLanding(body.landing);
   const device = normalizeDevice(body.device);

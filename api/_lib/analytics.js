@@ -71,7 +71,7 @@ export const MAIL_PAIR_VIEW_METRIC = 'premiumViewsMailPair';
 // 鑑定した人（入力画面から鑑定した人だけ）の一部になっていない（2026-11-05）
 export const FORTUNE_VIEW_METRIC = 'premiumViewFortuneSessions';
 export const SALES_METRIC = 'salesYen'; // 本番の購入額（円、Stripe の amount_total）。月額は初回分のみ（更新の請求は入らない）
-export const CLIENT_TYPES = new Set(['visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'reg_error', 'auth_open', 'lock_view', 'lp_exit', 'lp_leave', 'ref_send']);
+export const CLIENT_TYPES = new Set(['kakera', 'visit', 'fortune', 'signup', 'share', 'premium_view', 'checkout', 'checkout_pair', 'tool_use', 'tool_cta', 'column_cta_mid', 'column_cta_end', 'reg_view', 'reg_click', 'reg_submit', 'reg_error', 'auth_open', 'lock_view', 'lp_exit', 'lp_leave', 'ref_send']);
 
 // 鑑定した人の属性（入力画面の「あなた」の性別・年代・MBTI）。生年月日は送らず、ブラウザで年代にしてから送る。
 // 訪問ごとの最初の鑑定（first='1'、fortuneSessions と同じ人数）だけ、日の書き込みの byFortuneAttr に g_*・a_*・m_* で数える（2026-11-10〜）
@@ -220,4 +220,39 @@ export async function countPair(db, { uid, sessionId, livemode, amount = 0, fall
   if (!(await markCounted(db, sessionId, uid))) return false;
   await recordEvent(db, { type: 'pair', ...(await purchaseAttribution(db, uid, fallback)), yen: Number(amount) || 0 });
   return true;
+}
+
+// 月のかけら（二人の相性100）の計測。日の書き込みの byDrops に数える（2026-11-14〜）。個人の記録は持たない。
+// ログイン中の会員の配った・使った分は _lib/couple-drops.js（サーバー）が数える。未登録の端末のかけら（3個）と、
+// 「使い切りました」が出た・そこから案内ボタンを押した、はブラウザから /api/track（type 'kakera'）で届く。
+// キー: grant_payday（月額の支払い日の50個）/ grant_p（月額の毎日）/ grant_f（無料会員の毎日）/ grant_s（シングルの10個）/ grant_g（未登録の3個）
+//       use_<分>_<rank|reading>（分: p 月額・f 無料会員の毎日・s シングルの分・g 未登録）、topic_r_<番号>・topic_g_<番号>（どのランキング・テーマか）
+//       users_<人>（その日に初めて使った人。人: p 月額・s シングルを買った人・f 無料会員・g 未登録）
+//       short_<人>（かけらが0で「使い切りました」が出た）、shortcta_<人>（そこから登録・購入の案内ボタンを押した）
+export const DROPS_SEGMENTS = new Set(['p', 's', 'f', 'g']);
+export const DROP_KINDS = new Set(['rank', 'reading']);
+export const GUEST_DROPS = 3;
+const DROP_TOPIC_MAX = 50;
+export const dropTopicKeys = (kind, no) => (DROP_KINDS.has(kind) && Number.isInteger(no) && no >= 1 && no <= DROP_TOPIC_MAX ? [`topic_${kind === 'rank' ? 'r' : 'g'}_${no}`] : []);
+
+/** /api/track の type 'kakera' → byDrops に足すキー（{キー: 数}）。おかしな値は null */
+export function clientDropKeys(body = {}) {
+  const ev = String(body.ev || '');
+  const seg = DROPS_SEGMENTS.has(String(body.seg)) ? String(body.seg) : null;
+  if (ev === 'short' || ev === 'short_cta') return seg ? { [`${ev === 'short' ? 'short' : 'shortcta'}_${seg}`]: 1 } : null;
+  if (ev === 'grant') return { grant_g: GUEST_DROPS };
+  if (ev === 'open') {
+    const no = Number(body.no);
+    const topic = dropTopicKeys(String(body.kind), no);
+    if (!topic.length) return null;
+    return { [`use_g_${body.kind}`]: 1, [topic[0]]: 1, ...(body.first === '1' ? { users_g: 1 } : {}) };
+  }
+  return null;
+}
+
+/** byDrops に足す（1回の書き込み）。counts が空なら何もしない */
+export async function recordDrops(db, counts, date = jstDate()) {
+  const entries = Object.entries(counts || {}).filter(([, n]) => Number(n) > 0);
+  if (!entries.length) return;
+  await db.collection(DAILY).doc(date).set({ date, byDrops: Object.fromEntries(entries.map(([k, n]) => [k, FieldValue.increment(Number(n))])) }, { merge: true });
 }

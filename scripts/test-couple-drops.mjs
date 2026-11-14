@@ -262,6 +262,56 @@ test('お相手ごとに開けた記録は別（同じ番号でも、別のお�
   assert.deepEqual(res.body.opened.rank, []);
 });
 
+// 計測（/admin「月のかけら」）: 何をいくつ配り、何に使ったか。運営・Preview・運営の端末は数えない
+const callCount = async (db, today, body = {}, extra = {}) => {
+  const got = [];
+  const res = mockRes();
+  await drops(req(body), res, { auth, db, live: true, today, premiumEmails: '', adminEmails: 'boss@example.com', vercelEnv: 'production', recordDrops: async (_db, c, d) => { got.push({ c, d }); }, ...extra });
+  return { res, got };
+};
+
+test('計測: 月額の支払い日50・毎日5、使ったお題と「その日に初めて使った人」を数える', async () => {
+  const db = mockDb({ ...PREMIUM });
+  let { got } = await callCount(db, '2026-11-12');
+  assert.deepEqual(got, [{ c: { grant_payday: 50, grant_p: 5 }, d: '2026-11-12' }]);
+  ({ got } = await callCount(db, '2026-11-12', { open: { kind: 'rank', no: 7 } }));
+  assert.deepEqual(got[0].c, { use_p_rank: 1, topic_r_7: 1, users_p: 1 });
+  ({ got } = await callCount(db, '2026-11-12', { open: { kind: 'reading', no: 3 } }));
+  assert.deepEqual(got[0].c, { use_p_reading: 1, topic_g_3: 1 }); // 同じ日の2回目は人数に入れない
+  ({ got } = await callCount(db, '2026-11-12', { open: { kind: 'reading', no: 3 } }));
+  assert.deepEqual(got, []); // 開いているお題は使っていないので数えない
+  ({ got } = await callCount(db, '2026-11-13', { open: { kind: 'rank', no: 8 } }));
+  assert.deepEqual(got[0].c, { grant_p: 5, use_p_rank: 1, topic_r_8: 1, users_p: 1 });
+});
+
+test('計測: 無料会員の毎日2個、シングルの10個とその分で開けたお題', async () => {
+  const db = mockDb({ 'coupleDrops/u1': { balance: 0, lastDaily: '2026-11-12', opened: {} } });
+  let { got } = await callCount(db, '2026-11-13', { open: { kind: 'rank', no: 1 } });
+  assert.deepEqual(got[0].c, { grant_f: 2, use_f_rank: 1, topic_r_1: 1, users_f: 1 });
+  const pdb = mockDb({ 'coupleDrops/u1': { balance: 0, lastDaily: '2026-11-13', tier: 'f', opened: {} } });
+  const pair = { 'pairUnlocks/u1': { partners: { [partnerKey(BIRTH)]: { livemode: true, sessionId: 'cs_1' } } } };
+  Object.assign(pdb.docs, pair);
+  ({ got } = await callCount(pdb, '2026-11-13', { open: { kind: 'reading', no: 5 } }));
+  assert.deepEqual(got[0].c, { grant_s: 10, use_s_reading: 1, topic_g_5: 1, users_s: 1 });
+});
+
+test('計測: 運営のメール・「自分」にした会員・運営の端末・支払いなしの月額扱い・Preview は数えない', async () => {
+  const boss = { verifyIdToken: async () => ({ uid: 'u1', email: 'boss+2@example.com', email_verified: true }) };
+  let { got } = await callCount(mockDb({ ...PREMIUM }), '2026-11-12', {}, { auth: boss });
+  assert.deepEqual(got, []);
+  ({ got } = await callCount(mockDb({ ...PREMIUM, 'adminSettings/owners': { uids: ['u1'] } }), '2026-11-12'));
+  assert.deepEqual(got, []);
+  ({ got } = await callCount(mockDb({ ...PREMIUM }), '2026-11-12', { nt: '1' }));
+  assert.deepEqual(got, []);
+  ({ got } = await callCount(mockDb({}), '2026-11-12', {}, { premiumEmails: 'a@example.com' }));
+  assert.deepEqual(got, []);
+  ({ got } = await callCount(mockDb({ ...PREMIUM }), '2026-11-12', {}, { vercelEnv: 'preview' }));
+  assert.deepEqual(got, []);
+  // 計測が失敗しても、画面には答えを返す
+  const { res } = await callCount(mockDb({ ...PREMIUM }), '2026-11-12', {}, { recordDrops: async () => { throw new Error('x'); } });
+  assert.equal(res.code, 200);
+});
+
 // 2026-11-14 境界ケースの洗い出しで見つけた不具合
 test('月額が終わった日（同じ日の2回目の表示）: 月額の残りは無料の2個に戻り、無料のかけらとして使えない', async () => {
   const db = mockDb({ ...PREMIUM });
