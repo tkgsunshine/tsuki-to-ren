@@ -51,9 +51,9 @@ const LotusRule: React.FC = () => (
   </div>
 );
 
-// キャッチの「相性」は蓮のピンク、「本性」は紫で光らせる
+// キャッチの「相性」は蓮のピンク、「本性」は月光の白で光らせる
 const HERO_HL_PINK: React.CSSProperties = { color: '#ffb8d9', WebkitTextFillColor: '#ffb8d9', textShadow: '0 0 10px rgba(255, 150, 200, 0.75)' };
-const HERO_HL_PURPLE: React.CSSProperties = { color: '#dccbff', WebkitTextFillColor: '#dccbff', textShadow: '0 0 10px rgba(185, 155, 255, 0.85), 0 0 20px rgba(160, 120, 255, 0.45)' };
+const HERO_HL_WHITE: React.CSSProperties = { color: '#fffaf0', WebkitTextFillColor: '#fffaf0', textShadow: '0 0 10px rgba(255, 244, 214, 0.85), 0 0 22px rgba(242, 226, 179, 0.5)' };
 
 // 鑑定で分かること（トップのアピール）
 // 2つずつ3行で並べる（小さいスマホでも行の数がそろうように）
@@ -65,7 +65,7 @@ const HeroCopy: React.FC = () => (
     <div aria-hidden="true" style={{ position: 'absolute', inset: '-8% -4%', background: 'radial-gradient(ellipse at center, rgba(10,7,26,0.7) 0%, rgba(10,7,26,0.4) 50%, rgba(10,7,26,0) 75%)', pointerEvents: 'none' }} />
     <div style={{ position: 'relative' }}>
       <p className="font-serif gold-text" style={{ margin: 0, fontSize: 'min(1.25rem, 5.6vw)', fontWeight: 700, lineHeight: 1.45, letterSpacing: '0.05em' }}>
-        <span className="nobr">生年月日と16タイプで</span><br /><span className="nobr">二人の<span style={HERO_HL_PINK}>相性</span>と<span style={HERO_HL_PURPLE}>本性</span>を本格鑑定</span>
+        <span className="nobr">生年月日と16タイプで</span><br /><span className="nobr">二人の<span style={HERO_HL_PINK}>相性</span>と<span style={HERO_HL_WHITE}>本性</span>を本格鑑定</span>
       </p>
       <div style={{ margin: '0.4rem 0 0.3rem' }}><LotusRule /></div>
       <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: '0.1rem', fontSize: 'min(0.84rem, 3.9vw)', fontWeight: 600, color: '#ece6da', lineHeight: 1.6, letterSpacing: '0.02em', textShadow: READ_SHADOW }}>
