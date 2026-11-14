@@ -198,7 +198,7 @@ const LP_SECTION_LABELS: Record<string, string> = {
   worries: 'こんな夜はありませんか？', benefits: 'プレミアムでできること', price: '料金（¥980）', faq: 'よくある質問', end: '一番下'
 };
 const LP_LAYOUTS: [string, string, string[]][] = [
-  ['pair2', '買い切りと月額を見比べる形（お相手の鑑定から開いたとき・11/14〜の並び）', ['top', 'premium', 'common', 'plans', 'worries', 'price', 'faq', 'end']],
+  ['pair2', '買い切りと月額を見比べる形（お相手の鑑定から開いたとき・11/14〜の並び）', ['top', 'common', 'premium', 'plans', 'worries', 'price', 'faq', 'end']],
   ['pair', '買い切りと月額を見比べる形（〜11/14の前の並び）', ['top', 'intro', 'plans', 'worries', 'benefits', 'price', 'faq', 'end']],
   ['monthly', '月額だけの形（お相手なし・マイページなどから開いたとき）', ['top', 'worries', 'benefits', 'price', 'faq', 'end']]
 ];

@@ -485,7 +485,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
   }, [isOpen, Boolean(pair), isSubscribed]);
   // 閉じたときに、一番下まで届いたまとまり（data-lp-sec の並び）・いた時間・閉じ方を1回送る（有料会員は送らない）
   const leaveRef = useRef({ reached: 'top' as LpSection, idx: -1, openedAt: 0, byX: false, layout: 'monthly' as LpLayout, subscribed: false });
-  // 見比べる形は 2026-11-14 に並びを変えた（限定機能→共通→比較表）ので、前の並びの数字と混ざらないよう pair2 で送る
+  // 見比べる形は 2026-11-14 に並びを変えた（共通→限定機能→比較表）ので、前の並びの数字と混ざらないよう pair2 で送る
   leaveRef.current.layout = Boolean(pair) && !isSubscribed ? 'pair2' : 'monthly';
   leaveRef.current.subscribed = isSubscribed;
   useEffect(() => {
@@ -827,17 +827,7 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
             </div>
           )}
 
-          {/* 見比べる形（お相手あり）: プレミアムだけの機能 → どちらのプランでも見れること → 比較表 の順（2026-11-14 TAKASHI「前半にプレミアム限定機能、そのあと共通機能、その下に比較表」） */}
-          {showPlans && pair && <div data-lp-sec="premium" />}
-          {showPlans && pair && (
-            <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
-              <h2 className="font-serif gold-text" style={sectionTitleStyle}>
-                プレミアムだけでできること
-              </h2>
-              {[unlimitedBenefit(pairWho), ...benefits.filter((b) => !b.hideInDiff).map((b) => ({ ...b, body: b.diffBody || b.body, pairNote: undefined }))].map(renderBenefit)}
-            </div>
-          )}
-
+          {/* 見比べる形（お相手あり）: どちらのプランでも見れること → プレミアムだけの機能 → 比較表 の順（2026-11-14 TAKASHI「共通機能から紹介→プレミアムだけにできる機能の紹介の流れに」） */}
           {showPlans && pair && !pair.unlocked && <div data-lp-sec="common" />}
           {/* どちらのプランでも見れること（シングルプランは、このお相手について）。トリセツは1つの紹介にまとめる（2026-11-14 TAKASHI「取説で1個の紹介にまとめて」） */}
           {showPlans && pair && !pair.unlocked && (
@@ -872,6 +862,16 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
                   </CharBubble>
                 ))}
               </div>
+            </div>
+          )}
+
+          {showPlans && pair && <div data-lp-sec="premium" />}
+          {showPlans && pair && (
+            <div style={{ padding: '0 1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+              <h2 className="font-serif gold-text" style={sectionTitleStyle}>
+                プレミアムだけでできること
+              </h2>
+              {[unlimitedBenefit(pairWho), ...benefits.filter((b) => !b.hideInDiff).map((b) => ({ ...b, body: b.diffBody || b.body, pairNote: undefined }))].map(renderBenefit)}
             </div>
           )}
 
