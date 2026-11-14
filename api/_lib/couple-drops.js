@@ -138,6 +138,8 @@ export default async function handler(req, res, deps = {}) {
     const key = partnerKey(birth);
     const ref = db.collection(COUPLE_DROPS).doc(user.uid);
     const pair = await findPairUnlock(db, user.uid, birth, deps.live ?? isLiveKey());
+    // シングルプランを買ったお相手: 月額の間に開けたお題も、解約後ずっと見られる（買い切りのため。2026-11-14 TAKASHI「解約後も見えるほうがいい」）
+    const keepAll = Boolean(pair);
 
     const out = await db.runTransaction(async (tx) => {
       const snap = await tx.get(ref);
@@ -153,7 +155,7 @@ export default async function handler(req, res, deps = {}) {
       let openedNow = false;
       let error = null;
       if (open) {
-        const vis = visibleOpened(o, premium);
+        const vis = visibleOpened(o, premium || keepAll);
         const already = (open.kind === 'rank' ? vis.rank : vis.reading).includes(open.no);
         if (!already) {
           if (r.balance + bonus < 1) error = 'no_drops';
@@ -162,7 +164,8 @@ export default async function handler(req, res, deps = {}) {
             const fromBonus = r.balance < 1;
             if (fromBonus) bonus -= 1; else r.balance -= 1;
             // シングルプランのかけらで開けたお題は、月額をやめても見られる（買い切りのため）
-            const field = `${open.kind === 'rank' ? 'r' : 'g'}${premium && !fromBonus ? 'p' : 'f'}`;
+            // シングルプランを買ったお相手は、月額のかけらで開けても解約後も見える（2026-11-14 TAKASHI）
+            const field = `${open.kind === 'rank' ? 'r' : 'g'}${premium && !fromBonus && !keepAll ? 'p' : 'f'}`;
             o[field] = [...o[field], open.no];
             openedNow = true;
           }
@@ -190,7 +193,7 @@ export default async function handler(req, res, deps = {}) {
       cap: premium ? PREMIUM_CAP : FREE_CAP,
       daily: premium ? PREMIUM_DAILY : FREE_DAILY,
       granted: out.r.granted + (out.bonusGranted ? PAIR_BONUS : 0),
-      opened: visibleOpened(out.o, premium),
+      opened: visibleOpened(out.o, premium || keepAll),
       openedNow: out.openedNow
     };
     return res.status(out.error ? 409 : 200).json(payload);
