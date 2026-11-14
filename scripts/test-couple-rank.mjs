@@ -3,7 +3,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as X from './x/lib/couple-rank.mjs';
-import { COUPLE_THEMES, COUPLE_TYPES, rankAllPairs, pickPostPairs, appRankOrder, coupleRank, themeScore, rankTopicFromUtm } from '../src/utils/coupleRank.ts';
+import fs from 'node:fs';
+import { COUPLE_THEMES, COUPLE_TYPES, rankAllPairs, pickPostPairs, appRankOrder, coupleRank, themeScore, rankTopicFromUtm, themeIndexOf, X_POST_TOPIC } from '../src/utils/coupleRank.ts';
 import { RANK_TOPICS, SINGLE_RANK_NOS } from '../src/data/coupleTopics.ts';
 
 test('X投稿済みの17お題: お題名・136組の点・並び・Xに載せた30組がX側と完全に一致', () => {
@@ -60,4 +61,49 @@ test('シングルの25本にX投稿済み17本が全部入る／utm_content の
   assert.equal(rankTopicFromUtm('couple-20261111-3'), 1);
   assert.equal(rankTopicFromUtm('couple-20261111-99'), null);
   assert.equal(rankTopicFromUtm('rank-xxx'), null);
+  // 手作りの投稿「理想の二人」は、アプリに同じランキングが無いので入口を出さない（以前は並びの18番目＝片思いが開いていた）
+  assert.equal(rankTopicFromUtm('couple-20261113-18'), null);
+  assert.equal(rankTopicFromUtm('couple-20261111-18'), null);
+});
+
+// X に出した（出す）カップル投稿のリンクが、投稿と同じランキングを開くこと（2026-11-14）。
+// 投稿の30組が、開くお題のアプリの1〜30位（flip なら136〜107位）と1組残らず一致しなければ失敗する。
+// 新しいカップル投稿をキューに足したら、src/utils/coupleRank.ts の X_POST_TOPIC に1行足すか、
+// 同じランキングがアプリに無いなら NO_APP_TOPIC に足す（足さないとこのテストが失敗する）。
+const NO_APP_TOPIC = new Set(['couple-20261113-18']);
+test('X投稿のリンク（utm_content=couple-…）は、投稿と同じランキングを開く', () => {
+  const q = JSON.parse(fs.readFileSync(new URL('../data/x/queue.json', import.meta.url), 'utf8'));
+  const items = Array.isArray(q) ? q : (q.items || q.queue);
+  const key = (a, b) => [a, b].sort().join('');
+  const ids = new Set();
+  for (const it of items) {
+    for (const m of (it.text || '').matchAll(/utm_content=(couple-[0-9A-Za-z-]+)/g)) ids.add(m[1]);
+  }
+  assert.ok(ids.size >= 6, 'キューからカップル投稿のリンクが見つからない');
+  for (const id of ids) {
+    if (NO_APP_TOPIC.has(id)) { assert.equal(rankTopicFromUtm(id), null, id); continue; }
+    const no = X_POST_TOPIC[id];
+    assert.ok(no, `${id} が X_POST_TOPIC にも NO_APP_TOPIC にも無い`);
+    const ti = themeIndexOf(no);
+    const order = appRankOrder(ti);
+    const ranked = COUPLE_THEMES[ti].flip ? [...order].reverse() : order;
+    const posts = items.filter((it) => it.id === id || it.id === `${id}-r`);
+    let n = 0;
+    for (const it of posts) {
+      for (const m of (it.text || '').matchAll(/(\d+)位 ([A-Z]{4})（[^）]*）×([A-Z]{4})/g)) {
+        const p = ranked[Number(m[1]) - 1];
+        assert.equal(key(p.a, p.b), key(m[2], m[3]), `${id} の${m[1]}位`);
+        n++;
+      }
+    }
+    if (posts.length) assert.equal(n, 30, `${id} の順位の行が30行ない`);
+  }
+  // 対応表の17本すべて（キューに本文が無いものも含む）: X側の30組とアプリの並びが一致
+  for (const [id, no] of Object.entries(X_POST_TOPIC)) {
+    const ti = themeIndexOf(no);
+    const xi = Number(id.split('-').pop()) - 1;
+    const order = appRankOrder(ti);
+    const ranked = COUPLE_THEMES[ti].flip ? [...order].reverse() : order;
+    X.pickPostPairs(xi).forEach((p, k) => assert.equal(key(ranked[k].a, ranked[k].b), key(p.a, p.b), `${id} の${k + 1}位`));
+  }
 });

@@ -414,13 +414,38 @@ const themeIndexByNo = new Map(COUPLE_THEMES.map((t, i) => [t.no, i]));
 export const themeIndexOf = (topicNo: number): number => themeIndexByNo.get(topicNo) ?? -1;
 
 /**
- * X投稿の utm_content（例: couple-20261111-11）から、ランキングのお題番号を取り出す。当てはまらなければ null。
- * 末尾の数字は X側の並び（themeIndex+1）で、お題番号ではない（couple-20261111-11 は お題24「スマホを見る・見ないで揉める」）。
+ * X投稿の utm_content → そのリンクで開くランキングのお題番号（2026-11-14）。
+ * 以前は末尾の数字で COUPLE_THEMES の並びを引いていたが、並びの18番目以降はX投稿と関係ないお題なので、
+ * 手作りの投稿（couple-20261113-18「理想の二人」）で別のランキング（片思い）が開いていた。
+ * 投稿ごとに、開くお題をここに書く。載っていない投稿は入口を出さず、普通の入力画面にする。
+ * 載せてよいのは、投稿の30組がアプリの1〜30位（flip のお題は136〜107位）と同じお題だけ（scripts/test-couple-rank.mjs で、data/x/queue.json の投稿と照らして確かめる）。
+ * flip のお題は、投稿と逆の名前で順位も逆（例: 投稿「同棲すると揉めやすい」1位 → アプリ「同棲しても揉めにくい」136位）。
  */
+export const X_POST_TOPIC: Record<string, number> = {
+  'couple-20261111-1': 31,
+  'couple-20261111-2': 21,
+  'couple-20261111-3': 1,
+  'couple-20261111-4': 32,
+  'couple-20261111-5': 34,
+  'couple-20261111-6': 2,
+  'couple-20261111-7': 33,
+  'couple-20261111-8': 41,
+  'couple-20261111-9': 22,
+  'couple-20261111-10': 23,
+  'couple-20261111-11': 24,
+  'couple-20261111-12': 25,
+  'couple-20261111-13': 42,
+  'couple-20261111-14': 35,
+  'couple-20261111-15': 12,
+  'couple-20261111-16': 26,
+  'couple-20261111-17': 11,
+  // couple-20261113-18（周りから「理想の二人」）: 手作りの並びで、アプリに同じランキングが無いので載せない
+};
+
+/** X投稿の utm_content から、開くランキングのお題番号を取り出す。対応表に無ければ null */
 export function rankTopicFromUtm(utmContent: string | null | undefined): number | null {
-  const m = /^couple-\d{8}-(\d{1,2})$/.exec((utmContent || '').trim());
-  if (!m) return null;
-  return COUPLE_THEMES[Number(m[1]) - 1]?.no ?? null;
+  const no = X_POST_TOPIC[(utmContent || '').trim()];
+  return no && themeIndexOf(no) >= 0 ? no : null;
 }
 
 const normType = (t: string | undefined | null): string | null => {
