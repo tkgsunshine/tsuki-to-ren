@@ -233,6 +233,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
         luckTitle={result.dailyLuckTitle}
         specials={[next.pair, next.solo].filter((n): n is NextDay => Boolean(n))}
         kakera={kakera.key === dropKey ? kakera.balance : null}
+        monthly={result.monthlyPreviews}
         onOpenDay={dropKey ? openDay : undefined}
       />
 
@@ -584,12 +585,14 @@ const SCALE_STOPS: [number, number, number][] = [[34, 42, 104], [116, 74, 196], 
 // 各色の位置（0＝最低点〜1＝最高点）。上位およそ2割がはっきり金になるよう、金を手前に置く（2026-11-12 TAKASHI「地味すぎる、90点でも薄い」）
 const SCALE_POS = [0, 0.5, 0.8];
 
-function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials, kakera, onOpenDay }: {
+function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitle, specials, kakera, onOpenDay, monthly = [] }: {
   now: Date; dayPillar?: string; title: string; baseLabel: string; base: number; daily: number; diff: number | null;
   months: CalMonth[]; luckTitle?: string; specials: NextDay[];
   /** いま使える月のかけら（読めないときは null） */
   kakera?: number | null;
   onOpenDay?: (iso: string) => Promise<'ok' | 'no_drops' | 'failed'>;
+  /** 月ごとの運気（鑑定書の「月次運勢スケジュール」と同じもの。今月から3か月） */
+  monthly?: FortuneResult['monthlyPreviews'];
 }) {
   // 15日目より先の日をタップ → かけら10個で開けるかの確認（ブラウザのダイアログは使わず、暦の下に出す）
   const [ask, setAsk] = useState<{ iso: string; label: string } | null>(null);
@@ -749,6 +752,19 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
               {typeof kakera === 'number' && kakera < DAY_COST && asking !== 'no_drops' && <p style={{ margin: 0, fontSize: '0.68rem', color: '#b9b2a4', lineHeight: 1.5 }}>あと{DAY_COST - kakera}個たまると開けられます（かけらは毎日増えます）。</p>}
             </div>
           )}
+          {/* その月の運気（鑑定書の月次運勢スケジュールと同じ文。2026-11-14 TAKASHI「月毎の運気も表示して」）。先月は出さない */}
+          {(() => {
+            const mf = mo.before ? null : monthly.find((x) => x.month === `${mo.month + 1}月`);
+            if (!mf) return null;
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', padding: '0.7rem 0.8rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)', marginTop: '0.2rem' }}>
+                <p className="font-serif" style={{ margin: 0, fontSize: '0.84rem', fontWeight: 'bold', color: '#f2e2b3', lineHeight: 1.5 }}>
+                  {mo.month + 1}月の運気：<span style={{ color: GOLD }}>{mf.label}</span>
+                </p>
+                <p style={{ ...body, fontSize: '0.78rem', lineHeight: 1.75, color: '#d8d2c6' }}>{mf.text}</p>
+              </div>
+            );
+          })()}
         </div>
         );
       })}
