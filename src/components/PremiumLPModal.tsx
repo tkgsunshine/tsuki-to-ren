@@ -840,8 +840,9 @@ export const PremiumLPModal: React.FC<PremiumLPModalProps> = ({
           {showPlans && pair && <div data-lp-sec="plans" />}
           {/* プランを選ぶ（買い切り ¥680 と 月額 ¥980 を1枚で見比べる） */}
           {showPlans && pair && (
-            <div style={{ padding: '0 1.15rem 1.35rem' }}>
-              <h2 className="font-serif gold-text" style={sectionTitleStyle}>
+            <div style={{ padding: '0 1.15rem 1.35rem', containerType: 'inline-size' }}>
+              {/* 1行に収める（名前の長さに合わせて文字を小さく。cqw＝この箱の幅、字間ぶん1.15倍で見積もる）（2026-11-14 TAKASHI「1行にできない？」） */}
+              <h2 className="font-serif gold-text" style={{ ...sectionTitleStyle, whiteSpace: 'nowrap', fontSize: `min(1rem, calc(100cqw / ${((pair.name.length + 16) * 1.15).toFixed(2)}))` }}>
                 {pair.name}のこと、どこまで知りたいですか？
               </h2>
               {/* 鑑定結果のプランの箱と同じ表（PlanCompareTable） */}

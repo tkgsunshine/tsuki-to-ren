@@ -15,7 +15,7 @@ export const planCompareRows = (name: string): PlanRow[] => {
     { label: 'あなたの恋愛運MAX日（日付）', monthly: '○', pair: '○' },
     { label: '10年先までの二人の流れ（結婚・転機の年）、14日間・月ごとの波', monthly: '○', pair: '－' },
     // 月のかけらは別の行に（2026-11-13 TAKASHI「かけらについては別行にして」「10年先の下」）
-    { label: '月のかけら（1個で1つ開ける）', monthly: '毎月50個\n＋毎日5個', pair: '購入時10個\n＋毎日2個' },
+    { label: '月のかけら', monthly: '毎月50個\n＋毎日5個', pair: '購入時10個\n＋毎日2個' },
     { label: '月・蓮へのチャット相談', monthly: '無制限', pair: '1日2回' },
     { label: 'お相手の保存', monthly: '5人', pair: '2人' }
   ];
