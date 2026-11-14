@@ -6,6 +6,8 @@ import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
 import type { PersonStars, NextDay } from '../utils/todayStars';
 import { WEEKDAYS } from '../utils/luckyDays';
 import { MoonMark } from './icons/BrandIcons';
+import { TermHelpModal, HelpDot } from './TermHelpModal';
+import type { TermHelp } from './TermHelpModal';
 import { getPartnerToday, getMyToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, getTenGodState, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
 import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
@@ -57,10 +59,15 @@ const sameGenderFix = (mine: 'male' | 'female', theirs: 'male' | 'female'): 'mal
 
 const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 
-function StarsBlock({ p, self }: { p: PersonStars; self: boolean }) {
+function StarsBlock({ p, self, onHelp }: { p: PersonStars; self: boolean; onHelp: (h: TermHelp) => void }) {
+  const hasMarks = p.goodKeys.length > 0 || p.cautionKeys.length > 0;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
-      <p style={{ ...sub, color: self ? '#cdbfe2' : '#9cc6d8', fontWeight: 'bold' }}>{p.who}にとって今日は「{p.tenGodName}」の日</p>
+      <p style={{ ...sub, color: self ? '#cdbfe2' : '#9cc6d8', fontWeight: 'bold' }}>
+        {p.who}にとって今日は「{p.tenGodName}」の日{' '}
+        <HelpDot label="心のモード（十神）の説明と全10種類を見る" onClick={() => onHelp({ kind: 'tengod', who: p.who, self, current: p.tenGod })} />
+        {hasMarks && <HelpDot label="今日の星のしるしの説明と一覧を見る" onClick={() => onHelp({ kind: 'marks', who: p.who, goods: p.goodKeys, cautions: p.cautionKeys })} />}
+      </p>
       <p style={{ ...body, fontSize: '0.84rem' }}>{p.tenGodText}</p>
       {p.goods.map((g) => (
         <p key={g} style={{ ...sub, color: '#f2e2b3' }}>✦ {g}</p>
@@ -77,6 +84,8 @@ const fmtDay = (n: NextDay) => `${n.date.m}月${n.date.d}日(${WEEKDAYS[n.date.w
 export function TodayView({ result, selectedChar, setSelectedChar, myName, oppName, hasOpponent, input, partners, onSwitch, onOpenBook, onOpenChat, onUpdateJourney }: Props) {
   const now = useMemo(() => new Date(), []);
   const oppLabel = san(oppName);
+  // 占い用語の「？」（十神・十二運・星のしるしの一覧）
+  const [help, setHelp] = useState<TermHelp | null>(null);
 
   // 昨日の点数（同じ入力・同じ計算で日付だけ前日に）
   const yesterdayScore = useMemo(() => {
@@ -204,6 +213,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
 
   return (
     <div key={dayKey(now)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {help && <TermHelpModal help={help} onClose={() => setHelp(null)} />}
       {/* お相手の切り替え（それぞれの今日の点数つき） */}
       {(chips.length > 1 || (!hasOpponent && chips.length > 0)) && (
         <div style={{ display: 'flex', gap: '0.45rem', overflowX: 'auto', padding: '0.1rem 0.1rem 0.3rem', scrollbarWidth: 'none' }}>
@@ -256,9 +266,9 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
             <p key={n} style={{ ...body, color: GOLD, fontWeight: 'bold', fontSize: '0.84rem' }}>★ {n}</p>
           ))}
           {/* 自分の星は下の「あなたの今日」に出す */}
-          {!myToday && <StarsBlock p={stars.me} self />}
+          {!myToday && <StarsBlock p={stars.me} self onHelp={setHelp} />}
           {/* お相手の星は下の「〇〇さんの今日」に出す */}
-          {stars.partner && !partnerToday && <StarsBlock p={stars.partner} self={false} />}
+          {stars.partner && !partnerToday && <StarsBlock p={stars.partner} self={false} onHelp={setHelp} />}
         </section>
       )}
 
@@ -270,6 +280,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
           pt={myToday}
           p={stars.me}
           self
+          onHelp={setHelp}
           guardian={result.myAvatarUrl ? { img: result.myAvatarUrl, name: result.myAstrologyName || '', theme: (result.myAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
         />
       )}
@@ -281,6 +292,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
           oppLabel={oppLabel}
           pt={partnerToday}
           p={stars.partner}
+          onHelp={setHelp}
           guardian={result.opponentAvatarUrl ? { img: result.opponentAvatarUrl, name: result.opponentAstrologyName || '', theme: (result.opponentAstrologyTheme || '').replace(/[【】]/g, '') } : undefined}
         />
       )}
@@ -387,7 +399,7 @@ export function TodayView({ result, selectedChar, setSelectedChar, myName, oppNa
 const WAVE_COLOR: Record<PartnerToday['wave'], string> = { low: '#9cc6d8', mid: '#f2e2b3', high: '#7fe0a8' };
 
 /** 〇〇さんの今日: 心のモード（十神）・元気の量（十二運）・心の揺れ（空亡・六冲）と良いしるし */
-function PartnerTodayCard({ oppLabel, pt, p, guardian, now, self = false }: { oppLabel: string; pt: PartnerToday; now: Date; p: PersonStars; guardian?: { img: string; name: string; theme: string }; self?: boolean }) {
+function PartnerTodayCard({ oppLabel, pt, p, guardian, now, self = false, onHelp }: { oppLabel: string; pt: PartnerToday; now: Date; p: PersonStars; guardian?: { img: string; name: string; theme: string }; self?: boolean; onHelp: (h: TermHelp) => void }) {
   const accent = self ? '#e2c074' : '#9cc6d8';
   return (
     <section style={{ ...card, border: self ? '1px solid rgba(226, 192, 116, 0.4)' : '1px solid rgba(156, 198, 216, 0.45)', background: self ? 'linear-gradient(160deg, rgba(212,175,55,0.1), rgba(255,255,255,0.03))' : 'linear-gradient(160deg, rgba(77,140,168,0.14), rgba(255,255,255,0.03))' }}>
@@ -410,7 +422,10 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian, now, self = false }: { op
       <p style={sub}>{oppLabel}の生まれた日の星と、今日の星の関係から見た「今日の傾向」です。</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
-        <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>心のモード</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>心のモード</p>
+          <HelpDot label="心のモード（十神）の説明と全10種類を見る" onClick={() => onHelp({ kind: 'tengod', who: oppLabel, self, current: pt.tenGod })} />
+        </div>
         <p className="font-serif" style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#ffffff', lineHeight: 1.4 }}>{pt.mood}</p>
         <p style={{ ...body, fontSize: '0.84rem' }}>{getTenGodState(pt.tenGod, now)}</p>
         <p style={sub}>今日は「{p.tenGodName}」の日</p>
@@ -418,7 +433,10 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian, now, self = false }: { op
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', padding: '0.65rem 0.75rem', borderRadius: '12px', background: 'rgba(0,0,0,0.22)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-          <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>元気の量</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>元気の量</p>
+            <HelpDot label="元気の量（十二運）の説明と全12段階を見る" onClick={() => onHelp({ kind: 'juniun', who: oppLabel, current: pt.juniun })} />
+          </div>
           {/* 元気の量は5つの炎（2026-11-12 TAKASHI「丸じゃなくて別の形」→B案の炎） */}
           <span aria-label={`元気の量 5段階中${pt.energy}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
@@ -442,6 +460,10 @@ function PartnerTodayCard({ oppLabel, pt, p, guardian, now, self = false }: { op
 
       {(p.cautions.length > 0 || p.goods.length > 0) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <p style={{ ...sub, color: accent, fontWeight: 'bold' }}>今日の星のしるし</p>
+            <HelpDot label="今日の星のしるしの説明と一覧を見る" onClick={() => onHelp({ kind: 'marks', who: oppLabel, goods: p.goodKeys, cautions: p.cautionKeys })} />
+          </div>
           {p.cautions.map((c) => <p key={c} style={{ ...sub, color: '#f0b4a6' }}>△ 心が揺れやすい日: {c}</p>)}
           {p.goods.map((g) => <p key={g} style={{ ...sub, color: '#f2e2b3' }}>✦ {g}</p>)}
         </div>

@@ -20,7 +20,7 @@ export const TEN_GOD_INFO: Record<TenGod, { name: string; self: string; other: s
 };
 
 /** 印（良い日のしるし）。天地徳合のときは干合・支合を重ねて書かない */
-const MARK_INFO: Record<LuckMark, string> = {
+export const MARK_INFO: Record<LuckMark, string> = {
   tentoku: '天地徳合（てんちとくごう）＝今日の干支が、生まれた日の干支と上下とも結びつく、60日に1度の日',
   kango: '干合（かんごう）＝今日の十干が、生まれた日の十干と結びつく日。惹きつける力が強まります',
   shigo: '支合（しごう）＝今日の十二支が、生まれた日の十二支と手をつなぐ日。気持ちが通じやすくなります',
@@ -31,8 +31,8 @@ const MARK_INFO: Record<LuckMark, string> = {
   seiki: '生気（せいき）＝今日の九星が、本命星を生かす日（九星気学）。星が背中を押してくれます'
 };
 
-const KUUBOU_TEXT = '空亡（くうぼう）＝生まれた日の干支から見て、星の力が抜けやすい日。大事な決めごとは別の日に';
-const ROKUCHU_TEXT = '六冲（ろくちゅう）＝今日の十二支が、生まれた日の十二支と真向かい。すれ違いやすいので、言葉は丁寧に';
+export const KUUBOU_TEXT = '空亡（くうぼう）＝生まれた日の干支から見て、星の力が抜けやすい日。大事な決めごとは別の日に';
+export const ROKUCHU_TEXT = '六冲（ろくちゅう）＝今日の十二支が、生まれた日の十二支と真向かい。すれ違いやすいので、言葉は丁寧に';
 const BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
 
 export interface PersonStars {
@@ -44,6 +44,10 @@ export interface PersonStars {
   goods: string[];
   /** 注意のしるし */
   cautions: string[];
+  /** 用語の説明（「？」の一覧）で今日の分を強調するためのキー */
+  tenGod: TenGod;
+  goodKeys: LuckMark[];
+  cautionKeys: ('kuubou' | 'rokuchu')[];
 }
 
 export interface TodayStars {
@@ -60,14 +64,18 @@ function personStars(person: LuckPerson, day: DayInfo, who: string, isSelf: bool
   const marks = pd.marks.includes('tentoku') ? pd.marks.filter((k) => k !== 'kango' && k !== 'shigo') : pd.marks;
   const rokuchu = (BRANCHES.indexOf(day.branch) - BRANCHES.indexOf(person.branch) + 12) % 12 === 6;
   const cautions: string[] = [];
-  if (pd.kuubou) cautions.push(KUUBOU_TEXT);
-  if (rokuchu) cautions.push(ROKUCHU_TEXT);
+  const cautionKeys: ('kuubou' | 'rokuchu')[] = [];
+  if (pd.kuubou) { cautions.push(KUUBOU_TEXT); cautionKeys.push('kuubou'); }
+  if (rokuchu) { cautions.push(ROKUCHU_TEXT); cautionKeys.push('rokuchu'); }
   return {
     who,
     tenGodName: TEN_GOD_INFO[tg].name,
     tenGodText: isSelf ? TEN_GOD_INFO[tg].self : TEN_GOD_INFO[tg].other,
     goods: marks.map((k) => MARK_INFO[k]),
-    cautions
+    cautions,
+    tenGod: tg,
+    goodKeys: marks,
+    cautionKeys
   };
 }
 
