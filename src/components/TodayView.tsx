@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight, MessageCircle } from 'lucide-react';
-import { generateFortuneResult, san, getScoreMood } from '../utils/fortuneEngine';
+import { generateFortuneResult, san } from '../utils/fortuneEngine';
 import type { FortuneResult, DiagnosisInput } from '../utils/fortuneEngine';
 import { getTodayStars, getNextSpecialDays } from '../utils/todayStars';
 import type { PersonStars, NextDay } from '../utils/todayStars';
 import { WEEKDAYS } from '../utils/luckyDays';
-import { MoonMark, MoonPhaseMark } from './icons/BrandIcons';
+import { MoonMark } from './icons/BrandIcons';
 import { getPartnerToday, getMyToday, getTodayStep, getCourage, getMbtiAction, getStepDelivery, getTenGodState, cleanJourney, defaultJourney, JOURNEY_STAGES, SITUATIONS, WAVE_LABEL } from '../utils/partnerToday';
 import type { Journey, JourneyMode, PartnerToday } from '../utils/partnerToday';
 import type { SavedPartner } from '../App';
@@ -623,7 +623,6 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
   // 次の特別な日（シンクロ日＝♥、恋愛運MAX日＝★）は暦のマスに印をつけ、暦の下に「あと〇日」で出す（2026-11-12 TAKASHI「カレンダーのところにいい感じに」）
   const markOf = (n: NextDay) => (n.label.includes('シンクロ') ? '♥' : '★');
   const specialAt = (y: number, m: number, d: number) => specials.find((n) => n.date.y === y && n.date.m === m + 1 && n.date.d === d);
-  const sm = getScoreMood(base, daily, baseLabel === '基本の相性');
   // 表示する月（今月／翌月をタップで切り替え。2026-11-12 TAKASHI）
   const [monthIdx, setMonthIdx] = useState(() => Math.max(0, months.findIndex((m) => m.current)));
   const diffText = diff === null ? null : diff > 0 ? `+${diff}` : diff < 0 ? `−${Math.abs(diff)}` : '±0';
@@ -659,11 +658,8 @@ function KoyomiCard({ now, title, baseLabel, base, daily, diff, months, luckTitl
           <span className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 'bold', color: GOLD }}>点</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <MoonPhaseMark size={20} phase={sm.phase} />
-            <span className="font-serif" style={{ fontSize: '1rem', fontWeight: 900, color: '#f2e2b3', letterSpacing: '0.06em' }}>{sm.title}</span>
-          </div>
-          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', fontSize: '0.72rem', color: '#a9a293' }}>
+          {/* 「今日はいつも通り」等の調子ラベルは出さない（基本の相性と並ぶと重複するため。2026-11-14 TAKASHI） */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.78rem', color: '#a9a293' }}>
             {diffText && <span>昨日より <b style={{ color: diff! > 0 ? '#8fd3ae' : diff! < 0 ? '#e0a9a0' : '#d8cfb8' }}>{diffText}</b></span>}
             <span>{baseLabel} <b style={{ color: '#d8d2c6' }}>{base}点</b></span>
           </div>
