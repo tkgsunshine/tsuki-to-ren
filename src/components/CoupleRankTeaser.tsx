@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { Crown } from 'lucide-react';
 import { coupleRank, COUPLE_TYPES, COUPLE_PAIR_COUNT } from '../utils/coupleRank';
 import { RANK_TOPICS } from '../data/coupleTopics';
+import { mbtiOptions } from '../constants/mbti';
+
+// 選択肢は「ESTP（起業家）」の形（入力画面と同じ名前。2026-11-14 TAKASHI）
+// 枠が狭いので ESFP は X投稿と同じ「エンター」に縮める
+const typeLabel = (t: string) => (mbtiOptions.find((o) => o.value === t)?.label || t).replace('エンターテイナー', 'エンター');
 
 // X投稿（カップル相性ランキング）から来た人の入口（2026-11-12 TAKASHI）。
 // 入力画面の上に、投稿のお題と「二人のMBTIを選ぶと何位か分かる」欄を出す。選ぶとその場で順位を見せ、
@@ -15,7 +20,7 @@ interface Props {
 }
 
 const selectStyle: React.CSSProperties = {
-  flex: 1, minWidth: 0, padding: '0.55rem 0.5rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold',
+  flex: 1, minWidth: 0, padding: '0.55rem 0.3rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold',
   background: 'rgba(11, 15, 21, 0.85)', color: '#f3efe6', border: '1px solid rgba(212, 175, 55, 0.45)'
 };
 
@@ -38,12 +43,12 @@ export const CoupleRankTeaser: React.FC<Props> = ({ topicNo, initialMy = '', onC
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
         <select aria-label="あなたのMBTI" value={my} onChange={(e) => setMy(e.target.value)} style={selectStyle}>
           <option value="">あなた</option>
-          {COUPLE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          {COUPLE_TYPES.map((t) => <option key={t} value={t}>{typeLabel(t)}</option>)}
         </select>
         <span style={{ color: '#d4af37', fontWeight: 'bold' }}>×</span>
         <select aria-label="お相手のMBTI" value={opp} onChange={(e) => setOpp(e.target.value)} style={selectStyle}>
           <option value="">お相手</option>
-          {COUPLE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          {COUPLE_TYPES.map((t) => <option key={t} value={t}>{typeLabel(t)}</option>)}
         </select>
       </div>
       {r && (
