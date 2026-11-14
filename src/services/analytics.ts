@@ -309,8 +309,10 @@ export const trackLpExit = (reason: LpExitReason, seen: boolean) => {
 };
 
 // 購入LPを閉じたとき（有料会員以外、閉じるたびに1回）: 一番下まで届いたまとまり・いた時間・閉じ方（×か、それ以外＝戻る・下メニュー）
-export type LpSection = 'top' | 'intro' | 'plans' | 'worries' | 'benefits' | 'price' | 'faq' | 'end';
-export const trackLpLeave = (layout: 'pair' | 'monthly', reached: LpSection, ms: number, close: 'x' | 'other') => {
+export type LpSection = 'top' | 'intro' | 'premium' | 'common' | 'plans' | 'worries' | 'benefits' | 'price' | 'faq' | 'end';
+// pair = 見比べる形（〜2026-11-14の並び）、pair2 = 見比べる形（共通→限定機能→比較表の並び）、monthly = 月額だけの形
+export type LpLayout = 'pair' | 'pair2' | 'monthly';
+export const trackLpLeave = (layout: LpLayout, reached: LpSection, ms: number, close: 'x' | 'other') => {
   const s = ms / 1000;
   const time = s < 10 ? 'lt10' : s < 30 ? '10_30' : s < 60 ? '30_60' : s < 180 ? '60_180' : 'gt180';
   void send({ type: 'lp_leave', layout, reached, time, close, ...current() });

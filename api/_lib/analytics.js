@@ -31,11 +31,11 @@ export const REF_FRIEND_METRIC = 'refFriends';
 // 購入LPを閉じたときの1問アンケートの答え（決まった3つ＋スキップ）。byLpExit に `${reason}` と、料金のところまで読んでいたら `seen_${reason}` も数える
 export const LP_EXIT_REASONS = new Set(['price', 'content', 'free_enough', 'skip']); // skip = 答えずにスキップした
 // 購入LPを閉じたとき: 一番下まで届いたまとまり（並びは src/components/PremiumLPModal.tsx の data-lp-sec）、いた時間、閉じ方
-export const LP_SECTIONS = ['top', 'intro', 'plans', 'worries', 'benefits', 'price', 'faq', 'end'];
+export const LP_SECTIONS = ['top', 'intro', 'premium', 'common', 'plans', 'worries', 'benefits', 'price', 'faq', 'end'];
 export const LP_TIMES = ['lt10', '10_30', '30_60', '60_180', 'gt180'];
 export const normalizeLpLeave = (type, body = {}) => {
   if (type !== 'lp_leave') return undefined;
-  const layout = body.layout === 'pair' ? 'pair' : 'monthly';
+  const layout = body.layout === 'pair' || body.layout === 'pair2' ? body.layout : 'monthly';
   const reached = LP_SECTIONS.includes(String(body.reached)) ? String(body.reached) : 'top';
   const time = LP_TIMES.includes(String(body.time)) ? String(body.time) : 'lt10';
   return [`${layout}_${reached}`, `time_${time}`, `close_${body.close === 'x' ? 'x' : 'other'}`];

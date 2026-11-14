@@ -194,11 +194,12 @@ const sumLpLeave = (docs: DailyDoc[]) => {
 };
 // 購入LPのまとまり（上から順）。買い切りと月額を見比べる形（pair）と、月額だけの形（monthly）で並びが違う
 const LP_SECTION_LABELS: Record<string, string> = {
-  top: '最初の画面（月の語りかけ）', intro: '無料で見えているのは入り口', plans: 'プランを選ぶ（¥680 / ¥980 の比較）',
+  top: '最初の画面（月の語りかけ）', intro: '無料で見えているのは入り口', premium: 'プレミアムだけでできること', common: '〇〇さんのこと、ここまで分かります（どちらのプランでも）', plans: 'プランを選ぶ（¥680 / ¥980 の比較）',
   worries: 'こんな夜はありませんか？', benefits: 'プレミアムでできること', price: '料金（¥980）', faq: 'よくある質問', end: '一番下'
 };
 const LP_LAYOUTS: [string, string, string[]][] = [
-  ['pair', '買い切りと月額を見比べる形（お相手の鑑定から開いたとき）', ['top', 'intro', 'plans', 'worries', 'benefits', 'price', 'faq', 'end']],
+  ['pair2', '買い切りと月額を見比べる形（お相手の鑑定から開いたとき・11/14〜の並び）', ['top', 'common', 'premium', 'plans', 'worries', 'price', 'faq', 'end']],
+  ['pair', '買い切りと月額を見比べる形（〜11/14の前の並び）', ['top', 'intro', 'plans', 'worries', 'benefits', 'price', 'faq', 'end']],
   ['monthly', '月額だけの形（お相手なし・マイページなどから開いたとき）', ['top', 'worries', 'benefits', 'price', 'faq', 'end']]
 ];
 const LP_TIME_LABELS: [string, string][] = [['lt10', '10秒未満'], ['10_30', '10〜30秒'], ['30_60', '30秒〜1分'], ['60_180', '1〜3分'], ['gt180', '3分以上']];
