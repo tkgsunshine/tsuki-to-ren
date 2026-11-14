@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { CoupleDrops } from '../services/coupleDrops';
+import { trackKakera } from '../services/analytics';
 
 // 月のかけら: ロック中のお題を押したときに出る「かけらを1つ使って開ける」の箱と、残高の表示。
 // かけらは単体では売らない（資金決済法）。足りないとき、無料会員にはプレミアム／シングルの案内（購入LP）だけを出す。
@@ -77,6 +78,9 @@ export const DropPanel: React.FC<{
 }> = ({ drops, what, onDrop, onLockClick, lockWord }) => {
   const [busy, setBusy] = useState(false);
   const empty = drops.balance < 1;
+  const seg = drops.guest ? 'g' : drops.premium ? 'p' : 'f';
+  // かけらが0で「使い切りました」が出た（/admin の「足りなかった」）。この欄を開くたびに1回
+  useEffect(() => { if (empty) trackKakera('short', { seg }); }, [empty, seg]);
   const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   if (busy && !reduce) return <KakeraBurst />;
   return (
@@ -121,7 +125,7 @@ export const DropPanel: React.FC<{
       )}
       {/* 「のこり〇個…」の文と「続きを見る」は削除（2026-11-13 TAKASHI）。かけらが0のときだけ、登録・購入への案内ボタンを出す */}
       {empty && !drops.premium && (
-        <button type="button" className="premium-lock-tag" data-paid-lock onClick={onLockClick}>
+        <button type="button" className="premium-lock-tag" data-paid-lock onClick={(e) => { trackKakera('short_cta', { seg }); onLockClick(e); }}>
           {drops.guest ? '無料の会員登録で、かけらをもらう' : lockWord}
         </button>
       )}

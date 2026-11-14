@@ -3,6 +3,7 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirebaseAuth, signInWithGoogle, logOutUser } from '../services/firebase';
 import { COLUMNS_DATA } from '../data/columnsData';
 import { mbtiOptions } from '../constants/mbti';
+import { RANK_TOPICS, READING_TOPICS } from '../data/coupleTopics';
 import AdminKpiCharts from './AdminKpiCharts';
 import { isTrackingOptedOut, optOutAdminBrowser, setTrackingOptOut } from '../services/analytics';
 
@@ -29,6 +30,7 @@ interface DailyDoc extends Counts {
   byReg?: Record<string, number>;
   byLpExit?: Record<string, number>;
   byLpLeave?: Record<string, number>;
+  byDrops?: Record<string, number>; // 月のかけら（配った・使った・使い切った）。キーは api/_lib/analytics.js の recordDrops（2026-11-14〜）
   byFortuneAttr?: Record<string, number>; // 鑑定した人（訪問で最初の鑑定）の g_性別・a_年代・m_MBTI（2026-11-10〜）
 }
 interface DayRow extends FullCounts {
@@ -1018,6 +1020,108 @@ function RelationshipTable({ docs }: { docs: DailyDoc[] }) {
   );
 }
 
+// 月のかけら（二人の相性100）: 配った数・使った数・何に使ったか・使い切った回数
+const RANK_TITLE = new Map(RANK_TOPICS.map((t) => [t.no, t.title]));
+const READING_TITLE = new Map(READING_TOPICS.map((t) => [t.no, t.title]));
+const DROP_SEGS: [string, string][] = [['p', '月額プレミアム'], ['s', 'シングルプラン'], ['f', '無料会員'], ['g', '未登録']];
+const sumDrops = (docs: DailyDoc[]) => {
+  const out: Record<string, number> = {};
+  for (const d of docs) for (const [k, v] of Object.entries(d.byDrops || {})) out[k] = (out[k] || 0) + (v || 0);
+  return out;
+};
+function DropsTable({ docs }: { docs: DailyDoc[] }) {
+  const k = sumDrops(docs);
+  const n = (key: string) => k[key] || 0;
+  const since = docs.find((d) => d.byDrops && Object.keys(d.byDrops).length)?.date || null;
+  const grant: Record<string, number> = { p: n('grant_payday') + n('grant_p'), s: n('grant_s'), f: n('grant_f'), g: n('grant_g') };
+  const use = (seg: string, kind: string) => n(`use_${seg}_${kind}`);
+  const usedAll = DROP_SEGS.reduce((t, [s]) => t + use(s, 'rank') + use(s, 'reading'), 0);
+  const grantAll = Object.values(grant).reduce((a, b) => a + b, 0);
+  const usersAll = DROP_SEGS.reduce((t, [s]) => t + n(`users_${s}`), 0);
+  const shortAll = DROP_SEGS.reduce((t, [s]) => t + n(`short_${s}`), 0);
+  const ctaAll = DROP_SEGS.reduce((t, [s]) => t + n(`shortcta_${s}`), 0);
+  const top = (prefix: 'r' | 'g', titles: Map<number, string>) => Object.entries(k)
+    .filter(([key]) => key.startsWith(`topic_${prefix}_`))
+    .map(([key, v]): [number, number] => [Number(key.slice(8)), v])
+    .sort((a, b) => b[1] - a[1] || a[0] - b[0])
+    .slice(0, 10)
+    .map(([no, v]) => ({ no, v, title: titles.get(no) || `${no}` }));
+  const topRank = top('r', RANK_TITLE);
+  const topReading = top('g', READING_TITLE);
+  const topList = (label: string, list: { no: number; v: number; title: string }[]) => (
+    <div style={{ flex: '1 1 320px' }}>
+      <div style={{ ...c.muted, marginBottom: 4 }}>{label}（多い順・上位10）</div>
+      {list.length === 0 ? <div style={c.muted}>まだありません</div> : (
+        <table style={c.table}>
+          <tbody>
+            {list.map((t) => (
+              <tr key={t.no}>
+                <td style={{ ...c.td, ...c.muted, width: 28 }}>{t.no}</td>
+                <td style={c.td}>{t.title}</td>
+                <td style={{ ...c.td, ...c.num }}>{t.v}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+  return (
+    <div style={c.card}>
+      <h2 style={c.h2}>月のかけら（二人の相性100）</h2>
+      {grantAll + usedAll + shortAll === 0 ? (
+        <div style={c.muted}>まだデータがありません</div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+            <Tile label="配った数" value={grantAll} />
+            <Tile label="使った数" value={usedAll} sub={grantAll ? `配った数の ${pct(usedAll, grantAll)}` : undefined} />
+            <Tile label="使った人（日ごと）" value={usersAll} sub="同じ人も日が違えば別に数える" />
+            <Tile label="使い切って見られなかった" value={shortAll} sub={`そこから案内を押した ${ctaAll}（${pct(ctaAll, shortAll)}）`} />
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={c.table}>
+              <thead>
+                <tr>
+                  <th style={c.th}></th>
+                  <th style={{ ...c.th, ...c.num }}>配った</th>
+                  <th style={{ ...c.th, ...c.num }}>使った：ランキング</th>
+                  <th style={{ ...c.th, ...c.num }}>使った：テーマ</th>
+                  <th style={{ ...c.th, ...c.num }}>使った人（日ごと）</th>
+                  <th style={{ ...c.th, ...c.num }}>使い切り</th>
+                  <th style={{ ...c.th, ...c.num }}>→案内を押した</th>
+                </tr>
+              </thead>
+              <tbody>
+                {DROP_SEGS.map(([s, label]) => (
+                  <tr key={s}>
+                    <td style={{ ...c.td, whiteSpace: 'nowrap' }}>{label}</td>
+                    <td style={{ ...c.td, ...c.num }}>{grant[s]}{s === 'p' && n('grant_payday') ? <div style={c.muted}>うち支払い日 {n('grant_payday')}</div> : null}</td>
+                    <td style={{ ...c.td, ...c.num }}>{use(s, 'rank')}</td>
+                    <td style={{ ...c.td, ...c.num }}>{use(s, 'reading')}</td>
+                    <td style={{ ...c.td, ...c.num }}>{n(`users_${s}`)}</td>
+                    <td style={{ ...c.td, ...c.num }}>{s === 's' ? '—' : n(`short_${s}`)}</td>
+                    <td style={{ ...c.td, ...c.num }}>{s === 's' ? '—' : n(`shortcta_${s}`)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 14 }}>
+            {topList('よく開かれたランキング', topRank)}
+            {topList('よく開かれたテーマ', topReading)}
+          </div>
+        </>
+      )}
+      <div style={{ ...c.muted, marginTop: 8 }}>
+        2026-11-14 から計測{since ? `（この期間は ${since} から）` : ''}。配った＝月額は支払い日の50個と毎日5個、無料会員は毎日の2個（前の日の残りがあれば足りない分だけ）、シングルは購入ごとの10個、未登録はその端末で初めて表示した3個。
+        使った＝どの分のかけらを使ったか（シングルを買った人も、毎日の2個から先に使うので、その分は「無料会員」に入る）。使った人＝その日に初めてかけらを使った人（会員はアカウント、未登録は端末）。
+        使い切り＝かけらが0の状態で、まだ開いていないランキング・テーマを開こうとした回数（月額以外の会員は「無料会員」にまとめて数える）。運営のアカウント・端末と Preview は数えません。
+      </div>
+    </div>
+  );
+}
+
 function ShareTable({ rows, total }: { rows: [string, number][]; total: number }) {
   return (
     <div style={c.card}>
@@ -1391,6 +1495,8 @@ export default function AdminView() {
             <LpLeaveTable lv={sumLpLeave(data.daily)} />
 
             <LpExitTable ex={sumLpExit(data.daily)} />
+
+            <DropsTable docs={data.daily} />
               </>
             )}
 

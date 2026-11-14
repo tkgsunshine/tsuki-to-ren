@@ -135,6 +135,24 @@ const send = (payload: Record<string, string>, token?: string) => {
   }).then(() => undefined).catch(() => undefined);
 };
 
+/** この端末が計測から外れているか（運営の端末・自動操作）。月のかけらの API に「数えない」と伝えるのに使う */
+export const trackingOff = () => isAutomated() || isTrackingOptedOut();
+
+/**
+ * 月のかけら（二人の相性100）。api/_lib/analytics.js の clientDropKeys と合わせる。
+ * grant = 未登録の端末に3個を配った（初めて表示したとき）、open = 未登録の端末のかけらで開けた（first = 3個のうち最初の1個）、
+ * short = かけらが0で「使い切りました」が出た、short_cta = そこから登録・購入の案内ボタンを押した。
+ * seg: g 未登録 / f 会員（月額以外） / p 月額。会員が使った分はサーバー（/api/stripe/drops）が数える
+ */
+export const trackKakera = (ev: 'grant' | 'open' | 'short' | 'short_cta', extra: { seg?: 'g' | 'f' | 'p'; kind?: 'rank' | 'reading'; no?: number; first?: boolean } = {}) => {
+  const payload: Record<string, string> = { type: 'kakera', ev };
+  if (extra.seg) payload.seg = extra.seg;
+  if (extra.kind) payload.kind = extra.kind;
+  if (extra.no !== undefined) payload.no = String(extra.no);
+  if (extra.first) payload.first = '1';
+  void send(payload);
+};
+
 /** Records where this browser session came from, once per session. Call once at start-up. */
 export const initAttribution = () => {
   if (typeof window === 'undefined' || read(session(), SESSION_KEY)) return;
