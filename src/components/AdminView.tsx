@@ -446,8 +446,12 @@ function Notices({ items, members, mailReach, target, setTarget, onSend, onTestM
               取り消す
             </button>
           </div>
-          <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', ...c.muted }}>{n.body}</div>
-          {n.link && <div style={c.muted}>リンク: {n.link}</div>}
+          {/* 本文は長いので最初は閉じておき、タップで開く */}
+          <details>
+            <summary style={{ ...c.muted, cursor: 'pointer', color: '#a5b4fc' }}>本文を見る（{n.body.length}文字）</summary>
+            <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', ...c.muted, marginTop: 4 }}>{n.body}</div>
+            {n.link && <div style={c.muted}>リンク: {n.link}</div>}
+          </details>
         </div>
       ))}
     </div>
